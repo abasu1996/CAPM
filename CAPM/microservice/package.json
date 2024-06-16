@@ -1,0 +1,24 @@
+{
+  "name": "microservice",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": {
+    "type": "git",
+    "url": "<Add your repository here>"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": ">=7",
+    "express": ">=4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": ">=1",
+    "@sap/cds-dk": ">=7"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "main": "index.js",
+  "author": "Anim"
+}
