@@ -1,4 +1,3 @@
----
 _schema-version: '3.1'
 ID: microservice
 version: 1.0.0
@@ -9,6 +8,7 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
+        - npm ci
         - npx cds build --production
 modules:
   - name: microservice-srv
@@ -16,10 +16,40 @@ modules:
     path: gen/srv
     parameters:
       buildpack: nodejs_buildpack
+      readiness-health-check-type: http
+      readiness-health-check-http-endpoint: /health
     build-parameters:
       builder: npm
     provides:
       - name: srv-api # required by consumers of CAP services (e.g. approuter)
         properties:
           srv-url: ${default-url}
-    requires: []
+    requires:
+      - name: microservice-auth2
+
+  - name: microservice
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      keep-existing-routes: true
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api # must be used in xs-app.json as well
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: microservice-auth2
+
+resources:
+  - name: microservice-auth2
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: microservice-${org}-${space}
+        tenant-mode: dedicated
