@@ -5,4 +5,5 @@ cds.on("bootstrap", async (app) => {
 });
 
 // Delegate bootstrapping to built-in server.js
+//test comment
 module.exports = cds.server;

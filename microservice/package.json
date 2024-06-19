@@ -1,0 +1,44 @@
+{
+  "name": "microservice",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/approuter": "^16.5.2",
+    "@sap/cds": "^7",
+    "@sap/cds-dk": "^7.9.3",
+    "@sap/eslint-plugin-cds": "^3",
+    "@sap/hana-client": "^2.20.23",
+    "@sap/xssec": "^3",
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "passport": "^0"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "engines": {
+    "node": "^20",
+    "npm": "^10.5.0"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^7.9.3"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "credentials": {
+          "database": ":memory:"
+        }
+      },
+      "auth": "jwt-auth",
+      "uaa": {
+        "kind": "xsuaa"
+    }
+    }
+  }
+}

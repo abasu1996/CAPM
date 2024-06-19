@@ -1,0 +1,30 @@
+{
+  "xsappname": "microservice",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.Admin",
+      "description": "Admin"
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "Admin",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.Admin"
+      ],
+      "attribute-references": []
+    }
+  ],
+  "oauth2-configuration": {
+    "token-validity": 900,
+    "refresh-token-validity": 1800,
+    "redirect-uris": [
+      "https://*.applicationstudio.cloud.sap/**",
+      "https://api.cfapps.us10-001.hana.ondemand.com"
+    ],
+    "autoapprove": "false"
+  }
+}
