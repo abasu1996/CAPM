@@ -35,10 +35,10 @@
           "database": ":memory:"
         }
       },
-      "auth": "jwt-auth",
+      "auth": "xsuaa",
       "uaa": {
         "kind": "xsuaa"
-    }
+      }
     }
   }
 }

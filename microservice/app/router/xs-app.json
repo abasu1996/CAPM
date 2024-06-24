@@ -4,9 +4,9 @@
       "source": "^/(.*)$",
       "target": "$1",
       "destination": "srv-api",
-      "authenticationType":"xsuaa",
+      "authenticationType": "xsuaa",
       "csrfProtection": true
     }
-  ]
-  
+  ],
+  "welcomeFile": "app/index.html"
 }
