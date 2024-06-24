@@ -1,5 +1,6 @@
 //Path registered to avoid confusion
-service say@(requires: 'authenticated-user')@(path: '/'){
+//@(requires: 'authenticated-user')
+service say@(path: '/'){
   action upload() returns String;
   action customer() returns String;
   action lead() returns String;
