@@ -54,7 +54,7 @@ module.exports = (say) => {
         }
         req._.res.send(cust_pos_resp);
       }
-      else if(accountTeamrole !== "ZCR" && readyforsample_ex === true) {
+      else if (accountTeamrole !== "ZCR" && readyforsample_ex === true) {
         const cust_neg_resp = {
           "noChanges": true,
           "error": [
@@ -67,6 +67,18 @@ module.exports = (say) => {
         };
         req._.res.send(cust_neg_resp);
       }
+      req._res.send({
+        "noChanges": true,
+        "info": [
+          {
+            "code": "external_AccountService.10001",
+            "message": "Validation Skipped for Creation Screen",
+            "target": "",
+            "severity": "INFO"
+          }
+        ]
+
+      });
     }
     //req._.res.send(jsonstring);
 
