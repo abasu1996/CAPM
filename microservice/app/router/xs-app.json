@@ -7,6 +7,5 @@
       "authenticationType": "xsuaa",
       "csrfProtection": true
     }
-  ],
-  "welcomeFile": "app/index.html"
+  ]
 }
