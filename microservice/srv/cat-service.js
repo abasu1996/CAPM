@@ -41,25 +41,26 @@ module.exports = (say) => {
     let accountTeam = jsonstring.currentImage.accountTeamMembers;
     let accountcreationscreen = jsonstring.beforeImage;
     let accountTeamrole = "";
+    let readyforsample_ex = jsonstring.extensions.Z_ReadyForSample;
     if (accountcreationscreen !== null) {
       accountTeam.forEach(element => {
         if (element.role === "ZCR") {
           accountTeamrole = element.role;
         }
       });
-      if (accountTeamrole === "ZCR") {
+      if (accountTeamrole === "ZCR" && readyforsample_ex === false) {
         const cust_pos_resp = {
           "noChanges": true
         }
         req._.res.send(cust_pos_resp);
       }
-      else {
+      else if(accountTeamrole !== "ZCR" && readyforsample_ex === true) {
         const cust_neg_resp = {
           "noChanges": true,
           "error": [
             {
               "code": "external_AccountService.10000",
-              "message": "ZCSR Role Nahin hain Account Team Mamber me. Pehle usko maintain karo",
+              "message": "Sorry! ZCR Role in not maintained in Account Team, Please maintain and proceed",
               "target": "{accountTeamMembers.role}"
             }
           ]

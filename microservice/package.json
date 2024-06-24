@@ -7,7 +7,7 @@
   "private": true,
   "dependencies": {
     "@cap-js/sqlite": "^1",
-    "@sap/approuter": "^16.5.2",
+    "@sap/approuter": "^8.4.1",
     "@sap/cds": "^7",
     "@sap/cds-dk": "^7.9.3",
     "@sap/eslint-plugin-cds": "^3",
