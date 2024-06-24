@@ -53,10 +53,10 @@ module.exports = (say) => {
     const jsondata = JSON.stringify(data);
     const jsonstring = JSON.parse(jsondata);
     let accountTeam = jsonstring.currentImage.accountTeamMembers;
-    let accountcreationscreen = jsonstring.beforeImage;
+    const accountcreationscreen = jsonstring.beforeImage;
     let accountTeamrole = "";
     let readyforsample_ex = jsonstring.currentImage.extensions.Z_ReadyForSample;
-    if (accountcreationscreen !== null) {
+    if (Object.keys(accountcreationscreen).length !== 0) {
       accountTeam.forEach(element => {
         if (element.role === "ZCR") {
           accountTeamrole = element.role;
@@ -161,7 +161,7 @@ module.exports = (say) => {
 
 
 
-  
+
   say.on("quote", (req, res) => {
 
     let data = req._.req.body;
