@@ -1,4 +1,6 @@
-
+const cds = require('@sap/cds');
+const express = require('express');
+const validateKey = require('./reusablefunctions');
 module.exports = (say) => {
   say.on("upload", (req, res) => {
     const cust_pos_resp = {
@@ -45,31 +47,37 @@ module.exports = (say) => {
 
   /****************CUSTOMER LOGIC ***************/
 
-  say.on("customer", (req, res) => {
+  srv.on("customer", (req, res) => {
+
     const cust_pos_resp = {
       "noChanges": true
-    }
+    };
     let data = req._.req.body;
     const jsondata = JSON.stringify(data);
     const jsonstring = JSON.parse(jsondata);
-    let accountTeam = jsonstring.currentImage.accountTeamMembers;
-    const accountcreationscreen = jsonstring.beforeImage;
+    let accountTeam = jsonstring.currentImage;
+    let beforechange = jsonstring.beforeImage;
     let accountTeamrole = "";
-    
-    if (Object.keys(accountcreationscreen).length !== 0) {
-      accountTeam.forEach(element => {
-        if (element.role === "ZCR") {
-          accountTeamrole = element.role;
-        }
-      });
+    let valindi = validateKey(jsonstring, beforechange);
+    if (valindi !== false) {
+      if (!accountTeam.hasOwnProperty('accountTeamMembers')) {
+        const accountteammember = accountTeam.accountTeamMembers;
+        accountteammember.forEach(element => {
+          if (element.role === "ZCR") {
+            accountTeamrole = element.role;
+          }
+        });
+      }
+
+
+      accountTeamrole = "ZCR";
       let readyforsample_ex = jsonstring.currentImage.extensions.Z_ReadyForSample;
-      if(readyforsample_ex)
-      {
+      if (readyforsample_ex) {
         if (accountTeamrole === "ZCR") {
-  
+
           req._.res.send(cust_pos_resp);
         }
-        else{
+        else {
           const cust_neg_resp = {
             "noChanges": true,
             "error": [
@@ -84,11 +92,10 @@ module.exports = (say) => {
         }
       }
       else
-      req._.res.send(cust_pos_resp);
+        req._.res.send(cust_pos_resp);
 
     }
-    else
-    {
+    else {
       const noval_creationScreen = {
         "noChanges": true,
         "info": [
@@ -103,8 +110,6 @@ module.exports = (say) => {
       }
       req._.res.send(noval_creationScreen);
     }
-    //req._.res.send(jsonstring);
-
   });
 
 
