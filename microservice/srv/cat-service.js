@@ -1,6 +1,7 @@
 const cds = require('@sap/cds');
 const express = require('express');
 const validateKey = require('./reusablefunctions');
+const { log } = require('console');
 module.exports = (say) => {
   say.on("upload", (req, res) => {
     const cust_pos_resp = {
@@ -53,28 +54,39 @@ module.exports = (say) => {
       "noChanges": true
     };
     let data = req._.req.body;
+
     const jsondata = JSON.stringify(data);
     const jsonstring = JSON.parse(jsondata);
+    console.log(jsondata);
     let accountTeam = jsonstring.currentImage;
-    let beforechange = jsonstring.beforeImage;
+    console.log("Account Team " + accountTeam);
+    let beforechange = "beforeImage";
     let accountTeamrole = "";
     let valindi = validateKey(jsonstring, beforechange);
+    console.log(valindi);
     if (valindi !== false) {
-      if (!accountTeam.hasOwnProperty('accountTeamMembers')) {
+      var teamcheck = accountTeam.hasOwnProperty('accountTeamMembers');
+      console.log("TEAM CHECK " + teamcheck);
+      if (accountTeam.hasOwnProperty('accountTeamMembers')) {
+        console.log("Team check started");
         const accountteammember = accountTeam.accountTeamMembers;
+        console.log(accountteammember);
         accountteammember.forEach(element => {
-          if (element.role === "ZCR") {
+          console.log(element.role);
+          if(element.role === "ZCSR-1") 
+          {
             accountTeamrole = element.role;
-          }
+            console.log("TEST Log " + accountTeamrole);
+          };
+          console.log(element.role);
         });
       }
-
-
-      accountTeamrole = "ZCR";
       let readyforsample_ex = jsonstring.currentImage.extensions.Z_ReadyForSample;
+      console.log(readyforsample_ex);
       if (readyforsample_ex) {
-        if (accountTeamrole === "ZCR") {
-
+        console.log("IN1");
+        if (accountTeamrole === "ZCSR-1") {
+          console.log("IN2");
           req._.res.send(cust_pos_resp);
         }
         else {
