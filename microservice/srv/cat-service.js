@@ -47,7 +47,7 @@ module.exports = (say) => {
 
   /****************CUSTOMER LOGIC ***************/
 
-  srv.on("customer", (req, res) => {
+  say.on("customer", (req, res) => {
 
     const cust_pos_resp = {
       "noChanges": true
