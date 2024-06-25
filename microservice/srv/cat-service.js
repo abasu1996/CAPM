@@ -55,13 +55,14 @@ module.exports = (say) => {
     let accountTeam = jsonstring.currentImage.accountTeamMembers;
     const accountcreationscreen = jsonstring.beforeImage;
     let accountTeamrole = "";
-    let readyforsample_ex = jsonstring.currentImage.extensions.Z_ReadyForSample;
+    
     if (Object.keys(accountcreationscreen).length !== 0) {
       accountTeam.forEach(element => {
         if (element.role === "ZCR") {
           accountTeamrole = element.role;
         }
       });
+      let readyforsample_ex = jsonstring.currentImage.extensions.Z_ReadyForSample;
       if(readyforsample_ex)
       {
         if (accountTeamrole === "ZCR") {

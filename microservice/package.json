@@ -35,9 +35,9 @@
           "database": ":memory:"
         }
       },
-      "auth": "mocked",
+      "auth": "xsuaa",
       "uaa": {
-        "kind": "mocked"
+        "kind": "xsuaa"
       }
     }
   }
