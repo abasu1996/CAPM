@@ -107,7 +107,7 @@ module.exports = (say) => {
             "error": [
               {
                 "code": "external_AccountService.10000",
-                "message": "Sorry! ZCR Role in not maintained in Account Team, Please maintain and proceed",
+                "message": "Sorry! CSR Role is not maintained in Account Team, Please maintain and proceed",
                 "target": "{accountTeamMembers.role}"
               }
             ]
