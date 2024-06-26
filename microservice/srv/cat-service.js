@@ -65,7 +65,8 @@ module.exports = (say) => {
     let readyforsample = "Z_ReadyForSample";
     let accountTeamrole = "";
     let valindi = validateKey(jsonstring, beforechange);
-    let readyforsampleindi = validateKey(jsonstring,extensionkey);
+    let readyforsampleindi = validateKey(accountTeam,extensionkey);
+    console.log(readyforsampleindi);
     let readyforsample_ex = false;
     console.log(valindi);
     if (valindi !== false) {

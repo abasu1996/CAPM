@@ -96,156 +96,146 @@ Authorization: Basic eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vMDIwMWRiNmJ0cmlhbC5
 }
 
 ###
-POST http://localhost:4004/customer HTTP/1.1 //Account Team has ZCSR-1
+POST http://localhost:45887/customer HTTP/1.1 //Account Team has ZCSR-1
 Content-Type: application/json
 
 {
-  "entity": "sap.ssc.md.accountservice.entity.account",
-  "currentImage": {
-    "lifeCycleStatus": "ACTIVE",
-    "isProspect": true,
-    "customerRole": "BUP002",
-    "formattedName": "Henkel Lead",
-    "customerABCClassification": "B",
-    "isNaturalPerson": false,
-    "blockingReasons": {
-      "isSalesSupportBlocked": false
-    },
-    "firstLineName": "Henkel Lead",
-    "ownerId": "11ef2fa5-5d46-498e-afdb-81941f020a00",
-    "adminData": {
-      "createdOn": "2024-06-24T13:20:08.575Z",
-      "createdBy": "74fb2599-2fa5-11ef-b82d-77b7f718a80c",
-      "createdByName": "Anim Kumar",
-      "updatedOn": "2024-06-25T16:34:43.929Z",
-      "updatedBy": "74fb2599-2fa5-11ef-b82d-77b7f718a80c",
-      "updatedByName": "Anim Kumar"
-    },
-    "id": "11ef322c-7a54-2d1e-afdb-81daa7020a00",
-    "displayId": "1000002",
-    "isBusinessPurposeCompleted": false,
-    "extensions": {
-      "Z_ReadyForSample": true
-    },
-    "defaultAddress": {
-      "country": "IN",
-      "region": {
-        "country": "IN",
-        "region": "22"
+   "entity":"sap.ssc.md.accountservice.entity.account",
+   "currentImage":{
+      "lifeCycleStatus":"ACTIVE",
+      "isProspect":true,
+      "customerRole":"BUP002",
+      "formattedName":"Henkel Energy Lead",
+      "customerABCClassification":"A",
+      "isNaturalPerson":false,
+      "blockingReasons":{
+         "isSalesSupportBlocked":false
       },
-      "isPostOfficeBoxAddress": false,
-      "correspondenceLanguage": "en",
-      "formattedPostalAddressDescription": "IN"
-    },
-    "addresses": [
-      {
-        "isDefaultAddress": true,
-        "country": "IN",
-        "region": {
-          "country": "IN",
-          "region": "22"
-        },
-        "isPostOfficeBoxAddress": false,
-        "formattedPostalAddressDescription": "IN",
-        "correspondenceLanguage": "en",
-        "id": "11ef322c-7a54-c95e-afdb-81daa7020a00",
-        "parentId": "11ef322c-7a54-2d1e-afdb-81daa7020a00",
-        "addressId": "11ef322c-7a54-f06e-afdb-81daa7020a00"
-      }
-    ],
-    "accountTeamMembers": [
-      {
-        "employeeId": "11ef2fa5-5d46-498e-afdb-81941f020a00",
-        "role": "BUR011-1",
-        "isDefault": true,
-        "id": "11ef322c-7a54-a24e-afdb-81daa7020a00",
-        "validFrom": "0001-01-01",
-        "validTo": "9999-12-31"
+      "firstLineName":"Henkel Energy Lead",
+      "ownerId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
+      "adminData":{
+         "createdOn":"2024-06-25T21:28:57.995Z",
+         "createdBy":"74fb2599-2fa5-11ef-b82d-77b7f718a80c",
+         "createdByName":"Anim Kumar",
+         "updatedOn":"2024-06-26T08:35:24.394Z",
+         "updatedBy":"74fb2599-2fa5-11ef-b82d-77b7f718a80c",
+         "updatedByName":"Anim Kumar"
       },
-      {
-        "employeeId": "11ef2fa5-5d46-498e-afdb-81941f020a00",
-        "role": "ZCSR-",
-        "isDefault": true,
-        "id": "11ef3310-caea-c4ce-afdb-81f114020a00",
-        "validFrom": "0001-01-01",
-        "validTo": "9999-12-31"
-      }
-    ],
-    "accessControlEntries": [
-      "11ef2fa5-5d46-498e-afdb-81941f020a00"
-    ]
-  },
-  "beforeImage": {
-    "lifeCycleStatus": "ACTIVE",
-    "isProspect": true,
-    "customerRole": "BUP002",
-    "formattedName": "Henkel Lead",
-    "customerABCClassification": "B",
-    "isNaturalPerson": false,
-    "blockingReasons": {
-      "isSalesSupportBlocked": false
-    },
-    "firstLineName": "Henkel Lead",
-    "ownerId": "11ef2fa5-5d46-498e-afdb-81941f020a00",
-    "adminData": {
-      "createdOn": "2024-06-24T13:20:08.575Z",
-      "createdBy": "74fb2599-2fa5-11ef-b82d-77b7f718a80c",
-      "createdByName": "Anim Kumar",
-      "updatedOn": "2024-06-25T16:34:43.929Z",
-      "updatedBy": "74fb2599-2fa5-11ef-b82d-77b7f718a80c",
-      "updatedByName": "Anim Kumar"
-    },
-    "id": "11ef322c-7a54-2d1e-afdb-81daa7020a00",
-    "displayId": "1000002",
-    "isBusinessPurposeCompleted": false,
-    "extensions": {
-      "Z_ReadyForSample": true
-    },
-    "addresses": [
-      {
-        "isDefaultAddress": true,
-        "country": "IN",
-        "region": {
-          "country": "IN",
-          "region": "22"
-        },
-        "isPostOfficeBoxAddress": false,
-        "formattedPostalAddressDescription": "IN",
-        "correspondenceLanguage": "en",
-        "id": "11ef322c-7a54-c95e-afdb-81daa7020a00",
-        "parentId": "11ef322c-7a54-2d1e-afdb-81daa7020a00",
-        "addressId": "11ef322c-7a54-f06e-afdb-81daa7020a00"
-      }
-    ],
-    "accountTeamMembers": [
-      {
-        "employeeId": "11ef2fa5-5d46-498e-afdb-81941f020a00",
-        "role": "BUR011-1",
-        "isDefault": true,
-        "id": "11ef322c-7a54-a24e-afdb-81daa7020a00",
-        "validFrom": "0001-01-01",
-        "validTo": "9999-12-31"
+      "id":"11ef3339-ee6f-a59e-afdb-81daa7020a00",
+      "displayId":"1000029",
+      "isBusinessPurposeCompleted":false,
+      "extensions":{
+         "Z_ReadyForSample":true
       },
-      {
-        "employeeId": "11ef2fa5-5d46-498e-afdb-81941f020a00",
-        "role": "ZCSR-1",
-        "isDefault": true,
-        "id": "11ef3310-caea-c4ce-afdb-81f114020a00",
-        "validFrom": "0001-01-01",
-        "validTo": "9999-12-31"
-      }
-    ],
-    "defaultAddress": {
-      "country": "IN",
-      "region": {
-        "country": "IN",
-        "region": "22"
+      "defaultAddress":{
+         "country":"IN",
+         "region":{
+            "country":"IN",
+            "region":"03"
+         },
+         "isPostOfficeBoxAddress":false,
+         "correspondenceLanguage":"en",
+         "formattedPostalAddressDescription":"IN"
       },
-      "isPostOfficeBoxAddress": false,
-      "correspondenceLanguage": "en",
-      "formattedPostalAddressDescription": "IN"
-    }
-  }
+      "addresses":[
+         {
+            "isDefaultAddress":true,
+            "country":"IN",
+            "region":{
+               "country":"IN",
+               "region":"03"
+            },
+            "isPostOfficeBoxAddress":false,
+            "formattedPostalAddressDescription":"IN",
+            "correspondenceLanguage":"en",
+            "id":"11ef3339-ee70-41de-afdb-81daa7020a00",
+            "parentId":"11ef3339-ee6f-a59e-afdb-81daa7020a00",
+            "addressId":"11ef3339-ee70-68ee-afdb-81daa7020a00"
+         }
+      ],
+      "accountTeamMembers":[
+         {
+            "employeeId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
+            "role":"BUR011-1",
+            "isDefault":true,
+            "id":"11ef3339-ee70-1ace-afdb-81daa7020a00",
+            "validFrom":"0001-01-01",
+            "validTo":"9999-12-31"
+         },
+         {
+            "employeeId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
+            "role":"ZCSR-2",
+            "isDefault":false,
+            "id":"11ef3397-f624-ac0e-afdb-81f377020a00"
+         }
+      ],
+      "accessControlEntries":[
+         "11ef2fa5-5d46-498e-afdb-81941f020a00"
+      ]
+   },
+   "beforeImage":{
+      "lifeCycleStatus":"ACTIVE",
+      "isProspect":true,
+      "customerRole":"BUP002",
+      "formattedName":"Henkel Energy Lead",
+      "customerABCClassification":"A",
+      "isNaturalPerson":false,
+      "blockingReasons":{
+         "isSalesSupportBlocked":false
+      },
+      "firstLineName":"Henkel Energy Lead",
+      "ownerId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
+      "adminData":{
+         "createdOn":"2024-06-25T21:28:57.995Z",
+         "createdBy":"74fb2599-2fa5-11ef-b82d-77b7f718a80c",
+         "createdByName":"Anim Kumar",
+         "updatedOn":"2024-06-26T08:35:24.394Z",
+         "updatedBy":"74fb2599-2fa5-11ef-b82d-77b7f718a80c",
+         "updatedByName":"Anim Kumar"
+      },
+      "id":"11ef3339-ee6f-a59e-afdb-81daa7020a00",
+      "displayId":"1000029",
+      "isBusinessPurposeCompleted":false,
+      "extensions":{
+         "Z_ReadyForSample":true
+      },
+      "addresses":[
+         {
+            "isDefaultAddress":true,
+            "country":"IN",
+            "region":{
+               "country":"IN",
+               "region":"03"
+            },
+            "isPostOfficeBoxAddress":false,
+            "formattedPostalAddressDescription":"IN",
+            "correspondenceLanguage":"en",
+            "id":"11ef3339-ee70-41de-afdb-81daa7020a00",
+            "parentId":"11ef3339-ee6f-a59e-afdb-81daa7020a00",
+            "addressId":"11ef3339-ee70-68ee-afdb-81daa7020a00"
+         }
+      ],
+      "accountTeamMembers":[
+         {
+            "employeeId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
+            "role":"BUR011-1",
+            "isDefault":true,
+            "id":"11ef3339-ee70-1ace-afdb-81daa7020a00",
+            "validFrom":"0001-01-01",
+            "validTo":"9999-12-31"
+         }
+      ],
+      "defaultAddress":{
+         "country":"IN",
+         "region":{
+            "country":"IN",
+            "region":"03"
+         },
+         "isPostOfficeBoxAddress":false,
+         "correspondenceLanguage":"en",
+         "formattedPostalAddressDescription":"IN"
+      }
+   }
 }
 
 ###
