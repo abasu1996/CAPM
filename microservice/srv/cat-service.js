@@ -61,8 +61,12 @@ module.exports = (say) => {
     let accountTeam = jsonstring.currentImage;
     console.log("Account Team " + accountTeam);
     let beforechange = "beforeImage";
+    let extensionkey = "extensions";
+    let readyforsample = "Z_ReadyForSample";
     let accountTeamrole = "";
     let valindi = validateKey(jsonstring, beforechange);
+    let readyforsampleindi = validateKey(jsonstring,extensionkey);
+    let readyforsample_ex = false;
     console.log(valindi);
     if (valindi !== false) {
       var teamcheck = accountTeam.hasOwnProperty('accountTeamMembers');
@@ -81,7 +85,14 @@ module.exports = (say) => {
           console.log(element.role);
         });
       }
-      let readyforsample_ex = jsonstring.currentImage.extensions.Z_ReadyForSample;
+      if(readyforsampleindi)
+      {
+        let extensionkeyobj = jsonstring.currentImage.extensions;
+        if(validateKey(extensionkeyobj,readyforsample))
+        {
+          readyforsample_ex = extensionkeyobj.Z_ReadyForSample;
+        }
+      }
       console.log(readyforsample_ex);
       if (readyforsample_ex) {
         console.log("IN1");
