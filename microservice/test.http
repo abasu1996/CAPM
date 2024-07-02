@@ -92,7 +92,7 @@ Authorization: Basic eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vMDIwMWRiNmJ0cmlhbC5
       }
     ]
   },
-  "beforeImage": {}
+  "beforeImage": null
 }
 
 ###
