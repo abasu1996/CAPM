@@ -1,10 +1,9 @@
-//Path registered to avoid confusion
+service customservice @(path:'/v2api'){//@(requires: 'authenticated-user') {
 
-service say@(path: '/')@(requires: 'authenticated-user'){
-  action upload() returns String;
-  action customer() returns String;
-  action lead() returns String;
-  action opportunity() returns String;
-  action quote() returns String;
-
+    action customer() returns String;
+    action aynccustomer() returns String;
+    action opportunity() returns String;
+    action lead() returns String;
+    action appointment() returns String;
+    action quote() returns String;
 }

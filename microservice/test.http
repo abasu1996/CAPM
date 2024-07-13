@@ -92,11 +92,11 @@ Authorization: Basic eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vMDIwMWRiNmJ0cmlhbC5
       }
     ]
   },
-  "beforeImage": null
+  "beforeImage": {}
 }
 
 ###
-POST http://localhost:45887/customer HTTP/1.1 //Account Team has ZCSR-1
+POST http://localhost:4004/customer HTTP/1.1 //Account Team has ZCSR-1
 Content-Type: application/json
 
 {
@@ -156,7 +156,7 @@ Content-Type: application/json
       "accountTeamMembers":[
          {
             "employeeId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
-            "role":"BUR011-1",
+            "role":"ZCSR-2",
             "isDefault":true,
             "id":"11ef3339-ee70-1ace-afdb-81daa7020a00",
             "validFrom":"0001-01-01",
@@ -164,7 +164,7 @@ Content-Type: application/json
          },
          {
             "employeeId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
-            "role":"ZCSR-2",
+            "role":"ABCD",
             "isDefault":false,
             "id":"11ef3397-f624-ac0e-afdb-81f377020a00"
          }
@@ -255,18 +255,22 @@ Content-Type: application/json
          "isSalesSupportBlocked":false
       },
       "firstLineName":"Henkel Energy Lead",
+      "industrialSector":"22",
       "ownerId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
       "adminData":{
          "createdOn":"2024-06-25T21:28:57.995Z",
          "createdBy":"74fb2599-2fa5-11ef-b82d-77b7f718a80c",
          "createdByName":"Anim Kumar",
-         "updatedOn":"2024-06-25T21:28:57.995Z",
+         "updatedOn":"2024-06-27T09:01:02.869Z",
          "updatedBy":"74fb2599-2fa5-11ef-b82d-77b7f718a80c",
          "updatedByName":"Anim Kumar"
       },
       "id":"11ef3339-ee6f-a59e-afdb-81daa7020a00",
       "displayId":"1000029",
       "isBusinessPurposeCompleted":false,
+      "extensions":{
+         "Z_ReadyForSample":false
+      },
       "defaultAddress":{
          "country":"IN",
          "region":{
@@ -293,6 +297,19 @@ Content-Type: application/json
             "addressId":"11ef3339-ee70-68ee-afdb-81daa7020a00"
          }
       ],
+      "salesArrangements":[
+         {
+            "blockingReasons":{
+               "isSalesSupportBlocked":false
+            },
+            "id":"11ef382f-ab3c-cc3e-afdb-811f73020a00",
+            "salesOrganizationId":"11ef3459-8819-81fe-afdb-81ba16020a00",
+            "distributionChannel":"10",
+            "division":"10",
+            "isMarkedForDeletion":false,
+            "isCompleteDeliveryRequested":false
+         }
+      ],
       "accountTeamMembers":[
          {
             "employeeId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
@@ -301,12 +318,6 @@ Content-Type: application/json
             "id":"11ef3339-ee70-1ace-afdb-81daa7020a00",
             "validFrom":"0001-01-01",
             "validTo":"9999-12-31"
-         },
-         {
-            "employeeId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
-            "role":"ZCSR-1",
-            "isDefault":false,
-            "id":"11ef338e-2bcb-273e-afdb-81daa7020a00"
          }
       ],
       "accessControlEntries":[
@@ -324,18 +335,22 @@ Content-Type: application/json
          "isSalesSupportBlocked":false
       },
       "firstLineName":"Henkel Energy Lead",
+      "industrialSector":"22",
       "ownerId":"11ef2fa5-5d46-498e-afdb-81941f020a00",
       "adminData":{
          "createdOn":"2024-06-25T21:28:57.995Z",
          "createdBy":"74fb2599-2fa5-11ef-b82d-77b7f718a80c",
          "createdByName":"Anim Kumar",
-         "updatedOn":"2024-06-25T21:28:57.995Z",
+         "updatedOn":"2024-06-27T09:01:02.869Z",
          "updatedBy":"74fb2599-2fa5-11ef-b82d-77b7f718a80c",
          "updatedByName":"Anim Kumar"
       },
       "id":"11ef3339-ee6f-a59e-afdb-81daa7020a00",
       "displayId":"1000029",
       "isBusinessPurposeCompleted":false,
+      "extensions":{
+         "Z_ReadyForSample":true
+      },
       "addresses":[
          {
             "isDefaultAddress":true,
