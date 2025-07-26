@@ -1,12 +1,14 @@
-import logo from './logo.svg';
-import './App.css';
-import NewsComponent from "./catelogService";
+
+
+
 
 function App() {
   return (
     <div className="App">
       <center className='App-header'>
-      <NewsComponent />
+        <h1>Welcome to the Capgular Project</h1>
+        <p>This is a simple React application.</p>
+        <p>Feel free to explore and modify the code!</p>
       </center>
     </div>
   );
