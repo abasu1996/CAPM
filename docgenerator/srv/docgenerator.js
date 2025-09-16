@@ -1,7 +1,7 @@
 const env = require('dot-env').config;
 const cds = require('@sap/cds')
 
-//const axios = require('axios');
+
 const SapCfAxios = require('sap-cf-axios').default;
 module.exports = class generateDocument extends cds.ApplicationService { init() {
 const destinationName = 'ariba-api';
@@ -9,9 +9,10 @@ const destinationName = 'ariba-api';
 
   this.on ('generate', async (req) => {
     const axios = SapCfAxios(destinationName);
-    console.log('On generate', req.data)
+    console.log('On generate', process.env.apiKey, process.env.realm);
 
-    let docResponse = await axios.get({
+    let docResponse = await axios({
+      method:'get',
       url:'/parameters',
       params:{
         "includeMetadata": true,
