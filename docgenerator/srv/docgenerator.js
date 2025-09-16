@@ -28,13 +28,14 @@ const destinationName = 'ariba-api';
       }
     });
 
-    console.log('Response from Ariba API', docResponse.data[0])
+    console.log('Response from Ariba API', docResponse.data)
 
     try {
-      const gen = new DocGenerator(docResponse.data[0], { creator: "Doc Generator" });
+      const gen = new DocGenerator(docResponse.data, { creator: "Doc Generator" });
       
-      const out = await gen.generate("Audit-AutoReject-EmailApprovals.docx");
-      
+      const out = await gen.generateCombined("Audit-AutoReject-EmailApprovals.docx");
+
+
 
       console.log(`Saved ${out}`);
     } catch (err) {
