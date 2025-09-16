@@ -1,5 +1,9 @@
 const env = require('dot-env').config;
 const cds = require('@sap/cds')
+const {DocGenerator} = require('./docgeneratorclass');
+
+
+
 
 
 const SapCfAxios = require('sap-cf-axios').default;
@@ -24,9 +28,20 @@ const destinationName = 'ariba-api';
       }
     });
 
-    console.log('Response from Ariba API', docResponse.data)
+    console.log('Response from Ariba API', docResponse.data[0])
 
-    return docResponse.data;
+    try {
+      const gen = new DocGenerator(docResponse.data[0], { creator: "Doc Generator" });
+      
+      const out = await gen.generate("Audit-AutoReject-EmailApprovals.docx");
+      
+
+      console.log(`Saved ${out}`);
+    } catch (err) {
+      console.error("Failed to generate doc:", err);
+    }
+
+    return docResponse.data[0];
 
 
 
