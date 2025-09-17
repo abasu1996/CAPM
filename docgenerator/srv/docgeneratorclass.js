@@ -47,7 +47,10 @@ class DocGenerator {
     return v === true || v===1 ? "Yes" : v === false || v===0 ? "No" : String(v);
   }
 
-
+  _htmlToText(html) {
+    
+    return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  }
   _buildForItem(item) {
     const title = new Paragraph({
       children: [new TextRun({text:item.displayName || "Configuration Item",color:"2E74B5",bold:true, size:32})],
@@ -82,9 +85,9 @@ class DocGenerator {
     const description = new Paragraph({
       children: [
         new TextRun({ text: "Description:	", bold: true }),
-        new TextRun({ text: item.description || "-" }),
+        new TextRun({ text: (this._htmlToText(item.description) || "-").slice(0, 1000) }),
       ],
-      spacing: { after: 300 },
+      spacing: { after: 100 },
     });
 
     // Table for properties
@@ -167,7 +170,7 @@ class DocGenerator {
     const note = new Paragraph({
       children: [
         new TextRun({ text: "Note: ", bold: true }),
-        new TextRun({ text: (item.description.replace(/<P>/g, '\n') || "-").slice(0, 400) }),
+        new TextRun({ text: (this._htmlToText(item.description) || "-").slice(0, 1000) }),
       ],
       spacing: { before: 300 },
     });
@@ -184,7 +187,7 @@ class DocGenerator {
       const built = this._buildForItem(item);
 
       if (idx !== 0) {
-        docChildren.push(new Paragraph({ text: "", pageBreakBefore: true }));
+        docChildren.push(new Paragraph({ text: "", pageBreakBefore: false }));
       }
 
       docChildren.push(
@@ -192,8 +195,7 @@ class DocGenerator {
         built.subtitle,
         built.badge,
         built.description,
-        built.detailsTable,
-        built.note
+        built.detailsTable
       );
     });
 

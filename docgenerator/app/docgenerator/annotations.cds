@@ -1,0 +1,1 @@
+using generateDocument as service from '../../srv/docgenerator';

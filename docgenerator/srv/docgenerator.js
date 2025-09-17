@@ -28,10 +28,24 @@ const destinationName = 'ariba-api';
       }
     });
 
-    console.log('Response from Ariba API', docResponse.data)
+   
 
     try {
-      const gen = new DocGenerator(docResponse.data, { creator: "Doc Generator" });
+      console.log(typeof docResponse.data);
+      var filterPayload = [];
+      docResponse.data.forEach((item,index) => {
+        
+        if(item.defaultValue !== item.parameterValue) {
+          
+          filterPayload.push(item);
+          
+        }
+      
+      });
+      console.log(`Length of filterPayload: ${docResponse.data.length}`);
+      console.log(`Length of filterPayload: ${filterPayload.length}`);
+      
+      const gen = new DocGenerator(filterPayload, { creator: "Doc Generator" });
       
       const out = await gen.generateCombined("Audit-AutoReject-EmailApprovals.docx");
 
@@ -42,7 +56,7 @@ const destinationName = 'ariba-api';
       console.error("Failed to generate doc:", err);
     }
 
-    return docResponse.data[0];
+    return docResponse.data.value;
 
 
 
