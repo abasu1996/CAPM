@@ -1,3 +1,5 @@
+
+
 sap.ui.define(
   [
     "sap/ui/core/mvc/Controller",
@@ -262,7 +264,7 @@ sap.ui.define(
                 var k = oItem.parameterName; // adjust property name if different
                 if (k !== undefined && !parameterNameSeen[k]) {
                   parameterNameSeen[k] = true;
-                  prm1.push({ key: k, text: String(k) });
+                  prm1.push({ key: k, text: String(k.replace(/\./g, " ")) });
                 }
                 return prm1;
               }, []);
@@ -292,6 +294,81 @@ sap.ui.define(
               });
             }.bind(this)
           );
+      },
+      onGeneratePress: function () {
+        //get the filter parameters from multicombo boxes in the filterbar
+
+        var oView = this.getView();
+        var oTable = oView.byId("idDocTable");
+        oTable.setBusy(true);
+        var oSelectedParams = this.getView()
+          .byId("parameterName")
+          .getSelectedItems();
+        var aParamKeys = oSelectedParams.map(function (item) {
+          return item.getKey();
+        });
+
+        var oSelectedCustomerEdit = this.getView()
+          .byId("isCustomerEditable")
+          .getSelectedItems();
+        var aCustomerEditKeys = oSelectedCustomerEdit.map(function (item) {
+          if(item.getKey() === "true" || item.getKey() === 0){
+            return true;
+          } else if(item.getKey() === "false" || item.getKey() === 1){
+            return false;
+          }
+          return item.getKey();
+        });
+
+        //call the generate action with the selected parameters as filter conditions
+        // If no parameters selected, pass empty array to avoid issues in srv side
+        var sParamFilter =
+          aParamKeys.length > 0 ? aParamKeys.join(",") : "___empty___";
+        var sCustomerEditFilter =
+          aCustomerEditKeys.length === 1
+            ? aCustomerEditKeys[0]
+            : "___empty___";
+            
+        // Adjust service path to your service name; change CatalogService if different.
+        var params = {
+          parameterName: [sParamFilter],
+          isCustomerEditable: sCustomerEditFilter,
+        };
+        // Create URL with query parameters
+        var sUrl =
+          "/odata/v4/generate-document/helper?params=" + encodeURIComponent(JSON.stringify(params));
+
+        // Adjust service path to your service name; change CatalogService if different.
+        //var sUrl = "/odata/v4/generate-document/helper";
+
+        fetch(sUrl, {
+          method: "GET",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+          .then(function (res) {
+            if (!res.ok) {
+              throw new Error("Network response was not ok: " + res.status);
+            }
+            return res.json();
+          })
+          .then(
+            function (data) {
+              MessageBox.success("Document created: " + data);
+              oTable.setBusy(false);
+            }.bind(this)
+          )
+          .catch(
+            function (err) {
+              MessageBox.error(
+                err.message || "Failed to call getDocumentCreated function"
+              );
+              oTable.setBusy(false);
+            }.bind(this)
+          );
+        
       },
     });
   }

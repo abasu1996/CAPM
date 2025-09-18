@@ -27,7 +27,7 @@
                         <filterbar:control>
                            
                                 <MultiComboBox
-                                    id="idCustomerEditable"
+                                    id="isCustomerEditable"
                                     items="{filter>/customerEditableOptions}"
                                     selectionFinish="onCustomerEditFilterSelectionFinish"
                                 >
@@ -41,13 +41,13 @@
 
                     <filterbar:FilterGroupItem
                         groupName="G2"
-                        name="isCustomerEditable2"
+                        name="parameterName"
                         label="{i18n>parameterName}"
                         visibleInFilterBar="true"
                     >
                         <filterbar:control>
                                 <MultiComboBox
-                                    id="id2CustomerEditable"
+                                    id="parameterName"
                                     items="{filter>/parameterNameOptions}"
                                     selectionFinish="onParamNameFilterSelectionFinish"
                                 >
@@ -101,9 +101,9 @@
                     <Column>
                         <Text text="{i18n>CustomerEditable}" />
                     </Column>
-                    <Column>
+                    <!-- <Column>
                         <Text text="{i18n>Description}" />
-                    </Column>
+                    </Column> -->
                 </columns>
 
                 <items>
@@ -111,7 +111,7 @@
                         <cells>
                             <!-- Column 1: displayName (title) + parameterName (subtext) -->
                             <ObjectIdentifier
-                                title="{docs>displayName}"
+                                title="{= ${docs>displayName} ? ${docs>displayName} : ${docs>parameterName}}"
                                 text="{docs>parameterName}"
                                 titleActive="true"
                             />
@@ -127,7 +127,7 @@
                             /> -->
                             <Text text="{docs>isCustomerEditable}" />
 
-                            <FormattedText htmlText="{docs>description}" />
+                            <!-- <FormattedText htmlText="{docs>description}" /> -->
                         </cells>
                     </ColumnListItem>
                 </items>

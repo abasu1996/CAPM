@@ -63,5 +63,53 @@ const destinationName = 'ariba-api';
 
   })
 
+  this.on ('getDocumentCreated', async (req) => {
+    const axios = SapCfAxios(destinationName);
+    console.log('On getDocumentCreated', req.req.data);
+
+    let docResponse = await axios({
+      method:'get',
+      url:'/parameters',
+      params:{
+        "includeMetadata": true,
+        "realm": process.env.realm,
+        //"$filter": "isCustomerEditable eq true"
+      },
+      headers:{
+        "Accept": 'application/json',
+        "apiKey": process.env.apiKey
+      }
+
+
+    });
+
+    return `Document created with ${docResponse.data.length} parameters`;
+  });
+
+    this.on ('helper', async (req) => {
+    const axios = SapCfAxios(destinationName);
+    console.log('On helper', await req.data.params.isCustomerEditable);
+    let buildingQueries = `$filter=isCustomerEditable eq ${req.data.params["isCustomerEditable"]}`;
+    console.log(`Building queries: ${buildingQueries}`);
+    
+    let docResponse = await axios({
+      method:'get',
+      url:'/parameters',
+      params:{
+        "includeMetadata": true,
+        "realm": process.env.realm,
+        //"$filter": "isCustomerEditable eq true"
+      },
+      headers:{
+        "Accept": 'application/json',
+        "apiKey": process.env.apiKey
+      }
+
+
+    });
+
+    return `Document created with ${docResponse.data.length} parameters`;
+  });
+
   return super.init()
 }}
