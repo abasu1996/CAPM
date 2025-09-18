@@ -146,12 +146,64 @@ sap.ui.define(
           );
         }
       },
+      onParamNameFilterSelectionFinish: function (oEvent) {
+        var oMultiComboBox = oEvent.getSource();
+        var aSelectedItems = oMultiComboBox.getSelectedItems();
+        var aKeys = aSelectedItems.map(function (item) {
+          return item.getKey();
+        });
+        var oTable = this.getView().byId("idDocTable");
+        var oBinding = oTable.getBinding("items");
 
-      /**
-       * Fallback: fetch raw response and normalize into an array, then bind to JSONModel "docs".
-       * This handles single-object responses and { value: [...] } wrappers.
-       */
-      _fallbackFetchAndBind: async function () {
+        if (oBinding) {
+          if (aKeys.length > 0) {
+            var aFilters = aKeys.map(function (key) {
+              return new sap.ui.model.Filter(
+                "parameterName",
+                sap.ui.model.FilterOperator.EQ,
+                key
+              );
+            });
+            var oCombinedFilter = new sap.ui.model.Filter(aFilters, false); // false for OR logic
+            oBinding.filter(oCombinedFilter);
+          } else {
+            // No selection, clear filter
+            oBinding.filter([]);
+          }
+        }
+    },
+    onCustomerEditFilterSelectionFinish: function (oEvent) {
+      var oMultiComboBox = oEvent.getSource();
+      var aSelectedItems = oMultiComboBox.getSelectedItems();
+      var aKeys = aSelectedItems.map(function (item) {
+        if(item.getKey() === "true" || item.getKey() === 0){
+          return true;
+        } else if(item.getKey() === "false" || item.getKey() === 1){
+          return false;
+        }
+        return item.getKey();
+      });
+      var oTable = this.getView().byId("idDocTable");
+      var oBinding = oTable.getBinding("items");
+
+      if (oBinding) {
+        if (aKeys.length > 0) {
+          var aFilters = aKeys.map(function (key) {
+            return new sap.ui.model.Filter(
+              "isCustomerEditable",
+              sap.ui.model.FilterOperator.EQ,
+              key
+            );
+          });
+          var oCombinedFilter = new sap.ui.model.Filter(aFilters, false); // false for OR logic
+          oBinding.filter(oCombinedFilter);
+        } else {
+          // No selection, clear filter
+          oBinding.filter([]);
+        }
+      }
+    },
+    _fallbackFetchAndBind: async function () {
         var oView = this.getView();
         var oTable = oView.byId("idDocTable");
         // oTable.setBusy(true);
@@ -174,7 +226,7 @@ sap.ui.define(
             return res.json();
           })
           .then(
-            function (data) {
+            async function (data) {
               var aItems;
               if (Array.isArray(data)) {
                 aItems = data;
@@ -203,9 +255,10 @@ sap.ui.define(
                   mSeen[v] = true;
                   acc.push({ key: v, text: String(v) });
                 }
+                return acc;
               }, []);
 
-              var aParameterName = aDocs.reduce(function (prm1, oItem) {
+              var aParameterName = await aDocs.reduce(function (prm1, oItem) {
                 var k = oItem.parameterName; // adjust property name if different
                 if (k !== undefined && !parameterNameSeen[k]) {
                   parameterNameSeen[k] = true;

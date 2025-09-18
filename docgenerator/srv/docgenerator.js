@@ -21,7 +21,7 @@ const destinationName = 'ariba-api';
       params:{
         "includeMetadata": true,
         "realm": process.env.realm,
-        "$filter": "isCustomerEditable eq true"
+        //"$filter": "isCustomerEditable eq true"
       },
       headers:{
         "Accept": 'application/json',

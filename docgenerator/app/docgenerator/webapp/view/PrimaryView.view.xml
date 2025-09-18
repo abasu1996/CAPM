@@ -29,7 +29,7 @@
                                 <MultiComboBox
                                     id="idCustomerEditable"
                                     items="{filter>/customerEditableOptions}"
-                                    selectionFinish="onFilterSelectionFinish"
+                                    selectionFinish="onCustomerEditFilterSelectionFinish"
                                 >
                                     <core:Item
                                         key="{filter>key}"
@@ -49,7 +49,7 @@
                                 <MultiComboBox
                                     id="id2CustomerEditable"
                                     items="{filter>/parameterNameOptions}"
-                                    selectionFinish="onFilterSelectionFinish"
+                                    selectionFinish="onParamNameFilterSelectionFinish"
                                 >
                                     <core:Item
                                         key="{filter>key}"
