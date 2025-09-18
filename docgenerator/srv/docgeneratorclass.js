@@ -7,6 +7,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { saveAs } = require("file-saver");
 const {
   Document,
   Packer,
@@ -44,19 +45,32 @@ class DocGenerator {
   }
 
   static _prettyBool(v) {
-    return v === true || v===1 ? "Yes" : v === false || v===0 ? "No" : String(v);
+    return v === true || v === 1
+      ? "Yes"
+      : v === false || v === 0
+      ? "No"
+      : String(v);
   }
 
   _htmlToText(html) {
-    
-    return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    return html
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   }
   _buildForItem(item) {
     const title = new Paragraph({
-      children: [new TextRun({text:item.displayName || "Configuration Item",color:"2E74B5",bold:true, size:32})],
+      children: [
+        new TextRun({
+          text: item.displayName || "Configuration Item",
+          color: "2E74B5",
+          bold: true,
+          size: 32,
+        }),
+      ],
       heading: HeadingLevel.HEADING_2,
       alignment: AlignmentType.CENTER,
-      spacing: { after: 200 }
+      spacing: { after: 200 },
     });
 
     const subtitle = new Paragraph({
@@ -85,7 +99,9 @@ class DocGenerator {
     const description = new Paragraph({
       children: [
         new TextRun({ text: "Description:	", bold: true }),
-        new TextRun({ text: (this._htmlToText(item.description) || "-").slice(0, 1000) }),
+        new TextRun({
+          text: (this._htmlToText(item.description) || "-").slice(0, 1000),
+        }),
       ],
       spacing: { after: 100 },
     });
@@ -170,7 +186,9 @@ class DocGenerator {
     const note = new Paragraph({
       children: [
         new TextRun({ text: "Note: ", bold: true }),
-        new TextRun({ text: (this._htmlToText(item.description) || "-").slice(0, 1000) }),
+        new TextRun({
+          text: (this._htmlToText(item.description) || "-").slice(0, 1000),
+        }),
       ],
       spacing: { before: 300 },
     });
@@ -229,11 +247,22 @@ class DocGenerator {
       ],
     });
 
+    // Packer.toBlob(doc)
+    //   .then((blob) => {
+    //     saveAs(blob, filename);
+    //     console.log("Document created successfully");
+    //     return filename;
+    //   })
+    //   .catch((err) => {
+    //     console.error("Error creating document:", err);
+    //   });
+    // console.log("BUFFER", doc);
     const buffer = await Packer.toBuffer(doc);
     fs.writeFileSync(filename, buffer);
+    console.log("Document created successfully");
+
     return filename;
   }
-
 
   async generateSeparate(outputDir = "output-files") {
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
@@ -281,13 +310,14 @@ class DocGenerator {
         ],
       });
 
-      const buffer = await Packer.toBuffer(doc);
       const safeName = (item.parameterName || `item-${i + 1}`).replace(
         /[\/:*?"<>|]/g,
         "_"
       );
       const fname = path.join(outputDir, `${safeName}.docx`);
-      fs.writeFileSync(fname, buffer);
+      const buffer = await Packer.toBlob(doc).then((blob) => {
+        saveAs(blob, fname);
+      });
       results.push(fname);
     }
 

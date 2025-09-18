@@ -323,11 +323,11 @@ sap.ui.define(
         //call the generate action with the selected parameters as filter conditions
         // If no parameters selected, pass empty array to avoid issues in srv side
         var sParamFilter =
-          aParamKeys.length > 0 ? aParamKeys.join(",") : "___empty___";
+          aParamKeys.length > 0 ? aParamKeys.join(",") : " ";
         var sCustomerEditFilter =
           aCustomerEditKeys.length === 1
             ? aCustomerEditKeys[0]
-            : "___empty___";
+            : " ";
             
         // Adjust service path to your service name; change CatalogService if different.
         var params = {
@@ -336,7 +336,7 @@ sap.ui.define(
         };
         // Create URL with query parameters
         var sUrl =
-          "/odata/v4/generate-document/helper?params=" + encodeURIComponent(JSON.stringify(params));
+          "/odata/v4/generate-document/getDocumentCreated?params=" + encodeURIComponent(JSON.stringify(params));
 
         // Adjust service path to your service name; change CatalogService if different.
         //var sUrl = "/odata/v4/generate-document/helper";
