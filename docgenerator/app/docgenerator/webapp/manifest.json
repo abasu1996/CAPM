@@ -43,7 +43,7 @@
     }
   },
   "sap.ui5": {
-    "flexEnabled": true,
+    "flexEnabled": false,
     "dependencies": {
       "minUI5Version": "1.140.0",
       "libs": {
@@ -88,8 +88,7 @@
         "type": "View",
         "viewType": "XML",
         "path": "docgenerator.view",
-        "async": true,
-        "viewPath": "docgenerator.view"
+        "async": true
       },
       "routes": [
         {

@@ -20,7 +20,8 @@ const destinationName = 'ariba-api';
       url:'/parameters',
       params:{
         "includeMetadata": true,
-        "realm": process.env.realm
+        "realm": process.env.realm,
+        "$filter": "isCustomerEditable eq true"
       },
       headers:{
         "Accept": 'application/json',
@@ -38,7 +39,7 @@ const destinationName = 'ariba-api';
         if(item.defaultValue !== item.parameterValue) {
           
           filterPayload.push(item);
-          
+          filterPayload.sort((a,b) => b.isCustomerEditable - a.isCustomerEditable);
         }
       
       });
@@ -56,7 +57,7 @@ const destinationName = 'ariba-api';
       console.error("Failed to generate doc:", err);
     }
 
-    return docResponse.data.value;
+    return filterPayload;
 
 
 

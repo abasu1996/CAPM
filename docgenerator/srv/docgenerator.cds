@@ -1,5 +1,7 @@
 service generateDocument {
 
-   function generate(input: String) returns String;
+   function generate() returns String;
+
+   function getDocumentCreated() returns String;
 
 }

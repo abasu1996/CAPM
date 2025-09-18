@@ -1,10 +1,245 @@
-sap.ui.define([
-    "sap/ui/core/mvc/Controller"
-], (Controller) => {
+sap.ui.define(
+  [
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel",
+    "sap/m/ColumnListItem",
+    "sap/m/ObjectIdentifier",
+    "sap/m/Text",
+    "sap/m/VBox",
+    "sap/m/FormattedText",
+    "sap/m/MessageBox",
+  ],
+  function (
+    Controller,
+    JSONModel,
+    ColumnListItem,
+    ObjectIdentifier,
+    Text,
+    VBox,
+    FormattedText,
+    MessageBox
+  ) {
     "use strict";
 
     return Controller.extend("docgenerator.controller.PrimaryView", {
-        onInit() {
+      onInit: function () {
+        // initial bind attempt using deferred list binding to the function
+        //this._bindTableToFunction();
+        var oView = this.getView();
+        var oTable = oView.byId("idDocTable");
+        oTable.setBusy(true);
+        this._fallbackFetchAndBind();
+      },
+
+      /**
+       * Create a deferred list binding to the unbound function /generate.
+       * If no rows are returned (binding empty), fallback to fetch+JSONModel.
+       */
+      _bindTableToFunction: function () {
+        var oView = this.getView();
+        var oTable = oView.byId("idDocTable");
+        var oModel = this.getOwnerComponent().getModel(); // default OData V4 model
+
+        if (!oTable || !oModel) {
+          MessageBox.error("Table or OData V4 model not found.");
+          return;
         }
+
+        // Build the function path. If your function has params change this accordingly.
+        // If no params, "/generate" or "/generate()" should be fine.
+        var sPath = "/generate";
+
+        // Create reusable template for rows (relative bindings)
+        var oTemplate = new ColumnListItem({
+          cells: [
+            new ObjectIdentifier({
+              title: "{displayName}",
+              text: "{parameterName}",
+            }),
+            new VBox({
+              items: [
+                new Text({ text: "{parameterType}" }),
+                new Text({
+                  text: {
+                    parts: [{ path: "defaultValue" }],
+                    formatter: function (v) {
+                      return "Default: " + v;
+                    },
+                  },
+                }),
+                new Text({
+                  text: {
+                    parts: [{ path: "parameterValue" }],
+                    formatter: function (v) {
+                      return "Value: " + v;
+                    },
+                  },
+                }),
+                new Text({
+                  text: {
+                    parts: [{ path: "isDefault" }],
+                    formatter: function (v) {
+                      return v ? "Is Default: true" : "";
+                    },
+                  },
+                }),
+                new FormattedText({ htmlText: "{description}" }),
+              ],
+            }),
+          ],
+        });
+
+        // Unbind previous binding and create a deferred binding to the OData operation
+        oTable.unbindItems();
+        oTable.bindItems({
+          path: sPath,
+          parameters: {
+            operationMode: "Server", // optional
+          },
+          template: oTemplate,
+        });
+
+        // Attach change handler to the list binding to detect empty results
+        var oBinding = oTable.getBinding("items");
+        if (!oBinding) {
+          // unexpected - fallback immediately
+          this._fallbackFetchAndBind();
+          return;
+        }
+
+        // On change, check if contexts are present. If empty, fallback to fetch.
+        // getCurrentContexts() is available for OData V4 list bindings.
+        var fnOnChange = function () {
+          try {
+            var aContexts =
+              typeof oBinding.getCurrentContexts === "function"
+                ? oBinding.getCurrentContexts()
+                : [];
+            var iCount = aContexts && aContexts.length ? aContexts.length : 0;
+
+            if (iCount === 0) {
+              // No rows returned by the OData list binding — try fallback
+              // Detach handler to avoid repeated fallback attempts
+              oBinding.detachChange(fnOnChange);
+              this._fallbackFetchAndBind();
+            } else {
+              // Binding returned rows — you may perform additional UI updates here
+              oBinding.detachChange(fnOnChange);
+            }
+          } catch (e) {
+            // On any error, fallback
+            oBinding.detachChange(fnOnChange);
+            this._fallbackFetchAndBind();
+          }
+        }.bind(this);
+
+        // Attach change event
+        if (typeof oBinding.attachChange === "function") {
+          oBinding.attachChange(fnOnChange);
+        } else {
+          // If attachChange not present, fallback after a small timeout
+          setTimeout(
+            function () {
+              this._fallbackFetchAndBind();
+            }.bind(this),
+            800
+          );
+        }
+      },
+
+      /**
+       * Fallback: fetch raw response and normalize into an array, then bind to JSONModel "docs".
+       * This handles single-object responses and { value: [...] } wrappers.
+       */
+      _fallbackFetchAndBind: async function () {
+        var oView = this.getView();
+        var oTable = oView.byId("idDocTable");
+        // oTable.setBusy(true);
+
+        if (!oTable) {
+          MessageBox.error("Table not found.");
+          return;
+        }
+
+        // Simple fetch call to the function import /generate
+
+        // Adjust service path to your service name; change CatalogService if different.
+        var sUrl = "/odata/v4/generate-document/generate";
+
+        await fetch(sUrl, { method: "GET", credentials: "same-origin" })
+          .then(function (res) {
+            if (!res.ok) {
+              throw new Error("Network response was not ok: " + res.status);
+            }
+            return res.json();
+          })
+          .then(
+            function (data) {
+              var aItems;
+              if (Array.isArray(data)) {
+                aItems = data;
+              } else if (data && Array.isArray(data.value)) {
+                aItems = data.value;
+              } else if (data && typeof data === "object") {
+                aItems = [data];
+              } else {
+                aItems = [];
+              }
+
+              // Create JSONModel and bind table to it
+              debugger;
+              var oDocModel = new JSONModel({ items: aItems });
+              oView.setModel(oDocModel, "docs");
+              oTable.setBusy(false);
+              var oDocsModel = this.getView().getModel("docs");
+              var aDocs = oDocsModel.getProperty("/items") || [];
+
+              var mSeen = {};
+              var parameterNameSeen = {};
+              var aOptions = aDocs.reduce(function (acc, oItem) {
+                var v = oItem.isCustomerEditable;
+                // adjust property name if different
+                if (v !== undefined && !mSeen[v]) {
+                  mSeen[v] = true;
+                  acc.push({ key: v, text: String(v) });
+                }
+              }, []);
+
+              var aParameterName = aDocs.reduce(function (prm1, oItem) {
+                var k = oItem.parameterName; // adjust property name if different
+                if (k !== undefined && !parameterNameSeen[k]) {
+                  parameterNameSeen[k] = true;
+                  prm1.push({ key: k, text: String(k) });
+                }
+                return prm1;
+              }, []);
+
+              // set a small JSON model just for the filter options
+              var oFilterModel = new sap.ui.model.json.JSONModel({
+                customerEditableOptions: aOptions,
+                parameterNameOptions: aParameterName,
+              });
+              this.getView().setModel(oFilterModel, "filter");
+            }.bind(this)
+          )
+          .catch(
+            function (err) {
+              MessageBox.error(
+                err.message || "Failed to call generate function"
+              );
+              // ensure table cleared
+              var oDocModel = new JSONModel({ items: [] });
+
+              oView.setModel(oDocModel, "docs");
+
+              oTable.unbindItems();
+              oTable.bindItems({
+                path: "docs>/items",
+                template: new ColumnListItem(),
+              });
+            }.bind(this)
+          );
+      },
     });
-});
+  }
+);

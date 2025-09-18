@@ -1,6 +1,137 @@
-<mvc:View controllerName="docgenerator.controller.PrimaryView"
+<mvc:View
+    xmlns:filterbar="sap.ui.comp.filterbar"
+    xmlns:smartfilterbar="sap.ui.comp.smartfilterbar"
+    controllerName="docgenerator.controller.PrimaryView"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Page
+        id="page"
+        showHeader="false"
+    >
+        <VBox fitContainer="true">
+            <filterbar:FilterBar
+                id="idsFilterBar"
+                search="onFilterSearch"
+                useToolbar="true"
+                showRestoreButton="true"
+            >
+                <filterbar:filterGroupItems>
+                    <filterbar:FilterGroupItem
+                        groupName="G1"
+                        name="isCustomerEditable"
+                        label="{i18n>CustomerEditable}"
+                        visibleInFilterBar="true"
+                    >
+                        <filterbar:control>
+                           
+                                <MultiComboBox
+                                    id="idCustomerEditable"
+                                    items="{filter>/customerEditableOptions}"
+                                    selectionFinish="onFilterSelectionFinish"
+                                >
+                                    <core:Item
+                                        key="{filter>key}"
+                                        text="{filter>text}"
+                                    />
+                                </MultiComboBox>
+                            </filterbar:control>
+                    </filterbar:FilterGroupItem>
+
+                    <filterbar:FilterGroupItem
+                        groupName="G2"
+                        name="isCustomerEditable2"
+                        label="{i18n>parameterName}"
+                        visibleInFilterBar="true"
+                    >
+                        <filterbar:control>
+                                <MultiComboBox
+                                    id="id2CustomerEditable"
+                                    items="{filter>/parameterNameOptions}"
+                                    selectionFinish="onFilterSelectionFinish"
+                                >
+                                    <core:Item
+                                        key="{filter>key}"
+                                        text="{filter>text}"
+                                    />
+                                </MultiComboBox>
+                           
+                        </filterbar:control>
+                    </filterbar:FilterGroupItem>
+
+                    <!-- Add other FilterGroupItems here if needed -->
+                </filterbar:filterGroupItems>
+            </filterbar:FilterBar>
+            <OverflowToolbar style="Clear">
+                <Title
+                    id="docTitle"
+                    text="{i18n>title}"
+                />
+                <ToolbarSpacer />
+
+                <Button
+                    text="{i18n>generateButton}"
+                    press="onGeneratePress"
+                    class="sapUiSmallMarginEnd"
+                    icon="sap-icon://ai"
+                />
+            </OverflowToolbar>
+            <Table
+                id="idDocTable"
+                items="{docs>/items}"
+                inset="false"
+                growing="true"
+                growingThreshold="10"
+                mode="MultiSelect"
+            >
+                <columns>
+                    <Column>
+                        <Text text="{i18n>DisplayName}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>ParameterType}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>DefaultValue}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>ParameterValue}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>CustomerEditable}" />
+                    </Column>
+                    <Column>
+                        <Text text="{i18n>Description}" />
+                    </Column>
+                </columns>
+
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <!-- Column 1: displayName (title) + parameterName (subtext) -->
+                            <ObjectIdentifier
+                                title="{docs>displayName}"
+                                text="{docs>parameterName}"
+                                titleActive="true"
+                            />
+
+                            <!-- Column 2: stacked information:
+                 parameterType, defaultValue, parameterValue, isDefault flag, description -->
+
+                            <Text text="{docs>parameterType}" />
+                            <Text text="{docs>defaultValue}" />
+                            <Text text="{docs>parameterValue}" />
+                            <!-- <Text
+                                text="{= ${docs>isDefault} ? 'Is Default: true' : '' }"
+                            /> -->
+                            <Text text="{docs>isCustomerEditable}" />
+
+                            <FormattedText htmlText="{docs>description}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
     </Page>
 </mvc:View>
