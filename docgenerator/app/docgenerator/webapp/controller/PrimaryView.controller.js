@@ -31,6 +31,7 @@ sap.ui.define(
         var oTable = oView.byId("idDocTable");
         oTable.setBusy(true);
         this._fallbackFetchAndBind();
+        this.aFinalFilters = [];
       },
 
       /**
@@ -177,6 +178,7 @@ sap.ui.define(
     onCustomerEditFilterSelectionFinish: function (oEvent) {
       var oMultiComboBox = oEvent.getSource();
       var aSelectedItems = oMultiComboBox.getSelectedItems();
+      
       var aKeys = aSelectedItems.map(function (item) {
         if(item.getKey() === "true" || item.getKey() === 0){
           return true;
@@ -196,12 +198,13 @@ sap.ui.define(
               sap.ui.model.FilterOperator.EQ,
               key
             );
+            aFinalFilters.push(new sap.ui.model.Filter({filters:aFilters}))
           });
           var oCombinedFilter = new sap.ui.model.Filter(aFilters, false); // false for OR logic
           oBinding.filter(oCombinedFilter);
         } else {
           // No selection, clear filter
-          oBinding.filter([]);
+          //oBinding.filter([]);
         }
       }
     },
