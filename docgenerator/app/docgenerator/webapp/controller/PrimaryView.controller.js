@@ -171,7 +171,7 @@ sap.ui.define(
             oBinding.filter(oCombinedFilter);
           } else {
             // No selection, clear filter
-            oBinding.filter([]);
+            //oBinding.filter([]);
           }
         }
     },
