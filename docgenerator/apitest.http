@@ -9,6 +9,6 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:4004/odata/v4/generate-document/helper?params={"parameterName":["Application.Approvable.AllowApprovalOfDeniedApprovable,Application.Approvable.AllowedForExternalApproval,Application.Approvable.ApprovalRequestEscalateWarningPeriod"],"isCustomerEditable":"___empty___"} HTTP/1.1
+GET http://localhost:4004/odata/v4/generate-document/getDocumentCreated?params={"parameterName":["Application.Approvable.AllowApprovalOfDeniedApprovable,Application.Approvable.AllowedForExternalApproval,Application.Approvable.ApprovalRequestEscalateWarningPeriod"],"isCustomerEditable":true} HTTP/1.1
 Content-Type: application/json
 

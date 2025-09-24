@@ -258,10 +258,10 @@ class DocGenerator {
     //   });
     // console.log("BUFFER", doc);
     const buffer = await Packer.toBuffer(doc);
-    fs.writeFileSync(filename, buffer);
-    console.log("Document created successfully");
+    let fileContent = fs.writeFileSync(filename, buffer);
+    console.log("Document created successfully", fileContent);
 
-    return filename;
+    return buffer;
   }
 
   async generateSeparate(outputDir = "output-files") {

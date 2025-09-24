@@ -1,0 +1,19 @@
+{
+  "xsappname": "docgenerator",
+  "tenant-mode": "dedicated",
+  "scopes": [],
+  "attributes": [],
+  "role-templates": [],
+  "oauth2-configuration": {
+    "token-validity": 900,
+    "refresh-token-validity": 1800,
+    "redirect-uris": [
+      "http://localhost:5000/login/callback",
+      "http://*.localhost:4004/**",
+      "https://*.hana.ondemand.com/**",
+      "https://*.applicationstudio.cloud.sap/**",
+      "https://*.us10-001.hana.ondemand.com/**"
+    ],
+    "autoapprove": "true"
+  }
+}

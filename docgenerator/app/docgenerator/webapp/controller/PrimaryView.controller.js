@@ -1,5 +1,3 @@
-
-
 sap.ui.define(
   [
     "sap/ui/core/mvc/Controller",
@@ -25,8 +23,7 @@ sap.ui.define(
 
     return Controller.extend("docgenerator.controller.PrimaryView", {
       onInit: function () {
-        // initial bind attempt using deferred list binding to the function
-        //this._bindTableToFunction();
+       
         var oView = this.getView();
         var oTable = oView.byId("idDocTable");
         oTable.setBusy(true);
@@ -34,10 +31,7 @@ sap.ui.define(
         this.aFinalFilters = [];
       },
 
-      /**
-       * Create a deferred list binding to the unbound function /generate.
-       * If no rows are returned (binding empty), fallback to fetch+JSONModel.
-       */
+     
       _bindTableToFunction: function () {
         var oView = this.getView();
         var oTable = oView.byId("idDocTable");
@@ -48,11 +42,9 @@ sap.ui.define(
           return;
         }
 
-        // Build the function path. If your function has params change this accordingly.
-        // If no params, "/generate" or "/generate()" should be fine.
         var sPath = "/generate";
 
-        // Create reusable template for rows (relative bindings)
+
         var oTemplate = new ColumnListItem({
           cells: [
             new ObjectIdentifier({
@@ -110,8 +102,7 @@ sap.ui.define(
           return;
         }
 
-        // On change, check if contexts are present. If empty, fallback to fetch.
-        // getCurrentContexts() is available for OData V4 list bindings.
+
         var fnOnChange = function () {
           try {
             var aContexts =
@@ -121,12 +112,11 @@ sap.ui.define(
             var iCount = aContexts && aContexts.length ? aContexts.length : 0;
 
             if (iCount === 0) {
-              // No rows returned by the OData list binding — try fallback
-              // Detach handler to avoid repeated fallback attempts
+    
               oBinding.detachChange(fnOnChange);
               this._fallbackFetchAndBind();
             } else {
-              // Binding returned rows — you may perform additional UI updates here
+        
               oBinding.detachChange(fnOnChange);
             }
           } catch (e) {
@@ -136,11 +126,11 @@ sap.ui.define(
           }
         }.bind(this);
 
-        // Attach change event
+ 
         if (typeof oBinding.attachChange === "function") {
           oBinding.attachChange(fnOnChange);
         } else {
-          // If attachChange not present, fallback after a small timeout
+  
           setTimeout(
             function () {
               this._fallbackFetchAndBind();
@@ -171,44 +161,46 @@ sap.ui.define(
             oBinding.filter(oCombinedFilter);
           } else {
             // No selection, clear filter
-            //oBinding.filter([]);
+            oBinding.filter([]);
           }
         }
-    },
-    onCustomerEditFilterSelectionFinish: function (oEvent) {
-      var oMultiComboBox = oEvent.getSource();
-      var aSelectedItems = oMultiComboBox.getSelectedItems();
-      
-      var aKeys = aSelectedItems.map(function (item) {
-        if(item.getKey() === "true" || item.getKey() === 0){
-          return true;
-        } else if(item.getKey() === "false" || item.getKey() === 1){
-          return false;
-        }
-        return item.getKey();
-      });
-      var oTable = this.getView().byId("idDocTable");
-      var oBinding = oTable.getBinding("items");
+      },
+      onCustomerEditFilterSelectionFinish: function (oEvent) {
+        var oMultiComboBox = oEvent.getSource();
+        var aSelectedItems = oMultiComboBox.getSelectedItems();
 
-      if (oBinding) {
-        if (aKeys.length > 0) {
-          var aFilters = aKeys.map(function (key) {
-            return new sap.ui.model.Filter(
-              "isCustomerEditable",
-              sap.ui.model.FilterOperator.EQ,
-              key
-            );
-            aFinalFilters.push(new sap.ui.model.Filter({filters:aFilters}))
-          });
-          var oCombinedFilter = new sap.ui.model.Filter(aFilters, false); // false for OR logic
-          oBinding.filter(oCombinedFilter);
-        } else {
-          // No selection, clear filter
-          //oBinding.filter([]);
+        var aKeys = aSelectedItems.map(function (item) {
+          if (item.getKey() === "true" || item.getKey() === 0) {
+            return true;
+          } else if (item.getKey() === "false" || item.getKey() === 1) {
+            return false;
+          }
+          return item.getKey();
+        });
+        var oTable = this.getView().byId("idDocTable");
+        var oBinding = oTable.getBinding("items");
+
+        if (oBinding) {
+          if (aKeys.length > 0) {
+            var aFilters = aKeys.map(function (key) {
+              return new sap.ui.model.Filter(
+                "isCustomerEditable",
+                sap.ui.model.FilterOperator.EQ,
+                key
+              );
+              aFinalFilters.push(
+                new sap.ui.model.Filter({ filters: aFilters })
+              );
+            });
+            var oCombinedFilter = new sap.ui.model.Filter(aFilters, false); // false for OR logic
+            oBinding.filter(oCombinedFilter);
+          } else {
+            // No selection, clear filter
+            oBinding.filter([]);
+          }
         }
-      }
-    },
-    _fallbackFetchAndBind: async function () {
+      },
+      _fallbackFetchAndBind: async function () {
         var oView = this.getView();
         var oTable = oView.byId("idDocTable");
         // oTable.setBusy(true);
@@ -218,9 +210,7 @@ sap.ui.define(
           return;
         }
 
-        // Simple fetch call to the function import /generate
-
-        // Adjust service path to your service name; change CatalogService if different.
+        
         var sUrl = "/odata/v4/generate-document/generate";
 
         await fetch(sUrl, { method: "GET", credentials: "same-origin" })
@@ -243,7 +233,7 @@ sap.ui.define(
                 aItems = [];
               }
 
-              // Create JSONModel and bind table to it
+       
               debugger;
               var oDocModel = new JSONModel({ items: aItems });
               oView.setModel(oDocModel, "docs");
@@ -255,7 +245,7 @@ sap.ui.define(
               var parameterNameSeen = {};
               var aOptions = aDocs.reduce(function (acc, oItem) {
                 var v = oItem.isCustomerEditable;
-                // adjust property name if different
+             
                 if (v !== undefined && !mSeen[v]) {
                   mSeen[v] = true;
                   acc.push({ key: v, text: String(v) });
@@ -315,63 +305,74 @@ sap.ui.define(
           .byId("isCustomerEditable")
           .getSelectedItems();
         var aCustomerEditKeys = oSelectedCustomerEdit.map(function (item) {
-          if(item.getKey() === "true" || item.getKey() === 0){
+          if (item.getKey() === "true" || item.getKey() === 0) {
             return true;
-          } else if(item.getKey() === "false" || item.getKey() === 1){
+          } else if (item.getKey() === "false" || item.getKey() === 1) {
             return false;
           }
           return item.getKey();
         });
 
-        //call the generate action with the selected parameters as filter conditions
-        // If no parameters selected, pass empty array to avoid issues in srv side
-        var sParamFilter =
-          aParamKeys.length > 0 ? aParamKeys.join(",") : " ";
+        var sParamFilter = aParamKeys.length > 0 ? aParamKeys.join(",") : " ";
         var sCustomerEditFilter =
-          aCustomerEditKeys.length === 1
-            ? aCustomerEditKeys[0]
-            : " ";
-            
-        // Adjust service path to your service name; change CatalogService if different.
+          aCustomerEditKeys.length === 1 ? aCustomerEditKeys[0] : " ";
+
         var params = {
           parameterName: [sParamFilter],
           isCustomerEditable: sCustomerEditFilter,
         };
-        // Create URL with query parameters
-        var sUrl =
-          "/odata/v4/generate-document/getDocumentCreated?params=" + encodeURIComponent(JSON.stringify(params));
 
-        // Adjust service path to your service name; change CatalogService if different.
-        //var sUrl = "/odata/v4/generate-document/helper";
+        var sUrl =
+          "/odata/v4/generate-document/getDocumentCreated?params=" +
+          encodeURIComponent(JSON.stringify(params));
+
+     
 
         fetch(sUrl, {
           method: "GET",
           credentials: "same-origin",
           headers: {
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         })
-          .then(function (res) {
+          .then(async function (res) {
+
             if (!res.ok) {
               throw new Error("Network response was not ok: " + res.status);
             }
-            return res.json();
+            const blob = await res.blob();
+
+            const cd = res.headers.get("Content-Disposition") || "";
+            let filename = "Ariba Config Document.docx";
+            const mUtf8 = cd.match(/filename\\*=?UTF-8''([^;\\n\\r]+)/i);
+            const mQuoted = cd.match(/filename=\"?([^\";]+)\"?/i);
+            if (mUtf8 && mUtf8[1]) filename = decodeURIComponent(mUtf8[1]);
+            else if (mQuoted && mQuoted[1]) filename = mQuoted[1];
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+           
           })
           .then(
             function (data) {
-              MessageBox.success("Document created: " + data);
+              console.log("Document created: " + data);
+              
+              MessageBox.success("Document created: ");
               oTable.setBusy(false);
             }.bind(this)
           )
           .catch(
             function (err) {
-              MessageBox.error(
-                err.message || "Failed to call getDocumentCreated function"
-              );
+              MessageBox.error(err.message || "Failed to call create document");
               oTable.setBusy(false);
             }.bind(this)
           );
-        
       },
     });
   }

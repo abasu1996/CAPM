@@ -1,5 +1,9 @@
 {
   "_version": "1.76.0",
+    "sap.cloud": {
+    "public": true,
+    "service": "docgenerator.service"
+  },
   "sap.app": {
     "id": "docgenerator",
     "type": "application",

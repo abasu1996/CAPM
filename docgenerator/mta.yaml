@@ -1,0 +1,174 @@
+_schema-version: 3.3.0
+ID: docgenerator
+version: 1.0.0
+description: "A Document Generation Service"
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+modules:
+  - name: docgenerator-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+      readiness-health-check-http-endpoint: /health
+      readiness-health-check-type: http
+      memory: 256M
+      disk-quota: 256M
+    properties:
+      OPTIMIZE_MEMORY: true
+    build-parameters:
+      ignore:
+        - "node_modules/"
+      builder: npm-ci
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: docgen-destination
+      - name: docgen-auth
+        properties:
+          properties:
+          destinations: '[{"forwardAuthToken": false,"name": "ui5","url": "https://ui5.sap.com"}]'
+          SEND_XFRAMEOPTIONS: false
+          COOKIES: '{"SameSite":"None" }'
+      - name: docgen-html5-runtime
+  - name: docgenerator-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: docgen_html_repo_host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - docgen_app-content.zip
+          name: docgenerator_app
+          target-path: resources/
+  - name: docgenerator_app
+    type: html5
+    path: app/docgenerator
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: docgenerator
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      keep-existing-routes: true
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api # must be used in xs-app.json as well
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: docgen-auth
+      - name: docgen-destination
+    provides:
+      - name: app-api
+        properties:
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}
+  - name: docgenerator-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: docgen-auth
+        parameters:
+          service-key:
+            name: docgen-auth-key
+      - name: docgen_html_repo_host
+        parameters:
+          service-key:
+            name: docgen_html_repo_host-key
+      - name: srv-api
+      - name: docgen-destination
+        parameters:
+          content-target: true
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: srv-api
+              TokenServiceInstanceName: docgen-auth
+              TokenServiceKeyName: docgen-auth-key
+              URL: ~{srv-api/srv-url}
+              HTML5.Timeout: 3600000
+            - Name: docgen_html_repo_host
+              ServiceInstanceName: docgen_html_repo_host
+              ServiceKeyName: docgen_html_repo_host-key
+              sap.cloud.service: docgenerator.service
+            - Authentication: OAuth2UserTokenExchange
+              Name: docgen-auth
+              ServiceInstanceName: docgen-auth
+              ServiceKeyName: docgen-auth-key
+              sap.cloud.service: docgenerator.service
+          existing_destinations_policy: update
+    build-parameters:
+      no-source: true
+
+resources:
+  - name: docgen-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+            existing_destinations_policy: update
+      service: destination
+      service-plan: lite
+  - name: docgen-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: runtime
+  - name: docgen-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: docgenerator
+        tenant-mode: dedicated
+  - name: docgen_html_repo_host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+  - name: docgen-auth-key
+    type: org.cloudfoundry.service-key
+    parameters:
+      service-instance-name: docgen-auth
+      service-key-name: docgen-auth-key
+  - name: docgen_html_repo_host-key
+    type: org.cloudfoundry.service-key
+    parameters:
+      service-instance-name: docgen_html_repo_host
+      service-key-name: docgen_html_repo_host-key

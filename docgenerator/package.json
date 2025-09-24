@@ -5,23 +5,26 @@
   "repository": "<Add your repository here>",
   "license": "UNLICENSED",
   "private": true,
+  "main": "webapp/index.html",
+  "engines": {
+    "node": ">=20 <21",
+    "npm": ">=9 <10"
+  },
   "dependencies": {
     "@sap/cds": "^8",
+    "@sap/xssec": "^4",
     "axios": "^1.12.2",
     "docx": "^9.5.1",
     "dot-env": "^0.0.1",
     "express": "^4",
     "file-saver": "^2.0.5",
     "fs": "^0.0.1-security",
-    "node": "^20.0.0",
     "sap-cf-axios": "^1.0.2"
-  },
-  "engines": {
-    "node": "<=20"
   },
   "devDependencies": {
     "@cap-js/cds-types": "^0.9.0",
-    "@cap-js/sqlite": "^1"
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^8"
   },
   "scripts": {
     "start": "cds-serve",
@@ -33,7 +36,8 @@
         "kind": "odata",
         "model": "srv/docgenerator",
         "credentials": {}
-      }
+      },
+      "auth": "mocked"
     }
   },
   "workspaces": [

@@ -69,8 +69,9 @@ module.exports = class generateDocument extends cds.ApplicationService {
 
     this.on("getDocumentCreated", async (req) => {
       const axios = SapCfAxios(destinationName);
+      var buffer = null;
       var parameterName = JSON.parse(req.data.params).parameterName[0];
-      if (parameterName.length === 1 && parameterName[0] === "___empty___") {
+      if (parameterName.length === 1 ) {
         parameterName = [];
       }
 
@@ -89,7 +90,7 @@ module.exports = class generateDocument extends cds.ApplicationService {
         params: {
           includeMetadata: true,
           realm: process.env.realm,
-          $filter: buildingQueries,
+          $filter: buildingQueries ? buildingQueries : "",
         },
         headers: {
           Accept: "application/json",
@@ -118,12 +119,29 @@ module.exports = class generateDocument extends cds.ApplicationService {
           "Audit-AutoReject-EmailApprovals.docx"
         );
 
-        console.log(`Saved ${out}`);
+        buffer = out;
+        
+        console.log("File Type:", typeof buffer);
+        //console.error("Failed to generate doc:", req._);
+        
+        // for testing purpose
+        /*
+        const fs = require("fs");
+        const filename = `output-files/Document-${Date.now()}.docx`;
+        fs.writeFileSync(filename, out);
+        console.log(`Document created successfully: ${filename}`);
+        */
+
+        //console.log(`Saved ${out}`);
       } catch (err) {
         console.error("Failed to generate doc:", err);
       }
-      
-      return filterPayload;
+      const filename = `Ariba - Config - Document-${Date.now()}.docx`;
+      req._.res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      // Provide both filename (legacy) and filename* (RFC5987, UTF-8)
+      req._.res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
+      req._.res.setHeader('Content-Length', buffer.length);
+      req._.res.status(200).send(buffer);
     });
 
     return super.init();
