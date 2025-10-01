@@ -8,8 +8,6 @@ sap.ui.define(
     "sap/m/VBox",
     "sap/m/FormattedText",
     "sap/m/MessageBox",
-    "sap/ui/core/Fragment",
-    "sap/m/MessageToast",
   ],
   function (
     Controller,
@@ -19,102 +17,21 @@ sap.ui.define(
     Text,
     VBox,
     FormattedText,
-    MessageBox,
-    Fragment,
-    MessageToast
+    MessageBox
   ) {
     "use strict";
 
     return Controller.extend("docgenerator.controller.PrimaryView", {
       onInit: function () {
+       
         var oView = this.getView();
         var oTable = oView.byId("idDocTable");
         oTable.setBusy(true);
         this._fallbackFetchAndBind();
         this.aFinalFilters = [];
       },
-      //Button Actions
-      onTaxConfigPress: function () {
-        if (!this._oTaxConfigDialog) {
-          this._oTaxConfigDialog = sap.ui.xmlfragment(
-            "docgenerator.fragments.TaxConfig",
-            this
-          );
-          this.getView().addDependent(this._oTaxConfigDialog);
-        }
-        this._oTaxConfigDialog.open();
-      },
-      onGuidedBuyingPress: function () {
-        var sFragment = "docgenerator.fragments.guidedBuying"; // adjust namespace
-        if (!this._pGuidedBuyingDialog) {
-          this._pGuidedBuyingDialog = Fragment.load({
-            name: sFragment,
-            controller: this,
-          })
-            .then(
-              function (oDialog) {
-                this.getView().addDependent(oDialog);
-                return oDialog;
-              }.bind(this)
-            )
-            .catch(
-              function (err) {
-                console.error("Dialog load error", err);
-                this._pGuidedBuyingDialog = null;
-              }.bind(this)
-            );
-        }
 
-        this._pGuidedBuyingDialog.then(function (oDialog) {
-          oDialog.open(); // Dialog opens centered
-        });
-      },
-
-      onCloseFieldConfig: function () {
-        var that = this;
-        if (this._pGuidedBuyingDialog) {
-          this._pGuidedBuyingDialog.then(function (oDialog) {
-            oDialog.close();
-          });
-        }
-      },
-
-      onFieldConfigPress: function (oEvent) {
-        debugger;
-        var oView = this.getView();
-        var that = this;
-        if (!that._pFieldConfigDialog) {
-          that._pFieldConfigDialog = Fragment.load({
-            name: "docgenerator.fragments.FieldConfig",
-            id: oView.getId(),
-            controller: this,
-          })
-            .then(function (oDialog) {
-              oView.addDependent(oDialog);
-              return oDialog;
-            })
-            .catch(
-              function (oErr) {
-                console.error("FieldConfig fragment load error:", oErr);
-                MessageToast.show(
-                  "Unable to open Field Configuration (see console)."
-                );
-
-                this._pFieldConfigDialog = null;
-                throw oErr;
-              }.bind(this)
-            );
-        }
-        that._pFieldConfigDialog
-          .then(function (oDialog) {
-         
-            
-              oDialog.open();
-            
-          })
-          .catch(function () {});
-      },
-
+     
       _bindTableToFunction: function () {
         var oView = this.getView();
         var oTable = oView.byId("idDocTable");
@@ -126,6 +43,7 @@ sap.ui.define(
         }
 
         var sPath = "/generate";
+
 
         var oTemplate = new ColumnListItem({
           cells: [
@@ -184,6 +102,7 @@ sap.ui.define(
           return;
         }
 
+
         var fnOnChange = function () {
           try {
             var aContexts =
@@ -193,9 +112,11 @@ sap.ui.define(
             var iCount = aContexts && aContexts.length ? aContexts.length : 0;
 
             if (iCount === 0) {
+    
               oBinding.detachChange(fnOnChange);
               this._fallbackFetchAndBind();
             } else {
+        
               oBinding.detachChange(fnOnChange);
             }
           } catch (e) {
@@ -205,9 +126,11 @@ sap.ui.define(
           }
         }.bind(this);
 
+ 
         if (typeof oBinding.attachChange === "function") {
           oBinding.attachChange(fnOnChange);
         } else {
+  
           setTimeout(
             function () {
               this._fallbackFetchAndBind();
@@ -287,6 +210,7 @@ sap.ui.define(
           return;
         }
 
+        
         var sUrl = "/odata/v4/generate-document/generate";
 
         await fetch(sUrl, { method: "GET", credentials: "same-origin" })
@@ -309,6 +233,8 @@ sap.ui.define(
                 aItems = [];
               }
 
+       
+              debugger;
               var oDocModel = new JSONModel({ items: aItems });
               oView.setModel(oDocModel, "docs");
               oTable.setBusy(false);
@@ -319,7 +245,7 @@ sap.ui.define(
               var parameterNameSeen = {};
               var aOptions = aDocs.reduce(function (acc, oItem) {
                 var v = oItem.isCustomerEditable;
-
+             
                 if (v !== undefined && !mSeen[v]) {
                   mSeen[v] = true;
                   acc.push({ key: v, text: String(v) });
@@ -400,6 +326,8 @@ sap.ui.define(
           "/odata/v4/generate-document/getDocumentCreated?params=" +
           encodeURIComponent(JSON.stringify(params));
 
+     
+
         fetch(sUrl, {
           method: "GET",
           credentials: "same-origin",
@@ -408,6 +336,7 @@ sap.ui.define(
           },
         })
           .then(async function (res) {
+
             if (!res.ok) {
               throw new Error("Network response was not ok: " + res.status);
             }
@@ -428,11 +357,12 @@ sap.ui.define(
             a.click();
             a.remove();
             URL.revokeObjectURL(url);
+           
           })
           .then(
             function (data) {
               console.log("Document created: " + data);
-
+              
               MessageBox.success("Document created: ");
               oTable.setBusy(false);
             }.bind(this)

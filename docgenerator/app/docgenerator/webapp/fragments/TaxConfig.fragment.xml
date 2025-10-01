@@ -1,0 +1,17 @@
+<core:FragmentDefinition xmlns:unified="sap.ui.unified" xmlns:layout="sap.ui.layout"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+>
+<Page title="Upload & Convert to Word">
+    <content>
+      <VBox class="sapUiSmallMargin">
+
+          <unified:FileUploader id="idTaxConfigFileUploader" name="file" width="100%"
+            tooltip="Select file (CSV / JSON / TXT)"
+            placeholder="Choose a CSV / JSON / TXT file..." />
+        <Button text="Upload & Convert to Word" press=".onUploadConvert" />
+      </VBox>
+    </content>
+  </Page>
+</core:FragmentDefinition>

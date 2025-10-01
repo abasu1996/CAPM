@@ -4,6 +4,7 @@ version: 1.0.0
 description: "A Document Generation Service"
 parameters:
   enable-parallel-deployments: true
+  deploy_mode: html5-repo
 build-parameters:
   before-all:
     - builder: custom
@@ -19,8 +20,8 @@ modules:
       buildpack: nodejs_buildpack
       readiness-health-check-http-endpoint: /health
       readiness-health-check-type: http
-      memory: 256M
-      disk-quota: 256M
+      memory: 1G
+      disk-quota: 2G
     properties:
       OPTIMIZE_MEMORY: true
     build-parameters:
@@ -65,15 +66,16 @@ modules:
         - npm run build:cf
         - npm ci
         - npm run build
-      supported-platforms:
-        []
+      supported-platforms: []
   - name: docgenerator
     type: approuter.nodejs
     path: app/router
     parameters:
       keep-existing-routes: true
-      disk-quota: 256M
-      memory: 256M
+      disk-quota: 2G
+      memory: 1G
+      instances: 1
+      buildpack: nodejs_buildpack
     requires:
       - name: srv-api
         group: destinations
@@ -81,6 +83,7 @@ modules:
           name: srv-api # must be used in xs-app.json as well
           url: ~{srv-url}
           forwardAuthToken: true
+      - name: docgen-html5-runtime
       - name: docgen-auth
       - name: docgen-destination
     provides:
@@ -147,7 +150,7 @@ resources:
     type: org.cloudfoundry.managed-service
     parameters:
       service: html5-apps-repo
-      service-plan: runtime
+      service-plan: app-runtime
   - name: docgen-auth
     type: org.cloudfoundry.managed-service
     parameters:
@@ -162,13 +165,6 @@ resources:
     parameters:
       service: html5-apps-repo
       service-plan: app-host
-  - name: docgen-auth-key
-    type: org.cloudfoundry.service-key
-    parameters:
-      service-instance-name: docgen-auth
-      service-key-name: docgen-auth-key
-  - name: docgen_html_repo_host-key
-    type: org.cloudfoundry.service-key
-    parameters:
-      service-instance-name: docgen_html_repo_host
-      service-key-name: docgen_html_repo_host-key
+
+
+
