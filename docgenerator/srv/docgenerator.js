@@ -10,6 +10,15 @@ module.exports = class generateDocument extends cds.ApplicationService {
 
     this.on("generate", async (req) => {
       const axios = SapCfAxios(destinationName);
+      //var f1 = req.data;
+      
+      // JSON.parse(f1.parameters).forEach(element => {
+      //   console.log(element);
+        
+      // });
+     
+      
+      
       console.log("On generate", process.env.apiKey, process.env.realm);
 
       let docResponse = await axios({
@@ -70,10 +79,12 @@ module.exports = class generateDocument extends cds.ApplicationService {
     this.on("getDocumentCreated", async (req) => {
       const axios = SapCfAxios(destinationName);
       var buffer = null;
-      var parameterName = JSON.parse(req.data.params).parameterName[0];
-      if (parameterName.length === 1 ) {
-        parameterName = [];
-      }
+      console.log("JSSS",JSON.parse(JSON.stringify(req.data.params)));
+      
+      var parameterName = JSON.parse(req.data.params).parameterName;
+      // if (parameterName) {
+      //   parameterName = [];
+      // }
 
       console.log("On helper", JSON.parse(req.data.params));
       let buildingQueries = `isCustomerEditable eq ${
@@ -141,7 +152,9 @@ module.exports = class generateDocument extends cds.ApplicationService {
       // Provide both filename (legacy) and filename* (RFC5987, UTF-8)
       req._.res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
       req._.res.setHeader('Content-Length', buffer.length);
-      req._.res.status(200).send(buffer);
+      console.log(buffer);
+      
+      req._.res.status(200).send(JSON.stringify({"buffer":buffer}));
     });
 
     return super.init();

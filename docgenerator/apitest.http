@@ -1,7 +1,7 @@
 GET http://localhost:4004/odata/v4/generate-document/generate HTTP/1.1
 
 ### 
-POST  http://localhost:4004/odata/v4/generate-document/getDocumentCreated HTTP/1.1
+POST  http://localhost:4004/odata/v4/generate-document/helper HTTP/1.1
 Content-Type: application/json
 
 {

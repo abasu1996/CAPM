@@ -147,6 +147,7 @@
                     growing="true"
                     growingThreshold="10"
                     mode="MultiSelect"
+                    bindingContexts="/generate(...)"
                 >
                     <columns>
                         <Column>

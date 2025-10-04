@@ -1,0 +1,33 @@
+<core:FragmentDefinition
+    xmlns:unified="sap.ui.unified"
+    xmlns:layout="sap.ui.layout"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+>
+    <Dialog
+        id="idTemplatePopover"
+        initialFocus="idTemplateFileUploader"
+        title="Upload and Convert to Word"
+        resizable="true"
+        contentWidth="40%"
+    >
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <unified:FileUploader
+                    id="idTemplateFileUploader"
+                    name="file"
+                    width="100%"
+                    tooltip="Select file (CSV / JSON / TXT)"
+                    placeholder="Choose a CSV / JSON / TXT file..."
+                />
+            </VBox>
+        </content>
+        <endButton>
+            <Button
+                text="Upload"
+                press=".onUploadConvert"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
