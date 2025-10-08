@@ -305,14 +305,14 @@ module.exports = class generateDocument extends cds.ApplicationService {
       console.log("Real Payload", typeof realPayload);
 
 
-      //       // const gen = new TemplateDocgenerator();
-      //       // const out = await gen.generate(realPayload, {
-      //       //    creator: "Doc Generator",
-      //       // });
-      //       // const fs = require("fs");
-      //       // const filename2 = `Ariba Doc From template.docx`;
-      //       //   fs.writeFileSync(filename2, out);
-      //       //   console.log(`Document created successfully: ${filename2}`);
+            const gen = new TemplateDocgenerator();
+            const out = await gen.generate(realPayload, {
+               creator: "Doc Generator",
+            });
+            
+            const filename2 = `Ariba Doc From template.docx`;
+              fs.writeFileSync(filename2, out);
+              console.log(`Document created successfully: ${filename2}`);
       // /******************Above Code for Debugging and Local testing */
       //       const axios = SapCfAxios(destinationName);
       //       var buffer = null;
