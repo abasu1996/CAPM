@@ -2,7 +2,7 @@ const env = require("dot-env").config;
 const cds = require("@sap/cds");
 const fs = require("fs");
 const csv = require("csv-parser");
-const { DocGenerator,TemplateDocgenerator } = require("./docgeneratorclass");
+const { DocGenerator, TemplateDocgenerator } = require("./docgeneratorclass");
 
 const SapCfAxios = require("sap-cf-axios").default;
 module.exports = class generateDocument extends cds.ApplicationService {
@@ -126,7 +126,6 @@ module.exports = class generateDocument extends cds.ApplicationService {
         ],
         tasksByCustomer: [],
         tasksByPartner: [],
-        
       };
       // const gen = new TemplateDocgenerator();
       // const out = await gen.generate(payload, {
@@ -136,7 +135,7 @@ module.exports = class generateDocument extends cds.ApplicationService {
       // const filename2 = `Ariba Doc From template.docx`;
       //   fs.writeFileSync(filename2, out);
       //   console.log(`Document created successfully: ${filename2}`);
-/******************Above Code for Debugging and Local testing */
+      /******************Above Code for Debugging and Local testing */
       const axios = SapCfAxios(destinationName);
       var buffer = null;
       console.log("JSSS", JSON.parse(JSON.stringify(req.data.params)));
@@ -225,10 +224,31 @@ module.exports = class generateDocument extends cds.ApplicationService {
       req._.res.status(200).send(JSON.stringify({ buffer: buffer }));
     });
 
-    this.on("combinedDocGenerate", async (req)=>{
-      const csvArray = [];
+    this.on("combinedDocGenerate", async (req) => {
       console.log("On combinedDocGenerate", JSON.stringify(req.data));
-
+      
+      // Wrap CSV reading in a Promise to make it awaitable
+      const csvArray = await new Promise((resolve, reject) => {
+        const data = [];
+        fs.createReadStream(
+          "D:\\GitApps\\abasu1996\\CAPM\\CAPM\\docgenerator\\BrainBoxDSAPP-T_Guided Buying_parameters.csv"
+        )
+          .pipe(csv())
+          .on("data", (row) => {
+            data.push(row);
+          })
+          .on("end", () => {
+            console.log("CSV file successfully processed", data.length);
+            resolve(data);
+          })
+          .on("error", (error) => {
+            console.error("Error reading CSV file:", error);
+            reject(error);
+          });
+      });
+      
+      console.log("CSV Array Length", csvArray.length);
+        
       const payload = {
         projectName: "Ariba Integration for Contoso",
         customerName: "Contoso Ltd",
@@ -276,117 +296,112 @@ module.exports = class generateDocument extends cds.ApplicationService {
             dependency: "Customer test data",
           },
         ],
+        guidedBuyingParameters: csvArray,
         tasksByCustomer: [],
         tasksByPartner: [],
-        
       };
-      fs.createReadStream("D:\\GitApps\\abasu1996\\CAPM\\CAPM\\docgenerator\\BrainBoxDSAPP-T_Guided Buying_parameters.csv")
-        .pipe(csv())
-        .on('data', (row) => {
-          csvArray.push(row);
-        })
-        .on('end', () => {
-          console.log('CSV file successfully processed', csvArray.length);
-        });
+      const realPayload = req.data;
+      realPayload.docpayload.csvGuidedBuyingParameters = csvArray;
+      console.log("Real Payload", typeof realPayload);
 
-      
-//       // const gen = new TemplateDocgenerator();
-//       // const out = await gen.generate(payload, {
-//       //    creator: "Doc Generator",
-//       // });
-//       // const fs = require("fs");
-//       // const filename2 = `Ariba Doc From template.docx`;
-//       //   fs.writeFileSync(filename2, out);
-//       //   console.log(`Document created successfully: ${filename2}`);
-// /******************Above Code for Debugging and Local testing */
-//       const axios = SapCfAxios(destinationName);
-//       var buffer = null;
-//       console.log("JSSS", JSON.parse(JSON.stringify(req.data.params)));
 
-//       var parameterName = JSON.parse(req.data.params).parameterName;
-//       // if (parameterName) {
-//       //   parameterName = [];
-//       // }
+      //       // const gen = new TemplateDocgenerator();
+      //       // const out = await gen.generate(realPayload, {
+      //       //    creator: "Doc Generator",
+      //       // });
+      //       // const fs = require("fs");
+      //       // const filename2 = `Ariba Doc From template.docx`;
+      //       //   fs.writeFileSync(filename2, out);
+      //       //   console.log(`Document created successfully: ${filename2}`);
+      // /******************Above Code for Debugging and Local testing */
+      //       const axios = SapCfAxios(destinationName);
+      //       var buffer = null;
+      //       console.log("JSSS", JSON.parse(JSON.stringify(req.data.params)));
 
-//       console.log("On helper", JSON.parse(req.data.params));
-//       let buildingQueries = `isCustomerEditable eq ${
-//         JSON.parse(req.data.params).isCustomerEditable
-//       } and (parameterName eq '${parameterName.replace(
-//         /,/g,
-//         "' or parameterName eq '"
-//       )}' )`;
-//       console.log(`Building queries: ${buildingQueries}`);
+      //       var parameterName = JSON.parse(req.data.params).parameterName;
+      //       // if (parameterName) {
+      //       //   parameterName = [];
+      //       // }
 
-//       let docResponse = await axios({
-//         method: "get",
-//         url: "/parameters",
-//         params: {
-//           includeMetadata: true,
-//           realm: process.env.realm,
-//           $filter: buildingQueries ? buildingQueries : "",
-//         },
-//         headers: {
-//           Accept: "application/json",
-//           apiKey: process.env.apiKey,
-//         },
-//       });
-//       try {
-//         console.log(typeof docResponse.data);
-//         var filterPayload = [];
-//         docResponse.data.forEach((item, index) => {
-//           if (item.defaultValue !== item.parameterValue) {
-//             filterPayload.push(item);
-//             filterPayload.sort(
-//               (a, b) => b.isCustomerEditable - a.isCustomerEditable
-//             );
-//           }
-//         });
-//         console.log(`Length of filterPayload: ${docResponse.data.length}`);
-//         console.log(`Length of filterPayload: ${filterPayload.length}`);
+      //       console.log("On helper", JSON.parse(req.data.params));
+      //       let buildingQueries = `isCustomerEditable eq ${
+      //         JSON.parse(req.data.params).isCustomerEditable
+      //       } and (parameterName eq '${parameterName.replace(
+      //         /,/g,
+      //         "' or parameterName eq '"
+      //       )}' )`;
+      //       console.log(`Building queries: ${buildingQueries}`);
 
-//         const gen = new DocGenerator(filterPayload, {
-//           creator: "Doc Generator",
-//         });
+      //       let docResponse = await axios({
+      //         method: "get",
+      //         url: "/parameters",
+      //         params: {
+      //           includeMetadata: true,
+      //           realm: process.env.realm,
+      //           $filter: buildingQueries ? buildingQueries : "",
+      //         },
+      //         headers: {
+      //           Accept: "application/json",
+      //           apiKey: process.env.apiKey,
+      //         },
+      //       });
+      //       try {
+      //         console.log(typeof docResponse.data);
+      //         var filterPayload = [];
+      //         docResponse.data.forEach((item, index) => {
+      //           if (item.defaultValue !== item.parameterValue) {
+      //             filterPayload.push(item);
+      //             filterPayload.sort(
+      //               (a, b) => b.isCustomerEditable - a.isCustomerEditable
+      //             );
+      //           }
+      //         });
+      //         console.log(`Length of filterPayload: ${docResponse.data.length}`);
+      //         console.log(`Length of filterPayload: ${filterPayload.length}`);
 
-//         const out = await gen.generateCombined(
-//           "Audit-AutoReject-EmailApprovals.docx"
-//         );
+      //         const gen = new DocGenerator(filterPayload, {
+      //           creator: "Doc Generator",
+      //         });
 
-//         buffer = out;
+      //         const out = await gen.generateCombined(
+      //           "Audit-AutoReject-EmailApprovals.docx"
+      //         );
 
-//         console.log("File Type:", typeof buffer);
-//         //console.error("Failed to generate doc:", req._);
+      //         buffer = out;
 
-//         // for testing purpose
-//         /*
-//         const fs = require("fs");
-//         const filename = `output-files/Document-${Date.now()}.docx`;
-//         fs.writeFileSync(filename, out);
-//         console.log(`Document created successfully: ${filename}`);
-//         */
+      //         console.log("File Type:", typeof buffer);
+      //         //console.error("Failed to generate doc:", req._);
 
-//         //console.log(`Saved ${out}`);
-//       } catch (err) {
-//         console.error("Failed to generate doc:", err);
-//       }
-//       const filename = `Ariba - Config - Document-${Date.now()}.docx`;
-//       req._.res.setHeader(
-//         "Content-Type",
-//         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-//       );
-//       // Provide both filename (legacy) and filename* (RFC5987, UTF-8)
-//       req._.res.setHeader(
-//         "Content-Disposition",
-//         `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(
-//           filename
-//         )}`
-//       );
-//       req._.res.setHeader("Content-Length", buffer.length);
-//       console.log(buffer);
+      //         // for testing purpose
+      //         /*
+      //         const fs = require("fs");
+      //         const filename = `output-files/Document-${Date.now()}.docx`;
+      //         fs.writeFileSync(filename, out);
+      //         console.log(`Document created successfully: ${filename}`);
+      //         */
 
-//       req._.res.status(200).send(JSON.stringify({ buffer: buffer }));
+      //         //console.log(`Saved ${out}`);
+      //       } catch (err) {
+      //         console.error("Failed to generate doc:", err);
+      //       }
+      //       const filename = `Ariba - Config - Document-${Date.now()}.docx`;
+      //       req._.res.setHeader(
+      //         "Content-Type",
+      //         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      //       );
+      //       // Provide both filename (legacy) and filename* (RFC5987, UTF-8)
+      //       req._.res.setHeader(
+      //         "Content-Disposition",
+      //         `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(
+      //           filename
+      //         )}`
+      //       );
+      //       req._.res.setHeader("Content-Length", buffer.length);
+      //       console.log(buffer);
 
-    return req.data;
+      //       req._.res.status(200).send(JSON.stringify({ buffer: buffer }));
+
+      return realPayload;
     });
 
     return super.init();
