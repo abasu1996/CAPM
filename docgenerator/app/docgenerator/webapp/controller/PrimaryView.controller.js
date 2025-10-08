@@ -27,13 +27,47 @@ sap.ui.define(
 
     return Controller.extend("docgenerator.controller.PrimaryView", {
       onInit: function () {
-        var oView = this.getView();
-        var oTable = oView.byId("idDocTable");
+        this.oView = this.getView();
+        this.oTable = this.oView.byId("idDocTable");
         this.oModel = this.getOwnerComponent().getModel();
-        oTable.setBusy(true);
+        // oTable.setBusy(true);
         this._fallbackFetchAndBind();
         //this._bindTableToFunction();
         this.aFinalFilters = [];
+      },
+      onFileUpload: function (oEvent) {
+
+        var file = oEvent;
+
+      },
+      onLoadCsvHeaders: function () {
+        debugger;
+        var oFileUploader = this.getView().byId("csvUploader");
+        var domRef = oFileUploader.oFileUpload;
+        var file = domRef.files[0];
+        if (file) {
+          var reader = new FileReader();
+          reader.onload =  function (e) {
+            var content = e.target.result;
+            var lines = content.split("\n");
+            if (lines.length > 0) {
+              var headers = lines[0].split(",");
+              var csvHeaders = headers.map(function (header) {
+                return { key: header.trim(), text: header.trim() };
+              });
+              var oFileModel = new sap.ui.model.json.JSONModel({
+                csvHeaders: csvHeaders,
+              });
+              this.getView().setModel(oFileModel, "csv");
+              console.log(csvHeaders);
+              
+              MessageToast.show("CSV headers loaded successfully.");
+            }
+          }.bind(this);
+          reader.onerror = function (e) {
+            MessageBox.error("Error reading file: " + e.target.error.message);
+          };
+        }
       },
       //Button Actions
       onTaxConfigPress: function () {
@@ -371,9 +405,9 @@ sap.ui.define(
       onGeneratePress: async function () {
         //get the filter parameters from multicombo boxes in the filterbar
 
-        var oView = this.getView();
-        var oTable = oView.byId("idDocTable");
-        oTable.setBusy(true);
+        
+        var oTable = this.oView.byId("idDocTable");
+        this.oTable.setBusy(true);
         var oSelectedParams = this.getView()
           .byId("parameterName")
           .getSelectedItems();
@@ -401,18 +435,7 @@ sap.ui.define(
           parameterName: sParamFilter,
           isCustomerEditable: sCustomerEditFilter,
         };
-
-        // var sUrl =
-        //   "/odata/v4/generate-document/getDocumentCreated?params=" +
-        //   encodeURIComponent(JSON.stringify(params));
-
-        // fetch(sUrl, {
-        //   method: "GET",
-        //   credentials: "same-origin",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        // })
+        
         var resp = await this.oModel.bindContext(
           "/generateDocument.getDocumentCreated(...)"
         );
@@ -424,40 +447,13 @@ sap.ui.define(
         //
 
         const buff = resp.getBoundContext().getObject();
-        console.log(buff);
+        console.log(invokeResult);
 
         const blob = this._bufferDownload(buff)
-
-        //const cd = invokeResult.response.headers.get("Content-Disposition") || "";
+        
+ 
         let filename = "Ariba Config Document.docx";
-        // const mUtf8 = cd.match(/filename\\*=?UTF-8''([^;\\n\\r]+)/i);
-        // const mQuoted = cd.match(/filename=\"?([^\";]+)\"?/i);
-        // if (mUtf8 && mUtf8[1]) filename = decodeURIComponent(mUtf8[1]);
-        // else if (mQuoted && mQuoted[1]) filename = mQuoted[1];
 
-        // const url = URL.createObjectURL(blob);
-        // const a = document.createElement("a");
-        // a.href = url;
-        // a.download = filename;
-        // document.body.appendChild(a);
-        // a.click();
-        // a.remove();
-        // URL.revokeObjectURL(url);
-        //})
-        //.then(
-        //  function (data) {
-        // console.log("Document created: " + data);
-
-        // MessageBox.success("Document created: ");
-        // oTable.setBusy(false);
-        // }.bind(this)
-        // )
-        //.catch(
-        // function (err) {
-        // MessageBox.error(err.message || "Failed to call create document");
-        // oTable.setBusy(false);
-        //  }.bind(this)
-        // );
       },
 
       _bufferDownload: async function (
@@ -534,6 +530,7 @@ sap.ui.define(
           a.click();
           a.remove();
           URL.revokeObjectURL(url);
+          this.oTable.setBusy(false);
         }
       },
     });

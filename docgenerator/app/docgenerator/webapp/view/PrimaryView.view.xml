@@ -1,4 +1,6 @@
 <mvc:View
+    xmlns:uxap="sap.uxap"
+    xmlns:smartform="sap.ui.comp.smartform"
     xmlns:unified="sap.ui.unified"
     xmlns:smartvariants="sap.ui.comp.smartvariants"
     xmlns:f="sap.f"
@@ -8,6 +10,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout"
 >
     <f:DynamicPage
         id="page"
@@ -25,12 +28,12 @@
 
                 <f:actions>
                     <Button
-                        icon="sap-icon://add-document"
-                        tooltip="{i18n>refreshTooltip}"
-                        press="onFieldConfigPress"
-                        text="{i18n>fieldconfigButton}"
+                        text="{i18n>generateButton}"
+                        press="onGeneratePress"
+                        class="sapUiSmallMarginEnd"
+                        icon="sap-icon://ai"
                     />
-                    <MenuButton
+                    <!-- <MenuButton
                         text="Actions"
                         icon="sap-icon://action"
                     >
@@ -64,13 +67,105 @@
                                 </items>
                             </Menu>
                         </menu>
-                    </MenuButton>
+                    </MenuButton> -->
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>
-        <f:header>
-            <f:DynamicPageHeader>
-                <f:content>
+
+        <f:content>
+            <VBox
+                class="sapUiSmallMargin"
+                fitContainer="true"
+                renderType="Bare"
+            >
+                <Panel headerText="1. Project Information">
+                    <layout:Grid
+                        defaultSpan="L6 M6 S12"
+                        class="sapUiSmallMargin"
+                    >
+                        <layout:content>
+                            <Label text="Project Name" />
+                            <Input
+                                id="inpProjectName"
+                                placeholder="Enter Project Name"
+                            />
+
+                            <Label text="Customer Name" />
+                            <Input
+                                id="inpCustomerName"
+                                placeholder="Enter Customer Name"
+                            />
+
+                            <Label text="Customer Project ID" />
+                            <Input
+                                id="inpCustomerProject"
+                                placeholder="Enter Customer Project ID"
+                            />
+
+                            <Label text="SAP Ariba Solution" />
+                            <Input
+                                id="inpAribaSolution"
+                                placeholder="e.g. Ariba Services – Buy Channel"
+                            />
+
+                            <Label text="SAP Ariba PM" />
+                            <Input
+                                id="inpAribaPM"
+                                placeholder="Project Manager Name"
+                            />
+
+                            <Label text="Customer PM" />
+                            <Input
+                                id="inpCustomerPM"
+                                placeholder="Customer Project Manager"
+                            />
+
+                            <Label text="User Story" />
+                            <TextArea
+                                id="inpUserStory"
+                                rows="3"
+                                width="100%"
+                                placeholder="Enter user story description"
+                            />
+
+                            <Label text="Realm" />
+                            <MultiComboBox
+                                id="inpRealm"
+                                selectionFinish=".onSelectRealmMulti"
+                            >
+                                <core:Item
+                                    key="BBX"
+                                    text="brainboxdsapp-t"
+                                />
+                            </MultiComboBox>
+                        </layout:content>
+                    </layout:Grid>
+                </Panel>
+
+                <!-- <Panel headerText="2. Upload Data (CSV) or Paste JSON">
+                    <VBox class="sapUiSmallMargin">
+                        <unified:FileUploader
+                            id="csvUploader"
+                            name="csv"
+                            width="100%"
+                            placeholder="Choose CSV"
+                            tooltip="Upload CSV file (first row = headers)"
+                            uploadComplete=".onUploadComplete"
+                            change=".onFileUpload"
+                            fileType="csv"
+                        />
+                        <Button
+                            text="Load CSV headers"
+                            press=".onLoadCsvHeaders"
+                            class="sapUiSmallMarginTop"
+                        />
+                    </VBox>
+                </Panel> -->
+                <Panel
+                    headerText="3.Ariba Config Table"
+                    visible="false"
+                    id="configTablePanel"
+                >
                     <filterbar:FilterBar
                         id="idsFilterBar"
                         search="onFilterSearch"
@@ -117,85 +212,101 @@
                                     </MultiComboBox>
                                 </filterbar:control>
                             </filterbar:FilterGroupItem>
-
-                            <!-- Add other FilterGroupItems here if needed -->
                         </filterbar:filterGroupItems>
                     </filterbar:FilterBar>
-                </f:content>
-            </f:DynamicPageHeader>
-        </f:header>
-        <f:content>
-            <VBox fitContainer="true">
-                <OverflowToolbar style="Clear">
-                    <Title
-                        id="docTitle"
-                        text="{i18n>title}"
-                    />
-                    <ToolbarSpacer />
+                    <VBox fitContainer="true">
+                        <OverflowToolbar style="Clear">
+                            <Title
+                                id="docTitle"
+                                text="{i18n>title}"
+                            />
+                            <ToolbarSpacer />
 
-                    <Button
-                        text="{i18n>generateButton}"
-                        press="onGeneratePress"
-                        class="sapUiSmallMarginEnd"
-                        icon="sap-icon://ai"
-                    />
-                </OverflowToolbar>
-                <Table
-                    id="idDocTable"
-                    items="{docs>/items}"
-                    inset="false"
-                    growing="true"
-                    growingThreshold="10"
-                    mode="MultiSelect"
-                    bindingContexts="/generate(...)"
-                >
-                    <columns>
-                        <Column>
-                            <Text text="{i18n>DisplayName}" />
-                        </Column>
-                        <Column>
-                            <Text text="{i18n>ParameterType}" />
-                        </Column>
-                        <Column>
-                            <Text text="{i18n>DefaultValue}" />
-                        </Column>
-                        <Column>
-                            <Text text="{i18n>ParameterValue}" />
-                        </Column>
-                        <Column>
-                            <Text text="{i18n>CustomerEditable}" />
-                        </Column>
-                        <!-- <Column>
+                            <Button
+                                text="{i18n>generateButton}"
+                                press="onGeneratePress"
+                                class="sapUiSmallMarginEnd"
+                                icon="sap-icon://ai"
+                            />
+                        </OverflowToolbar>
+                        <Table
+                            id="idDocTable"
+                            items="{docs>/items}"
+                            inset="false"
+                            growing="true"
+                            growingThreshold="10"
+                            mode="MultiSelect"
+                            bindingContexts="/generate(...)"
+                        >
+                            <columns>
+                                <Column>
+                                    <Text text="{i18n>DisplayName}" />
+                                </Column>
+                                <Column>
+                                    <Text text="{i18n>ParameterType}" />
+                                </Column>
+                                <Column>
+                                    <Text text="{i18n>DefaultValue}" />
+                                </Column>
+                                <Column>
+                                    <Text text="{i18n>ParameterValue}" />
+                                </Column>
+                                <Column>
+                                    <Text text="{i18n>CustomerEditable}" />
+                                </Column>
+                                <!-- <Column>
                         <Text text="{i18n>Description}" />
                     </Column> -->
-                    </columns>
+                            </columns>
 
-                    <items>
-                        <ColumnListItem>
-                            <cells>
-                                <!-- Column 1: displayName (title) + parameterName (subtext) -->
-                                <ObjectIdentifier
-                                    title="{= ${docs>displayName} ? ${docs>displayName} : ${docs>parameterName}}"
-                                    text="{docs>parameterName}"
-                                    titleActive="true"
-                                />
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <!-- Column 1: displayName (title) + parameterName (subtext) -->
+                                        <ObjectIdentifier
+                                            title="{= ${docs>displayName} ? ${docs>displayName} : ${docs>parameterName}}"
+                                            text="{docs>parameterName}"
+                                            titleActive="true"
+                                        />
 
-                                <!-- Column 2: stacked information:
+                                        <!-- Column 2: stacked information:
                  parameterType, defaultValue, parameterValue, isDefault flag, description -->
 
-                                <Text text="{docs>parameterType}" />
-                                <Text text="{docs>defaultValue}" />
-                                <Text text="{docs>parameterValue}" />
-                                <!-- <Text
+                                        <Text text="{docs>parameterType}" />
+                                        <Text text="{docs>defaultValue}" />
+                                        <Text text="{docs>parameterValue}" />
+                                        <!-- <Text
                                 text="{= ${docs>isDefault} ? 'Is Default: true' : '' }"
                             /> -->
-                                <Text text="{docs>isCustomerEditable}" />
+                                        <Text
+                                            text="{docs>isCustomerEditable}"
+                                        />
 
-                                <!-- <FormattedText htmlText="{docs>description}" /> -->
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-                </Table>
+                                        <!-- <FormattedText htmlText="{docs>description}" /> -->
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </VBox>
+                </Panel>
+                <!-- <Panel headerText="3. Preview / Generate">
+                    <VBox class="sapUiSmallMargin">
+                        <Button
+                            text="Preview mapping JSON"
+                            press=".onPreviewMapping"
+                        />
+                        <Button
+                            text="Generate Document"
+                            type="Emphasized"
+                            press=".onGenerate"
+                            class="sapUiSmallMarginTop"
+                        />
+                        <Text
+                            id="opStatus"
+                            text=""
+                        />
+                    </VBox>
+                </Panel> -->
             </VBox>
         </f:content>
     </f:DynamicPage>

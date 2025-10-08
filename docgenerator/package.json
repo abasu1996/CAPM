@@ -13,6 +13,7 @@
     "@sap/cds": "^8",
     "@sap/xssec": "^4",
     "axios": "^1.12.2",
+    "csv-parser": "^3.2.0",
     "docx": "^9.5.1",
     "dot-env": "^0.0.1",
     "express": "^4",

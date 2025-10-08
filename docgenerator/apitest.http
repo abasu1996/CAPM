@@ -9,6 +9,64 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:4004/odata/v4/generate-document/getDocumentCreated?params={"parameterName":["Application.Approvable.AllowApprovalOfDeniedApprovable,Application.Approvable.AllowedForExternalApproval,Application.Approvable.ApprovalRequestEscalateWarningPeriod"],"isCustomerEditable":true} HTTP/1.1
+GET http://localhost:51615/odata/v4/generate-document/getDocumentCreated?params={"parameterName":["Application.Approvable.AllowApprovalOfDeniedApprovable,Application.Approvable.AllowedForExternalApproval,Application.Approvable.ApprovalRequestEscalateWarningPeriod"],"isCustomerEditable":true} HTTP/1.1
 Content-Type: application/json
+
+
+###
+POST http://localhost:56659/odata/v4/generate-document/combinedDocGenerate HTTP/1.1
+Content-Type: application/json
+
+{
+    "docpayload": {
+    "projectName": "Ariba Integration for Contoso",
+    "customerName": "Contoso Ltd",
+    "projectIdentification": [
+      { "label": "Project Name", "value": "Ariba Integration for Contoso" },
+      { "label": "Customer Name", "value": "Contoso Ltd" },
+      { "label": "SAP Ariba Project Manager", "value": "Alice Example" }
+    ],
+    "revisionHistory": [
+      {
+        "author": "Alice Example",
+        "version": "0.1",
+        "date": "2025-10-07T00:00:00Z",
+        "status": "Draft",
+        "location": "repo/docs/FS_v0.1.docx"
+      }
+    ],
+    "businessProcessOverview": "This project covers integration between Contoso purchasing and SAP Ariba services...",
+    "functionalOverview": "High-level description of the solution components...",
+    "alternativesConsidered": "- Option A: ...\n- Option B: ...",
+    "businessBenefit": "Expected cost savings and automated ordering...",
+    "assumptions": "Customer provides X data; network access available.",
+    "relationshipToOtherDocumentation": "See Leading Practice Functional Design Document - Ref: LD-001",
+    "userStories": [
+      {
+        "id": "US-001",
+        "title": "Create Purchase Order",
+        "description": "As a buyer, I want to create a PO from Contoso so that Ariba receives it."
+      }
+    ],
+    "functionalDesign": "Detailed design of the RICEFWD objects, mapping, API calls...",
+    "constraints": [
+      "No changes to S/4 master data",
+      "Ariba API rate limits are 1000 calls/min"
+    ],
+    "tasksBySapAriba": [
+      {
+        "task": "Develop connector",
+        "description": "Build and test the Ariba connector.",
+        "dependency": "Customer test data"
+      }
+    ],
+    "tasksByCustomer": [],
+    "tasksByPartner": []
+  }
+}
+
+            
+
+
+
 
