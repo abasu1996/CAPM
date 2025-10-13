@@ -16,6 +16,7 @@
         id="page"
         title="{i18n>appTitle}"
         headerExpanded="true"
+        
     >
         <f:title>
             <f:DynamicPageTitle>

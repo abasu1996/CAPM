@@ -28,17 +28,15 @@ sap.ui.define(
     return Controller.extend("docgenerator.controller.PrimaryView", {
       onInit: function () {
         this.oView = this.getView();
-        this.oTable = this.oView.byId("idDocTable");
+        //this.oTable = this.oView.byId("idDocTable");
         this.oModel = this.getOwnerComponent().getModel();
         // oTable.setBusy(true);
-        this._fallbackFetchAndBind();
+        //this._fallbackFetchAndBind();
         //this._bindTableToFunction();
         this.aFinalFilters = [];
       },
       onFileUpload: function (oEvent) {
-
         var file = oEvent;
-
       },
       onLoadCsvHeaders: function () {
         debugger;
@@ -47,7 +45,7 @@ sap.ui.define(
         var file = domRef.files[0];
         if (file) {
           var reader = new FileReader();
-          reader.onload =  function (e) {
+          reader.onload = function (e) {
             var content = e.target.result;
             var lines = content.split("\n");
             if (lines.length > 0) {
@@ -60,7 +58,7 @@ sap.ui.define(
               });
               this.getView().setModel(oFileModel, "csv");
               console.log(csvHeaders);
-              
+
               MessageToast.show("CSV headers loaded successfully.");
             }
           }.bind(this);
@@ -403,57 +401,89 @@ sap.ui.define(
           );
       },
       onGeneratePress: async function () {
-        //get the filter parameters from multicombo boxes in the filterbar
-
-        
-        var oTable = this.oView.byId("idDocTable");
-        this.oTable.setBusy(true);
-        var oSelectedParams = this.getView()
-          .byId("parameterName")
-          .getSelectedItems();
-        var aParamKeys = oSelectedParams.map(function (item) {
-          return item.getKey();
-        });
-
-        var oSelectedCustomerEdit = this.getView()
-          .byId("isCustomerEditable")
-          .getSelectedItems();
-        var aCustomerEditKeys = oSelectedCustomerEdit.map(function (item) {
-          if (item.getKey() === "true" || item.getKey() === 0) {
-            return true;
-          } else if (item.getKey() === "false" || item.getKey() === 1) {
-            return false;
-          }
-          return item.getKey();
-        });
-
-        var sParamFilter = aParamKeys.length > 0 ? aParamKeys.join(",") : " ";
-        var sCustomerEditFilter =
-          aCustomerEditKeys.length === 1 ? aCustomerEditKeys[0] : " ";
-
-        var params = {
-          parameterName: sParamFilter,
-          isCustomerEditable: sCustomerEditFilter,
+        this.byId("page").setBusy(true);
+        const payload = {
+          value: {
+            docpayload: {
+              projectName: this.byId("inpProjectName").getValue(),
+              customerName: this.byId("inpCustomerName").getValue(),
+              projectIdentification: [
+                {
+                  label: "Project Name",
+                  value: this.byId("inpProjectName").getValue(),
+                },
+                {
+                  label: "Customer Name",
+                  value: this.byId("inpCustomerName").getValue(),
+                },
+                {
+                  label: "SAP Ariba Project Manager",
+                  value: this.byId("inpAribaPM").getValue(),
+                },
+              ],
+              revisionHistory: [
+                {
+                  author: this.byId("inpAribaPM").getValue(),
+                  version: "0.1",
+                  date: "2025-10-07T00:00:00Z",
+                  status: "Draft",
+                  location: "<Link to document>",
+                },
+              ],
+              businessProcessOverview:
+                `This Project ${this.byId("inpProjectName").getValue()?this.byId("inpProjectName").getValue():"<Project Name>"} covers configuration between ${this.byId("inpCustomerName").getValue()?this.byId("inpCustomerName").getValue():"<Customer Name>"}  and SAP Ariba services...`,
+              functionalOverview:
+                `High-level description of the solution components...`,
+              alternativesConsidered:
+                `- Option A: ...\n- Option B: ...`,
+              businessBenefit:
+                `Expected cost savings and automated ordering...`,
+              assumptions:
+                `Customer provides X data; network access available.`,
+              relationshipToOtherDocumentation:
+                "See Leading Practice Functional Design Document for core details.",
+              functionalDesign:
+                "Detailed design of the RICEFWD objects, mapping, API calls...",
+              constraints: [
+                "No changes to S/4 master data",
+                "Ariba API rate limits are 1000 calls/min",
+              ],
+              tasksBySapAriba: [
+                {
+                  task: "Develop connector",
+                  description: "Build and test the Ariba connector.",
+                  dependency: "Customer test data",
+                },
+              ],
+              tasksByCustomer: [],
+              tasksByPartner: [],
+              csvGuidedBuyingParameters: [],
+              sapEditableParameters: [],
+              customerEditableParameters: [],
+            },
+          },
         };
-        
-        var resp = await this.oModel.bindContext(
-          "/generateDocument.getDocumentCreated(...)"
-        );
-        var invokeResult = await resp
-          .setParameter("params", JSON.stringify(params))
-          .invoke();
 
-        // .then(function (res) {
-        //
+        var actionPath = "/generateDocument.combinedDocGenerate(...)";
+        var resp = await this.oModel.bindContext(actionPath);
+        Object.entries(payload).forEach(([key, value]) => {
+          resp.setParameter(key, value);
+        });
+        await resp.invoke();
 
-        const buff = resp.getBoundContext().getObject();
-        console.log(invokeResult);
+        if (resp.getBoundContext().getObject()) {
+          const buff = resp.getBoundContext().getObject();
+         
+          const blob = this._bufferDownload(buff);
+          MessageToast.show("Document generated successfully.");
+          this.byId("page").setBusy(false);
+        }
+        else {
+          MessageBox.error("Document generation failed.");
+          this.byId("page").setBusy(false);
+        }
 
-        const blob = this._bufferDownload(buff)
-        
- 
         let filename = "Ariba Config Document.docx";
-
       },
 
       _bufferDownload: async function (
@@ -469,30 +499,19 @@ sap.ui.define(
           const buf = payload.buffer;
           let uint8;
 
-   
           if (buf instanceof ArrayBuffer) {
             uint8 = new Uint8Array(buf);
             console.log(uint8);
-            
-          }
-         
-          else if (ArrayBuffer.isView(buf)) {
+          } else if (ArrayBuffer.isView(buf)) {
             uint8 = new Uint8Array(buf.buffer || buf);
             console.log(uint8);
-          }
-       
-          else if (buf && buf.type === "Buffer" && Array.isArray(buf.data)) {
+          } else if (buf && buf.type === "Buffer" && Array.isArray(buf.data)) {
             uint8 = new Uint8Array(buf.data);
             console.log(uint8);
-          }
-      
-          else if (Array.isArray(buf)) {
+          } else if (Array.isArray(buf)) {
             uint8 = new Uint8Array(buf);
             console.log(uint8);
-          }
-         
-          else if (typeof buf === "string") {
-   
+          } else if (typeof buf === "string") {
             const base64 =
               buf.indexOf("base64,") >= 0 ? buf.split("base64,")[1] : buf;
             const binary = atob(base64);
@@ -501,9 +520,7 @@ sap.ui.define(
             for (let i = 0; i < len; i++) {
               uint8[i] = binary.charCodeAt(i);
             }
-          }
-     
-          else if (
+          } else if (
             buf &&
             (buf.data instanceof ArrayBuffer ||
               Array.isArray(buf.data) ||
@@ -520,7 +537,6 @@ sap.ui.define(
             );
           }
 
-         
           const blob = new Blob([uint8], { type: mimeType });
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
@@ -530,7 +546,7 @@ sap.ui.define(
           a.click();
           a.remove();
           URL.revokeObjectURL(url);
-          this.oTable.setBusy(false);
+          this.byId("page").setBusy(false);
         }
       },
     });

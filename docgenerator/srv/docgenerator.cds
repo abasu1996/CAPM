@@ -5,6 +5,7 @@ service generateDocument {
    @open
    type AnyJson {};
    
-   action combinedDocGenerate(docpayload:AnyJson) returns String;
+   action combinedDocGenerate(value:AnyJson) returns String;
    function getDocumentCreated(params:String) returns String;
 }
+annotate generateDocument with @cds.server.body_parser.limit: '1mb';
