@@ -1,5 +1,3 @@
-
-
 const fs = require("fs");
 const path = require("path");
 const {
@@ -116,8 +114,6 @@ class TemplateDocgenerator {
   async generate(data = {}, outputPath = null) {
     // Document sections based on uploaded template structure.
     const sections = [{ properties: {}, children: [] }];
-
-    
 
     // Convenience
     const c = sections[0].children;
@@ -826,13 +822,13 @@ class DocGenerator {
    */
   async generateBuffer(payload = {}) {
     // if payload wrapped inside value.docpayload (like in your jsonformatter) handle that.
-    
+
     const root =
       payload.docpayload ||
       payload.value?.docpayload ||
       payload.value ||
       payload;
- 
+
     const doc = new Document({
       creator: this.creator,
       title: "Project Functional Specification Document",
@@ -893,11 +889,21 @@ class DocGenerator {
         }),
         this._para(" ", { spacing: { after: 400 } }),
         // Add logo as floating image so it doesn't affect layout and avoid
-        
-        new Paragraph({ children: [
-          new ImageRun({ data: fs.readFileSync(path.join(__dirname, "/public/logo.png")), transformation: { width: 400, height: 400 },floating: { horizontalPosition: { offset: 1014400 }, verticalPosition: { offset: 1014400 }, wrap: { type: "behindText" } } })
-        ],alignment: AlignmentType.CENTER }),
-        
+
+        new Paragraph({
+          children: [
+            new ImageRun({
+              data: fs.readFileSync(path.join(__dirname, "/public/logo.png")),
+              transformation: { width: 800, height: 800 },
+              floating: {
+                horizontalPosition: { offset: 1614400 },
+                verticalPosition: { offset: 1614400 },
+                wrap: { type: "behindText" },
+              },
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+        }),
       ],
     });
 
@@ -1091,12 +1097,7 @@ class DocGenerator {
         this._spacingAfter(50),
         root.csvGuidedBuyingParameters && root.csvGuidedBuyingParameters.length
           ? this._buildSimpleTable(
-              [
-                `${"Parameter Name"}`,
-                "Description",
-                "Value",
-                "Modified By",
-              ],
+              [`${"Parameter Name"}`, "Description", "Value", "Modified By"],
               root.csvGuidedBuyingParameters.map((p) => [
                 p.PARAM_NAME,
                 p.PARAM_DESC,
@@ -1147,6 +1148,36 @@ class DocGenerator {
           : this._para("No Customer-editable parameters provided."),
       ],
     });
+    // const footerTable = new Table({
+    //   rows: [first, last],
+    //   width: {
+    //     size: 100,
+    //     type: WidthType.PERCENTAGE,
+    //   },
+    //   float: {
+    //     relativeVerticalPosition: RelativeVerticalPosition.BOTTOM,
+    //     bottomFromText: 200,
+    //   },
+    //   layout: TableLayoutType.FIXED,
+    //   // float: {
+    //   //   horizontalAnchor: TableAnchorType.MARGIN,
+    //   //   verticalAnchor: TableAnchorType.MARGIN,
+    //   //   relativeHorizontalPosition: RelativeHorizontalPosition.LEFT,
+    //   //   relativeVerticalPosition: RelativeVerticalPosition.OUTSIDE,
+    //   //   overlap: OverlapType.NEVER,
+    //   //   // topFromText: convertInchesToTwip(0.2),
+    //   // },
+    // });
+    // doc.addSection({
+    //   footers: {
+    //     first: new Footer({
+    //       children: [],
+    //     }),
+    //     default: new Footer({
+    //       children: [footerTable],
+    //     }),
+    //   },
+    // });
 
     // Packer to buffer
     const buffer = await Packer.toBuffer(doc);
@@ -1156,6 +1187,7 @@ class DocGenerator {
   // helper for building tasks sections returns an array of paragraphs/tables
   _buildTasksSection(title, tasks = []) {
     const out = [this._heading(title, 2)];
+    this._spacingAfter(100);
     if (!tasks || tasks.length === 0) {
       out.push(this._para("No tasks specified."));
       return out;
