@@ -284,28 +284,49 @@ module.exports = class generateDocument extends cds.ApplicationService {
         });
 
         const buffer = await gen.generateBuffer(realPayload);
+        
           
         
     
-            const filename = `Ariba - Config - Document-${Date.now()}.docx`;
-           
+            const filename = `Project Functional Specification Document.docx`;
+           if(fs.existsSync(`C:\\Users\\animb\\Downloads\\${filename}`)){
+              //I want to overwrite the file
+              console.log("File exists, overwriting...");
+              
+              fs.writeFileSync(`C:\\Users\\animb\\Downloads\\${filename}`, buffer);
+              req._.res.status(200).send(JSON.stringify({ "fileMessage": "File overwritten successfully." }));
+            }
+            else{
             // Provide both filename (legacy) and filename* (RFC5987, UTF-8)
-            req._.res.setHeader(
-              "Content-Type",
-              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-              "Content-Disposition",
-              "Content-Length", buffer.length,
-              `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(
-                filename
-              )}`
-            );
-         
+              req._.res.setHeader(
+                "Content-Type",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "Content-Disposition",
+                "Content-Length", buffer.length,
+                `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(
+                  filename
+                )}`
+              );
+          
+            const updatePayload = {
+              docUrl: `Generated-${Date.now()}.docx`,
+              status: "Completed",
+            };
+            // if (req.data.docId) {
+            //   const db = await cds.connect.to("db");
+            //   await db
+            //     .update("ariba.DocRequests")
+            //     .set(updatePayload)
+            //     .where({ ID: req.data.docId });
+            // }
+            // console.timeLog("doc-gen-time", "Before sending response");
       
 
             req._.res.status(200).send(JSON.stringify({ buffer: buffer }));
             console.timeLog("doc-gen-time", "After sending response");
-
-      return realPayload;
+          }
+          console.timeEnd("doc-gen-time");
+        return realPayload;
     });
 
     return super.init();

@@ -835,9 +835,23 @@ class DocGenerator {
       description: "Generated functional specification document",
       sections: [],
     });
+    const pageFooter = new Footer({
+      children: [
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new TextRun("Page "),
+            PageNumber.CURRENT,
+            new TextRun(" of "),
+            PageNumber.TOTAL_PAGES,
+          ],
+        }),
+      ],
+    });
 
     // COVER PAGE
     doc.addSection({
+      footers: { default: pageFooter },
       children: [
         this._para("", { spacing: { before: 200 } }),
         new Paragraph({
@@ -894,11 +908,17 @@ class DocGenerator {
           children: [
             new ImageRun({
               data: fs.readFileSync(path.join(__dirname, "/public/logo.png")),
-              transformation: { width: 800, height: 800 },
+              transformation: { width: 700, height: 700 },
               floating: {
-                horizontalPosition: { offset: 1614400 },
-                verticalPosition: { offset: 1614400 },
-                wrap: { type: "behindText" },
+                horizontalPosition: {
+                  align: "center", // Centers image horizontally on the page
+                },
+                verticalPosition: {
+                  offset: 3000000, // Moves image down (~2.7 cm)
+                },
+                wrap: {
+                  type: "behindText",
+                },
               },
             }),
           ],

@@ -430,16 +430,19 @@ sap.ui.define(
                   location: "<Link to document>",
                 },
               ],
-              businessProcessOverview:
-                `This Project ${this.byId("inpProjectName").getValue()?this.byId("inpProjectName").getValue():"<Project Name>"} covers configuration between ${this.byId("inpCustomerName").getValue()?this.byId("inpCustomerName").getValue():"<Customer Name>"}  and SAP Ariba services...`,
-              functionalOverview:
-                `High-level description of the solution components...`,
-              alternativesConsidered:
-                `- Option A: ...\n- Option B: ...`,
-              businessBenefit:
-                `Expected cost savings and automated ordering...`,
-              assumptions:
-                `Customer provides X data; network access available.`,
+              businessProcessOverview: `This Project ${
+                this.byId("inpProjectName").getValue()
+                  ? this.byId("inpProjectName").getValue()
+                  : "<Project Name>"
+              } covers configuration between ${
+                this.byId("inpCustomerName").getValue()
+                  ? this.byId("inpCustomerName").getValue()
+                  : "<Customer Name>"
+              }  and SAP Ariba services...`,
+              functionalOverview: `High-level description of the solution components...`,
+              alternativesConsidered: `- Option A: ...\n- Option B: ...`,
+              businessBenefit: `Expected cost savings and automated ordering...`,
+              assumptions: `Customer provides X data; network access available.`,
               relationshipToOtherDocumentation:
                 "See Leading Practice Functional Design Document for core details.",
               functionalDesign:
@@ -473,12 +476,11 @@ sap.ui.define(
 
         if (resp.getBoundContext().getObject()) {
           const buff = resp.getBoundContext().getObject();
-         
+
           const blob = this._bufferDownload(buff);
           MessageToast.show("Document generated successfully.");
           this.byId("page").setBusy(false);
-        }
-        else {
+        } else {
           MessageBox.error("Document generation failed.");
           this.byId("page").setBusy(false);
         }
@@ -488,12 +490,18 @@ sap.ui.define(
 
       _bufferDownload: async function (
         payload,
-        suggestedFilename = "Ariba.docx",
+        suggestedFilename = "Project Functional Specification Document.docx",
         mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       ) {
         {
           if (!payload || !payload.buffer) {
-            throw new Error("No buffer found in payload");
+            if (payload && payload.fileMessage) {
+              MessageBox.information(payload.fileMessage);
+              this.byId("page").setBusy(false);
+              return;
+            } else {
+              throw new Error("No buffer found in payload");
+            }
           }
 
           const buf = payload.buffer;
@@ -544,9 +552,9 @@ sap.ui.define(
           a.download = suggestedFilename;
           document.body.appendChild(a);
           a.click();
+          this.byId("page").setBusy(false);
           a.remove();
           URL.revokeObjectURL(url);
-          this.byId("page").setBusy(false);
         }
       },
     });
