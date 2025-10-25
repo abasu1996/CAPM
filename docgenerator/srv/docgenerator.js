@@ -288,14 +288,14 @@ module.exports = class generateDocument extends cds.ApplicationService {
         
     
             const filename = `Project Functional Specification Document.docx`;
-           if(fs.existsSync(`C:\\Users\\animb\\Downloads\\${filename}`)){
-              //I want to overwrite the file
-              console.log("File exists, overwriting...");
+          //  if(fs.existsSync(`C:\\Users\\animb\\Downloads\\${filename}`)){
+          //     //I want to overwrite the file
+          //     console.log("File exists, overwriting...");
               
-              fs.writeFileSync(`C:\\Users\\animb\\Downloads\\${filename}`, buffer);
-              req._.res.status(200).send(JSON.stringify({ "fileMessage": "File overwritten successfully." }));
-            }
-            else{
+          //     fs.writeFileSync(`C:\\Users\\animb\\Downloads\\${filename}`, buffer);
+          //     req._.res.status(200).send(JSON.stringify({ "fileMessage": "File overwritten successfully." }));
+          //   }
+          //   else{
             // Provide both filename (legacy) and filename* (RFC5987, UTF-8)
               req._.res.setHeader(
                 "Content-Type",
@@ -323,7 +323,7 @@ module.exports = class generateDocument extends cds.ApplicationService {
 
             req._.res.status(200).send(JSON.stringify({ buffer: buffer }));
             console.timeLog("doc-gen-time", "After sending response");
-          }
+          //}
           console.timeEnd("doc-gen-time");
         return realPayload;
     });

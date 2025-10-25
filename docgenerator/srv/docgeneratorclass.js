@@ -906,21 +906,21 @@ class DocGenerator {
 
         new Paragraph({
           children: [
-            new ImageRun({
-              data: fs.readFileSync(path.join(__dirname, "/public/logo.png")),
-              transformation: { width: 700, height: 700 },
-              floating: {
-                horizontalPosition: {
-                  align: "center", // Centers image horizontally on the page
-                },
-                verticalPosition: {
-                  offset: 3000000, // Moves image down (~2.7 cm)
-                },
-                wrap: {
-                  type: "behindText",
-                },
-              },
-            }),
+            // new ImageRun({
+            //   data: fs.readFileSync(path.join(__dirname, "/public/logo.png")),
+            //   transformation: { width: 700, height: 700 },
+            //   floating: {
+            //     horizontalPosition: {
+            //       align: "center", // Centers image horizontally on the page
+            //     },
+            //     verticalPosition: {
+            //       offset: 3000000, // Moves image down (~2.7 cm)
+            //     },
+            //     wrap: {
+            //       type: "behindText",
+            //     },
+            //   },
+            // }),
           ],
           alignment: AlignmentType.CENTER,
         }),
