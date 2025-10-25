@@ -1,7 +1,6 @@
-const env = require("dot-env").config;
 const cds = require("@sap/cds");
 const fs = require("fs");
-const csv = require("csv-parser");
+const parser = require("csv-parser");
 const { DocGenerator, TemplateDocgenerator } = require("./docgeneratorclass");
 
 const SapCfAxios = require("sap-cf-axios").default;
@@ -230,7 +229,7 @@ module.exports = class generateDocument extends cds.ApplicationService {
         fs.createReadStream(
           "srv/public/BrainBoxDSAPP-T_Guided Buying_parameters.csv"
         )
-          .pipe(csv())
+          .pipe(parser())
           .on("data", (row) => {
             data.push(row);
           })

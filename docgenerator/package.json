@@ -10,20 +10,18 @@
     "node": "^20.18.0"
   },
   "dependencies": {
-    "@sap/cds": "^9.4.3",
+    "@sap/cds": "^9.4.4",
     "@sap/xssec": "^4",
     "axios": "^1.12.2",
-    "csv-parser": "^3.2.0",
     "docx": "^9.5.1",
-    "dot-env": "^0.0.1",
     "express": "^4",
+    "csv-parser": "^3.2.0",
     "fs": "^0.0.1-security",
     "kill-port": "^2.0.1",
     "sap-cf-axios": "^1.0.2"
   },
   "devDependencies": {
     "@cap-js/cds-types": "^0.15.0",
-    "@cap-js/sqlite": "^1",
     "csv-parser": "^3.2.0",
     "docx": "^9.5.1",
     "dot-env": "^0.0.1",
