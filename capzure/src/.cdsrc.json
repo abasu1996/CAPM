@@ -1,0 +1,52 @@
+{
+  "requires": {
+    "auth": {
+      "[development]": {
+        "kind": "mocked"
+      },
+      "[hybrid]": {
+        "kind": "mocked"
+      },
+      "[azure]": {
+        "impl": "cds-entra-id"
+      }
+    },
+    "db": {
+      "kind": "postgres",
+      "impl": "@cap-js/postgres",
+      "[development]": {
+        "credentials": {
+          "host": "localhost",
+          "port": 5432,
+          "database": "postgres",
+          "user": "postgres",
+          "password": "postgres"
+        }
+      },
+      "[hybrid]": {
+        "credentials": {
+          "host": "",
+          "port": 5432,
+          "database": "citus",
+          "user": "citus",
+          "password": "",
+          "ssl": true
+        }
+      },
+      "[azure]": {
+        "credentials": {
+          "host": "",
+          "port": 5432,
+          "database": "citus",
+          "user": "citus",
+          "password": "",
+          "ssl": true
+        },
+        "pool": {
+          "acquireTimeoutMillis": 20000,
+          "destroyTimeoutMillis": 20000
+        }
+      }
+    }
+  }
+}
