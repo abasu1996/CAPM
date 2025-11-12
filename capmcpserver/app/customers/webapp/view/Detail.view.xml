@@ -1,0 +1,98 @@
+<mvc:View
+    controllerName="capmcpserver.customers.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:form="sap.ui.layout.form"
+    displayBlock="true">
+    <Page
+        id="page"
+        title="{i18n>detailTitle}"
+        showNavButton="true"
+        navButtonPress=".onNavBack">
+        <content>
+            <ObjectHeader
+                id="objectHeader"
+                title="{Name}"
+                number="{CustomerID}">
+                <attributes>
+                    <ObjectAttribute text="{Email}" />
+                    <ObjectAttribute text="{Phone}" />
+                </attributes>
+            </ObjectHeader>
+            <form:SimpleForm
+                id="customerForm"
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="3"
+                labelSpanL="3"
+                labelSpanM="3"
+                labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="4"
+                emptySpanL="4"
+                emptySpanM="4"
+                emptySpanS="0"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false">
+                <form:content>
+                    <Label text="{i18n>customerID}" required="true"/>
+                    <Input
+                        id="customerIDInput"
+                        value="{CustomerID}"
+                        enabled="{= !${editModel>/isEdit}}"
+                        required="true"/>
+                    <Label text="{i18n>name}" required="true"/>
+                    <Input
+                        id="nameInput"
+                        value="{Name}"
+                        required="true"/>
+                    <Label text="{i18n>email}"/>
+                    <Input
+                        id="emailInput"
+                        value="{Email}"
+                        type="Email"/>
+                    <Label text="{i18n>phone}"/>
+                    <Input
+                        id="phoneInput"
+                        value="{Phone}"
+                        type="Tel"/>
+                    <Label text="{i18n>address}"/>
+                    <TextArea
+                        id="addressInput"
+                        value="{Address}"
+                        rows="3"/>
+                </form:content>
+            </form:SimpleForm>
+        </content>
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer/>
+                <Button
+                    id="editButton"
+                    text="{i18n>editButtonText}"
+                    type="Emphasized"
+                    press=".onEdit"
+                    visible="{= !${editModel>/isEdit} &amp;&amp; !${editModel>/isCreate}}"/>
+                <Button
+                    id="saveButton"
+                    text="{i18n>saveButtonText}"
+                    type="Emphasized"
+                    press=".onSave"
+                    visible="{= ${editModel>/isEdit} || ${editModel>/isCreate}}"/>
+                <Button
+                    id="cancelButton"
+                    text="{i18n>cancelButtonText}"
+                    press=".onCancel"
+                    visible="{= ${editModel>/isEdit} || ${editModel>/isCreate}}"/>
+                <Button
+                    id="deleteButton"
+                    text="{i18n>deleteButtonText}"
+                    type="Reject"
+                    press=".onDelete"
+                    visible="{= !${editModel>/isCreate}}"/>
+            </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>
