@@ -14,7 +14,8 @@ sap.ui.define([
         onPress: function (oEvent) {
             var oItem = oEvent.getSource();
             var oRouter = this.getOwnerComponent().getRouter();
-            var sCustomerID = oItem.getBindingContext().getProperty("ID");
+            var sCustomerID = oItem.getBindingContext().getProperty("CustomerID");
+            console.log(sCustomerID);
             
             oRouter.navTo("RouteDetail", {
                 key: sCustomerID

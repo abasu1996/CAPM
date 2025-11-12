@@ -68,6 +68,7 @@
                             <Text text="{Email}" />
                             <Text text="{Phone}" />
                             <Text text="{Address}" />
+                            <Text text="{ID}" visible="false" />
                         </cells>
                     </ColumnListItem>
                 </items>
