@@ -1,6 +1,7 @@
 const cds = require("@sap/cds");
 const fs = require("fs");
 const parser = require("csv-parser");
+const papa = require("papaparse");
 const { DocGenerator, TemplateDocgenerator } = require("./docgeneratorclass");
 
 const SapCfAxios = require("sap-cf-axios").default;
@@ -226,21 +227,25 @@ module.exports = class generateDocument extends cds.ApplicationService {
       const csvArray = await new Promise((resolve, reject) => {
         const data = [];
         const fs = require("fs");
-        fs.createReadStream(
-          "srv/public/BrainBoxDSAPP-T_Guided Buying_parameters.csv"
-        )
-          .pipe(parser())
-          .on("data", (row) => {
-            data.push(row);
-          })
-          .on("end", () => {
-           
-            resolve(data);
-          })
-          .on("error", (error) => {
-            console.error("Error reading CSV file:", error);
-            reject(error);
-          });
+        const file = fs.readFileSync(
+          "srv/public/BrainBoxDSAPP-T_Guided Buying_parameters.csv","utf8");
+        papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          dynamicTyping: true,
+          complete: function(results) {
+            resolve(results.data);
+          },
+          error: function(err) {
+            reject(err);
+          }
+        });
+        const jsonCsv =  data.push(papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            dynamicTyping: true
+          }
+        ));
       });
       console.timeLog("doc-gen-time", "After CSV read");
       let docResponse = await axios({

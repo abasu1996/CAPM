@@ -13,9 +13,9 @@
     "@ui5/cli": "^4.0.16",
     "@sap/ux-ui5-tooling": "1"
   },
-  "scripts": {
-    "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf",
-    "build": "ui5 build --dest dist && copy xs-app.json dist\\xs-app.json",
-    "build:cf": "npm run build && powershell -Command \"Compress-Archive -Path dist\\* -DestinationPath docgen_app-content.zip\" && cd .."
-  }
+"scripts": {
+  "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf",
+  "build": "ui5 build --dest dist && npx copyfiles xs-app.json dist/",
+  "build:cf": "npm run build && cd dist && zip -r ../docgen_app-content.zip * && cd .."
 }
+} 

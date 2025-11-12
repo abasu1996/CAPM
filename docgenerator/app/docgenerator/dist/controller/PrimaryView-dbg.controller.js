@@ -34,6 +34,7 @@ sap.ui.define(
         //this._fallbackFetchAndBind();
         //this._bindTableToFunction();
         this.aFinalFilters = [];
+        this.counter = 0;
       },
       onFileUpload: function (oEvent) {
         var file = oEvent;
@@ -466,7 +467,7 @@ sap.ui.define(
             },
           },
         };
-
+        this.counter++;
         var actionPath = "/generateDocument.combinedDocGenerate(...)";
         var resp = await this.oModel.bindContext(actionPath);
         Object.entries(payload).forEach(([key, value]) => {
@@ -490,10 +491,11 @@ sap.ui.define(
 
       _bufferDownload: async function (
         payload,
-        suggestedFilename = "Project Functional Specification Document.docx",
+        suggestedFilename = `Project Functional Specification Document_V${this.counter}.docx`,
         mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       ) {
         {
+          
           if (!payload || !payload.buffer) {
             if (payload && payload.fileMessage) {
               MessageBox.information(payload.fileMessage);
