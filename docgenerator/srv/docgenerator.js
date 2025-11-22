@@ -1,7 +1,6 @@
 const cds = require("@sap/cds");
 const fs = require("fs");
-const parser = require("csv-parser");
-const papa = require("papaparse");
+const dotenv = require("dotenv").config();
 const { DocGenerator, TemplateDocgenerator } = require("./docgeneratorclass");
 
 const SapCfAxios = require("sap-cf-axios").default;

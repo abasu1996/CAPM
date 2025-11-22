@@ -10,7 +10,7 @@ build-parameters:
     - builder: custom
       commands:
         - npm ci
-        - npx cds build --production
+        - npx cds build
 modules:
   - name: docgenerator-srv
     type: nodejs
@@ -25,8 +25,6 @@ modules:
     properties:
       OPTIMIZE_MEMORY: true
     build-parameters:
-      ignore:
-        - "node_modules/"
       builder: npm-ci
     provides:
       - name: srv-api # required by consumers of CAP services (e.g. approuter)
@@ -41,6 +39,7 @@ modules:
           SEND_XFRAMEOPTIONS: false
           COOKIES: '{"SameSite":"None" }'
       - name: docgen-html5-runtime
+
   - name: docgenerator-app-content
     type: com.sap.application.content
     path: .
@@ -55,6 +54,7 @@ modules:
             - docgen_app-content.zip
           name: docgenerator_app
           target-path: resources/
+
   - name: docgenerator_app
     type: html5
     path: app/docgenerator
@@ -67,6 +67,7 @@ modules:
         - npm ci
         - npm run build
       supported-platforms: []
+
   - name: docgenerator
     type: approuter.nodejs
     path: app/router
@@ -76,6 +77,8 @@ modules:
       memory: 1G
       instances: 1
       buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
     requires:
       - name: srv-api
         group: destinations
@@ -91,6 +94,7 @@ modules:
         properties:
           app-protocol: ${protocol}
           app-uri: ${default-uri}
+
   - name: docgenerator-destination-content
     type: com.sap.application.content
     requires:
@@ -146,11 +150,13 @@ resources:
             existing_destinations_policy: update
       service: destination
       service-plan: lite
+
   - name: docgen-html5-runtime
     type: org.cloudfoundry.managed-service
     parameters:
       service: html5-apps-repo
       service-plan: app-runtime
+
   - name: docgen-auth
     type: org.cloudfoundry.managed-service
     parameters:
@@ -160,11 +166,9 @@ resources:
       config:
         xsappname: docgenerator
         tenant-mode: dedicated
+
   - name: docgen_html_repo_host
     type: org.cloudfoundry.managed-service
     parameters:
       service: html5-apps-repo
       service-plan: app-host
-
-
-
