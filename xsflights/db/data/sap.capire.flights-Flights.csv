@@ -1,0 +1,2 @@
+flight_ID  , date      , aircraft         , price     , currency_code, maximum_seats, occupied_seats
+ns-25621763, 2007-03-07, aircraft-13987872, 59512.1419,           079,            56,             45

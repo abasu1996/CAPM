@@ -1,0 +1,21 @@
+code,criticality,name,descr
+N,2,New,Incident has been created and is waiting for assignment
+A,2,Assigned,Incident has been assigned to a support agent
+I,2,In Process,Incident is currently being worked on
+H,1,On Hold,Incident is temporarily on hold
+R,3,Resolved,Incident has been resolved successfully
+C,3,Closed,Incident has been closed after resolution
+OP,2,Open,Incident is open and pending action
+RV,2,Review,Incident is under review
+ES,1,Escalated,Incident has been escalated due to severity
+PD,2,Pending,Incident is pending customer response
+CN,3,Completed,Incident processing is completed
+RJ,1,Rejected,Incident has been rejected
+IP,2,In Progress,Work on the incident is ongoing
+WL,2,Waiting,Waiting for external dependency
+DF,1,Deferred,Incident handling deferred to later time
+AP,3,Approved,Incident resolution approved
+CL,3,Completed Late,Incident closed after SLA breach
+UR,1,Under Review,Incident is being reviewed by senior team
+RS,3,Reassigned,Incident reassigned to another agent
+FC,3,Fully Closed,Incident lifecycle fully completed

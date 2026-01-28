@@ -1,0 +1,44 @@
+{
+  "name": "mcp-presentation",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@gavdi/cap-mcp": "^0.10.1",
+    "@sap/cds": "^9.3.1",
+    "@sap/xssec": "^4",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/cds-typer": "^0.37.0",
+    "@cap-js/cds-types": "^0.14.0",
+    "@cap-js/sqlite": "^2.0.2",
+    "@sap/cds-dk": "^9.3.1",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds-tsx w",
+    "inspect": "npx @modelcontextprotocol/inspector"
+  },
+  "imports": {
+    "#cds-models/*": "./@cds-models/*/index.js"
+  },
+  "cds": {
+    "mcp": {
+      "name": "my-bookshop",
+      "auth": "none",
+      "instruction": "Use this server to query books and authors",
+      "wrap_entities_to_actions": true
+    },
+    "log": {
+      "levels": {
+        "mcp": "debug"
+      }
+    }
+  }
+}

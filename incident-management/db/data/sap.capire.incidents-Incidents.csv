@@ -1,0 +1,21 @@
+ID,customer_ID,title,urgency_code,status_code,createdAt,createdBy,modifiedAt,modifiedBy
+3f2c9c3a-6a4a-4e7f-8c2b-1f6d5a9b1a01,CUST1,Login issue,M,N,2024-01-01T09:00:00Z,customer1,2024-01-02T10:00:00Z,support1
+a8b1f3d2-1c6a-4a5e-9f8e-2d4a7b6c1b02,CUST2,App crash on start,H,A,2024-01-02T09:15:00Z,customer2,2024-01-03T10:10:00Z,support2
+c4e9a2f5-7b1d-4e6a-8f3c-9a2b1c4d3e03,CUST1,Password reset failed,M,I,2024-01-03T09:30:00Z,customer3,2024-01-04T10:20:00Z,support1
+e1b3d7a9-5f6c-4b2e-9a1d-7c8f2e4a5b04,CUST2,Payment declined,H,H,2024-01-04T09:45:00Z,customer4,2024-01-05T10:30:00Z,support3
+9f7a3b6c-2e1d-4a8b-9c5f-1d2e4b6a7c05,CUST5,Slow application,L,R,2024-01-05T10:00:00Z,customer5,2024-01-06T11:00:00Z,support2
+5c8d1a2f-9e6b-4c3a-8f7d-6b1e9a4d2f06,CUST6,Account locked,M,A,2024-01-06T10:15:00Z,customer6,2024-01-07T11:10:00Z,support1
+b6a7e2d4-3c9f-4b1a-8e5d-2f7c9a6b1d07,CUST7,Incorrect dashboard data,H,I,2024-01-07T10:30:00Z,customer7,2024-01-08T11:20:00Z,support4
+7e3b9c2a-1f6d-4e8a-9b5c-4a2d6f1c8e08,CUST8,Email not received,L,N,2024-01-08T10:45:00Z,customer8,2024-01-09T11:30:00Z,support2
+2a9c4e7b-6f1d-4b5a-8e3c-7d1f2a6b9c09,CUST9,Report download error,M,A,2024-01-09T11:00:00Z,customer9,2024-01-10T11:40:00Z,support3
+f1d6b8a4-3c2e-4a9b-8e7f-5c2a9d6b1e10,CUST10,UI alignment issue,L,R,2024-01-10T11:15:00Z,customer10,2024-01-11T11:50:00Z,support1
+8b7a6e2f-1c9d-4a3b-9e5f-2d4c6a1b7f11,CUST1,Notification delay,M,I,2024-01-11T11:30:00Z,customer11,2024-01-12T12:00:00Z,support2
+6c1f3a8b-9d7e-4b2a-8f5c-1e2a9d4b6c12,CUST1,Profile update failed,H,A,2024-01-12T11:45:00Z,customer12,2024-01-13T12:10:00Z,support4
+4e9d2b7a-6f5c-4a1e-8b3f-9c1a6d2b7e13,CUST13,Search not working,M,H,2024-01-13T12:00:00Z,customer13,2024-01-14T12:20:00Z,support3
+d3f6c1b8-9a7e-4a2d-8b5c-6e1f9a2b7d14,CUST14,Export timeout,H,I,2024-01-14T12:15:00Z,customer14,2024-01-15T12:30:00Z,support2
+9a4e7b2d-6c1f-4b8a-8e5d-2f1c6b7a9e15,CUST15,Wrong invoice generated,M,R,2024-01-15T12:30:00Z,customer15,2024-01-16T12:40:00Z,support1
+1f6a3b8d-9e4c-4a7b-8d2e-5c9a1b7f3e16,CUST16,Session expired quickly,L,C,2024-01-16T12:45:00Z,customer16,2024-01-17T12:50:00Z,support2
+7b9e2a4c-6d1f-4a5b-8c3e-9f1a6b2d7e17,CUST17,Unable to upload file,H,A,2024-01-17T13:00:00Z,customer17,2024-01-18T13:00:00Z,support3
+c2d6a9b7-1e8f-4b3a-9c5d-7f1a4e6b2c18,CUST18,Search results incorrect,M,I,2024-01-18T13:15:00Z,customer18,2024-01-19T13:10:00Z,support4
+e8b1d7a2-6c9f-4a5b-8e3d-1f4c9a2b6e19,CUST19,Application logout issue,L,R,2024-01-19T13:30:00Z,customer19,2024-01-20T13:20:00Z,support1
+5a6f9c1d-8b2e-4a7c-9e3f-1b6d2a4c8f20,CUST20,Feature request submitted,L,N,2024-01-20T13:45:00Z,customer20,2024-01-21T13:30:00Z,support2

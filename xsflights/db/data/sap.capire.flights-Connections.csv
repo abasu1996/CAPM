@@ -1,0 +1,2 @@
+ID         , airline_ID                          , origin_ID                           , destination_ID                      , departure, arrival , distance
+ns-25621763, 12228452-77e3-4d14-8665-24663436b6b5, 17943202-f05b-4959-950f-fe973a4c2028, 17943202-f05b-4959-950f-fe973a4c2028, 22:59:53 , 22:59:53,       32

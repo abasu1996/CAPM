@@ -1,0 +1,21 @@
+code,name,descr
+N,New,Incident has been created
+A,Assigned,Incident assigned to support agent
+I,In Process,Incident is currently being worked on
+H,On Hold,Incident is temporarily paused
+R,Resolved,Incident has been resolved
+C,Closed,Incident has been closed
+OP,Open,Incident is open and active
+PD,Pending,Waiting for further action
+ES,Escalated,Incident escalated to higher support
+RV,Review,Incident is under review
+CN,Completed,Incident processing completed
+RJ,Rejected,Incident request rejected
+IP,In Progress,Work on incident is ongoing
+WL,Waiting,Waiting for customer response
+DF,Deferred,Incident postponed for later handling
+AP,Approved,Incident resolution approved
+CL,Closed Late,Incident closed after SLA breach
+UR,Under Review,Senior team reviewing the incident
+RS,Reassigned,Incident reassigned to another agent
+FC,Fully Closed,Incident lifecycle fully completed
