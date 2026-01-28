@@ -10,3 +10,9 @@ RUN apt-get update && apt-get -y install --no-install-recommends curl git sqlite
 USER node
 RUN npm install -g @sap/cds-dk
 WORKDIR /home/node
+COPY . /home/node
+# Start your CAP application
+CMD ["npm", "start"]
+
+# Important for exposing our service
+EXPOSE 4004
