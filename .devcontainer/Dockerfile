@@ -9,10 +9,9 @@ RUN apt-get update && apt-get -y install --no-install-recommends curl git sqlite
 # Install SAP CAP SDK globally
 USER node
 RUN npm install -g @sap/cds-dk
-WORKDIR /home/node
-COPY . /home/node
-# Start your CAP application
-CMD ["npm", "start"]
+WORKDIR /usr/src/app
 
-# Important for exposing our service
+
 EXPOSE 4004
+USER node
+CMD [ "npm", "start" ]

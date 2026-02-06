@@ -93,6 +93,6 @@ annotate service.Incidents with {
 
 annotate service.Incidents with{
     title @assert: (case when length(title) < 5 then error('Title must be at least 5 characters long.') end);    
-    status_code @assert: (case when status_code = 'C' and urgency_code = 'H' then error('Closed incidents cannot have high urgency.') end);
+    //status_code @assert: (case when status_code = 'C' and urgency_code = 'H' then error('Closed incidents cannot have high urgency.') end);
 }
 

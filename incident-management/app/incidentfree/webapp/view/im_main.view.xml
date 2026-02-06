@@ -1,6 +1,10 @@
 <mvc:View controllerName="ns.incidentfree.incidentfree.controller.im_main"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
+    <Page title="{i18n>title}">
+    <Button text="{i18n>goToIncidentList}" press="onGoToIncidentList"/>
     </Page>
 </mvc:View>
+
+
+

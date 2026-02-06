@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "description": "A simple CAP project.",
   "dependencies": {
+    "@cap-js/sqlite": "^2.1.2",
     "@sap/cds": "^9",
-    "express": "^4"
+    "@sap/cds-dk": "9.6.1",
+    "express": "^4",
+    "sap-cf-axios": "^1.0.2"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2.1.2",
     "cds-plugin-ui5": "^0.13.0"
   },
   "scripts": {
-    "start": "cds-serve",
+    "start": "cds deploy --to sqlite && cds serve",
     "watch-incidents": "cds watch --open ns.incidents/index.html?sap-ui-xx-viewCache=false --livereload false",
     "watch-incidentfree": "cds watch --open ns.incidentfree.incidentfree/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
@@ -26,9 +29,6 @@
     "requires": {
       "db": {
         "kind": "sqlite",
-        "credentials": {
-          "url": "db.sqlite"
-        },
         "schema_evolution": "auto"
       }
     }
