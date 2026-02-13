@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-using {Currency, Country, cuid, sap.common.CodeList } from '@sap/cds/common';
-=======
 using { Currency, Country, cuid, sap.common.CodeList } from '@sap/cds/common';
->>>>>>> cd7bc9e (new changes for this github)
 
 namespace sap.capire.flights;
 
@@ -12,21 +8,12 @@ entity Airlines : cuid {
   currency : Currency;
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> cd7bc9e (new changes for this github)
 entity Airports : cuid {
   name    : String;
   city    : String;
   country : Country;
 }
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> cd7bc9e (new changes for this github)
 entity Connections {
   key ID      : String(11); // e.g. LH4711
   airline     : Association to Airlines;

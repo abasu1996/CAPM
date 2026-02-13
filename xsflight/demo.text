@@ -1,0 +1,14 @@
+{"cds":{
+    "requires":{
+        "db":{
+            "url":{
+                "mainUrl":"https://google.db.com"
+            }
+        }
+    }
+}
+
+}
+
+cds.requires.db
+print(db)
