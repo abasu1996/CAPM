@@ -11,6 +11,7 @@ sap.ui.define([
          * @param aSelectedContexts the selected contexts of the table rows.
          */
         onRefresh: function(oContext, aSelectedContexts) {
+            debugger;
             MessageToast.show("Custom handler invoked.");
         }
     };

@@ -1,10 +1,46 @@
-<mvc:View controllerName="ns.incidentfree.incidentfree.controller.im_main"
+<mvc:View xmlns:macros="sap.fe.macros"
+    controllerName="ns.incidentfree.incidentfree.controller.im_main"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
+    xmlns="sap.m"
+>
     <Page title="{i18n>title}">
-    <Button text="{i18n>goToIncidentList}" press="onGoToIncidentList"/>
+        <Button
+            text="{i18n>goToIncidentList}"
+            press="onGoToIncidentList"
+        />
+        <Table
+            id="incidentTable"
+            visible="true"
+            width="100%"
+            items="{
+                path:'/Customers'
+            }"
+        >
+            <columns>
+                <Column >
+                    <Text text="ID"></Text>
+                </Column>
+                <Column >
+                    <Text text="Name"></Text>
+                </Column>
+                <Column >
+                    <Text text="Last Name"></Text>
+                </Column>
+                <Column >
+                <Text text="Email"></Text>
+                </Column>
+            </columns>
+            <items>
+                <ColumnListItem >
+                <cells>
+                <ObjectIdentifier title="{ID}" text="{ID}"/>
+                <Text text="{firstName}"></Text>
+                <Text text="{lastName}"></Text>
+                <!-- <ObjectIdentifier title="{email}" ></ObjectIdentifier> -->
+                <!-- <Input type="Url" editable="false" value="{email}" enabled="false"></Input> -->
+                </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
     </Page>
 </mvc:View>
-
-
-
