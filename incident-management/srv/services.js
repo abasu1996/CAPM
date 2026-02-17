@@ -42,7 +42,7 @@ module.exports = class ProcessorService extends cds.ApplicationService {
 
       //results = await cds.tx(req).run(SELECT.from(Customers).columns('ID','firstName','lastName',{ref:['incidents'],expand:[{ref:['ID']},{ref:['title']},{ref:['status_code']}]}));
 
-      results2 = await cds.tx(req).run(SELECT.from(Customers).columns('ID', 'firstName', 'lastName', { ref: ['incidents'], expand: [{ ref: ['ID'] }, { ref: ['status_code'] }, { ref: ['title'] }] }))
+      results2 = await cds.tx(req).run(SELECT.from(Customers).columns('ID', 'firstName','lastName','email','phone', { ref: ['incidents'], expand: [{ ref: ['ID'] }, { ref: ['status_code'] }, { ref: ['title'] }] }))
       //console.log(results);
 
       return results2;
