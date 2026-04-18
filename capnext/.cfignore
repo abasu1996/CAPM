@@ -1,0 +1,6 @@
+.git/
+.vscode/
+app/
+node_modules/
+npm-debug.log
+README.md

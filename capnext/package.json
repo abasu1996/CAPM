@@ -2,15 +2,29 @@
   "name": "capnext",
   "version": "1.0.0",
   "description": "A simple CAP project.",
+  "engines": {
+    "node": "^20"
+  },
   "dependencies": {
     "@sap/cds": "^9",
+    "@cap-js/sqlite": "^2",
     "express": "^4"
   },
-  "devDependencies": {
-    "@cap-js/sqlite": "^2"
-  },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-deploy && cds-serve"
+  },
+  "cds": {
+    "requires": {
+      "auth": {
+        "kind": "dummy"
+      },
+      "db": {
+        "kind": "sqlite",
+        "credentials": {
+          "url": "db.sqlite"
+        }
+      }
+    }
   },
   "private": true
 }
