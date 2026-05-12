@@ -2,13 +2,30 @@
   "name": "suppliershield",
   "version": "1.0.0",
   "dependencies": {
+    "@cap-js/mcp-server": "^0.0.5",
     "@sap/cds": "^9"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "app:dev": "npm --prefix app run dev",
+    "app:build": "npm --prefix app run build",
+    "app:preview": "npm --prefix app run preview"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "credentials": {
+          "url": "db.sqlite"
+        }
+      },
+      "auth": {
+        "kind": "dummy"
+      }
+    }
   },
   "private": true
 }

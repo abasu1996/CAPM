@@ -13,6 +13,7 @@ module.exports = class SupplierShieldService extends cds.ApplicationService { in
 
   this.on ('getVerifiedSuppliers', async (req) => {
     console.log('On getVerifiedSuppliers', req.data)
+    return "List of verified suppliers"
   })
 
   return super.init()
