@@ -1,8 +1,13 @@
 ID,title,author,stock
-94317036-85d2-4a29-9c3f-8743ea1dc655,title-9431703,author-9431703,16
-a1b2c3d4-12f3-4e56-9a1b-1234567890ab,title-a1b2c3d,author-a1b2c3d,25
-b7e4f9a1-3c45-4b67-8d9e-abcdef123456,title-b7e4f9a,author-b7e4f9a,10
-c9d8e7f6-4567-4abc-9def-9876543210ff,title-c9d8e7f,author-c9d8e7f,42
-d1234567-89ab-4cde-8f01-112233445566,title-d123456,author-d123456,8
-e89f0123-4567-4abc-9def-665544332211,title-e89f012,author-e89f012,30
-
+94317036-85d2-4a29-9c3f-8743ea1dc655,Clean Code,Robert C. Martin,16
+a1b2c3d4-12f3-4e56-9a1b-1234567890ab,The Pragmatic Programmer,David Thomas,25
+b7e4f9a1-3c45-4b67-8d9e-abcdef123456,Domain-Driven Design,Eric Evans,10
+c9d8e7f6-4567-4abc-9def-9876543210ff,Refactoring,Martin Fowler,42
+d1234567-89ab-4cde-8f01-112233445566,Designing Data-Intensive Applications,Martin Kleppmann,8
+e89f0123-4567-4abc-9def-665544332211,Working Effectively with Legacy Code,Michael Feathers,30
+f1029384-7564-4b12-9a87-001122334455,Effective Java,Joshua Bloch,18
+0a1b2c3d-4e5f-4678-9abc-0fedcba98765,Head First Design Patterns,Eric Freeman,21
+11223344-5566-4789-9abc-ddeeff001122,You Don't Know JS Yet,Kyle Simpson,14
+22334455-6677-489a-abcd-eeff00112233,Grokking Algorithms,Aditya Bhargava,36
+33445566-7788-49ab-bcde-ff0011223344,System Design Interview,Alex Xu,12
+44556677-8899-4abc-cdef-001122334455,Continuous Delivery,Jez Humble,9

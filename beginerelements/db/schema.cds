@@ -9,16 +9,21 @@ entity Books {
 }
 
 annotate Books with @(
+    UI.HeaderInfo: {
+        TypeName      : 'Book',
+        TypeNamePlural: 'Books',
+        Title         : {Value: title},
+        Description   : {Value: author}
+    },
     UI.LineItem:[
         {Value:title, Label:'Title',@UI.Importance:#High},
         {Value:author, Label:'Author Name'},
         {Value:stock, Label:'Stock'}
     ],
     UI.Identification:[
-        {Value:author}
+        {Value:title, Label:'Title'},
+        {Value:author, Label:'Author'},
+        {Value:stock, Label:'Stock'}
     ],
-    UI.SelectionFields : [author]
-    ,
-    
+    UI.SelectionFields : [title, author]
 );
-
