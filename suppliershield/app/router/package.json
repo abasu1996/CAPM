@@ -1,0 +1,14 @@
+{
+  "name": "suppliershield-approuter",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node node_modules/@sap/approuter/approuter.js"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@sap/approuter": "^20.8.2"
+  }
+}

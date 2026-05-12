@@ -1,15 +1,17 @@
 {
   "name": "suppliershield",
   "version": "1.0.0",
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@cap-js/mcp-server": "^0.0.5",
+    "@cap-js/sqlite": "^2",
     "@sap/cds": "^9"
   },
-  "devDependencies": {
-    "@cap-js/sqlite": "^2"
-  },
+  "devDependencies": {},
   "scripts": {
-    "start": "cds-serve",
+    "start": "cds-deploy && cds-serve",
     "app:dev": "npm --prefix app run dev",
     "app:build": "npm --prefix app run build",
     "app:preview": "npm --prefix app run preview"

@@ -1,0 +1,15 @@
+{
+  "sap.app": {
+    "id": "suppliershield.app",
+    "type": "application",
+    "title": "Supplier Shield",
+    "description": "Supplier Shield React application",
+    "applicationVersion": {
+      "version": "1.0.0"
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "suppliershield.service"
+  }  
+}
