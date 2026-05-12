@@ -1,0 +1,875 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CAP Vite Cloud Foundry Deployment Guide</title>
+  <style>
+    @page { margin: 18mm 16mm; }
+    * { box-sizing: border-box; }
+    body {
+      color: #172033;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.48;
+      margin: 0;
+    }
+    h1 {
+      color: #0f3f5f;
+      font-size: 28px;
+      line-height: 1.12;
+      margin: 0 0 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #58a6c4;
+    }
+    h2 {
+      color: #174862;
+      font-size: 18px;
+      margin: 24px 0 8px;
+      page-break-after: avoid;
+    }
+    h3 {
+      color: #28546a;
+      font-size: 14px;
+      margin: 16px 0 6px;
+      page-break-after: avoid;
+    }
+    p { margin: 6px 0; }
+    ul { margin: 6px 0 10px 18px; padding: 0; }
+    li { margin: 3px 0; }
+    code {
+      color: #243244;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 10.5px;
+    }
+    p code, li code {
+      background: #eef3f7;
+      border: 1px solid #d9e3ea;
+      border-radius: 4px;
+      padding: 1px 4px;
+    }
+    pre {
+      background: #f6f8fa;
+      border: 1px solid #d8dee4;
+      border-radius: 6px;
+      margin: 8px 0 12px;
+      padding: 10px 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      page-break-inside: avoid;
+    }
+    pre code {
+      display: block;
+      color: #1f2937;
+      font-size: 9.5px;
+      line-height: 1.42;
+    }
+    .code-lang {
+      color: #64748b;
+      display: block;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 9px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+<h1>CAP + Vite + Cloud Foundry Deployment Guide</h1>
+<p>Project: Supplier Shield Stack: SAP CAP Node.js, SQLite, React, Vite, SAP Application Router, Cloud Foundry MTA Authentication model: Public app, no XSUAA, no IAS, no external IDP Deployment model: Packaged CAP application using <code>mbt build</code> and <code>cf deploy</code></p>
+<h2>1. Goal</h2>
+<p>This guide explains how to build and deploy a small full stack SAP CAP application with:</p>
+<ul>
+<li>A CAP backend exposing an OData service.</li>
+<li>A React frontend built with Vite.</li>
+<li>A custom SAP Application Router serving the frontend and proxying OData calls.</li>
+<li>SQLite as the production database.</li>
+<li>No login requirement.</li>
+<li>Deployment to SAP BTP Cloud Foundry as one packaged MTA archive.</li>
+</ul>
+<p>The final Cloud Foundry runtime shape is:</p>
+<pre><span class="code-lang">text</span><code>Browser
+  |
+  v
+suppliershield-approuter
+  |-- serves React static files from app/router/resources
+  |
+  |-- proxies /odata/* to destination srv-api
+      |
+      v
+suppliershield-srv
+  |-- CAP OData service
+  |-- SQLite db.sqlite</code></pre>
+<h2>2. Important Trade-Off</h2>
+<p>SQLite on Cloud Foundry is stored on the app container filesystem. That means it is not durable storage.</p>
+<p>Impact:</p>
+<ul>
+<li>Good for demos, prototypes, small read-heavy apps, and seed-data apps.</li>
+<li>The database can reset after restage, redeploy, crash recovery, or container replacement.</li>
+<li>Do not use this model for important production data.</li>
+</ul>
+<p>For this application, the database is initialized from CSV data on application startup. That makes the app simple and self-contained.</p>
+<h2>3. Expected Project Structure</h2>
+<p>The important folders are:</p>
+<pre><span class="code-lang">text</span><code>suppliershield/
+  app/
+    index.html
+    package.json
+    vite.config.js
+    src/
+      App.jsx
+      main.jsx
+      odata.js
+      styles.css
+    router/
+      package.json
+      xs-app.json
+      resources/
+  db/
+    schema.cds
+    data/
+      db.suppliershield-SupplierShield.csv
+  srv/
+    supplier-shield.cds
+    supplier-shield.js
+  mta.yaml
+  package.json
+  package-lock.json
+  .mtaignore</code></pre>
+<h2>4. CAP Data Model</h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>db/schema.cds</code></pre>
+<p>Example:</p>
+<pre><span class="code-lang">cds</span><code>namespace db.suppliershield;
+
+using { cuid, managed } from '@sap/cds/common';
+
+aspect primary: cuid, managed {};
+
+entity SupplierShield : primary {
+  firstName   : String(255);
+  lastName    : String(255);
+  Description : String(255);
+  IsActive    : Boolean;
+}</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li>Defines the database table.</li>
+<li>CAP uses this model to generate SQL artifacts.</li>
+<li>The CSV file under <code>db/data</code> can seed this entity.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>Entity name becomes part of the CSV file naming convention.</li>
+<li>For this namespace and entity, the seed file is:</li>
+</ul>
+<pre><span class="code-lang">text</span><code>db/data/db.suppliershield-SupplierShield.csv</code></pre>
+<h2>5. CAP Service Definition</h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>srv/supplier-shield.cds</code></pre>
+<p>Example:</p>
+<pre><span class="code-lang">cds</span><code>using { db.suppliershield as ss } from '../db/schema';
+
+service SupplierShieldService {
+  entity SupplierShield as projection on ss.SupplierShield;
+
+  function getVerifiedSuppliers(params : String) returns String;
+}</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li>Exposes the database entity as an OData service.</li>
+<li>Keeps the external service contract separate from the database model.</li>
+<li>Adds a custom function endpoint.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>CAP exposes the service at:</li>
+</ul>
+<pre><span class="code-lang">text</span><code>/odata/v4/supplier-shield</code></pre>
+<ul>
+<li>The entity collection is available at:</li>
+</ul>
+<pre><span class="code-lang">text</span><code>/odata/v4/supplier-shield/SupplierShield</code></pre>
+<h2>6. CAP Service Implementation</h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>srv/supplier-shield.js</code></pre>
+<p>Example:</p>
+<pre><span class="code-lang">js</span><code>const cds = require('@sap/cds')
+
+module.exports = class SupplierShieldService extends cds.ApplicationService {
+  init() {
+    const { SupplierShield } = cds.entities('SupplierShieldService')
+
+    this.before(['CREATE', 'UPDATE'], SupplierShield, async (req) =&gt; {
+      console.log('Before CREATE/UPDATE SupplierShield', req.data)
+    })
+
+    this.after('READ', SupplierShield, async (supplierShield, req) =&gt; {
+      console.log('After READ SupplierShield', supplierShield)
+    })
+
+    this.on('getVerifiedSuppliers', async (req) =&gt; {
+      console.log('On getVerifiedSuppliers', req.data)
+      return 'List of verified suppliers'
+    })
+
+    return super.init()
+  }
+}</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li>Adds custom event handlers to the CAP service.</li>
+<li>Allows validation, enrichment, logging, or custom business behavior.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li><code>READ</code> calls log returned supplier data.</li>
+<li><code>CREATE</code> and <code>UPDATE</code> calls can be extended later.</li>
+<li>The custom OData function returns a string.</li>
+</ul>
+<h2>7. Root <code>package.json</code></h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>package.json</code></pre>
+<p>Important configuration:</p>
+<pre><span class="code-lang">json</span><code>{
+  "name": "suppliershield",
+  "version": "1.0.0",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@cap-js/mcp-server": "^0.0.5",
+    "@cap-js/sqlite": "^2",
+    "@sap/cds": "^9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "cds-deploy &amp;&amp; cds-serve",
+    "app:dev": "npm --prefix app run dev",
+    "app:build": "npm --prefix app run build",
+    "app:preview": "npm --prefix app run preview"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "credentials": {
+          "url": "db.sqlite"
+        }
+      },
+      "auth": {
+        "kind": "dummy"
+      }
+    }
+  },
+  "private": true
+}</code></pre>
+<p>Why these changes were done:</p>
+<ul>
+<li><code>@cap-js/sqlite</code> is in <code>dependencies</code>, not <code>devDependencies</code>, because it must exist in the deployed Cloud Foundry app.</li>
+<li><code>@sap/cds</code> is in <code>dependencies</code> because the deployed service needs CAP runtime.</li>
+<li><code>engines.node</code> pins the intended Node.js major version for Cloud Foundry.</li>
+<li><code>start</code> runs <code>cds-deploy</code> first so SQLite is initialized when the app starts.</li>
+<li><code>cds.requires.db.kind = sqlite</code> tells CAP to use SQLite.</li>
+<li><code>cds.requires.auth.kind = dummy</code> avoids mandatory production authentication.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>The CAP service can run in Cloud Foundry without HANA.</li>
+<li>No XSUAA service binding is required.</li>
+<li>No user login is required.</li>
+<li>The SQLite database is recreated or updated from deployment artifacts at startup.</li>
+</ul>
+<h2>8. React + Vite Frontend</h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>app/package.json</code></pre>
+<p>Important scripts:</p>
+<pre><span class="code-lang">json</span><code>{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li>Vite provides fast local development.</li>
+<li><code>vite build</code> creates static production files in <code>app/dist</code>.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>The frontend can be built independently from CAP.</li>
+<li>The app router can later serve the static build output.</li>
+</ul>
+<h2>9. Vite Development Proxy</h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>app/vite.config.js</code></pre>
+<p>Configuration:</p>
+<pre><span class="code-lang">js</span><code>import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/odata': {
+        target: 'http://localhost:4004',
+        changeOrigin: true,
+      },
+    },
+  },
+})</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li>During local development, Vite runs on port <code>5173</code>.</li>
+<li>CAP usually runs on port <code>4004</code>.</li>
+<li>The proxy forwards frontend calls from <code>/odata</code> to CAP.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>React code can call <code>/odata/v4/...</code> in both local and deployed environments.</li>
+<li>No hardcoded Cloud Foundry URL is needed in frontend code.</li>
+</ul>
+<p>Local development commands:</p>
+<pre><span class="code-lang">bash</span><code>npm install
+npm start</code></pre>
+<p>In another terminal:</p>
+<pre><span class="code-lang">bash</span><code>npm --prefix app install
+npm --prefix app run dev</code></pre>
+<p>Then open:</p>
+<pre><span class="code-lang">text</span><code>http://localhost:5173</code></pre>
+<h2>10. Frontend OData Client</h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>app/src/odata.js</code></pre>
+<p>Important pattern:</p>
+<pre><span class="code-lang">js</span><code>const SERVICE_ROOT = import.meta.env.VITE_ODATA_BASE_URL || '/odata/v4/supplier-shield'</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li>The default service root works behind the app router.</li>
+<li>An environment variable can override it if needed.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>Local Vite proxy and deployed app router use the same URL path.</li>
+<li>The frontend remains portable across environments.</li>
+</ul>
+<p>Useful checks:</p>
+<pre><span class="code-lang">bash</span><code>curl http://localhost:4004/odata/v4/supplier-shield/SupplierShield
+curl http://localhost:5173/odata/v4/supplier-shield/SupplierShield</code></pre>
+<p>The first command checks CAP directly. The second command checks Vite proxy behavior.</p>
+<h2>11. Custom Application Router</h2>
+<p>Folder:</p>
+<pre><span class="code-lang">text</span><code>app/router</code></pre>
+<p>This application uses a custom SAP Application Router because it gives direct control over:</p>
+<ul>
+<li>Static file serving.</li>
+<li>OData proxy routing.</li>
+<li>Authentication settings.</li>
+<li>Cloud Foundry destination wiring.</li>
+</ul>
+<h3>11.1 App Router <code>package.json</code></h3>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>app/router/package.json</code></pre>
+<p>Configuration:</p>
+<pre><span class="code-lang">json</span><code>{
+  "name": "suppliershield-approuter",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node node_modules/@sap/approuter/approuter.js"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@sap/approuter": "^20.8.2"
+  }
+}</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li>Cloud Foundry starts this as a separate Node.js app.</li>
+<li><code>@sap/approuter</code> serves the static frontend and proxies backend calls.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>The browser only needs to access the app router URL.</li>
+<li>CAP service can stay behind the app router.</li>
+</ul>
+<h3>11.2 App Router Routes</h3>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>app/router/xs-app.json</code></pre>
+<p>Configuration:</p>
+<pre><span class="code-lang">json</span><code>{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [
+    {
+      "source": "^/odata/(.*)$",
+      "target": "/odata/$1",
+      "destination": "srv-api",
+      "authenticationType": "none",
+      "csrfProtection": false
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "localDir": "resources",
+      "authenticationType": "none"
+    }
+  ]
+}</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li><code>/odata/*</code> requests are forwarded to the CAP service.</li>
+<li>All other requests are served from static frontend files.</li>
+<li><code>authenticationType: none</code> makes the app public.</li>
+<li><code>csrfProtection: false</code> avoids app router CSRF handling for this public OData proxy.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>No XSUAA is needed.</li>
+<li>No login page appears.</li>
+<li>The deployed frontend can call:</li>
+</ul>
+<pre><span class="code-lang">text</span><code>/odata/v4/supplier-shield/SupplierShield</code></pre>
+<h2>12. MTA Descriptor</h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>mta.yaml</code></pre>
+<p>Final structure:</p>
+<pre><span class="code-lang">yaml</span><code>_schema-version: 3.3.0
+ID: suppliershield
+version: 1.0.0
+description: Supplier Shield full stack CAP application
+
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+        - mkdir -p gen/srv/db/data
+        - cp db/data/db.suppliershield-SupplierShield.csv gen/srv/db/data/
+
+modules:
+  - name: suppliershield-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 512M
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+
+  - name: suppliershield-approuter
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      buildpack: nodejs_buildpack
+      keep-existing-routes: true
+      memory: 256M
+      disk-quota: 512M
+    build-parameters:
+      builder: custom
+      commands:
+        - npm ci
+        - npm --prefix .. ci
+        - npm --prefix .. run build
+        - rm -rf resources
+        - cp -R ../dist resources
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          url: ~{srv-url}
+          forwardAuthToken: false
+    provides:
+      - name: app-api
+        properties:
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}</code></pre>
+<h3>12.1 Why <code>before-all</code> Exists</h3>
+<pre><span class="code-lang">bash</span><code>npm ci
+npx cds build --production
+mkdir -p gen/srv/db/data
+cp db/data/db.suppliershield-SupplierShield.csv gen/srv/db/data/</code></pre>
+<p>Why:</p>
+<ul>
+<li><code>npm ci</code> installs exact backend dependencies.</li>
+<li><code>npx cds build --production</code> creates the deployable CAP output under <code>gen/srv</code>.</li>
+<li>The CSV file is copied into <code>gen/srv</code> so the deployed SQLite initialization can load seed data.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>The MTAR contains the generated CAP app, not just source files.</li>
+<li>SQLite has seed data available inside the deployed service module.</li>
+</ul>
+<h3>12.2 Why There Is a <code>suppliershield-srv</code> Module</h3>
+<p>This module deploys the CAP backend.</p>
+<p>Important properties:</p>
+<pre><span class="code-lang">yaml</span><code>type: nodejs
+path: gen/srv</code></pre>
+<p>Why:</p>
+<ul>
+<li><code>gen/srv</code> is the CAP production build output.</li>
+<li>Cloud Foundry runs the generated CAP service as a Node.js app.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>The backend starts with the root package start command copied into the generated build.</li>
+<li>The service provides a URL to other MTA modules through <code>srv-api</code>.</li>
+</ul>
+<h3>12.3 Why There Is a <code>suppliershield-approuter</code> Module</h3>
+<p>This module deploys the public web entry point.</p>
+<p>Important properties:</p>
+<pre><span class="code-lang">yaml</span><code>type: approuter.nodejs
+path: app/router</code></pre>
+<p>Why:</p>
+<ul>
+<li>It packages the app router as a separate Cloud Foundry app.</li>
+<li>It builds the Vite frontend and copies the output into <code>app/router/resources</code>.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>Users access only the app router URL.</li>
+<li>Static files and OData proxying are handled in one place.</li>
+</ul>
+<h3>12.4 Why the Destination Is Inline</h3>
+<p>Configuration:</p>
+<pre><span class="code-lang">yaml</span><code>requires:
+  - name: srv-api
+    group: destinations
+    properties:
+      name: srv-api
+      url: ~{srv-url}
+      forwardAuthToken: false</code></pre>
+<p>Why:</p>
+<ul>
+<li>The app router needs to know where the CAP service is.</li>
+<li>The MTA provides the CAP service URL from <code>suppliershield-srv</code>.</li>
+<li>No destination service instance is required for this simple setup.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>Fewer BTP service dependencies.</li>
+<li>No XSUAA or destination service binding is needed.</li>
+<li>The app router receives an environment destination named <code>srv-api</code>.</li>
+</ul>
+<h2>13. MTA Ignore File</h2>
+<p>File:</p>
+<pre><span class="code-lang">text</span><code>.mtaignore</code></pre>
+<p>Recommended contents:</p>
+<pre><span class="code-lang">text</span><code>node_modules/
+app/node_modules/
+app/router/node_modules/
+mta_archives/
+*.mtar
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.DS_Store</code></pre>
+<p>Why this exists:</p>
+<ul>
+<li>Keeps generated and local runtime files out of the MTAR.</li>
+<li>Prevents accidental packaging of large dependency folders.</li>
+<li>Prevents local SQLite files from being deployed by mistake.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>Smaller deployment archive.</li>
+<li>Cleaner and more reproducible builds.</li>
+</ul>
+<h2>14. Build the Application Locally</h2>
+<p>From the project root:</p>
+<pre><span class="code-lang">bash</span><code>npm ci
+npm --prefix app ci
+npm --prefix app/router ci</code></pre>
+<p>Build CAP:</p>
+<pre><span class="code-lang">bash</span><code>npx cds build --production</code></pre>
+<p>Build frontend:</p>
+<pre><span class="code-lang">bash</span><code>npm --prefix app run build</code></pre>
+<p>Build MTA archive:</p>
+<pre><span class="code-lang">bash</span><code>mbt build</code></pre>
+<p>Expected result:</p>
+<pre><span class="code-lang">text</span><code>mta_archives/suppliershield_1.0.0.mtar</code></pre>
+<h2>15. Deploy to Cloud Foundry</h2>
+<p>Log in:</p>
+<pre><span class="code-lang">bash</span><code>cf login -a &lt;api-endpoint&gt;</code></pre>
+<p>Check target:</p>
+<pre><span class="code-lang">bash</span><code>cf target</code></pre>
+<p>Deploy:</p>
+<pre><span class="code-lang">bash</span><code>cf deploy mta_archives/suppliershield_1.0.0.mtar -f</code></pre>
+<p>Why:</p>
+<ul>
+<li><code>mbt build</code> creates the deployable MTAR package.</li>
+<li><code>cf deploy</code> uploads and deploys the MTA to Cloud Foundry.</li>
+<li><code>-f</code> allows updating an existing deployment.</li>
+</ul>
+<p>Impact:</p>
+<ul>
+<li>Cloud Foundry creates or updates both apps:</li>
+</ul>
+<pre><span class="code-lang">text</span><code>suppliershield-srv
+suppliershield-approuter</code></pre>
+<h2>16. Runtime Checks</h2>
+<p>Check deployed apps:</p>
+<pre><span class="code-lang">bash</span><code>cf apps</code></pre>
+<p>Expected:</p>
+<pre><span class="code-lang">text</span><code>suppliershield-approuter   started
+suppliershield-srv         started</code></pre>
+<p>Check routes:</p>
+<pre><span class="code-lang">bash</span><code>cf app suppliershield-approuter
+cf app suppliershield-srv</code></pre>
+<p>Check logs:</p>
+<pre><span class="code-lang">bash</span><code>cf logs suppliershield-srv --recent
+cf logs suppliershield-approuter --recent</code></pre>
+<p>Stream logs during troubleshooting:</p>
+<pre><span class="code-lang">bash</span><code>cf logs suppliershield-srv
+cf logs suppliershield-approuter</code></pre>
+<p>Check environment variables:</p>
+<pre><span class="code-lang">bash</span><code>cf env suppliershield-approuter
+cf env suppliershield-srv</code></pre>
+<p>Check the frontend:</p>
+<pre><span class="code-lang">bash</span><code>curl -I https://&lt;approuter-route&gt;/index.html</code></pre>
+<p>Expected:</p>
+<pre><span class="code-lang">text</span><code>HTTP/2 200</code></pre>
+<p>Check OData through the app router:</p>
+<pre><span class="code-lang">bash</span><code>curl https://&lt;approuter-route&gt;/odata/v4/supplier-shield/SupplierShield</code></pre>
+<p>Expected:</p>
+<pre><span class="code-lang">json</span><code>{
+  "value": []
+}</code></pre>
+<p>or seeded supplier rows.</p>
+<p>Check OData directly against CAP:</p>
+<pre><span class="code-lang">bash</span><code>curl https://&lt;srv-route&gt;/odata/v4/supplier-shield/SupplierShield</code></pre>
+<p>This verifies whether a problem is in CAP itself or in app router routing.</p>
+<h2>17. Local Development Flow</h2>
+<p>Start CAP:</p>
+<pre><span class="code-lang">bash</span><code>npm start</code></pre>
+<p>Start Vite:</p>
+<pre><span class="code-lang">bash</span><code>npm --prefix app run dev</code></pre>
+<p>Open:</p>
+<pre><span class="code-lang">text</span><code>http://localhost:5173</code></pre>
+<p>Check CAP:</p>
+<pre><span class="code-lang">bash</span><code>curl http://localhost:4004/odata/v4/supplier-shield/SupplierShield</code></pre>
+<p>Check Vite proxy:</p>
+<pre><span class="code-lang">bash</span><code>curl http://localhost:5173/odata/v4/supplier-shield/SupplierShield</code></pre>
+<h2>18. Killing a Local Port</h2>
+<p>Find the process using port <code>4004</code>:</p>
+<pre><span class="code-lang">bash</span><code>lsof -i :4004</code></pre>
+<p>Kill by PID:</p>
+<pre><span class="code-lang">bash</span><code>kill &lt;PID&gt;</code></pre>
+<p>Force kill only if needed:</p>
+<pre><span class="code-lang">bash</span><code>kill -9 &lt;PID&gt;</code></pre>
+<p>For Vite:</p>
+<pre><span class="code-lang">bash</span><code>lsof -i :5173
+kill &lt;PID&gt;</code></pre>
+<h2>19. Common Failure: <code>cds</code> Not Found</h2>
+<p>Symptom:</p>
+<pre><span class="code-lang">text</span><code>cds: command not found</code></pre>
+<p>Cause:</p>
+<ul>
+<li>The deployed app may not have the global <code>cds</code> CLI.</li>
+</ul>
+<p>Fix:</p>
+<ul>
+<li>Use CAP executable package scripts such as:</li>
+</ul>
+<pre><span class="code-lang">json</span><code>"start": "cds-deploy &amp;&amp; cds-serve"</code></pre>
+<p>Why:</p>
+<ul>
+<li>CAP packages expose runtime binaries through <code>node_modules/.bin</code>.</li>
+<li>Cloud Foundry runs npm scripts with <code>node_modules/.bin</code> on the path.</li>
+</ul>
+<h2>20. Common Failure: SQLite Not Initialized</h2>
+<p>Symptoms:</p>
+<pre><span class="code-lang">text</span><code>no such table</code></pre>
+<p>or empty data when seed data was expected.</p>
+<p>Check:</p>
+<pre><span class="code-lang">bash</span><code>cf logs suppliershield-srv --recent</code></pre>
+<p>Likely causes:</p>
+<ul>
+<li><code>@cap-js/sqlite</code> is missing from production dependencies.</li>
+<li>CSV seed files were not copied into <code>gen/srv</code>.</li>
+<li><code>cds.requires.db.kind</code> is not set to <code>sqlite</code>.</li>
+<li>Start command does not run <code>cds-deploy</code>.</li>
+</ul>
+<p>Fix:</p>
+<ul>
+<li>Keep <code>@cap-js/sqlite</code> in root <code>dependencies</code>.</li>
+<li>Keep the CSV copy command in <code>mta.yaml</code>.</li>
+<li>Keep root <code>start</code> script as:</li>
+</ul>
+<pre><span class="code-lang">json</span><code>"start": "cds-deploy &amp;&amp; cds-serve"</code></pre>
+<h2>21. Common Failure: App Router Returns 404 for OData</h2>
+<p>Check app router route:</p>
+<pre><span class="code-lang">bash</span><code>cf logs suppliershield-approuter --recent</code></pre>
+<p>Check direct CAP route:</p>
+<pre><span class="code-lang">bash</span><code>curl https://&lt;srv-route&gt;/odata/v4/supplier-shield/SupplierShield</code></pre>
+<p>If direct CAP works but app router fails, inspect:</p>
+<pre><span class="code-lang">text</span><code>app/router/xs-app.json</code></pre>
+<p>The OData route must appear before the static catch-all route:</p>
+<pre><span class="code-lang">json</span><code>{
+  "source": "^/odata/(.*)$",
+  "target": "/odata/$1",
+  "destination": "srv-api",
+  "authenticationType": "none",
+  "csrfProtection": false
+}</code></pre>
+<p>Why:</p>
+<ul>
+<li>Routes are evaluated in order.</li>
+<li>The catch-all static route would otherwise capture <code>/odata</code>.</li>
+</ul>
+<h2>22. Common Failure: Login Page Appears</h2>
+<p>Cause:</p>
+<ul>
+<li>XSUAA was added.</li>
+<li>A route has authentication enabled.</li>
+<li>CAP auth is configured for production authentication.</li>
+</ul>
+<p>Checks:</p>
+<pre><span class="code-lang">bash</span><code>cf env suppliershield-approuter</code></pre>
+<p>Inspect:</p>
+<pre><span class="code-lang">text</span><code>app/router/xs-app.json
+package.json
+mta.yaml</code></pre>
+<p>Expected:</p>
+<ul>
+<li>No XSUAA resource in <code>mta.yaml</code>.</li>
+<li>No XSUAA binding in any module.</li>
+<li><code>authenticationType</code> is <code>none</code> for public routes.</li>
+<li>CAP auth uses dummy mode:</li>
+</ul>
+<pre><span class="code-lang">json</span><code>"auth": {
+  "kind": "dummy"
+}</code></pre>
+<p>Impact:</p>
+<ul>
+<li>The app is public.</li>
+<li>Anyone with the route can access frontend and OData endpoints.</li>
+</ul>
+<h2>23. Common Failure: MTAR Includes Too Much</h2>
+<p>Symptom:</p>
+<ul>
+<li>MTAR is unexpectedly large.</li>
+<li>Build is slow.</li>
+<li>Local database files are packaged.</li>
+</ul>
+<p>Check:</p>
+<pre><span class="code-lang">bash</span><code>du -sh mta_archives/*</code></pre>
+<p>Inspect:</p>
+<pre><span class="code-lang">bash</span><code>tar -tf mta_archives/suppliershield_1.0.0.mtar</code></pre>
+<p>Fix:</p>
+<ul>
+<li>Maintain <code>.mtaignore</code>.</li>
+<li>Do not package <code>node_modules</code>, local SQLite files, or old build output unless intentionally needed.</li>
+</ul>
+<h2>24. Clean Rebuild</h2>
+<p>Use this when a deployment behaves strangely after many local changes:</p>
+<pre><span class="code-lang">bash</span><code>rm -rf gen
+rm -rf app/dist
+rm -rf app/router/resources
+rm -rf mta_archives
+npm ci
+npm --prefix app ci
+npm --prefix app/router ci
+mbt build
+cf deploy mta_archives/suppliershield_1.0.0.mtar -f</code></pre>
+<p>Note:</p>
+<ul>
+<li><code>rm -rf</code> is destructive.</li>
+<li>Review the paths before running it.</li>
+</ul>
+<h2>25. Useful Command Cheat Sheet</h2>
+<p>Install backend dependencies:</p>
+<pre><span class="code-lang">bash</span><code>npm ci</code></pre>
+<p>Install frontend dependencies:</p>
+<pre><span class="code-lang">bash</span><code>npm --prefix app ci</code></pre>
+<p>Install app router dependencies:</p>
+<pre><span class="code-lang">bash</span><code>npm --prefix app/router ci</code></pre>
+<p>Run CAP locally:</p>
+<pre><span class="code-lang">bash</span><code>npm start</code></pre>
+<p>Run Vite locally:</p>
+<pre><span class="code-lang">bash</span><code>npm --prefix app run dev</code></pre>
+<p>Build frontend:</p>
+<pre><span class="code-lang">bash</span><code>npm --prefix app run build</code></pre>
+<p>Build CAP:</p>
+<pre><span class="code-lang">bash</span><code>npx cds build --production</code></pre>
+<p>Build MTAR:</p>
+<pre><span class="code-lang">bash</span><code>mbt build</code></pre>
+<p>Deploy MTAR:</p>
+<pre><span class="code-lang">bash</span><code>cf deploy mta_archives/suppliershield_1.0.0.mtar -f</code></pre>
+<p>Check CF target:</p>
+<pre><span class="code-lang">bash</span><code>cf target</code></pre>
+<p>Check apps:</p>
+<pre><span class="code-lang">bash</span><code>cf apps</code></pre>
+<p>Check one app:</p>
+<pre><span class="code-lang">bash</span><code>cf app suppliershield-approuter
+cf app suppliershield-srv</code></pre>
+<p>Check recent logs:</p>
+<pre><span class="code-lang">bash</span><code>cf logs suppliershield-srv --recent
+cf logs suppliershield-approuter --recent</code></pre>
+<p>Check frontend route:</p>
+<pre><span class="code-lang">bash</span><code>curl -I https://&lt;approuter-route&gt;/index.html</code></pre>
+<p>Check OData through app router:</p>
+<pre><span class="code-lang">bash</span><code>curl https://&lt;approuter-route&gt;/odata/v4/supplier-shield/SupplierShield</code></pre>
+<p>Check OData directly:</p>
+<pre><span class="code-lang">bash</span><code>curl https://&lt;srv-route&gt;/odata/v4/supplier-shield/SupplierShield</code></pre>
+<h2>26. Deployment Checklist</h2>
+<p>Before deploy:</p>
+<ul>
+<li><code>package.json</code> has <code>@cap-js/sqlite</code> in <code>dependencies</code>.</li>
+<li><code>package.json</code> has <code>@sap/cds</code> in <code>dependencies</code>.</li>
+<li><code>package.json</code> has <code>start</code> set to <code>cds-deploy &amp;&amp; cds-serve</code>.</li>
+<li><code>package.json</code> has CAP <code>db.kind</code> set to <code>sqlite</code>.</li>
+<li><code>package.json</code> has CAP <code>auth.kind</code> set to <code>dummy</code>.</li>
+<li><code>app/router/package.json</code> has <code>@sap/approuter</code>.</li>
+<li><code>app/router/xs-app.json</code> has public routes.</li>
+<li><code>mta.yaml</code> has only the backend and app router modules.</li>
+<li><code>mta.yaml</code> has no XSUAA resource.</li>
+<li><code>mta.yaml</code> has no HANA resource.</li>
+<li><code>mta.yaml</code> copies seed CSV files into <code>gen/srv</code>.</li>
+<li><code>.mtaignore</code> excludes local runtime files.</li>
+</ul>
+<p>After deploy:</p>
+<ul>
+<li><code>cf apps</code> shows both apps started.</li>
+<li>App router <code>/index.html</code> returns <code>200</code>.</li>
+<li>App router <code>/odata/v4/...</code> returns <code>200</code>.</li>
+<li>CAP service direct route returns <code>200</code>.</li>
+<li>Logs do not show SQLite initialization errors.</li>
+</ul>
+<h2>27. Current Supplier Shield Deployment Example</h2>
+<p>The deployed app router URL from this project was:</p>
+<pre><span class="code-lang">text</span><code>https://brainbox-consulting-bv-brainboxconsultingig-dev-supplier8d21874.cfapps.eu10-005.hana.ondemand.com/</code></pre>
+<p>The deployed OData endpoint was:</p>
+<pre><span class="code-lang">text</span><code>https://brainbox-consulting-bv-brainboxconsultingig-dev-supplier8d21874.cfapps.eu10-005.hana.ondemand.com/odata/v4/supplier-shield/SupplierShield</code></pre>
+<p>The generated MTAR was:</p>
+<pre><span class="code-lang">text</span><code>mta_archives/suppliershield_1.0.0.mtar</code></pre>
+<h2>28. When to Change This Architecture</h2>
+<p>Use this SQLite and no-auth model when:</p>
+<ul>
+<li>The app is small.</li>
+<li>The app is a demo, prototype, or internal throwaway tool.</li>
+<li>Data can be reset from CSV.</li>
+<li>Public access is acceptable.</li>
+</ul>
+<p>Switch to HANA and XSUAA or IAS when:</p>
+<ul>
+<li>Data must be durable.</li>
+<li>Users need login.</li>
+<li>Different users need different authorizations.</li>
+<li>The app handles sensitive or business-critical data.</li>
+<li>Auditing and compliance matter.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,1486 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+4 0 obj
+<< /Length 3170 >>
+stream
+BT /F3 22 Tf 48.00 789.89 Td (CAP + Vite + Cloud Foundry Deployment Guide) Tj ET
+0.35 0.65 0.77 RG 48 752.89 m 547 752.89 l S
+BT /F1 10.5 Tf 48.00 738.89 Td (Project: Supplier Shield Stack: SAP CAP Node.js, SQLite, React, Vite, SAP Application Router, Cloud) Tj ET
+BT /F1 10.5 Tf 48.00 724.72 Td (Foundry MTA Authentication model: Public app, no XSUAA, no IAS, no external IDP Deployment model:) Tj ET
+BT /F1 10.5 Tf 48.00 710.54 Td (Packaged CAP application using mbt build and cf deploy) Tj ET
+BT /F3 15 Tf 48.00 676.37 Td (1. Goal) Tj ET
+BT /F1 10.5 Tf 48.00 652.37 Td (This guide explains how to build and deploy a small full stack SAP CAP application with:) Tj ET
+BT /F1 10.2 Tf 60.00 632.19 Td (- A CAP backend exposing an OData service.) Tj ET
+BT /F1 10.2 Tf 60.00 616.42 Td (- A React frontend built with Vite.) Tj ET
+BT /F1 10.2 Tf 60.00 600.65 Td (- A custom SAP Application Router serving the frontend and proxying OData calls.) Tj ET
+BT /F1 10.2 Tf 60.00 584.88 Td (- SQLite as the production database.) Tj ET
+BT /F1 10.2 Tf 60.00 569.11 Td (- No login requirement.) Tj ET
+BT /F1 10.2 Tf 60.00 553.34 Td (- Deployment to SAP BTP Cloud Foundry as one packaged MTA archive.) Tj ET
+BT /F1 10.5 Tf 48.00 537.57 Td (The final Cloud Foundry runtime shape is:) Tj ET
+0.96 0.97 0.98 rg
+48 367.00 499.28 158.40 re f
+0.82 0.86 0.90 RG
+48 367.00 499.28 158.40 re S
+BT /F2 8.2 Tf 58.00 507.40 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 496.60 Td (Browser) Tj ET
+BT /F2 8.2 Tf 58.00 485.80 Td (|) Tj ET
+BT /F2 8.2 Tf 58.00 475.00 Td (v) Tj ET
+BT /F2 8.2 Tf 58.00 464.20 Td (suppliershield-approuter) Tj ET
+BT /F2 8.2 Tf 58.00 453.40 Td (|-- serves React static files from app/router/resources) Tj ET
+BT /F2 8.2 Tf 58.00 442.60 Td (|) Tj ET
+BT /F2 8.2 Tf 58.00 431.80 Td (|-- proxies /odata/* to destination srv-api) Tj ET
+BT /F2 8.2 Tf 58.00 421.00 Td (|) Tj ET
+BT /F2 8.2 Tf 58.00 410.20 Td (v) Tj ET
+BT /F2 8.2 Tf 58.00 399.40 Td (suppliershield-srv) Tj ET
+BT /F2 8.2 Tf 58.00 388.60 Td (|-- CAP OData service) Tj ET
+BT /F2 8.2 Tf 58.00 377.80 Td (|-- SQLite db.sqlite) Tj ET
+BT /F3 15 Tf 48.00 343.00 Td (2. Important Trade-Off) Tj ET
+BT /F1 10.5 Tf 48.00 319.00 Td (SQLite on Cloud Foundry is stored on the app container filesystem. That means it is not durable) Tj ET
+BT /F1 10.5 Tf 48.00 304.82 Td (storage.) Tj ET
+BT /F1 10.5 Tf 48.00 284.65 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 264.47 Td (- Good for demos, prototypes, small read-heavy apps, and seed-data apps.) Tj ET
+BT /F1 10.2 Tf 60.00 248.70 Td (- The database can reset after restage, redeploy, crash recovery, or container replacement.) Tj ET
+BT /F1 10.2 Tf 60.00 232.93 Td (- Do not use this model for important production data.) Tj ET
+BT /F1 10.5 Tf 48.00 217.16 Td (For this application, the database is initialized from CSV data on application startup. That makes the) Tj ET
+BT /F1 10.5 Tf 48.00 202.99 Td (app simple and self-contained.) Tj ET
+BT /F3 15 Tf 48.00 168.81 Td (3. Expected Project Structure) Tj ET
+BT /F1 10.5 Tf 48.00 144.81 Td (The important folders are:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 1) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 3238 >>
+stream
+0.96 0.97 0.98 rg
+48 499.09 499.28 298.80 re f
+0.82 0.86 0.90 RG
+48 499.09 499.28 298.80 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (suppliershield/) Tj ET
+BT /F2 8.2 Tf 58.00 758.29 Td (app/) Tj ET
+BT /F2 8.2 Tf 58.00 747.49 Td (index.html) Tj ET
+BT /F2 8.2 Tf 58.00 736.69 Td (package.json) Tj ET
+BT /F2 8.2 Tf 58.00 725.89 Td (vite.config.js) Tj ET
+BT /F2 8.2 Tf 58.00 715.09 Td (src/) Tj ET
+BT /F2 8.2 Tf 58.00 704.29 Td (App.jsx) Tj ET
+BT /F2 8.2 Tf 58.00 693.49 Td (main.jsx) Tj ET
+BT /F2 8.2 Tf 58.00 682.69 Td (odata.js) Tj ET
+BT /F2 8.2 Tf 58.00 671.89 Td (styles.css) Tj ET
+BT /F2 8.2 Tf 58.00 661.09 Td (router/) Tj ET
+BT /F2 8.2 Tf 58.00 650.29 Td (package.json) Tj ET
+BT /F2 8.2 Tf 58.00 639.49 Td (xs-app.json) Tj ET
+BT /F2 8.2 Tf 58.00 628.69 Td (resources/) Tj ET
+BT /F2 8.2 Tf 58.00 617.89 Td (db/) Tj ET
+BT /F2 8.2 Tf 58.00 607.09 Td (schema.cds) Tj ET
+BT /F2 8.2 Tf 58.00 596.29 Td (data/) Tj ET
+BT /F2 8.2 Tf 58.00 585.49 Td (db.suppliershield-SupplierShield.csv) Tj ET
+BT /F2 8.2 Tf 58.00 574.69 Td (srv/) Tj ET
+BT /F2 8.2 Tf 58.00 563.89 Td (supplier-shield.cds) Tj ET
+BT /F2 8.2 Tf 58.00 553.09 Td (supplier-shield.js) Tj ET
+BT /F2 8.2 Tf 58.00 542.29 Td (mta.yaml) Tj ET
+BT /F2 8.2 Tf 58.00 531.49 Td (package.json) Tj ET
+BT /F2 8.2 Tf 58.00 520.69 Td (package-lock.json) Tj ET
+BT /F2 8.2 Tf 58.00 509.89 Td (.mtaignore) Tj ET
+BT /F3 15 Tf 48.00 475.09 Td (4. CAP Data Model) Tj ET
+BT /F1 10.5 Tf 48.00 451.09 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 399.32 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 399.32 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 420.92 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 410.12 Td (db/schema.cds) Tj ET
+BT /F1 10.5 Tf 48.00 389.32 Td (Example:) Tj ET
+0.96 0.97 0.98 rg
+48 218.74 499.28 158.40 re f
+0.82 0.86 0.90 RG
+48 218.74 499.28 158.40 re S
+BT /F2 8.2 Tf 58.00 359.14 Td ([cds]) Tj ET
+BT /F2 8.2 Tf 58.00 348.34 Td (namespace db.suppliershield;) Tj ET
+BT /F2 8.2 Tf 58.00 337.54 Td () Tj ET
+BT /F2 8.2 Tf 58.00 326.74 Td (using { cuid, managed } from '@sap/cds/common';) Tj ET
+BT /F2 8.2 Tf 58.00 315.94 Td () Tj ET
+BT /F2 8.2 Tf 58.00 305.14 Td (aspect primary: cuid, managed {};) Tj ET
+BT /F2 8.2 Tf 58.00 294.34 Td () Tj ET
+BT /F2 8.2 Tf 58.00 283.54 Td (entity SupplierShield : primary {) Tj ET
+BT /F2 8.2 Tf 58.00 272.74 Td (firstName : String\(255\);) Tj ET
+BT /F2 8.2 Tf 58.00 261.94 Td (lastName : String\(255\);) Tj ET
+BT /F2 8.2 Tf 58.00 251.14 Td (Description : String\(255\);) Tj ET
+BT /F2 8.2 Tf 58.00 240.34 Td (IsActive : Boolean;) Tj ET
+BT /F2 8.2 Tf 58.00 229.54 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 208.74 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 188.57 Td (- Defines the database table.) Tj ET
+BT /F1 10.2 Tf 60.00 172.80 Td (- CAP uses this model to generate SQL artifacts.) Tj ET
+BT /F1 10.2 Tf 60.00 157.03 Td (- The CSV file under db/data can seed this entity.) Tj ET
+BT /F1 10.5 Tf 48.00 141.26 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 121.08 Td (- Entity name becomes part of the CSV file naming convention.) Tj ET
+BT /F1 10.2 Tf 60.00 105.31 Td (- For this namespace and entity, the seed file is:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 2) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 2621 >>
+stream
+0.96 0.97 0.98 rg
+48 758.29 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 758.29 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (db/data/db.suppliershield-SupplierShield.csv) Tj ET
+BT /F3 15 Tf 48.00 734.29 Td (5. CAP Service Definition) Tj ET
+BT /F1 10.5 Tf 48.00 710.29 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 658.52 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 658.52 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 680.12 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 669.32 Td (srv/supplier-shield.cds) Tj ET
+BT /F1 10.5 Tf 48.00 648.52 Td (Example:) Tj ET
+0.96 0.97 0.98 rg
+48 531.94 499.28 104.40 re f
+0.82 0.86 0.90 RG
+48 531.94 499.28 104.40 re S
+BT /F2 8.2 Tf 58.00 618.34 Td ([cds]) Tj ET
+BT /F2 8.2 Tf 58.00 607.54 Td (using { db.suppliershield as ss } from '../db/schema';) Tj ET
+BT /F2 8.2 Tf 58.00 596.74 Td () Tj ET
+BT /F2 8.2 Tf 58.00 585.94 Td (service SupplierShieldService {) Tj ET
+BT /F2 8.2 Tf 58.00 575.14 Td (entity SupplierShield as projection on ss.SupplierShield;) Tj ET
+BT /F2 8.2 Tf 58.00 564.34 Td () Tj ET
+BT /F2 8.2 Tf 58.00 553.54 Td (function getVerifiedSuppliers\(params : String\) returns String;) Tj ET
+BT /F2 8.2 Tf 58.00 542.74 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 521.94 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 501.77 Td (- Exposes the database entity as an OData service.) Tj ET
+BT /F1 10.2 Tf 60.00 486.00 Td (- Keeps the external service contract separate from the database model.) Tj ET
+BT /F1 10.2 Tf 60.00 470.23 Td (- Adds a custom function endpoint.) Tj ET
+BT /F1 10.5 Tf 48.00 454.46 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 434.28 Td (- CAP exposes the service at:) Tj ET
+0.96 0.97 0.98 rg
+48 386.91 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 386.91 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 408.51 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 397.71 Td (/odata/v4/supplier-shield) Tj ET
+BT /F1 10.2 Tf 60.00 376.91 Td (- The entity collection is available at:) Tj ET
+0.96 0.97 0.98 rg
+48 329.54 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 329.54 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 351.14 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 340.34 Td (/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F3 15 Tf 48.00 305.54 Td (6. CAP Service Implementation) Tj ET
+BT /F1 10.5 Tf 48.00 281.54 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 229.77 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 229.77 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 251.37 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 240.57 Td (srv/supplier-shield.js) Tj ET
+BT /F1 10.5 Tf 48.00 219.77 Td (Example:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 3) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 2643 >>
+stream
+0.96 0.97 0.98 rg
+48 531.49 499.28 266.40 re f
+0.82 0.86 0.90 RG
+48 531.49 499.28 266.40 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([js]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (const cds = require\('@sap/cds'\)) Tj ET
+BT /F2 8.2 Tf 58.00 758.29 Td () Tj ET
+BT /F2 8.2 Tf 58.00 747.49 Td (module.exports = class SupplierShieldService extends cds.ApplicationService {) Tj ET
+BT /F2 8.2 Tf 58.00 736.69 Td (init\(\) {) Tj ET
+BT /F2 8.2 Tf 58.00 725.89 Td (const { SupplierShield } = cds.entities\('SupplierShieldService'\)) Tj ET
+BT /F2 8.2 Tf 58.00 715.09 Td () Tj ET
+BT /F2 8.2 Tf 58.00 704.29 Td (this.before\(['CREATE', 'UPDATE'], SupplierShield, async \(req\) => {) Tj ET
+BT /F2 8.2 Tf 58.00 693.49 Td (console.log\('Before CREATE/UPDATE SupplierShield', req.data\)) Tj ET
+BT /F2 8.2 Tf 58.00 682.69 Td (}\)) Tj ET
+BT /F2 8.2 Tf 58.00 671.89 Td () Tj ET
+BT /F2 8.2 Tf 58.00 661.09 Td (this.after\('READ', SupplierShield, async \(supplierShield, req\) => {) Tj ET
+BT /F2 8.2 Tf 58.00 650.29 Td (console.log\('After READ SupplierShield', supplierShield\)) Tj ET
+BT /F2 8.2 Tf 58.00 639.49 Td (}\)) Tj ET
+BT /F2 8.2 Tf 58.00 628.69 Td () Tj ET
+BT /F2 8.2 Tf 58.00 617.89 Td (this.on\('getVerifiedSuppliers', async \(req\) => {) Tj ET
+BT /F2 8.2 Tf 58.00 607.09 Td (console.log\('On getVerifiedSuppliers', req.data\)) Tj ET
+BT /F2 8.2 Tf 58.00 596.29 Td (return 'List of verified suppliers') Tj ET
+BT /F2 8.2 Tf 58.00 585.49 Td (}\)) Tj ET
+BT /F2 8.2 Tf 58.00 574.69 Td () Tj ET
+BT /F2 8.2 Tf 58.00 563.89 Td (return super.init\(\)) Tj ET
+BT /F2 8.2 Tf 58.00 553.09 Td (}) Tj ET
+BT /F2 8.2 Tf 58.00 542.29 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 521.49 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 501.32 Td (- Adds custom event handlers to the CAP service.) Tj ET
+BT /F1 10.2 Tf 60.00 485.55 Td (- Allows validation, enrichment, logging, or custom business behavior.) Tj ET
+BT /F1 10.5 Tf 48.00 469.78 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 449.60 Td (- READ calls log returned supplier data.) Tj ET
+BT /F1 10.2 Tf 60.00 433.83 Td (- CREATE and UPDATE calls can be extended later.) Tj ET
+BT /F1 10.2 Tf 60.00 418.06 Td (- The custom OData function returns a string.) Tj ET
+BT /F3 15 Tf 48.00 388.29 Td (7. Root package.json) Tj ET
+BT /F1 10.5 Tf 48.00 364.29 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 312.52 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 312.52 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 334.12 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 323.32 Td (package.json) Tj ET
+BT /F1 10.5 Tf 48.00 302.52 Td (Important configuration:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 4) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 3623 >>
+stream
+0.96 0.97 0.98 rg
+48 412.69 499.28 385.20 re f
+0.82 0.86 0.90 RG
+48 412.69 499.28 385.20 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td ({) Tj ET
+BT /F2 8.2 Tf 58.00 758.29 Td ("name": "suppliershield",) Tj ET
+BT /F2 8.2 Tf 58.00 747.49 Td ("version": "1.0.0",) Tj ET
+BT /F2 8.2 Tf 58.00 736.69 Td ("engines": {) Tj ET
+BT /F2 8.2 Tf 58.00 725.89 Td ("node": "22.x") Tj ET
+BT /F2 8.2 Tf 58.00 715.09 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 704.29 Td ("dependencies": {) Tj ET
+BT /F2 8.2 Tf 58.00 693.49 Td ("@cap-js/mcp-server": "^0.0.5",) Tj ET
+BT /F2 8.2 Tf 58.00 682.69 Td ("@cap-js/sqlite": "^2",) Tj ET
+BT /F2 8.2 Tf 58.00 671.89 Td ("@sap/cds": "^9") Tj ET
+BT /F2 8.2 Tf 58.00 661.09 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 650.29 Td ("devDependencies": {},) Tj ET
+BT /F2 8.2 Tf 58.00 639.49 Td ("scripts": {) Tj ET
+BT /F2 8.2 Tf 58.00 628.69 Td ("start": "cds-deploy && cds-serve",) Tj ET
+BT /F2 8.2 Tf 58.00 617.89 Td ("app:dev": "npm --prefix app run dev",) Tj ET
+BT /F2 8.2 Tf 58.00 607.09 Td ("app:build": "npm --prefix app run build",) Tj ET
+BT /F2 8.2 Tf 58.00 596.29 Td ("app:preview": "npm --prefix app run preview") Tj ET
+BT /F2 8.2 Tf 58.00 585.49 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 574.69 Td ("cds": {) Tj ET
+BT /F2 8.2 Tf 58.00 563.89 Td ("requires": {) Tj ET
+BT /F2 8.2 Tf 58.00 553.09 Td ("db": {) Tj ET
+BT /F2 8.2 Tf 58.00 542.29 Td ("kind": "sqlite",) Tj ET
+BT /F2 8.2 Tf 58.00 531.49 Td ("credentials": {) Tj ET
+BT /F2 8.2 Tf 58.00 520.69 Td ("url": "db.sqlite") Tj ET
+BT /F2 8.2 Tf 58.00 509.89 Td (}) Tj ET
+BT /F2 8.2 Tf 58.00 499.09 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 488.29 Td ("auth": {) Tj ET
+BT /F2 8.2 Tf 58.00 477.49 Td ("kind": "dummy") Tj ET
+BT /F2 8.2 Tf 58.00 466.69 Td (}) Tj ET
+BT /F2 8.2 Tf 58.00 455.89 Td (}) Tj ET
+BT /F2 8.2 Tf 58.00 445.09 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 434.29 Td ("private": true) Tj ET
+BT /F2 8.2 Tf 58.00 423.49 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 402.69 Td (Why these changes were done:) Tj ET
+BT /F1 10.2 Tf 60.00 382.52 Td (- @cap-js/sqlite is in dependencies, not devDependencies, because it must exist in the deployed Cloud) Tj ET
+BT /F1 10.2 Tf 60.00 368.75 Td (Foundry app.) Tj ET
+BT /F1 10.2 Tf 60.00 352.98 Td (- @sap/cds is in dependencies because the deployed service needs CAP runtime.) Tj ET
+BT /F1 10.2 Tf 60.00 337.21 Td (- engines.node pins the intended Node.js major version for Cloud Foundry.) Tj ET
+BT /F1 10.2 Tf 60.00 321.44 Td (- start runs cds-deploy first so SQLite is initialized when the app starts.) Tj ET
+BT /F1 10.2 Tf 60.00 305.67 Td (- cds.requires.db.kind = sqlite tells CAP to use SQLite.) Tj ET
+BT /F1 10.2 Tf 60.00 289.90 Td (- cds.requires.auth.kind = dummy avoids mandatory production authentication.) Tj ET
+BT /F1 10.5 Tf 48.00 274.13 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 253.95 Td (- The CAP service can run in Cloud Foundry without HANA.) Tj ET
+BT /F1 10.2 Tf 60.00 238.18 Td (- No XSUAA service binding is required.) Tj ET
+BT /F1 10.2 Tf 60.00 222.41 Td (- No user login is required.) Tj ET
+BT /F1 10.2 Tf 60.00 206.64 Td (- The SQLite database is recreated or updated from deployment artifacts at startup.) Tj ET
+BT /F3 15 Tf 48.00 176.87 Td (8. React + Vite Frontend) Tj ET
+BT /F1 10.5 Tf 48.00 152.87 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 101.10 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 101.10 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 122.70 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 111.90 Td (app/package.json) Tj ET
+BT /F1 10.5 Tf 48.00 91.10 Td (Important scripts:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 5) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 3319 >>
+stream
+0.96 0.97 0.98 rg
+48 693.49 499.28 104.40 re f
+0.82 0.86 0.90 RG
+48 693.49 499.28 104.40 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td ({) Tj ET
+BT /F2 8.2 Tf 58.00 758.29 Td ("scripts": {) Tj ET
+BT /F2 8.2 Tf 58.00 747.49 Td ("dev": "vite",) Tj ET
+BT /F2 8.2 Tf 58.00 736.69 Td ("build": "vite build",) Tj ET
+BT /F2 8.2 Tf 58.00 725.89 Td ("preview": "vite preview") Tj ET
+BT /F2 8.2 Tf 58.00 715.09 Td (}) Tj ET
+BT /F2 8.2 Tf 58.00 704.29 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 683.49 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 663.32 Td (- Vite provides fast local development.) Tj ET
+BT /F1 10.2 Tf 60.00 647.55 Td (- vite build creates static production files in app/dist.) Tj ET
+BT /F1 10.5 Tf 48.00 631.78 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 611.60 Td (- The frontend can be built independently from CAP.) Tj ET
+BT /F1 10.2 Tf 60.00 595.83 Td (- The app router can later serve the static build output.) Tj ET
+BT /F3 15 Tf 48.00 566.06 Td (9. Vite Development Proxy) Tj ET
+BT /F1 10.5 Tf 48.00 542.06 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 490.29 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 490.29 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 511.89 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 501.09 Td (app/vite.config.js) Tj ET
+BT /F1 10.5 Tf 48.00 480.29 Td (Configuration:) Tj ET
+0.96 0.97 0.98 rg
+48 277.31 499.28 190.80 re f
+0.82 0.86 0.90 RG
+48 277.31 499.28 190.80 re S
+BT /F2 8.2 Tf 58.00 450.11 Td ([js]) Tj ET
+BT /F2 8.2 Tf 58.00 439.31 Td (import { defineConfig } from 'vite') Tj ET
+BT /F2 8.2 Tf 58.00 428.51 Td (import react from '@vitejs/plugin-react') Tj ET
+BT /F2 8.2 Tf 58.00 417.71 Td () Tj ET
+BT /F2 8.2 Tf 58.00 406.91 Td (export default defineConfig\({) Tj ET
+BT /F2 8.2 Tf 58.00 396.11 Td (plugins: [react\(\)],) Tj ET
+BT /F2 8.2 Tf 58.00 385.31 Td (server: {) Tj ET
+BT /F2 8.2 Tf 58.00 374.51 Td (port: 5173,) Tj ET
+BT /F2 8.2 Tf 58.00 363.71 Td (proxy: {) Tj ET
+BT /F2 8.2 Tf 58.00 352.91 Td ('/odata': {) Tj ET
+BT /F2 8.2 Tf 58.00 342.11 Td (target: 'http://localhost:4004',) Tj ET
+BT /F2 8.2 Tf 58.00 331.31 Td (changeOrigin: true,) Tj ET
+BT /F2 8.2 Tf 58.00 320.51 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 309.71 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 298.91 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 288.11 Td (}\)) Tj ET
+BT /F1 10.5 Tf 48.00 267.31 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 247.14 Td (- During local development, Vite runs on port 5173.) Tj ET
+BT /F1 10.2 Tf 60.00 231.37 Td (- CAP usually runs on port 4004.) Tj ET
+BT /F1 10.2 Tf 60.00 215.60 Td (- The proxy forwards frontend calls from /odata to CAP.) Tj ET
+BT /F1 10.5 Tf 48.00 199.83 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 179.65 Td (- React code can call /odata/v4/... in both local and deployed environments.) Tj ET
+BT /F1 10.2 Tf 60.00 163.88 Td (- No hardcoded Cloud Foundry URL is needed in frontend code.) Tj ET
+BT /F1 10.5 Tf 48.00 148.11 Td (Local development commands:) Tj ET
+0.96 0.97 0.98 rg
+48 85.54 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 85.54 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 117.94 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 107.14 Td (npm install) Tj ET
+BT /F2 8.2 Tf 58.00 96.34 Td (npm start) Tj ET
+BT /F1 10.5 Tf 48.00 75.54 Td (In another terminal:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 6) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Length 3077 >>
+stream
+0.96 0.97 0.98 rg
+48 747.49 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 747.49 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (npm --prefix app install) Tj ET
+BT /F2 8.2 Tf 58.00 758.29 Td (npm --prefix app run dev) Tj ET
+BT /F1 10.5 Tf 48.00 737.49 Td (Then open:) Tj ET
+0.96 0.97 0.98 rg
+48 685.72 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 685.72 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 707.32 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 696.52 Td (http://localhost:5173) Tj ET
+BT /F3 15 Tf 48.00 661.72 Td (10. Frontend OData Client) Tj ET
+BT /F1 10.5 Tf 48.00 637.72 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 585.94 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 585.94 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 607.54 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 596.74 Td (app/src/odata.js) Tj ET
+BT /F1 10.5 Tf 48.00 575.94 Td (Important pattern:) Tj ET
+0.96 0.97 0.98 rg
+48 524.17 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 524.17 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 545.77 Td ([js]) Tj ET
+BT /F2 8.2 Tf 58.00 534.97 Td (const SERVICE_ROOT = import.meta.env.VITE_ODATA_BASE_URL || '/odata/v4/supplier-shield') Tj ET
+BT /F1 10.5 Tf 48.00 514.17 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 493.99 Td (- The default service root works behind the app router.) Tj ET
+BT /F1 10.2 Tf 60.00 478.22 Td (- An environment variable can override it if needed.) Tj ET
+BT /F1 10.5 Tf 48.00 462.45 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 442.28 Td (- Local Vite proxy and deployed app router use the same URL path.) Tj ET
+BT /F1 10.2 Tf 60.00 426.51 Td (- The frontend remains portable across environments.) Tj ET
+BT /F1 10.5 Tf 48.00 410.74 Td (Useful checks:) Tj ET
+0.96 0.97 0.98 rg
+48 348.16 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 348.16 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 380.56 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 369.76 Td (curl http://localhost:4004/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F2 8.2 Tf 58.00 358.96 Td (curl http://localhost:5173/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F1 10.5 Tf 48.00 338.16 Td (The first command checks CAP directly. The second command checks Vite proxy behavior.) Tj ET
+BT /F3 15 Tf 48.00 303.99 Td (11. Custom Application Router) Tj ET
+BT /F1 10.5 Tf 48.00 279.99 Td (Folder:) Tj ET
+0.96 0.97 0.98 rg
+48 228.21 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 228.21 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 249.81 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 239.01 Td (app/router) Tj ET
+BT /F1 10.5 Tf 48.00 218.21 Td (This application uses a custom SAP Application Router because it gives direct control over:) Tj ET
+BT /F1 10.2 Tf 60.00 198.04 Td (- Static file serving.) Tj ET
+BT /F1 10.2 Tf 60.00 182.27 Td (- OData proxy routing.) Tj ET
+BT /F1 10.2 Tf 60.00 166.50 Td (- Authentication settings.) Tj ET
+BT /F1 10.2 Tf 60.00 150.73 Td (- Cloud Foundry destination wiring.) Tj ET
+BT /F3 12.2 Tf 48.00 126.96 Td (11.1 App Router package.json) Tj ET
+BT /F1 10.5 Tf 48.00 106.96 Td (File:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 7) Tj ET
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 16 0 R >>
+endobj
+18 0 obj
+<< /Length 3446 >>
+stream
+0.96 0.97 0.98 rg
+48 758.29 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 758.29 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (app/router/package.json) Tj ET
+BT /F1 10.5 Tf 48.00 748.29 Td (Configuration:) Tj ET
+0.96 0.97 0.98 rg
+48 556.12 499.28 180.00 re f
+0.82 0.86 0.90 RG
+48 556.12 499.28 180.00 re S
+BT /F2 8.2 Tf 58.00 718.12 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 707.32 Td ({) Tj ET
+BT /F2 8.2 Tf 58.00 696.52 Td ("name": "suppliershield-approuter",) Tj ET
+BT /F2 8.2 Tf 58.00 685.72 Td ("private": true,) Tj ET
+BT /F2 8.2 Tf 58.00 674.92 Td ("version": "1.0.0",) Tj ET
+BT /F2 8.2 Tf 58.00 664.12 Td ("scripts": {) Tj ET
+BT /F2 8.2 Tf 58.00 653.32 Td ("start": "node node_modules/@sap/approuter/approuter.js") Tj ET
+BT /F2 8.2 Tf 58.00 642.52 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 631.72 Td ("engines": {) Tj ET
+BT /F2 8.2 Tf 58.00 620.92 Td ("node": "22.x") Tj ET
+BT /F2 8.2 Tf 58.00 610.12 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 599.32 Td ("dependencies": {) Tj ET
+BT /F2 8.2 Tf 58.00 588.52 Td ("@sap/approuter": "^20.8.2") Tj ET
+BT /F2 8.2 Tf 58.00 577.72 Td (}) Tj ET
+BT /F2 8.2 Tf 58.00 566.92 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 546.12 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 525.94 Td (- Cloud Foundry starts this as a separate Node.js app.) Tj ET
+BT /F1 10.2 Tf 60.00 510.17 Td (- @sap/approuter serves the static frontend and proxies backend calls.) Tj ET
+BT /F1 10.5 Tf 48.00 494.40 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 474.23 Td (- The browser only needs to access the app router URL.) Tj ET
+BT /F1 10.2 Tf 60.00 458.46 Td (- CAP service can stay behind the app router.) Tj ET
+BT /F3 12.2 Tf 48.00 434.69 Td (11.2 App Router Routes) Tj ET
+BT /F1 10.5 Tf 48.00 414.69 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 362.91 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 362.91 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 384.51 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 373.71 Td (app/router/xs-app.json) Tj ET
+BT /F1 10.5 Tf 48.00 352.91 Td (Configuration:) Tj ET
+0.96 0.97 0.98 rg
+48 106.74 499.28 234.00 re f
+0.82 0.86 0.90 RG
+48 106.74 499.28 234.00 re S
+BT /F2 8.2 Tf 58.00 322.74 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 311.94 Td ({) Tj ET
+BT /F2 8.2 Tf 58.00 301.14 Td ("welcomeFile": "/index.html",) Tj ET
+BT /F2 8.2 Tf 58.00 290.34 Td ("authenticationMethod": "route",) Tj ET
+BT /F2 8.2 Tf 58.00 279.54 Td ("routes": [) Tj ET
+BT /F2 8.2 Tf 58.00 268.74 Td ({) Tj ET
+BT /F2 8.2 Tf 58.00 257.94 Td ("source": "^/odata/\(.*\)$",) Tj ET
+BT /F2 8.2 Tf 58.00 247.14 Td ("target": "/odata/$1",) Tj ET
+BT /F2 8.2 Tf 58.00 236.34 Td ("destination": "srv-api",) Tj ET
+BT /F2 8.2 Tf 58.00 225.54 Td ("authenticationType": "none",) Tj ET
+BT /F2 8.2 Tf 58.00 214.74 Td ("csrfProtection": false) Tj ET
+BT /F2 8.2 Tf 58.00 203.94 Td (},) Tj ET
+BT /F2 8.2 Tf 58.00 193.14 Td ({) Tj ET
+BT /F2 8.2 Tf 58.00 182.34 Td ("source": "^\(.*\)$",) Tj ET
+BT /F2 8.2 Tf 58.00 171.54 Td ("target": "$1",) Tj ET
+BT /F2 8.2 Tf 58.00 160.74 Td ("localDir": "resources",) Tj ET
+BT /F2 8.2 Tf 58.00 149.94 Td ("authenticationType": "none") Tj ET
+BT /F2 8.2 Tf 58.00 139.14 Td (}) Tj ET
+BT /F2 8.2 Tf 58.00 128.34 Td (]) Tj ET
+BT /F2 8.2 Tf 58.00 117.54 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 96.74 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 76.56 Td (- /odata/* requests are forwarded to the CAP service.) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 8) Tj ET
+endstream
+endobj
+19 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 18 0 R >>
+endobj
+20 0 obj
+<< /Length 1239 >>
+stream
+BT /F1 10.2 Tf 60.00 789.89 Td (- All other requests are served from static frontend files.) Tj ET
+BT /F1 10.2 Tf 60.00 774.12 Td (- authenticationType: none makes the app public.) Tj ET
+BT /F1 10.2 Tf 60.00 758.35 Td (- csrfProtection: false avoids app router CSRF handling for this public OData proxy.) Tj ET
+BT /F1 10.5 Tf 48.00 742.58 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 722.41 Td (- No XSUAA is needed.) Tj ET
+BT /F1 10.2 Tf 60.00 706.64 Td (- No login page appears.) Tj ET
+BT /F1 10.2 Tf 60.00 690.87 Td (- The deployed frontend can call:) Tj ET
+0.96 0.97 0.98 rg
+48 643.50 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 643.50 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 665.10 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 654.30 Td (/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F3 15 Tf 48.00 619.50 Td (12. MTA Descriptor) Tj ET
+BT /F1 10.5 Tf 48.00 595.50 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 543.72 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 543.72 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 565.32 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 554.52 Td (mta.yaml) Tj ET
+BT /F1 10.5 Tf 48.00 533.72 Td (Final structure:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 9) Tj ET
+endstream
+endobj
+21 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 20 0 R >>
+endobj
+22 0 obj
+<< /Length 3711 >>
+stream
+0.96 0.97 0.98 rg
+48 121.09 499.28 676.80 re f
+0.82 0.86 0.90 RG
+48 121.09 499.28 676.80 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([yaml]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (_schema-version: 3.3.0) Tj ET
+BT /F2 8.2 Tf 58.00 758.29 Td (ID: suppliershield) Tj ET
+BT /F2 8.2 Tf 58.00 747.49 Td (version: 1.0.0) Tj ET
+BT /F2 8.2 Tf 58.00 736.69 Td (description: Supplier Shield full stack CAP application) Tj ET
+BT /F2 8.2 Tf 58.00 725.89 Td () Tj ET
+BT /F2 8.2 Tf 58.00 715.09 Td (parameters:) Tj ET
+BT /F2 8.2 Tf 58.00 704.29 Td (enable-parallel-deployments: true) Tj ET
+BT /F2 8.2 Tf 58.00 693.49 Td () Tj ET
+BT /F2 8.2 Tf 58.00 682.69 Td (build-parameters:) Tj ET
+BT /F2 8.2 Tf 58.00 671.89 Td (before-all:) Tj ET
+BT /F2 8.2 Tf 58.00 661.09 Td (- builder: custom) Tj ET
+BT /F2 8.2 Tf 58.00 650.29 Td (commands:) Tj ET
+BT /F2 8.2 Tf 58.00 639.49 Td (- npm ci) Tj ET
+BT /F2 8.2 Tf 58.00 628.69 Td (- npx cds build --production) Tj ET
+BT /F2 8.2 Tf 58.00 617.89 Td (- mkdir -p gen/srv/db/data) Tj ET
+BT /F2 8.2 Tf 58.00 607.09 Td (- cp db/data/db.suppliershield-SupplierShield.csv gen/srv/db/data/) Tj ET
+BT /F2 8.2 Tf 58.00 596.29 Td () Tj ET
+BT /F2 8.2 Tf 58.00 585.49 Td (modules:) Tj ET
+BT /F2 8.2 Tf 58.00 574.69 Td (- name: suppliershield-srv) Tj ET
+BT /F2 8.2 Tf 58.00 563.89 Td (type: nodejs) Tj ET
+BT /F2 8.2 Tf 58.00 553.09 Td (path: gen/srv) Tj ET
+BT /F2 8.2 Tf 58.00 542.29 Td (parameters:) Tj ET
+BT /F2 8.2 Tf 58.00 531.49 Td (buildpack: nodejs_buildpack) Tj ET
+BT /F2 8.2 Tf 58.00 520.69 Td (memory: 256M) Tj ET
+BT /F2 8.2 Tf 58.00 509.89 Td (disk-quota: 512M) Tj ET
+BT /F2 8.2 Tf 58.00 499.09 Td (build-parameters:) Tj ET
+BT /F2 8.2 Tf 58.00 488.29 Td (builder: npm-ci) Tj ET
+BT /F2 8.2 Tf 58.00 477.49 Td (provides:) Tj ET
+BT /F2 8.2 Tf 58.00 466.69 Td (- name: srv-api) Tj ET
+BT /F2 8.2 Tf 58.00 455.89 Td (properties:) Tj ET
+BT /F2 8.2 Tf 58.00 445.09 Td (srv-url: ${default-url}) Tj ET
+BT /F2 8.2 Tf 58.00 434.29 Td () Tj ET
+BT /F2 8.2 Tf 58.00 423.49 Td (- name: suppliershield-approuter) Tj ET
+BT /F2 8.2 Tf 58.00 412.69 Td (type: approuter.nodejs) Tj ET
+BT /F2 8.2 Tf 58.00 401.89 Td (path: app/router) Tj ET
+BT /F2 8.2 Tf 58.00 391.09 Td (parameters:) Tj ET
+BT /F2 8.2 Tf 58.00 380.29 Td (buildpack: nodejs_buildpack) Tj ET
+BT /F2 8.2 Tf 58.00 369.49 Td (keep-existing-routes: true) Tj ET
+BT /F2 8.2 Tf 58.00 358.69 Td (memory: 256M) Tj ET
+BT /F2 8.2 Tf 58.00 347.89 Td (disk-quota: 512M) Tj ET
+BT /F2 8.2 Tf 58.00 337.09 Td (build-parameters:) Tj ET
+BT /F2 8.2 Tf 58.00 326.29 Td (builder: custom) Tj ET
+BT /F2 8.2 Tf 58.00 315.49 Td (commands:) Tj ET
+BT /F2 8.2 Tf 58.00 304.69 Td (- npm ci) Tj ET
+BT /F2 8.2 Tf 58.00 293.89 Td (- npm --prefix .. ci) Tj ET
+BT /F2 8.2 Tf 58.00 283.09 Td (- npm --prefix .. run build) Tj ET
+BT /F2 8.2 Tf 58.00 272.29 Td (- rm -rf resources) Tj ET
+BT /F2 8.2 Tf 58.00 261.49 Td (- cp -R ../dist resources) Tj ET
+BT /F2 8.2 Tf 58.00 250.69 Td (requires:) Tj ET
+BT /F2 8.2 Tf 58.00 239.89 Td (- name: srv-api) Tj ET
+BT /F2 8.2 Tf 58.00 229.09 Td (group: destinations) Tj ET
+BT /F2 8.2 Tf 58.00 218.29 Td (properties:) Tj ET
+BT /F2 8.2 Tf 58.00 207.49 Td (name: srv-api) Tj ET
+BT /F2 8.2 Tf 58.00 196.69 Td (url: ~{srv-url}) Tj ET
+BT /F2 8.2 Tf 58.00 185.89 Td (forwardAuthToken: false) Tj ET
+BT /F2 8.2 Tf 58.00 175.09 Td (provides:) Tj ET
+BT /F2 8.2 Tf 58.00 164.29 Td (- name: app-api) Tj ET
+BT /F2 8.2 Tf 58.00 153.49 Td (properties:) Tj ET
+BT /F2 8.2 Tf 58.00 142.69 Td (app-protocol: ${protocol}) Tj ET
+BT /F2 8.2 Tf 58.00 131.89 Td (app-uri: ${default-uri}) Tj ET
+BT /F3 12.2 Tf 48.00 103.09 Td (12.1 Why before-all Exists) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 10) Tj ET
+endstream
+endobj
+23 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 22 0 R >>
+endobj
+24 0 obj
+<< /Length 3266 >>
+stream
+0.96 0.97 0.98 rg
+48 725.89 499.28 72.00 re f
+0.82 0.86 0.90 RG
+48 725.89 499.28 72.00 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (npm ci) Tj ET
+BT /F2 8.2 Tf 58.00 758.29 Td (npx cds build --production) Tj ET
+BT /F2 8.2 Tf 58.00 747.49 Td (mkdir -p gen/srv/db/data) Tj ET
+BT /F2 8.2 Tf 58.00 736.69 Td (cp db/data/db.suppliershield-SupplierShield.csv gen/srv/db/data/) Tj ET
+BT /F1 10.5 Tf 48.00 715.89 Td (Why:) Tj ET
+BT /F1 10.2 Tf 60.00 695.72 Td (- npm ci installs exact backend dependencies.) Tj ET
+BT /F1 10.2 Tf 60.00 679.95 Td (- npx cds build --production creates the deployable CAP output under gen/srv.) Tj ET
+BT /F1 10.2 Tf 60.00 664.18 Td (- The CSV file is copied into gen/srv so the deployed SQLite initialization can load seed data.) Tj ET
+BT /F1 10.5 Tf 48.00 648.41 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 628.23 Td (- The MTAR contains the generated CAP app, not just source files.) Tj ET
+BT /F1 10.2 Tf 60.00 612.46 Td (- SQLite has seed data available inside the deployed service module.) Tj ET
+BT /F3 12.2 Tf 48.00 588.69 Td (12.2 Why There Is a suppliershield-srv Module) Tj ET
+BT /F1 10.5 Tf 48.00 568.69 Td (This module deploys the CAP backend.) Tj ET
+BT /F1 10.5 Tf 48.00 548.52 Td (Important properties:) Tj ET
+0.96 0.97 0.98 rg
+48 485.94 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 485.94 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 518.34 Td ([yaml]) Tj ET
+BT /F2 8.2 Tf 58.00 507.54 Td (type: nodejs) Tj ET
+BT /F2 8.2 Tf 58.00 496.74 Td (path: gen/srv) Tj ET
+BT /F1 10.5 Tf 48.00 475.94 Td (Why:) Tj ET
+BT /F1 10.2 Tf 60.00 455.77 Td (- gen/srv is the CAP production build output.) Tj ET
+BT /F1 10.2 Tf 60.00 440.00 Td (- Cloud Foundry runs the generated CAP service as a Node.js app.) Tj ET
+BT /F1 10.5 Tf 48.00 424.23 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 404.05 Td (- The backend starts with the root package start command copied into the generated build.) Tj ET
+BT /F1 10.2 Tf 60.00 388.28 Td (- The service provides a URL to other MTA modules through srv-api.) Tj ET
+BT /F3 12.2 Tf 48.00 364.51 Td (12.3 Why There Is a suppliershield-approuter Module) Tj ET
+BT /F1 10.5 Tf 48.00 344.51 Td (This module deploys the public web entry point.) Tj ET
+BT /F1 10.5 Tf 48.00 324.34 Td (Important properties:) Tj ET
+0.96 0.97 0.98 rg
+48 261.76 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 261.76 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 294.16 Td ([yaml]) Tj ET
+BT /F2 8.2 Tf 58.00 283.36 Td (type: approuter.nodejs) Tj ET
+BT /F2 8.2 Tf 58.00 272.56 Td (path: app/router) Tj ET
+BT /F1 10.5 Tf 48.00 251.76 Td (Why:) Tj ET
+BT /F1 10.2 Tf 60.00 231.59 Td (- It packages the app router as a separate Cloud Foundry app.) Tj ET
+BT /F1 10.2 Tf 60.00 215.82 Td (- It builds the Vite frontend and copies the output into app/router/resources.) Tj ET
+BT /F1 10.5 Tf 48.00 200.05 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 179.87 Td (- Users access only the app router URL.) Tj ET
+BT /F1 10.2 Tf 60.00 164.10 Td (- Static files and OData proxying are handled in one place.) Tj ET
+BT /F3 12.2 Tf 48.00 140.33 Td (12.4 Why the Destination Is Inline) Tj ET
+BT /F1 10.5 Tf 48.00 120.33 Td (Configuration:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 11) Tj ET
+endstream
+endobj
+25 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 24 0 R >>
+endobj
+26 0 obj
+<< /Length 3251 >>
+stream
+0.96 0.97 0.98 rg
+48 693.49 499.28 104.40 re f
+0.82 0.86 0.90 RG
+48 693.49 499.28 104.40 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([yaml]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (requires:) Tj ET
+BT /F2 8.2 Tf 58.00 758.29 Td (- name: srv-api) Tj ET
+BT /F2 8.2 Tf 58.00 747.49 Td (group: destinations) Tj ET
+BT /F2 8.2 Tf 58.00 736.69 Td (properties:) Tj ET
+BT /F2 8.2 Tf 58.00 725.89 Td (name: srv-api) Tj ET
+BT /F2 8.2 Tf 58.00 715.09 Td (url: ~{srv-url}) Tj ET
+BT /F2 8.2 Tf 58.00 704.29 Td (forwardAuthToken: false) Tj ET
+BT /F1 10.5 Tf 48.00 683.49 Td (Why:) Tj ET
+BT /F1 10.2 Tf 60.00 663.32 Td (- The app router needs to know where the CAP service is.) Tj ET
+BT /F1 10.2 Tf 60.00 647.55 Td (- The MTA provides the CAP service URL from suppliershield-srv.) Tj ET
+BT /F1 10.2 Tf 60.00 631.78 Td (- No destination service instance is required for this simple setup.) Tj ET
+BT /F1 10.5 Tf 48.00 616.01 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 595.83 Td (- Fewer BTP service dependencies.) Tj ET
+BT /F1 10.2 Tf 60.00 580.06 Td (- No XSUAA or destination service binding is needed.) Tj ET
+BT /F1 10.2 Tf 60.00 564.29 Td (- The app router receives an environment destination named srv-api.) Tj ET
+BT /F3 15 Tf 48.00 534.52 Td (13. MTA Ignore File) Tj ET
+BT /F1 10.5 Tf 48.00 510.52 Td (File:) Tj ET
+0.96 0.97 0.98 rg
+48 458.75 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 458.75 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 480.35 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 469.55 Td (.mtaignore) Tj ET
+BT /F1 10.5 Tf 48.00 448.75 Td (Recommended contents:) Tj ET
+0.96 0.97 0.98 rg
+48 310.57 499.28 126.00 re f
+0.82 0.86 0.90 RG
+48 310.57 499.28 126.00 re S
+BT /F2 8.2 Tf 58.00 418.57 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 407.77 Td (node_modules/) Tj ET
+BT /F2 8.2 Tf 58.00 396.97 Td (app/node_modules/) Tj ET
+BT /F2 8.2 Tf 58.00 386.17 Td (app/router/node_modules/) Tj ET
+BT /F2 8.2 Tf 58.00 375.37 Td (mta_archives/) Tj ET
+BT /F2 8.2 Tf 58.00 364.57 Td (*.mtar) Tj ET
+BT /F2 8.2 Tf 58.00 353.77 Td (*.sqlite) Tj ET
+BT /F2 8.2 Tf 58.00 342.97 Td (*.sqlite-shm) Tj ET
+BT /F2 8.2 Tf 58.00 332.17 Td (*.sqlite-wal) Tj ET
+BT /F2 8.2 Tf 58.00 321.37 Td (.DS_Store) Tj ET
+BT /F1 10.5 Tf 48.00 300.57 Td (Why this exists:) Tj ET
+BT /F1 10.2 Tf 60.00 280.40 Td (- Keeps generated and local runtime files out of the MTAR.) Tj ET
+BT /F1 10.2 Tf 60.00 264.63 Td (- Prevents accidental packaging of large dependency folders.) Tj ET
+BT /F1 10.2 Tf 60.00 248.86 Td (- Prevents local SQLite files from being deployed by mistake.) Tj ET
+BT /F1 10.5 Tf 48.00 233.09 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 212.91 Td (- Smaller deployment archive.) Tj ET
+BT /F1 10.2 Tf 60.00 197.14 Td (- Cleaner and more reproducible builds.) Tj ET
+BT /F3 15 Tf 48.00 167.37 Td (14. Build the Application Locally) Tj ET
+BT /F1 10.5 Tf 48.00 143.37 Td (From the project root:) Tj ET
+0.96 0.97 0.98 rg
+48 70.00 499.28 61.20 re f
+0.82 0.86 0.90 RG
+48 70.00 499.28 61.20 re S
+BT /F2 8.2 Tf 58.00 113.20 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 102.40 Td (npm ci) Tj ET
+BT /F2 8.2 Tf 58.00 91.60 Td (npm --prefix app ci) Tj ET
+BT /F2 8.2 Tf 58.00 80.80 Td (npm --prefix app/router ci) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 12) Tj ET
+endstream
+endobj
+27 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 26 0 R >>
+endobj
+28 0 obj
+<< /Length 2972 >>
+stream
+BT /F1 10.5 Tf 48.00 789.89 Td (Build CAP:) Tj ET
+0.96 0.97 0.98 rg
+48 738.12 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 738.12 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 759.72 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 748.92 Td (npx cds build --production) Tj ET
+BT /F1 10.5 Tf 48.00 728.12 Td (Build frontend:) Tj ET
+0.96 0.97 0.98 rg
+48 676.34 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 676.34 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 697.94 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 687.14 Td (npm --prefix app run build) Tj ET
+BT /F1 10.5 Tf 48.00 666.34 Td (Build MTA archive:) Tj ET
+0.96 0.97 0.98 rg
+48 614.57 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 614.57 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 636.17 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 625.37 Td (mbt build) Tj ET
+BT /F1 10.5 Tf 48.00 604.57 Td (Expected result:) Tj ET
+0.96 0.97 0.98 rg
+48 552.79 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 552.79 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 574.39 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 563.59 Td (mta_archives/suppliershield_1.0.0.mtar) Tj ET
+BT /F3 15 Tf 48.00 528.79 Td (15. Deploy to Cloud Foundry) Tj ET
+BT /F1 10.5 Tf 48.00 504.79 Td (Log in:) Tj ET
+0.96 0.97 0.98 rg
+48 453.02 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 453.02 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 474.62 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 463.82 Td (cf login -a <api-endpoint>) Tj ET
+BT /F1 10.5 Tf 48.00 443.02 Td (Check target:) Tj ET
+0.96 0.97 0.98 rg
+48 391.24 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 391.24 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 412.84 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 402.04 Td (cf target) Tj ET
+BT /F1 10.5 Tf 48.00 381.24 Td (Deploy:) Tj ET
+0.96 0.97 0.98 rg
+48 329.47 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 329.47 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 351.07 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 340.27 Td (cf deploy mta_archives/suppliershield_1.0.0.mtar -f) Tj ET
+BT /F1 10.5 Tf 48.00 319.47 Td (Why:) Tj ET
+BT /F1 10.2 Tf 60.00 299.29 Td (- mbt build creates the deployable MTAR package.) Tj ET
+BT /F1 10.2 Tf 60.00 283.52 Td (- cf deploy uploads and deploys the MTA to Cloud Foundry.) Tj ET
+BT /F1 10.2 Tf 60.00 267.75 Td (- -f allows updating an existing deployment.) Tj ET
+BT /F1 10.5 Tf 48.00 251.98 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 231.81 Td (- Cloud Foundry creates or updates both apps:) Tj ET
+0.96 0.97 0.98 rg
+48 173.64 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 173.64 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 206.04 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 195.24 Td (suppliershield-srv) Tj ET
+BT /F2 8.2 Tf 58.00 184.44 Td (suppliershield-approuter) Tj ET
+BT /F3 15 Tf 48.00 149.64 Td (16. Runtime Checks) Tj ET
+BT /F1 10.5 Tf 48.00 125.64 Td (Check deployed apps:) Tj ET
+0.96 0.97 0.98 rg
+48 73.86 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 73.86 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 95.46 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 84.66 Td (cf apps) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 13) Tj ET
+endstream
+endobj
+29 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 28 0 R >>
+endobj
+30 0 obj
+<< /Length 3440 >>
+stream
+BT /F1 10.5 Tf 48.00 789.89 Td (Expected:) Tj ET
+0.96 0.97 0.98 rg
+48 727.32 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 727.32 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 759.72 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 748.92 Td (suppliershield-approuter started) Tj ET
+BT /F2 8.2 Tf 58.00 738.12 Td (suppliershield-srv started) Tj ET
+BT /F1 10.5 Tf 48.00 717.32 Td (Check routes:) Tj ET
+0.96 0.97 0.98 rg
+48 654.74 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 654.74 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 687.14 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 676.34 Td (cf app suppliershield-approuter) Tj ET
+BT /F2 8.2 Tf 58.00 665.54 Td (cf app suppliershield-srv) Tj ET
+BT /F1 10.5 Tf 48.00 644.74 Td (Check logs:) Tj ET
+0.96 0.97 0.98 rg
+48 582.17 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 582.17 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 614.57 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 603.77 Td (cf logs suppliershield-srv --recent) Tj ET
+BT /F2 8.2 Tf 58.00 592.97 Td (cf logs suppliershield-approuter --recent) Tj ET
+BT /F1 10.5 Tf 48.00 572.17 Td (Stream logs during troubleshooting:) Tj ET
+0.96 0.97 0.98 rg
+48 509.59 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 509.59 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 541.99 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 531.19 Td (cf logs suppliershield-srv) Tj ET
+BT /F2 8.2 Tf 58.00 520.39 Td (cf logs suppliershield-approuter) Tj ET
+BT /F1 10.5 Tf 48.00 499.59 Td (Check environment variables:) Tj ET
+0.96 0.97 0.98 rg
+48 437.02 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 437.02 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 469.42 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 458.62 Td (cf env suppliershield-approuter) Tj ET
+BT /F2 8.2 Tf 58.00 447.82 Td (cf env suppliershield-srv) Tj ET
+BT /F1 10.5 Tf 48.00 427.02 Td (Check the frontend:) Tj ET
+0.96 0.97 0.98 rg
+48 375.24 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 375.24 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 396.84 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 386.04 Td (curl -I https://<approuter-route>/index.html) Tj ET
+BT /F1 10.5 Tf 48.00 365.24 Td (Expected:) Tj ET
+0.96 0.97 0.98 rg
+48 313.47 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 313.47 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 335.07 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 324.27 Td (HTTP/2 200) Tj ET
+BT /F1 10.5 Tf 48.00 303.47 Td (Check OData through the app router:) Tj ET
+0.96 0.97 0.98 rg
+48 251.69 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 251.69 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 273.29 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 262.49 Td (curl https://<approuter-route>/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F1 10.5 Tf 48.00 241.69 Td (Expected:) Tj ET
+0.96 0.97 0.98 rg
+48 168.32 499.28 61.20 re f
+0.82 0.86 0.90 RG
+48 168.32 499.28 61.20 re S
+BT /F2 8.2 Tf 58.00 211.52 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 200.72 Td ({) Tj ET
+BT /F2 8.2 Tf 58.00 189.92 Td ("value": []) Tj ET
+BT /F2 8.2 Tf 58.00 179.12 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 158.32 Td (or seeded supplier rows.) Tj ET
+BT /F1 10.5 Tf 48.00 138.14 Td (Check OData directly against CAP:) Tj ET
+0.96 0.97 0.98 rg
+48 86.37 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 86.37 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 107.97 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 97.17 Td (curl https://<srv-route>/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F1 10.5 Tf 48.00 76.37 Td (This verifies whether a problem is in CAP itself or in app router routing.) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 14) Tj ET
+endstream
+endobj
+31 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 30 0 R >>
+endobj
+32 0 obj
+<< /Length 2733 >>
+stream
+BT /F3 15 Tf 48.00 775.89 Td (17. Local Development Flow) Tj ET
+BT /F1 10.5 Tf 48.00 751.89 Td (Start CAP:) Tj ET
+0.96 0.97 0.98 rg
+48 700.12 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 700.12 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 721.72 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 710.92 Td (npm start) Tj ET
+BT /F1 10.5 Tf 48.00 690.12 Td (Start Vite:) Tj ET
+0.96 0.97 0.98 rg
+48 638.34 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 638.34 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 659.94 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 649.14 Td (npm --prefix app run dev) Tj ET
+BT /F1 10.5 Tf 48.00 628.34 Td (Open:) Tj ET
+0.96 0.97 0.98 rg
+48 576.57 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 576.57 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 598.17 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 587.37 Td (http://localhost:5173) Tj ET
+BT /F1 10.5 Tf 48.00 566.57 Td (Check CAP:) Tj ET
+0.96 0.97 0.98 rg
+48 514.79 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 514.79 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 536.39 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 525.59 Td (curl http://localhost:4004/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F1 10.5 Tf 48.00 504.79 Td (Check Vite proxy:) Tj ET
+0.96 0.97 0.98 rg
+48 453.02 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 453.02 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 474.62 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 463.82 Td (curl http://localhost:5173/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F3 15 Tf 48.00 429.02 Td (18. Killing a Local Port) Tj ET
+BT /F1 10.5 Tf 48.00 405.02 Td (Find the process using port 4004:) Tj ET
+0.96 0.97 0.98 rg
+48 353.24 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 353.24 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 374.84 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 364.04 Td (lsof -i :4004) Tj ET
+BT /F1 10.5 Tf 48.00 343.24 Td (Kill by PID:) Tj ET
+0.96 0.97 0.98 rg
+48 291.47 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 291.47 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 313.07 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 302.27 Td (kill <PID>) Tj ET
+BT /F1 10.5 Tf 48.00 281.47 Td (Force kill only if needed:) Tj ET
+0.96 0.97 0.98 rg
+48 229.69 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 229.69 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 251.29 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 240.49 Td (kill -9 <PID>) Tj ET
+BT /F1 10.5 Tf 48.00 219.69 Td (For Vite:) Tj ET
+0.96 0.97 0.98 rg
+48 157.12 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 157.12 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 189.52 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 178.72 Td (lsof -i :5173) Tj ET
+BT /F2 8.2 Tf 58.00 167.92 Td (kill <PID>) Tj ET
+BT /F3 15 Tf 48.00 133.12 Td (19. Common Failure: cds Not Found) Tj ET
+BT /F1 10.5 Tf 48.00 109.12 Td (Symptom:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 15) Tj ET
+endstream
+endobj
+33 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 32 0 R >>
+endobj
+34 0 obj
+<< /Length 3034 >>
+stream
+0.96 0.97 0.98 rg
+48 758.29 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 758.29 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (cds: command not found) Tj ET
+BT /F1 10.5 Tf 48.00 748.29 Td (Cause:) Tj ET
+BT /F1 10.2 Tf 60.00 728.12 Td (- The deployed app may not have the global cds CLI.) Tj ET
+BT /F1 10.5 Tf 48.00 712.35 Td (Fix:) Tj ET
+BT /F1 10.2 Tf 60.00 692.17 Td (- Use CAP executable package scripts such as:) Tj ET
+0.96 0.97 0.98 rg
+48 644.80 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 644.80 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 666.40 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 655.60 Td ("start": "cds-deploy && cds-serve") Tj ET
+BT /F1 10.5 Tf 48.00 634.80 Td (Why:) Tj ET
+BT /F1 10.2 Tf 60.00 614.63 Td (- CAP packages expose runtime binaries through node_modules/.bin.) Tj ET
+BT /F1 10.2 Tf 60.00 598.86 Td (- Cloud Foundry runs npm scripts with node_modules/.bin on the path.) Tj ET
+BT /F3 15 Tf 48.00 569.09 Td (20. Common Failure: SQLite Not Initialized) Tj ET
+BT /F1 10.5 Tf 48.00 545.09 Td (Symptoms:) Tj ET
+0.96 0.97 0.98 rg
+48 493.31 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 493.31 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 514.91 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 504.11 Td (no such table) Tj ET
+BT /F1 10.5 Tf 48.00 483.31 Td (or empty data when seed data was expected.) Tj ET
+BT /F1 10.5 Tf 48.00 463.14 Td (Check:) Tj ET
+0.96 0.97 0.98 rg
+48 411.36 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 411.36 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 432.96 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 422.16 Td (cf logs suppliershield-srv --recent) Tj ET
+BT /F1 10.5 Tf 48.00 401.36 Td (Likely causes:) Tj ET
+BT /F1 10.2 Tf 60.00 381.19 Td (- @cap-js/sqlite is missing from production dependencies.) Tj ET
+BT /F1 10.2 Tf 60.00 365.42 Td (- CSV seed files were not copied into gen/srv.) Tj ET
+BT /F1 10.2 Tf 60.00 349.65 Td (- cds.requires.db.kind is not set to sqlite.) Tj ET
+BT /F1 10.2 Tf 60.00 333.88 Td (- Start command does not run cds-deploy.) Tj ET
+BT /F1 10.5 Tf 48.00 318.11 Td (Fix:) Tj ET
+BT /F1 10.2 Tf 60.00 297.93 Td (- Keep @cap-js/sqlite in root dependencies.) Tj ET
+BT /F1 10.2 Tf 60.00 282.16 Td (- Keep the CSV copy command in mta.yaml.) Tj ET
+BT /F1 10.2 Tf 60.00 266.39 Td (- Keep root start script as:) Tj ET
+0.96 0.97 0.98 rg
+48 219.02 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 219.02 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 240.62 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 229.82 Td ("start": "cds-deploy && cds-serve") Tj ET
+BT /F3 15 Tf 48.00 195.02 Td (21. Common Failure: App Router Returns 404 for OData) Tj ET
+BT /F1 10.5 Tf 48.00 171.02 Td (Check app router route:) Tj ET
+0.96 0.97 0.98 rg
+48 119.25 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 119.25 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 140.85 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 130.05 Td (cf logs suppliershield-approuter --recent) Tj ET
+BT /F1 10.5 Tf 48.00 109.25 Td (Check direct CAP route:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 16) Tj ET
+endstream
+endobj
+35 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 34 0 R >>
+endobj
+36 0 obj
+<< /Length 3300 >>
+stream
+0.96 0.97 0.98 rg
+48 758.29 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 758.29 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (curl https://<srv-route>/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F1 10.5 Tf 48.00 748.29 Td (If direct CAP works but app router fails, inspect:) Tj ET
+0.96 0.97 0.98 rg
+48 696.52 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 696.52 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 718.12 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 707.32 Td (app/router/xs-app.json) Tj ET
+BT /F1 10.5 Tf 48.00 686.52 Td (The OData route must appear before the static catch-all route:) Tj ET
+0.96 0.97 0.98 rg
+48 569.94 499.28 104.40 re f
+0.82 0.86 0.90 RG
+48 569.94 499.28 104.40 re S
+BT /F2 8.2 Tf 58.00 656.34 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 645.54 Td ({) Tj ET
+BT /F2 8.2 Tf 58.00 634.74 Td ("source": "^/odata/\(.*\)$",) Tj ET
+BT /F2 8.2 Tf 58.00 623.94 Td ("target": "/odata/$1",) Tj ET
+BT /F2 8.2 Tf 58.00 613.14 Td ("destination": "srv-api",) Tj ET
+BT /F2 8.2 Tf 58.00 602.34 Td ("authenticationType": "none",) Tj ET
+BT /F2 8.2 Tf 58.00 591.54 Td ("csrfProtection": false) Tj ET
+BT /F2 8.2 Tf 58.00 580.74 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 559.94 Td (Why:) Tj ET
+BT /F1 10.2 Tf 60.00 539.77 Td (- Routes are evaluated in order.) Tj ET
+BT /F1 10.2 Tf 60.00 524.00 Td (- The catch-all static route would otherwise capture /odata.) Tj ET
+BT /F3 15 Tf 48.00 494.23 Td (22. Common Failure: Login Page Appears) Tj ET
+BT /F1 10.5 Tf 48.00 470.23 Td (Cause:) Tj ET
+BT /F1 10.2 Tf 60.00 450.05 Td (- XSUAA was added.) Tj ET
+BT /F1 10.2 Tf 60.00 434.28 Td (- A route has authentication enabled.) Tj ET
+BT /F1 10.2 Tf 60.00 418.51 Td (- CAP auth is configured for production authentication.) Tj ET
+BT /F1 10.5 Tf 48.00 402.74 Td (Checks:) Tj ET
+0.96 0.97 0.98 rg
+48 350.97 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 350.97 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 372.57 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 361.77 Td (cf env suppliershield-approuter) Tj ET
+BT /F1 10.5 Tf 48.00 340.97 Td (Inspect:) Tj ET
+0.96 0.97 0.98 rg
+48 267.59 499.28 61.20 re f
+0.82 0.86 0.90 RG
+48 267.59 499.28 61.20 re S
+BT /F2 8.2 Tf 58.00 310.79 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 299.99 Td (app/router/xs-app.json) Tj ET
+BT /F2 8.2 Tf 58.00 289.19 Td (package.json) Tj ET
+BT /F2 8.2 Tf 58.00 278.39 Td (mta.yaml) Tj ET
+BT /F1 10.5 Tf 48.00 257.59 Td (Expected:) Tj ET
+BT /F1 10.2 Tf 60.00 237.42 Td (- No XSUAA resource in mta.yaml.) Tj ET
+BT /F1 10.2 Tf 60.00 221.65 Td (- No XSUAA binding in any module.) Tj ET
+BT /F1 10.2 Tf 60.00 205.88 Td (- authenticationType is none for public routes.) Tj ET
+BT /F1 10.2 Tf 60.00 190.11 Td (- CAP auth uses dummy mode:) Tj ET
+0.96 0.97 0.98 rg
+48 121.14 499.28 61.20 re f
+0.82 0.86 0.90 RG
+48 121.14 499.28 61.20 re S
+BT /F2 8.2 Tf 58.00 164.34 Td ([json]) Tj ET
+BT /F2 8.2 Tf 58.00 153.54 Td ("auth": {) Tj ET
+BT /F2 8.2 Tf 58.00 142.74 Td ("kind": "dummy") Tj ET
+BT /F2 8.2 Tf 58.00 131.94 Td (}) Tj ET
+BT /F1 10.5 Tf 48.00 111.14 Td (Impact:) Tj ET
+BT /F1 10.2 Tf 60.00 90.96 Td (- The app is public.) Tj ET
+BT /F1 10.2 Tf 60.00 75.19 Td (- Anyone with the route can access frontend and OData endpoints.) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 17) Tj ET
+endstream
+endobj
+37 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 36 0 R >>
+endobj
+38 0 obj
+<< /Length 2893 >>
+stream
+BT /F3 15 Tf 48.00 775.89 Td (23. Common Failure: MTAR Includes Too Much) Tj ET
+BT /F1 10.5 Tf 48.00 751.89 Td (Symptom:) Tj ET
+BT /F1 10.2 Tf 60.00 731.72 Td (- MTAR is unexpectedly large.) Tj ET
+BT /F1 10.2 Tf 60.00 715.95 Td (- Build is slow.) Tj ET
+BT /F1 10.2 Tf 60.00 700.18 Td (- Local database files are packaged.) Tj ET
+BT /F1 10.5 Tf 48.00 684.41 Td (Check:) Tj ET
+0.96 0.97 0.98 rg
+48 632.63 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 632.63 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 654.23 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 643.43 Td (du -sh mta_archives/*) Tj ET
+BT /F1 10.5 Tf 48.00 622.63 Td (Inspect:) Tj ET
+0.96 0.97 0.98 rg
+48 570.86 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 570.86 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 592.46 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 581.66 Td (tar -tf mta_archives/suppliershield_1.0.0.mtar) Tj ET
+BT /F1 10.5 Tf 48.00 560.86 Td (Fix:) Tj ET
+BT /F1 10.2 Tf 60.00 540.68 Td (- Maintain .mtaignore.) Tj ET
+BT /F1 10.2 Tf 60.00 524.91 Td (- Do not package node_modules, local SQLite files, or old build output unless intentionally needed.) Tj ET
+BT /F3 15 Tf 48.00 495.14 Td (24. Clean Rebuild) Tj ET
+BT /F1 10.5 Tf 48.00 471.14 Td (Use this when a deployment behaves strangely after many local changes:) Tj ET
+0.96 0.97 0.98 rg
+48 332.97 499.28 126.00 re f
+0.82 0.86 0.90 RG
+48 332.97 499.28 126.00 re S
+BT /F2 8.2 Tf 58.00 440.97 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 430.17 Td (rm -rf gen) Tj ET
+BT /F2 8.2 Tf 58.00 419.37 Td (rm -rf app/dist) Tj ET
+BT /F2 8.2 Tf 58.00 408.57 Td (rm -rf app/router/resources) Tj ET
+BT /F2 8.2 Tf 58.00 397.77 Td (rm -rf mta_archives) Tj ET
+BT /F2 8.2 Tf 58.00 386.97 Td (npm ci) Tj ET
+BT /F2 8.2 Tf 58.00 376.17 Td (npm --prefix app ci) Tj ET
+BT /F2 8.2 Tf 58.00 365.37 Td (npm --prefix app/router ci) Tj ET
+BT /F2 8.2 Tf 58.00 354.57 Td (mbt build) Tj ET
+BT /F2 8.2 Tf 58.00 343.77 Td (cf deploy mta_archives/suppliershield_1.0.0.mtar -f) Tj ET
+BT /F1 10.5 Tf 48.00 322.97 Td (Note:) Tj ET
+BT /F1 10.2 Tf 60.00 302.79 Td (- rm -rf is destructive.) Tj ET
+BT /F1 10.2 Tf 60.00 287.02 Td (- Review the paths before running it.) Tj ET
+BT /F3 15 Tf 48.00 257.25 Td (25. Useful Command Cheat Sheet) Tj ET
+BT /F1 10.5 Tf 48.00 233.25 Td (Install backend dependencies:) Tj ET
+0.96 0.97 0.98 rg
+48 181.48 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 181.48 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 203.08 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 192.28 Td (npm ci) Tj ET
+BT /F1 10.5 Tf 48.00 171.48 Td (Install frontend dependencies:) Tj ET
+0.96 0.97 0.98 rg
+48 119.70 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 119.70 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 141.30 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 130.50 Td (npm --prefix app ci) Tj ET
+BT /F1 10.5 Tf 48.00 109.70 Td (Install app router dependencies:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 18) Tj ET
+endstream
+endobj
+39 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 38 0 R >>
+endobj
+40 0 obj
+<< /Length 3061 >>
+stream
+0.96 0.97 0.98 rg
+48 758.29 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 758.29 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (npm --prefix app/router ci) Tj ET
+BT /F1 10.5 Tf 48.00 748.29 Td (Run CAP locally:) Tj ET
+0.96 0.97 0.98 rg
+48 696.52 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 696.52 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 718.12 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 707.32 Td (npm start) Tj ET
+BT /F1 10.5 Tf 48.00 686.52 Td (Run Vite locally:) Tj ET
+0.96 0.97 0.98 rg
+48 634.74 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 634.74 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 656.34 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 645.54 Td (npm --prefix app run dev) Tj ET
+BT /F1 10.5 Tf 48.00 624.74 Td (Build frontend:) Tj ET
+0.96 0.97 0.98 rg
+48 572.97 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 572.97 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 594.57 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 583.77 Td (npm --prefix app run build) Tj ET
+BT /F1 10.5 Tf 48.00 562.97 Td (Build CAP:) Tj ET
+0.96 0.97 0.98 rg
+48 511.19 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 511.19 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 532.79 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 521.99 Td (npx cds build --production) Tj ET
+BT /F1 10.5 Tf 48.00 501.19 Td (Build MTAR:) Tj ET
+0.96 0.97 0.98 rg
+48 449.42 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 449.42 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 471.02 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 460.22 Td (mbt build) Tj ET
+BT /F1 10.5 Tf 48.00 439.42 Td (Deploy MTAR:) Tj ET
+0.96 0.97 0.98 rg
+48 387.64 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 387.64 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 409.24 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 398.44 Td (cf deploy mta_archives/suppliershield_1.0.0.mtar -f) Tj ET
+BT /F1 10.5 Tf 48.00 377.64 Td (Check CF target:) Tj ET
+0.96 0.97 0.98 rg
+48 325.87 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 325.87 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 347.47 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 336.67 Td (cf target) Tj ET
+BT /F1 10.5 Tf 48.00 315.87 Td (Check apps:) Tj ET
+0.96 0.97 0.98 rg
+48 264.09 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 264.09 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 285.69 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 274.89 Td (cf apps) Tj ET
+BT /F1 10.5 Tf 48.00 254.09 Td (Check one app:) Tj ET
+0.96 0.97 0.98 rg
+48 191.52 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 191.52 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 223.92 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 213.12 Td (cf app suppliershield-approuter) Tj ET
+BT /F2 8.2 Tf 58.00 202.32 Td (cf app suppliershield-srv) Tj ET
+BT /F1 10.5 Tf 48.00 181.52 Td (Check recent logs:) Tj ET
+0.96 0.97 0.98 rg
+48 118.94 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 118.94 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 151.34 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 140.54 Td (cf logs suppliershield-srv --recent) Tj ET
+BT /F2 8.2 Tf 58.00 129.74 Td (cf logs suppliershield-approuter --recent) Tj ET
+BT /F1 10.5 Tf 48.00 108.94 Td (Check frontend route:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 19) Tj ET
+endstream
+endobj
+41 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 40 0 R >>
+endobj
+42 0 obj
+<< /Length 3537 >>
+stream
+0.96 0.97 0.98 rg
+48 758.29 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 758.29 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (curl -I https://<approuter-route>/index.html) Tj ET
+BT /F1 10.5 Tf 48.00 748.29 Td (Check OData through app router:) Tj ET
+0.96 0.97 0.98 rg
+48 696.52 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 696.52 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 718.12 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 707.32 Td (curl https://<approuter-route>/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F1 10.5 Tf 48.00 686.52 Td (Check OData directly:) Tj ET
+0.96 0.97 0.98 rg
+48 634.74 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 634.74 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 656.34 Td ([bash]) Tj ET
+BT /F2 8.2 Tf 58.00 645.54 Td (curl https://<srv-route>/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F3 15 Tf 48.00 610.74 Td (26. Deployment Checklist) Tj ET
+BT /F1 10.5 Tf 48.00 586.74 Td (Before deploy:) Tj ET
+BT /F1 10.2 Tf 60.00 566.57 Td (- package.json has @cap-js/sqlite in dependencies.) Tj ET
+BT /F1 10.2 Tf 60.00 550.80 Td (- package.json has @sap/cds in dependencies.) Tj ET
+BT /F1 10.2 Tf 60.00 535.03 Td (- package.json has start set to cds-deploy && cds-serve.) Tj ET
+BT /F1 10.2 Tf 60.00 519.26 Td (- package.json has CAP db.kind set to sqlite.) Tj ET
+BT /F1 10.2 Tf 60.00 503.49 Td (- package.json has CAP auth.kind set to dummy.) Tj ET
+BT /F1 10.2 Tf 60.00 487.72 Td (- app/router/package.json has @sap/approuter.) Tj ET
+BT /F1 10.2 Tf 60.00 471.95 Td (- app/router/xs-app.json has public routes.) Tj ET
+BT /F1 10.2 Tf 60.00 456.18 Td (- mta.yaml has only the backend and app router modules.) Tj ET
+BT /F1 10.2 Tf 60.00 440.41 Td (- mta.yaml has no XSUAA resource.) Tj ET
+BT /F1 10.2 Tf 60.00 424.64 Td (- mta.yaml has no HANA resource.) Tj ET
+BT /F1 10.2 Tf 60.00 408.87 Td (- mta.yaml copies seed CSV files into gen/srv.) Tj ET
+BT /F1 10.2 Tf 60.00 393.10 Td (- .mtaignore excludes local runtime files.) Tj ET
+BT /F1 10.5 Tf 48.00 377.33 Td (After deploy:) Tj ET
+BT /F1 10.2 Tf 60.00 357.15 Td (- cf apps shows both apps started.) Tj ET
+BT /F1 10.2 Tf 60.00 341.38 Td (- App router /index.html returns 200.) Tj ET
+BT /F1 10.2 Tf 60.00 325.61 Td (- App router /odata/v4/... returns 200.) Tj ET
+BT /F1 10.2 Tf 60.00 309.84 Td (- CAP service direct route returns 200.) Tj ET
+BT /F1 10.2 Tf 60.00 294.07 Td (- Logs do not show SQLite initialization errors.) Tj ET
+BT /F3 15 Tf 48.00 264.30 Td (27. Current Supplier Shield Deployment Example) Tj ET
+BT /F1 10.5 Tf 48.00 240.30 Td (The deployed app router URL from this project was:) Tj ET
+0.96 0.97 0.98 rg
+48 177.73 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 177.73 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 210.13 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 199.33 Td (https://brainbox-consulting-bv-brainboxconsultingig-dev-supplier8d21874.cfapps.eu10-005.hana.ondemand) Tj ET
+BT /F2 8.2 Tf 58.00 188.53 Td (.com/) Tj ET
+BT /F1 10.5 Tf 48.00 167.73 Td (The deployed OData endpoint was:) Tj ET
+0.96 0.97 0.98 rg
+48 105.15 499.28 50.40 re f
+0.82 0.86 0.90 RG
+48 105.15 499.28 50.40 re S
+BT /F2 8.2 Tf 58.00 137.55 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 126.75 Td (https://brainbox-consulting-bv-brainboxconsultingig-dev-supplier8d21874.cfapps.eu10-005.hana.ondemand) Tj ET
+BT /F2 8.2 Tf 58.00 115.95 Td (.com/odata/v4/supplier-shield/SupplierShield) Tj ET
+BT /F1 10.5 Tf 48.00 95.15 Td (The generated MTAR was:) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 20) Tj ET
+endstream
+endobj
+43 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 42 0 R >>
+endobj
+44 0 obj
+<< /Length 1245 >>
+stream
+0.96 0.97 0.98 rg
+48 758.29 499.28 39.60 re f
+0.82 0.86 0.90 RG
+48 758.29 499.28 39.60 re S
+BT /F2 8.2 Tf 58.00 779.89 Td ([text]) Tj ET
+BT /F2 8.2 Tf 58.00 769.09 Td (mta_archives/suppliershield_1.0.0.mtar) Tj ET
+BT /F3 15 Tf 48.00 734.29 Td (28. When to Change This Architecture) Tj ET
+BT /F1 10.5 Tf 48.00 710.29 Td (Use this SQLite and no-auth model when:) Tj ET
+BT /F1 10.2 Tf 60.00 690.12 Td (- The app is small.) Tj ET
+BT /F1 10.2 Tf 60.00 674.35 Td (- The app is a demo, prototype, or internal throwaway tool.) Tj ET
+BT /F1 10.2 Tf 60.00 658.58 Td (- Data can be reset from CSV.) Tj ET
+BT /F1 10.2 Tf 60.00 642.81 Td (- Public access is acceptable.) Tj ET
+BT /F1 10.5 Tf 48.00 627.04 Td (Switch to HANA and XSUAA or IAS when:) Tj ET
+BT /F1 10.2 Tf 60.00 606.86 Td (- Data must be durable.) Tj ET
+BT /F1 10.2 Tf 60.00 591.09 Td (- Users need login.) Tj ET
+BT /F1 10.2 Tf 60.00 575.32 Td (- Different users need different authorizations.) Tj ET
+BT /F1 10.2 Tf 60.00 559.55 Td (- The app handles sensitive or business-critical data.) Tj ET
+BT /F1 10.2 Tf 60.00 543.78 Td (- Auditing and compliance matter.) Tj ET
+0.72 0.78 0.83 RG 48 38 m 547 38 l S
+BT /F1 8 Tf 48.00 24.00 Td (CAP + Vite + Cloud Foundry Deployment Guide  |  Page 21) Tj ET
+endstream
+endobj
+45 0 obj
+<< /Type /Page /Parent 46 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 44 0 R >>
+endobj
+46 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R 17 0 R 19 0 R 21 0 R 23 0 R 25 0 R 27 0 R 29 0 R 31 0 R 33 0 R 35 0 R 37 0 R 39 0 R 41 0 R 43 0 R 45 0 R] /Count 21 >>
+endobj
+47 0 obj
+<< /Type /Catalog /Pages 46 0 R >>
+endobj
+xref
+0 48
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000147 00000 n 
+0000000222 00000 n 
+0000003444 00000 n 
+0000003597 00000 n 
+0000006887 00000 n 
+0000007040 00000 n 
+0000009713 00000 n 
+0000009866 00000 n 
+0000012562 00000 n 
+0000012717 00000 n 
+0000016393 00000 n 
+0000016548 00000 n 
+0000019920 00000 n 
+0000020075 00000 n 
+0000023205 00000 n 
+0000023360 00000 n 
+0000026859 00000 n 
+0000027014 00000 n 
+0000028306 00000 n 
+0000028461 00000 n 
+0000032225 00000 n 
+0000032380 00000 n 
+0000035699 00000 n 
+0000035854 00000 n 
+0000039158 00000 n 
+0000039313 00000 n 
+0000042338 00000 n 
+0000042493 00000 n 
+0000045986 00000 n 
+0000046141 00000 n 
+0000048927 00000 n 
+0000049082 00000 n 
+0000052169 00000 n 
+0000052324 00000 n 
+0000055677 00000 n 
+0000055832 00000 n 
+0000058778 00000 n 
+0000058933 00000 n 
+0000062047 00000 n 
+0000062202 00000 n 
+0000065792 00000 n 
+0000065947 00000 n 
+0000067245 00000 n 
+0000067400 00000 n 
+0000067597 00000 n 
+trailer
+<< /Size 48 /Root 47 0 R >>
+startxref
+67648
+%%EOF
