@@ -41,3 +41,27 @@ export async function getVerifiedSuppliersMessage() {
   const payload = await response.json()
   return payload?.value || ''
 }
+
+function encodeODataString(value) {
+  return encodeURIComponent(`'${String(value).replaceAll("'", "''")}'`)
+}
+
+export async function findDuplicateSuppliers(firstName, lastName) {
+  const encodedFirstName = encodeODataString(firstName)
+  const encodedLastName = encodeODataString(lastName)
+  const response = await fetch(
+    `${SERVICE_ROOT}/findDuplicateSuppliers(firstName=@firstName,lastName=@lastName)?@firstName=${encodedFirstName}&@lastName=${encodedLastName}`,
+    {
+      headers: {
+        Accept: 'application/json',
+      },
+    },
+  )
+
+  if (!response.ok) {
+    const message = await response.text()
+    throw new Error(message || `Duplicate supplier search returned ${response.status}`)
+  }
+
+  return normalizeODataCollection(await response.json())
+}

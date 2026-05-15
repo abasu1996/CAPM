@@ -16,5 +16,30 @@ module.exports = class SupplierShieldService extends cds.ApplicationService { in
     return "List of verified suppliers"
   })
 
+  this.on ('findDuplicateSuppliers', async (req) => {
+    const firstName = String(req.data.firstName || '').trim()
+    const lastName = String(req.data.lastName || '').trim()
+
+    if (!firstName && !lastName) {
+      return []
+    }
+
+    let query = SELECT.from(SupplierShield)
+
+    if (firstName && lastName) {
+      query = query.where`
+        lower(firstName) = ${firstName.toLowerCase()} and lower(lastName) = ${lastName.toLowerCase()}
+      `
+    } else if (firstName) {
+      query = query.where`lower(firstName) = ${firstName.toLowerCase()}`
+    } else {
+      query = query.where`lower(lastName) = ${lastName.toLowerCase()}`
+    }
+
+    const suppliers = await query
+
+    return suppliers
+  })
+
   return super.init()
 }}

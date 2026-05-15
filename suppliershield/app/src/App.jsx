@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getSupplierShieldEntries, getVerifiedSuppliersMessage } from './odata.js'
+import {
+  findDuplicateSuppliers,
+  getSupplierShieldEntries,
+  getVerifiedSuppliersMessage,
+} from './odata.js'
 
 function SupplierStatus({ active }) {
   return (
@@ -13,9 +17,15 @@ function App() {
   const [suppliers, setSuppliers] = useState([])
   const [verifiedMessage, setVerifiedMessage] = useState('')
   const [query, setQuery] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [duplicateSuppliers, setDuplicateSuppliers] = useState([])
+  const [duplicateSearchDone, setDuplicateSearchDone] = useState(false)
+  const [duplicateLoading, setDuplicateLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [duplicateError, setDuplicateError] = useState('')
 
   async function loadSuppliers() {
     setLoading(true)
@@ -40,6 +50,50 @@ function App() {
     loadSuppliers()
   }, [])
 
+  useEffect(() => {
+    const searchedFirstName = firstName.trim()
+    const searchedLastName = lastName.trim()
+
+    if (!searchedFirstName && !searchedLastName) {
+      setDuplicateSearchDone(false)
+      setDuplicateSuppliers([])
+      setDuplicateError('')
+      setDuplicateLoading(false)
+      return undefined
+    }
+
+    let ignoreResult = false
+    setDuplicateLoading(true)
+    setDuplicateSearchDone(false)
+    setDuplicateError('')
+
+    const searchTimer = window.setTimeout(async () => {
+      try {
+        const duplicates = await findDuplicateSuppliers(searchedFirstName, searchedLastName)
+
+        if (!ignoreResult) {
+          setDuplicateSuppliers(duplicates)
+          setDuplicateSearchDone(true)
+        }
+      } catch (err) {
+        if (!ignoreResult) {
+          setDuplicateSuppliers([])
+          setDuplicateError(err.message || 'Unable to search duplicate suppliers.')
+        }
+      } finally {
+        if (!ignoreResult) {
+          setDuplicateLoading(false)
+        }
+      }
+    }, 300)
+
+    return () => {
+      ignoreResult = true
+      window.clearTimeout(searchTimer)
+    }
+  }, [firstName, lastName])
+
+
   const filteredSuppliers = useMemo(() => {
     const searchText = query.trim().toLowerCase()
 
@@ -58,6 +112,10 @@ function App() {
     })
   }, [query, statusFilter, suppliers])
 
+  const duplicateIds = useMemo(
+    () => new Set(duplicateSuppliers.map((supplier) => supplier.ID)),
+    [duplicateSuppliers],
+  )
   const activeCount = suppliers.filter((supplier) => supplier.IsActive).length
   const inactiveCount = suppliers.length - activeCount
 
@@ -90,6 +148,64 @@ function App() {
       </section>
 
       {verifiedMessage ? <p className="serviceMessage">{verifiedMessage}</p> : null}
+
+      <section className="duplicateSearch" aria-label="Duplicate supplier search">
+        <div>
+          <label htmlFor="firstName">First name</label>
+          <input
+            id="firstName"
+            type="text"
+            placeholder="Enter first name"
+            value={firstName}
+            onChange={(event) => setFirstName(event.target.value)}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="lastName">Last name</label>
+          <input
+            id="lastName"
+            type="text"
+            placeholder="Enter last name"
+            value={lastName}
+            onChange={(event) => setLastName(event.target.value)}
+          />
+        </div>
+      </section>
+
+      {duplicateError ? (
+        <section className="notice error" role="alert">
+          {duplicateError}
+        </section>
+      ) : null}
+
+      {duplicateLoading ? (
+        <section className="duplicateResults" aria-live="polite">
+          <strong>Checking for duplicates...</strong>
+        </section>
+      ) : null}
+
+      {duplicateSearchDone && !duplicateLoading ? (
+        <section
+          className={duplicateSuppliers.length > 0 ? 'duplicateResults found' : 'duplicateResults'}
+          aria-live="polite"
+        >
+          <strong>
+            {duplicateSuppliers.length > 0
+              ? `${duplicateSuppliers.length} duplicate record${duplicateSuppliers.length === 1 ? '' : 's'} found`
+              : 'No duplicate records found'}
+          </strong>
+          {duplicateSuppliers.length > 0 ? (
+            <ul>
+              {duplicateSuppliers.map((supplier) => (
+                <li key={supplier.ID}>
+                  {supplier.firstName} {supplier.lastName} - {supplier.Description || 'No description'}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="filters" aria-label="Supplier filters">
         <input
@@ -127,7 +243,10 @@ function App() {
             </thead>
             <tbody>
               {filteredSuppliers.map((supplier) => (
-                <tr key={supplier.ID}>
+                <tr
+                  key={supplier.ID}
+                  className={duplicateIds.has(supplier.ID) ? 'duplicateRow' : undefined}
+                >
                   <td>
                     <strong>
                       {supplier.firstName} {supplier.lastName}

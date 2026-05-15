@@ -11,5 +11,5 @@
   "sap.cloud": {
     "public": true,
     "service": "suppliershield.service"
-  }  
+  }
 }
