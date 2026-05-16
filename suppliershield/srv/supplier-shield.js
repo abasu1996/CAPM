@@ -19,24 +19,35 @@ module.exports = class SupplierShieldService extends cds.ApplicationService { in
   this.on ('findDuplicateSuppliers', async (req) => {
     const firstName = String(req.data.firstName || '').trim()
     const lastName = String(req.data.lastName || '').trim()
+    const email = String(req.data.email || '').trim()
+    const emailDomain = email.includes('@') ? email.split('@').pop().trim() : email
 
-    if (!firstName && !lastName) {
+    if (!firstName && !lastName && !email) {
       return []
     }
 
-    let query = SELECT.from(SupplierShield)
+    const filters = []
 
-    if (firstName && lastName) {
-      query = query.where`
-        lower(firstName) = ${firstName.toLowerCase()} and lower(lastName) = ${lastName.toLowerCase()}
-      `
-    } else if (firstName) {
-      query = query.where`lower(firstName) = ${firstName.toLowerCase()}`
-    } else {
-      query = query.where`lower(lastName) = ${lastName.toLowerCase()}`
+    if (firstName) {
+      filters.push({ field: 'firstName', value: firstName.toLowerCase() })
+    }
+    if (lastName) {
+      filters.push({ field: 'lastName', value: lastName.toLowerCase() })
+    }
+    if (emailDomain) {
+      filters.push({ field: 'email', operator: 'like', value: `%${emailDomain.toLowerCase()}` })
     }
 
-    const suppliers = await query
+    const where = filters.reduce((expression, filter) => {
+      const condition = [
+        { func: 'lower', args: [{ ref: [filter.field] }] },
+        filter.operator || '=',
+        { val: filter.value },
+      ]
+      return expression.length ? [...expression, 'and', ...condition] : condition
+    }, [])
+
+    const suppliers = await SELECT.from(SupplierShield).where(where)
 
     return suppliers
   })

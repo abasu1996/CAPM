@@ -46,11 +46,12 @@ function encodeODataString(value) {
   return encodeURIComponent(`'${String(value).replaceAll("'", "''")}'`)
 }
 
-export async function findDuplicateSuppliers(firstName, lastName) {
+export async function findDuplicateSuppliers(firstName, lastName, email) {
   const encodedFirstName = encodeODataString(firstName)
   const encodedLastName = encodeODataString(lastName)
+  const encodedEmail = encodeODataString(email)
   const response = await fetch(
-    `${SERVICE_ROOT}/findDuplicateSuppliers(firstName=@firstName,lastName=@lastName)?@firstName=${encodedFirstName}&@lastName=${encodedLastName}`,
+    `${SERVICE_ROOT}/findDuplicateSuppliers(firstName=@firstName,lastName=@lastName,email=@email)?@firstName=${encodedFirstName}&@lastName=${encodedLastName}&@email=${encodedEmail}`,
     {
       headers: {
         Accept: 'application/json',

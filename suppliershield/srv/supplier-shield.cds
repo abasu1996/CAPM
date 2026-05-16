@@ -7,5 +7,5 @@ Service SupplierShieldService {
     entity SupplierShield as projection on ss.SupplierShield;
 
     function getVerifiedSuppliers(params : String) returns String;
-    function findDuplicateSuppliers(firstName : String, lastName : String) returns many SupplierShield;
+    function findDuplicateSuppliers(firstName : String, lastName : String, email : String) returns many SupplierShield;
 }

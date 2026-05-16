@@ -9,4 +9,6 @@ entity SupplierShield : primary {
     lastName : String(255);
     Description : String(255);
     IsActive : Boolean;
+    @mandatory
+    email: String(255);
 }

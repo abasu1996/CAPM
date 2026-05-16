@@ -19,6 +19,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
   const [duplicateSuppliers, setDuplicateSuppliers] = useState([])
   const [duplicateSearchDone, setDuplicateSearchDone] = useState(false)
   const [duplicateLoading, setDuplicateLoading] = useState(false)
@@ -53,8 +54,9 @@ function App() {
   useEffect(() => {
     const searchedFirstName = firstName.trim()
     const searchedLastName = lastName.trim()
+    const searchedEmail = email.trim()
 
-    if (!searchedFirstName && !searchedLastName) {
+    if (!searchedFirstName && !searchedLastName && !searchedEmail) {
       setDuplicateSearchDone(false)
       setDuplicateSuppliers([])
       setDuplicateError('')
@@ -69,7 +71,11 @@ function App() {
 
     const searchTimer = window.setTimeout(async () => {
       try {
-        const duplicates = await findDuplicateSuppliers(searchedFirstName, searchedLastName)
+        const duplicates = await findDuplicateSuppliers(
+          searchedFirstName,
+          searchedLastName,
+          searchedEmail,
+        )
 
         if (!ignoreResult) {
           setDuplicateSuppliers(duplicates)
@@ -91,14 +97,14 @@ function App() {
       ignoreResult = true
       window.clearTimeout(searchTimer)
     }
-  }, [firstName, lastName])
+  }, [firstName, lastName, email])
 
 
   const filteredSuppliers = useMemo(() => {
     const searchText = query.trim().toLowerCase()
 
     return suppliers.filter((supplier) => {
-      const matchesSearch = [supplier.firstName, supplier.lastName, supplier.Description]
+      const matchesSearch = [supplier.firstName, supplier.lastName, supplier.email, supplier.Description]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
@@ -171,6 +177,17 @@ function App() {
             onChange={(event) => setLastName(event.target.value)}
           />
         </div>
+
+        <div>
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Enter email or domain"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </div>
       </section>
 
       {duplicateError ? (
@@ -199,7 +216,8 @@ function App() {
             <ul>
               {duplicateSuppliers.map((supplier) => (
                 <li key={supplier.ID}>
-                  {supplier.firstName} {supplier.lastName} - {supplier.Description || 'No description'}
+                  {supplier.firstName} {supplier.lastName} - {supplier.email || 'No email'} -{' '}
+                  {supplier.Description || 'No description'}
                 </li>
               ))}
             </ul>
@@ -236,6 +254,7 @@ function App() {
             <thead>
               <tr>
                 <th>Supplier</th>
+                <th>Email</th>
                 <th>Description</th>
                 <th>Status</th>
                 <th>Modified</th>
@@ -252,6 +271,7 @@ function App() {
                       {supplier.firstName} {supplier.lastName}
                     </strong>
                   </td>
+                  <td>{supplier.email || '-'}</td>
                   <td>{supplier.Description}</td>
                   <td>
                     <SupplierStatus active={supplier.IsActive} />

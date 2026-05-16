@@ -1,6 +1,501 @@
-ID,firstName,lastName,Description,IsActive,createdAt,createdBy,modifiedAt,modifiedBy
-11111111-1111-1111-1111-111111111111,Aarav,Mehta,Verified electronics supplier,true,2026-05-13T09:00:00Z,dummy.user,2026-05-13T09:00:00Z,dummy.user
-22222222-2222-2222-2222-222222222222,Neha,Rao,Preferred packaging partner,true,2026-05-13T09:05:00Z,dummy.user,2026-05-13T09:05:00Z,dummy.user
-33333333-3333-3333-3333-333333333333,Rohan,Kapoor,Pending compliance review,false,2026-05-13T09:10:00Z,dummy.user,2026-05-13T09:10:00Z,dummy.user
-44444444-4444-4444-4444-444444444444,Anika,Shah,Approved logistics vendor,true,2026-05-13T09:15:00Z,dummy.user,2026-05-13T09:15:00Z,dummy.user
-55555555-5555-5555-5555-555555555555,Vikram,Iyer,Inactive raw materials supplier,false,2026-05-13T09:20:00Z,dummy.user,2026-05-13T09:20:00Z,dummy.user
+ID,firstName,lastName,Description,IsActive,email,createdAt,createdBy,modifiedAt,modifiedBy
+71b7bfac-a172-5f80-8fb5-ef7210e8645a,Aarav,Mehta,Verified electronics supplier,true,aarav.mehta001@gmail.com,2026-05-13T09:00:00Z,dummy.user,2026-05-13T09:00:00Z,dummy.user
+407d83e1-43cd-5e05-b5a8-d8e1c8fca970,Neha,Rao,Preferred packaging partner,true,neha.rao002@outlook.com,2026-05-13T09:05:00Z,dummy.user,2026-05-13T09:05:00Z,dummy.user
+0c646f31-2958-5b1c-9484-8dc463f9fc34,Rohan,Kapoor,Pending compliance review,false,rohan.kapoor003@yahoo.com,2026-05-13T09:10:00Z,dummy.user,2026-05-13T09:10:00Z,dummy.user
+fca4dbda-3f9a-5f42-9c0b-d11b6aea18de,Anika,Shah,Approved logistics vendor,true,anika.shah004@brainbox.consulting,2026-05-13T09:15:00Z,dummy.user,2026-05-13T09:15:00Z,dummy.user
+8246863c-1fa7-57c0-9217-8ad9acca6b41,Vikram,Iyer,Inactive raw materials supplier,false,vikram.iyer005@mail.com,2026-05-13T09:20:00Z,dummy.user,2026-05-13T09:20:00Z,dummy.user
+3af39222-9b6f-56ad-bfdc-a57529fd9549,Isha,Nair,Certified software services provider,true,isha.nair006@brainbox.com,2026-05-13T09:25:00Z,dummy.user,2026-05-13T09:25:00Z,dummy.user
+862a7375-eb0f-59db-b7c9-97e1c529acbd,Kabir,Patel,Shortlisted office supplies vendor,true,kabir.patel007@dialog.com,2026-05-13T09:30:00Z,dummy.user,2026-05-13T09:30:00Z,dummy.user
+7a9d7461-d342-5f7f-8ab7-c95ce22fe3ac,Mira,Gupta,Approved maintenance contractor,false,mira.gupta008@dlg.com,2026-05-13T09:35:00Z,dummy.user,2026-05-13T09:35:00Z,dummy.user
+7dc2c86a-c6ab-5e7f-8547-94e7244ac75e,Arjun,Verma,Preferred consulting partner,true,arjun.verma009@hotmail.com,2026-05-13T09:40:00Z,dummy.user,2026-05-13T09:40:00Z,dummy.user
+51cd50ea-16f4-5799-8668-6ec76c3a1313,Priya,Joshi,Verified component distributor,false,priya.joshi010@icloud.com,2026-05-13T09:45:00Z,dummy.user,2026-05-13T09:45:00Z,dummy.user
+543b649e-0b26-5e59-bfd2-2811a2a40d33,Dev,Reddy,Onboarding documentation pending,true,dev.reddy011@proton.me,2026-05-13T09:50:00Z,dummy.user,2026-05-13T09:50:00Z,dummy.user
+16ad795e-66a3-5827-a81a-4d7a35ead9e5,Sara,Menon,Approved facilities management vendor,true,sara.menon012@zoho.com,2026-05-13T09:55:00Z,dummy.user,2026-05-13T09:55:00Z,dummy.user
+c6a556af-2683-5b43-86a6-63c08ec2d5c1,Karan,Bose,Preferred IT hardware supplier,false,karan.bose013@company.example,2026-05-13T10:00:00Z,dummy.user,2026-05-13T10:00:00Z,dummy.user
+2036dca3-0e94-5b8c-adb3-bdd21dc64a83,Tara,Malhotra,Inactive transport service provider,true,tara.malhotra014@vendor.example,2026-05-13T10:05:00Z,dummy.user,2026-05-13T10:05:00Z,dummy.user
+61f99982-60e3-5ad0-bb48-e72e98eec594,Nikhil,Chopra,Compliance documents under review,false,nikhil.chopra015@supplier.example,2026-05-13T10:10:00Z,dummy.user,2026-05-13T10:10:00Z,dummy.user
+cfe4246d-1a47-50ca-8c09-3cbedfa46cb2,Pooja,Das,Approved marketing services agency,true,pooja.das016@gmail.com,2026-05-13T10:15:00Z,dummy.user,2026-05-13T10:15:00Z,dummy.user
+7245b3ce-bdc9-57fd-8d74-b8407b2ec097,Rahul,Kulkarni,Verified cloud services reseller,true,rahul.kulkarni017@outlook.com,2026-05-13T10:20:00Z,dummy.user,2026-05-13T10:20:00Z,dummy.user
+3ded1335-c26c-53fc-8d3b-90eff5bf0f00,Sneha,Bhat,Preferred training services provider,false,sneha.bhat018@yahoo.com,2026-05-13T10:25:00Z,dummy.user,2026-05-13T10:25:00Z,dummy.user
+fd02b188-577d-5536-82f6-921ebe5c36fc,Aditya,Saxena,Approved security services vendor,true,aditya.saxena019@brainbox.consulting,2026-05-13T10:30:00Z,dummy.user,2026-05-13T10:30:00Z,dummy.user
+268ebc28-f6da-53d7-9deb-d4328acdab3f,Riya,Pillai,Pending financial verification,false,riya.pillai020@mail.com,2026-05-13T10:35:00Z,dummy.user,2026-05-13T10:35:00Z,dummy.user
+ca0cd960-1118-5a57-8d04-3cad3bb0eb72,Manav,Mishra,Verified electronics supplier,true,manav.mishra021@brainbox.com,2026-05-13T10:40:00Z,dummy.user,2026-05-13T10:40:00Z,dummy.user
+9a7a3909-a4a5-5d01-a248-5b5f4cd1b368,Diya,Agarwal,Preferred packaging partner,true,diya.agarwal022@dialog.com,2026-05-13T10:45:00Z,dummy.user,2026-05-13T10:45:00Z,dummy.user
+0303a599-522c-5e7d-b091-0d9dae2f41c2,Siddharth,Khan,Pending compliance review,false,siddharth.khan023@dlg.com,2026-05-13T10:50:00Z,dummy.user,2026-05-13T10:50:00Z,dummy.user
+ba32f62d-b1bc-5c95-8363-61369756544a,Kavya,Shetty,Approved logistics vendor,true,kavya.shetty024@hotmail.com,2026-05-13T10:55:00Z,dummy.user,2026-05-13T10:55:00Z,dummy.user
+4ecd9fde-a5df-5630-bf15-a5814dcf0240,Yash,Srinivasan,Inactive raw materials supplier,false,yash.srinivasan025@icloud.com,2026-05-13T11:00:00Z,dummy.user,2026-05-13T11:00:00Z,dummy.user
+bce4bd90-0a68-5feb-b150-f141374a570b,Ananya,Banerjee,Certified software services provider,true,ananya.banerjee026@proton.me,2026-05-13T11:05:00Z,dummy.user,2026-05-13T11:05:00Z,dummy.user
+30c270cd-9190-553f-9e64-096f1858b8e0,Harsh,Jain,Shortlisted office supplies vendor,true,harsh.jain027@zoho.com,2026-05-13T11:10:00Z,dummy.user,2026-05-13T11:10:00Z,dummy.user
+8a21f4b2-f971-5637-9012-89f470860e63,Meera,Desai,Approved maintenance contractor,false,meera.desai028@company.example,2026-05-13T11:15:00Z,dummy.user,2026-05-13T11:15:00Z,dummy.user
+8062136b-e6ab-5af2-a323-68e9bded4cb4,Varun,Ghosh,Preferred consulting partner,true,varun.ghosh029@vendor.example,2026-05-13T11:20:00Z,dummy.user,2026-05-13T11:20:00Z,dummy.user
+9f35398d-d27c-5f41-8b09-aab31776329a,Naina,Chatterjee,Verified component distributor,false,naina.chatterjee030@supplier.example,2026-05-13T11:25:00Z,dummy.user,2026-05-13T11:25:00Z,dummy.user
+7193cda0-85a8-52e3-b85b-ab4782e2ba2c,Ayaan,Mehta,Onboarding documentation pending,true,ayaan.mehta031@gmail.com,2026-05-13T11:30:00Z,dummy.user,2026-05-13T11:30:00Z,dummy.user
+21853c0a-083c-5de8-be0e-c1fb3c8f56b4,Sanya,Rao,Approved facilities management vendor,true,sanya.rao032@outlook.com,2026-05-13T11:35:00Z,dummy.user,2026-05-13T11:35:00Z,dummy.user
+48a6a59f-08c9-56d2-bb36-925fbde119dd,Ishaan,Kapoor,Preferred IT hardware supplier,false,ishaan.kapoor033@yahoo.com,2026-05-13T11:40:00Z,dummy.user,2026-05-13T11:40:00Z,dummy.user
+08d53a8b-cab9-52ba-963c-a1c0888abb8f,Avni,Shah,Inactive transport service provider,true,avni.shah034@brainbox.consulting,2026-05-13T11:45:00Z,dummy.user,2026-05-13T11:45:00Z,dummy.user
+c58a497b-0378-5e62-8aaa-e1d7262ad9a3,Reyansh,Iyer,Compliance documents under review,false,reyansh.iyer035@mail.com,2026-05-13T11:50:00Z,dummy.user,2026-05-13T11:50:00Z,dummy.user
+9a80e0ef-3ec9-55fb-af7b-cd61406eb246,Kiara,Nair,Approved marketing services agency,true,kiara.nair036@brainbox.com,2026-05-13T11:55:00Z,dummy.user,2026-05-13T11:55:00Z,dummy.user
+ef92a1dd-1f63-5a85-9ac6-95d564728214,Vivaan,Patel,Verified cloud services reseller,true,vivaan.patel037@dialog.com,2026-05-13T12:00:00Z,dummy.user,2026-05-13T12:00:00Z,dummy.user
+0d6f45a0-74d9-518c-abf7-fe267b9fdedc,Myra,Gupta,Preferred training services provider,false,myra.gupta038@dlg.com,2026-05-13T12:05:00Z,dummy.user,2026-05-13T12:05:00Z,dummy.user
+d73f809f-f8ee-539a-986e-83f26a293be3,Dhruv,Verma,Approved security services vendor,true,dhruv.verma039@hotmail.com,2026-05-13T12:10:00Z,dummy.user,2026-05-13T12:10:00Z,dummy.user
+c8c47c8c-1dc3-5515-ad20-e157f56107b7,Aisha,Joshi,Pending financial verification,false,aisha.joshi040@icloud.com,2026-05-13T12:15:00Z,dummy.user,2026-05-13T12:15:00Z,dummy.user
+991fcb00-f30c-5af4-91dc-bba1dd425465,Aarav,Reddy,Verified electronics supplier,true,aarav.reddy041@proton.me,2026-05-13T12:20:00Z,dummy.user,2026-05-13T12:20:00Z,dummy.user
+2d52ad32-a578-5bce-991d-fb352d0dc4dd,Neha,Menon,Preferred packaging partner,true,neha.menon042@zoho.com,2026-05-13T12:25:00Z,dummy.user,2026-05-13T12:25:00Z,dummy.user
+c9e06b14-3054-57f9-bdf5-3af2785efcde,Rohan,Bose,Pending compliance review,false,rohan.bose043@company.example,2026-05-13T12:30:00Z,dummy.user,2026-05-13T12:30:00Z,dummy.user
+d2354bd1-9e24-5a1e-b422-8566213b260b,Anika,Malhotra,Approved logistics vendor,true,anika.malhotra044@vendor.example,2026-05-13T12:35:00Z,dummy.user,2026-05-13T12:35:00Z,dummy.user
+4b867fe9-93c5-5529-8874-824aec0d6468,Vikram,Chopra,Inactive raw materials supplier,false,vikram.chopra045@supplier.example,2026-05-13T12:40:00Z,dummy.user,2026-05-13T12:40:00Z,dummy.user
+d74ea7d4-21e3-5dcf-b926-f24648c6f502,Isha,Das,Certified software services provider,true,isha.das046@gmail.com,2026-05-13T12:45:00Z,dummy.user,2026-05-13T12:45:00Z,dummy.user
+c734a0b8-fb00-5fd3-a350-3c7259f293a7,Kabir,Kulkarni,Shortlisted office supplies vendor,true,kabir.kulkarni047@outlook.com,2026-05-13T12:50:00Z,dummy.user,2026-05-13T12:50:00Z,dummy.user
+3dce3876-213a-5618-8f1c-9ddd15af800f,Mira,Bhat,Approved maintenance contractor,false,mira.bhat048@yahoo.com,2026-05-13T12:55:00Z,dummy.user,2026-05-13T12:55:00Z,dummy.user
+9574c3c5-b9fb-5289-a811-964822c05932,Arjun,Saxena,Preferred consulting partner,true,arjun.saxena049@brainbox.consulting,2026-05-13T13:00:00Z,dummy.user,2026-05-13T13:00:00Z,dummy.user
+4ac9664e-43a8-54ac-9da9-b91fd4a1d807,Priya,Pillai,Verified component distributor,false,priya.pillai050@mail.com,2026-05-13T13:05:00Z,dummy.user,2026-05-13T13:05:00Z,dummy.user
+552ba694-847d-5a58-aaef-797e5f11b195,Dev,Mishra,Onboarding documentation pending,true,dev.mishra051@brainbox.com,2026-05-13T13:10:00Z,dummy.user,2026-05-13T13:10:00Z,dummy.user
+dd1197a9-9f03-5c9e-848d-3c70297e3c36,Sara,Agarwal,Approved facilities management vendor,true,sara.agarwal052@dialog.com,2026-05-13T13:15:00Z,dummy.user,2026-05-13T13:15:00Z,dummy.user
+0e22f05a-714f-5ae1-94a4-aa32192aacb0,Karan,Khan,Preferred IT hardware supplier,false,karan.khan053@dlg.com,2026-05-13T13:20:00Z,dummy.user,2026-05-13T13:20:00Z,dummy.user
+acf49cb7-70e1-556a-9eb7-bed959b47ccd,Tara,Shetty,Inactive transport service provider,true,tara.shetty054@hotmail.com,2026-05-13T13:25:00Z,dummy.user,2026-05-13T13:25:00Z,dummy.user
+9696f033-8edb-587b-ad88-6ac658c4ccc9,Nikhil,Srinivasan,Compliance documents under review,false,nikhil.srinivasan055@icloud.com,2026-05-13T13:30:00Z,dummy.user,2026-05-13T13:30:00Z,dummy.user
+c3753394-16fc-535e-80ea-301fa0446f95,Pooja,Banerjee,Approved marketing services agency,true,pooja.banerjee056@proton.me,2026-05-13T13:35:00Z,dummy.user,2026-05-13T13:35:00Z,dummy.user
+caad1120-e275-58e2-a9bb-b101eb4d7f0b,Rahul,Jain,Verified cloud services reseller,true,rahul.jain057@zoho.com,2026-05-13T13:40:00Z,dummy.user,2026-05-13T13:40:00Z,dummy.user
+a16d6b81-72f4-5d85-b92d-c9cf8d65a0be,Sneha,Desai,Preferred training services provider,false,sneha.desai058@company.example,2026-05-13T13:45:00Z,dummy.user,2026-05-13T13:45:00Z,dummy.user
+62ddd916-9354-5536-983f-9e5559deae35,Aditya,Ghosh,Approved security services vendor,true,aditya.ghosh059@vendor.example,2026-05-13T13:50:00Z,dummy.user,2026-05-13T13:50:00Z,dummy.user
+518ae3c0-8ef1-5404-b0ec-f986890fb2ce,Riya,Chatterjee,Pending financial verification,false,riya.chatterjee060@supplier.example,2026-05-13T13:55:00Z,dummy.user,2026-05-13T13:55:00Z,dummy.user
+cec7a412-9b5e-54da-9cf5-f4ed5b26a248,Manav,Mehta,Verified electronics supplier,true,manav.mehta061@gmail.com,2026-05-13T14:00:00Z,dummy.user,2026-05-13T14:00:00Z,dummy.user
+769ca5e1-616d-5e11-89a7-6b3235f35bec,Diya,Rao,Preferred packaging partner,true,diya.rao062@outlook.com,2026-05-13T14:05:00Z,dummy.user,2026-05-13T14:05:00Z,dummy.user
+4f89a398-647a-5adf-8201-430c1bab4ae3,Siddharth,Kapoor,Pending compliance review,false,siddharth.kapoor063@yahoo.com,2026-05-13T14:10:00Z,dummy.user,2026-05-13T14:10:00Z,dummy.user
+ef8c697e-49cb-5283-9c5a-b7c9e1180b97,Kavya,Shah,Approved logistics vendor,true,kavya.shah064@brainbox.consulting,2026-05-13T14:15:00Z,dummy.user,2026-05-13T14:15:00Z,dummy.user
+84c871b0-9e84-5993-935c-068aa5a0a349,Yash,Iyer,Inactive raw materials supplier,false,yash.iyer065@mail.com,2026-05-13T14:20:00Z,dummy.user,2026-05-13T14:20:00Z,dummy.user
+3cd49633-01c8-558a-9a4b-f8fa60851445,Ananya,Nair,Certified software services provider,true,ananya.nair066@brainbox.com,2026-05-13T14:25:00Z,dummy.user,2026-05-13T14:25:00Z,dummy.user
+ed73a311-1bb0-574b-8e90-58ab7e1927c5,Harsh,Patel,Shortlisted office supplies vendor,true,harsh.patel067@dialog.com,2026-05-13T14:30:00Z,dummy.user,2026-05-13T14:30:00Z,dummy.user
+6815220b-1730-54ca-a738-7166bc480469,Meera,Gupta,Approved maintenance contractor,false,meera.gupta068@dlg.com,2026-05-13T14:35:00Z,dummy.user,2026-05-13T14:35:00Z,dummy.user
+3e209e8f-674b-5527-a035-f059362452d3,Varun,Verma,Preferred consulting partner,true,varun.verma069@hotmail.com,2026-05-13T14:40:00Z,dummy.user,2026-05-13T14:40:00Z,dummy.user
+475e1fd7-6c56-54e6-adbe-2487663a8b53,Naina,Joshi,Verified component distributor,false,naina.joshi070@icloud.com,2026-05-13T14:45:00Z,dummy.user,2026-05-13T14:45:00Z,dummy.user
+852604e5-0835-58f3-8c58-9899c5d34505,Ayaan,Reddy,Onboarding documentation pending,true,ayaan.reddy071@proton.me,2026-05-13T14:50:00Z,dummy.user,2026-05-13T14:50:00Z,dummy.user
+b0c612fa-d88f-5e22-96a7-222c9f8ef133,Sanya,Menon,Approved facilities management vendor,true,sanya.menon072@zoho.com,2026-05-13T14:55:00Z,dummy.user,2026-05-13T14:55:00Z,dummy.user
+858051b6-f5c4-5c40-a456-a38cd77c897c,Ishaan,Bose,Preferred IT hardware supplier,false,ishaan.bose073@company.example,2026-05-13T15:00:00Z,dummy.user,2026-05-13T15:00:00Z,dummy.user
+014a7afc-3f25-5b8f-93b6-d95c1e49222d,Avni,Malhotra,Inactive transport service provider,true,avni.malhotra074@vendor.example,2026-05-13T15:05:00Z,dummy.user,2026-05-13T15:05:00Z,dummy.user
+e5e59265-7208-53fa-bbcb-990e8dca5318,Reyansh,Chopra,Compliance documents under review,false,reyansh.chopra075@supplier.example,2026-05-13T15:10:00Z,dummy.user,2026-05-13T15:10:00Z,dummy.user
+420537e6-6c4d-561b-82c1-b1762fd62d4f,Kiara,Das,Approved marketing services agency,true,kiara.das076@gmail.com,2026-05-13T15:15:00Z,dummy.user,2026-05-13T15:15:00Z,dummy.user
+399cd3f8-9505-5b03-b091-b594ad70f46c,Vivaan,Kulkarni,Verified cloud services reseller,true,vivaan.kulkarni077@outlook.com,2026-05-13T15:20:00Z,dummy.user,2026-05-13T15:20:00Z,dummy.user
+9267a6e8-6672-581a-b4e0-a631fc06d426,Myra,Bhat,Preferred training services provider,false,myra.bhat078@yahoo.com,2026-05-13T15:25:00Z,dummy.user,2026-05-13T15:25:00Z,dummy.user
+68653aa4-7e0b-5dbe-b0fa-f89b5f73cb2a,Dhruv,Saxena,Approved security services vendor,true,dhruv.saxena079@brainbox.consulting,2026-05-13T15:30:00Z,dummy.user,2026-05-13T15:30:00Z,dummy.user
+351394be-7e4b-5cda-9187-664ef909e368,Aisha,Pillai,Pending financial verification,false,aisha.pillai080@mail.com,2026-05-13T15:35:00Z,dummy.user,2026-05-13T15:35:00Z,dummy.user
+68173484-ce25-51d2-971c-9e1a9bcc361e,Aarav,Mishra,Verified electronics supplier,true,aarav.mishra081@brainbox.com,2026-05-13T15:40:00Z,dummy.user,2026-05-13T15:40:00Z,dummy.user
+926341a1-0040-5a5f-9510-5863c08334ff,Neha,Agarwal,Preferred packaging partner,true,neha.agarwal082@dialog.com,2026-05-13T15:45:00Z,dummy.user,2026-05-13T15:45:00Z,dummy.user
+aed6b62d-35e7-5a84-b678-84c0421f5da1,Rohan,Khan,Pending compliance review,false,rohan.khan083@dlg.com,2026-05-13T15:50:00Z,dummy.user,2026-05-13T15:50:00Z,dummy.user
+d55088fc-1d20-5f19-9c6a-574c4d1ad4e7,Anika,Shetty,Approved logistics vendor,true,anika.shetty084@hotmail.com,2026-05-13T15:55:00Z,dummy.user,2026-05-13T15:55:00Z,dummy.user
+47aa8fc5-fdb4-5d6a-bf38-ef94365d3236,Vikram,Srinivasan,Inactive raw materials supplier,false,vikram.srinivasan085@icloud.com,2026-05-13T16:00:00Z,dummy.user,2026-05-13T16:00:00Z,dummy.user
+80200f01-ce41-5299-8640-e55e1fa94861,Isha,Banerjee,Certified software services provider,true,isha.banerjee086@proton.me,2026-05-13T16:05:00Z,dummy.user,2026-05-13T16:05:00Z,dummy.user
+8936feba-5656-54bb-8a36-d0b08e0fa56c,Kabir,Jain,Shortlisted office supplies vendor,true,kabir.jain087@zoho.com,2026-05-13T16:10:00Z,dummy.user,2026-05-13T16:10:00Z,dummy.user
+44cc0e3b-a016-5096-9788-3b29a6cb93a4,Mira,Desai,Approved maintenance contractor,false,mira.desai088@company.example,2026-05-13T16:15:00Z,dummy.user,2026-05-13T16:15:00Z,dummy.user
+c4d3cba1-def1-5f14-bd98-59c6cb68844f,Arjun,Ghosh,Preferred consulting partner,true,arjun.ghosh089@vendor.example,2026-05-13T16:20:00Z,dummy.user,2026-05-13T16:20:00Z,dummy.user
+f5daf1e6-67cb-5c83-b1b9-65d4c41d3454,Priya,Chatterjee,Verified component distributor,false,priya.chatterjee090@supplier.example,2026-05-13T16:25:00Z,dummy.user,2026-05-13T16:25:00Z,dummy.user
+8de197f8-a0e2-5d96-9c2c-1936e8e8feb0,Dev,Mehta,Onboarding documentation pending,true,dev.mehta091@gmail.com,2026-05-13T16:30:00Z,dummy.user,2026-05-13T16:30:00Z,dummy.user
+5b78cb6c-be0c-5cfb-a5ea-89acdc60a790,Sara,Rao,Approved facilities management vendor,true,sara.rao092@outlook.com,2026-05-13T16:35:00Z,dummy.user,2026-05-13T16:35:00Z,dummy.user
+ac5cf162-d6d7-5bee-a94d-b795e75246f0,Karan,Kapoor,Preferred IT hardware supplier,false,karan.kapoor093@yahoo.com,2026-05-13T16:40:00Z,dummy.user,2026-05-13T16:40:00Z,dummy.user
+24a9b0af-dcaa-5a67-a4ac-3d71579b6440,Tara,Shah,Inactive transport service provider,true,tara.shah094@brainbox.consulting,2026-05-13T16:45:00Z,dummy.user,2026-05-13T16:45:00Z,dummy.user
+6491c721-0446-5c18-b41c-57cdea9d790a,Nikhil,Iyer,Compliance documents under review,false,nikhil.iyer095@mail.com,2026-05-13T16:50:00Z,dummy.user,2026-05-13T16:50:00Z,dummy.user
+b5a4dc80-2eca-5d53-bcb8-2032eb80ba4c,Pooja,Nair,Approved marketing services agency,true,pooja.nair096@brainbox.com,2026-05-13T16:55:00Z,dummy.user,2026-05-13T16:55:00Z,dummy.user
+48e9b674-5181-5979-aa28-6eb90ba6e434,Rahul,Patel,Verified cloud services reseller,true,rahul.patel097@dialog.com,2026-05-13T17:00:00Z,dummy.user,2026-05-13T17:00:00Z,dummy.user
+7f5ede89-5a38-505f-9b89-7a0b94475190,Sneha,Gupta,Preferred training services provider,false,sneha.gupta098@dlg.com,2026-05-13T17:05:00Z,dummy.user,2026-05-13T17:05:00Z,dummy.user
+0ee098f4-5615-585a-90e1-6bcc1f0422cb,Aditya,Verma,Approved security services vendor,true,aditya.verma099@hotmail.com,2026-05-13T17:10:00Z,dummy.user,2026-05-13T17:10:00Z,dummy.user
+cbf73cc8-700c-590d-a0c4-06d4c8f3c0d6,Riya,Joshi,Pending financial verification,false,riya.joshi100@icloud.com,2026-05-13T17:15:00Z,dummy.user,2026-05-13T17:15:00Z,dummy.user
+8ce4b00d-76e9-5280-9400-f7798b78c6b0,Manav,Reddy,Verified electronics supplier,true,manav.reddy101@proton.me,2026-05-13T17:20:00Z,dummy.user,2026-05-13T17:20:00Z,dummy.user
+5c67563c-b6cb-5ece-ab0e-f8f7a54b4707,Diya,Menon,Preferred packaging partner,true,diya.menon102@zoho.com,2026-05-13T17:25:00Z,dummy.user,2026-05-13T17:25:00Z,dummy.user
+d8bce55a-d818-5620-a2cb-fb0ae2a1f29e,Siddharth,Bose,Pending compliance review,false,siddharth.bose103@company.example,2026-05-13T17:30:00Z,dummy.user,2026-05-13T17:30:00Z,dummy.user
+3436fd51-6ccb-5a6b-b04e-0da160ecbec8,Kavya,Malhotra,Approved logistics vendor,true,kavya.malhotra104@vendor.example,2026-05-13T17:35:00Z,dummy.user,2026-05-13T17:35:00Z,dummy.user
+88ff7851-3f43-5b70-985b-9dab3b4f4645,Yash,Chopra,Inactive raw materials supplier,false,yash.chopra105@supplier.example,2026-05-13T17:40:00Z,dummy.user,2026-05-13T17:40:00Z,dummy.user
+5639f8f3-5039-56e7-843e-b3e489459e72,Ananya,Das,Certified software services provider,true,ananya.das106@gmail.com,2026-05-13T17:45:00Z,dummy.user,2026-05-13T17:45:00Z,dummy.user
+e56dfe35-8cf6-5258-b641-d78f6cdac90d,Harsh,Kulkarni,Shortlisted office supplies vendor,true,harsh.kulkarni107@outlook.com,2026-05-13T17:50:00Z,dummy.user,2026-05-13T17:50:00Z,dummy.user
+35241091-e64a-5b03-a044-3b7c85e5896d,Meera,Bhat,Approved maintenance contractor,false,meera.bhat108@yahoo.com,2026-05-13T17:55:00Z,dummy.user,2026-05-13T17:55:00Z,dummy.user
+6a64a0f8-c826-5075-8ea4-a61be89f07e0,Varun,Saxena,Preferred consulting partner,true,varun.saxena109@brainbox.consulting,2026-05-13T18:00:00Z,dummy.user,2026-05-13T18:00:00Z,dummy.user
+83ce1e18-b01e-5923-b16c-639aa4f76351,Naina,Pillai,Verified component distributor,false,naina.pillai110@mail.com,2026-05-13T18:05:00Z,dummy.user,2026-05-13T18:05:00Z,dummy.user
+5d738f5d-4e91-525b-8ea4-4758c12c78fd,Ayaan,Mishra,Onboarding documentation pending,true,ayaan.mishra111@brainbox.com,2026-05-13T18:10:00Z,dummy.user,2026-05-13T18:10:00Z,dummy.user
+09f73846-ce19-5b8e-a260-b6b572ee2b8a,Sanya,Agarwal,Approved facilities management vendor,true,sanya.agarwal112@dialog.com,2026-05-13T18:15:00Z,dummy.user,2026-05-13T18:15:00Z,dummy.user
+5c733ce9-2166-5d35-9307-9182c6187397,Ishaan,Khan,Preferred IT hardware supplier,false,ishaan.khan113@dlg.com,2026-05-13T18:20:00Z,dummy.user,2026-05-13T18:20:00Z,dummy.user
+8a504bb6-be03-58e0-947d-a003972a09c8,Avni,Shetty,Inactive transport service provider,true,avni.shetty114@hotmail.com,2026-05-13T18:25:00Z,dummy.user,2026-05-13T18:25:00Z,dummy.user
+b5eb2e47-3e8f-5c3c-91dd-a521a1e688e1,Reyansh,Srinivasan,Compliance documents under review,false,reyansh.srinivasan115@icloud.com,2026-05-13T18:30:00Z,dummy.user,2026-05-13T18:30:00Z,dummy.user
+1f3f6fb7-43a6-5d48-b2a4-686f9034579b,Kiara,Banerjee,Approved marketing services agency,true,kiara.banerjee116@proton.me,2026-05-13T18:35:00Z,dummy.user,2026-05-13T18:35:00Z,dummy.user
+77b45d7f-d62f-504b-be19-c1f3c279a2bd,Vivaan,Jain,Verified cloud services reseller,true,vivaan.jain117@zoho.com,2026-05-13T18:40:00Z,dummy.user,2026-05-13T18:40:00Z,dummy.user
+c2575eba-ef7c-5970-839f-0f42614913bd,Myra,Desai,Preferred training services provider,false,myra.desai118@company.example,2026-05-13T18:45:00Z,dummy.user,2026-05-13T18:45:00Z,dummy.user
+d4f84509-1772-5527-93b5-6248cf2b7e8d,Dhruv,Ghosh,Approved security services vendor,true,dhruv.ghosh119@vendor.example,2026-05-13T18:50:00Z,dummy.user,2026-05-13T18:50:00Z,dummy.user
+854a70f9-4911-5ab3-b0d4-1ba2816f5c3a,Aisha,Chatterjee,Pending financial verification,false,aisha.chatterjee120@supplier.example,2026-05-13T18:55:00Z,dummy.user,2026-05-13T18:55:00Z,dummy.user
+0a0aa1bb-7106-521c-a370-2f285a5c02e1,Aarav,Mehta,Verified electronics supplier,true,aarav.mehta121@gmail.com,2026-05-13T19:00:00Z,dummy.user,2026-05-13T19:00:00Z,dummy.user
+96ead3f6-93a0-5202-be35-4d5d9bdcf3e0,Neha,Rao,Preferred packaging partner,true,neha.rao122@outlook.com,2026-05-13T19:05:00Z,dummy.user,2026-05-13T19:05:00Z,dummy.user
+ca44b61a-8f6a-5430-b103-39b57bb4c94f,Rohan,Kapoor,Pending compliance review,false,rohan.kapoor123@yahoo.com,2026-05-13T19:10:00Z,dummy.user,2026-05-13T19:10:00Z,dummy.user
+7fb99784-edcf-5628-9538-26f533e3504b,Anika,Shah,Approved logistics vendor,true,anika.shah124@brainbox.consulting,2026-05-13T19:15:00Z,dummy.user,2026-05-13T19:15:00Z,dummy.user
+2c511b0a-da96-516f-974a-d3732bb3eac9,Vikram,Iyer,Inactive raw materials supplier,false,vikram.iyer125@mail.com,2026-05-13T19:20:00Z,dummy.user,2026-05-13T19:20:00Z,dummy.user
+c670e6e5-5992-5a1a-b40b-35aec4a111f7,Isha,Nair,Certified software services provider,true,isha.nair126@brainbox.com,2026-05-13T19:25:00Z,dummy.user,2026-05-13T19:25:00Z,dummy.user
+875b53f0-1657-5e38-a2b7-1cd65dfa485b,Kabir,Patel,Shortlisted office supplies vendor,true,kabir.patel127@dialog.com,2026-05-13T19:30:00Z,dummy.user,2026-05-13T19:30:00Z,dummy.user
+e7221fa6-3bee-56cc-a09b-6203083fb867,Mira,Gupta,Approved maintenance contractor,false,mira.gupta128@dlg.com,2026-05-13T19:35:00Z,dummy.user,2026-05-13T19:35:00Z,dummy.user
+872866ac-5b95-5585-ba75-b568b0b98c11,Arjun,Verma,Preferred consulting partner,true,arjun.verma129@hotmail.com,2026-05-13T19:40:00Z,dummy.user,2026-05-13T19:40:00Z,dummy.user
+85510219-2a47-5a28-a05b-0b8940fefed2,Priya,Joshi,Verified component distributor,false,priya.joshi130@icloud.com,2026-05-13T19:45:00Z,dummy.user,2026-05-13T19:45:00Z,dummy.user
+ae6b40ba-9d3b-59cd-a522-0a7051398bef,Dev,Reddy,Onboarding documentation pending,true,dev.reddy131@proton.me,2026-05-13T19:50:00Z,dummy.user,2026-05-13T19:50:00Z,dummy.user
+78b86610-c5c3-59a2-ae6e-318fe54e845e,Sara,Menon,Approved facilities management vendor,true,sara.menon132@zoho.com,2026-05-13T19:55:00Z,dummy.user,2026-05-13T19:55:00Z,dummy.user
+0ff09c7c-015c-5d82-9c6a-6c8524de8e9f,Karan,Bose,Preferred IT hardware supplier,false,karan.bose133@company.example,2026-05-13T20:00:00Z,dummy.user,2026-05-13T20:00:00Z,dummy.user
+c57dc517-33fc-5355-a442-d9258bc7748a,Tara,Malhotra,Inactive transport service provider,true,tara.malhotra134@vendor.example,2026-05-13T20:05:00Z,dummy.user,2026-05-13T20:05:00Z,dummy.user
+e35a1c8a-874f-56a2-ad67-f8ee4cbdd586,Nikhil,Chopra,Compliance documents under review,false,nikhil.chopra135@supplier.example,2026-05-13T20:10:00Z,dummy.user,2026-05-13T20:10:00Z,dummy.user
+2db2d14e-6fd3-5893-b0a5-bb5e8b35faf5,Pooja,Das,Approved marketing services agency,true,pooja.das136@gmail.com,2026-05-13T20:15:00Z,dummy.user,2026-05-13T20:15:00Z,dummy.user
+088223c8-6a88-5b07-9707-7064c09fe86a,Rahul,Kulkarni,Verified cloud services reseller,true,rahul.kulkarni137@outlook.com,2026-05-13T20:20:00Z,dummy.user,2026-05-13T20:20:00Z,dummy.user
+afc7e8a8-5d27-58cc-88be-1886390099fe,Sneha,Bhat,Preferred training services provider,false,sneha.bhat138@yahoo.com,2026-05-13T20:25:00Z,dummy.user,2026-05-13T20:25:00Z,dummy.user
+05c0b006-bd3f-5048-ad9b-23cea20cff47,Aditya,Saxena,Approved security services vendor,true,aditya.saxena139@brainbox.consulting,2026-05-13T20:30:00Z,dummy.user,2026-05-13T20:30:00Z,dummy.user
+a5ca274b-f5ce-56b6-8d7f-c1df5b9020e5,Riya,Pillai,Pending financial verification,false,riya.pillai140@mail.com,2026-05-13T20:35:00Z,dummy.user,2026-05-13T20:35:00Z,dummy.user
+2f2aed4e-5d56-5ba1-bbd4-10d2d2021141,Manav,Mishra,Verified electronics supplier,true,manav.mishra141@brainbox.com,2026-05-13T20:40:00Z,dummy.user,2026-05-13T20:40:00Z,dummy.user
+2f93abb6-8999-5fef-8035-b99234b11699,Diya,Agarwal,Preferred packaging partner,true,diya.agarwal142@dialog.com,2026-05-13T20:45:00Z,dummy.user,2026-05-13T20:45:00Z,dummy.user
+3b025e41-fe04-529a-9eb3-9f6a4ad01547,Siddharth,Khan,Pending compliance review,false,siddharth.khan143@dlg.com,2026-05-13T20:50:00Z,dummy.user,2026-05-13T20:50:00Z,dummy.user
+729808ec-0d41-50b2-9f89-371c3bac217e,Kavya,Shetty,Approved logistics vendor,true,kavya.shetty144@hotmail.com,2026-05-13T20:55:00Z,dummy.user,2026-05-13T20:55:00Z,dummy.user
+a90bc38f-de68-5b6e-b828-c07928eedb72,Yash,Srinivasan,Inactive raw materials supplier,false,yash.srinivasan145@icloud.com,2026-05-13T21:00:00Z,dummy.user,2026-05-13T21:00:00Z,dummy.user
+f2a52564-63b6-597f-881d-00817dbafb91,Ananya,Banerjee,Certified software services provider,true,ananya.banerjee146@proton.me,2026-05-13T21:05:00Z,dummy.user,2026-05-13T21:05:00Z,dummy.user
+5ddc0a5a-dd9d-5d79-8287-af769f0db532,Harsh,Jain,Shortlisted office supplies vendor,true,harsh.jain147@zoho.com,2026-05-13T21:10:00Z,dummy.user,2026-05-13T21:10:00Z,dummy.user
+82b1848b-45ed-5c9e-b133-de584b5d5e16,Meera,Desai,Approved maintenance contractor,false,meera.desai148@company.example,2026-05-13T21:15:00Z,dummy.user,2026-05-13T21:15:00Z,dummy.user
+58a3a9e0-3d71-55ae-96c7-f28eaeb73631,Varun,Ghosh,Preferred consulting partner,true,varun.ghosh149@vendor.example,2026-05-13T21:20:00Z,dummy.user,2026-05-13T21:20:00Z,dummy.user
+9321db26-8f97-55bd-bc92-732518b68c30,Naina,Chatterjee,Verified component distributor,false,naina.chatterjee150@supplier.example,2026-05-13T21:25:00Z,dummy.user,2026-05-13T21:25:00Z,dummy.user
+877cbb74-fec9-5781-8fd8-1fe5f4b7da03,Ayaan,Mehta,Onboarding documentation pending,true,ayaan.mehta151@gmail.com,2026-05-13T21:30:00Z,dummy.user,2026-05-13T21:30:00Z,dummy.user
+1a589c67-6d8f-56d7-8f94-1fe98c05467e,Sanya,Rao,Approved facilities management vendor,true,sanya.rao152@outlook.com,2026-05-13T21:35:00Z,dummy.user,2026-05-13T21:35:00Z,dummy.user
+fad22835-912b-53e1-8a4b-cff7676390c6,Ishaan,Kapoor,Preferred IT hardware supplier,false,ishaan.kapoor153@yahoo.com,2026-05-13T21:40:00Z,dummy.user,2026-05-13T21:40:00Z,dummy.user
+8d9146c1-8fb7-5173-b242-595de2632e63,Avni,Shah,Inactive transport service provider,true,avni.shah154@brainbox.consulting,2026-05-13T21:45:00Z,dummy.user,2026-05-13T21:45:00Z,dummy.user
+750a4b5c-5249-55a4-b317-fe84be1aa569,Reyansh,Iyer,Compliance documents under review,false,reyansh.iyer155@mail.com,2026-05-13T21:50:00Z,dummy.user,2026-05-13T21:50:00Z,dummy.user
+6f46342f-32c7-5042-a3d6-782c69adc599,Kiara,Nair,Approved marketing services agency,true,kiara.nair156@brainbox.com,2026-05-13T21:55:00Z,dummy.user,2026-05-13T21:55:00Z,dummy.user
+bb60a3fc-1268-52d7-9062-81c5fc9b1287,Vivaan,Patel,Verified cloud services reseller,true,vivaan.patel157@dialog.com,2026-05-13T22:00:00Z,dummy.user,2026-05-13T22:00:00Z,dummy.user
+c45f1a0c-1910-5e94-b972-a28bfc60a4c2,Myra,Gupta,Preferred training services provider,false,myra.gupta158@dlg.com,2026-05-13T22:05:00Z,dummy.user,2026-05-13T22:05:00Z,dummy.user
+e7125299-81ff-512a-900e-0abc27312367,Dhruv,Verma,Approved security services vendor,true,dhruv.verma159@hotmail.com,2026-05-13T22:10:00Z,dummy.user,2026-05-13T22:10:00Z,dummy.user
+7f1cab5c-9605-5885-8592-801ee7040faa,Aisha,Joshi,Pending financial verification,false,aisha.joshi160@icloud.com,2026-05-13T22:15:00Z,dummy.user,2026-05-13T22:15:00Z,dummy.user
+ad3caa49-35b5-5b7d-af7a-0bade021428d,Aarav,Reddy,Verified electronics supplier,true,aarav.reddy161@proton.me,2026-05-13T22:20:00Z,dummy.user,2026-05-13T22:20:00Z,dummy.user
+fbabc7b4-f631-578d-9741-05ea70758297,Neha,Menon,Preferred packaging partner,true,neha.menon162@zoho.com,2026-05-13T22:25:00Z,dummy.user,2026-05-13T22:25:00Z,dummy.user
+d4aefa2a-f659-54a2-ba2e-16dc2139c698,Rohan,Bose,Pending compliance review,false,rohan.bose163@company.example,2026-05-13T22:30:00Z,dummy.user,2026-05-13T22:30:00Z,dummy.user
+1ba9cd39-c685-51b0-a1b2-f8af37bdd431,Anika,Malhotra,Approved logistics vendor,true,anika.malhotra164@vendor.example,2026-05-13T22:35:00Z,dummy.user,2026-05-13T22:35:00Z,dummy.user
+7b72947c-bc02-5856-8520-dcb7311ffb39,Vikram,Chopra,Inactive raw materials supplier,false,vikram.chopra165@supplier.example,2026-05-13T22:40:00Z,dummy.user,2026-05-13T22:40:00Z,dummy.user
+cfede3ed-e0a8-5c71-954b-d205b61fb7c3,Isha,Das,Certified software services provider,true,isha.das166@gmail.com,2026-05-13T22:45:00Z,dummy.user,2026-05-13T22:45:00Z,dummy.user
+18f56bd5-0441-5ac8-8c79-c2efd7878891,Kabir,Kulkarni,Shortlisted office supplies vendor,true,kabir.kulkarni167@outlook.com,2026-05-13T22:50:00Z,dummy.user,2026-05-13T22:50:00Z,dummy.user
+696de9be-545c-5302-8c01-8f4bee50d8aa,Mira,Bhat,Approved maintenance contractor,false,mira.bhat168@yahoo.com,2026-05-13T22:55:00Z,dummy.user,2026-05-13T22:55:00Z,dummy.user
+6760501d-57ae-5c5c-8e01-b15e9214e0a6,Arjun,Saxena,Preferred consulting partner,true,arjun.saxena169@brainbox.consulting,2026-05-13T23:00:00Z,dummy.user,2026-05-13T23:00:00Z,dummy.user
+03e86a68-4f2e-5d92-872a-93d8c315b8a5,Priya,Pillai,Verified component distributor,false,priya.pillai170@mail.com,2026-05-13T23:05:00Z,dummy.user,2026-05-13T23:05:00Z,dummy.user
+af08fbc2-2563-579f-8d45-fde9207985fe,Dev,Mishra,Onboarding documentation pending,true,dev.mishra171@brainbox.com,2026-05-13T23:10:00Z,dummy.user,2026-05-13T23:10:00Z,dummy.user
+32b2e94a-ca3c-56ab-a730-1a32c2686e71,Sara,Agarwal,Approved facilities management vendor,true,sara.agarwal172@dialog.com,2026-05-13T23:15:00Z,dummy.user,2026-05-13T23:15:00Z,dummy.user
+172d0b0b-5cf3-5e3d-84b4-f1b1b36ceb84,Karan,Khan,Preferred IT hardware supplier,false,karan.khan173@dlg.com,2026-05-13T23:20:00Z,dummy.user,2026-05-13T23:20:00Z,dummy.user
+b8c4e47d-e435-560e-a318-cbf0bdbc143a,Tara,Shetty,Inactive transport service provider,true,tara.shetty174@hotmail.com,2026-05-13T23:25:00Z,dummy.user,2026-05-13T23:25:00Z,dummy.user
+62d68211-3c53-57af-833a-1ed8ca006068,Nikhil,Srinivasan,Compliance documents under review,false,nikhil.srinivasan175@icloud.com,2026-05-13T23:30:00Z,dummy.user,2026-05-13T23:30:00Z,dummy.user
+348c4239-de81-5ff9-be30-677fec93f40a,Pooja,Banerjee,Approved marketing services agency,true,pooja.banerjee176@proton.me,2026-05-13T23:35:00Z,dummy.user,2026-05-13T23:35:00Z,dummy.user
+fc6a9a13-338c-5992-96fd-432dbae3ec44,Rahul,Jain,Verified cloud services reseller,true,rahul.jain177@zoho.com,2026-05-13T23:40:00Z,dummy.user,2026-05-13T23:40:00Z,dummy.user
+1bd7c4dd-9221-5dbd-9602-d08ae1eb7cb3,Sneha,Desai,Preferred training services provider,false,sneha.desai178@company.example,2026-05-13T23:45:00Z,dummy.user,2026-05-13T23:45:00Z,dummy.user
+d972231b-abbd-53ca-93a1-a8c467c43a9b,Aditya,Ghosh,Approved security services vendor,true,aditya.ghosh179@vendor.example,2026-05-13T23:50:00Z,dummy.user,2026-05-13T23:50:00Z,dummy.user
+0b8c2c4b-6f9c-5177-9910-2817415ccd5c,Riya,Chatterjee,Pending financial verification,false,riya.chatterjee180@supplier.example,2026-05-13T23:55:00Z,dummy.user,2026-05-13T23:55:00Z,dummy.user
+36078ead-5292-501d-9770-667a5a9bfb8c,Manav,Mehta,Verified electronics supplier,true,manav.mehta181@gmail.com,2026-05-14T00:00:00Z,dummy.user,2026-05-14T00:00:00Z,dummy.user
+d261a372-d079-56d6-a24c-d8a05a2d6e33,Diya,Rao,Preferred packaging partner,true,diya.rao182@outlook.com,2026-05-14T00:05:00Z,dummy.user,2026-05-14T00:05:00Z,dummy.user
+b12157e7-eac7-58f3-87e0-41a562ddadbb,Siddharth,Kapoor,Pending compliance review,false,siddharth.kapoor183@yahoo.com,2026-05-14T00:10:00Z,dummy.user,2026-05-14T00:10:00Z,dummy.user
+cbf36f29-c5df-59b4-80ae-fb5c222d7f6a,Kavya,Shah,Approved logistics vendor,true,kavya.shah184@brainbox.consulting,2026-05-14T00:15:00Z,dummy.user,2026-05-14T00:15:00Z,dummy.user
+0390429c-7711-5609-9f33-9de05e577832,Yash,Iyer,Inactive raw materials supplier,false,yash.iyer185@mail.com,2026-05-14T00:20:00Z,dummy.user,2026-05-14T00:20:00Z,dummy.user
+23d396ca-e7cf-5aff-869d-39999fd80105,Ananya,Nair,Certified software services provider,true,ananya.nair186@brainbox.com,2026-05-14T00:25:00Z,dummy.user,2026-05-14T00:25:00Z,dummy.user
+d0a91ca3-e550-5388-bac1-380e7eecfdc5,Harsh,Patel,Shortlisted office supplies vendor,true,harsh.patel187@dialog.com,2026-05-14T00:30:00Z,dummy.user,2026-05-14T00:30:00Z,dummy.user
+0014fd5f-087f-5999-9218-a7ca3b7a9a40,Meera,Gupta,Approved maintenance contractor,false,meera.gupta188@dlg.com,2026-05-14T00:35:00Z,dummy.user,2026-05-14T00:35:00Z,dummy.user
+fb61ae1a-b208-56f1-861e-09debe897ab0,Varun,Verma,Preferred consulting partner,true,varun.verma189@hotmail.com,2026-05-14T00:40:00Z,dummy.user,2026-05-14T00:40:00Z,dummy.user
+f111c504-9efb-5320-b9e5-9717ed3b6fb9,Naina,Joshi,Verified component distributor,false,naina.joshi190@icloud.com,2026-05-14T00:45:00Z,dummy.user,2026-05-14T00:45:00Z,dummy.user
+d9c27ac2-a87c-5bac-88db-6896d8e248d2,Ayaan,Reddy,Onboarding documentation pending,true,ayaan.reddy191@proton.me,2026-05-14T00:50:00Z,dummy.user,2026-05-14T00:50:00Z,dummy.user
+e178eee4-16ac-52e7-988c-26e7ea25f79f,Sanya,Menon,Approved facilities management vendor,true,sanya.menon192@zoho.com,2026-05-14T00:55:00Z,dummy.user,2026-05-14T00:55:00Z,dummy.user
+ef683406-0b93-5982-a628-d4750168279a,Ishaan,Bose,Preferred IT hardware supplier,false,ishaan.bose193@company.example,2026-05-14T01:00:00Z,dummy.user,2026-05-14T01:00:00Z,dummy.user
+1ac23036-7094-5d6f-9c3a-db8d5b483c78,Avni,Malhotra,Inactive transport service provider,true,avni.malhotra194@vendor.example,2026-05-14T01:05:00Z,dummy.user,2026-05-14T01:05:00Z,dummy.user
+0e8ebcd1-7ad1-5db8-9b0d-9f7f01de7569,Reyansh,Chopra,Compliance documents under review,false,reyansh.chopra195@supplier.example,2026-05-14T01:10:00Z,dummy.user,2026-05-14T01:10:00Z,dummy.user
+eee0a12c-0f39-5381-a9a9-26510060e139,Kiara,Das,Approved marketing services agency,true,kiara.das196@gmail.com,2026-05-14T01:15:00Z,dummy.user,2026-05-14T01:15:00Z,dummy.user
+8e621e0b-1a83-588f-8d6c-a4ccc3bb93ff,Vivaan,Kulkarni,Verified cloud services reseller,true,vivaan.kulkarni197@outlook.com,2026-05-14T01:20:00Z,dummy.user,2026-05-14T01:20:00Z,dummy.user
+f931550e-eb9a-5aac-81d0-8506da7b412c,Myra,Bhat,Preferred training services provider,false,myra.bhat198@yahoo.com,2026-05-14T01:25:00Z,dummy.user,2026-05-14T01:25:00Z,dummy.user
+bf24f1da-95ca-5a5d-9ad9-78aa5ecba66a,Dhruv,Saxena,Approved security services vendor,true,dhruv.saxena199@brainbox.consulting,2026-05-14T01:30:00Z,dummy.user,2026-05-14T01:30:00Z,dummy.user
+085244f4-49ed-5544-9977-946101d397d9,Aisha,Pillai,Pending financial verification,false,aisha.pillai200@mail.com,2026-05-14T01:35:00Z,dummy.user,2026-05-14T01:35:00Z,dummy.user
+fd1e4eb9-6990-5174-9b41-a6ad849de706,Aarav,Mishra,Verified electronics supplier,true,aarav.mishra201@brainbox.com,2026-05-14T01:40:00Z,dummy.user,2026-05-14T01:40:00Z,dummy.user
+9be21495-ebcf-54eb-9735-1371e0733f10,Neha,Agarwal,Preferred packaging partner,true,neha.agarwal202@dialog.com,2026-05-14T01:45:00Z,dummy.user,2026-05-14T01:45:00Z,dummy.user
+098328d4-0f2e-50b0-928e-fd128a23dfa8,Rohan,Khan,Pending compliance review,false,rohan.khan203@dlg.com,2026-05-14T01:50:00Z,dummy.user,2026-05-14T01:50:00Z,dummy.user
+5092c4e1-2d84-5c88-a8f2-20a27b583463,Anika,Shetty,Approved logistics vendor,true,anika.shetty204@hotmail.com,2026-05-14T01:55:00Z,dummy.user,2026-05-14T01:55:00Z,dummy.user
+f702b07f-4c10-514f-873e-3cc3ac0b3a63,Vikram,Srinivasan,Inactive raw materials supplier,false,vikram.srinivasan205@icloud.com,2026-05-14T02:00:00Z,dummy.user,2026-05-14T02:00:00Z,dummy.user
+10344aff-8d97-50ca-bcd1-f52c92c848da,Isha,Banerjee,Certified software services provider,true,isha.banerjee206@proton.me,2026-05-14T02:05:00Z,dummy.user,2026-05-14T02:05:00Z,dummy.user
+99b7df1f-af08-57be-a978-b395a24fe161,Kabir,Jain,Shortlisted office supplies vendor,true,kabir.jain207@zoho.com,2026-05-14T02:10:00Z,dummy.user,2026-05-14T02:10:00Z,dummy.user
+20a683cc-e18f-5dc3-8785-051c23535806,Mira,Desai,Approved maintenance contractor,false,mira.desai208@company.example,2026-05-14T02:15:00Z,dummy.user,2026-05-14T02:15:00Z,dummy.user
+150945f4-a268-5343-8b94-d447bd3f5036,Arjun,Ghosh,Preferred consulting partner,true,arjun.ghosh209@vendor.example,2026-05-14T02:20:00Z,dummy.user,2026-05-14T02:20:00Z,dummy.user
+edb10649-f091-5388-a93b-8428ed9a8b36,Priya,Chatterjee,Verified component distributor,false,priya.chatterjee210@supplier.example,2026-05-14T02:25:00Z,dummy.user,2026-05-14T02:25:00Z,dummy.user
+54bc054f-8c21-5b50-8d17-306b24090434,Dev,Mehta,Onboarding documentation pending,true,dev.mehta211@gmail.com,2026-05-14T02:30:00Z,dummy.user,2026-05-14T02:30:00Z,dummy.user
+3f099f30-8a2e-5c1b-9a3c-c514606265b1,Sara,Rao,Approved facilities management vendor,true,sara.rao212@outlook.com,2026-05-14T02:35:00Z,dummy.user,2026-05-14T02:35:00Z,dummy.user
+db318204-b467-5710-9236-9c2f725c4a77,Karan,Kapoor,Preferred IT hardware supplier,false,karan.kapoor213@yahoo.com,2026-05-14T02:40:00Z,dummy.user,2026-05-14T02:40:00Z,dummy.user
+5da679aa-9e80-5fa0-bda2-75ca480c17e4,Tara,Shah,Inactive transport service provider,true,tara.shah214@brainbox.consulting,2026-05-14T02:45:00Z,dummy.user,2026-05-14T02:45:00Z,dummy.user
+a34fe5a8-0867-5f0c-9497-729aa732547e,Nikhil,Iyer,Compliance documents under review,false,nikhil.iyer215@mail.com,2026-05-14T02:50:00Z,dummy.user,2026-05-14T02:50:00Z,dummy.user
+9544737a-577a-55dd-8a0b-59a8931d70e4,Pooja,Nair,Approved marketing services agency,true,pooja.nair216@brainbox.com,2026-05-14T02:55:00Z,dummy.user,2026-05-14T02:55:00Z,dummy.user
+c49dd697-5e21-5660-8773-20c0c6af56c6,Rahul,Patel,Verified cloud services reseller,true,rahul.patel217@dialog.com,2026-05-14T03:00:00Z,dummy.user,2026-05-14T03:00:00Z,dummy.user
+0e811619-cd7f-52ef-9c3b-f51ed6f8282c,Sneha,Gupta,Preferred training services provider,false,sneha.gupta218@dlg.com,2026-05-14T03:05:00Z,dummy.user,2026-05-14T03:05:00Z,dummy.user
+d5f69267-d6d8-5071-b729-8b8fcd70d5b6,Aditya,Verma,Approved security services vendor,true,aditya.verma219@hotmail.com,2026-05-14T03:10:00Z,dummy.user,2026-05-14T03:10:00Z,dummy.user
+3f9b44b7-b7d3-5b92-adf7-368b41f8ab3d,Riya,Joshi,Pending financial verification,false,riya.joshi220@icloud.com,2026-05-14T03:15:00Z,dummy.user,2026-05-14T03:15:00Z,dummy.user
+a8baac0f-02e9-5ac9-a3aa-eb45cc00b1e3,Manav,Reddy,Verified electronics supplier,true,manav.reddy221@proton.me,2026-05-14T03:20:00Z,dummy.user,2026-05-14T03:20:00Z,dummy.user
+dd2a1672-9fc6-57d5-88de-ec5ce0c5eea8,Diya,Menon,Preferred packaging partner,true,diya.menon222@zoho.com,2026-05-14T03:25:00Z,dummy.user,2026-05-14T03:25:00Z,dummy.user
+211389fa-cd2d-58d1-8405-eacb6d8d6b4d,Siddharth,Bose,Pending compliance review,false,siddharth.bose223@company.example,2026-05-14T03:30:00Z,dummy.user,2026-05-14T03:30:00Z,dummy.user
+4fa71f11-0576-55f7-b592-177d65c56c10,Kavya,Malhotra,Approved logistics vendor,true,kavya.malhotra224@vendor.example,2026-05-14T03:35:00Z,dummy.user,2026-05-14T03:35:00Z,dummy.user
+985bb6ef-f570-5bc8-a724-362ed7ba5653,Yash,Chopra,Inactive raw materials supplier,false,yash.chopra225@supplier.example,2026-05-14T03:40:00Z,dummy.user,2026-05-14T03:40:00Z,dummy.user
+dac0e498-6540-524a-a0b9-50f45f639546,Ananya,Das,Certified software services provider,true,ananya.das226@gmail.com,2026-05-14T03:45:00Z,dummy.user,2026-05-14T03:45:00Z,dummy.user
+3284efec-b4ad-56bb-9d31-ba6e93ea43f9,Harsh,Kulkarni,Shortlisted office supplies vendor,true,harsh.kulkarni227@outlook.com,2026-05-14T03:50:00Z,dummy.user,2026-05-14T03:50:00Z,dummy.user
+63e3eb65-ba2f-5e95-adea-a535c6a59033,Meera,Bhat,Approved maintenance contractor,false,meera.bhat228@yahoo.com,2026-05-14T03:55:00Z,dummy.user,2026-05-14T03:55:00Z,dummy.user
+24349e55-f32c-5294-bd46-b11c07ef7986,Varun,Saxena,Preferred consulting partner,true,varun.saxena229@brainbox.consulting,2026-05-14T04:00:00Z,dummy.user,2026-05-14T04:00:00Z,dummy.user
+e667d7a6-dfcf-59b2-9800-90f5d50b4a7d,Naina,Pillai,Verified component distributor,false,naina.pillai230@mail.com,2026-05-14T04:05:00Z,dummy.user,2026-05-14T04:05:00Z,dummy.user
+39748e97-1b33-5583-82b2-ddca91dea6df,Ayaan,Mishra,Onboarding documentation pending,true,ayaan.mishra231@brainbox.com,2026-05-14T04:10:00Z,dummy.user,2026-05-14T04:10:00Z,dummy.user
+e7f97fc6-dd40-571b-90e9-c8b0396d7b67,Sanya,Agarwal,Approved facilities management vendor,true,sanya.agarwal232@dialog.com,2026-05-14T04:15:00Z,dummy.user,2026-05-14T04:15:00Z,dummy.user
+270d11d0-3302-58be-bb0e-822075dc2186,Ishaan,Khan,Preferred IT hardware supplier,false,ishaan.khan233@dlg.com,2026-05-14T04:20:00Z,dummy.user,2026-05-14T04:20:00Z,dummy.user
+3632978d-0b10-53c7-8ab0-698535ea8911,Avni,Shetty,Inactive transport service provider,true,avni.shetty234@hotmail.com,2026-05-14T04:25:00Z,dummy.user,2026-05-14T04:25:00Z,dummy.user
+aa11e4f0-7484-59c3-abfe-bc1ab38b417d,Reyansh,Srinivasan,Compliance documents under review,false,reyansh.srinivasan235@icloud.com,2026-05-14T04:30:00Z,dummy.user,2026-05-14T04:30:00Z,dummy.user
+03edae46-3f0a-50c1-85e9-85ee684c68fa,Kiara,Banerjee,Approved marketing services agency,true,kiara.banerjee236@proton.me,2026-05-14T04:35:00Z,dummy.user,2026-05-14T04:35:00Z,dummy.user
+abeab916-3349-5e67-a126-050565f9e83f,Vivaan,Jain,Verified cloud services reseller,true,vivaan.jain237@zoho.com,2026-05-14T04:40:00Z,dummy.user,2026-05-14T04:40:00Z,dummy.user
+461a74d7-215c-5c67-9547-85537e52b79e,Myra,Desai,Preferred training services provider,false,myra.desai238@company.example,2026-05-14T04:45:00Z,dummy.user,2026-05-14T04:45:00Z,dummy.user
+e559dfbb-32f8-593a-a71a-e1f310a3da66,Dhruv,Ghosh,Approved security services vendor,true,dhruv.ghosh239@vendor.example,2026-05-14T04:50:00Z,dummy.user,2026-05-14T04:50:00Z,dummy.user
+eee63ac5-14af-5294-8e0f-e97215bb4177,Aisha,Chatterjee,Pending financial verification,false,aisha.chatterjee240@supplier.example,2026-05-14T04:55:00Z,dummy.user,2026-05-14T04:55:00Z,dummy.user
+2e08d2a6-cbf2-5129-bc29-5ba5b50c2d15,Aarav,Mehta,Verified electronics supplier,true,aarav.mehta241@gmail.com,2026-05-14T05:00:00Z,dummy.user,2026-05-14T05:00:00Z,dummy.user
+39328c45-35ca-54b3-946f-96f41ae2a83f,Neha,Rao,Preferred packaging partner,true,neha.rao242@outlook.com,2026-05-14T05:05:00Z,dummy.user,2026-05-14T05:05:00Z,dummy.user
+078b5506-3607-54f2-84c7-355a3183acdc,Rohan,Kapoor,Pending compliance review,false,rohan.kapoor243@yahoo.com,2026-05-14T05:10:00Z,dummy.user,2026-05-14T05:10:00Z,dummy.user
+10fd1ddb-b473-5127-8942-f022d5f1a1c9,Anika,Shah,Approved logistics vendor,true,anika.shah244@brainbox.consulting,2026-05-14T05:15:00Z,dummy.user,2026-05-14T05:15:00Z,dummy.user
+69b1e861-701c-5fbd-b303-9e076fab4f72,Vikram,Iyer,Inactive raw materials supplier,false,vikram.iyer245@mail.com,2026-05-14T05:20:00Z,dummy.user,2026-05-14T05:20:00Z,dummy.user
+dce9c4b0-89df-5fb2-a6a9-9c8d3e3ac2cc,Isha,Nair,Certified software services provider,true,isha.nair246@brainbox.com,2026-05-14T05:25:00Z,dummy.user,2026-05-14T05:25:00Z,dummy.user
+370d6fdd-1ba5-505e-8b6a-232fe421b919,Kabir,Patel,Shortlisted office supplies vendor,true,kabir.patel247@dialog.com,2026-05-14T05:30:00Z,dummy.user,2026-05-14T05:30:00Z,dummy.user
+69674746-555e-5972-9925-66a79e51f4a8,Mira,Gupta,Approved maintenance contractor,false,mira.gupta248@dlg.com,2026-05-14T05:35:00Z,dummy.user,2026-05-14T05:35:00Z,dummy.user
+e3dbbb81-bec2-52e4-a5d6-aa5acf0818fd,Arjun,Verma,Preferred consulting partner,true,arjun.verma249@hotmail.com,2026-05-14T05:40:00Z,dummy.user,2026-05-14T05:40:00Z,dummy.user
+dc314f70-07c0-51da-a5cc-f620e43e7944,Priya,Joshi,Verified component distributor,false,priya.joshi250@icloud.com,2026-05-14T05:45:00Z,dummy.user,2026-05-14T05:45:00Z,dummy.user
+05f5e832-cdfd-5759-9363-7564cf8f79f8,Dev,Reddy,Onboarding documentation pending,true,dev.reddy251@proton.me,2026-05-14T05:50:00Z,dummy.user,2026-05-14T05:50:00Z,dummy.user
+10907871-0c5f-52f3-a103-4daee0d5ddc9,Sara,Menon,Approved facilities management vendor,true,sara.menon252@zoho.com,2026-05-14T05:55:00Z,dummy.user,2026-05-14T05:55:00Z,dummy.user
+30a95304-dc78-5854-97f5-c8bd814eaa94,Karan,Bose,Preferred IT hardware supplier,false,karan.bose253@company.example,2026-05-14T06:00:00Z,dummy.user,2026-05-14T06:00:00Z,dummy.user
+c3489552-c7b9-5c5b-ba35-9f1117f4da3a,Tara,Malhotra,Inactive transport service provider,true,tara.malhotra254@vendor.example,2026-05-14T06:05:00Z,dummy.user,2026-05-14T06:05:00Z,dummy.user
+121c904b-6406-5a6f-a77e-d02ff8734851,Nikhil,Chopra,Compliance documents under review,false,nikhil.chopra255@supplier.example,2026-05-14T06:10:00Z,dummy.user,2026-05-14T06:10:00Z,dummy.user
+9d02f1d3-0401-5f20-94f5-6dab4974b240,Pooja,Das,Approved marketing services agency,true,pooja.das256@gmail.com,2026-05-14T06:15:00Z,dummy.user,2026-05-14T06:15:00Z,dummy.user
+7cc6fd24-1de2-5826-8605-52db5d5cacb2,Rahul,Kulkarni,Verified cloud services reseller,true,rahul.kulkarni257@outlook.com,2026-05-14T06:20:00Z,dummy.user,2026-05-14T06:20:00Z,dummy.user
+6b76967d-71eb-5b82-80e9-443282272da1,Sneha,Bhat,Preferred training services provider,false,sneha.bhat258@yahoo.com,2026-05-14T06:25:00Z,dummy.user,2026-05-14T06:25:00Z,dummy.user
+aab51dae-5f56-5db0-8df1-8e2b49669215,Aditya,Saxena,Approved security services vendor,true,aditya.saxena259@brainbox.consulting,2026-05-14T06:30:00Z,dummy.user,2026-05-14T06:30:00Z,dummy.user
+040f0c7f-6ddb-514c-a76f-32364609e79a,Riya,Pillai,Pending financial verification,false,riya.pillai260@mail.com,2026-05-14T06:35:00Z,dummy.user,2026-05-14T06:35:00Z,dummy.user
+7acab420-7438-51c8-9e35-22cb17a65ca6,Manav,Mishra,Verified electronics supplier,true,manav.mishra261@brainbox.com,2026-05-14T06:40:00Z,dummy.user,2026-05-14T06:40:00Z,dummy.user
+7c98d100-860e-5791-b3d6-4ee22b8a02ce,Diya,Agarwal,Preferred packaging partner,true,diya.agarwal262@dialog.com,2026-05-14T06:45:00Z,dummy.user,2026-05-14T06:45:00Z,dummy.user
+54179124-2014-55be-b8e5-d4aeaa1456bd,Siddharth,Khan,Pending compliance review,false,siddharth.khan263@dlg.com,2026-05-14T06:50:00Z,dummy.user,2026-05-14T06:50:00Z,dummy.user
+9a2b7885-920a-59ac-a729-ef08e001c1e2,Kavya,Shetty,Approved logistics vendor,true,kavya.shetty264@hotmail.com,2026-05-14T06:55:00Z,dummy.user,2026-05-14T06:55:00Z,dummy.user
+5bab91a3-3e7c-5de2-bf1d-0a0a513c2e00,Yash,Srinivasan,Inactive raw materials supplier,false,yash.srinivasan265@icloud.com,2026-05-14T07:00:00Z,dummy.user,2026-05-14T07:00:00Z,dummy.user
+310d6206-9a0d-5345-b58e-aab71e5e4b0b,Ananya,Banerjee,Certified software services provider,true,ananya.banerjee266@proton.me,2026-05-14T07:05:00Z,dummy.user,2026-05-14T07:05:00Z,dummy.user
+901522e9-2173-5b93-b834-c791adc333fb,Harsh,Jain,Shortlisted office supplies vendor,true,harsh.jain267@zoho.com,2026-05-14T07:10:00Z,dummy.user,2026-05-14T07:10:00Z,dummy.user
+4f481ebb-28e2-5462-9cb1-a599de6707e9,Meera,Desai,Approved maintenance contractor,false,meera.desai268@company.example,2026-05-14T07:15:00Z,dummy.user,2026-05-14T07:15:00Z,dummy.user
+7767f1b9-98aa-550b-86bd-20733d2a615d,Varun,Ghosh,Preferred consulting partner,true,varun.ghosh269@vendor.example,2026-05-14T07:20:00Z,dummy.user,2026-05-14T07:20:00Z,dummy.user
+9971098d-7fae-557e-a08c-aa7cc3610373,Naina,Chatterjee,Verified component distributor,false,naina.chatterjee270@supplier.example,2026-05-14T07:25:00Z,dummy.user,2026-05-14T07:25:00Z,dummy.user
+ba690edb-9974-57e7-a96d-c6764e2b1359,Ayaan,Mehta,Onboarding documentation pending,true,ayaan.mehta271@gmail.com,2026-05-14T07:30:00Z,dummy.user,2026-05-14T07:30:00Z,dummy.user
+44e4cd1a-0213-589f-8128-6e7eee6df552,Sanya,Rao,Approved facilities management vendor,true,sanya.rao272@outlook.com,2026-05-14T07:35:00Z,dummy.user,2026-05-14T07:35:00Z,dummy.user
+8662fa05-b518-5b22-b7b9-629be9148817,Ishaan,Kapoor,Preferred IT hardware supplier,false,ishaan.kapoor273@yahoo.com,2026-05-14T07:40:00Z,dummy.user,2026-05-14T07:40:00Z,dummy.user
+f61394b6-9ba5-5173-9fa2-e11c48254f81,Avni,Shah,Inactive transport service provider,true,avni.shah274@brainbox.consulting,2026-05-14T07:45:00Z,dummy.user,2026-05-14T07:45:00Z,dummy.user
+2f022230-c0b9-5187-bb50-5c21b965392b,Reyansh,Iyer,Compliance documents under review,false,reyansh.iyer275@mail.com,2026-05-14T07:50:00Z,dummy.user,2026-05-14T07:50:00Z,dummy.user
+089a602f-2117-5d59-8546-ee460a7bd41a,Kiara,Nair,Approved marketing services agency,true,kiara.nair276@brainbox.com,2026-05-14T07:55:00Z,dummy.user,2026-05-14T07:55:00Z,dummy.user
+832d3bad-8a9d-54b6-89fa-c94817c71462,Vivaan,Patel,Verified cloud services reseller,true,vivaan.patel277@dialog.com,2026-05-14T08:00:00Z,dummy.user,2026-05-14T08:00:00Z,dummy.user
+7032b2bc-3454-5284-8068-03bdfb74fb54,Myra,Gupta,Preferred training services provider,false,myra.gupta278@dlg.com,2026-05-14T08:05:00Z,dummy.user,2026-05-14T08:05:00Z,dummy.user
+fa5e77a9-b56b-5366-8fb9-4746c1e46768,Dhruv,Verma,Approved security services vendor,true,dhruv.verma279@hotmail.com,2026-05-14T08:10:00Z,dummy.user,2026-05-14T08:10:00Z,dummy.user
+03d9fbea-b7d3-5307-8f23-bbf5d0ad1a5a,Aisha,Joshi,Pending financial verification,false,aisha.joshi280@icloud.com,2026-05-14T08:15:00Z,dummy.user,2026-05-14T08:15:00Z,dummy.user
+ff6fc9e1-bdf9-5687-8a36-3f5f38c0f1f1,Aarav,Reddy,Verified electronics supplier,true,aarav.reddy281@proton.me,2026-05-14T08:20:00Z,dummy.user,2026-05-14T08:20:00Z,dummy.user
+50dfa889-a83e-5c35-9d8f-3dde0d87fb9d,Neha,Menon,Preferred packaging partner,true,neha.menon282@zoho.com,2026-05-14T08:25:00Z,dummy.user,2026-05-14T08:25:00Z,dummy.user
+0267781d-b9b7-5980-be11-23c77df81b14,Rohan,Bose,Pending compliance review,false,rohan.bose283@company.example,2026-05-14T08:30:00Z,dummy.user,2026-05-14T08:30:00Z,dummy.user
+aaec5c95-1968-51f3-adfc-8b58cb9bf2c4,Anika,Malhotra,Approved logistics vendor,true,anika.malhotra284@vendor.example,2026-05-14T08:35:00Z,dummy.user,2026-05-14T08:35:00Z,dummy.user
+603bdd03-182f-50e3-a4aa-600a24fdf0e1,Vikram,Chopra,Inactive raw materials supplier,false,vikram.chopra285@supplier.example,2026-05-14T08:40:00Z,dummy.user,2026-05-14T08:40:00Z,dummy.user
+6088da18-31e0-548d-a2e7-312059ad3ce2,Isha,Das,Certified software services provider,true,isha.das286@gmail.com,2026-05-14T08:45:00Z,dummy.user,2026-05-14T08:45:00Z,dummy.user
+21261792-78d5-58fd-a3d2-da887035d021,Kabir,Kulkarni,Shortlisted office supplies vendor,true,kabir.kulkarni287@outlook.com,2026-05-14T08:50:00Z,dummy.user,2026-05-14T08:50:00Z,dummy.user
+7be3dcbb-6827-597c-b2fc-fc6d0e455d44,Mira,Bhat,Approved maintenance contractor,false,mira.bhat288@yahoo.com,2026-05-14T08:55:00Z,dummy.user,2026-05-14T08:55:00Z,dummy.user
+5bcc066d-6fdd-5e26-b888-31875762221f,Arjun,Saxena,Preferred consulting partner,true,arjun.saxena289@brainbox.consulting,2026-05-14T09:00:00Z,dummy.user,2026-05-14T09:00:00Z,dummy.user
+25fa7b3d-bdd4-51ad-9d3e-13373b1e5537,Priya,Pillai,Verified component distributor,false,priya.pillai290@mail.com,2026-05-14T09:05:00Z,dummy.user,2026-05-14T09:05:00Z,dummy.user
+8decc184-bcb4-58d4-932f-d5de333ea1f0,Dev,Mishra,Onboarding documentation pending,true,dev.mishra291@brainbox.com,2026-05-14T09:10:00Z,dummy.user,2026-05-14T09:10:00Z,dummy.user
+90894198-863b-5207-bde2-06cfdd0dea39,Sara,Agarwal,Approved facilities management vendor,true,sara.agarwal292@dialog.com,2026-05-14T09:15:00Z,dummy.user,2026-05-14T09:15:00Z,dummy.user
+7cadeefd-16fa-5c97-94a0-4e51e5fe0ae8,Karan,Khan,Preferred IT hardware supplier,false,karan.khan293@dlg.com,2026-05-14T09:20:00Z,dummy.user,2026-05-14T09:20:00Z,dummy.user
+6fb51c2e-7ce4-5313-8ecd-122fa67a007d,Tara,Shetty,Inactive transport service provider,true,tara.shetty294@hotmail.com,2026-05-14T09:25:00Z,dummy.user,2026-05-14T09:25:00Z,dummy.user
+cf289030-e4d8-5897-ade7-8985754dfde3,Nikhil,Srinivasan,Compliance documents under review,false,nikhil.srinivasan295@icloud.com,2026-05-14T09:30:00Z,dummy.user,2026-05-14T09:30:00Z,dummy.user
+3f2ea658-fb7c-5c4a-8117-874dbc79e082,Pooja,Banerjee,Approved marketing services agency,true,pooja.banerjee296@proton.me,2026-05-14T09:35:00Z,dummy.user,2026-05-14T09:35:00Z,dummy.user
+9e82a477-3bf0-5ccc-9cce-0cc0ebd130e3,Rahul,Jain,Verified cloud services reseller,true,rahul.jain297@zoho.com,2026-05-14T09:40:00Z,dummy.user,2026-05-14T09:40:00Z,dummy.user
+e6864250-1b00-5579-9849-ac99bc400084,Sneha,Desai,Preferred training services provider,false,sneha.desai298@company.example,2026-05-14T09:45:00Z,dummy.user,2026-05-14T09:45:00Z,dummy.user
+39da4994-8280-5b9e-8580-f2e32dba9325,Aditya,Ghosh,Approved security services vendor,true,aditya.ghosh299@vendor.example,2026-05-14T09:50:00Z,dummy.user,2026-05-14T09:50:00Z,dummy.user
+e8f1316a-9d3e-5baa-ba14-4a3aaa099701,Riya,Chatterjee,Pending financial verification,false,riya.chatterjee300@supplier.example,2026-05-14T09:55:00Z,dummy.user,2026-05-14T09:55:00Z,dummy.user
+b337c695-d4ab-5461-8d94-94dce08cea1d,Manav,Mehta,Verified electronics supplier,true,manav.mehta301@gmail.com,2026-05-14T10:00:00Z,dummy.user,2026-05-14T10:00:00Z,dummy.user
+6b9bc27e-55bd-56bf-94a9-ceffabbce4e3,Diya,Rao,Preferred packaging partner,true,diya.rao302@outlook.com,2026-05-14T10:05:00Z,dummy.user,2026-05-14T10:05:00Z,dummy.user
+ab2af85b-20bd-5df1-9d0d-5c13b9f244cd,Siddharth,Kapoor,Pending compliance review,false,siddharth.kapoor303@yahoo.com,2026-05-14T10:10:00Z,dummy.user,2026-05-14T10:10:00Z,dummy.user
+9c84b29a-83f0-599f-9041-82b05d24c8d9,Kavya,Shah,Approved logistics vendor,true,kavya.shah304@brainbox.consulting,2026-05-14T10:15:00Z,dummy.user,2026-05-14T10:15:00Z,dummy.user
+b9e1ba2f-4fee-5321-83c3-e346ddd5579d,Yash,Iyer,Inactive raw materials supplier,false,yash.iyer305@mail.com,2026-05-14T10:20:00Z,dummy.user,2026-05-14T10:20:00Z,dummy.user
+10cc6a46-3891-5105-8d87-005c9014c89a,Ananya,Nair,Certified software services provider,true,ananya.nair306@brainbox.com,2026-05-14T10:25:00Z,dummy.user,2026-05-14T10:25:00Z,dummy.user
+f72bf97a-65d0-5fe6-a5ec-b31942e55b11,Harsh,Patel,Shortlisted office supplies vendor,true,harsh.patel307@dialog.com,2026-05-14T10:30:00Z,dummy.user,2026-05-14T10:30:00Z,dummy.user
+97fc93bc-f7d0-503f-a240-9d51c3ebe471,Meera,Gupta,Approved maintenance contractor,false,meera.gupta308@dlg.com,2026-05-14T10:35:00Z,dummy.user,2026-05-14T10:35:00Z,dummy.user
+9c85c577-e6e0-5f1e-8be2-4b85d99cba48,Varun,Verma,Preferred consulting partner,true,varun.verma309@hotmail.com,2026-05-14T10:40:00Z,dummy.user,2026-05-14T10:40:00Z,dummy.user
+8aa3f0f7-c563-53a6-84de-ce365c3e0511,Naina,Joshi,Verified component distributor,false,naina.joshi310@icloud.com,2026-05-14T10:45:00Z,dummy.user,2026-05-14T10:45:00Z,dummy.user
+d67224b5-ad58-53fb-af90-04a4cc12fb4d,Ayaan,Reddy,Onboarding documentation pending,true,ayaan.reddy311@proton.me,2026-05-14T10:50:00Z,dummy.user,2026-05-14T10:50:00Z,dummy.user
+72faa4f2-31d7-5b15-8fca-f7eaa441f17e,Sanya,Menon,Approved facilities management vendor,true,sanya.menon312@zoho.com,2026-05-14T10:55:00Z,dummy.user,2026-05-14T10:55:00Z,dummy.user
+b506f0dd-2d14-54c0-9dc6-cfa5605598e8,Ishaan,Bose,Preferred IT hardware supplier,false,ishaan.bose313@company.example,2026-05-14T11:00:00Z,dummy.user,2026-05-14T11:00:00Z,dummy.user
+b20cf087-f62e-5f11-951e-80451d2b80d4,Avni,Malhotra,Inactive transport service provider,true,avni.malhotra314@vendor.example,2026-05-14T11:05:00Z,dummy.user,2026-05-14T11:05:00Z,dummy.user
+26d55942-63a6-50cc-bea8-8dcdbb56d106,Reyansh,Chopra,Compliance documents under review,false,reyansh.chopra315@supplier.example,2026-05-14T11:10:00Z,dummy.user,2026-05-14T11:10:00Z,dummy.user
+a18a0c02-ddc9-531d-beea-60d81f38b39e,Kiara,Das,Approved marketing services agency,true,kiara.das316@gmail.com,2026-05-14T11:15:00Z,dummy.user,2026-05-14T11:15:00Z,dummy.user
+202afd7b-bfc0-595e-9c80-c06cf08bc62c,Vivaan,Kulkarni,Verified cloud services reseller,true,vivaan.kulkarni317@outlook.com,2026-05-14T11:20:00Z,dummy.user,2026-05-14T11:20:00Z,dummy.user
+a6163c93-064a-51b1-aad3-183d977267b6,Myra,Bhat,Preferred training services provider,false,myra.bhat318@yahoo.com,2026-05-14T11:25:00Z,dummy.user,2026-05-14T11:25:00Z,dummy.user
+89566fa2-407c-5b2b-9f7d-632f7a5b27db,Dhruv,Saxena,Approved security services vendor,true,dhruv.saxena319@brainbox.consulting,2026-05-14T11:30:00Z,dummy.user,2026-05-14T11:30:00Z,dummy.user
+c46da2f4-7dc1-5287-a6d3-e2c25e41f1eb,Aisha,Pillai,Pending financial verification,false,aisha.pillai320@mail.com,2026-05-14T11:35:00Z,dummy.user,2026-05-14T11:35:00Z,dummy.user
+405aaa37-2f28-5231-8a22-3bf45e486c94,Aarav,Mishra,Verified electronics supplier,true,aarav.mishra321@brainbox.com,2026-05-14T11:40:00Z,dummy.user,2026-05-14T11:40:00Z,dummy.user
+151a368e-da96-5277-9cd6-573e93478596,Neha,Agarwal,Preferred packaging partner,true,neha.agarwal322@dialog.com,2026-05-14T11:45:00Z,dummy.user,2026-05-14T11:45:00Z,dummy.user
+6ce1e21f-b846-5958-bce7-565a5752871b,Rohan,Khan,Pending compliance review,false,rohan.khan323@dlg.com,2026-05-14T11:50:00Z,dummy.user,2026-05-14T11:50:00Z,dummy.user
+bda8d7bb-97a4-503d-99bb-52716e2c8215,Anika,Shetty,Approved logistics vendor,true,anika.shetty324@hotmail.com,2026-05-14T11:55:00Z,dummy.user,2026-05-14T11:55:00Z,dummy.user
+97e0441b-f466-55e9-9339-f967fc9d2853,Vikram,Srinivasan,Inactive raw materials supplier,false,vikram.srinivasan325@icloud.com,2026-05-14T12:00:00Z,dummy.user,2026-05-14T12:00:00Z,dummy.user
+e375ece8-5b14-501b-b526-9d5ef5ddef05,Isha,Banerjee,Certified software services provider,true,isha.banerjee326@proton.me,2026-05-14T12:05:00Z,dummy.user,2026-05-14T12:05:00Z,dummy.user
+44a9046c-d75d-5ece-9a41-4d1091caea94,Kabir,Jain,Shortlisted office supplies vendor,true,kabir.jain327@zoho.com,2026-05-14T12:10:00Z,dummy.user,2026-05-14T12:10:00Z,dummy.user
+911b38fd-78fc-5290-98aa-3f80c77b7bd1,Mira,Desai,Approved maintenance contractor,false,mira.desai328@company.example,2026-05-14T12:15:00Z,dummy.user,2026-05-14T12:15:00Z,dummy.user
+d4087ede-4650-5092-9127-d4f209fe0dc8,Arjun,Ghosh,Preferred consulting partner,true,arjun.ghosh329@vendor.example,2026-05-14T12:20:00Z,dummy.user,2026-05-14T12:20:00Z,dummy.user
+fbefe673-36df-5efc-8398-db08956752aa,Priya,Chatterjee,Verified component distributor,false,priya.chatterjee330@supplier.example,2026-05-14T12:25:00Z,dummy.user,2026-05-14T12:25:00Z,dummy.user
+22d0a421-605a-50d3-8a58-5ff084cc74c5,Dev,Mehta,Onboarding documentation pending,true,dev.mehta331@gmail.com,2026-05-14T12:30:00Z,dummy.user,2026-05-14T12:30:00Z,dummy.user
+9007dff8-1007-5dfd-a979-ac793fdcfc8c,Sara,Rao,Approved facilities management vendor,true,sara.rao332@outlook.com,2026-05-14T12:35:00Z,dummy.user,2026-05-14T12:35:00Z,dummy.user
+cda1a05a-15f5-5bfa-8fc6-34f4d04fc4db,Karan,Kapoor,Preferred IT hardware supplier,false,karan.kapoor333@yahoo.com,2026-05-14T12:40:00Z,dummy.user,2026-05-14T12:40:00Z,dummy.user
+714482a3-a867-553b-bd3a-6f5bf1a69f7c,Tara,Shah,Inactive transport service provider,true,tara.shah334@brainbox.consulting,2026-05-14T12:45:00Z,dummy.user,2026-05-14T12:45:00Z,dummy.user
+6bc4bf2c-e796-5ec4-9282-98c6f091e367,Nikhil,Iyer,Compliance documents under review,false,nikhil.iyer335@mail.com,2026-05-14T12:50:00Z,dummy.user,2026-05-14T12:50:00Z,dummy.user
+ad71d788-b59b-50f3-a917-78cd16cddd24,Pooja,Nair,Approved marketing services agency,true,pooja.nair336@brainbox.com,2026-05-14T12:55:00Z,dummy.user,2026-05-14T12:55:00Z,dummy.user
+dcc61c99-ce7f-5f6c-8355-aad1e840567b,Rahul,Patel,Verified cloud services reseller,true,rahul.patel337@dialog.com,2026-05-14T13:00:00Z,dummy.user,2026-05-14T13:00:00Z,dummy.user
+a86c59a6-0526-5da9-8b63-fb5424ae41ce,Sneha,Gupta,Preferred training services provider,false,sneha.gupta338@dlg.com,2026-05-14T13:05:00Z,dummy.user,2026-05-14T13:05:00Z,dummy.user
+8463fadf-2311-5005-b110-c48e30749337,Aditya,Verma,Approved security services vendor,true,aditya.verma339@hotmail.com,2026-05-14T13:10:00Z,dummy.user,2026-05-14T13:10:00Z,dummy.user
+77d71ec3-8035-5bb6-8bba-50d08c9c21f0,Riya,Joshi,Pending financial verification,false,riya.joshi340@icloud.com,2026-05-14T13:15:00Z,dummy.user,2026-05-14T13:15:00Z,dummy.user
+244a7f19-91f6-5fe5-bfb4-a6104d81ff01,Manav,Reddy,Verified electronics supplier,true,manav.reddy341@proton.me,2026-05-14T13:20:00Z,dummy.user,2026-05-14T13:20:00Z,dummy.user
+ab489146-5bcb-52a3-9430-ff3a7d93312d,Diya,Menon,Preferred packaging partner,true,diya.menon342@zoho.com,2026-05-14T13:25:00Z,dummy.user,2026-05-14T13:25:00Z,dummy.user
+910f8f99-2005-5637-9eb0-a18fc4c38bdb,Siddharth,Bose,Pending compliance review,false,siddharth.bose343@company.example,2026-05-14T13:30:00Z,dummy.user,2026-05-14T13:30:00Z,dummy.user
+b241ed75-b085-512c-817f-13a6888e2c15,Kavya,Malhotra,Approved logistics vendor,true,kavya.malhotra344@vendor.example,2026-05-14T13:35:00Z,dummy.user,2026-05-14T13:35:00Z,dummy.user
+5c3a019e-489a-5f1b-af38-66fe4c535a6a,Yash,Chopra,Inactive raw materials supplier,false,yash.chopra345@supplier.example,2026-05-14T13:40:00Z,dummy.user,2026-05-14T13:40:00Z,dummy.user
+0808df3b-7cf9-5541-9fe4-1b49a7ce2d87,Ananya,Das,Certified software services provider,true,ananya.das346@gmail.com,2026-05-14T13:45:00Z,dummy.user,2026-05-14T13:45:00Z,dummy.user
+8c9365d1-4a1f-53c4-9c48-3daafe910de8,Harsh,Kulkarni,Shortlisted office supplies vendor,true,harsh.kulkarni347@outlook.com,2026-05-14T13:50:00Z,dummy.user,2026-05-14T13:50:00Z,dummy.user
+aa370f77-ec28-5120-8036-7675bdf437e3,Meera,Bhat,Approved maintenance contractor,false,meera.bhat348@yahoo.com,2026-05-14T13:55:00Z,dummy.user,2026-05-14T13:55:00Z,dummy.user
+5dbdf068-1555-525e-90a4-a66e0c606a4c,Varun,Saxena,Preferred consulting partner,true,varun.saxena349@brainbox.consulting,2026-05-14T14:00:00Z,dummy.user,2026-05-14T14:00:00Z,dummy.user
+2f103362-c897-5f9a-82a6-9bd14431ed41,Naina,Pillai,Verified component distributor,false,naina.pillai350@mail.com,2026-05-14T14:05:00Z,dummy.user,2026-05-14T14:05:00Z,dummy.user
+91ac89d3-03e7-5c7b-abbb-5d50fe5c7847,Ayaan,Mishra,Onboarding documentation pending,true,ayaan.mishra351@brainbox.com,2026-05-14T14:10:00Z,dummy.user,2026-05-14T14:10:00Z,dummy.user
+9f09bc93-06f3-594d-a2ad-27af7faa68eb,Sanya,Agarwal,Approved facilities management vendor,true,sanya.agarwal352@dialog.com,2026-05-14T14:15:00Z,dummy.user,2026-05-14T14:15:00Z,dummy.user
+3a88ea3f-8279-5904-a20e-6888511db71f,Ishaan,Khan,Preferred IT hardware supplier,false,ishaan.khan353@dlg.com,2026-05-14T14:20:00Z,dummy.user,2026-05-14T14:20:00Z,dummy.user
+cf19dc82-ea7b-5954-ab9a-654b886b9d21,Avni,Shetty,Inactive transport service provider,true,avni.shetty354@hotmail.com,2026-05-14T14:25:00Z,dummy.user,2026-05-14T14:25:00Z,dummy.user
+b50a5c1f-ba6a-56e8-9a1f-8f9243af6d9c,Reyansh,Srinivasan,Compliance documents under review,false,reyansh.srinivasan355@icloud.com,2026-05-14T14:30:00Z,dummy.user,2026-05-14T14:30:00Z,dummy.user
+df04793c-40fe-54fd-a110-c404bd628c20,Kiara,Banerjee,Approved marketing services agency,true,kiara.banerjee356@proton.me,2026-05-14T14:35:00Z,dummy.user,2026-05-14T14:35:00Z,dummy.user
+5454f16d-ee75-5df7-870e-b95c8025ab54,Vivaan,Jain,Verified cloud services reseller,true,vivaan.jain357@zoho.com,2026-05-14T14:40:00Z,dummy.user,2026-05-14T14:40:00Z,dummy.user
+22a35e56-d443-5972-8ca8-112d332c785b,Myra,Desai,Preferred training services provider,false,myra.desai358@company.example,2026-05-14T14:45:00Z,dummy.user,2026-05-14T14:45:00Z,dummy.user
+319437ce-e75c-55d9-8965-60c4230cc8f5,Dhruv,Ghosh,Approved security services vendor,true,dhruv.ghosh359@vendor.example,2026-05-14T14:50:00Z,dummy.user,2026-05-14T14:50:00Z,dummy.user
+7f727a28-202c-5540-8118-3f25f5075c64,Aisha,Chatterjee,Pending financial verification,false,aisha.chatterjee360@supplier.example,2026-05-14T14:55:00Z,dummy.user,2026-05-14T14:55:00Z,dummy.user
+2a450a23-2d36-5f0a-b194-28ca2180fd09,Aarav,Mehta,Verified electronics supplier,true,aarav.mehta361@gmail.com,2026-05-14T15:00:00Z,dummy.user,2026-05-14T15:00:00Z,dummy.user
+c88a3f77-10fe-5595-86eb-7aa31626b3ee,Neha,Rao,Preferred packaging partner,true,neha.rao362@outlook.com,2026-05-14T15:05:00Z,dummy.user,2026-05-14T15:05:00Z,dummy.user
+8f3f95cb-0a4f-5a6e-a6c6-5f013ae3a6ca,Rohan,Kapoor,Pending compliance review,false,rohan.kapoor363@yahoo.com,2026-05-14T15:10:00Z,dummy.user,2026-05-14T15:10:00Z,dummy.user
+8a85f400-d42d-555d-8ee0-659e7746af80,Anika,Shah,Approved logistics vendor,true,anika.shah364@brainbox.consulting,2026-05-14T15:15:00Z,dummy.user,2026-05-14T15:15:00Z,dummy.user
+82d5ebe3-fa8e-5f77-9c1d-00972b5f915c,Vikram,Iyer,Inactive raw materials supplier,false,vikram.iyer365@mail.com,2026-05-14T15:20:00Z,dummy.user,2026-05-14T15:20:00Z,dummy.user
+1ba6695d-8851-5b85-8437-8c5b8cdfd09e,Isha,Nair,Certified software services provider,true,isha.nair366@brainbox.com,2026-05-14T15:25:00Z,dummy.user,2026-05-14T15:25:00Z,dummy.user
+6f53dae3-233f-5ea0-80d8-716893de2572,Kabir,Patel,Shortlisted office supplies vendor,true,kabir.patel367@dialog.com,2026-05-14T15:30:00Z,dummy.user,2026-05-14T15:30:00Z,dummy.user
+75fd5042-ee63-5ae8-90dc-10f44942f75a,Mira,Gupta,Approved maintenance contractor,false,mira.gupta368@dlg.com,2026-05-14T15:35:00Z,dummy.user,2026-05-14T15:35:00Z,dummy.user
+9c409c9b-76b1-5ef7-9096-4eb4f1186fc3,Arjun,Verma,Preferred consulting partner,true,arjun.verma369@hotmail.com,2026-05-14T15:40:00Z,dummy.user,2026-05-14T15:40:00Z,dummy.user
+f03196fc-56d7-5685-9bb2-527b70a17116,Priya,Joshi,Verified component distributor,false,priya.joshi370@icloud.com,2026-05-14T15:45:00Z,dummy.user,2026-05-14T15:45:00Z,dummy.user
+8a13cc62-889c-54fb-9ed0-efab3fd46b53,Dev,Reddy,Onboarding documentation pending,true,dev.reddy371@proton.me,2026-05-14T15:50:00Z,dummy.user,2026-05-14T15:50:00Z,dummy.user
+97afadee-02eb-5b27-90d1-85f799c4802a,Sara,Menon,Approved facilities management vendor,true,sara.menon372@zoho.com,2026-05-14T15:55:00Z,dummy.user,2026-05-14T15:55:00Z,dummy.user
+3bdea339-4e6c-51c4-adbf-93e7eed26a3f,Karan,Bose,Preferred IT hardware supplier,false,karan.bose373@company.example,2026-05-14T16:00:00Z,dummy.user,2026-05-14T16:00:00Z,dummy.user
+6b3c5b13-9ba1-52ec-9456-039bb9fee5f4,Tara,Malhotra,Inactive transport service provider,true,tara.malhotra374@vendor.example,2026-05-14T16:05:00Z,dummy.user,2026-05-14T16:05:00Z,dummy.user
+9057f791-96e4-5d81-86e9-57e8a1d1c3b6,Nikhil,Chopra,Compliance documents under review,false,nikhil.chopra375@supplier.example,2026-05-14T16:10:00Z,dummy.user,2026-05-14T16:10:00Z,dummy.user
+c4340055-c060-5d5c-a5b6-30e0b44183c8,Pooja,Das,Approved marketing services agency,true,pooja.das376@gmail.com,2026-05-14T16:15:00Z,dummy.user,2026-05-14T16:15:00Z,dummy.user
+617a259e-d4d4-53b3-9b57-ba9fd1e7a0fb,Rahul,Kulkarni,Verified cloud services reseller,true,rahul.kulkarni377@outlook.com,2026-05-14T16:20:00Z,dummy.user,2026-05-14T16:20:00Z,dummy.user
+5519956a-5cc5-5f00-b89f-4f5f11865a22,Sneha,Bhat,Preferred training services provider,false,sneha.bhat378@yahoo.com,2026-05-14T16:25:00Z,dummy.user,2026-05-14T16:25:00Z,dummy.user
+2ad784bd-c0b0-5558-9a55-8e0a77c85bfa,Aditya,Saxena,Approved security services vendor,true,aditya.saxena379@brainbox.consulting,2026-05-14T16:30:00Z,dummy.user,2026-05-14T16:30:00Z,dummy.user
+15440494-bec6-5276-83d3-d3e231e45752,Riya,Pillai,Pending financial verification,false,riya.pillai380@mail.com,2026-05-14T16:35:00Z,dummy.user,2026-05-14T16:35:00Z,dummy.user
+84843785-6865-5c98-8fcf-03bdd5566309,Manav,Mishra,Verified electronics supplier,true,manav.mishra381@brainbox.com,2026-05-14T16:40:00Z,dummy.user,2026-05-14T16:40:00Z,dummy.user
+4e4b1ab1-19b4-535a-9e59-a69577387236,Diya,Agarwal,Preferred packaging partner,true,diya.agarwal382@dialog.com,2026-05-14T16:45:00Z,dummy.user,2026-05-14T16:45:00Z,dummy.user
+14feb0be-486b-5934-b2ee-4a409d507379,Siddharth,Khan,Pending compliance review,false,siddharth.khan383@dlg.com,2026-05-14T16:50:00Z,dummy.user,2026-05-14T16:50:00Z,dummy.user
+270cf421-98b3-5310-82c8-7156be1d2042,Kavya,Shetty,Approved logistics vendor,true,kavya.shetty384@hotmail.com,2026-05-14T16:55:00Z,dummy.user,2026-05-14T16:55:00Z,dummy.user
+dd65a6fd-9b16-5f36-86ab-0f352f035a09,Yash,Srinivasan,Inactive raw materials supplier,false,yash.srinivasan385@icloud.com,2026-05-14T17:00:00Z,dummy.user,2026-05-14T17:00:00Z,dummy.user
+ad412a3e-c92c-545b-ac82-fffc5863242b,Ananya,Banerjee,Certified software services provider,true,ananya.banerjee386@proton.me,2026-05-14T17:05:00Z,dummy.user,2026-05-14T17:05:00Z,dummy.user
+25fc18a8-932d-53ac-84ce-d634180d84ae,Harsh,Jain,Shortlisted office supplies vendor,true,harsh.jain387@zoho.com,2026-05-14T17:10:00Z,dummy.user,2026-05-14T17:10:00Z,dummy.user
+bd12ab35-8e67-5a50-b99f-a5fef47bc213,Meera,Desai,Approved maintenance contractor,false,meera.desai388@company.example,2026-05-14T17:15:00Z,dummy.user,2026-05-14T17:15:00Z,dummy.user
+c00f7561-387e-50dd-b3c1-9c8c504cbdb5,Varun,Ghosh,Preferred consulting partner,true,varun.ghosh389@vendor.example,2026-05-14T17:20:00Z,dummy.user,2026-05-14T17:20:00Z,dummy.user
+22507f2b-64ea-5e01-9a32-402511b3e37c,Naina,Chatterjee,Verified component distributor,false,naina.chatterjee390@supplier.example,2026-05-14T17:25:00Z,dummy.user,2026-05-14T17:25:00Z,dummy.user
+9b21bde7-5ff8-507d-a8b7-2b3b9f64580c,Ayaan,Mehta,Onboarding documentation pending,true,ayaan.mehta391@gmail.com,2026-05-14T17:30:00Z,dummy.user,2026-05-14T17:30:00Z,dummy.user
+efff1e95-8c28-53c4-9ce5-be953ab0a23c,Sanya,Rao,Approved facilities management vendor,true,sanya.rao392@outlook.com,2026-05-14T17:35:00Z,dummy.user,2026-05-14T17:35:00Z,dummy.user
+d0213dad-874e-5acb-b89d-3d5e8690b4a4,Ishaan,Kapoor,Preferred IT hardware supplier,false,ishaan.kapoor393@yahoo.com,2026-05-14T17:40:00Z,dummy.user,2026-05-14T17:40:00Z,dummy.user
+58f04ff5-1aba-5ccb-a8f8-c7089515c1c1,Avni,Shah,Inactive transport service provider,true,avni.shah394@brainbox.consulting,2026-05-14T17:45:00Z,dummy.user,2026-05-14T17:45:00Z,dummy.user
+88e1febd-6b4c-58bf-a246-df21695de470,Reyansh,Iyer,Compliance documents under review,false,reyansh.iyer395@mail.com,2026-05-14T17:50:00Z,dummy.user,2026-05-14T17:50:00Z,dummy.user
+8f4eafa8-7a2a-56b4-8a45-ca3da1b3e2d7,Kiara,Nair,Approved marketing services agency,true,kiara.nair396@brainbox.com,2026-05-14T17:55:00Z,dummy.user,2026-05-14T17:55:00Z,dummy.user
+c80d4962-cc4a-5b14-8e5b-2e283579870a,Vivaan,Patel,Verified cloud services reseller,true,vivaan.patel397@dialog.com,2026-05-14T18:00:00Z,dummy.user,2026-05-14T18:00:00Z,dummy.user
+7b3f7802-d8b6-5d72-a58a-8429d365f90d,Myra,Gupta,Preferred training services provider,false,myra.gupta398@dlg.com,2026-05-14T18:05:00Z,dummy.user,2026-05-14T18:05:00Z,dummy.user
+d115e0dd-e870-5067-b6d1-af771a0e774e,Dhruv,Verma,Approved security services vendor,true,dhruv.verma399@hotmail.com,2026-05-14T18:10:00Z,dummy.user,2026-05-14T18:10:00Z,dummy.user
+14f24728-e754-51c1-aa38-975c6b882c09,Aisha,Joshi,Pending financial verification,false,aisha.joshi400@icloud.com,2026-05-14T18:15:00Z,dummy.user,2026-05-14T18:15:00Z,dummy.user
+01f53b1f-385a-5a7d-9b3f-8018a1d5e03d,Aarav,Reddy,Verified electronics supplier,true,aarav.reddy401@proton.me,2026-05-14T18:20:00Z,dummy.user,2026-05-14T18:20:00Z,dummy.user
+188ee1e0-e268-53fa-982d-0b506b711939,Neha,Menon,Preferred packaging partner,true,neha.menon402@zoho.com,2026-05-14T18:25:00Z,dummy.user,2026-05-14T18:25:00Z,dummy.user
+534af580-478c-5816-8a74-9dc12d6c8b25,Rohan,Bose,Pending compliance review,false,rohan.bose403@company.example,2026-05-14T18:30:00Z,dummy.user,2026-05-14T18:30:00Z,dummy.user
+8990116b-8d91-5438-a540-0b7e30c85f1d,Anika,Malhotra,Approved logistics vendor,true,anika.malhotra404@vendor.example,2026-05-14T18:35:00Z,dummy.user,2026-05-14T18:35:00Z,dummy.user
+a07faff2-f2b6-553d-b2f8-d9a3e4fcabe1,Vikram,Chopra,Inactive raw materials supplier,false,vikram.chopra405@supplier.example,2026-05-14T18:40:00Z,dummy.user,2026-05-14T18:40:00Z,dummy.user
+33b4653d-6599-5103-8f9e-14852d635460,Isha,Das,Certified software services provider,true,isha.das406@gmail.com,2026-05-14T18:45:00Z,dummy.user,2026-05-14T18:45:00Z,dummy.user
+1f12b0fe-10ae-5297-9789-18c63011b391,Kabir,Kulkarni,Shortlisted office supplies vendor,true,kabir.kulkarni407@outlook.com,2026-05-14T18:50:00Z,dummy.user,2026-05-14T18:50:00Z,dummy.user
+5d137ce8-92d6-585e-a50b-d2bcd431cae9,Mira,Bhat,Approved maintenance contractor,false,mira.bhat408@yahoo.com,2026-05-14T18:55:00Z,dummy.user,2026-05-14T18:55:00Z,dummy.user
+29f0350d-8c2e-57d8-ba60-1b9d43a4f54b,Arjun,Saxena,Preferred consulting partner,true,arjun.saxena409@brainbox.consulting,2026-05-14T19:00:00Z,dummy.user,2026-05-14T19:00:00Z,dummy.user
+08742303-8b1f-53b7-909f-167953e8e472,Priya,Pillai,Verified component distributor,false,priya.pillai410@mail.com,2026-05-14T19:05:00Z,dummy.user,2026-05-14T19:05:00Z,dummy.user
+a1c9f92f-5a7f-57c1-a119-c115156589ca,Dev,Mishra,Onboarding documentation pending,true,dev.mishra411@brainbox.com,2026-05-14T19:10:00Z,dummy.user,2026-05-14T19:10:00Z,dummy.user
+60a5f609-3d17-5b1b-9fcc-8d2b91af4922,Sara,Agarwal,Approved facilities management vendor,true,sara.agarwal412@dialog.com,2026-05-14T19:15:00Z,dummy.user,2026-05-14T19:15:00Z,dummy.user
+7dc9910e-b488-5f56-bf12-622b03a238d5,Karan,Khan,Preferred IT hardware supplier,false,karan.khan413@dlg.com,2026-05-14T19:20:00Z,dummy.user,2026-05-14T19:20:00Z,dummy.user
+9acf54f7-fd11-505e-add1-ba6b79adfd8b,Tara,Shetty,Inactive transport service provider,true,tara.shetty414@hotmail.com,2026-05-14T19:25:00Z,dummy.user,2026-05-14T19:25:00Z,dummy.user
+7565b5f3-16f2-58f4-988b-26ec88c24b36,Nikhil,Srinivasan,Compliance documents under review,false,nikhil.srinivasan415@icloud.com,2026-05-14T19:30:00Z,dummy.user,2026-05-14T19:30:00Z,dummy.user
+3f1192c9-9474-5629-a283-cb2de53653da,Pooja,Banerjee,Approved marketing services agency,true,pooja.banerjee416@proton.me,2026-05-14T19:35:00Z,dummy.user,2026-05-14T19:35:00Z,dummy.user
+d8b2e2be-4426-59f8-aaf3-21aa1e85f3d1,Rahul,Jain,Verified cloud services reseller,true,rahul.jain417@zoho.com,2026-05-14T19:40:00Z,dummy.user,2026-05-14T19:40:00Z,dummy.user
+9c55af33-2a69-5c81-9782-7901d2783186,Sneha,Desai,Preferred training services provider,false,sneha.desai418@company.example,2026-05-14T19:45:00Z,dummy.user,2026-05-14T19:45:00Z,dummy.user
+fd938af7-c3bc-5bc3-a0c5-11d927e04d3d,Aditya,Ghosh,Approved security services vendor,true,aditya.ghosh419@vendor.example,2026-05-14T19:50:00Z,dummy.user,2026-05-14T19:50:00Z,dummy.user
+44c12494-938e-5459-81b1-9f958a151066,Riya,Chatterjee,Pending financial verification,false,riya.chatterjee420@supplier.example,2026-05-14T19:55:00Z,dummy.user,2026-05-14T19:55:00Z,dummy.user
+5e72fc33-dd35-5ddb-a7de-daabc25363bf,Manav,Mehta,Verified electronics supplier,true,manav.mehta421@gmail.com,2026-05-14T20:00:00Z,dummy.user,2026-05-14T20:00:00Z,dummy.user
+450a77b3-ec17-5ca7-883c-33c76a639c86,Diya,Rao,Preferred packaging partner,true,diya.rao422@outlook.com,2026-05-14T20:05:00Z,dummy.user,2026-05-14T20:05:00Z,dummy.user
+b393844b-3e73-5957-ae5d-54a8eee40c7b,Siddharth,Kapoor,Pending compliance review,false,siddharth.kapoor423@yahoo.com,2026-05-14T20:10:00Z,dummy.user,2026-05-14T20:10:00Z,dummy.user
+da3cdfa8-118d-537c-9a30-e46e6bf73d08,Kavya,Shah,Approved logistics vendor,true,kavya.shah424@brainbox.consulting,2026-05-14T20:15:00Z,dummy.user,2026-05-14T20:15:00Z,dummy.user
+8bf9cf04-ecfa-5627-884b-bc403a103ab9,Yash,Iyer,Inactive raw materials supplier,false,yash.iyer425@mail.com,2026-05-14T20:20:00Z,dummy.user,2026-05-14T20:20:00Z,dummy.user
+ec9915de-e6e8-59c8-8d27-b0d65af1b204,Ananya,Nair,Certified software services provider,true,ananya.nair426@brainbox.com,2026-05-14T20:25:00Z,dummy.user,2026-05-14T20:25:00Z,dummy.user
+c3e7f596-a1be-5c03-a951-589f0bf653fb,Harsh,Patel,Shortlisted office supplies vendor,true,harsh.patel427@dialog.com,2026-05-14T20:30:00Z,dummy.user,2026-05-14T20:30:00Z,dummy.user
+c6f1ce81-90fd-51c9-ac62-6570b67dbba8,Meera,Gupta,Approved maintenance contractor,false,meera.gupta428@dlg.com,2026-05-14T20:35:00Z,dummy.user,2026-05-14T20:35:00Z,dummy.user
+77e75bc5-d694-5df0-ab9a-41795833fe96,Varun,Verma,Preferred consulting partner,true,varun.verma429@hotmail.com,2026-05-14T20:40:00Z,dummy.user,2026-05-14T20:40:00Z,dummy.user
+19ae466c-faad-5600-bed4-cdcfd56e3c88,Naina,Joshi,Verified component distributor,false,naina.joshi430@icloud.com,2026-05-14T20:45:00Z,dummy.user,2026-05-14T20:45:00Z,dummy.user
+132e78be-58c6-5ac5-9a5f-39b82e438659,Ayaan,Reddy,Onboarding documentation pending,true,ayaan.reddy431@proton.me,2026-05-14T20:50:00Z,dummy.user,2026-05-14T20:50:00Z,dummy.user
+34bc9530-1a53-5e15-8a92-fc10f9776b51,Sanya,Menon,Approved facilities management vendor,true,sanya.menon432@zoho.com,2026-05-14T20:55:00Z,dummy.user,2026-05-14T20:55:00Z,dummy.user
+3de32d79-2b8c-5349-b542-25a057bf9ace,Ishaan,Bose,Preferred IT hardware supplier,false,ishaan.bose433@company.example,2026-05-14T21:00:00Z,dummy.user,2026-05-14T21:00:00Z,dummy.user
+b9b70c0a-547e-552f-a6ad-d43f76bbca69,Avni,Malhotra,Inactive transport service provider,true,avni.malhotra434@vendor.example,2026-05-14T21:05:00Z,dummy.user,2026-05-14T21:05:00Z,dummy.user
+3e92ee36-d7e3-510b-943e-bf6ef9baa0ef,Reyansh,Chopra,Compliance documents under review,false,reyansh.chopra435@supplier.example,2026-05-14T21:10:00Z,dummy.user,2026-05-14T21:10:00Z,dummy.user
+f7ae37e4-ba2c-5982-9232-797b0618309e,Kiara,Das,Approved marketing services agency,true,kiara.das436@gmail.com,2026-05-14T21:15:00Z,dummy.user,2026-05-14T21:15:00Z,dummy.user
+c2abc707-2285-51dd-9178-43263eccab18,Vivaan,Kulkarni,Verified cloud services reseller,true,vivaan.kulkarni437@outlook.com,2026-05-14T21:20:00Z,dummy.user,2026-05-14T21:20:00Z,dummy.user
+c5c06ea8-6a62-514d-b3f8-f365755aee46,Myra,Bhat,Preferred training services provider,false,myra.bhat438@yahoo.com,2026-05-14T21:25:00Z,dummy.user,2026-05-14T21:25:00Z,dummy.user
+27a758bc-ddd9-52d6-a3d6-31ff426d2ee0,Dhruv,Saxena,Approved security services vendor,true,dhruv.saxena439@brainbox.consulting,2026-05-14T21:30:00Z,dummy.user,2026-05-14T21:30:00Z,dummy.user
+bf0a9eef-8706-5f0d-ab9a-ba4ebe79a20d,Aisha,Pillai,Pending financial verification,false,aisha.pillai440@mail.com,2026-05-14T21:35:00Z,dummy.user,2026-05-14T21:35:00Z,dummy.user
+f444a9de-7e76-5168-8186-dbda89784ac7,Aarav,Mishra,Verified electronics supplier,true,aarav.mishra441@brainbox.com,2026-05-14T21:40:00Z,dummy.user,2026-05-14T21:40:00Z,dummy.user
+7078316c-c95f-53eb-8fe3-a272a27ea7f3,Neha,Agarwal,Preferred packaging partner,true,neha.agarwal442@dialog.com,2026-05-14T21:45:00Z,dummy.user,2026-05-14T21:45:00Z,dummy.user
+da9d78b7-cf37-58d1-bf34-ec686cf363d2,Rohan,Khan,Pending compliance review,false,rohan.khan443@dlg.com,2026-05-14T21:50:00Z,dummy.user,2026-05-14T21:50:00Z,dummy.user
+48096177-7a09-5f4c-b492-3d8cd28c83ed,Anika,Shetty,Approved logistics vendor,true,anika.shetty444@hotmail.com,2026-05-14T21:55:00Z,dummy.user,2026-05-14T21:55:00Z,dummy.user
+42e9601a-eb51-5228-b540-3a94ad998391,Vikram,Srinivasan,Inactive raw materials supplier,false,vikram.srinivasan445@icloud.com,2026-05-14T22:00:00Z,dummy.user,2026-05-14T22:00:00Z,dummy.user
+6d8d10bd-5ffd-5586-91ba-e31edf88e3ec,Isha,Banerjee,Certified software services provider,true,isha.banerjee446@proton.me,2026-05-14T22:05:00Z,dummy.user,2026-05-14T22:05:00Z,dummy.user
+044525bb-2c7d-52f2-9ce4-7058f2986d48,Kabir,Jain,Shortlisted office supplies vendor,true,kabir.jain447@zoho.com,2026-05-14T22:10:00Z,dummy.user,2026-05-14T22:10:00Z,dummy.user
+b6f6d936-12ac-5ca3-9934-294aebde754f,Mira,Desai,Approved maintenance contractor,false,mira.desai448@company.example,2026-05-14T22:15:00Z,dummy.user,2026-05-14T22:15:00Z,dummy.user
+1b4cbad5-b8a2-5034-bed9-2710a3706510,Arjun,Ghosh,Preferred consulting partner,true,arjun.ghosh449@vendor.example,2026-05-14T22:20:00Z,dummy.user,2026-05-14T22:20:00Z,dummy.user
+1bf5ec47-d120-5874-af66-b516aad92b5a,Priya,Chatterjee,Verified component distributor,false,priya.chatterjee450@supplier.example,2026-05-14T22:25:00Z,dummy.user,2026-05-14T22:25:00Z,dummy.user
+a4303fba-c935-5629-9d63-15fd06288018,Dev,Mehta,Onboarding documentation pending,true,dev.mehta451@gmail.com,2026-05-14T22:30:00Z,dummy.user,2026-05-14T22:30:00Z,dummy.user
+359acc0c-ca1f-568b-a624-e3833908e3a7,Sara,Rao,Approved facilities management vendor,true,sara.rao452@outlook.com,2026-05-14T22:35:00Z,dummy.user,2026-05-14T22:35:00Z,dummy.user
+1b40d704-933b-5f74-8d03-5b43c566986f,Karan,Kapoor,Preferred IT hardware supplier,false,karan.kapoor453@yahoo.com,2026-05-14T22:40:00Z,dummy.user,2026-05-14T22:40:00Z,dummy.user
+1126dd6a-7195-5ff5-9296-8546f9218006,Tara,Shah,Inactive transport service provider,true,tara.shah454@brainbox.consulting,2026-05-14T22:45:00Z,dummy.user,2026-05-14T22:45:00Z,dummy.user
+cd76e6db-b17c-5686-8f18-39bb71bbf6d1,Nikhil,Iyer,Compliance documents under review,false,nikhil.iyer455@mail.com,2026-05-14T22:50:00Z,dummy.user,2026-05-14T22:50:00Z,dummy.user
+d9c347fb-bed7-5069-9d5f-132f0b24ca6a,Pooja,Nair,Approved marketing services agency,true,pooja.nair456@brainbox.com,2026-05-14T22:55:00Z,dummy.user,2026-05-14T22:55:00Z,dummy.user
+91d32107-651e-5f33-a280-dc98a9ac4857,Rahul,Patel,Verified cloud services reseller,true,rahul.patel457@dialog.com,2026-05-14T23:00:00Z,dummy.user,2026-05-14T23:00:00Z,dummy.user
+af872027-0fdb-5f6e-8349-7f6a459d88a5,Sneha,Gupta,Preferred training services provider,false,sneha.gupta458@dlg.com,2026-05-14T23:05:00Z,dummy.user,2026-05-14T23:05:00Z,dummy.user
+c1446c44-df65-5b42-abba-f4bfecdee521,Aditya,Verma,Approved security services vendor,true,aditya.verma459@hotmail.com,2026-05-14T23:10:00Z,dummy.user,2026-05-14T23:10:00Z,dummy.user
+884cfed6-15ad-5eae-ba65-6f258fd49581,Riya,Joshi,Pending financial verification,false,riya.joshi460@icloud.com,2026-05-14T23:15:00Z,dummy.user,2026-05-14T23:15:00Z,dummy.user
+a717b5ce-1ba3-50cc-9f77-8d983f22f02b,Manav,Reddy,Verified electronics supplier,true,manav.reddy461@proton.me,2026-05-14T23:20:00Z,dummy.user,2026-05-14T23:20:00Z,dummy.user
+23cefa68-12f7-5c6a-9a4a-dd0b25d87db3,Diya,Menon,Preferred packaging partner,true,diya.menon462@zoho.com,2026-05-14T23:25:00Z,dummy.user,2026-05-14T23:25:00Z,dummy.user
+3ced039c-69e8-5c8f-91c7-039b097d8b21,Siddharth,Bose,Pending compliance review,false,siddharth.bose463@company.example,2026-05-14T23:30:00Z,dummy.user,2026-05-14T23:30:00Z,dummy.user
+f4bcff93-6e8e-5688-81ba-27c5ab1a6eaa,Kavya,Malhotra,Approved logistics vendor,true,kavya.malhotra464@vendor.example,2026-05-14T23:35:00Z,dummy.user,2026-05-14T23:35:00Z,dummy.user
+a2e8c8bf-1404-5df3-9e19-ba18a84062f5,Yash,Chopra,Inactive raw materials supplier,false,yash.chopra465@supplier.example,2026-05-14T23:40:00Z,dummy.user,2026-05-14T23:40:00Z,dummy.user
+0aa51813-65a4-52a3-bb43-03c02a0245df,Ananya,Das,Certified software services provider,true,ananya.das466@gmail.com,2026-05-14T23:45:00Z,dummy.user,2026-05-14T23:45:00Z,dummy.user
+306ca4af-fe61-5024-8e3c-c825aaeed94b,Harsh,Kulkarni,Shortlisted office supplies vendor,true,harsh.kulkarni467@outlook.com,2026-05-14T23:50:00Z,dummy.user,2026-05-14T23:50:00Z,dummy.user
+b7889756-69e2-5586-b7d9-0751cfd40985,Meera,Bhat,Approved maintenance contractor,false,meera.bhat468@yahoo.com,2026-05-14T23:55:00Z,dummy.user,2026-05-14T23:55:00Z,dummy.user
+9db1237f-69b4-5ef4-9db6-87788ecd5063,Varun,Saxena,Preferred consulting partner,true,varun.saxena469@brainbox.consulting,2026-05-15T00:00:00Z,dummy.user,2026-05-15T00:00:00Z,dummy.user
+558474da-a61a-5a78-a3cd-774deb5a013b,Naina,Pillai,Verified component distributor,false,naina.pillai470@mail.com,2026-05-15T00:05:00Z,dummy.user,2026-05-15T00:05:00Z,dummy.user
+b96f430a-fe3c-537a-88a6-6900a95a008e,Ayaan,Mishra,Onboarding documentation pending,true,ayaan.mishra471@brainbox.com,2026-05-15T00:10:00Z,dummy.user,2026-05-15T00:10:00Z,dummy.user
+fb4a8d71-dd63-5b19-8c10-9bb6dcaad012,Sanya,Agarwal,Approved facilities management vendor,true,sanya.agarwal472@dialog.com,2026-05-15T00:15:00Z,dummy.user,2026-05-15T00:15:00Z,dummy.user
+53b11c6e-fb1d-5404-8dc4-71cd5e21c20c,Ishaan,Khan,Preferred IT hardware supplier,false,ishaan.khan473@dlg.com,2026-05-15T00:20:00Z,dummy.user,2026-05-15T00:20:00Z,dummy.user
+c6028d79-3da1-5ed2-8867-c5f646de8550,Avni,Shetty,Inactive transport service provider,true,avni.shetty474@hotmail.com,2026-05-15T00:25:00Z,dummy.user,2026-05-15T00:25:00Z,dummy.user
+2bf123a3-c1d9-5be1-af1f-f86eaefc23c4,Reyansh,Srinivasan,Compliance documents under review,false,reyansh.srinivasan475@icloud.com,2026-05-15T00:30:00Z,dummy.user,2026-05-15T00:30:00Z,dummy.user
+b9adde29-ba18-5865-8afc-4632b08e1727,Kiara,Banerjee,Approved marketing services agency,true,kiara.banerjee476@proton.me,2026-05-15T00:35:00Z,dummy.user,2026-05-15T00:35:00Z,dummy.user
+20d4f498-36d5-55d5-8393-ff01a752886e,Vivaan,Jain,Verified cloud services reseller,true,vivaan.jain477@zoho.com,2026-05-15T00:40:00Z,dummy.user,2026-05-15T00:40:00Z,dummy.user
+346ffb39-a612-52c3-9eae-a86e3cbf61d7,Myra,Desai,Preferred training services provider,false,myra.desai478@company.example,2026-05-15T00:45:00Z,dummy.user,2026-05-15T00:45:00Z,dummy.user
+8ff7b320-2757-596d-b54c-4743d734c784,Dhruv,Ghosh,Approved security services vendor,true,dhruv.ghosh479@vendor.example,2026-05-15T00:50:00Z,dummy.user,2026-05-15T00:50:00Z,dummy.user
+cb2fd15e-e6df-5f58-842c-891a7277a77f,Aisha,Chatterjee,Pending financial verification,false,aisha.chatterjee480@supplier.example,2026-05-15T00:55:00Z,dummy.user,2026-05-15T00:55:00Z,dummy.user
+0b8a2615-d8d4-5a0a-9553-f2775b22ae67,Aarav,Mehta,Verified electronics supplier,true,aarav.mehta481@gmail.com,2026-05-15T01:00:00Z,dummy.user,2026-05-15T01:00:00Z,dummy.user
+7a39eefa-2058-56a1-b5f3-f18fa2b19505,Neha,Rao,Preferred packaging partner,true,neha.rao482@outlook.com,2026-05-15T01:05:00Z,dummy.user,2026-05-15T01:05:00Z,dummy.user
+1ee73e2d-ce1f-5400-92bb-ed7455501a52,Rohan,Kapoor,Pending compliance review,false,rohan.kapoor483@yahoo.com,2026-05-15T01:10:00Z,dummy.user,2026-05-15T01:10:00Z,dummy.user
+ff448272-134b-5de6-9d38-40194f8c1d0b,Anika,Shah,Approved logistics vendor,true,anika.shah484@brainbox.consulting,2026-05-15T01:15:00Z,dummy.user,2026-05-15T01:15:00Z,dummy.user
+78aa4e67-756d-58f7-9838-e940248240e7,Vikram,Iyer,Inactive raw materials supplier,false,vikram.iyer485@mail.com,2026-05-15T01:20:00Z,dummy.user,2026-05-15T01:20:00Z,dummy.user
+e1798a3f-8406-520f-981c-d2a520d7090f,Isha,Nair,Certified software services provider,false,isha.nair486@brainbox.com,2026-05-15T01:25:00Z,dummy.user,2026-05-15T01:25:00Z,dummy.user
+9fdc17db-344f-54b0-b12b-0b5bcc873eda,Kabir,Patel,Shortlisted office supplies vendor,true,kabir.patel487@dialog.com,2026-05-15T01:30:00Z,dummy.user,2026-05-15T01:30:00Z,dummy.user
+453c3008-de36-5147-b0e3-010a2ac11158,Mira,Gupta,Approved maintenance contractor,false,mira.gupta488@dlg.com,2026-05-15T01:35:00Z,dummy.user,2026-05-15T01:35:00Z,dummy.user
+e56f14fe-eade-5a18-8275-222f71e42fea,Arjun,Verma,Preferred consulting partner,true,arjun.verma489@hotmail.com,2026-05-15T01:40:00Z,dummy.user,2026-05-15T01:40:00Z,dummy.user
+0d141abf-161e-5ee4-a5ce-d96f3e9509a6,Priya,Joshi,Verified component distributor,false,priya.joshi490@icloud.com,2026-05-15T01:45:00Z,dummy.user,2026-05-15T01:45:00Z,dummy.user
+480faf0c-0a95-547f-b627-3b4671fa2844,Dev,Reddy,Onboarding documentation pending,true,dev.reddy491@proton.me,2026-05-15T01:50:00Z,dummy.user,2026-05-15T01:50:00Z,dummy.user
+fadddd4b-8433-5ac8-9476-dab43411f8fe,Sara,Menon,Approved facilities management vendor,true,sara.menon492@zoho.com,2026-05-15T01:55:00Z,dummy.user,2026-05-15T01:55:00Z,dummy.user
+2609d5df-1235-5552-9a05-6643ef35776f,Karan,Bose,Preferred IT hardware supplier,false,karan.bose493@company.example,2026-05-15T02:00:00Z,dummy.user,2026-05-15T02:00:00Z,dummy.user
+eb83fd33-3eee-5828-a93a-e9b6bedffe86,Tara,Malhotra,Inactive transport service provider,true,tara.malhotra494@vendor.example,2026-05-15T02:05:00Z,dummy.user,2026-05-15T02:05:00Z,dummy.user
+361b5e99-b6c3-5434-94ad-abf05a86c71c,Nikhil,Chopra,Compliance documents under review,false,nikhil.chopra495@supplier.example,2026-05-15T02:10:00Z,dummy.user,2026-05-15T02:10:00Z,dummy.user
+73a50669-8e1b-5365-9f69-3d749210b4f4,Pooja,Das,Approved marketing services agency,true,pooja.das496@gmail.com,2026-05-15T02:15:00Z,dummy.user,2026-05-15T02:15:00Z,dummy.user
+0eb5f3f9-d0c7-533c-9b24-e4adac6b1846,Rahul,Kulkarni,Verified cloud services reseller,true,rahul.kulkarni497@outlook.com,2026-05-15T02:20:00Z,dummy.user,2026-05-15T02:20:00Z,dummy.user
+e01af919-414e-5518-899e-305c9d5ca290,Sneha,Bhat,Preferred training services provider,false,sneha.bhat498@yahoo.com,2026-05-15T02:25:00Z,dummy.user,2026-05-15T02:25:00Z,dummy.user
+1bd02243-d25e-5bc7-8546-6877fe381345,Aditya,Saxena,Approved security services vendor,true,aditya.saxena499@brainbox.consulting,2026-05-15T02:30:00Z,dummy.user,2026-05-15T02:30:00Z,dummy.user
+79acdc41-2df2-5eca-99b0-618c5fcfee35,Riya,Pillai,Pending financial verification,false,riya.pillai500@mail.com,2026-05-15T02:35:00Z,dummy.user,2026-05-15T02:35:00Z,dummy.user

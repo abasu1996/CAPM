@@ -14,7 +14,7 @@
     "start": "cds-deploy && cds-serve",
     "app:dev": "npm --prefix app run dev",
     "app:build": "npm --prefix app run build",
-    "app:preview": "npm --prefix app run preview"
+    "app:start": "npm --prefix app run start"
   },
   "cds": {
     "requires": {
