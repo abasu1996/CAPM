@@ -250,7 +250,7 @@ function App() {
         <section className="notice">Loading supplier data...</section>
       ) : (
         <section className="tableWrap" aria-label="Supplier Shield data">
-          <table>
+          {/* <table>
             <thead>
               <tr>
                 <th>Supplier</th>
@@ -280,7 +280,7 @@ function App() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table> */}
 
           {filteredSuppliers.length === 0 ? (
             <div className="empty">No suppliers match the selected filters.</div>

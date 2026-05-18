@@ -5,11 +5,11 @@
     "node": "22.x"
   },
   "dependencies": {
+    "@cap-js/attachments": "^3.12.1",
     "@cap-js/mcp-server": "^0.0.5",
     "@cap-js/sqlite": "^2",
     "@sap/cds": "^9"
   },
-  "devDependencies": {},
   "scripts": {
     "start": "cds-deploy && cds-serve",
     "app:dev": "npm --prefix app run dev",
