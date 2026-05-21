@@ -1,0 +1,74 @@
+<mvc:View
+    controllerName="flowmate.controller.MyRequests"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+    <f:DynamicPage
+        id="myRequestsPage"
+        fitContent="true"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>myRequestsTitle}" />
+                </f:heading>
+                <f:actions>
+                    <Button
+                        icon="sap-icon://add"
+                        text="{i18n>createRequestButton}"
+                        type="Emphasized"
+                        press=".onCreateRequest" />
+                    <Button
+                        icon="sap-icon://display"
+                        text="{i18n>openRequestButton}"
+                        press=".onOpenSelectedRequest" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="sapUiResponsiveContentPadding">
+                <OverflowToolbar>
+                    <Title text="{i18n>requestsTableHeader}" />
+                    <ToolbarSpacer />
+                    <SearchField
+                        width="18rem"
+                        search=".onSearch"
+                        liveChange=".onSearch" />
+                </OverflowToolbar>
+                <Table
+                    id="requestsTable"
+                    mode="SingleSelectMaster"
+                    growing="true"
+                    growingScrollToLoad="true"
+                    items="{/ProcessRequests}">
+                    <columns>
+                        <Column><Text text="{i18n>requestTitleLabel}" /></Column>
+                        <Column><Text text="{i18n>processTypeLabel}" /></Column>
+                        <Column><Text text="{i18n>statusLabel}" /></Column>
+                        <Column><Text text="{i18n>priorityLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>stepLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>dueDateLabel}" /></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem
+                            type="Navigation"
+                            press=".onRequestPress">
+                            <cells>
+                                <ObjectIdentifier
+                                    title="{title}"
+                                    text="{requester}" />
+                                <Text text="{processType_code}" />
+                                <ObjectStatus text="{status_code}" />
+                                <Text text="{priority}" />
+                                <Text text="{department}" />
+                                <Text text="{currentStep}" />
+                                <Text text="{dueDate}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

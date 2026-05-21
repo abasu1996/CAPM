@@ -1,0 +1,111 @@
+<mvc:View
+    controllerName="flowmate.controller.RequestDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+    <f:DynamicPage
+        id="requestDetailPage"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{title}" />
+                </f:heading>
+                <f:actions>
+                    <Button
+                        icon="sap-icon://decline"
+                        text="{i18n>closeButton}"
+                        press=".onClose" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="sapUiResponsiveContentPadding">
+                <ObjectHeader
+                    title="{title}"
+                    intro="{processType_code}"
+                    number="{status_code}"
+                    numberUnit="{priority}">
+                    <attributes>
+                        <ObjectAttribute
+                            title="{i18n>departmentLabel}"
+                            text="{department}" />
+                        <ObjectAttribute
+                            title="{i18n>requesterLabel}"
+                            text="{requester}" />
+                        <ObjectAttribute
+                            title="{i18n>dueDateLabel}"
+                            text="{dueDate}" />
+                    </attributes>
+                </ObjectHeader>
+                <IconTabBar
+                    class="sapUiSmallMarginTop"
+                    expandable="false">
+                    <items>
+                        <IconTabFilter
+                            icon="sap-icon://workflow-tasks"
+                            text="{i18n>tasksTitle}">
+                            <Table items="{tasks}">
+                                <columns>
+                                    <Column><Text text="{i18n>stepLabel}" /></Column>
+                                    <Column><Text text="{i18n>taskNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>assignedToLabel}" /></Column>
+                                    <Column><Text text="{i18n>statusLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{stepNo}" />
+                                            <Text text="{taskName}" />
+                                            <Text text="{assignedTo}" />
+                                            <ObjectStatus text="{status_code}" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter
+                            icon="sap-icon://comment"
+                            text="{i18n>commentsTitle}">
+                            <List items="{comments}">
+                                <StandardListItem
+                                    title="{userId}"
+                                    description="{comment}" />
+                            </List>
+                        </IconTabFilter>
+                        <IconTabFilter
+                            icon="sap-icon://attachment"
+                            text="{i18n>attachmentsTitle}">
+                            <Table items="{attachments}">
+                                <columns>
+                                    <Column><Text text="{i18n>fileNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>mimeTypeLabel}" /></Column>
+                                    <Column><Text text="{i18n>statusLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{filename}" />
+                                            <Text text="{mimeType}" />
+                                            <ObjectStatus text="{status}" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter
+                            icon="sap-icon://history"
+                            text="{i18n>historyTitle}">
+                            <List items="{history}">
+                                <StandardListItem
+                                    title="{action}"
+                                    description="{actor} - {remarks}"
+                                    info="{newStatus}" />
+                            </List>
+                        </IconTabFilter>
+                    </items>
+                </IconTabBar>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

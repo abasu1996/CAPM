@@ -1,0 +1,60 @@
+<mvc:View
+    controllerName="flowmate.controller.AdminProcessConfig"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+    <f:DynamicPage
+        id="adminProcessConfigPage"
+        fitContent="true"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>adminConfigTitle}" />
+                </f:heading>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="sapUiResponsiveContentPadding">
+                <OverflowToolbar>
+                    <Title text="{i18n>processConfigTableHeader}" />
+                    <ToolbarSpacer />
+                    <SearchField
+                        width="18rem"
+                        search=".onSearch"
+                        liveChange=".onSearch" />
+                </OverflowToolbar>
+                <Table
+                    id="configTable"
+                    growing="true"
+                    growingScrollToLoad="true"
+                    items="{/ProcessStepConfig}">
+                    <columns>
+                        <Column><Text text="{i18n>processTypeLabel}" /></Column>
+                        <Column><Text text="{i18n>stepLabel}" /></Column>
+                        <Column><Text text="{i18n>stepNameLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>mandatoryLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>slaDaysLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextApproveLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextRejectLabel}" /></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{processType_code}" />
+                                <Text text="{stepNo}" />
+                                <ObjectIdentifier title="{stepName}" />
+                                <Text text="{role}" />
+                                <ObjectStatus text="{= ${isMandatory} ? 'Yes' : 'No' }" />
+                                <Text text="{slaDays}" />
+                                <Text text="{nextOnApprove}" />
+                                <Text text="{nextOnReject}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

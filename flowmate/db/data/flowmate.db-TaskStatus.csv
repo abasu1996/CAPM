@@ -1,0 +1,6 @@
+code,name,descr
+OPEN,Open,Task is pending action
+APPROVED,Approved,Task was approved
+REJECTED,Rejected,Task was rejected
+SENT_BACK,Sent Back,Task was sent back
+COMPLETED,Completed,Task was completed

@@ -1,0 +1,5 @@
+code,name,descr
+PURCHASE_REQUEST,Purchase Request,Purchase request with manager finance and procurement review
+DOCUMENT_REVIEW,Document Review,Document review and approval workflow
+ACCESS_REQUEST,Access Request,Access request with owner approval and fulfillment
+EXCEPTION_REQUEST,Exception Request,Exception or escalation workflow

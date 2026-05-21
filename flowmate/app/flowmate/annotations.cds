@@ -1,0 +1,1 @@
+using FlowmateService as service from '../../srv/flowmate';

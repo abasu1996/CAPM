@@ -1,0 +1,59 @@
+<mvc:View
+    controllerName="flowmate.controller.ApprovalDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+    <f:DynamicPage
+        id="approvalDetailPage"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{taskName}" />
+                </f:heading>
+                <f:actions>
+                    <Button
+                        text="{i18n>approveButton}"
+                        type="Accept"
+                        press=".onApprove" />
+                    <Button
+                        text="{i18n>sendBackButton}"
+                        press=".onSendBack" />
+                    <Button
+                        text="{i18n>rejectButton}"
+                        type="Reject"
+                        press=".onReject" />
+                    <Button
+                        icon="sap-icon://decline"
+                        text="{i18n>closeButton}"
+                        press=".onClose" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="sapUiResponsiveContentPadding">
+                <ObjectHeader
+                    title="{taskName}"
+                    intro="{request/title}"
+                    number="{status_code}"
+                    numberUnit="{role}">
+                    <attributes>
+                        <ObjectAttribute
+                            title="{i18n>assignedToLabel}"
+                            text="{assignedTo}" />
+                        <ObjectAttribute
+                            title="{i18n>stepLabel}"
+                            text="{stepNo}" />
+                    </attributes>
+                </ObjectHeader>
+                <Label
+                    class="sapUiSmallMarginTop"
+                    text="{i18n>remarksLabel}" />
+                <TextArea
+                    id="remarksTextArea"
+                    rows="6"
+                    width="100%" />
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

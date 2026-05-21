@@ -1,0 +1,9 @@
+<mvc:View controllerName="flowmate.controller.App"
+    displayBlock="true"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f">
+    <f:FlexibleColumnLayout
+        id="flexibleColumnlayout"
+        layout="OneColumn"
+        backgroundDesign="Solid" />
+</mvc:View>

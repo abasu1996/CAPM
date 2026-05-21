@@ -1,0 +1,68 @@
+<mvc:View
+    controllerName="flowmate.controller.MyTasks"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+    <f:DynamicPage
+        id="myTasksPage"
+        fitContent="true"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>myTasksTitle}" />
+                </f:heading>
+                <f:actions>
+                    <Button
+                        icon="sap-icon://accept"
+                        text="{i18n>openTaskButton}"
+                        type="Emphasized"
+                        press=".onOpenSelectedTask" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="sapUiResponsiveContentPadding">
+                <OverflowToolbar>
+                    <Title text="{i18n>tasksTableHeader}" />
+                    <ToolbarSpacer />
+                    <SearchField
+                        width="18rem"
+                        search=".onSearch"
+                        liveChange=".onSearch" />
+                </OverflowToolbar>
+                <Table
+                    id="tasksTable"
+                    mode="SingleSelectMaster"
+                    growing="true"
+                    growingScrollToLoad="true"
+                    items="{/ProcessTasks}">
+                    <columns>
+                        <Column><Text text="{i18n>taskNameLabel}" /></Column>
+                        <Column><Text text="{i18n>stepLabel}" /></Column>
+                        <Column><Text text="{i18n>assignedToLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
+                        <Column><Text text="{i18n>statusLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>decisionLabel}" /></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem
+                            type="Navigation"
+                            press=".onTaskPress">
+                            <cells>
+                                <ObjectIdentifier
+                                    title="{taskName}"
+                                    text="{request_ID}" />
+                                <Text text="{stepNo}" />
+                                <Text text="{assignedTo}" />
+                                <Text text="{role}" />
+                                <ObjectStatus text="{status_code}" />
+                                <Text text="{decision}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

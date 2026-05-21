@@ -1,0 +1,7 @@
+code,name,descr
+DRAFT,Draft,Request is being prepared
+SUBMITTED,Submitted,Request has been submitted
+IN_PROGRESS,In Progress,Request is being processed
+SENT_BACK,Sent Back,Request was sent back for clarification
+REJECTED,Rejected,Request was rejected
+COMPLETED,Completed,Request was completed

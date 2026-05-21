@@ -1,0 +1,212 @@
+{
+  "_version": "1.84.0",
+  "sap.app": {
+    "id": "flowmate",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.24.0",
+      "toolsId": "850842c4-21e4-4355-b405-2f86440c44d6"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v2/flowmate/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "flowmate-openflowmate": {
+          "semanticObject": "flowmate",
+          "action": "openflowmate",
+          "title": "{{flowmate-openflowmate.flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.148.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.layout": {},
+        "sap.ui.core": {},
+        "sap.ui.unified": {},
+        "sap.f": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "flowmate.i18n.i18n",
+          "supportedLocales": [
+            ""
+          ],
+          "fallbackLocale": ""
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "defaultCountMode": "Inline",
+          "useBatch": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.f.routing.Router",
+        "controlAggregation": "beginColumnPages",
+        "controlId": "flexibleColumnlayout",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "flowmate.view",
+        "async": true
+      },
+      "routes": [
+        {
+          "name": "RouteDashboard",
+          "pattern": ":?query:",
+          "target": [
+            "TargetDashboard"
+          ]
+        },
+        {
+          "name": "RouteMyRequests",
+          "pattern": "requests:?query:",
+          "target": [
+            "TargetMyRequests"
+          ]
+        },
+        {
+          "name": "RouteMyTasks",
+          "pattern": "tasks:?query:",
+          "target": [
+            "TargetMyTasks"
+          ]
+        },
+        {
+          "name": "RouteAdminProcessConfig",
+          "pattern": "admin/process-config:?query:",
+          "target": [
+            "TargetAdminProcessConfig"
+          ]
+        },
+        {
+          "name": "RouteRequestCreate",
+          "pattern": "requests/create:?query:",
+          "target": [
+            "TargetMyRequests",
+            "TargetRequestCreate"
+          ]
+        },
+        {
+          "name": "RouteRequestDetail",
+          "pattern": "requests/{requestId}:?query:",
+          "target": [
+            "TargetMyRequests",
+            "TargetRequestDetail"
+          ]
+        },
+        {
+          "name": "RouteApprovalDetail",
+          "pattern": "tasks/{taskId}:?query:",
+          "target": [
+            "TargetMyTasks",
+            "TargetApprovalDetail"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetDashboard": {
+          "id": "MainView",
+          "name": "MainView",
+          "controlAggregation": "beginColumnPages"
+        },
+        "TargetMyRequests": {
+          "id": "MyRequests",
+          "name": "MyRequests",
+          "controlAggregation": "beginColumnPages"
+        },
+        "TargetMyTasks": {
+          "id": "MyTasks",
+          "name": "MyTasks",
+          "controlAggregation": "beginColumnPages"
+        },
+        "TargetRequestCreate": {
+          "id": "RequestCreate",
+          "name": "RequestCreate",
+          "controlAggregation": "midColumnPages"
+        },
+        "TargetRequestDetail": {
+          "id": "RequestDetail",
+          "name": "RequestDetail",
+          "controlAggregation": "midColumnPages"
+        },
+        "TargetApprovalDetail": {
+          "id": "ApprovalDetail",
+          "name": "ApprovalDetail",
+          "controlAggregation": "midColumnPages"
+        },
+        "TargetAdminProcessConfig": {
+          "id": "AdminProcessConfig",
+          "name": "AdminProcessConfig",
+          "controlAggregation": "beginColumnPages"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "flowmate.view.App",
+      "type": "XML",
+      "id": "fcl",
+      "async": true
+    }
+  }
+}

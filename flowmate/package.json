@@ -1,0 +1,55 @@
+{
+  "name": "flowmate",
+  "version": "1.0.0",
+  "dependencies": {
+    "@cap-js-community/odata-v2-adapter": "^1.15.12",
+    "@cap-js/attachments": "^3.12.2",
+    "@cap-js/hana": "^2",
+    "@sap/cds": "^9",
+    "@sap/xssec": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2",
+    "cds-plugin-ui5": "^0.13.0"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "serve-flowmate": "cds serve --in-memory",
+    "watch-flowmate": "cds serve --in-memory",
+    "watch-flowmate-hybrid": "cds watch --profile hybrid --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false"
+  },
+  "private": true,
+  "cds": {
+    "requires": {
+      "[production]": {
+        "auth": "xsuaa",
+        "db": {
+          "kind": "hana"
+        },
+        "attachments": {
+          "kind": "db",
+          "scan": false
+        }
+      },
+      "[hybrid]": {
+        "db": {
+          "kind": "hana"
+        },
+        "attachments": {
+          "kind": "db",
+          "scan": false
+        }
+      },
+      "attachments": {
+        "kind": "db",
+        "scan": false
+      },
+      "db": {
+        "kind": "sqlite"
+      }
+    }
+  },
+  "workspaces": [
+    "app/*"
+  ]
+}

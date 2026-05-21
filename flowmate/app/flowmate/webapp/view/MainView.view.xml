@@ -1,0 +1,81 @@
+<mvc:View
+    controllerName="flowmate.controller.MainView"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+    <f:DynamicPage
+        id="dashboardPage"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>dashboardTitle}" />
+                </f:heading>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="sapUiResponsiveContentPadding">
+                <HBox
+                    wrap="Wrap"
+                    renderType="Bare"
+                    class="sapUiSmallMarginBottom">
+                    <GenericTile
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        header="{i18n>myRequestsTitle}"
+                        subheader="{i18n>myRequestsSubtitle}"
+                        press=".onOpenRequests">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://request"
+                                value="32" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        header="{i18n>myTasksTitle}"
+                        subheader="{i18n>myTasksSubtitle}"
+                        press=".onOpenTasks">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://workflow-tasks"
+                                value="0" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        header="{i18n>createRequestTitle}"
+                        subheader="{i18n>createRequestSubtitle}"
+                        press=".onCreateRequest">
+                        <TileContent>
+                            <NumericContent icon="sap-icon://add-document" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        header="{i18n>adminConfigTitle}"
+                        subheader="{i18n>adminConfigSubtitle}"
+                        press=".onOpenConfig">
+                        <TileContent>
+                            <NumericContent icon="sap-icon://action-settings" />
+                        </TileContent>
+                    </GenericTile>
+                </HBox>
+                <Panel
+                    headerText="{i18n>frameworkSummaryTitle}"
+                    expandable="false">
+                    <List>
+                        <StandardListItem
+                            icon="sap-icon://process"
+                            title="{i18n>frameworkSummaryProcessModel}" />
+                        <StandardListItem
+                            icon="sap-icon://approvals"
+                            title="{i18n>frameworkSummaryActions}" />
+                        <StandardListItem
+                            icon="sap-icon://attachment"
+                            title="{i18n>frameworkSummaryAttachments}" />
+                    </List>
+                </Panel>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

@@ -1,0 +1,86 @@
+<mvc:View
+    controllerName="flowmate.controller.RequestCreate"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
+    <f:DynamicPage
+        id="requestCreatePage"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>requestCreateTitle}" />
+                </f:heading>
+                <f:actions>
+                    <Button
+                        text="{i18n>createButton}"
+                        type="Emphasized"
+                        press=".onCreate" />
+                    <Button
+                        text="{i18n>cancelButton}"
+                        press=".onCancel" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <form:SimpleForm
+                class="sapUiResponsiveContentPadding"
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="3"
+                labelSpanL="3"
+                labelSpanM="4"
+                adjustLabelSpan="false">
+                <Label
+                    text="{i18n>processTypeLabel}"
+                    required="true" />
+                <Select
+                    selectedKey="{create>/processType_code}"
+                    items="{/ProcessTypes}">
+                    <core:Item
+                        key="{code}"
+                        text="{name}" />
+                </Select>
+                <Label
+                    text="{i18n>requestTitleLabel}"
+                    required="true" />
+                <Input
+                    value="{create>/title}"
+                    maxLength="255"
+                    required="true" />
+                <Label text="{i18n>requesterLabel}" />
+                <Input
+                    value="{create>/requester}"
+                    maxLength="100" />
+                <Label text="{i18n>departmentLabel}" />
+                <Input
+                    value="{create>/department}"
+                    maxLength="100" />
+                <Label text="{i18n>priorityLabel}" />
+                <Select selectedKey="{create>/priority}">
+                    <core:Item
+                        key="Low"
+                        text="{i18n>priorityLow}" />
+                    <core:Item
+                        key="Medium"
+                        text="{i18n>priorityMedium}" />
+                    <core:Item
+                        key="High"
+                        text="{i18n>priorityHigh}" />
+                    <core:Item
+                        key="Critical"
+                        text="{i18n>priorityCritical}" />
+                </Select>
+                <Label text="{i18n>descriptionLabel}" />
+                <TextArea
+                    value="{create>/description}"
+                    rows="6"
+                    width="100%" />
+                <Label text="{i18n>autoSubmitLabel}" />
+                <Switch state="{create>/autoSubmit}" />
+            </form:SimpleForm>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>
