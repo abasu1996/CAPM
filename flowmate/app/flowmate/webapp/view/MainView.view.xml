@@ -11,6 +11,24 @@
                 <f:heading>
                     <Title text="{i18n>dashboardTitle}" />
                 </f:heading>
+                <f:actions>
+                    <Button
+                        icon="sap-icon://request"
+                        text="{i18n>requestsNavButton}"
+                        press=".onNavToRequests" />
+                    <Button
+                        icon="sap-icon://workflow-tasks"
+                        text="{i18n>tasksNavButton}"
+                        press=".onNavToTasks" />
+                    <Button
+                        icon="sap-icon://add-document"
+                        text="{i18n>createRequestButton}"
+                        press=".onNavToCreateRequest" />
+                    <Button
+                        icon="sap-icon://action-settings"
+                        text="{i18n>adminNavButton}"
+                        press=".onNavToAdminConfig" />
+                </f:actions>
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
@@ -27,7 +45,7 @@
                         <TileContent>
                             <NumericContent
                                 icon="sap-icon://request"
-                                value="32" />
+                                value="{dashboard>/requestsCount}" />
                         </TileContent>
                     </GenericTile>
                     <GenericTile
@@ -38,7 +56,7 @@
                         <TileContent>
                             <NumericContent
                                 icon="sap-icon://workflow-tasks"
-                                value="0" />
+                                value="{dashboard>/tasksCount}" />
                         </TileContent>
                     </GenericTile>
                     <GenericTile

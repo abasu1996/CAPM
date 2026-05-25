@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap/f/library",
+    "sap/m/MessageToast",
     "sap/ui/core/mvc/Controller"
-], (fLibrary, Controller) => {
+], (MessageToast, Controller) => {
     "use strict";
 
     const SERVICE_V4_URL = "/odata/v4/flowmate/";
@@ -20,20 +20,68 @@ sap.ui.define([
         },
 
         setOneColumnLayout() {
-            this._setLayout(fLibrary.LayoutType.OneColumn);
         },
 
         setTwoColumnLayout() {
-            this._setLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
         },
 
         navTo(sRoute, oParameters) {
             this.getRouter().navTo(sRoute, oParameters || {});
         },
 
+        onNavToDashboard() {
+            this.navTo("RouteDashboard");
+        },
+
+        onNavToRequests() {
+            this.navTo("RouteMyRequests");
+        },
+
+        onNavToTasks() {
+            this.navTo("RouteMyTasks");
+        },
+
+        onNavToCreateRequest() {
+            this.navTo("RouteRequestCreate");
+        },
+
+        onNavToAdminConfig() {
+            this.navTo("RouteAdminProcessConfig");
+        },
+
+        onNotifyAssignee(oEvent) {
+            const oContext = oEvent.getSource().getBindingContext();
+            const sAssignee = oContext && oContext.getProperty("assignedTo");
+
+            if (!sAssignee) {
+                MessageToast.show(this.getText("assigneeMissingMessage"));
+                return;
+            }
+
+            const sTaskName = oContext.getProperty("taskName") || this.getText("taskFallbackName");
+            const sRequestTitle = oContext.getProperty("request/title") || oContext.getProperty("request_ID") || "";
+            const sSubject = this.getText("taskNotificationSubject", [sTaskName]);
+            const sBody = this.getText("taskNotificationBody", [
+                sTaskName,
+                sRequestTitle,
+                window.location.href
+            ]);
+
+            window.location.href = `mailto:${encodeURIComponent(sAssignee)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
+        },
+
         createEntry(sPath, oPayload) {
             return new Promise((resolve, reject) => {
                 this.getModel().create(sPath, oPayload, {
+                    success: resolve,
+                    error: reject
+                });
+            });
+        },
+
+        removeEntry(sPath) {
+            return new Promise((resolve, reject) => {
+                this.getModel().remove(sPath, {
                     success: resolve,
                     error: reject
                 });
@@ -67,15 +115,6 @@ sap.ui.define([
             }
 
             return oResponse.json();
-        },
-
-        _setLayout(sLayout) {
-            const oRootView = this.getOwnerComponent().getRootControl();
-            const oFcl = oRootView && oRootView.byId("flexibleColumnlayout");
-
-            if (oFcl) {
-                oFcl.setLayout(sLayout);
-            }
         },
 
         async _fetchCsrfToken() {

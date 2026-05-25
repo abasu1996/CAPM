@@ -2,73 +2,465 @@
     controllerName="flowmate.controller.MyRequests"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:f="sap.f">
-    <f:DynamicPage
-        id="myRequestsPage"
-        fitContent="true"
-        toggleHeaderOnTitleClick="false">
-        <f:title>
-            <f:DynamicPageTitle>
-                <f:heading>
-                    <Title text="{i18n>myRequestsTitle}" />
-                </f:heading>
-                <f:actions>
-                    <Button
-                        icon="sap-icon://add"
-                        text="{i18n>createRequestButton}"
-                        type="Emphasized"
-                        press=".onCreateRequest" />
-                    <Button
-                        icon="sap-icon://display"
-                        text="{i18n>openRequestButton}"
-                        press=".onOpenSelectedRequest" />
-                </f:actions>
-            </f:DynamicPageTitle>
-        </f:title>
-        <f:content>
-            <VBox class="sapUiResponsiveContentPadding">
-                <OverflowToolbar>
-                    <Title text="{i18n>requestsTableHeader}" />
-                    <ToolbarSpacer />
-                    <SearchField
-                        width="18rem"
-                        search=".onSearch"
-                        liveChange=".onSearch" />
-                </OverflowToolbar>
-                <Table
-                    id="requestsTable"
-                    mode="SingleSelectMaster"
-                    growing="true"
-                    growingScrollToLoad="true"
-                    items="{/ProcessRequests}">
-                    <columns>
-                        <Column><Text text="{i18n>requestTitleLabel}" /></Column>
-                        <Column><Text text="{i18n>processTypeLabel}" /></Column>
-                        <Column><Text text="{i18n>statusLabel}" /></Column>
-                        <Column><Text text="{i18n>priorityLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>stepLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>dueDateLabel}" /></Column>
-                    </columns>
-                    <items>
-                        <ColumnListItem
-                            type="Navigation"
-                            press=".onRequestPress">
-                            <cells>
-                                <ObjectIdentifier
-                                    title="{title}"
-                                    text="{requester}" />
-                                <Text text="{processType_code}" />
-                                <ObjectStatus text="{status_code}" />
-                                <Text text="{priority}" />
-                                <Text text="{department}" />
-                                <Text text="{currentStep}" />
-                                <Text text="{dueDate}" />
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-                </Table>
-            </VBox>
-        </f:content>
-    </f:DynamicPage>
+    xmlns:f="sap.f"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.ui.unified"
+    xmlns:uxap="sap.uxap">
+    <f:FlexibleColumnLayout
+        id="requestsFlexibleColumnLayout"
+        layout="OneColumn"
+        backgroundDesign="Solid">
+        <f:beginColumnPages>
+            <f:DynamicPage
+                id="myRequestsPage"
+                fitContent="true"
+                toggleHeaderOnTitleClick="false">
+                <f:title>
+                    <f:DynamicPageTitle>
+                        <f:heading>
+                            <Title text="{i18n>myRequestsTitle}" />
+                        </f:heading>
+                        <f:actions>
+                            <Button
+                                icon="sap-icon://home"
+                                text="{i18n>dashboardNavButton}"
+                                press=".onNavToDashboard" />
+                            <Button
+                                icon="sap-icon://workflow-tasks"
+                                text="{i18n>tasksNavButton}"
+                                press=".onNavToTasks" />
+                            <Button
+                                icon="sap-icon://add"
+                                text="{i18n>createRequestButton}"
+                                type="Emphasized"
+                                press=".onCreateRequest" />
+                            <Button
+                                icon="sap-icon://action-settings"
+                                text="{i18n>adminNavButton}"
+                                press=".onNavToAdminConfig" />
+                            <Button
+                                icon="sap-icon://display"
+                                text="{i18n>openRequestButton}"
+                                press=".onOpenSelectedRequest" />
+                        </f:actions>
+                    </f:DynamicPageTitle>
+                </f:title>
+                <f:content>
+                    <VBox class="sapUiResponsiveContentPadding">
+                        <OverflowToolbar>
+                            <Title text="{i18n>requestsTableHeader}" />
+                            <ToolbarSpacer />
+                            <SearchField
+                                width="18rem"
+                                search=".onSearch"
+                                liveChange=".onSearch" />
+                        </OverflowToolbar>
+                        <smartTable:SmartTable
+                            id="requestsSmartTable"
+                            entitySet="ProcessRequests"
+                            tableType="ResponsiveTable"
+                            useVariantManagement="false"
+                            useTablePersonalisation="true"
+                            header="{i18n>requestsTableHeader}"
+                            showRowCount="true"
+                            enableAutoBinding="true"
+                            initiallyVisibleFields="title,processType_code,status_code,priority,department,dueDate">
+                            <Table
+                                id="requestsTable"
+                                mode="SingleSelectMaster"
+                                growing="true"
+
+                                growingScrollToLoad="true">
+                                <columns>
+                                    <Column>
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"title","leadingProperty":"title","sortProperty":"title","filterProperty":"title"}' />
+                                        </customData>
+                                        <Text text="{i18n>requestTitleLabel}" />
+                                    </Column>
+                                    <Column>
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"processType_code","leadingProperty":"processType_code","sortProperty":"processType_code","filterProperty":"processType_code"}' />
+                                        </customData>
+                                        <Text text="{i18n>processTypeLabel}" />
+                                    </Column>
+                                    <Column>
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"status_code","leadingProperty":"status_code","sortProperty":"status_code","filterProperty":"status_code"}' />
+                                        </customData>
+                                        <Text text="{i18n>statusLabel}" />
+                                    </Column>
+                                    <Column>
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"priority","leadingProperty":"priority","sortProperty":"priority","filterProperty":"priority"}' />
+                                        </customData>
+                                        <Text text="{i18n>priorityLabel}" />
+                                    </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet">
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"department","leadingProperty":"department","sortProperty":"department","filterProperty":"department"}' />
+                                        </customData>
+                                        <Text text="{i18n>departmentLabel}" />
+                                    </Column>
+                                    <Column demandPopin="true" minScreenWidth="Desktop">
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"dueDate","leadingProperty":"dueDate","sortProperty":"dueDate","filterProperty":"dueDate"}' />
+                                        </customData>
+                                        <Text text="{i18n>dueDateLabel}" />
+                                    </Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem
+                                        highlight="{path: 'priority', formatter: '.formatPriorityHighlight'}"
+                                        type="Navigation"
+                                        press=".onRequestPress">
+                                        <cells>
+                                            <ObjectIdentifier
+                                                title="{title}"
+                                                text="{requester}" />
+                                            <Text text="{processType_code}" />
+                                            <ObjectStatus text="{status_code}" />
+                                            <ObjectStatus
+                                                text="{priority}"
+                                                state="{path: 'priority', formatter: '.formatPriorityState'}" />
+                                            <Text text="{department}" />
+                                            <Text text="{dueDate}" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </smartTable:SmartTable>
+                    </VBox>
+                </f:content>
+            </f:DynamicPage>
+        </f:beginColumnPages>
+        <f:midColumnPages>
+            <uxap:ObjectPageLayout
+                id="requestObjectPage"
+                showTitleInHeaderContent="true"
+                enableLazyLoading="false">
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:expandedHeading>
+                            <Title text="{title}" />
+                        </uxap:expandedHeading>
+                        <uxap:snappedHeading>
+                            <Title text="{title}" />
+                        </uxap:snappedHeading>
+                        <uxap:actions>
+                            <Button
+                                icon="sap-icon://decline"
+                                text="{i18n>closeButton}"
+                                press=".onCloseRequestDetail" />
+                        </uxap:actions>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+                <uxap:headerContent>
+                    <ObjectStatus
+                        title="{i18n>statusLabel}"
+                        text="{status_code}" />
+                    <ObjectStatus
+                        title="{i18n>priorityLabel}"
+                        text="{priority}"
+                        state="{path: 'priority', formatter: '.formatPriorityState'}" />
+                    <ObjectAttribute
+                        title="{i18n>processTypeLabel}"
+                        text="{processType_code}" />
+                    <ObjectAttribute
+                        title="{i18n>requesterLabel}"
+                        text="{requester}" />
+                    <ObjectAttribute
+                        title="{i18n>departmentLabel}"
+                        text="{department}" />
+                    <ObjectAttribute
+                        title="{i18n>dueDateLabel}"
+                        text="{dueDate}" />
+                </uxap:headerContent>
+                <uxap:sections>
+                    <uxap:ObjectPageSection title="{i18n>requestDetailsTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox>
+                                        <Label text="{i18n>descriptionLabel}" />
+                                        <Text text="{description}" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="{i18n>tasksTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox>
+                                        <OverflowToolbar>
+                                            <Title text="{i18n>tasksTitle}" />
+                                            <ToolbarSpacer />
+                                            <Button
+                                                icon="sap-icon://add"
+                                                text="{i18n>addTaskButton}"
+                                                press=".onOpenAddTaskDialog" />
+                                        </OverflowToolbar>
+                                        <Table items="{tasks}">
+                                            <columns>
+                                                <Column><Text text="{i18n>stepLabel}" /></Column>
+                                                <Column><Text text="{i18n>taskNameLabel}" /></Column>
+                                                <Column><Text text="{i18n>assignedToLabel}" /></Column>
+                                                <Column><Text text="{i18n>statusLabel}" /></Column>
+                                                <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                            </columns>
+                                            <items>
+                                                <ColumnListItem
+                                                    type="Active"
+                                                    press=".onRequestTaskPress">
+                                                    <cells>
+                                                        <Text text="{stepNo}" />
+                                                        <Text text="{taskName}" />
+                                                        <Text text="{assignedTo}" />
+                                                        <ObjectStatus text="{status_code}" />
+                                                        <HBox justifyContent="End">
+                                                            <Button
+                                                                icon="sap-icon://delete"
+                                                                type="Transparent"
+                                                                tooltip="{i18n>deleteTaskButton}"
+                                                                press=".onDeleteRequestTask" />
+                                                        </HBox>
+                                                    </cells>
+                                                </ColumnListItem>
+                                            </items>
+                                        </Table>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="{i18n>attachmentsTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox>
+                                        <OverflowToolbar>
+                                            <Title text="{i18n>attachmentsTitle}" />
+                                            <ToolbarSpacer />
+                                            <u:FileUploader
+                                                id="requestAttachmentsUploader"
+                                                buttonOnly="true"
+                                                buttonText="{i18n>addAttachmentsButton}"
+                                                change=".onRequestAttachmentsSelected"
+                                                icon="sap-icon://attachment"
+                                                multiple="true"
+                                                sameFilenameAllowed="true" />
+                                        </OverflowToolbar>
+                                        <Table items="{attachments}">
+                                            <columns>
+                                                <Column><Text text="{i18n>fileNameLabel}" /></Column>
+                                                <Column><Text text="{i18n>mimeTypeLabel}" /></Column>
+                                                <Column><Text text="{i18n>statusLabel}" /></Column>
+                                                <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                            </columns>
+                                            <items>
+                                                <ColumnListItem>
+                                                    <cells>
+                                                        <Text text="{filename}" />
+                                                        <Text text="{mimeType}" />
+                                                        <ObjectStatus text="{status}" />
+                                                        <HBox justifyContent="End">
+                                                            <Button
+                                                                icon="sap-icon://show"
+                                                                text="{i18n>viewAttachmentButton}"
+                                                                press=".onViewAttachment" />
+                                                            <Button
+                                                                icon="sap-icon://download"
+                                                                text="{i18n>downloadAttachmentButton}"
+                                                                press=".onDownloadAttachment" />
+                                                            <Button
+                                                                icon="sap-icon://delete"
+                                                                type="Transparent"
+                                                                tooltip="{i18n>deleteAttachmentButton}"
+                                                                press=".onDeleteAttachment" />
+                                                        </HBox>
+                                                    </cells>
+                                                </ColumnListItem>
+                                            </items>
+                                        </Table>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="{i18n>historyTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <List items="{history}">
+                                        <StandardListItem
+                                            title="{action}"
+                                            description="{actor} - {remarks}"
+                                            info="{newStatus}" />
+                                    </List>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
+        </f:midColumnPages>
+        <f:endColumnPages>
+            <uxap:ObjectPageLayout
+                id="requestTaskObjectPage"
+                showTitleInHeaderContent="true"
+                enableLazyLoading="false">
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:expandedHeading>
+                            <Title text="{taskName}" />
+                        </uxap:expandedHeading>
+                        <uxap:snappedHeading>
+                            <Title text="{taskName}" />
+                        </uxap:snappedHeading>
+                        <uxap:actions>
+                            <Button
+                                icon="sap-icon://email"
+                                text="{i18n>notifyAssigneeButton}"
+                                press=".onNotifyAssignee" />
+                            <Button
+                                text="{i18n>approveButton}"
+                                type="Accept"
+                                press=".onApproveRequestTask" />
+                            <Button
+                                text="{i18n>sendBackButton}"
+                                press=".onSendBackRequestTask" />
+                            <Button
+                                text="{i18n>rejectButton}"
+                                type="Reject"
+                                press=".onRejectRequestTask" />
+                            <Button
+                                icon="sap-icon://decline"
+                                text="{i18n>closeButton}"
+                                press=".onCloseRequestTaskDetail" />
+                        </uxap:actions>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+                <uxap:headerContent>
+                    <ObjectStatus
+                        title="{i18n>statusLabel}"
+                        text="{status_code}" />
+                    <ObjectStatus
+                        title="{i18n>roleLabel}"
+                        text="{role}" />
+                    <ObjectAttribute
+                        title="{i18n>assignedToLabel}"
+                        text="{assignedTo}" />
+                    <ObjectAttribute
+                        title="{i18n>stepLabel}"
+                        text="{stepNo}" />
+                </uxap:headerContent>
+                <uxap:sections>
+                    <uxap:ObjectPageSection title="{i18n>taskDetailsTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox>
+                                        <ObjectIdentifier
+                                            title="{request/title}"
+                                            text="{request_ID}" />
+                                        <Label
+                                            class="sapUiSmallMarginTop"
+                                            text="{i18n>decisionLabel}" />
+                                        <Text text="{decision}" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="{i18n>taskActionsTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox>
+                                        <Label text="{i18n>remarksLabel}" />
+                                        <TextArea
+                                            id="requestTaskRemarksTextArea"
+                                            rows="6"
+                                            width="100%" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
+        </f:endColumnPages>
+    </f:FlexibleColumnLayout>
+    <mvc:dependents>
+        <Dialog
+            id="addTaskDialog"
+            contentWidth="42rem"
+            draggable="true"
+            resizable="true"
+            title="{i18n>addTaskButton}">
+            <content>
+                <VBox class="flowmateDialogContent">
+                    <Text
+                        class="sapUiSmallMarginBottom"
+                        text="{i18n>addTaskDialogDescription}" />
+                    <form:SimpleForm
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="3"
+                        labelSpanL="3"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        adjustLabelSpan="false"
+                        emptySpanXL="1"
+                        emptySpanL="1"
+                        emptySpanM="0"
+                        columnsXL="1"
+                        columnsL="1"
+                        columnsM="1">
+                        <Label
+                            text="{i18n>taskNameLabel}"
+                            required="true" />
+                        <Input
+                            value="{newTask>/taskName}"
+                            maxLength="100"
+                            placeholder="{i18n>taskNamePlaceholder}"
+                            required="true" />
+                        <Label
+                            text="{i18n>stepLabel}"
+                            required="true" />
+                        <Input
+                            value="{newTask>/stepNo}"
+                            type="Number"
+                            placeholder="{i18n>stepPlaceholder}"
+                            required="true" />
+                        <Label text="{i18n>assignedToLabel}" />
+                        <Input
+                            value="{newTask>/assignedTo}"
+                            maxLength="100"
+                            placeholder="{i18n>assignedToPlaceholder}" />
+                        <Label text="{i18n>roleLabel}" />
+                        <Input
+                            value="{newTask>/role}"
+                            maxLength="100"
+                            placeholder="{i18n>rolePlaceholder}" />
+                    </form:SimpleForm>
+                </VBox>
+            </content>
+            <beginButton>
+                <Button
+                    text="{i18n>createButton}"
+                    type="Emphasized"
+                    press=".onAddTaskConfirm" />
+            </beginButton>
+            <endButton>
+                <Button
+                    text="{i18n>cancelButton}"
+                    press=".onAddTaskCancel" />
+            </endButton>
+        </Dialog>
+    </mvc:dependents>
 </mvc:View>

@@ -2,5 +2,16 @@
   "scopes": [],
   "attributes": [],
   "role-templates": [],
+  "oauth2-configuration": {
+    "credential-types": [
+      "binding-secret",
+      "x509"
+    ],
+    "redirect-uris": [
+      "https://brainbox-consulting-bv-brainboxconsultingig-dev-flowmate7c2aa8e.cfapps.eu10-005.hana.ondemand.com/login/callback",
+      "http://localhost:5000/login/callback",
+      "http://localhost:5001/login/callback"
+    ]
+  },
   "authorities-inheritance": false
 }

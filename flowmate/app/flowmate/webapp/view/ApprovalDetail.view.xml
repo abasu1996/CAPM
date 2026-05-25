@@ -13,6 +13,30 @@
                 </f:heading>
                 <f:actions>
                     <Button
+                        icon="sap-icon://home"
+                        text="{i18n>dashboardNavButton}"
+                        press=".onNavToDashboard" />
+                    <Button
+                        icon="sap-icon://request"
+                        text="{i18n>requestsNavButton}"
+                        press=".onNavToRequests" />
+                    <Button
+                        icon="sap-icon://workflow-tasks"
+                        text="{i18n>tasksNavButton}"
+                        press=".onNavToTasks" />
+                    <Button
+                        icon="sap-icon://add-document"
+                        text="{i18n>createRequestButton}"
+                        press=".onNavToCreateRequest" />
+                    <Button
+                        icon="sap-icon://action-settings"
+                        text="{i18n>adminNavButton}"
+                        press=".onNavToAdminConfig" />
+                    <Button
+                        icon="sap-icon://email"
+                        text="{i18n>notifyAssigneeButton}"
+                        press=".onNotifyAssignee" />
+                    <Button
                         text="{i18n>approveButton}"
                         type="Accept"
                         press=".onApprove" />

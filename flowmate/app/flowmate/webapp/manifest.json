@@ -63,7 +63,9 @@
         "sap.m": {},
         "sap.ui.layout": {},
         "sap.ui.core": {},
+        "sap.ui.comp": {},
         "sap.ui.unified": {},
+        "sap.uxap": {},
         "sap.f": {}
       }
     },
@@ -101,9 +103,9 @@
     },
     "routing": {
       "config": {
-        "routerClass": "sap.f.routing.Router",
-        "controlAggregation": "beginColumnPages",
-        "controlId": "flexibleColumnlayout",
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
         "transition": "slide",
         "type": "View",
         "viewType": "XML",
@@ -143,7 +145,6 @@
           "name": "RouteRequestCreate",
           "pattern": "requests/create:?query:",
           "target": [
-            "TargetMyRequests",
             "TargetRequestCreate"
           ]
         },
@@ -151,7 +152,6 @@
           "name": "RouteRequestDetail",
           "pattern": "requests/{requestId}:?query:",
           "target": [
-            "TargetMyRequests",
             "TargetRequestDetail"
           ]
         },
@@ -159,7 +159,6 @@
           "name": "RouteApprovalDetail",
           "pattern": "tasks/{taskId}:?query:",
           "target": [
-            "TargetMyTasks",
             "TargetApprovalDetail"
           ]
         }
@@ -168,37 +167,37 @@
         "TargetDashboard": {
           "id": "MainView",
           "name": "MainView",
-          "controlAggregation": "beginColumnPages"
+          "controlAggregation": "pages"
         },
         "TargetMyRequests": {
           "id": "MyRequests",
           "name": "MyRequests",
-          "controlAggregation": "beginColumnPages"
+          "controlAggregation": "pages"
         },
         "TargetMyTasks": {
           "id": "MyTasks",
           "name": "MyTasks",
-          "controlAggregation": "beginColumnPages"
+          "controlAggregation": "pages"
         },
         "TargetRequestCreate": {
           "id": "RequestCreate",
           "name": "RequestCreate",
-          "controlAggregation": "midColumnPages"
+          "controlAggregation": "pages"
         },
         "TargetRequestDetail": {
           "id": "RequestDetail",
           "name": "RequestDetail",
-          "controlAggregation": "midColumnPages"
+          "controlAggregation": "pages"
         },
         "TargetApprovalDetail": {
           "id": "ApprovalDetail",
           "name": "ApprovalDetail",
-          "controlAggregation": "midColumnPages"
+          "controlAggregation": "pages"
         },
         "TargetAdminProcessConfig": {
           "id": "AdminProcessConfig",
           "name": "AdminProcessConfig",
-          "controlAggregation": "beginColumnPages"
+          "controlAggregation": "pages"
         }
       }
     },

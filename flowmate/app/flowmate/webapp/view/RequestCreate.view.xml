@@ -4,6 +4,7 @@
     xmlns="sap.m"
     xmlns:f="sap.f"
     xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.ui.unified"
     xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="requestCreatePage"
@@ -14,6 +15,22 @@
                     <Title text="{i18n>requestCreateTitle}" />
                 </f:heading>
                 <f:actions>
+                    <Button
+                        icon="sap-icon://home"
+                        text="{i18n>dashboardNavButton}"
+                        press=".onNavToDashboard" />
+                    <Button
+                        icon="sap-icon://request"
+                        text="{i18n>requestsNavButton}"
+                        press=".onNavToRequests" />
+                    <Button
+                        icon="sap-icon://workflow-tasks"
+                        text="{i18n>tasksNavButton}"
+                        press=".onNavToTasks" />
+                    <Button
+                        icon="sap-icon://action-settings"
+                        text="{i18n>adminNavButton}"
+                        press=".onNavToAdminConfig" />
                     <Button
                         text="{i18n>createButton}"
                         type="Emphasized"
@@ -36,13 +53,13 @@
                 <Label
                     text="{i18n>processTypeLabel}"
                     required="true" />
-                <Select
-                    selectedKey="{create>/processType_code}"
-                    items="{/ProcessTypes}">
-                    <core:Item
-                        key="{code}"
-                        text="{name}" />
-                </Select>
+                <Input
+                    value="{create>/processTypeName}"
+                    placeholder="{i18n>chooseProcessTypePlaceholder}"
+                    showValueHelp="true"
+                    valueHelpOnly="true"
+                    valueHelpRequest=".onProcessTypeValueHelpRequest"
+                    required="true" />
                 <Label
                     text="{i18n>requestTitleLabel}"
                     required="true" />
@@ -80,7 +97,68 @@
                     width="100%" />
                 <Label text="{i18n>autoSubmitLabel}" />
                 <Switch state="{create>/autoSubmit}" />
+                <Label text="{i18n>attachmentsTitle}" />
+                <VBox>
+                    <u:FileUploader
+                        id="attachmentsUploader"
+                        buttonOnly="true"
+                        buttonText="{i18n>chooseDocumentsButton}"
+                        change=".onAttachmentsSelected"
+                        icon="sap-icon://attachment"
+                        multiple="true"
+                        sameFilenameAllowed="true" />
+                    <List
+                        class="sapUiSmallMarginTop"
+                        noDataText="{i18n>noAttachmentsSelectedText}"
+                        items="{create>/attachments}">
+                        <CustomListItem>
+                            <HBox
+                                alignItems="Center"
+                                justifyContent="SpaceBetween">
+                                <ObjectIdentifier
+                                    title="{create>name}"
+                                    text="{create>sizeText}" />
+                                <Button
+                                    icon="sap-icon://decline"
+                                    tooltip="{i18n>removeAttachmentButton}"
+                                    press=".onRemoveAttachment" />
+                            </HBox>
+                        </CustomListItem>
+                    </List>
+                </VBox>
             </form:SimpleForm>
         </f:content>
     </f:DynamicPage>
+    <mvc:dependents>
+        <TableSelectDialog
+            id="processTypeValueHelpDialog"
+            title="{i18n>processTypeLabel}"
+            noDataText="{i18n>noProcessTypesFoundText}"
+            rememberSelections="false"
+            search=".onProcessTypeValueHelpSearch"
+            confirm=".onProcessTypeValueHelpConfirm"
+            cancel=".onProcessTypeValueHelpClose"
+            items="{/ProcessTypes}">
+            <columns>
+                <Column>
+                    <Text text="{i18n>processTypeCodeLabel}" />
+                </Column>
+                <Column>
+                    <Text text="{i18n>processTypeNameLabel}" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet">
+                    <Text text="{i18n>processTypeDescriptionLabel}" />
+                </Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{code}" />
+                    <Text text="{name}" />
+                    <Text text="{descr}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+    </mvc:dependents>
 </mvc:View>

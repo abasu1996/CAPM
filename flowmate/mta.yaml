@@ -1,0 +1,75 @@
+_schema-version: 3.3.0
+ID: flowmate
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+        - mkdir -p gen/router/webapp
+        - cp router/package.json gen/router/package.json
+        - cp router/xs-app.json gen/router/xs-app.json
+        - cp -R app/flowmate/webapp/. gen/router/webapp
+modules:
+  - name: flowmate-approuter
+    type: nodejs
+    path: gen/router
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 512M
+    build-parameters:
+      builder: npm
+    requires:
+      - name: flowmate-auth
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          url: ~{srv-url}
+          forwardAuthToken: true
+
+  - name: flowmate-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: flowmate-auth
+      - name: flowmate-db
+
+  - name: flowmate-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: flowmate-db
+
+resources:
+  - name: flowmate-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: flowmate-${space}
+        tenant-mode: dedicated
+  - name: flowmate-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
