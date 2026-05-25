@@ -15,6 +15,7 @@
         <f:beginColumnPages>
             <f:DynamicPage
                 id="myRequestsPage"
+                class="flowmatePage"
                 fitContent="true"
                 toggleHeaderOnTitleClick="false">
                 <f:title>
@@ -39,7 +40,12 @@
                             <Button
                                 icon="sap-icon://action-settings"
                                 text="{i18n>adminNavButton}"
+                                visible="{permissions>/isAdmin}"
                                 press=".onNavToAdminConfig" />
+                            <Button
+                                icon="sap-icon://employee"
+                                text="{i18n>delegationsNavButton}"
+                                press=".onNavToDelegations" />
                             <Button
                                 icon="sap-icon://display"
                                 text="{i18n>openRequestButton}"
@@ -48,8 +54,8 @@
                     </f:DynamicPageTitle>
                 </f:title>
                 <f:content>
-                    <VBox class="sapUiResponsiveContentPadding">
-                        <OverflowToolbar>
+                    <VBox class="flowmateContent flowmateSurface">
+                        <OverflowToolbar class="flowmateToolbar">
                             <Title text="{i18n>requestsTableHeader}" />
                             <ToolbarSpacer />
                             <SearchField
@@ -59,6 +65,7 @@
                         </OverflowToolbar>
                         <smartTable:SmartTable
                             id="requestsSmartTable"
+                            class="flowmateSmartTable"
                             entitySet="ProcessRequests"
                             tableType="ResponsiveTable"
                             useVariantManagement="false"
@@ -66,12 +73,16 @@
                             header="{i18n>requestsTableHeader}"
                             showRowCount="true"
                             enableAutoBinding="true"
+                            beforeRebindTable=".onBeforeRebindRequestsTable"
                             initiallyVisibleFields="title,processType_code,status_code,priority,department,dueDate">
                             <Table
                                 id="requestsTable"
+                                class="flowmateTable"
+                                noDataText="{i18n>noRequestsText}"
+                                busyIndicatorDelay="0"
                                 mode="SingleSelectMaster"
                                 growing="true"
-
+                                itemPress=".onRequestPress"
                                 growingScrollToLoad="true">
                                 <columns>
                                     <Column>
@@ -114,14 +125,16 @@
                                 <items>
                                     <ColumnListItem
                                         highlight="{path: 'priority', formatter: '.formatPriorityHighlight'}"
-                                        type="Navigation"
-                                        press=".onRequestPress">
+                                        type="Active"
+                                        >
                                         <cells>
                                             <ObjectIdentifier
                                                 title="{title}"
                                                 text="{requester}" />
                                             <Text text="{processType_code}" />
-                                            <ObjectStatus text="{status_code}" />
+                                            <ObjectStatus
+                                                text="{status_code}"
+                                                state="{path: 'status_code', formatter: '.formatStatusState'}" />
                                             <ObjectStatus
                                                 text="{priority}"
                                                 state="{path: 'priority', formatter: '.formatPriorityState'}" />
@@ -139,6 +152,7 @@
         <f:midColumnPages>
             <uxap:ObjectPageLayout
                 id="requestObjectPage"
+                class="flowmateObjectPage"
                 showTitleInHeaderContent="true"
                 enableLazyLoading="false">
                 <uxap:headerTitle>
@@ -160,7 +174,8 @@
                 <uxap:headerContent>
                     <ObjectStatus
                         title="{i18n>statusLabel}"
-                        text="{status_code}" />
+                        text="{status_code}"
+                        state="{path: 'status_code', formatter: '.formatStatusState'}" />
                     <ObjectStatus
                         title="{i18n>priorityLabel}"
                         text="{priority}"
@@ -183,7 +198,7 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <VBox>
+                                    <VBox class="flowmateDetailBlock">
                                         <Label text="{i18n>descriptionLabel}" />
                                         <Text text="{description}" />
                                     </VBox>
@@ -195,8 +210,8 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <VBox>
-                                        <OverflowToolbar>
+                                    <VBox class="flowmateSurface">
+                                        <OverflowToolbar class="flowmateToolbar">
                                             <Title text="{i18n>tasksTitle}" />
                                             <ToolbarSpacer />
                                             <Button
@@ -204,7 +219,10 @@
                                                 text="{i18n>addTaskButton}"
                                                 press=".onOpenAddTaskDialog" />
                                         </OverflowToolbar>
-                                        <Table items="{tasks}">
+                                        <Table
+                                            class="flowmateTable"
+                                            noDataText="{i18n>noTasksText}"
+                                            items="{tasks}">
                                             <columns>
                                                 <Column><Text text="{i18n>stepLabel}" /></Column>
                                                 <Column><Text text="{i18n>taskNameLabel}" /></Column>
@@ -220,7 +238,9 @@
                                                         <Text text="{stepNo}" />
                                                         <Text text="{taskName}" />
                                                         <Text text="{assignedTo}" />
-                                                        <ObjectStatus text="{status_code}" />
+                                                        <ObjectStatus
+                                                            text="{status_code}"
+                                                            state="{path: 'status_code', formatter: '.formatStatusState'}" />
                                                         <HBox justifyContent="End">
                                                             <Button
                                                                 icon="sap-icon://delete"
@@ -241,8 +261,8 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <VBox>
-                                        <OverflowToolbar>
+                                    <VBox class="flowmateSurface">
+                                        <OverflowToolbar class="flowmateToolbar">
                                             <Title text="{i18n>attachmentsTitle}" />
                                             <ToolbarSpacer />
                                             <u:FileUploader
@@ -250,11 +270,40 @@
                                                 buttonOnly="true"
                                                 buttonText="{i18n>addAttachmentsButton}"
                                                 change=".onRequestAttachmentsSelected"
+                                                fileSizeExceed=".onAttachmentFileSizeExceed"
                                                 icon="sap-icon://attachment"
+                                                maximumFileSize="400"
                                                 multiple="true"
+                                                enabled="{= !${uploads>/active} }"
                                                 sameFilenameAllowed="true" />
                                         </OverflowToolbar>
-                                        <Table items="{attachments}">
+                                        <List
+                                            class="flowmateUploadQueue"
+                                            visible="{uploads>/active}"
+                                            showSeparators="Inner"
+                                            items="{uploads>/items}">
+                                            <CustomListItem>
+                                                <VBox class="flowmateUploadItem">
+                                                    <HBox
+                                                        alignItems="Center"
+                                                        justifyContent="SpaceBetween">
+                                                        <ObjectIdentifier title="{uploads>name}" />
+                                                        <ObjectStatus
+                                                            text="{uploads>statusText}"
+                                                            state="{uploads>statusState}" />
+                                                    </HBox>
+                                                    <ProgressIndicator
+                                                        class="sapUiTinyMarginTop"
+                                                        percentValue="{uploads>progress}"
+                                                        displayValue="{uploads>progressText}"
+                                                        state="{uploads>statusState}" />
+                                                </VBox>
+                                            </CustomListItem>
+                                        </List>
+                                        <Table
+                                            class="flowmateTable"
+                                            noDataText="{i18n>noAttachmentsText}"
+                                            items="{attachments}">
                                             <columns>
                                                 <Column><Text text="{i18n>fileNameLabel}" /></Column>
                                                 <Column><Text text="{i18n>mimeTypeLabel}" /></Column>
@@ -266,7 +315,9 @@
                                                     <cells>
                                                         <Text text="{filename}" />
                                                         <Text text="{mimeType}" />
-                                                        <ObjectStatus text="{status}" />
+                                                        <ObjectStatus
+                                                            text="{status}"
+                                                            state="{path: 'status', formatter: '.formatStatusState'}" />
                                                         <HBox justifyContent="End">
                                                             <Button
                                                                 icon="sap-icon://show"
@@ -295,7 +346,10 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <List items="{history}">
+                                    <List
+                                        class="flowmateDetailBlock"
+                                        noDataText="{i18n>noHistoryText}"
+                                        items="{history}">
                                         <StandardListItem
                                             title="{action}"
                                             description="{actor} - {remarks}"
@@ -311,6 +365,7 @@
         <f:endColumnPages>
             <uxap:ObjectPageLayout
                 id="requestTaskObjectPage"
+                class="flowmateObjectPage"
                 showTitleInHeaderContent="true"
                 enableLazyLoading="false">
                 <uxap:headerTitle>
@@ -347,7 +402,8 @@
                 <uxap:headerContent>
                     <ObjectStatus
                         title="{i18n>statusLabel}"
-                        text="{status_code}" />
+                        text="{status_code}"
+                        state="{path: 'status_code', formatter: '.formatStatusState'}" />
                     <ObjectStatus
                         title="{i18n>roleLabel}"
                         text="{role}" />
@@ -363,7 +419,7 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <VBox>
+                                    <VBox class="flowmateDetailBlock">
                                         <ObjectIdentifier
                                             title="{request/title}"
                                             text="{request_ID}" />
@@ -380,7 +436,7 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <VBox>
+                                    <VBox class="flowmateDetailBlock flowmateRemarks">
                                         <Label text="{i18n>remarksLabel}" />
                                         <TextArea
                                             id="requestTaskRemarksTextArea"
@@ -439,9 +495,11 @@
                             required="true" />
                         <Label text="{i18n>assignedToLabel}" />
                         <Input
-                            value="{newTask>/assignedTo}"
-                            maxLength="100"
-                            placeholder="{i18n>assignedToPlaceholder}" />
+                            value="{newTask>/assignedToName}"
+                            placeholder="{i18n>chooseUserPlaceholder}"
+                            showValueHelp="true"
+                            valueHelpOnly="true"
+                            valueHelpRequest=".onAssigneeValueHelpRequest" />
                         <Label text="{i18n>roleLabel}" />
                         <Input
                             value="{newTask>/role}"
@@ -462,5 +520,34 @@
                     press=".onAddTaskCancel" />
             </endButton>
         </Dialog>
+        <TableSelectDialog
+            id="assigneeValueHelpDialog"
+            title="{i18n>selectAssigneeTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            rememberSelections="false"
+            search=".onAssigneeValueHelpSearch"
+            confirm=".onAssigneeValueHelpConfirm"
+            cancel=".onAssigneeValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                    <Text text="{department}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
     </mvc:dependents>
 </mvc:View>

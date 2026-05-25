@@ -28,7 +28,11 @@ sap.ui.define([
         },
 
         onTaskPress(oEvent) {
-            this._showTaskDetail(oEvent.getSource().getBindingContext());
+            const oItem = oEvent.getParameter("listItem");
+
+            if (oItem) {
+                this._showTaskDetail(oItem.getBindingContext());
+            }
         },
 
         onOpenSelectedTask() {
@@ -99,7 +103,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.removeEntry(`/ProcessTasks(guid'${sTaskId}')`);
@@ -114,7 +118,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         },
 
@@ -128,6 +132,10 @@ sap.ui.define([
                 path: `/ProcessTasks(guid'${sTaskId}')`,
                 parameters: {
                     expand: "request"
+                },
+                events: {
+                    dataRequested: this.onDataRequested.bind(this),
+                    dataReceived: this.onDataReceived.bind(this)
                 }
             });
             this._setTasksLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
@@ -153,7 +161,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.callAction(sAction, {
@@ -167,7 +175,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("actionFailedMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         }
     });

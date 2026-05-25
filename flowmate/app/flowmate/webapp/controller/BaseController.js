@@ -19,6 +19,56 @@ sap.ui.define([
             return this.getModel("i18n").getResourceBundle().getText(sKey, aArgs);
         },
 
+        formatStatusState(sStatus) {
+            switch ((sStatus || "").toUpperCase()) {
+                case "APPROVED":
+                case "COMPLETED":
+                case "SUBMITTED":
+                case "CLEAN":
+                    return "Success";
+                case "OPEN":
+                case "IN_PROGRESS":
+                case "PENDING":
+                    return "Information";
+                case "SENT_BACK":
+                    return "Warning";
+                case "REJECTED":
+                case "FAILED":
+                case "INFECTED":
+                    return "Error";
+                default:
+                    return "None";
+            }
+        },
+
+        onDataRequested() {
+            this._iPendingDataRequests = (this._iPendingDataRequests || 0) + 1;
+            this._updateBusyState();
+        },
+
+        onDataReceived() {
+            this._iPendingDataRequests = Math.max((this._iPendingDataRequests || 0) - 1, 0);
+            this._updateBusyState();
+        },
+
+        showBusy() {
+            this._iPendingOperations = (this._iPendingOperations || 0) + 1;
+            this._updateBusyState();
+        },
+
+        hideBusy() {
+            this._iPendingOperations = Math.max((this._iPendingOperations || 0) - 1, 0);
+            this._updateBusyState();
+        },
+
+        _updateBusyState() {
+            const oView = this.getView();
+            const bBusy = Boolean(this._iPendingDataRequests || this._iPendingOperations);
+
+            oView.setBusyIndicatorDelay(0);
+            oView.setBusy(bBusy);
+        },
+
         setOneColumnLayout() {
         },
 
@@ -46,16 +96,65 @@ sap.ui.define([
         },
 
         onNavToAdminConfig() {
-            this.navTo("RouteAdminProcessConfig");
+            if (this.getModel("permissions").getProperty("/isAdmin")) {
+                this.navTo("RouteAdminProcessConfig");
+            }
         },
 
-        onNotifyAssignee(oEvent) {
+        onNavToDelegations() {
+            this.navTo("RouteDelegations");
+        },
+
+        onNavToUserAdministration() {
+            if (this.getModel("permissions").getProperty("/isAdmin")) {
+                this.navTo("RouteUserAdministration");
+            }
+        },
+
+        async requireAdministrator() {
+            const oPermissions = this.getModel("permissions");
+
+            if (!oPermissions.getProperty("/loaded")) {
+                await this.getOwnerComponent()._loadPermissions();
+            }
+
+            if (!oPermissions.getProperty("/isAdmin")) {
+                MessageToast.show(this.getText("administratorRequiredMessage"));
+                this.navTo("RouteDashboard");
+                return false;
+            }
+
+            return true;
+        },
+
+        async onNotifyAssignee(oEvent) {
             const oContext = oEvent.getSource().getBindingContext();
             const sAssignee = oContext && oContext.getProperty("assignedTo");
 
             if (!sAssignee) {
                 MessageToast.show(this.getText("assigneeMissingMessage"));
                 return;
+            }
+
+            let sRecipient = sAssignee;
+
+            this.showBusy();
+
+            try {
+                const oResolvedRecipient = await this.callAction("resolveNotificationRecipient", {
+                    userId: sAssignee
+                });
+
+                sRecipient = oResolvedRecipient.recipient || sAssignee;
+
+                if (oResolvedRecipient.delegated) {
+                    MessageToast.show(this.getText("notificationDelegatedMessage", [sRecipient]));
+                }
+            } catch (oError) {
+                MessageToast.show(oError.message || this.getText("actionFailedMessage"));
+                return;
+            } finally {
+                this.hideBusy();
             }
 
             const sTaskName = oContext.getProperty("taskName") || this.getText("taskFallbackName");
@@ -67,7 +166,7 @@ sap.ui.define([
                 window.location.href
             ]);
 
-            window.location.href = `mailto:${encodeURIComponent(sAssignee)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
+            window.location.href = `mailto:${encodeURIComponent(sRecipient)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
         },
 
         createEntry(sPath, oPayload) {
@@ -82,6 +181,15 @@ sap.ui.define([
         removeEntry(sPath) {
             return new Promise((resolve, reject) => {
                 this.getModel().remove(sPath, {
+                    success: resolve,
+                    error: reject
+                });
+            });
+        },
+
+        updateEntry(sPath, oPayload) {
+            return new Promise((resolve, reject) => {
+                this.getModel().update(sPath, oPayload, {
                     success: resolve,
                     error: reject
                 });

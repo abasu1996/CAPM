@@ -142,6 +142,20 @@
           ]
         },
         {
+          "name": "RouteDelegations",
+          "pattern": "delegations:?query:",
+          "target": [
+            "TargetDelegations"
+          ]
+        },
+        {
+          "name": "RouteUserAdministration",
+          "pattern": "admin/users:?query:",
+          "target": [
+            "TargetUserAdministration"
+          ]
+        },
+        {
           "name": "RouteRequestCreate",
           "pattern": "requests/create:?query:",
           "target": [
@@ -197,6 +211,16 @@
         "TargetAdminProcessConfig": {
           "id": "AdminProcessConfig",
           "name": "AdminProcessConfig",
+          "controlAggregation": "pages"
+        },
+        "TargetDelegations": {
+          "id": "Delegations",
+          "name": "Delegations",
+          "controlAggregation": "pages"
+        },
+        "TargetUserAdministration": {
+          "id": "UserAdministration",
+          "name": "UserAdministration",
           "controlAggregation": "pages"
         }
       }

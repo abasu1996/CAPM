@@ -8,6 +8,7 @@
     xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="requestCreatePage"
+        class="flowmatePage"
         toggleHeaderOnTitleClick="false">
         <f:title>
             <f:DynamicPageTitle>
@@ -30,20 +31,28 @@
                     <Button
                         icon="sap-icon://action-settings"
                         text="{i18n>adminNavButton}"
+                        visible="{permissions>/isAdmin}"
                         press=".onNavToAdminConfig" />
+                    <Button
+                        icon="sap-icon://employee"
+                        text="{i18n>delegationsNavButton}"
+                        press=".onNavToDelegations" />
                     <Button
                         text="{i18n>createButton}"
                         type="Emphasized"
+                        enabled="{= !${create>/uploading} }"
                         press=".onCreate" />
                     <Button
                         text="{i18n>cancelButton}"
+                        enabled="{= !${create>/uploading} }"
                         press=".onCancel" />
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <form:SimpleForm
-                class="sapUiResponsiveContentPadding"
+            <VBox class="flowmateContent flowmateNarrowContent">
+                <form:SimpleForm
+                class="flowmateFormSurface"
                 editable="true"
                 layout="ResponsiveGridLayout"
                 labelSpanXL="3"
@@ -69,8 +78,11 @@
                     required="true" />
                 <Label text="{i18n>requesterLabel}" />
                 <Input
-                    value="{create>/requester}"
-                    maxLength="100" />
+                    value="{create>/requesterName}"
+                    placeholder="{i18n>chooseUserPlaceholder}"
+                    showValueHelp="true"
+                    valueHelpOnly="true"
+                    valueHelpRequest=".onRequesterValueHelpRequest" />
                 <Label text="{i18n>departmentLabel}" />
                 <Input
                     value="{create>/department}"
@@ -104,29 +116,47 @@
                         buttonOnly="true"
                         buttonText="{i18n>chooseDocumentsButton}"
                         change=".onAttachmentsSelected"
+                        fileSizeExceed=".onAttachmentFileSizeExceed"
                         icon="sap-icon://attachment"
+                        maximumFileSize="400"
                         multiple="true"
+                        enabled="{= !${create>/uploading} }"
                         sameFilenameAllowed="true" />
                     <List
-                        class="sapUiSmallMarginTop"
+                        class="sapUiSmallMarginTop flowmateAttachmentList"
                         noDataText="{i18n>noAttachmentsSelectedText}"
                         items="{create>/attachments}">
                         <CustomListItem>
-                            <HBox
-                                alignItems="Center"
-                                justifyContent="SpaceBetween">
-                                <ObjectIdentifier
-                                    title="{create>name}"
-                                    text="{create>sizeText}" />
-                                <Button
-                                    icon="sap-icon://decline"
-                                    tooltip="{i18n>removeAttachmentButton}"
-                                    press=".onRemoveAttachment" />
-                            </HBox>
+                            <VBox class="flowmateUploadItem">
+                                <HBox
+                                    alignItems="Center"
+                                    justifyContent="SpaceBetween">
+                                    <ObjectIdentifier
+                                        title="{create>name}"
+                                        text="{create>sizeText}" />
+                                    <HBox alignItems="Center">
+                                        <ObjectStatus
+                                            text="{create>statusText}"
+                                            state="{create>statusState}" />
+                                        <Button
+                                            icon="sap-icon://decline"
+                                            enabled="{= !${create>/uploading} }"
+                                            tooltip="{i18n>removeAttachmentButton}"
+                                            press=".onRemoveAttachment" />
+                                    </HBox>
+                                </HBox>
+                                <ProgressIndicator
+                                    class="sapUiTinyMarginTop"
+                                    visible="{create>showProgress}"
+                                    percentValue="{create>progress}"
+                                    displayValue="{create>progressText}"
+                                    state="{create>statusState}" />
+                            </VBox>
                         </CustomListItem>
                     </List>
                 </VBox>
-            </form:SimpleForm>
+                </form:SimpleForm>
+            </VBox>
         </f:content>
     </f:DynamicPage>
     <mvc:dependents>
@@ -138,7 +168,13 @@
             search=".onProcessTypeValueHelpSearch"
             confirm=".onProcessTypeValueHelpConfirm"
             cancel=".onProcessTypeValueHelpClose"
-            items="{/ProcessTypes}">
+            items="{
+                path: '/ProcessTypes',
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
             <columns>
                 <Column>
                     <Text text="{i18n>processTypeCodeLabel}" />
@@ -157,6 +193,35 @@
                     <Text text="{code}" />
                     <Text text="{name}" />
                     <Text text="{descr}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+        <TableSelectDialog
+            id="requesterValueHelpDialog"
+            title="{i18n>selectRequesterTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            rememberSelections="false"
+            search=".onRequesterValueHelpSearch"
+            confirm=".onRequesterValueHelpConfirm"
+            cancel=".onRequesterValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                    <Text text="{department}" />
                 </cells>
             </ColumnListItem>
         </TableSelectDialog>

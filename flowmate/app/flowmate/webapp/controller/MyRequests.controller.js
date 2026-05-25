@@ -10,10 +10,16 @@ sap.ui.define([
     "use strict";
 
     const SERVICE_V4_URL = "/odata/v4/flowmate/";
+    const MAX_ATTACHMENT_SIZE_MB = 400;
+    const MAX_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
 
     return BaseController.extend("flowmate.controller.MyRequests", {
         onInit() {
             this.getView().setModel(new JSONModel(this._createEmptyTask()), "newTask");
+            this.getView().setModel(new JSONModel({
+                active: false,
+                items: []
+            }), "uploads");
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -26,8 +32,26 @@ sap.ui.define([
             this.navTo("RouteRequestCreate");
         },
 
+        onBeforeRebindRequestsTable(oEvent) {
+            const oBindingParams = oEvent.getParameter("bindingParams");
+            const oEvents = oBindingParams.events || {};
+            const fnDataRequested = oEvents.dataRequested;
+            const fnDataReceived = oEvents.dataReceived;
+
+            oBindingParams.events = oEvents;
+            oEvents.dataRequested = (...aArgs) => {
+                fnDataRequested?.(...aArgs);
+                this.onDataRequested();
+            };
+            oEvents.dataReceived = (...aArgs) => {
+                fnDataReceived?.(...aArgs);
+                this.onDataReceived();
+            };
+        },
+
         onRequestPress(oEvent) {
-            this._openRequest(oEvent.getSource().getBindingContext());
+            const oItem = oEvent.getParameter("listItem") || oEvent.getSource();
+            this._openRequest(oItem.getBindingContext());
         },
 
         onRequestTaskPress(oEvent) {
@@ -111,6 +135,32 @@ sap.ui.define([
             this.byId("addTaskDialog").close();
         },
 
+        onAssigneeValueHelpRequest() {
+            this.byId("assigneeValueHelpDialog").open();
+        },
+
+        onAssigneeValueHelpSearch(oEvent) {
+            this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
+        },
+
+        onAssigneeValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (!oContext) {
+                return;
+            }
+
+            const oTaskModel = this.getView().getModel("newTask");
+            oTaskModel.setProperty("/assignedUser_ID", oContext.getProperty("ID"));
+            oTaskModel.setProperty("/assignedToName", oContext.getProperty("displayName"));
+            oTaskModel.setProperty("/assignedTo", oContext.getProperty("email") || oContext.getProperty("userPrincipalName"));
+            this.onAssigneeValueHelpClose(oEvent);
+        },
+
+        onAssigneeValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
         async onAddTaskConfirm() {
             const oTask = this.getView().getModel("newTask").getData();
 
@@ -119,13 +169,14 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.createEntry("/ProcessTasks", {
                     request_ID: this._sSelectedRequestId,
                     stepNo: Number(oTask.stepNo),
                     taskName: oTask.taskName,
+                    assignedUser_ID: oTask.assignedUser_ID || undefined,
                     assignedTo: oTask.assignedTo,
                     role: oTask.role,
                     status_code: "OPEN"
@@ -136,7 +187,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("taskCreateErrorMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         },
 
@@ -144,6 +195,10 @@ sap.ui.define([
             const aFiles = Array.from(oEvent.getParameter("files") || []);
 
             oEvent.getSource().clear();
+
+            if (!this._validateAttachmentFiles(aFiles)) {
+                return;
+            }
 
             if (!this._sSelectedRequestId) {
                 MessageToast.show(this.getText("selectRequestMessage"));
@@ -154,7 +209,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this._startAttachmentUploads(aFiles);
 
             try {
                 await this._uploadAttachments(this._sSelectedRequestId, aFiles);
@@ -163,12 +218,22 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentContentErrorMessage", [""]));
             } finally {
-                this.getView().setBusy(false);
+                this.getView().getModel("uploads").setProperty("/active", false);
             }
+        },
+
+        onAttachmentFileSizeExceed(oEvent) {
+            MessageBox.warning(this.getText("attachmentSizeExceededMessage", [
+                oEvent.getParameter("fileName"),
+                MAX_ATTACHMENT_SIZE_MB
+            ]));
+            oEvent.getSource().clear();
         },
 
         async onViewAttachment(oEvent) {
             const oContext = oEvent.getSource().getBindingContext();
+
+            this.showBusy();
 
             try {
                 const oFile = await this._fetchAttachmentContent(oContext);
@@ -178,11 +243,15 @@ sap.ui.define([
                 setTimeout(() => URL.revokeObjectURL(sUrl), 60000);
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentOpenErrorMessage"));
+            } finally {
+                this.hideBusy();
             }
         },
 
         async onDownloadAttachment(oEvent) {
             const oContext = oEvent.getSource().getBindingContext();
+
+            this.showBusy();
 
             try {
                 const oFile = await this._fetchAttachmentContent(oContext);
@@ -197,6 +266,8 @@ sap.ui.define([
                 URL.revokeObjectURL(sUrl);
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentDownloadErrorMessage"));
+            } finally {
+                this.hideBusy();
             }
         },
 
@@ -218,7 +289,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.removeEntry(`/ProcessTasks(guid'${sTaskId}')`);
@@ -234,7 +305,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         },
 
@@ -254,7 +325,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.removeEntry(`/ProcessAttachments(guid'${sAttachmentId}')`);
@@ -263,7 +334,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentDeleteErrorMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         },
 
@@ -309,6 +380,10 @@ sap.ui.define([
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
                     expand: "tasks,comments,attachments,history"
+                },
+                events: {
+                    dataRequested: this.onDataRequested.bind(this),
+                    dataReceived: this.onDataReceived.bind(this)
                 }
             });
             this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
@@ -324,6 +399,10 @@ sap.ui.define([
                 path: `/ProcessTasks(guid'${sTaskId}')`,
                 parameters: {
                     expand: "request"
+                },
+                events: {
+                    dataRequested: this.onDataRequested.bind(this),
+                    dataReceived: this.onDataReceived.bind(this)
                 }
             });
             this._setRequestsLayout(fLibrary.LayoutType.ThreeColumnsEndExpanded);
@@ -335,7 +414,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.callAction(sAction, {
@@ -349,7 +428,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("actionFailedMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         },
 
@@ -357,9 +436,32 @@ sap.ui.define([
             return {
                 taskName: "",
                 stepNo: "",
+                assignedUser_ID: "",
+                assignedToName: "",
                 assignedTo: "",
                 role: ""
             };
+        },
+
+        _filterUsers(oDialog, sQuery) {
+            const oBinding = oDialog.getBinding("items");
+
+            if (!sQuery) {
+                oBinding.filter([]);
+                return;
+            }
+
+            oBinding.filter([
+                new Filter({
+                    filters: [
+                        new Filter("displayName", FilterOperator.Contains, sQuery),
+                        new Filter("email", FilterOperator.Contains, sQuery),
+                        new Filter("userPrincipalName", FilterOperator.Contains, sQuery),
+                        new Filter("department", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                })
+            ]);
         },
 
         _refreshSelectedRequest() {
@@ -383,10 +485,74 @@ sap.ui.define([
         async _uploadAttachments(sRequestId, aFiles) {
             const sToken = await this._fetchCsrfToken();
 
-            for (const oFile of aFiles) {
-                const oAttachment = await this._createAttachmentMetadata(sRequestId, oFile, sToken);
-                await this._uploadAttachmentContent(oAttachment.ID, oFile, sToken);
+            for (let iIndex = 0; iIndex < aFiles.length; iIndex += 1) {
+                const oFile = aFiles[iIndex];
+
+                this._setAttachmentUploadStatus(iIndex, {
+                    statusText: this.getText("attachmentUploadingStatus"),
+                    statusState: "Information"
+                });
+
+                try {
+                    const oAttachment = await this._createAttachmentMetadata(sRequestId, oFile, sToken);
+                    await this._uploadAttachmentContent(oAttachment.ID, oFile, sToken, (iPercent) => {
+                        this._setAttachmentUploadStatus(iIndex, {
+                            progress: iPercent,
+                            progressText: `${iPercent}%`,
+                            statusText: iPercent === 100
+                                ? this.getText("attachmentProcessingStatus")
+                                : this.getText("attachmentUploadingStatus")
+                        });
+                    });
+                    this._setAttachmentUploadStatus(iIndex, {
+                        progress: 100,
+                        progressText: "100%",
+                        statusText: this.getText("attachmentUploadedStatus"),
+                        statusState: "Success"
+                    });
+                } catch (oError) {
+                    this._setAttachmentUploadStatus(iIndex, {
+                        statusText: this.getText("attachmentUploadFailedStatus"),
+                        statusState: "Error"
+                    });
+                    throw oError;
+                }
             }
+        },
+
+        _startAttachmentUploads(aFiles) {
+            this.getView().getModel("uploads").setData({
+                active: true,
+                items: aFiles.map((oFile) => ({
+                    name: oFile.name,
+                    progress: 0,
+                    progressText: "0%",
+                    statusText: this.getText("attachmentQueuedStatus"),
+                    statusState: "None"
+                }))
+            });
+        },
+
+        _setAttachmentUploadStatus(iIndex, oValues) {
+            const oModel = this.getView().getModel("uploads");
+
+            Object.entries(oValues).forEach(([sProperty, vValue]) => {
+                oModel.setProperty(`/items/${iIndex}/${sProperty}`, vValue);
+            });
+        },
+
+        _validateAttachmentFiles(aFiles) {
+            const oOversizedFile = aFiles.find((oFile) => oFile.size > MAX_ATTACHMENT_SIZE_BYTES);
+
+            if (!oOversizedFile) {
+                return true;
+            }
+
+            MessageBox.warning(this.getText("attachmentSizeExceededMessage", [
+                oOversizedFile.name,
+                MAX_ATTACHMENT_SIZE_MB
+            ]));
+            return false;
         },
 
         async _createAttachmentMetadata(sRequestId, oFile, sToken) {
@@ -412,20 +578,32 @@ sap.ui.define([
             return oResponse.json();
         },
 
-        async _uploadAttachmentContent(sAttachmentId, oFile, sToken) {
-            const oResponse = await fetch(`${SERVICE_V4_URL}ProcessAttachments(ID=${sAttachmentId})/content`, {
-                method: "PUT",
-                credentials: "same-origin",
-                headers: {
-                    "Content-Type": oFile.type || "application/octet-stream",
-                    "X-CSRF-Token": sToken
-                },
-                body: oFile
-            });
+        _uploadAttachmentContent(sAttachmentId, oFile, sToken, fnProgress) {
+            return new Promise((resolve, reject) => {
+                const oRequest = new XMLHttpRequest();
 
-            if (!oResponse.ok) {
-                throw new Error(this.getText("attachmentContentErrorMessage", [oFile.name]));
-            }
+                oRequest.open("PUT", `${SERVICE_V4_URL}ProcessAttachments(ID=${sAttachmentId})/content`);
+                oRequest.withCredentials = true;
+                oRequest.setRequestHeader("Content-Type", oFile.type || "application/octet-stream");
+                oRequest.setRequestHeader("X-CSRF-Token", sToken);
+                oRequest.upload.onprogress = (oEvent) => {
+                    if (oEvent.lengthComputable) {
+                        fnProgress(Math.round((oEvent.loaded / oEvent.total) * 100));
+                    }
+                };
+                oRequest.onload = () => {
+                    if (oRequest.status >= 200 && oRequest.status < 300) {
+                        resolve();
+                        return;
+                    }
+
+                    reject(new Error(this.getText("attachmentContentErrorMessage", [oFile.name])));
+                };
+                oRequest.onerror = () => {
+                    reject(new Error(this.getText("attachmentContentErrorMessage", [oFile.name])));
+                };
+                oRequest.send(oFile);
+            });
         },
 
         async _fetchAttachmentContent(oContext) {

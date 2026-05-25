@@ -1,0 +1,140 @@
+<mvc:View
+    controllerName="flowmate.controller.UserAdministration"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:form="sap.ui.layout.form">
+    <f:DynamicPage
+        id="userAdministrationPage"
+        class="flowmatePage"
+        fitContent="true"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>userAdministrationTitle}" />
+                </f:heading>
+                <f:actions>
+                    <Button
+                        icon="sap-icon://home"
+                        text="{i18n>dashboardNavButton}"
+                        press=".onNavToDashboard" />
+                    <Button
+                        icon="sap-icon://action-settings"
+                        text="{i18n>adminNavButton}"
+                        visible="{permissions>/isAdmin}"
+                        press=".onNavToAdminConfig" />
+                    <Button
+                        icon="sap-icon://employee"
+                        text="{i18n>delegationsNavButton}"
+                        press=".onNavToDelegations" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="flowmateContent flowmateSurface">
+                <OverflowToolbar class="flowmateToolbar">
+                    <Title text="{i18n>usersTableHeader}" />
+                    <ToolbarSpacer />
+                    <SearchField
+                        width="18rem"
+                        search=".onSearch"
+                        liveChange=".onSearch" />
+                    <Button
+                        icon="sap-icon://add"
+                        text="{i18n>addUserButton}"
+                        visible="{userAdmin>/canMaintainUsers}"
+                        type="Emphasized"
+                        press=".onOpenCreateDialog" />
+                </OverflowToolbar>
+                <Table
+                    id="usersTable"
+                    class="flowmateTable"
+                    noDataText="{i18n>noUsersFoundText}"
+                    busyIndicatorDelay="0"
+                    growing="true"
+                    growingScrollToLoad="true"
+                    items="{
+                        path: '/Users',
+                        sorter: {
+                            path: 'displayName'
+                        },
+                        events: {
+                            dataRequested: '.onDataRequested',
+                            dataReceived: '.onDataReceived'
+                        }
+                    }">
+                    <columns>
+                        <Column><Text text="{i18n>userNameLabel}" /></Column>
+                        <Column><Text text="{i18n>emailLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>userPrincipalNameLabel}" /></Column>
+                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+                        <Column><Text text="{i18n>statusLabel}" /></Column>
+                        <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <ObjectIdentifier title="{displayName}" text="{azureObjectId}" />
+                                <Text text="{email}" />
+                                <Text text="{userPrincipalName}" />
+                                <Text text="{department}" />
+                                <ObjectStatus
+                                    text="{path: 'isActive', formatter: '.formatActiveText'}"
+                                    state="{path: 'isActive', formatter: '.formatActiveState'}" />
+                                <Button
+                                    icon="sap-icon://edit"
+                                    tooltip="{i18n>editUserButton}"
+                                    visible="{userAdmin>/canMaintainUsers}"
+                                    type="Transparent"
+                                    press=".onOpenEditDialog" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+    <mvc:dependents>
+        <Dialog
+            id="userDialog"
+            title="{= ${userAdmin>/isEdit} ? ${i18n>editUserButton} : ${i18n>addUserButton} }"
+            contentWidth="42rem"
+            stretchOnPhone="true">
+            <content>
+                <form:SimpleForm
+                    class="flowmateDialogContent"
+                    editable="true"
+                    layout="ResponsiveGridLayout"
+                    labelSpanXL="4"
+                    labelSpanL="4"
+                    labelSpanM="4">
+                    <Label text="{i18n>userNameLabel}" required="true" />
+                    <Input value="{userEdit>/displayName}" required="true" maxLength="150" />
+                    <Label text="{i18n>emailLabel}" required="true" />
+                    <Input value="{userEdit>/email}" type="Email" required="true" maxLength="255" />
+                    <Label text="{i18n>userPrincipalNameLabel}" required="true" />
+                    <Input value="{userEdit>/userPrincipalName}" required="true" maxLength="255" />
+                    <Label text="{i18n>azureObjectIdLabel}" />
+                    <Input value="{userEdit>/azureObjectId}" maxLength="100" />
+                    <Label text="{i18n>departmentLabel}" />
+                    <Input value="{userEdit>/department}" maxLength="100" />
+                    <Label text="{i18n>activeLabel}" />
+                    <Switch state="{userEdit>/isActive}" />
+                </form:SimpleForm>
+            </content>
+            <beginButton>
+                <Button
+                    icon="sap-icon://save"
+                    text="{i18n>saveButton}"
+                    type="Emphasized"
+                    press=".onSaveUser" />
+            </beginButton>
+            <endButton>
+                <Button
+                    text="{i18n>cancelButton}"
+                    press=".onCloseDialog" />
+            </endButton>
+        </Dialog>
+    </mvc:dependents>
+</mvc:View>

@@ -35,8 +35,30 @@ entity TaskStatus : CodeList {
     key code : String(20);
 }
 
+entity Users : cuid, managed {
+    azureObjectId     : String(100);
+    userPrincipalName : String(255);
+    displayName       : String(150);
+    email             : String(255);
+    department        : String(100);
+    isActive          : Boolean default true;
+}
+
+entity Delegations : cuid, managed {
+    delegatorUser        : Association to Users;
+    delegateUser         : Association to Users;
+    delegator            : String(255);
+    delegate             : String(255);
+    startDate            : Date;
+    endDate              : Date;
+    forwardNotifications : Boolean default true;
+    enabled              : Boolean default true;
+    createdOnBehalf      : Boolean default false;
+}
+
 entity ProcessRequests : cuid, managed {
     processType : Association to ProcessTypes;
+    requesterUser : Association to Users;
     title       : String(255);
     description : LargeString;
     requester   : String(100);
@@ -58,6 +80,7 @@ entity ProcessRequests : cuid, managed {
 
 entity ProcessTasks : cuid, managed {
     request     : Association to ProcessRequests;
+    assignedUser : Association to Users;
     stepNo      : Integer;
     taskName    : String(100);
     assignedTo  : String(100);
@@ -79,7 +102,7 @@ entity ProcessAttachments : Attachments {
 }
 
 annotate ProcessAttachments with {
-    content @Validation.Maximum : '25MB'
+    content @Validation.Maximum : '400MB'
             @Core.AcceptableMediaTypes : [
                 'application/pdf',
                 'image/*',

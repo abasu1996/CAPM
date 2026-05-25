@@ -22,18 +22,201 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessRequests,
       ProcessTasks,
       ProcessHistory,
-      ProcessStepConfig
+      ProcessStepConfig,
+      Users,
+      Delegations
     } = this.entities;
 
     if (this.handle_attachments) {
       await this.handle_attachments();
     }
 
-    this.before("CREATE", ProcessRequests, (req) => {
+    this.before("READ", Users, (req) => {
+      if (!this._isAdministrator(req)) {
+        req.query.where({ isActive: true });
+      }
+    });
+
+    this.before(["CREATE", "UPDATE"], Users, async (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only a user administrator can maintain users");
+      }
+
+      const oExisting = req.event === "UPDATE"
+        ? await cds.tx(req).run(SELECT.one.from(Users).where({ ID: req.data.ID }))
+        : {};
+      const oUser = { ...oExisting, ...req.data };
+
+      if (!oUser.displayName || !oUser.email || !oUser.userPrincipalName) {
+        return req.reject(400, "Name, email, and user principal name are required");
+      }
+
+      const aUsers = await cds.tx(req).run(SELECT.from(Users));
+      const sEmail = oUser.email.toLowerCase();
+      const sPrincipal = oUser.userPrincipalName.toLowerCase();
+      const bDuplicate = aUsers.some((oOther) =>
+        oOther.ID !== oUser.ID &&
+        (oOther.email?.toLowerCase() === sEmail ||
+          oOther.userPrincipalName?.toLowerCase() === sPrincipal ||
+          oUser.azureObjectId && oOther.azureObjectId === oUser.azureObjectId)
+      );
+
+      if (bDuplicate) {
+        return req.reject(409, "A user already exists with the same email, principal name, or Azure object ID");
+      }
+    });
+
+    this.before("DELETE", Users, (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only a user administrator can maintain users");
+      }
+
+      return req.reject(405, "Deactivate users instead of deleting them to preserve workflow history");
+    });
+
+    this.before(["READ", "CREATE", "UPDATE", "DELETE"], ProcessStepConfig, (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain process configuration");
+      }
+    });
+
+    this.before("CREATE", ProcessRequests, async (req) => {
+      if (req.data.requesterUser_ID) {
+        const oRequester = await this._getUser(req, req.data.requesterUser_ID, Users);
+
+        if (!oRequester) {
+          return req.reject(400, "Selected requester was not found");
+        }
+
+        req.data.requester = this._userAddress(oRequester);
+        req.data.department ||= oRequester.department;
+      } else {
+        const oCurrentUser = await this._findUserByPrincipal(req, req.user?.id, Users);
+
+        if (oCurrentUser) {
+          req.data.requesterUser_ID = oCurrentUser.ID;
+          req.data.requester = this._userAddress(oCurrentUser);
+          req.data.department ||= oCurrentUser.department;
+        }
+      }
+
       req.data.status_code ??= PROCESS_STATUS.DRAFT;
       req.data.requester ??= req.user?.id || "anonymous";
       req.data.priority ??= "Medium";
       req.data.currentStep ??= 0;
+    });
+
+    this.before("CREATE", ProcessTasks, async (req) => {
+      if (!req.data.assignedUser_ID) {
+        return;
+      }
+
+      const oAssignee = await this._getUser(req, req.data.assignedUser_ID, Users);
+
+      if (!oAssignee) {
+        return req.reject(400, "Selected assignee was not found");
+      }
+
+      req.data.assignedTo = this._userAddress(oAssignee);
+    });
+
+    this.before("CREATE", Delegations, async (req) => {
+      const oDelegation = req.data;
+      const sCurrentUser = req.user?.id || "anonymous";
+      const bCreatedOnBehalf = Boolean(
+        oDelegation.delegatorUser_ID || oDelegation.delegator && oDelegation.delegator !== sCurrentUser
+      );
+
+      if (!oDelegation.delegateUser_ID) {
+        return req.reject(400, "Select a delegate from the user list");
+      }
+
+      const oDelegate = await this._getUser(req, oDelegation.delegateUser_ID, Users);
+
+      if (!oDelegate) {
+        return req.reject(400, "Selected delegate was not found");
+      }
+
+      oDelegation.delegate = this._userAddress(oDelegate);
+
+      if (bCreatedOnBehalf && !oDelegation.delegatorUser_ID) {
+        return req.reject(400, "Select the user on leave from the user list");
+      }
+
+      if (oDelegation.delegatorUser_ID) {
+        const oDelegator = await this._getUser(req, oDelegation.delegatorUser_ID, Users);
+
+        if (!oDelegator) {
+          return req.reject(400, "Selected user on leave was not found");
+        }
+
+        oDelegation.delegator = this._userAddress(oDelegator);
+      } else {
+        const oCurrentUser = await this._findUserByPrincipal(req, sCurrentUser, Users);
+        oDelegation.delegatorUser_ID ||= oCurrentUser?.ID;
+        oDelegation.delegator = oCurrentUser ? this._userAddress(oCurrentUser) : sCurrentUser;
+      }
+
+      oDelegation.forwardNotifications ??= true;
+      oDelegation.enabled ??= true;
+      oDelegation.createdOnBehalf = bCreatedOnBehalf;
+
+      if (bCreatedOnBehalf && !this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can create a delegation for another user");
+      }
+
+      if (!oDelegation.delegator || !oDelegation.delegate || !oDelegation.startDate || !oDelegation.endDate) {
+        return req.reject(400, "User, delegate, start date, and end date are required");
+      }
+
+      if (oDelegation.delegator === oDelegation.delegate) {
+        return req.reject(400, "A user cannot be assigned as their own delegate");
+      }
+
+      if (oDelegation.startDate > oDelegation.endDate) {
+        return req.reject(400, "End date must be on or after start date");
+      }
+
+      if (oDelegation.enabled && oDelegation.forwardNotifications) {
+        const aDelegations = await cds.tx(req).run(
+          SELECT.from(Delegations).where({
+            delegator: oDelegation.delegator,
+            enabled: true,
+            forwardNotifications: true
+          })
+        );
+        const bOverlaps = aDelegations.some((oExisting) =>
+          oExisting.startDate <= oDelegation.endDate && oExisting.endDate >= oDelegation.startDate
+        );
+
+        if (bOverlaps) {
+          return req.reject(409, "An active notification delegation already exists during this period");
+        }
+      }
+    });
+
+    this.before("READ", Delegations, async (req) => {
+      if (!this._isAdministrator(req)) {
+        req.query.where({ delegator: await this._currentUserAddress(req, Users) });
+      }
+    });
+
+    this.before("UPDATE", Delegations, (req) => {
+      return req.reject(405, "Delete and recreate a delegation to change its details");
+    });
+
+    this.before("DELETE", Delegations, async (req) => {
+      if (this._isAdministrator(req)) {
+        return;
+      }
+
+      const oDelegation = await cds.tx(req).run(
+        SELECT.one.from(Delegations).where({ ID: req.data.ID })
+      );
+
+      if (!oDelegation || oDelegation.delegator !== await this._currentUserAddress(req, Users)) {
+        return req.reject(403, "Only the delegation owner or an administrator can delete this assignment");
+      }
     });
 
     this.on("submitRequest", async (req) => {
@@ -211,6 +394,42 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return true;
     });
 
+    this.on("resolveNotificationRecipient", async (req) => {
+      const sOriginalRecipient = req.data.userId;
+
+      if (!sOriginalRecipient) {
+        return req.reject(400, "Notification recipient is required");
+      }
+
+      const sToday = new Date().toISOString().slice(0, 10);
+      const oDelegation = await cds.tx(req).run(
+        SELECT.one.from(Delegations).where({
+          delegator: sOriginalRecipient,
+          enabled: true,
+          forwardNotifications: true,
+          startDate: { "<=": sToday },
+          endDate: { ">=": sToday }
+        })
+      );
+
+      return {
+        originalRecipient: sOriginalRecipient,
+        recipient: oDelegation?.delegate || sOriginalRecipient,
+        delegated: Boolean(oDelegation),
+        delegationId: oDelegation?.ID || null
+      };
+    });
+
+    this.on("getUserAdministrationCapabilities", (req) => ({
+      canMaintainUsers: this._isAdministrator(req)
+    }));
+
+    this.on("getApplicationCapabilities", (req) => ({
+      isAdmin: this._isAdministrator(req),
+      canMaintainUsers: this._isAdministrator(req),
+      canDelegateOnBehalf: this._isAdministrator(req)
+    }));
+
     return super.init();
   }
 
@@ -226,6 +445,43 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _getRequest(req, requestId) {
     return cds.tx(req).run(SELECT.one.from(this.entities.ProcessRequests).where({ ID: requestId }));
+  }
+
+  async _getUser(req, userId, Users) {
+    return cds.tx(req).run(SELECT.one.from(Users).where({ ID: userId, isActive: true }));
+  }
+
+  async _findUserByPrincipal(req, principal, Users) {
+    if (!principal) {
+      return null;
+    }
+
+    for (const sProperty of ["email", "userPrincipalName", "azureObjectId"]) {
+      const oUser = await cds.tx(req).run(
+        SELECT.one.from(Users).where({ [sProperty]: principal, isActive: true })
+      );
+
+      if (oUser) {
+        return oUser;
+      }
+    }
+
+    return null;
+  }
+
+  async _currentUserAddress(req, Users) {
+    const sPrincipal = req.user?.id || "anonymous";
+    const oUser = await this._findUserByPrincipal(req, sPrincipal, Users);
+
+    return oUser ? this._userAddress(oUser) : sPrincipal;
+  }
+
+  _userAddress(user) {
+    return user.email || user.userPrincipalName || user.displayName;
+  }
+
+  _isAdministrator(req) {
+    return Boolean(req.user?.is("Admin") || req.user?.is("admin"));
   }
 
   async _getTask(req, taskId) {

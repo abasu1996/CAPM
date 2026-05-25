@@ -19,6 +19,10 @@ sap.ui.define([
                 path: `/ProcessTasks(guid'${sTaskId}')`,
                 parameters: {
                     expand: "request"
+                },
+                events: {
+                    dataRequested: this.onDataRequested.bind(this),
+                    dataReceived: this.onDataReceived.bind(this)
                 }
             });
         },
@@ -40,7 +44,7 @@ sap.ui.define([
         },
 
         async _completeTask(sAction, sSuccessTextKey) {
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.callAction(sAction, {
@@ -52,7 +56,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("actionFailedMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         }
     });

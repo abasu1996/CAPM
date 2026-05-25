@@ -23,6 +23,8 @@ modules:
       buildpack: nodejs_buildpack
       memory: 256M
       disk-quota: 512M
+    properties:
+      INCOMING_CONNECTION_TIMEOUT: 600000
     build-parameters:
       builder: npm
     requires:
@@ -33,6 +35,7 @@ modules:
           name: srv-api
           url: ~{srv-url}
           forwardAuthToken: true
+          timeout: 600000
 
   - name: flowmate-srv
     type: nodejs

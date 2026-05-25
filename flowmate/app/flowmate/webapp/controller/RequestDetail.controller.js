@@ -20,6 +20,10 @@ sap.ui.define([
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
                     expand: "tasks,comments,attachments,history"
+                },
+                events: {
+                    dataRequested: this.onDataRequested.bind(this),
+                    dataReceived: this.onDataReceived.bind(this)
                 }
             });
         },
@@ -31,6 +35,8 @@ sap.ui.define([
         async onViewAttachment(oEvent) {
             const oContext = oEvent.getSource().getBindingContext();
 
+            this.showBusy();
+
             try {
                 const oFile = await this._fetchAttachmentContent(oContext);
                 const sUrl = URL.createObjectURL(oFile.blob);
@@ -39,11 +45,15 @@ sap.ui.define([
                 setTimeout(() => URL.revokeObjectURL(sUrl), 60000);
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentOpenErrorMessage"));
+            } finally {
+                this.hideBusy();
             }
         },
 
         async onDownloadAttachment(oEvent) {
             const oContext = oEvent.getSource().getBindingContext();
+
+            this.showBusy();
 
             try {
                 const oFile = await this._fetchAttachmentContent(oContext);
@@ -58,6 +68,8 @@ sap.ui.define([
                 URL.revokeObjectURL(sUrl);
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentDownloadErrorMessage"));
+            } finally {
+                this.hideBusy();
             }
         },
 
@@ -78,7 +90,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.removeEntry(`/ProcessTasks(guid'${sTaskId}')`);
@@ -87,7 +99,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         },
 
@@ -107,7 +119,7 @@ sap.ui.define([
                 return;
             }
 
-            this.getView().setBusy(true);
+            this.showBusy();
 
             try {
                 await this.removeEntry(`/ProcessAttachments(guid'${sAttachmentId}')`);
@@ -116,7 +128,7 @@ sap.ui.define([
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentDeleteErrorMessage"));
             } finally {
-                this.getView().setBusy(false);
+                this.hideBusy();
             }
         },
 

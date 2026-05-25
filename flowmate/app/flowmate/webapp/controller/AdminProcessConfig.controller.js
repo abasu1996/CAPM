@@ -10,7 +10,11 @@ sap.ui.define([
             this.getRouter().getRoute("RouteAdminProcessConfig").attachPatternMatched(this.onRouteMatched, this);
         },
 
-        onRouteMatched() {
+        async onRouteMatched() {
+            if (!await this.requireAdministrator()) {
+                return;
+            }
+
             this.setOneColumnLayout();
         },
 

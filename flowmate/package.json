@@ -22,6 +22,31 @@
   "private": true,
   "cds": {
     "requires": {
+      "[development]": {
+        "auth": {
+          "kind": "mocked",
+          "users": {
+            "*": false,
+            "alice": false,
+            "bob": false,
+            "carol": false,
+            "dave": false,
+            "erin": false,
+            "fred": false,
+            "me": false,
+            "yves": false,
+            "alex.johnson@flowmate.demo": {
+              "password": "FlowmateAdmin1!",
+              "roles": [
+                "Admin"
+              ]
+            },
+            "priya.sharma@flowmate.demo": {
+              "password": "FlowmateUser1!"
+            }
+          }
+        }
+      },
       "[production]": {
         "auth": "xsuaa",
         "db": {
@@ -43,7 +68,7 @@
       },
       "attachments": {
         "kind": "db",
-        "scan": false
+        "scan": true
       },
       "db": {
         "kind": "sqlite"

@@ -1,0 +1,9 @@
+ID,azureObjectId,userPrincipalName,displayName,email,department,isActive
+10000000-0000-4000-8000-000000000001,aad-alex-johnson,alex.johnson@flowmate.demo,Alex Johnson,alex.johnson@flowmate.demo,Operations,true
+10000000-0000-4000-8000-000000000002,aad-priya-sharma,priya.sharma@flowmate.demo,Priya Sharma,priya.sharma@flowmate.demo,Finance,true
+10000000-0000-4000-8000-000000000003,aad-daniel-kim,daniel.kim@flowmate.demo,Daniel Kim,daniel.kim@flowmate.demo,Procurement,true
+10000000-0000-4000-8000-000000000004,aad-maya-perera,maya.perera@flowmate.demo,Maya Perera,maya.perera@flowmate.demo,Human Resources,true
+10000000-0000-4000-8000-000000000005,aad-sophia-fernando,sophia.fernando@flowmate.demo,Sophia Fernando,sophia.fernando@flowmate.demo,IT Security,true
+10000000-0000-4000-8000-000000000006,aad-liam-patel,liam.patel@flowmate.demo,Liam Patel,liam.patel@flowmate.demo,Management,true
+10000000-0000-4000-8000-000000000007,aad-emma-silva,emma.silva@flowmate.demo,Emma Silva,emma.silva@flowmate.demo,Document Control,true
+10000000-0000-4000-8000-000000000008,aad-noah-wijesinghe,noah.wijesinghe@flowmate.demo,Noah Wijesinghe,noah.wijesinghe@flowmate.demo,Operations,false

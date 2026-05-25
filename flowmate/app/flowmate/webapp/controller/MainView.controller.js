@@ -8,7 +8,9 @@ sap.ui.define([
         onInit() {
             this.getView().setModel(new JSONModel({
                 requestsCount: 0,
-                tasksCount: 0
+                requestsState: "Loading",
+                tasksCount: 0,
+                tasksState: "Loading"
             }), "dashboard");
             this.getRouter().getRoute("RouteDashboard").attachPatternMatched(this.onRouteMatched, this);
         },
@@ -34,21 +36,27 @@ sap.ui.define([
             this.navTo("RouteAdminProcessConfig");
         },
 
-        _loadDashboardCounts() {
-            this._readCount("/ProcessRequests", "/requestsCount");
-            this._readCount("/ProcessTasks", "/tasksCount");
+        onOpenDelegations() {
+            this.navTo("RouteDelegations");
         },
 
-        _readCount(sPath, sPropertyPath) {
+        _loadDashboardCounts() {
+            this._readCount("/ProcessRequests", "/requestsCount", "/requestsState");
+            this._readCount("/ProcessTasks", "/tasksCount", "/tasksState");
+        },
+
+        _readCount(sPath, sPropertyPath, sStatePath) {
             const oModel = this.getModel();
             const oDashboardModel = this.getView().getModel("dashboard");
 
+            oDashboardModel.setProperty(sStatePath, "Loading");
             oModel.read(`${sPath}/$count`, {
                 success: (sCount) => {
                     oDashboardModel.setProperty(sPropertyPath, Number(sCount));
+                    oDashboardModel.setProperty(sStatePath, "Loaded");
                 },
                 error: () => {
-                    oDashboardModel.setProperty(sPropertyPath, 0);
+                    oDashboardModel.setProperty(sStatePath, "Failed");
                 }
             });
         }

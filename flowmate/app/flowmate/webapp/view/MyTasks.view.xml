@@ -11,6 +11,7 @@
         <f:beginColumnPages>
             <f:DynamicPage
                 id="myTasksPage"
+                class="flowmatePage"
                 fitContent="true"
                 toggleHeaderOnTitleClick="false">
                 <f:title>
@@ -34,7 +35,12 @@
                             <Button
                                 icon="sap-icon://action-settings"
                                 text="{i18n>adminNavButton}"
+                                visible="{permissions>/isAdmin}"
                                 press=".onNavToAdminConfig" />
+                            <Button
+                                icon="sap-icon://employee"
+                                text="{i18n>delegationsNavButton}"
+                                press=".onNavToDelegations" />
                             <Button
                                 icon="sap-icon://accept"
                                 text="{i18n>openTaskButton}"
@@ -44,8 +50,8 @@
                     </f:DynamicPageTitle>
                 </f:title>
                 <f:content>
-                    <VBox class="sapUiResponsiveContentPadding">
-                        <OverflowToolbar>
+                    <VBox class="flowmateContent flowmateSurface">
+                        <OverflowToolbar class="flowmateToolbar">
                             <Title text="{i18n>tasksTableHeader}" />
                             <ToolbarSpacer />
                             <SearchField
@@ -55,10 +61,20 @@
                         </OverflowToolbar>
                         <Table
                             id="tasksTable"
+                            class="flowmateTable"
+                            noDataText="{i18n>noTasksText}"
+                            busyIndicatorDelay="0"
                             mode="SingleSelectMaster"
                             growing="true"
                             growingScrollToLoad="true"
-                            items="{/ProcessTasks}">
+                            itemPress=".onTaskPress"
+                            items="{
+                                path: '/ProcessTasks',
+                                events: {
+                                    dataRequested: '.onDataRequested',
+                                    dataReceived: '.onDataReceived'
+                                }
+                            }">
                             <columns>
                                 <Column><Text text="{i18n>taskNameLabel}" /></Column>
                                 <Column><Text text="{i18n>stepLabel}" /></Column>
@@ -70,8 +86,7 @@
                             </columns>
                             <items>
                                 <ColumnListItem
-                                    type="Navigation"
-                                    press=".onTaskPress">
+                                    type="Active">
                                     <cells>
                                         <ObjectIdentifier
                                             title="{taskName}"
@@ -79,7 +94,9 @@
                                         <Text text="{stepNo}" />
                                         <Text text="{assignedTo}" />
                                         <Text text="{role}" />
-                                        <ObjectStatus text="{status_code}" />
+                                        <ObjectStatus
+                                            text="{status_code}"
+                                            state="{path: 'status_code', formatter: '.formatStatusState'}" />
                                         <Text text="{decision}" />
                                         <HBox justifyContent="End">
                                             <Button
@@ -99,6 +116,7 @@
         <f:midColumnPages>
             <uxap:ObjectPageLayout
                 id="taskObjectPage"
+                class="flowmateObjectPage"
                 showTitleInHeaderContent="true"
                 enableLazyLoading="false">
                 <uxap:headerTitle>
@@ -135,7 +153,8 @@
                 <uxap:headerContent>
                     <ObjectStatus
                         title="{i18n>statusLabel}"
-                        text="{status_code}" />
+                        text="{status_code}"
+                        state="{path: 'status_code', formatter: '.formatStatusState'}" />
                     <ObjectStatus
                         title="{i18n>roleLabel}"
                         text="{role}" />
@@ -151,7 +170,7 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <VBox>
+                                    <VBox class="flowmateDetailBlock">
                                         <ObjectIdentifier
                                             title="{request/title}"
                                             text="{request_ID}" />
@@ -168,7 +187,7 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <VBox>
+                                    <VBox class="flowmateDetailBlock flowmateRemarks">
                                         <Label text="{i18n>remarksLabel}" />
                                         <TextArea
                                             id="taskRemarksTextArea"

@@ -5,6 +5,7 @@
     xmlns:f="sap.f">
     <f:DynamicPage
         id="requestDetailPage"
+        class="flowmatePage"
         toggleHeaderOnTitleClick="false">
         <f:title>
             <f:DynamicPageTitle>
@@ -31,7 +32,12 @@
                     <Button
                         icon="sap-icon://action-settings"
                         text="{i18n>adminNavButton}"
+                        visible="{permissions>/isAdmin}"
                         press=".onNavToAdminConfig" />
+                    <Button
+                        icon="sap-icon://employee"
+                        text="{i18n>delegationsNavButton}"
+                        press=".onNavToDelegations" />
                     <Button
                         icon="sap-icon://decline"
                         text="{i18n>closeButton}"
@@ -40,11 +46,13 @@
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <VBox class="sapUiResponsiveContentPadding">
+            <VBox class="flowmateContent">
                 <ObjectHeader
+                    class="flowmateSurface"
                     title="{title}"
                     intro="{processType_code}"
                     number="{status_code}"
+                    numberState="{path: 'status_code', formatter: '.formatStatusState'}"
                     numberUnit="{priority}">
                     <attributes>
                         <ObjectAttribute
@@ -59,13 +67,16 @@
                     </attributes>
                 </ObjectHeader>
                 <IconTabBar
-                    class="sapUiSmallMarginTop"
+                    class="sapUiSmallMarginTop flowmateSurface"
                     expandable="false">
                     <items>
                         <IconTabFilter
                             icon="sap-icon://workflow-tasks"
                             text="{i18n>tasksTitle}">
-                            <Table items="{tasks}">
+                            <Table
+                                class="flowmateTable"
+                                noDataText="{i18n>noTasksText}"
+                                items="{tasks}">
                                 <columns>
                                     <Column><Text text="{i18n>stepLabel}" /></Column>
                                     <Column><Text text="{i18n>taskNameLabel}" /></Column>
@@ -79,7 +90,9 @@
                                             <Text text="{stepNo}" />
                                             <Text text="{taskName}" />
                                             <Text text="{assignedTo}" />
-                                            <ObjectStatus text="{status_code}" />
+                                            <ObjectStatus
+                                                text="{status_code}"
+                                                state="{path: 'status_code', formatter: '.formatStatusState'}" />
                                             <HBox justifyContent="End">
                                                 <Button
                                                     icon="sap-icon://delete"
@@ -95,7 +108,9 @@
                         <IconTabFilter
                             icon="sap-icon://comment"
                             text="{i18n>commentsTitle}">
-                            <List items="{comments}">
+                            <List
+                                noDataText="{i18n>noCommentsText}"
+                                items="{comments}">
                                 <StandardListItem
                                     title="{userId}"
                                     description="{comment}" />
@@ -104,7 +119,10 @@
                         <IconTabFilter
                             icon="sap-icon://attachment"
                             text="{i18n>attachmentsTitle}">
-                            <Table items="{attachments}">
+                            <Table
+                                class="flowmateTable"
+                                noDataText="{i18n>noAttachmentsText}"
+                                items="{attachments}">
                                 <columns>
                                     <Column><Text text="{i18n>fileNameLabel}" /></Column>
                                     <Column><Text text="{i18n>mimeTypeLabel}" /></Column>
@@ -116,7 +134,9 @@
                                         <cells>
                                             <Text text="{filename}" />
                                             <Text text="{mimeType}" />
-                                            <ObjectStatus text="{status}" />
+                                            <ObjectStatus
+                                                text="{status}"
+                                                state="{path: 'status', formatter: '.formatStatusState'}" />
                                             <HBox justifyContent="End">
                                                 <Button
                                                     icon="sap-icon://show"
@@ -140,7 +160,9 @@
                         <IconTabFilter
                             icon="sap-icon://history"
                             text="{i18n>historyTitle}">
-                            <List items="{history}">
+                            <List
+                                noDataText="{i18n>noHistoryText}"
+                                items="{history}">
                                 <StandardListItem
                                     title="{action}"
                                     description="{actor} - {remarks}"

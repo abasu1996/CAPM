@@ -5,6 +5,7 @@
     xmlns:f="sap.f">
     <f:DynamicPage
         id="dashboardPage"
+        class="flowmatePage"
         toggleHeaderOnTitleClick="false">
         <f:title>
             <f:DynamicPageTitle>
@@ -27,20 +28,29 @@
                     <Button
                         icon="sap-icon://action-settings"
                         text="{i18n>adminNavButton}"
+                        visible="{permissions>/isAdmin}"
                         press=".onNavToAdminConfig" />
+                    <Button
+                        icon="sap-icon://employee"
+                        text="{i18n>delegationsNavButton}"
+                        press=".onNavToDelegations" />
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <VBox class="sapUiResponsiveContentPadding">
+            <VBox class="flowmateContent">
+                <Title
+                    class="sapUiTinyMarginBottom"
+                    text="{i18n>workspaceTitle}" />
                 <HBox
                     wrap="Wrap"
                     renderType="Bare"
-                    class="sapUiSmallMarginBottom">
+                    class="flowmateTiles">
                     <GenericTile
-                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        class="flowmateTile"
                         header="{i18n>myRequestsTitle}"
                         subheader="{i18n>myRequestsSubtitle}"
+                        state="{dashboard>/requestsState}"
                         press=".onOpenRequests">
                         <TileContent>
                             <NumericContent
@@ -49,9 +59,10 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
-                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        class="flowmateTile"
                         header="{i18n>myTasksTitle}"
                         subheader="{i18n>myTasksSubtitle}"
+                        state="{dashboard>/tasksState}"
                         press=".onOpenTasks">
                         <TileContent>
                             <NumericContent
@@ -60,7 +71,7 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
-                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        class="flowmateTile"
                         header="{i18n>createRequestTitle}"
                         subheader="{i18n>createRequestSubtitle}"
                         press=".onCreateRequest">
@@ -69,30 +80,25 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
-                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                        class="flowmateTile"
                         header="{i18n>adminConfigTitle}"
                         subheader="{i18n>adminConfigSubtitle}"
+                        visible="{permissions>/isAdmin}"
                         press=".onOpenConfig">
                         <TileContent>
                             <NumericContent icon="sap-icon://action-settings" />
                         </TileContent>
                     </GenericTile>
+                    <GenericTile
+                        class="flowmateTile"
+                        header="{i18n>delegationsTitle}"
+                        subheader="{i18n>delegationsSubtitle}"
+                        press=".onOpenDelegations">
+                        <TileContent>
+                            <NumericContent icon="sap-icon://employee" />
+                        </TileContent>
+                    </GenericTile>
                 </HBox>
-                <Panel
-                    headerText="{i18n>frameworkSummaryTitle}"
-                    expandable="false">
-                    <List>
-                        <StandardListItem
-                            icon="sap-icon://process"
-                            title="{i18n>frameworkSummaryProcessModel}" />
-                        <StandardListItem
-                            icon="sap-icon://approvals"
-                            title="{i18n>frameworkSummaryActions}" />
-                        <StandardListItem
-                            icon="sap-icon://attachment"
-                            title="{i18n>frameworkSummaryAttachments}" />
-                    </List>
-                </Panel>
             </VBox>
         </f:content>
     </f:DynamicPage>

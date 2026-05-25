@@ -1,7 +1,20 @@
 {
-  "scopes": [],
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.Admin",
+      "description": "Administer Flowmate configuration, users, and delegate assignments"
+    }
+  ],
   "attributes": [],
-  "role-templates": [],
+  "role-templates": [
+    {
+      "name": "Admin",
+      "description": "Administer Flowmate configuration, users, and delegate assignments",
+      "scope-references": [
+        "$XSAPPNAME.Admin"
+      ]
+    }
+  ],
   "oauth2-configuration": {
     "credential-types": [
       "binding-secret",

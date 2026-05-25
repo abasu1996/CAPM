@@ -5,6 +5,7 @@
     xmlns:f="sap.f">
     <f:DynamicPage
         id="adminProcessConfigPage"
+        class="flowmatePage"
         fitContent="true"
         toggleHeaderOnTitleClick="false">
         <f:title>
@@ -29,12 +30,20 @@
                         icon="sap-icon://add-document"
                         text="{i18n>createRequestButton}"
                         press=".onNavToCreateRequest" />
+                    <Button
+                        icon="sap-icon://employee"
+                        text="{i18n>delegationsNavButton}"
+                        press=".onNavToDelegations" />
+                    <Button
+                        icon="sap-icon://group"
+                        text="{i18n>userAdminNavButton}"
+                        press=".onNavToUserAdministration" />
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <VBox class="sapUiResponsiveContentPadding">
-                <OverflowToolbar>
+            <VBox class="flowmateContent flowmateSurface">
+                <OverflowToolbar class="flowmateToolbar">
                     <Title text="{i18n>processConfigTableHeader}" />
                     <ToolbarSpacer />
                     <SearchField
@@ -44,9 +53,18 @@
                 </OverflowToolbar>
                 <Table
                     id="configTable"
+                    class="flowmateTable"
+                    noDataText="{i18n>noProcessStepsText}"
+                    busyIndicatorDelay="0"
                     growing="true"
                     growingScrollToLoad="true"
-                    items="{/ProcessStepConfig}">
+                    items="{
+                        path: '/ProcessStepConfig',
+                        events: {
+                            dataRequested: '.onDataRequested',
+                            dataReceived: '.onDataReceived'
+                        }
+                    }">
                     <columns>
                         <Column><Text text="{i18n>processTypeLabel}" /></Column>
                         <Column><Text text="{i18n>stepLabel}" /></Column>
@@ -64,7 +82,9 @@
                                 <Text text="{stepNo}" />
                                 <ObjectIdentifier title="{stepName}" />
                                 <Text text="{role}" />
-                                <ObjectStatus text="{= ${isMandatory} ? 'Yes' : 'No' }" />
+                                <ObjectStatus
+                                    text="{= ${isMandatory} ? 'Yes' : 'No' }"
+                                    state="{= ${isMandatory} ? 'Success' : 'None' }" />
                                 <Text text="{slaDays}" />
                                 <Text text="{nextOnApprove}" />
                                 <Text text="{nextOnReject}" />

@@ -5,6 +5,7 @@
     xmlns:f="sap.f">
     <f:DynamicPage
         id="approvalDetailPage"
+        class="flowmatePage"
         toggleHeaderOnTitleClick="false">
         <f:title>
             <f:DynamicPageTitle>
@@ -31,7 +32,12 @@
                     <Button
                         icon="sap-icon://action-settings"
                         text="{i18n>adminNavButton}"
+                        visible="{permissions>/isAdmin}"
                         press=".onNavToAdminConfig" />
+                    <Button
+                        icon="sap-icon://employee"
+                        text="{i18n>delegationsNavButton}"
+                        press=".onNavToDelegations" />
                     <Button
                         icon="sap-icon://email"
                         text="{i18n>notifyAssigneeButton}"
@@ -55,11 +61,13 @@
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <VBox class="sapUiResponsiveContentPadding">
+            <VBox class="flowmateContent flowmateNarrowContent">
                 <ObjectHeader
+                    class="flowmateSurface"
                     title="{taskName}"
                     intro="{request/title}"
                     number="{status_code}"
+                    numberState="{path: 'status_code', formatter: '.formatStatusState'}"
                     numberUnit="{role}">
                     <attributes>
                         <ObjectAttribute
@@ -70,13 +78,14 @@
                             text="{stepNo}" />
                     </attributes>
                 </ObjectHeader>
-                <Label
-                    class="sapUiSmallMarginTop"
-                    text="{i18n>remarksLabel}" />
-                <TextArea
-                    id="remarksTextArea"
-                    rows="6"
-                    width="100%" />
+                <VBox class="sapUiSmallMarginTop flowmateDetailBlock flowmateRemarks">
+                    <Label text="{i18n>remarksLabel}" />
+                    <TextArea
+                        id="remarksTextArea"
+                        class="sapUiTinyMarginTop"
+                        rows="6"
+                        width="100%" />
+                </VBox>
             </VBox>
         </f:content>
     </f:DynamicPage>
