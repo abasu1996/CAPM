@@ -23,6 +23,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessTasks,
       ProcessHistory,
       ProcessStepConfig,
+      ProcessStatus,
+      TaskStatus,
       Users,
       Delegations
     } = this.entities;
@@ -394,6 +396,72 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return true;
     });
 
+    this.on("updateRequestStatus", async (req) => {
+      const { requestId, statusCode } = req.data;
+      const request = await this._getRequest(req, requestId);
+
+      if (!request) {
+        return req.reject(404, `Process request ${requestId} was not found`);
+      }
+
+      if (!await this._isConfiguredStatus(req, ProcessStatus, statusCode)) {
+        return req.reject(400, "Select a valid request status");
+      }
+
+      if (request.status_code === statusCode) {
+        return true;
+      }
+
+      await cds.tx(req).run(
+        UPDATE(ProcessRequests, requestId).set({ status_code: statusCode })
+      );
+
+      await this._writeHistory(req, {
+        requestId,
+        stepNo: request.currentStep || 0,
+        action: "STATUS_CHANGED",
+        actor: req.user?.id,
+        oldStatus: request.status_code,
+        newStatus: statusCode,
+        remarks: "Request status changed manually"
+      });
+
+      return true;
+    });
+
+    this.on("updateTaskStatus", async (req) => {
+      const { taskId, statusCode } = req.data;
+      const task = await this._getTask(req, taskId);
+
+      if (!task) {
+        return req.reject(404, `Task ${taskId} was not found`);
+      }
+
+      if (!await this._isConfiguredStatus(req, TaskStatus, statusCode)) {
+        return req.reject(400, "Select a valid task status");
+      }
+
+      if (task.status_code === statusCode) {
+        return true;
+      }
+
+      await cds.tx(req).run(
+        UPDATE(ProcessTasks, taskId).set({ status_code: statusCode })
+      );
+
+      await this._writeHistory(req, {
+        requestId: task.request_ID,
+        stepNo: task.stepNo,
+        action: "TASK_STATUS_CHANGED",
+        actor: req.user?.id,
+        oldStatus: task.status_code,
+        newStatus: statusCode,
+        remarks: `Task status changed manually: ${task.taskName || ""}`
+      });
+
+      return true;
+    });
+
     this.on("resolveNotificationRecipient", async (req) => {
       const sOriginalRecipient = req.data.userId;
 
@@ -478,6 +546,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _userAddress(user) {
     return user.email || user.userPrincipalName || user.displayName;
+  }
+
+  async _isConfiguredStatus(req, StatusEntity, statusCode) {
+    if (!statusCode) {
+      return false;
+    }
+
+    return Boolean(await cds.tx(req).run(
+      SELECT.one.from(StatusEntity).where({ code: statusCode })
+    ));
   }
 
   _isAdministrator(req) {

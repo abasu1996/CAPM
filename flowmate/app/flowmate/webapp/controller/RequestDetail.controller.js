@@ -1,14 +1,18 @@
 sap.ui.define([
     "flowmate/controller/BaseController",
     "sap/m/MessageBox",
-    "sap/m/MessageToast"
-], (BaseController, MessageBox, MessageToast) => {
+    "sap/m/MessageToast",
+    "sap/ui/model/json/JSONModel"
+], (BaseController, MessageBox, MessageToast, JSONModel) => {
     "use strict";
 
     const SERVICE_V4_URL = "/odata/v4/flowmate/";
 
     return BaseController.extend("flowmate.controller.RequestDetail", {
         onInit() {
+            this.getView().setModel(new JSONModel({
+                requestStatus: ""
+            }), "statusEdit");
             this.getRouter().getRoute("RouteRequestDetail").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -23,9 +27,39 @@ sap.ui.define([
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
-                    dataReceived: this.onDataReceived.bind(this)
+                    dataReceived: () => {
+                        this.onDataReceived();
+                        this.getView().getModel("statusEdit").setProperty(
+                            "/requestStatus",
+                            this.getView().getBindingContext()?.getProperty("status_code") || ""
+                        );
+                    }
                 }
             });
+        },
+
+        async onSaveRequestStatus() {
+            const sRequestId = this.getView().getBindingContext()?.getProperty("ID");
+            const sStatusCode = this.getView().getModel("statusEdit").getProperty("/requestStatus");
+
+            if (!sRequestId || !sStatusCode) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("updateRequestStatus", {
+                    requestId: sRequestId,
+                    statusCode: sStatusCode
+                });
+                MessageToast.show(this.getText("requestStatusUpdatedMessage"));
+                this._refreshRequest();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
         },
 
         onClose() {

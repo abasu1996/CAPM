@@ -172,10 +172,23 @@
                     </uxap:ObjectPageDynamicHeaderTitle>
                 </uxap:headerTitle>
                 <uxap:headerContent>
-                    <ObjectStatus
-                        title="{i18n>statusLabel}"
-                        text="{status_code}"
-                        state="{path: 'status_code', formatter: '.formatStatusState'}" />
+                    <VBox class="flowmateStatusEditor">
+                        <Label text="{i18n>statusLabel}" />
+                        <HBox alignItems="Center">
+                            <Select
+                                width="11rem"
+                                selectedKey="{statusEdit>/requestStatus}"
+                                items="{/ProcessStatus}">
+                                <core:Item key="{code}" text="{name}" />
+                            </Select>
+                            <Button
+                                class="sapUiTinyMarginBegin"
+                                icon="sap-icon://save"
+                                type="Emphasized"
+                                tooltip="{i18n>saveStatusButton}"
+                                press=".onSaveRequestStatus" />
+                        </HBox>
+                    </VBox>
                     <ObjectStatus
                         title="{i18n>priorityLabel}"
                         text="{priority}"
@@ -400,10 +413,23 @@
                     </uxap:ObjectPageDynamicHeaderTitle>
                 </uxap:headerTitle>
                 <uxap:headerContent>
-                    <ObjectStatus
-                        title="{i18n>statusLabel}"
-                        text="{status_code}"
-                        state="{path: 'status_code', formatter: '.formatStatusState'}" />
+                    <VBox class="flowmateStatusEditor">
+                        <Label text="{i18n>statusLabel}" />
+                        <HBox alignItems="Center">
+                            <Select
+                                width="11rem"
+                                selectedKey="{statusEdit>/taskStatus}"
+                                items="{/TaskStatus}">
+                                <core:Item key="{code}" text="{name}" />
+                            </Select>
+                            <Button
+                                class="sapUiTinyMarginBegin"
+                                icon="sap-icon://save"
+                                type="Emphasized"
+                                tooltip="{i18n>saveStatusButton}"
+                                press=".onSaveRequestTaskStatus" />
+                        </HBox>
+                    </VBox>
                     <ObjectStatus
                         title="{i18n>roleLabel}"
                         text="{role}" />

@@ -138,6 +138,15 @@
     max-width: 44rem;
 }
 
+.flowmateStatusEditor .sapMLabel {
+    color: #526879;
+    font-weight: 600;
+}
+
+.flowmateStatusRow {
+    max-width: 28rem;
+}
+
 .flowmateFormSurface {
     box-sizing: border-box;
     padding: 1.25rem 1.5rem;

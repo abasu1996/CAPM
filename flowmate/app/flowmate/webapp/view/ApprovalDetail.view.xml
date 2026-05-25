@@ -2,7 +2,8 @@
     controllerName="flowmate.controller.ApprovalDetail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:f="sap.f">
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="approvalDetailPage"
         class="flowmatePage"
@@ -65,10 +66,7 @@
                 <ObjectHeader
                     class="flowmateSurface"
                     title="{taskName}"
-                    intro="{request/title}"
-                    number="{status_code}"
-                    numberState="{path: 'status_code', formatter: '.formatStatusState'}"
-                    numberUnit="{role}">
+                    intro="{request/title}">
                     <attributes>
                         <ObjectAttribute
                             title="{i18n>assignedToLabel}"
@@ -76,8 +74,30 @@
                         <ObjectAttribute
                             title="{i18n>stepLabel}"
                             text="{stepNo}" />
+                        <ObjectAttribute
+                            title="{i18n>roleLabel}"
+                            text="{role}" />
                     </attributes>
                 </ObjectHeader>
+                <HBox
+                    class="sapUiSmallMarginTop flowmateDetailBlock flowmateStatusRow"
+                    alignItems="End">
+                    <VBox class="flowmateStatusEditor">
+                        <Label text="{i18n>statusLabel}" />
+                        <Select
+                            width="12rem"
+                            selectedKey="{statusEdit>/taskStatus}"
+                            items="{/TaskStatus}">
+                            <core:Item key="{code}" text="{name}" />
+                        </Select>
+                    </VBox>
+                    <Button
+                        class="sapUiTinyMarginBegin"
+                        icon="sap-icon://save"
+                        text="{i18n>saveStatusButton}"
+                        type="Emphasized"
+                        press=".onSaveTaskStatus" />
+                </HBox>
                 <VBox class="sapUiSmallMarginTop flowmateDetailBlock flowmateRemarks">
                     <Label text="{i18n>remarksLabel}" />
                     <TextArea

@@ -20,6 +20,10 @@ sap.ui.define([
                 active: false,
                 items: []
             }), "uploads");
+            this.getView().setModel(new JSONModel({
+                requestStatus: "",
+                taskStatus: ""
+            }), "statusEdit");
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -107,6 +111,54 @@ sap.ui.define([
 
         onCloseRequestTaskDetail() {
             this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
+        },
+
+        async onSaveRequestStatus() {
+            const sStatusCode = this.getView().getModel("statusEdit").getProperty("/requestStatus");
+
+            if (!this._sSelectedRequestId || !sStatusCode) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("updateRequestStatus", {
+                    requestId: this._sSelectedRequestId,
+                    statusCode: sStatusCode
+                });
+                MessageToast.show(this.getText("requestStatusUpdatedMessage"));
+                this._refreshSelectedRequest();
+                this.byId("requestsTable").getBinding("items").refresh();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onSaveRequestTaskStatus() {
+            const sStatusCode = this.getView().getModel("statusEdit").getProperty("/taskStatus");
+
+            if (!this._sSelectedTaskId || !sStatusCode) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("updateTaskStatus", {
+                    taskId: this._sSelectedTaskId,
+                    statusCode: sStatusCode
+                });
+                MessageToast.show(this.getText("taskStatusUpdatedMessage"));
+                this._refreshSelectedRequest();
+                this.byId("requestTaskObjectPage").getElementBinding().refresh();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
         },
 
         async onApproveRequestTask() {
@@ -383,7 +435,13 @@ sap.ui.define([
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
-                    dataReceived: this.onDataReceived.bind(this)
+                    dataReceived: () => {
+                        this.onDataReceived();
+                        this.getView().getModel("statusEdit").setProperty(
+                            "/requestStatus",
+                            this.byId("requestObjectPage").getBindingContext()?.getProperty("status_code") || ""
+                        );
+                    }
                 }
             });
             this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
@@ -402,7 +460,13 @@ sap.ui.define([
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
-                    dataReceived: this.onDataReceived.bind(this)
+                    dataReceived: () => {
+                        this.onDataReceived();
+                        this.getView().getModel("statusEdit").setProperty(
+                            "/taskStatus",
+                            this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("status_code") || ""
+                        );
+                    }
                 }
             });
             this._setRequestsLayout(fLibrary.LayoutType.ThreeColumnsEndExpanded);

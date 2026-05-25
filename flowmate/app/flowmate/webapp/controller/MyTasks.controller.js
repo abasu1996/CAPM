@@ -4,12 +4,16 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/m/MessageToast",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
-], (BaseController, fLibrary, MessageBox, MessageToast, Filter, FilterOperator) => {
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/json/JSONModel"
+], (BaseController, fLibrary, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     return BaseController.extend("flowmate.controller.MyTasks", {
         onInit() {
+            this.getView().setModel(new JSONModel({
+                taskStatus: ""
+            }), "statusEdit");
             this.getRouter().getRoute("RouteMyTasks").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -74,6 +78,30 @@ sap.ui.define([
             this._setTasksLayout(fLibrary.LayoutType.OneColumn);
         },
 
+        async onSaveTaskStatus() {
+            const sStatusCode = this.getView().getModel("statusEdit").getProperty("/taskStatus");
+
+            if (!this._sSelectedTaskId || !sStatusCode) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("updateTaskStatus", {
+                    taskId: this._sSelectedTaskId,
+                    statusCode: sStatusCode
+                });
+                MessageToast.show(this.getText("taskStatusUpdatedMessage"));
+                this.byId("tasksTable").getBinding("items").refresh();
+                this.byId("taskObjectPage").getElementBinding().refresh();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
         async onApprove() {
             await this._completeTask("approveTask", "taskApprovedMessage");
         },
@@ -135,7 +163,13 @@ sap.ui.define([
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
-                    dataReceived: this.onDataReceived.bind(this)
+                    dataReceived: () => {
+                        this.onDataReceived();
+                        this.getView().getModel("statusEdit").setProperty(
+                            "/taskStatus",
+                            this.byId("taskObjectPage").getBindingContext()?.getProperty("status_code") || ""
+                        );
+                    }
                 }
             });
             this._setTasksLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);

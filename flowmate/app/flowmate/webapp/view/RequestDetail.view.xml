@@ -2,7 +2,8 @@
     controllerName="flowmate.controller.RequestDetail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:f="sap.f">
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="requestDetailPage"
         class="flowmatePage"
@@ -50,10 +51,7 @@
                 <ObjectHeader
                     class="flowmateSurface"
                     title="{title}"
-                    intro="{processType_code}"
-                    number="{status_code}"
-                    numberState="{path: 'status_code', formatter: '.formatStatusState'}"
-                    numberUnit="{priority}">
+                    intro="{processType_code}">
                     <attributes>
                         <ObjectAttribute
                             title="{i18n>departmentLabel}"
@@ -64,8 +62,30 @@
                         <ObjectAttribute
                             title="{i18n>dueDateLabel}"
                             text="{dueDate}" />
+                        <ObjectAttribute
+                            title="{i18n>priorityLabel}"
+                            text="{priority}" />
                     </attributes>
                 </ObjectHeader>
+                <HBox
+                    class="sapUiSmallMarginTop flowmateDetailBlock flowmateStatusRow"
+                    alignItems="End">
+                    <VBox class="flowmateStatusEditor">
+                        <Label text="{i18n>statusLabel}" />
+                        <Select
+                            width="12rem"
+                            selectedKey="{statusEdit>/requestStatus}"
+                            items="{/ProcessStatus}">
+                            <core:Item key="{code}" text="{name}" />
+                        </Select>
+                    </VBox>
+                    <Button
+                        class="sapUiTinyMarginBegin"
+                        icon="sap-icon://save"
+                        text="{i18n>saveStatusButton}"
+                        type="Emphasized"
+                        press=".onSaveRequestStatus" />
+                </HBox>
                 <IconTabBar
                     class="sapUiSmallMarginTop flowmateSurface"
                     expandable="false">

@@ -19,6 +19,8 @@ service FlowmateService {
     action approveTask(taskId: UUID, remarks: String) returns Boolean;
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
     action sendBack(taskId: UUID, remarks: String) returns Boolean;
+    action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
+    action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;
     action resolveNotificationRecipient(userId: String(100)) returns {
         originalRecipient : String(100);
         recipient         : String(100);
