@@ -82,6 +82,132 @@
     background: #f2f7fb;
 }
 
+.flowmateSemanticStatus {
+    font-weight: 600;
+}
+
+.flowmateTable .flowmateSemanticStatus {
+    white-space: nowrap;
+}
+
+.flowmateHistoryTransition {
+    gap: 0.375rem;
+}
+
+.flowmateHistoryArrow {
+    color: #607b92;
+}
+
+.flowmateHistoryRemarks {
+    max-width: 24rem;
+}
+
+.flowmateObjectPage .flowmateSemanticStatus,
+.flowmatePage .sapMOH .flowmateSemanticStatus {
+    margin-right: 0.5rem;
+}
+
+.flowmateRequestHeader.sapMOH {
+    padding: 1rem 1.25rem;
+}
+
+.flowmateRequestHeader .sapMOHNumber {
+    color: #0a6ed1;
+    font-weight: 700;
+}
+
+.flowmateRequestHeader .sapMOHNumberUnit {
+    color: #455b70;
+    font-weight: 600;
+}
+
+.flowmateRequestHeader .sapMOHAttr {
+    margin-right: 1.75rem;
+    margin-top: 0.4rem;
+}
+
+.flowmateObjectPage .sapUxAPObjectPageHeaderContent {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.flowmateObjectPage .sapUxAPObjectPageHeaderContentItem {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0;
+}
+
+.flowmateHeaderLayout {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.flowmateHeaderRow {
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.flowmateHeaderActionRow {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 0.0625rem solid #e5ebf0;
+}
+
+.flowmateHeaderCell {
+    box-sizing: border-box;
+    flex: 1 1 9.5rem;
+    min-width: 9.5rem;
+    min-height: 3.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #f7f9fb;
+    border-radius: 0.375rem;
+}
+
+.flowmateHeaderReference {
+    border-left: 0.1875rem solid #0a6ed1;
+}
+
+.flowmateHeaderReference .sapMLabel,
+.flowmateHeaderFact .sapMLabel,
+.flowmateHeaderBadgeGroup .sapMLabel {
+    margin-bottom: 0.3rem;
+    color: #526879;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.flowmateHeaderReference .sapMObjectIdentifierTitle .sapMText {
+    color: #0a6ed1;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.flowmateHeaderFact .sapMText {
+    color: #1d2d3e;
+    font-weight: 500;
+}
+
+.flowmateHeaderBadgeGroup {
+    min-width: 9.5rem;
+}
+
+.flowmateHeaderActionCell {
+    flex-basis: 15.5rem;
+    min-width: 15.5rem;
+    background: #ffffff;
+    border: 0.0625rem solid #e5ebf0;
+}
+
+.flowmateHeaderInputRow .sapMSlt {
+    flex: 0 0 11rem;
+    min-width: 11rem;
+}
+
+.flowmateHeaderInputRow .sapMInputBase {
+    flex: 1 1 auto;
+    min-width: 9rem;
+}
+
 .flowmateSmartTable .sapUiCompSmartTableToolbar {
     border-bottom: 0.0625rem solid #e5ebf0;
     background: #ffffff;
@@ -192,5 +318,16 @@
 @media (max-width: 47.99rem) {
     .flowmateContent {
         padding: 0.75rem 0.5rem 1rem;
+    }
+
+    .flowmateHeaderCell,
+    .flowmateHeaderActionCell {
+        flex-basis: 100%;
+        min-width: 100%;
+    }
+
+    .flowmateHeaderInputRow .sapMSlt {
+        flex: 1 1 auto;
+        min-width: 9rem;
     }
 }

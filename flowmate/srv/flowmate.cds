@@ -9,6 +9,7 @@ service FlowmateService {
     entity Delegations as projection on fldb.Delegations;
     entity ProcessRequests as projection on fldb.ProcessRequests;
     entity ProcessTasks as projection on fldb.ProcessTasks;
+    entity ProcessInvolvedParties as projection on fldb.ProcessInvolvedParties;
     entity ProcessComments as projection on fldb.ProcessComments;
     entity ProcessAttachments as projection on fldb.ProcessAttachments;
     entity ProcessHistory as projection on fldb.ProcessHistory;
@@ -21,9 +22,23 @@ service FlowmateService {
     action sendBack(taskId: UUID, remarks: String) returns Boolean;
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;
+    action assignRequestProcessor(requestId: UUID, processorUserId: UUID) returns Boolean;
+    action assignTaskProcessor(taskId: UUID, processorUserId: UUID) returns Boolean;
     action resolveNotificationRecipient(userId: String(100)) returns {
         originalRecipient : String(100);
         recipient         : String(100);
+        delegated         : Boolean;
+        delegationId      : UUID;
+    };
+    action resolveTaskNotificationRecipient(taskId: UUID) returns {
+        originalRecipient : String(255);
+        recipient         : String(255);
+        delegated         : Boolean;
+        delegationId      : UUID;
+    };
+    action resolveInvolvedPartyNotificationRecipient(partyId: UUID) returns {
+        originalRecipient : String(255);
+        recipient         : String(255);
         delegated         : Boolean;
         delegationId      : UUID;
     };

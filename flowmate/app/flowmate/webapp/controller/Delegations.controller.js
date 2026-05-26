@@ -30,6 +30,9 @@ sap.ui.define([
             oBinding.filter([
                 new Filter({
                     filters: [
+                        new Filter("referenceNumber", FilterOperator.Contains, sQuery),
+                        new Filter("delegatorUser/displayName", FilterOperator.Contains, sQuery),
+                        new Filter("delegateUser/displayName", FilterOperator.Contains, sQuery),
                         new Filter("delegator", FilterOperator.Contains, sQuery),
                         new Filter("delegate", FilterOperator.Contains, sQuery),
                         new Filter("createdBy", FilterOperator.Contains, sQuery)
@@ -141,6 +144,36 @@ sap.ui.define([
             try {
                 await this.removeEntry(`/Delegations(guid'${sId}')`);
                 MessageToast.show(this.getText("delegationDeletedMessage"));
+                this.byId("delegationsTable").getBinding("items").refresh();
+            } catch (oError) {
+                MessageBox.error(this._getErrorMessage(oError, "delegationDeleteErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onDeleteSelectedDelegations() {
+            const oTable = this.byId("delegationsTable");
+            const aIds = oTable.getSelectedContexts().map((oContext) => oContext.getProperty("ID"));
+
+            if (!aIds.length) {
+                MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+
+            const bConfirmed = await this._confirmDelete("deleteSelectedDelegationsConfirmMessage", [aIds.length]);
+
+            if (!bConfirmed) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await Promise.all(aIds.map((sId) => this.removeEntry(`/Delegations(guid'${sId}')`)));
+                MessageToast.show(this.getText("selectedDelegationsDeletedMessage", [aIds.length]));
+                oTable.removeSelections(true);
+                oTable.getBinding("items").refresh();
             } catch (oError) {
                 MessageBox.error(this._getErrorMessage(oError, "delegationDeleteErrorMessage"));
             } finally {
@@ -205,9 +238,9 @@ sap.ui.define([
             this.onUserValueHelpClose(oEvent);
         },
 
-        _confirmDelete() {
+        _confirmDelete(sMessageKey = "deleteDelegationConfirmMessage", aArguments) {
             return new Promise((resolve) => {
-                MessageBox.confirm(this.getText("deleteDelegationConfirmMessage"), {
+                MessageBox.confirm(this.getText(sMessageKey, aArguments), {
                     emphasizedAction: MessageBox.Action.DELETE,
                     actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
                     onClose: (sAction) => resolve(sAction === MessageBox.Action.DELETE)

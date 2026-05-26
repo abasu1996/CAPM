@@ -59,27 +59,36 @@
                                 width="18rem"
                                 search=".onSearch"
                                 liveChange=".onSearch" />
+                            <Button
+                                icon="sap-icon://delete"
+                                text="{i18n>deleteSelectedButton}"
+                                type="Reject"
+                                press=".onDeleteSelectedTasks" />
                         </OverflowToolbar>
                         <Table
                             id="tasksTable"
                             class="flowmateTable"
                             noDataText="{i18n>noTasksText}"
                             busyIndicatorDelay="0"
-                            mode="SingleSelectMaster"
+                            mode="MultiSelect"
                             growing="true"
                             growingScrollToLoad="true"
                             itemPress=".onTaskPress"
                             items="{
                                 path: '/ProcessTasks',
+                                parameters: {
+                                    expand: 'request'
+                                },
                                 events: {
                                     dataRequested: '.onDataRequested',
                                     dataReceived: '.onDataReceived'
                                 }
                             }">
                             <columns>
+                                <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                                 <Column><Text text="{i18n>taskNameLabel}" /></Column>
                                 <Column><Text text="{i18n>stepLabel}" /></Column>
-                                <Column><Text text="{i18n>assignedToLabel}" /></Column>
+                                <Column><Text text="{i18n>processorLabel}" /></Column>
                                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
                                 <Column><Text text="{i18n>statusLabel}" /></Column>
                                 <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>decisionLabel}" /></Column>
@@ -89,17 +98,25 @@
                                 <ColumnListItem
                                     type="Active">
                                     <cells>
+                                        <Text text="{referenceNumber}" />
                                         <ObjectIdentifier
                                             title="{taskName}"
-                                            text="{request_ID}" />
+                                            text="{request/referenceNumber}" />
                                         <Text text="{stepNo}" />
-                                        <Text text="{assignedTo}" />
+                                        <Text text="{processor}" />
                                         <Text text="{role}" />
                                         <ObjectStatus
-                                            text="{status_code}"
-                                            state="{path: 'status_code', formatter: '.formatStatusState'}" />
+                                            class="flowmateSemanticStatus"
+                                            text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                            state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                            inverted="true" />
                                         <Text text="{decision}" />
                                         <HBox justifyContent="End">
+                                            <Button
+                                                icon="sap-icon://email"
+                                                type="Transparent"
+                                                tooltip="{i18n>notifyProcessorButton}"
+                                                press=".onNotifyProcessor" />
                                             <Button
                                                 icon="sap-icon://delete"
                                                 type="Transparent"
@@ -131,8 +148,8 @@
                         <uxap:actions>
                             <Button
                                 icon="sap-icon://email"
-                                text="{i18n>notifyAssigneeButton}"
-                                press=".onNotifyAssignee" />
+                                text="{i18n>notifyProcessorButton}"
+                                press=".onNotifyProcessor" />
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
@@ -152,32 +169,78 @@
                     </uxap:ObjectPageDynamicHeaderTitle>
                 </uxap:headerTitle>
                 <uxap:headerContent>
-                    <VBox class="flowmateStatusEditor">
-                        <Label text="{i18n>statusLabel}" />
-                        <HBox alignItems="Center">
-                            <Select
-                                width="11rem"
-                                selectedKey="{statusEdit>/taskStatus}"
-                                items="{/TaskStatus}">
-                                <core:Item key="{code}" text="{name}" />
-                            </Select>
-                            <Button
-                                class="sapUiTinyMarginBegin"
-                                icon="sap-icon://save"
-                                type="Emphasized"
-                                tooltip="{i18n>saveStatusButton}"
-                                press=".onSaveTaskStatus" />
+                    <VBox class="flowmateHeaderLayout" width="100%">
+                        <HBox
+                            class="flowmateHeaderRow"
+                            width="100%"
+                            wrap="Wrap"
+                            alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderReference">
+                                <Label text="{i18n>taskIdLabel}" />
+                                <ObjectIdentifier title="{referenceNumber}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>requestIdLabel}" />
+                                <Text text="{request/referenceNumber}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>roleLabel}" />
+                                <Text text="{role}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>stepLabel}" />
+                                <Text text="{stepNo}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                                <Label text="{i18n>statusLabel}" />
+                                <ObjectStatus
+                                    class="flowmateSemanticStatus"
+                                    text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                    state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                    inverted="true" />
+                            </VBox>
+                        </HBox>
+                        <HBox
+                            class="flowmateHeaderRow flowmateHeaderActionRow"
+                            width="100%"
+                            wrap="Wrap"
+                            alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                                <Label text="{i18n>statusLabel}" />
+                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                    <Select
+                                        width="11rem"
+                                        selectedKey="{statusEdit>/taskStatus}"
+                                        items="{/TaskStatus}">
+                                        <core:Item key="{code}" text="{name}" />
+                                    </Select>
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        type="Emphasized"
+                                        tooltip="{i18n>saveStatusButton}"
+                                        press=".onSaveTaskStatus" />
+                                </HBox>
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                                <Label text="{i18n>processorLabel}" />
+                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                    <Input
+                                        width="100%"
+                                        value="{processorEdit>/processorName}"
+                                        placeholder="{i18n>selectProcessorPlaceholder}"
+                                        showValueHelp="true"
+                                        valueHelpOnly="true"
+                                        valueHelpRequest=".onProcessorValueHelpRequest" />
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        tooltip="{i18n>saveProcessorButton}"
+                                        press=".onSaveTaskProcessor" />
+                                </HBox>
+                            </VBox>
                         </HBox>
                     </VBox>
-                    <ObjectStatus
-                        title="{i18n>roleLabel}"
-                        text="{role}" />
-                    <ObjectAttribute
-                        title="{i18n>assignedToLabel}"
-                        text="{assignedTo}" />
-                    <ObjectAttribute
-                        title="{i18n>stepLabel}"
-                        text="{stepNo}" />
                 </uxap:headerContent>
                 <uxap:sections>
                     <uxap:ObjectPageSection title="{i18n>taskDetailsTitle}">
@@ -187,7 +250,7 @@
                                     <VBox class="flowmateDetailBlock">
                                         <ObjectIdentifier
                                             title="{request/title}"
-                                            text="{request_ID}" />
+                                            text="{request/referenceNumber}" />
                                         <Label
                                             class="sapUiSmallMarginTop"
                                             text="{i18n>decisionLabel}" />
@@ -216,4 +279,35 @@
             </uxap:ObjectPageLayout>
         </f:midColumnPages>
     </f:FlexibleColumnLayout>
+    <mvc:dependents>
+        <TableSelectDialog
+            id="myTasksProcessorValueHelpDialog"
+            title="{i18n>selectProcessorTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            rememberSelections="false"
+            search=".onProcessorValueHelpSearch"
+            confirm=".onProcessorValueHelpConfirm"
+            cancel=".onProcessorValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                    <Text text="{department}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+    </mvc:dependents>
 </mvc:View>

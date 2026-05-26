@@ -28,6 +28,9 @@ sap.ui.define([
                 requesterUser_ID: "",
                 requesterName: "",
                 requester: "",
+                processorUser_ID: "",
+                processorName: "",
+                processor: "",
                 department: "",
                 priority: "Medium",
                 autoSubmit: true,
@@ -54,6 +57,8 @@ sap.ui.define([
                     description: oPayload.description,
                     requesterUser_ID: oPayload.requesterUser_ID || undefined,
                     requester: oPayload.requester,
+                    processorUser_ID: oPayload.processorUser_ID || undefined,
+                    processor: oPayload.processor,
                     department: oPayload.department,
                     priority: oPayload.priority,
                     status_code: "DRAFT"
@@ -68,8 +73,10 @@ sap.ui.define([
                 }
 
                 MessageToast.show(this.getText("requestCreatedMessage"));
-                this.navTo("RouteRequestDetail", {
-                    requestId: encodeURIComponent(oCreated.ID)
+                this.navTo("RouteMyRequests", {
+                    "?query": {
+                        requestId: oCreated.ID
+                    }
                 });
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("requestCreateFailedMessage"));
@@ -175,7 +182,7 @@ sap.ui.define([
             const oCreateModel = this.getView().getModel("create");
             oCreateModel.setProperty("/requesterUser_ID", oContext.getProperty("ID"));
             oCreateModel.setProperty("/requesterName", oContext.getProperty("displayName"));
-            oCreateModel.setProperty("/requester", oContext.getProperty("email") || oContext.getProperty("userPrincipalName"));
+            oCreateModel.setProperty("/requester", oContext.getProperty("displayName"));
 
             if (!oCreateModel.getProperty("/department")) {
                 oCreateModel.setProperty("/department", oContext.getProperty("department"));
@@ -185,6 +192,32 @@ sap.ui.define([
         },
 
         onRequesterValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
+        onProcessorValueHelpRequest() {
+            this.byId("requestCreateProcessorValueHelpDialog").open();
+        },
+
+        onProcessorValueHelpSearch(oEvent) {
+            this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
+        },
+
+        onProcessorValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (!oContext) {
+                return;
+            }
+
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/processorUser_ID", oContext.getProperty("ID"));
+            oCreateModel.setProperty("/processorName", oContext.getProperty("displayName"));
+            oCreateModel.setProperty("/processor", oContext.getProperty("displayName"));
+            this.onProcessorValueHelpClose(oEvent);
+        },
+
+        onProcessorValueHelpClose(oEvent) {
             oEvent.getSource().getBinding("items")?.filter([]);
         },
 

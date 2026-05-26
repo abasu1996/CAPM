@@ -45,6 +45,7 @@ sap.ui.define([
             oBinding.filter([
                 new Filter({
                     filters: [
+                        new Filter("referenceNumber", FilterOperator.Contains, sQuery),
                         new Filter("displayName", FilterOperator.Contains, sQuery),
                         new Filter("email", FilterOperator.Contains, sQuery),
                         new Filter("userPrincipalName", FilterOperator.Contains, sQuery),

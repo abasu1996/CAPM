@@ -65,6 +65,7 @@
                         }
                     }">
                     <columns>
+                        <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                         <Column><Text text="{i18n>userNameLabel}" /></Column>
                         <Column><Text text="{i18n>emailLabel}" /></Column>
                         <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>userPrincipalNameLabel}" /></Column>
@@ -75,13 +76,16 @@
                     <items>
                         <ColumnListItem>
                             <cells>
+                                <Text text="{referenceNumber}" />
                                 <ObjectIdentifier title="{displayName}" text="{azureObjectId}" />
                                 <Text text="{email}" />
                                 <Text text="{userPrincipalName}" />
                                 <Text text="{department}" />
                                 <ObjectStatus
+                                    class="flowmateSemanticStatus"
                                     text="{path: 'isActive', formatter: '.formatActiveText'}"
-                                    state="{path: 'isActive', formatter: '.formatActiveState'}" />
+                                    state="{path: 'isActive', formatter: '.formatActiveState'}"
+                                    inverted="true" />
                                 <Button
                                     icon="sap-icon://edit"
                                     tooltip="{i18n>editUserButton}"

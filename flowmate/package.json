@@ -24,7 +24,7 @@
     "requires": {
       "[development]": {
         "auth": {
-          "kind": "mocked",
+          "kind": "dummy",
           "users": {
             "*": false,
             "alice": false,

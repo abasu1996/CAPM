@@ -36,6 +36,7 @@ entity TaskStatus : CodeList {
 }
 
 entity Users : cuid, managed {
+    referenceNumber   : String(30);
     azureObjectId     : String(100);
     userPrincipalName : String(255);
     displayName       : String(150);
@@ -45,6 +46,7 @@ entity Users : cuid, managed {
 }
 
 entity Delegations : cuid, managed {
+    referenceNumber      : String(30);
     delegatorUser        : Association to Users;
     delegateUser         : Association to Users;
     delegator            : String(255);
@@ -57,11 +59,14 @@ entity Delegations : cuid, managed {
 }
 
 entity ProcessRequests : cuid, managed {
+    referenceNumber : String(30);
     processType : Association to ProcessTypes;
     requesterUser : Association to Users;
+    processorUser : Association to Users;
     title       : String(255);
     description : LargeString;
     requester   : String(100);
+    processor   : String(255);
     department  : String(100);
     status      : Association to ProcessStatus;
     priority    : String(20);
@@ -70,6 +75,8 @@ entity ProcessRequests : cuid, managed {
     completedAt : DateTime;
     tasks       : Composition of many ProcessTasks
                     on tasks.request = $self;
+    involvedParties : Composition of many ProcessInvolvedParties
+                    on involvedParties.request = $self;
     comments    : Composition of many ProcessComments
                     on comments.request = $self;
     attachments : Composition of many ProcessAttachments
@@ -79,11 +86,14 @@ entity ProcessRequests : cuid, managed {
 }
 
 entity ProcessTasks : cuid, managed {
+    referenceNumber : String(30);
     request     : Association to ProcessRequests;
     assignedUser : Association to Users;
+    processorUser : Association to Users;
     stepNo      : Integer;
     taskName    : String(100);
     assignedTo  : String(100);
+    processor   : String(255);
     role        : String(100);
     status      : Association to TaskStatus;
     decision    : String(30);
@@ -91,18 +101,30 @@ entity ProcessTasks : cuid, managed {
     completedAt : DateTime;
 }
 
+entity ProcessInvolvedParties : cuid, managed {
+    referenceNumber : String(30);
+    request          : Association to ProcessRequests;
+    user             : Association to Users;
+    displayName      : String(150);
+    email            : String(255);
+    department       : String(100);
+    purpose          : String(255);
+}
+
 entity ProcessComments : cuid, managed {
+    referenceNumber : String(30);
     request : Association to ProcessRequests;
     comment : LargeString;
     userId  : String(100);
 }
 
 entity ProcessAttachments : Attachments {
+    referenceNumber : String(30);
     request : Association to ProcessRequests;
 }
 
 annotate ProcessAttachments with {
-    content @Validation.Maximum : '400MB'
+    content @Validation.Maximum : '50MB'
             @Core.AcceptableMediaTypes : [
                 'application/pdf',
                 'image/*',
@@ -115,6 +137,7 @@ annotate ProcessAttachments with {
 };
 
 entity ProcessHistory : cuid, managed {
+    referenceNumber : String(30);
     request   : Association to ProcessRequests;
     stepNo    : Integer;
     action    : String(50);
@@ -125,6 +148,7 @@ entity ProcessHistory : cuid, managed {
 }
 
 entity ProcessStepConfig : cuid, managed {
+    referenceNumber : String(30);
     processType   : Association to ProcessTypes;
     stepNo        : Integer;
     stepName      : String(100);

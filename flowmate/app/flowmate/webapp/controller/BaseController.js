@@ -27,6 +27,7 @@ sap.ui.define([
                 case "CLEAN":
                     return "Success";
                 case "OPEN":
+                case "DRAFT":
                 case "IN_PROGRESS":
                 case "PENDING":
                     return "Information";
@@ -36,6 +37,28 @@ sap.ui.define([
                 case "FAILED":
                 case "INFECTED":
                     return "Error";
+                default:
+                    return "None";
+            }
+        },
+
+        formatStatusText(sStatus) {
+            return (sStatus || "")
+                .toLowerCase()
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, (sCharacter) => sCharacter.toUpperCase());
+        },
+
+        formatPriorityState(sPriority) {
+            switch ((sPriority || "").toLowerCase()) {
+                case "critical":
+                    return "Error";
+                case "high":
+                    return "Warning";
+                case "medium":
+                    return "Information";
+                case "low":
+                    return "Success";
                 default:
                     return "None";
             }
@@ -127,38 +150,40 @@ sap.ui.define([
             return true;
         },
 
-        async onNotifyAssignee(oEvent) {
-            const oContext = oEvent.getSource().getBindingContext();
-            const sAssignee = oContext && oContext.getProperty("assignedTo");
+        async onNotifyProcessor(oEvent) {
+            oEvent.cancelBubble?.();
 
-            if (!sAssignee) {
-                MessageToast.show(this.getText("assigneeMissingMessage"));
+            const oContext = oEvent.getSource().getBindingContext();
+            const sTaskId = oContext && oContext.getProperty("ID");
+
+            if (!sTaskId) {
+                MessageToast.show(this.getText("selectTaskMessage"));
                 return;
             }
 
-            let sRecipient = sAssignee;
+            let sRecipient;
 
             this.showBusy();
 
             try {
-                const oResolvedRecipient = await this.callAction("resolveNotificationRecipient", {
-                    userId: sAssignee
+                const oResolvedRecipient = await this.callAction("resolveTaskNotificationRecipient", {
+                    taskId: sTaskId
                 });
 
-                sRecipient = oResolvedRecipient.recipient || sAssignee;
+                sRecipient = oResolvedRecipient.recipient;
 
                 if (oResolvedRecipient.delegated) {
                     MessageToast.show(this.getText("notificationDelegatedMessage", [sRecipient]));
                 }
             } catch (oError) {
-                MessageToast.show(oError.message || this.getText("actionFailedMessage"));
+                MessageToast.show(oError.message || this.getText("processorEmailMissingMessage"));
                 return;
             } finally {
                 this.hideBusy();
             }
 
             const sTaskName = oContext.getProperty("taskName") || this.getText("taskFallbackName");
-            const sRequestTitle = oContext.getProperty("request/title") || oContext.getProperty("request_ID") || "";
+            const sRequestTitle = oContext.getProperty("request/title") || oContext.getProperty("request/referenceNumber") || "";
             const sSubject = this.getText("taskNotificationSubject", [sTaskName]);
             const sBody = this.getText("taskNotificationBody", [
                 sTaskName,

@@ -14,6 +14,10 @@ sap.ui.define([
             this.getView().setModel(new JSONModel({
                 taskStatus: ""
             }), "statusEdit");
+            this.getView().setModel(new JSONModel({
+                processorUser_ID: "",
+                processorName: ""
+            }), "processorEdit");
             this.getRouter().getRoute("RouteMyTasks").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -63,8 +67,9 @@ sap.ui.define([
             oBinding.filter([
                 new Filter({
                     filters: [
+                        new Filter("referenceNumber", FilterOperator.Contains, sQuery),
                         new Filter("taskName", FilterOperator.Contains, sQuery),
-                        new Filter("assignedTo", FilterOperator.Contains, sQuery),
+                        new Filter("processor", FilterOperator.Contains, sQuery),
                         new Filter("role", FilterOperator.Contains, sQuery),
                         new Filter("status_code", FilterOperator.Contains, sQuery),
                         new Filter("decision", FilterOperator.Contains, sQuery)
@@ -97,6 +102,56 @@ sap.ui.define([
                 this.byId("taskObjectPage").getElementBinding().refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        onProcessorValueHelpRequest() {
+            this.byId("myTasksProcessorValueHelpDialog").open();
+        },
+
+        onProcessorValueHelpSearch(oEvent) {
+            this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
+        },
+
+        onProcessorValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (!oContext) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("processorEdit");
+            oModel.setProperty("/processorUser_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/processorName", oContext.getProperty("displayName"));
+            this.onProcessorValueHelpClose(oEvent);
+        },
+
+        onProcessorValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
+        async onSaveTaskProcessor() {
+            const sProcessorUserId = this.getView().getModel("processorEdit").getProperty("/processorUser_ID");
+
+            if (!this._sSelectedTaskId || !sProcessorUserId) {
+                MessageToast.show(this.getText("selectProcessorMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("assignTaskProcessor", {
+                    taskId: this._sSelectedTaskId,
+                    processorUserId: sProcessorUserId
+                });
+                MessageToast.show(this.getText("taskProcessorUpdatedMessage"));
+                this.byId("tasksTable").getBinding("items").refresh();
+                this.byId("taskObjectPage").getElementBinding().refresh();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
             } finally {
                 this.hideBusy();
             }
@@ -150,6 +205,41 @@ sap.ui.define([
             }
         },
 
+        async onDeleteSelectedTasks() {
+            const oTable = this.byId("tasksTable");
+            const aTaskIds = oTable.getSelectedContexts().map((oContext) => oContext.getProperty("ID"));
+
+            if (!aTaskIds.length) {
+                MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+
+            const bConfirmed = await this._confirmDelete("deleteSelectedTasksConfirmMessage", [aTaskIds.length]);
+
+            if (!bConfirmed) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await Promise.all(aTaskIds.map((sTaskId) => this.removeEntry(`/ProcessTasks(guid'${sTaskId}')`)));
+                MessageToast.show(this.getText("selectedTasksDeletedMessage", [aTaskIds.length]));
+
+                if (aTaskIds.includes(this._sSelectedTaskId)) {
+                    this._sSelectedTaskId = null;
+                    this._setTasksLayout(fLibrary.LayoutType.OneColumn);
+                }
+
+                oTable.removeSelections(true);
+                oTable.getBinding("items").refresh();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
         _showTaskDetail(oContext) {
             this._showTaskDetailById(oContext.getProperty("ID"));
         },
@@ -169,6 +259,14 @@ sap.ui.define([
                             "/taskStatus",
                             this.byId("taskObjectPage").getBindingContext()?.getProperty("status_code") || ""
                         );
+                        this.getView().getModel("processorEdit").setProperty(
+                            "/processorUser_ID",
+                            this.byId("taskObjectPage").getBindingContext()?.getProperty("processorUser_ID") || ""
+                        );
+                        this.getView().getModel("processorEdit").setProperty(
+                            "/processorName",
+                            this.byId("taskObjectPage").getBindingContext()?.getProperty("processor") || ""
+                        );
                     }
                 }
             });
@@ -179,9 +277,29 @@ sap.ui.define([
             this.byId("tasksFlexibleColumnLayout").setLayout(sLayout);
         },
 
-        _confirmDelete(sMessageKey) {
+        _filterUsers(oDialog, sQuery) {
+            const oBinding = oDialog.getBinding("items");
+
+            if (!sQuery) {
+                oBinding.filter([]);
+                return;
+            }
+
+            oBinding.filter([
+                new Filter({
+                    filters: [
+                        new Filter("displayName", FilterOperator.Contains, sQuery),
+                        new Filter("email", FilterOperator.Contains, sQuery),
+                        new Filter("department", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                })
+            ]);
+        },
+
+        _confirmDelete(sMessageKey, aArguments) {
             return new Promise((resolve) => {
-                MessageBox.confirm(this.getText(sMessageKey), {
+                MessageBox.confirm(this.getText(sMessageKey, aArguments), {
                     actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
                     emphasizedAction: MessageBox.Action.DELETE,
                     onClose: (sAction) => resolve(sAction === MessageBox.Action.DELETE)

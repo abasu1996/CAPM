@@ -21,10 +21,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const {
       ProcessRequests,
       ProcessTasks,
+      ProcessInvolvedParties,
+      ProcessComments,
+      ProcessAttachments,
       ProcessHistory,
       ProcessStepConfig,
+      ProcessTypes,
       ProcessStatus,
       TaskStatus,
+      RequestDropDown,
       Users,
       Delegations
     } = this.entities;
@@ -42,6 +47,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     this.before(["CREATE", "UPDATE"], Users, async (req) => {
       if (!this._isAdministrator(req)) {
         return req.reject(403, "Only a user administrator can maintain users");
+      }
+
+      if (req.event === "CREATE") {
+        req.data.referenceNumber = await this._nextReferenceNumber(req, Users, "USR");
       }
 
       const oExisting = req.event === "UPDATE"
@@ -82,7 +91,25 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
 
+    [ProcessTypes, ProcessStatus, TaskStatus, RequestDropDown].forEach((oCodeList) => {
+      this.before(["CREATE", "UPDATE", "DELETE"], oCodeList, (req) => {
+        if (!this._isAdministrator(req)) {
+          return req.reject(403, "Only an administrator can maintain configuration code lists");
+        }
+
+        if (req.event !== "DELETE" && (!req.data.code || !req.data.name || !req.data.descr)) {
+          return req.reject(400, "Code, name, and description are required");
+        }
+      });
+    });
+
+    this.before("CREATE", ProcessStepConfig, async (req) => {
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessStepConfig, "STP");
+    });
+
     this.before("CREATE", ProcessRequests, async (req) => {
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessRequests, "REQ");
+
       if (req.data.requesterUser_ID) {
         const oRequester = await this._getUser(req, req.data.requesterUser_ID, Users);
 
@@ -90,16 +117,26 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           return req.reject(400, "Selected requester was not found");
         }
 
-        req.data.requester = this._userAddress(oRequester);
+        req.data.requester = this._userDisplayName(oRequester);
         req.data.department ||= oRequester.department;
       } else {
         const oCurrentUser = await this._findUserByPrincipal(req, req.user?.id, Users);
 
         if (oCurrentUser) {
           req.data.requesterUser_ID = oCurrentUser.ID;
-          req.data.requester = this._userAddress(oCurrentUser);
+          req.data.requester = this._userDisplayName(oCurrentUser);
           req.data.department ||= oCurrentUser.department;
         }
+      }
+
+      if (req.data.processorUser_ID) {
+        const oProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
+
+        if (!oProcessor) {
+          return req.reject(400, "Selected processor was not found");
+        }
+
+        req.data.processor = this._userDisplayName(oProcessor);
       }
 
       req.data.status_code ??= PROCESS_STATUS.DRAFT;
@@ -108,18 +145,90 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       req.data.currentStep ??= 0;
     });
 
-    this.before("CREATE", ProcessTasks, async (req) => {
-      if (!req.data.assignedUser_ID) {
+    this.before("UPDATE", ProcessRequests, async (req) => {
+      if (!req.data.processorUser_ID) {
         return;
       }
 
-      const oAssignee = await this._getUser(req, req.data.assignedUser_ID, Users);
+      const oProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
 
-      if (!oAssignee) {
-        return req.reject(400, "Selected assignee was not found");
+      if (!oProcessor) {
+        return req.reject(400, "Selected processor was not found");
       }
 
-      req.data.assignedTo = this._userAddress(oAssignee);
+      req.data.processor = this._userDisplayName(oProcessor);
+    });
+
+    this.before("CREATE", ProcessTasks, async (req) => {
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessTasks, "TSK");
+
+      // Backend-only compatibility: external clients can still maintain an assignee snapshot.
+      if (req.data.assignedUser_ID) {
+        const oAssignee = await this._getUser(req, req.data.assignedUser_ID, Users);
+
+        if (!oAssignee) {
+          return req.reject(400, "Selected assignee was not found");
+        }
+
+        req.data.assignedTo = this._userAddress(oAssignee);
+      }
+
+      if (req.data.processorUser_ID) {
+        const oProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
+
+        if (!oProcessor) {
+          return req.reject(400, "Selected processor was not found");
+        }
+
+        req.data.processor = this._userDisplayName(oProcessor);
+      }
+    });
+
+    this.before("UPDATE", ProcessTasks, async (req) => {
+      if (!req.data.processorUser_ID) {
+        return;
+      }
+
+      const oProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
+
+      if (!oProcessor) {
+        return req.reject(400, "Selected processor was not found");
+      }
+
+      req.data.processor = this._userDisplayName(oProcessor);
+    });
+
+    this.before("CREATE", ProcessInvolvedParties, async (req) => {
+      if (!req.data.request_ID || !req.data.user_ID) {
+        return req.reject(400, "Select a request and an involved party");
+      }
+
+      const oRequest = await this._getRequest(req, req.data.request_ID);
+      const oUser = await this._getUser(req, req.data.user_ID, Users);
+
+      if (!oRequest) {
+        return req.reject(400, "Selected request was not found");
+      }
+
+      if (!oUser) {
+        return req.reject(400, "Selected involved party was not found");
+      }
+
+      const oExisting = await cds.tx(req).run(
+        SELECT.one.from(ProcessInvolvedParties).where({
+          request_ID: req.data.request_ID,
+          user_ID: req.data.user_ID
+        })
+      );
+
+      if (oExisting) {
+        return req.reject(409, "This user is already an involved party for the request");
+      }
+
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessInvolvedParties, "PTY");
+      req.data.displayName = this._userDisplayName(oUser);
+      req.data.email = oUser.email;
+      req.data.department = oUser.department;
     });
 
     this.before("CREATE", Delegations, async (req) => {
@@ -128,6 +237,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       const bCreatedOnBehalf = Boolean(
         oDelegation.delegatorUser_ID || oDelegation.delegator && oDelegation.delegator !== sCurrentUser
       );
+
+      oDelegation.referenceNumber = await this._nextReferenceNumber(req, Delegations, "DLG");
 
       if (!oDelegation.delegateUser_ID) {
         return req.reject(400, "Select a delegate from the user list");
@@ -219,6 +330,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!oDelegation || oDelegation.delegator !== await this._currentUserAddress(req, Users)) {
         return req.reject(403, "Only the delegation owner or an administrator can delete this assignment");
       }
+    });
+
+    this.before("CREATE", ProcessAttachments, async (req) => {
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessAttachments, "ATT");
+    });
+
+    this.before("CREATE", ProcessComments, async (req) => {
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessComments, "CMT");
+    });
+
+    this.before("CREATE", ProcessHistory, async (req) => {
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessHistory, "HIS");
     });
 
     this.on("submitRequest", async (req) => {
@@ -462,6 +585,86 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return true;
     });
 
+    this.on("assignRequestProcessor", async (req) => {
+      const { requestId, processorUserId } = req.data;
+      const request = await this._getRequest(req, requestId);
+
+      if (!request) {
+        return req.reject(404, `Process request ${requestId} was not found`);
+      }
+
+      const oProcessor = await this._getUser(req, processorUserId, Users);
+
+      if (!oProcessor) {
+        return req.reject(400, "Select an active request processor");
+      }
+
+      const sProcessor = this._userDisplayName(oProcessor);
+
+      if (request.processorUser_ID === processorUserId && request.processor === sProcessor) {
+        return true;
+      }
+
+      await cds.tx(req).run(
+        UPDATE(ProcessRequests, requestId).set({
+          processorUser_ID: processorUserId,
+          processor: sProcessor
+        })
+      );
+
+      await this._writeHistory(req, {
+        requestId,
+        stepNo: request.currentStep || 0,
+        action: "PROCESSOR_ASSIGNED",
+        actor: req.user?.id,
+        oldStatus: request.status_code,
+        newStatus: request.status_code,
+        remarks: `Request processor assigned: ${sProcessor}`
+      });
+
+      return true;
+    });
+
+    this.on("assignTaskProcessor", async (req) => {
+      const { taskId, processorUserId } = req.data;
+      const task = await this._getTask(req, taskId);
+
+      if (!task) {
+        return req.reject(404, `Task ${taskId} was not found`);
+      }
+
+      const oProcessor = await this._getUser(req, processorUserId, Users);
+
+      if (!oProcessor) {
+        return req.reject(400, "Select an active task processor");
+      }
+
+      const sProcessor = this._userDisplayName(oProcessor);
+
+      if (task.processorUser_ID === processorUserId && task.processor === sProcessor) {
+        return true;
+      }
+
+      await cds.tx(req).run(
+        UPDATE(ProcessTasks, taskId).set({
+          processorUser_ID: processorUserId,
+          processor: sProcessor
+        })
+      );
+
+      await this._writeHistory(req, {
+        requestId: task.request_ID,
+        stepNo: task.stepNo,
+        action: "TASK_PROCESSOR_ASSIGNED",
+        actor: req.user?.id,
+        oldStatus: task.status_code,
+        newStatus: task.status_code,
+        remarks: `Task processor assigned: ${sProcessor}`
+      });
+
+      return true;
+    });
+
     this.on("resolveNotificationRecipient", async (req) => {
       const sOriginalRecipient = req.data.userId;
 
@@ -469,23 +672,49 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "Notification recipient is required");
       }
 
-      const sToday = new Date().toISOString().slice(0, 10);
-      const oDelegation = await cds.tx(req).run(
-        SELECT.one.from(Delegations).where({
-          delegator: sOriginalRecipient,
-          enabled: true,
-          forwardNotifications: true,
-          startDate: { "<=": sToday },
-          endDate: { ">=": sToday }
-        })
+      return this._resolveDelegatedRecipient(req, sOriginalRecipient, Delegations);
+    });
+
+    this.on("resolveTaskNotificationRecipient", async (req) => {
+      const task = await this._getTask(req, req.data.taskId);
+
+      if (!task) {
+        return req.reject(404, `Task ${req.data.taskId} was not found`);
+      }
+
+      if (!task.processorUser_ID) {
+        return req.reject(400, "Please maintain an email first for the processor.");
+      }
+
+      const oProcessor = await cds.tx(req).run(
+        SELECT.one.from(Users).where({ ID: task.processorUser_ID, isActive: true })
       );
 
-      return {
-        originalRecipient: sOriginalRecipient,
-        recipient: oDelegation?.delegate || sOriginalRecipient,
-        delegated: Boolean(oDelegation),
-        delegationId: oDelegation?.ID || null
-      };
+      if (!oProcessor?.email) {
+        return req.reject(400, "Please maintain an email first for the processor.");
+      }
+
+      return this._resolveDelegatedRecipient(req, oProcessor.email, Delegations);
+    });
+
+    this.on("resolveInvolvedPartyNotificationRecipient", async (req) => {
+      const oParty = await cds.tx(req).run(
+        SELECT.one.from(ProcessInvolvedParties).where({ ID: req.data.partyId })
+      );
+
+      if (!oParty) {
+        return req.reject(404, `Involved party ${req.data.partyId} was not found`);
+      }
+
+      const oUser = await cds.tx(req).run(
+        SELECT.one.from(Users).where({ ID: oParty.user_ID, isActive: true })
+      );
+
+      if (!oUser?.email) {
+        return req.reject(400, "Please maintain an email first for the involved party.");
+      }
+
+      return this._resolveDelegatedRecipient(req, oUser.email, Delegations);
     });
 
     this.on("getUserAdministrationCapabilities", (req) => ({
@@ -519,6 +748,34 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return cds.tx(req).run(SELECT.one.from(Users).where({ ID: userId, isActive: true }));
   }
 
+  async _nextReferenceNumber(req, entity, prefix) {
+    this._referenceNumberLocks ??= new Map();
+    const oPrevious = this._referenceNumberLocks.get(prefix) || Promise.resolve();
+    let fnRelease;
+    const oCurrent = new Promise((resolve) => {
+      fnRelease = resolve;
+    });
+
+    this._referenceNumberLocks.set(prefix, oPrevious.then(() => oCurrent));
+    await oPrevious;
+
+    try {
+      const aReferences = await cds.tx(req).run(
+        SELECT.from(entity).columns("referenceNumber").where({
+          referenceNumber: { like: `${prefix}-%` }
+        })
+      );
+      const iLastNumber = aReferences.reduce((iHighest, oEntry) => {
+        const iNumber = Number((oEntry.referenceNumber || "").slice(prefix.length + 1));
+        return Number.isFinite(iNumber) ? Math.max(iHighest, iNumber) : iHighest;
+      }, 0);
+
+      return `${prefix}-${String(iLastNumber + 1).padStart(6, "0")}`;
+    } finally {
+      fnRelease();
+    }
+  }
+
   async _findUserByPrincipal(req, principal, Users) {
     if (!principal) {
       return null;
@@ -548,6 +805,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return user.email || user.userPrincipalName || user.displayName;
   }
 
+  _userDisplayName(user) {
+    return user.displayName || user.email || user.userPrincipalName;
+  }
+
   async _isConfiguredStatus(req, StatusEntity, statusCode) {
     if (!statusCode) {
       return false;
@@ -556,6 +817,26 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return Boolean(await cds.tx(req).run(
       SELECT.one.from(StatusEntity).where({ code: statusCode })
     ));
+  }
+
+  async _resolveDelegatedRecipient(req, originalRecipient, Delegations) {
+    const sToday = new Date().toISOString().slice(0, 10);
+    const oDelegation = await cds.tx(req).run(
+      SELECT.one.from(Delegations).where({
+        delegator: originalRecipient,
+        enabled: true,
+        forwardNotifications: true,
+        startDate: { "<=": sToday },
+        endDate: { ">=": sToday }
+      })
+    );
+
+    return {
+      originalRecipient,
+      recipient: oDelegation?.delegate || originalRecipient,
+      delegated: Boolean(oDelegation),
+      delegationId: oDelegation?.ID || null
+    };
   }
 
   _isAdministrator(req) {
@@ -618,11 +899,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _createTask(req, requestId, step) {
+    const sReferenceNumber = await this._nextReferenceNumber(req, this.entities.ProcessTasks, "TSK");
+
     await cds.tx(req).run(
       INSERT.into(this.entities.ProcessTasks).entries({
+        referenceNumber: sReferenceNumber,
         request_ID: requestId,
         stepNo: step.stepNo,
         taskName: step.stepName,
+        // Kept for workflow compatibility; assignee details are no longer presented by the UI.
         assignedTo: step.role,
         role: step.role,
         status_code: TASK_STATUS.OPEN
@@ -631,8 +916,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _writeHistory(req, entry) {
+    const sReferenceNumber = await this._nextReferenceNumber(req, this.entities.ProcessHistory, "HIS");
+
     await cds.tx(req).run(
       INSERT.into(this.entities.ProcessHistory).entries({
+        referenceNumber: sReferenceNumber,
         request_ID: entry.requestId,
         stepNo: entry.stepNo,
         action: entry.action,

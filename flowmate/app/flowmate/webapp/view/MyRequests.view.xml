@@ -62,6 +62,11 @@
                                 width="18rem"
                                 search=".onSearch"
                                 liveChange=".onSearch" />
+                            <Button
+                                icon="sap-icon://delete"
+                                text="{i18n>deleteSelectedButton}"
+                                type="Reject"
+                                press=".onDeleteSelectedRequests" />
                         </OverflowToolbar>
                         <smartTable:SmartTable
                             id="requestsSmartTable"
@@ -72,24 +77,36 @@
                             useTablePersonalisation="true"
                             header="{i18n>requestsTableHeader}"
                             showRowCount="true"
-                            enableAutoBinding="true"
+                            enableAutoBinding="false"
                             beforeRebindTable=".onBeforeRebindRequestsTable"
-                            initiallyVisibleFields="title,processType_code,status_code,priority,department,dueDate">
+                            initiallyVisibleFields="referenceNumber,title,processor,processType_code,status_code,priority,department,dueDate">
                             <Table
                                 id="requestsTable"
                                 class="flowmateTable"
                                 noDataText="{i18n>noRequestsText}"
                                 busyIndicatorDelay="0"
-                                mode="SingleSelectMaster"
+                                mode="MultiSelect"
                                 growing="true"
                                 itemPress=".onRequestPress"
                                 growingScrollToLoad="true">
                                 <columns>
                                     <Column>
                                         <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"referenceNumber","leadingProperty":"referenceNumber","sortProperty":"referenceNumber","filterProperty":"referenceNumber"}' />
+                                        </customData>
+                                        <Text text="{i18n>referenceNumberLabel}" />
+                                    </Column>
+                                    <Column>
+                                        <customData>
                                             <core:CustomData key="p13nData" value='\{"columnKey":"title","leadingProperty":"title","sortProperty":"title","filterProperty":"title"}' />
                                         </customData>
                                         <Text text="{i18n>requestTitleLabel}" />
+                                    </Column>
+                                    <Column>
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"processor","leadingProperty":"processor","sortProperty":"processor","filterProperty":"processor"}' />
+                                        </customData>
+                                        <Text text="{i18n>processorLabel}" />
                                     </Column>
                                     <Column>
                                         <customData>
@@ -121,6 +138,12 @@
                                         </customData>
                                         <Text text="{i18n>dueDateLabel}" />
                                     </Column>
+                                    <Column hAlign="End">
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"requestActions"}' />
+                                        </customData>
+                                        <Text text="{i18n>actionsLabel}" />
+                                    </Column>
                                 </columns>
                                 <items>
                                     <ColumnListItem
@@ -128,18 +151,31 @@
                                         type="Active"
                                         >
                                         <cells>
+                                            <Text text="{referenceNumber}" />
                                             <ObjectIdentifier
                                                 title="{title}"
                                                 text="{requester}" />
-                                            <Text text="{processType_code}" />
+                                            <Text text="{processor}" />
+                                            <ObjectIdentifier
+                                                title="{processType/name}"
+                                                 />
                                             <ObjectStatus
-                                                text="{status_code}"
-                                                state="{path: 'status_code', formatter: '.formatStatusState'}" />
+                                                class="flowmateSemanticStatus"
+                                                text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                                state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                                inverted="true" />
                                             <ObjectStatus
+                                                class="flowmateSemanticStatus"
                                                 text="{priority}"
-                                                state="{path: 'priority', formatter: '.formatPriorityState'}" />
+                                                state="{path: 'priority', formatter: '.formatPriorityState'}"
+                                                inverted="true" />
                                             <Text text="{department}" />
                                             <Text text="{dueDate}" />
+                                            <Button
+                                                icon="sap-icon://delete"
+                                                type="Transparent"
+                                                tooltip="{i18n>deleteRequestButton}"
+                                                press=".onDeleteRequest" />
                                         </cells>
                                     </ColumnListItem>
                                 </items>
@@ -165,6 +201,10 @@
                         </uxap:snappedHeading>
                         <uxap:actions>
                             <Button
+                                icon="{= ${fclState>/midFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen' }"
+                                tooltip="{= ${fclState>/midFullScreen} ? ${i18n>restoreColumnsButton} : ${i18n>expandColumnButton} }"
+                                press=".onToggleRequestFullScreen" />
+                            <Button
                                 icon="sap-icon://decline"
                                 text="{i18n>closeButton}"
                                 press=".onCloseRequestDetail" />
@@ -172,39 +212,90 @@
                     </uxap:ObjectPageDynamicHeaderTitle>
                 </uxap:headerTitle>
                 <uxap:headerContent>
-                    <VBox class="flowmateStatusEditor">
-                        <Label text="{i18n>statusLabel}" />
-                        <HBox alignItems="Center">
-                            <Select
-                                width="11rem"
-                                selectedKey="{statusEdit>/requestStatus}"
-                                items="{/ProcessStatus}">
-                                <core:Item key="{code}" text="{name}" />
-                            </Select>
-                            <Button
-                                class="sapUiTinyMarginBegin"
-                                icon="sap-icon://save"
-                                type="Emphasized"
-                                tooltip="{i18n>saveStatusButton}"
-                                press=".onSaveRequestStatus" />
+                    <VBox class="flowmateHeaderLayout" width="100%">
+                        <HBox
+                            class="flowmateHeaderRow"
+                            width="100%"
+                            wrap="Wrap"
+                            alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderReference">
+                                <Label text="{i18n>requestIdLabel}" />
+                                <ObjectIdentifier title="{referenceNumber}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>processTypeLabel}" />
+                                <Text text="{processType/name}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>requesterLabel}" />
+                                <Text text="{requester}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                                <Label text="{i18n>statusLabel}" />
+                                <ObjectStatus
+                                    class="flowmateSemanticStatus"
+                                    text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                    state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                    inverted="true" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                                <Label text="{i18n>priorityLabel}" />
+                                <ObjectStatus
+                                    class="flowmateSemanticStatus"
+                                    text="{priority}"
+                                    state="{path: 'priority', formatter: '.formatPriorityState'}"
+                                    inverted="true" />
+                            </VBox>
+                        </HBox>
+                        <HBox
+                            class="flowmateHeaderRow flowmateHeaderActionRow"
+                            width="100%"
+                            wrap="Wrap"
+                            alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>departmentLabel}" />
+                                <Text text="{department}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>dueDateLabel}" />
+                                <Text text="{dueDate}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                                <Label text="{i18n>statusLabel}" />
+                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                    <Select
+                                        width="11rem"
+                                        selectedKey="{statusEdit>/requestStatus}"
+                                        items="{/ProcessStatus}">
+                                        <core:Item key="{code}" text="{name}" />
+                                    </Select>
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        type="Emphasized"
+                                        tooltip="{i18n>saveStatusButton}"
+                                        press=".onSaveRequestStatus" />
+                                </HBox>
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                                <Label text="{i18n>processorLabel}" />
+                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                    <Input
+                                        width="100%"
+                                        value="{processorEdit>/requestProcessorName}"
+                                        placeholder="{i18n>selectProcessorPlaceholder}"
+                                        showValueHelp="true"
+                                        valueHelpOnly="true"
+                                        valueHelpRequest=".onRequestProcessorValueHelpRequest" />
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        tooltip="{i18n>saveProcessorButton}"
+                                        press=".onSaveRequestProcessor" />
+                                </HBox>
+                            </VBox>
                         </HBox>
                     </VBox>
-                    <ObjectStatus
-                        title="{i18n>priorityLabel}"
-                        text="{priority}"
-                        state="{path: 'priority', formatter: '.formatPriorityState'}" />
-                    <ObjectAttribute
-                        title="{i18n>processTypeLabel}"
-                        text="{processType_code}" />
-                    <ObjectAttribute
-                        title="{i18n>requesterLabel}"
-                        text="{requester}" />
-                    <ObjectAttribute
-                        title="{i18n>departmentLabel}"
-                        text="{department}" />
-                    <ObjectAttribute
-                        title="{i18n>dueDateLabel}"
-                        text="{dueDate}" />
                 </uxap:headerContent>
                 <uxap:sections>
                     <uxap:ObjectPageSection title="{i18n>requestDetailsTitle}">
@@ -231,15 +322,23 @@
                                                 icon="sap-icon://add"
                                                 text="{i18n>addTaskButton}"
                                                 press=".onOpenAddTaskDialog" />
+                                            <Button
+                                                icon="sap-icon://delete"
+                                                text="{i18n>deleteSelectedButton}"
+                                                type="Reject"
+                                                press=".onDeleteSelectedRequestTasks" />
                                         </OverflowToolbar>
                                         <Table
+                                            id="requestTasksTable"
                                             class="flowmateTable"
                                             noDataText="{i18n>noTasksText}"
+                                            mode="MultiSelect"
                                             items="{tasks}">
                                             <columns>
+                                                <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                                                 <Column><Text text="{i18n>stepLabel}" /></Column>
                                                 <Column><Text text="{i18n>taskNameLabel}" /></Column>
-                                                <Column><Text text="{i18n>assignedToLabel}" /></Column>
+                                                <Column><Text text="{i18n>processorLabel}" /></Column>
                                                 <Column><Text text="{i18n>statusLabel}" /></Column>
                                                 <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                             </columns>
@@ -248,18 +347,87 @@
                                                     type="Active"
                                                     press=".onRequestTaskPress">
                                                     <cells>
+                                                        <Text text="{referenceNumber}" />
                                                         <Text text="{stepNo}" />
                                                         <Text text="{taskName}" />
-                                                        <Text text="{assignedTo}" />
+                                                        <Text text="{processor}" />
                                                         <ObjectStatus
-                                                            text="{status_code}"
-                                                            state="{path: 'status_code', formatter: '.formatStatusState'}" />
+                                                            class="flowmateSemanticStatus"
+                                                            text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                                            state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                                            inverted="true" />
                                                         <HBox justifyContent="End">
+                                                            <Button
+                                                                icon="sap-icon://email"
+                                                                type="Transparent"
+                                                                tooltip="{i18n>notifyProcessorButton}"
+                                                                press=".onNotifyProcessor" />
                                                             <Button
                                                                 icon="sap-icon://delete"
                                                                 type="Transparent"
                                                                 tooltip="{i18n>deleteTaskButton}"
                                                                 press=".onDeleteRequestTask" />
+                                                        </HBox>
+                                                    </cells>
+                                                </ColumnListItem>
+                                            </items>
+                                        </Table>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="{i18n>involvedPartiesTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox class="flowmateSurface">
+                                        <OverflowToolbar class="flowmateToolbar">
+                                            <Title text="{i18n>involvedPartiesTitle}" />
+                                            <ToolbarSpacer />
+                                            <Button
+                                                icon="sap-icon://add-employee"
+                                                text="{i18n>addInvolvedPartyButton}"
+                                                type="Emphasized"
+                                                press=".onOpenAddPartyDialog" />
+                                            <Button
+                                                icon="sap-icon://delete"
+                                                text="{i18n>deleteSelectedButton}"
+                                                type="Reject"
+                                                press=".onDeleteSelectedParties" />
+                                        </OverflowToolbar>
+                                        <Table
+                                            id="requestPartiesTable"
+                                            class="flowmateTable"
+                                            noDataText="{i18n>noInvolvedPartiesText}"
+                                            mode="MultiSelect"
+                                            items="{involvedParties}">
+                                            <columns>
+                                                <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
+                                                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                                                <Column><Text text="{i18n>departmentLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>emailLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>purposeLabel}" /></Column>
+                                                <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                            </columns>
+                                            <items>
+                                                <ColumnListItem type="Active" press=".onRequestPartyPress">
+                                                    <cells>
+                                                        <Text text="{referenceNumber}" />
+                                                        <ObjectIdentifier title="{displayName}" />
+                                                        <Text text="{department}" />
+                                                        <Text text="{email}" />
+                                                        <Text text="{purpose}" />
+                                                        <HBox justifyContent="End">
+                                                            <Button
+                                                                icon="sap-icon://email"
+                                                                tooltip="{i18n>notifyPartyButton}"
+                                                                press=".onNotifyInvolvedParty" />
+                                                            <Button
+                                                                icon="sap-icon://delete"
+                                                                type="Transparent"
+                                                                tooltip="{i18n>deletePartyButton}"
+                                                                press=".onDeleteParty" />
                                                         </HBox>
                                                     </cells>
                                                 </ColumnListItem>
@@ -285,10 +453,15 @@
                                                 change=".onRequestAttachmentsSelected"
                                                 fileSizeExceed=".onAttachmentFileSizeExceed"
                                                 icon="sap-icon://attachment"
-                                                maximumFileSize="400"
+                                                maximumFileSize="50"
                                                 multiple="true"
                                                 enabled="{= !${uploads>/active} }"
                                                 sameFilenameAllowed="true" />
+                                            <Button
+                                                icon="sap-icon://delete"
+                                                text="{i18n>deleteSelectedButton}"
+                                                type="Reject"
+                                                press=".onDeleteSelectedAttachments" />
                                         </OverflowToolbar>
                                         <List
                                             class="flowmateUploadQueue"
@@ -302,8 +475,10 @@
                                                         justifyContent="SpaceBetween">
                                                         <ObjectIdentifier title="{uploads>name}" />
                                                         <ObjectStatus
+                                                            class="flowmateSemanticStatus"
                                                             text="{uploads>statusText}"
-                                                            state="{uploads>statusState}" />
+                                                            state="{uploads>statusState}"
+                                                            inverted="true" />
                                                     </HBox>
                                                     <ProgressIndicator
                                                         class="sapUiTinyMarginTop"
@@ -314,10 +489,13 @@
                                             </CustomListItem>
                                         </List>
                                         <Table
+                                            id="requestAttachmentsTable"
                                             class="flowmateTable"
                                             noDataText="{i18n>noAttachmentsText}"
+                                            mode="MultiSelect"
                                             items="{attachments}">
                                             <columns>
+                                                <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                                                 <Column><Text text="{i18n>fileNameLabel}" /></Column>
                                                 <Column><Text text="{i18n>mimeTypeLabel}" /></Column>
                                                 <Column><Text text="{i18n>statusLabel}" /></Column>
@@ -326,11 +504,14 @@
                                             <items>
                                                 <ColumnListItem>
                                                     <cells>
+                                                        <Text text="{referenceNumber}" />
                                                         <Text text="{filename}" />
                                                         <Text text="{mimeType}" />
                                                         <ObjectStatus
+                                                            class="flowmateSemanticStatus"
                                                             text="{status}"
-                                                            state="{path: 'status', formatter: '.formatStatusState'}" />
+                                                            state="{path: 'status', formatter: '.formatStatusState'}"
+                                                            inverted="true" />
                                                         <HBox justifyContent="End">
                                                             <Button
                                                                 icon="sap-icon://show"
@@ -359,15 +540,57 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <List
-                                        class="flowmateDetailBlock"
-                                        noDataText="{i18n>noHistoryText}"
-                                        items="{history}">
-                                        <StandardListItem
-                                            title="{action}"
-                                            description="{actor} - {remarks}"
-                                            info="{newStatus}" />
-                                    </List>
+                                    <VBox class="flowmateSurface">
+                                        <OverflowToolbar class="flowmateToolbar">
+                                            <Title text="{i18n>historyTitle}" />
+                                            <ToolbarSpacer />
+                                            <ObjectStatus
+                                                class="flowmateSemanticStatus"
+                                                icon="sap-icon://history"
+                                                text="{i18n>auditTrailLabel}"
+                                                state="Information"
+                                                inverted="true" />
+                                        </OverflowToolbar>
+                                        <Table
+                                            class="flowmateTable"
+                                            noDataText="{i18n>noHistoryText}"
+                                            items="{history}">
+                                            <columns>
+                                                <Column><Text text="{i18n>actionLabel}" /></Column>
+                                                <Column><Text text="{i18n>statusTransitionLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>changedByLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>changedAtLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>remarksLabel}" /></Column>
+                                            </columns>
+                                            <items>
+                                                <ColumnListItem>
+                                                    <cells>
+                                                        <ObjectStatus
+                                                            class="flowmateSemanticStatus"
+                                                            text="{path: 'action', formatter: '.formatStatusText'}"
+                                                            state="{path: 'newStatus', formatter: '.formatStatusState'}"
+                                                            inverted="true" />
+                                                        <HBox class="flowmateHistoryTransition" alignItems="Center">
+                                                            <ObjectStatus
+                                                                text="{path: 'oldStatus', formatter: '.formatStatusText'}"
+                                                                state="{path: 'oldStatus', formatter: '.formatStatusState'}" />
+                                                            <core:Icon
+                                                                class="flowmateHistoryArrow"
+                                                                src="sap-icon://navigation-right-arrow" />
+                                                            <ObjectStatus
+                                                                class="flowmateSemanticStatus"
+                                                                text="{path: 'newStatus', formatter: '.formatStatusText'}"
+                                                                state="{path: 'newStatus', formatter: '.formatStatusState'}"
+                                                                inverted="true" />
+                                                        </HBox>
+                                                        <Text text="{actor}" />
+                                                        <Text text="{createdAt}" />
+                                                        <Text class="flowmateHistoryRemarks" text="{remarks}" wrapping="true" />
+                                                    </cells>
+                                                </ColumnListItem>
+                                            </items>
+                                        </Table>
+                                    </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
@@ -391,9 +614,13 @@
                         </uxap:snappedHeading>
                         <uxap:actions>
                             <Button
+                                icon="{= ${fclState>/endFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen' }"
+                                tooltip="{= ${fclState>/endFullScreen} ? ${i18n>restoreColumnsButton} : ${i18n>expandColumnButton} }"
+                                press=".onToggleRequestTaskFullScreen" />
+                            <Button
                                 icon="sap-icon://email"
-                                text="{i18n>notifyAssigneeButton}"
-                                press=".onNotifyAssignee" />
+                                text="{i18n>notifyProcessorButton}"
+                                press=".onNotifyProcessor" />
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
@@ -413,32 +640,78 @@
                     </uxap:ObjectPageDynamicHeaderTitle>
                 </uxap:headerTitle>
                 <uxap:headerContent>
-                    <VBox class="flowmateStatusEditor">
-                        <Label text="{i18n>statusLabel}" />
-                        <HBox alignItems="Center">
-                            <Select
-                                width="11rem"
-                                selectedKey="{statusEdit>/taskStatus}"
-                                items="{/TaskStatus}">
-                                <core:Item key="{code}" text="{name}" />
-                            </Select>
-                            <Button
-                                class="sapUiTinyMarginBegin"
-                                icon="sap-icon://save"
-                                type="Emphasized"
-                                tooltip="{i18n>saveStatusButton}"
-                                press=".onSaveRequestTaskStatus" />
+                    <VBox class="flowmateHeaderLayout" width="100%">
+                        <HBox
+                            class="flowmateHeaderRow"
+                            width="100%"
+                            wrap="Wrap"
+                            alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderReference">
+                                <Label text="{i18n>taskIdLabel}" />
+                                <ObjectIdentifier title="{referenceNumber}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>requestIdLabel}" />
+                                <Text text="{request/referenceNumber}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>roleLabel}" />
+                                <Text text="{role}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>stepLabel}" />
+                                <Text text="{stepNo}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                                <Label text="{i18n>statusLabel}" />
+                                <ObjectStatus
+                                    class="flowmateSemanticStatus"
+                                    text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                    state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                    inverted="true" />
+                            </VBox>
+                        </HBox>
+                        <HBox
+                            class="flowmateHeaderRow flowmateHeaderActionRow"
+                            width="100%"
+                            wrap="Wrap"
+                            alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                                <Label text="{i18n>statusLabel}" />
+                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                    <Select
+                                        width="11rem"
+                                        selectedKey="{statusEdit>/taskStatus}"
+                                        items="{/TaskStatus}">
+                                        <core:Item key="{code}" text="{name}" />
+                                    </Select>
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        type="Emphasized"
+                                        tooltip="{i18n>saveStatusButton}"
+                                        press=".onSaveRequestTaskStatus" />
+                                </HBox>
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                                <Label text="{i18n>processorLabel}" />
+                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                    <Input
+                                        width="100%"
+                                        value="{processorEdit>/taskProcessorName}"
+                                        placeholder="{i18n>selectProcessorPlaceholder}"
+                                        showValueHelp="true"
+                                        valueHelpOnly="true"
+                                        valueHelpRequest=".onRequestTaskProcessorValueHelpRequest" />
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        tooltip="{i18n>saveProcessorButton}"
+                                        press=".onSaveRequestTaskProcessor" />
+                                </HBox>
+                            </VBox>
                         </HBox>
                     </VBox>
-                    <ObjectStatus
-                        title="{i18n>roleLabel}"
-                        text="{role}" />
-                    <ObjectAttribute
-                        title="{i18n>assignedToLabel}"
-                        text="{assignedTo}" />
-                    <ObjectAttribute
-                        title="{i18n>stepLabel}"
-                        text="{stepNo}" />
                 </uxap:headerContent>
                 <uxap:sections>
                     <uxap:ObjectPageSection title="{i18n>taskDetailsTitle}">
@@ -448,7 +721,7 @@
                                     <VBox class="flowmateDetailBlock">
                                         <ObjectIdentifier
                                             title="{request/title}"
-                                            text="{request_ID}" />
+                                            text="{request/referenceNumber}" />
                                         <Label
                                             class="sapUiSmallMarginTop"
                                             text="{i18n>decisionLabel}" />
@@ -468,6 +741,79 @@
                                             id="requestTaskRemarksTextArea"
                                             rows="6"
                                             width="100%" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
+            <uxap:ObjectPageLayout
+                id="requestPartyObjectPage"
+                class="flowmateObjectPage"
+                showTitleInHeaderContent="true"
+                enableLazyLoading="false">
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:expandedHeading>
+                            <Title text="{displayName}" />
+                        </uxap:expandedHeading>
+                        <uxap:snappedHeading>
+                            <Title text="{displayName}" />
+                        </uxap:snappedHeading>
+                        <uxap:actions>
+                            <Button
+                                icon="{= ${fclState>/endFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen' }"
+                                tooltip="{= ${fclState>/endFullScreen} ? ${i18n>restoreColumnsButton} : ${i18n>expandColumnButton} }"
+                                press=".onToggleRequestTaskFullScreen" />
+                            <Button
+                                icon="sap-icon://email"
+                                text="{i18n>notifyPartyButton}"
+                                type="Emphasized"
+                                press=".onNotifyInvolvedParty" />
+                            <Button
+                                icon="sap-icon://decline"
+                                text="{i18n>closeButton}"
+                                press=".onCloseInvolvedPartyDetail" />
+                        </uxap:actions>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+                <uxap:headerContent>
+                    <VBox class="flowmateHeaderLayout" width="100%">
+                        <HBox class="flowmateHeaderRow" width="100%" wrap="Wrap" alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderReference">
+                                <Label text="{i18n>partyIdLabel}" />
+                                <ObjectIdentifier title="{referenceNumber}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>requestIdLabel}" />
+                                <Text text="{request/referenceNumber}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>userNameLabel}" />
+                                <Text text="{displayName}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>departmentLabel}" />
+                                <Text text="{department}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>emailLabel}" />
+                                <Text text="{email}" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </uxap:headerContent>
+                <uxap:sections>
+                    <uxap:ObjectPageSection title="{i18n>involvedPartiesTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox class="flowmateDetailBlock">
+                                        <Label text="{i18n>purposeLabel}" />
+                                        <Text text="{purpose}" />
+                                        <Label class="sapUiSmallMarginTop" text="{i18n>requestTitleLabel}" />
+                                        <Text text="{request/title}" />
                                     </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
@@ -519,13 +865,13 @@
                             type="Number"
                             placeholder="{i18n>stepPlaceholder}"
                             required="true" />
-                        <Label text="{i18n>assignedToLabel}" />
+                        <Label text="{i18n>processorLabel}" />
                         <Input
-                            value="{newTask>/assignedToName}"
-                            placeholder="{i18n>chooseUserPlaceholder}"
+                            value="{newTask>/processorName}"
+                            placeholder="{i18n>selectProcessorPlaceholder}"
                             showValueHelp="true"
                             valueHelpOnly="true"
-                            valueHelpRequest=".onAssigneeValueHelpRequest" />
+                            valueHelpRequest=".onNewTaskProcessorValueHelpRequest" />
                         <Label text="{i18n>roleLabel}" />
                         <Input
                             value="{newTask>/role}"
@@ -546,14 +892,87 @@
                     press=".onAddTaskCancel" />
             </endButton>
         </Dialog>
+        <Dialog
+            id="addPartyDialog"
+            contentWidth="42rem"
+            draggable="true"
+            resizable="true"
+            title="{i18n>addInvolvedPartyButton}">
+            <content>
+                <VBox class="flowmateDialogContent">
+                    <Text class="sapUiSmallMarginBottom" text="{i18n>addInvolvedPartyDialogDescription}" />
+                    <form:SimpleForm
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="3"
+                        labelSpanL="3"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        adjustLabelSpan="false"
+                        columnsXL="1"
+                        columnsL="1"
+                        columnsM="1">
+                        <Label text="{i18n>userNameLabel}" required="true" />
+                        <Input
+                            value="{newParty>/displayName}"
+                            placeholder="{i18n>chooseUserPlaceholder}"
+                            showValueHelp="true"
+                            valueHelpOnly="true"
+                            required="true"
+                            valueHelpRequest=".onPartyValueHelpRequest" />
+                        <Label text="{i18n>departmentLabel}" />
+                        <Text text="{newParty>/department}" />
+                        <Label text="{i18n>emailLabel}" />
+                        <Text text="{newParty>/email}" />
+                        <Label text="{i18n>purposeLabel}" />
+                        <TextArea value="{newParty>/purpose}" maxLength="255" rows="3" />
+                    </form:SimpleForm>
+                </VBox>
+            </content>
+            <beginButton>
+                <Button text="{i18n>createButton}" type="Emphasized" press=".onAddPartyConfirm" />
+            </beginButton>
+            <endButton>
+                <Button text="{i18n>cancelButton}" press=".onAddPartyCancel" />
+            </endButton>
+        </Dialog>
         <TableSelectDialog
-            id="assigneeValueHelpDialog"
-            title="{i18n>selectAssigneeTitle}"
+            id="involvedPartyValueHelpDialog"
+            title="{i18n>addInvolvedPartyButton}"
             noDataText="{i18n>noUsersFoundText}"
             rememberSelections="false"
-            search=".onAssigneeValueHelpSearch"
-            confirm=".onAssigneeValueHelpConfirm"
-            cancel=".onAssigneeValueHelpClose"
+            search=".onPartyValueHelpSearch"
+            confirm=".onPartyValueHelpConfirm"
+            cancel=".onPartyValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>departmentLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{department}" />
+                    <Text text="{email}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+        <TableSelectDialog
+            id="myRequestsProcessorValueHelpDialog"
+            title="{i18n>selectProcessorTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            rememberSelections="false"
+            search=".onProcessorValueHelpSearch"
+            confirm=".onProcessorValueHelpConfirm"
+            cancel=".onProcessorValueHelpClose"
             items="{
                 path: '/Users',
                 filters: [{ path: 'isActive', operator: 'EQ', value1: true }],

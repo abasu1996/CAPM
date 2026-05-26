@@ -2,7 +2,9 @@
     controllerName="flowmate.controller.AdminProcessConfig"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:f="sap.f">
+    xmlns:f="sap.f"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="adminProcessConfigPage"
         class="flowmatePage"
@@ -14,85 +16,223 @@
                     <Title text="{i18n>adminConfigTitle}" />
                 </f:heading>
                 <f:actions>
-                    <Button
-                        icon="sap-icon://home"
-                        text="{i18n>dashboardNavButton}"
-                        press=".onNavToDashboard" />
-                    <Button
-                        icon="sap-icon://request"
-                        text="{i18n>requestsNavButton}"
-                        press=".onNavToRequests" />
-                    <Button
-                        icon="sap-icon://workflow-tasks"
-                        text="{i18n>tasksNavButton}"
-                        press=".onNavToTasks" />
-                    <Button
-                        icon="sap-icon://add-document"
-                        text="{i18n>createRequestButton}"
-                        press=".onNavToCreateRequest" />
-                    <Button
-                        icon="sap-icon://employee"
-                        text="{i18n>delegationsNavButton}"
-                        press=".onNavToDelegations" />
-                    <Button
-                        icon="sap-icon://group"
-                        text="{i18n>userAdminNavButton}"
-                        press=".onNavToUserAdministration" />
+                    <Button icon="sap-icon://home" text="{i18n>dashboardNavButton}" press=".onNavToDashboard" />
+                    <Button icon="sap-icon://request" text="{i18n>requestsNavButton}" press=".onNavToRequests" />
+                    <Button icon="sap-icon://workflow-tasks" text="{i18n>tasksNavButton}" press=".onNavToTasks" />
+                    <Button icon="sap-icon://add-document" text="{i18n>createRequestButton}" press=".onNavToCreateRequest" />
+                    <Button icon="sap-icon://employee" text="{i18n>delegationsNavButton}" press=".onNavToDelegations" />
+                    <Button icon="sap-icon://group" text="{i18n>userAdminNavButton}" press=".onNavToUserAdministration" />
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <VBox class="flowmateContent flowmateSurface">
-                <OverflowToolbar class="flowmateToolbar">
-                    <Title text="{i18n>processConfigTableHeader}" />
-                    <ToolbarSpacer />
-                    <SearchField
-                        width="18rem"
-                        search=".onSearch"
-                        liveChange=".onSearch" />
-                </OverflowToolbar>
-                <Table
-                    id="configTable"
-                    class="flowmateTable"
-                    noDataText="{i18n>noProcessStepsText}"
-                    busyIndicatorDelay="0"
-                    growing="true"
-                    growingScrollToLoad="true"
-                    items="{
-                        path: '/ProcessStepConfig',
-                        events: {
-                            dataRequested: '.onDataRequested',
-                            dataReceived: '.onDataReceived'
-                        }
-                    }">
-                    <columns>
-                        <Column><Text text="{i18n>processTypeLabel}" /></Column>
-                        <Column><Text text="{i18n>stepLabel}" /></Column>
-                        <Column><Text text="{i18n>stepNameLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>mandatoryLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>slaDaysLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextApproveLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextRejectLabel}" /></Column>
-                    </columns>
+            <VBox class="flowmateContent">
+                <IconTabBar class="flowmateSurface" expandable="false">
                     <items>
-                        <ColumnListItem>
-                            <cells>
-                                <Text text="{processType_code}" />
-                                <Text text="{stepNo}" />
-                                <ObjectIdentifier title="{stepName}" />
-                                <Text text="{role}" />
-                                <ObjectStatus
-                                    text="{= ${isMandatory} ? 'Yes' : 'No' }"
-                                    state="{= ${isMandatory} ? 'Success' : 'None' }" />
-                                <Text text="{slaDays}" />
-                                <Text text="{nextOnApprove}" />
-                                <Text text="{nextOnReject}" />
-                            </cells>
-                        </ColumnListItem>
+                        <IconTabFilter icon="sap-icon://process" text="{i18n>processConfigTableHeader}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>processConfigTableHeader}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchProcessSteps" liveChange=".onSearchProcessSteps" />
+                                <Button icon="sap-icon://add" text="{i18n>addProcessStepButton}" type="Emphasized" press=".onAddProcessStep" />
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedProcessSteps" />
+                            </OverflowToolbar>
+                            <Table
+                                id="configTable"
+                                class="flowmateTable"
+                                noDataText="{i18n>noProcessStepsText}"
+                                busyIndicatorDelay="0"
+                                mode="MultiSelect"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                items="{path: '/ProcessStepConfig', events: {dataRequested: '.onDataRequested', dataReceived: '.onDataReceived'}}">
+                                <columns>
+                                    <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
+                                    <Column><Text text="{i18n>processTypeLabel}" /></Column>
+                                    <Column><Text text="{i18n>stepLabel}" /></Column>
+                                    <Column><Text text="{i18n>stepNameLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>mandatoryLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>slaDaysLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextApproveLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextRejectLabel}" /></Column>
+                                    <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{referenceNumber}" />
+                                            <Text text="{processType_code}" />
+                                            <Text text="{stepNo}" />
+                                            <ObjectIdentifier title="{stepName}" />
+                                            <Text text="{role}" />
+                                            <ObjectStatus text="{= ${isMandatory} ? 'Yes' : 'No' }" state="{= ${isMandatory} ? 'Success' : 'None' }" />
+                                            <Text text="{slaDays}" />
+                                            <Text text="{nextOnApprove}" />
+                                            <Text text="{nextOnReject}" />
+                                            <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editProcessStepButton}" press=".onEditProcessStep" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://list" text="{i18n>processTypesConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>processTypesConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                    <customData><core:CustomData key="entitySet" value="ProcessTypes" /></customData>
+                                </SearchField>
+                                <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                    <customData><core:CustomData key="entitySet" value="ProcessTypes" /></customData>
+                                </Button>
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                    <customData><core:CustomData key="entitySet" value="ProcessTypes" /></customData>
+                                </Button>
+                            </OverflowToolbar>
+                            <Table id="processTypesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/ProcessTypes}">
+                                <columns>
+                                    <Column><Text text="{i18n>configCodeLabel}" /></Column>
+                                    <Column><Text text="{i18n>configNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column>
+                                    <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem><cells>
+                                        <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                        <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                            <customData><core:CustomData key="entitySet" value="ProcessTypes" /></customData>
+                                        </Button>
+                                    </cells></ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://status-positive" text="{i18n>processStatusesConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>processStatusesConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                    <customData><core:CustomData key="entitySet" value="ProcessStatus" /></customData>
+                                </SearchField>
+                                <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                    <customData><core:CustomData key="entitySet" value="ProcessStatus" /></customData>
+                                </Button>
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                    <customData><core:CustomData key="entitySet" value="ProcessStatus" /></customData>
+                                </Button>
+                            </OverflowToolbar>
+                            <Table id="processStatusTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/ProcessStatus}">
+                                <columns>
+                                    <Column><Text text="{i18n>configCodeLabel}" /></Column><Column><Text text="{i18n>configNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items><ColumnListItem><cells>
+                                    <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                    <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                        <customData><core:CustomData key="entitySet" value="ProcessStatus" /></customData>
+                                    </Button>
+                                </cells></ColumnListItem></items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://workflow-tasks" text="{i18n>taskStatusesConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>taskStatusesConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                    <customData><core:CustomData key="entitySet" value="TaskStatus" /></customData>
+                                </SearchField>
+                                <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                    <customData><core:CustomData key="entitySet" value="TaskStatus" /></customData>
+                                </Button>
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                    <customData><core:CustomData key="entitySet" value="TaskStatus" /></customData>
+                                </Button>
+                            </OverflowToolbar>
+                            <Table id="taskStatusTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/TaskStatus}">
+                                <columns>
+                                    <Column><Text text="{i18n>configCodeLabel}" /></Column><Column><Text text="{i18n>configNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items><ColumnListItem><cells>
+                                    <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                    <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                        <customData><core:CustomData key="entitySet" value="TaskStatus" /></customData>
+                                    </Button>
+                                </cells></ColumnListItem></items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://drop-down-list" text="{i18n>requestDropdownConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>requestDropdownConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                    <customData><core:CustomData key="entitySet" value="RequestDropDown" /></customData>
+                                </SearchField>
+                                <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                    <customData><core:CustomData key="entitySet" value="RequestDropDown" /></customData>
+                                </Button>
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                    <customData><core:CustomData key="entitySet" value="RequestDropDown" /></customData>
+                                </Button>
+                            </OverflowToolbar>
+                            <Table id="requestDropDownTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/RequestDropDown}">
+                                <columns>
+                                    <Column><Text text="{i18n>configCodeLabel}" /></Column><Column><Text text="{i18n>configNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items><ColumnListItem><cells>
+                                    <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                    <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                        <customData><core:CustomData key="entitySet" value="RequestDropDown" /></customData>
+                                    </Button>
+                                </cells></ColumnListItem></items>
+                            </Table>
+                        </IconTabFilter>
                     </items>
-                </Table>
+                </IconTabBar>
             </VBox>
         </f:content>
     </f:DynamicPage>
+    <mvc:dependents>
+        <Dialog id="codeListDialog" title="{configEdit>/dialogTitle}" contentWidth="42rem" stretchOnPhone="true">
+            <content>
+                <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
+                    <Label text="{i18n>configCodeLabel}" required="true" />
+                    <Input value="{configEdit>/code}" enabled="{= !${configEdit>/isEdit} }" maxLength="30" required="true" />
+                    <Label text="{i18n>configNameLabel}" required="true" />
+                    <Input value="{configEdit>/name}" maxLength="255" required="true" />
+                    <Label text="{i18n>configDescriptionLabel}" required="true" />
+                    <TextArea value="{configEdit>/descr}" rows="4" required="true" />
+                </form:SimpleForm>
+            </content>
+            <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveCodeList" /></beginButton>
+            <endButton><Button text="{i18n>cancelButton}" press=".onCloseCodeListDialog" /></endButton>
+        </Dialog>
+        <Dialog id="processStepDialog" title="{stepEdit>/dialogTitle}" contentWidth="50rem" stretchOnPhone="true">
+            <content>
+                <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
+                    <Label text="{i18n>processTypeLabel}" required="true" />
+                    <Select selectedKey="{stepEdit>/processType_code}" items="{/ProcessTypes}" required="true">
+                        <core:Item key="{code}" text="{name}" />
+                    </Select>
+                    <Label text="{i18n>stepLabel}" required="true" />
+                    <Input value="{stepEdit>/stepNo}" type="Number" required="true" />
+                    <Label text="{i18n>stepNameLabel}" required="true" />
+                    <Input value="{stepEdit>/stepName}" maxLength="100" required="true" />
+                    <Label text="{i18n>roleLabel}" />
+                    <Input value="{stepEdit>/role}" maxLength="100" />
+                    <Label text="{i18n>mandatoryLabel}" />
+                    <Switch state="{stepEdit>/isMandatory}" />
+                    <Label text="{i18n>slaDaysLabel}" />
+                    <Input value="{stepEdit>/slaDays}" type="Number" />
+                    <Label text="{i18n>nextApproveLabel}" />
+                    <Input value="{stepEdit>/nextOnApprove}" type="Number" />
+                    <Label text="{i18n>nextRejectLabel}" />
+                    <Input value="{stepEdit>/nextOnReject}" type="Number" />
+                </form:SimpleForm>
+            </content>
+            <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveProcessStep" /></beginButton>
+            <endButton><Button text="{i18n>cancelButton}" press=".onCloseProcessStepDialog" /></endButton>
+        </Dialog>
+    </mvc:dependents>
 </mvc:View>

@@ -53,12 +53,18 @@
                         text="{i18n>addDelegationButton}"
                         type="Emphasized"
                         press=".onOpenCreateDialog" />
+                    <Button
+                        icon="sap-icon://delete"
+                        text="{i18n>deleteSelectedButton}"
+                        type="Reject"
+                        press=".onDeleteSelectedDelegations" />
                 </OverflowToolbar>
                 <Table
                     id="delegationsTable"
                     class="flowmateTable"
                     noDataText="{i18n>noDelegationsText}"
                     busyIndicatorDelay="0"
+                    mode="MultiSelect"
                     growing="true"
                     growingScrollToLoad="true"
                     items="{
@@ -67,12 +73,16 @@
                             path: 'startDate',
                             descending: true
                         },
+                        parameters: {
+                            expand: 'delegatorUser,delegateUser'
+                        },
                         events: {
                             dataRequested: '.onDataRequested',
                             dataReceived: '.onDataReceived'
                         }
                     }">
                     <columns>
+                        <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                         <Column><Text text="{i18n>delegatorLabel}" /></Column>
                         <Column><Text text="{i18n>delegateLabel}" /></Column>
                         <Column><Text text="{i18n>startDateLabel}" /></Column>
@@ -85,16 +95,21 @@
                     <items>
                         <ColumnListItem>
                             <cells>
-                                <ObjectIdentifier title="{delegator}" text="{createdBy}" />
-                                <ObjectIdentifier title="{delegate}" />
+                                <Text text="{referenceNumber}" />
+                                <ObjectIdentifier title="{= ${delegatorUser/displayName} || ${delegator} }" text="{createdBy}" />
+                                <ObjectIdentifier title="{= ${delegateUser/displayName} || ${delegate} }" />
                                 <Text text="{startDate}" />
                                 <Text text="{endDate}" />
                                 <ObjectStatus
+                                    class="flowmateSemanticStatus"
                                     text="{= ${forwardNotifications} ? ${i18n>enabledLabel} : ${i18n>disabledLabel} }"
-                                    state="{= ${forwardNotifications} ? 'Success' : 'None' }" />
+                                    state="{= ${forwardNotifications} ? 'Success' : 'None' }"
+                                    inverted="true" />
                                 <ObjectStatus
+                                    class="flowmateSemanticStatus"
                                     text="{parts: ['startDate', 'endDate', 'enabled', 'forwardNotifications'], formatter: '.formatDelegationStatus'}"
-                                    state="{parts: ['startDate', 'endDate', 'enabled', 'forwardNotifications'], formatter: '.formatDelegationState'}" />
+                                    state="{parts: ['startDate', 'endDate', 'enabled', 'forwardNotifications'], formatter: '.formatDelegationState'}"
+                                    inverted="true" />
                                 <ObjectStatus
                                     text="{= ${createdOnBehalf} ? ${i18n>yesText} : ${i18n>noText} }" />
                                 <Button

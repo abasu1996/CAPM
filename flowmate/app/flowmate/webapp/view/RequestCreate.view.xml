@@ -83,6 +83,13 @@
                     showValueHelp="true"
                     valueHelpOnly="true"
                     valueHelpRequest=".onRequesterValueHelpRequest" />
+                <Label text="{i18n>processorLabel}" />
+                <Input
+                    value="{create>/processorName}"
+                    placeholder="{i18n>selectProcessorPlaceholder}"
+                    showValueHelp="true"
+                    valueHelpOnly="true"
+                    valueHelpRequest=".onProcessorValueHelpRequest" />
                 <Label text="{i18n>departmentLabel}" />
                 <Input
                     value="{create>/department}"
@@ -136,8 +143,10 @@
                                         text="{create>sizeText}" />
                                     <HBox alignItems="Center">
                                         <ObjectStatus
+                                            class="flowmateSemanticStatus"
                                             text="{create>statusText}"
-                                            state="{create>statusState}" />
+                                            state="{create>statusState}"
+                                            inverted="true" />
                                         <Button
                                             icon="sap-icon://decline"
                                             enabled="{= !${create>/uploading} }"
@@ -204,6 +213,35 @@
             search=".onRequesterValueHelpSearch"
             confirm=".onRequesterValueHelpConfirm"
             cancel=".onRequesterValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                    <Text text="{department}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+        <TableSelectDialog
+            id="requestCreateProcessorValueHelpDialog"
+            title="{i18n>selectProcessorTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            rememberSelections="false"
+            search=".onProcessorValueHelpSearch"
+            confirm=".onProcessorValueHelpConfirm"
+            cancel=".onProcessorValueHelpClose"
             items="{
                 path: '/Users',
                 filters: [{ path: 'isActive', operator: 'EQ', value1: true }],

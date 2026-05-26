@@ -41,8 +41,8 @@
                         press=".onNavToDelegations" />
                     <Button
                         icon="sap-icon://email"
-                        text="{i18n>notifyAssigneeButton}"
-                        press=".onNotifyAssignee" />
+                        text="{i18n>notifyProcessorButton}"
+                        press=".onNotifyProcessor" />
                     <Button
                         text="{i18n>approveButton}"
                         type="Accept"
@@ -69,8 +69,8 @@
                     intro="{request/title}">
                     <attributes>
                         <ObjectAttribute
-                            title="{i18n>assignedToLabel}"
-                            text="{assignedTo}" />
+                            title="{i18n>processorLabel}"
+                            text="{processor}" />
                         <ObjectAttribute
                             title="{i18n>stepLabel}"
                             text="{stepNo}" />
@@ -79,6 +79,12 @@
                             text="{role}" />
                     </attributes>
                 </ObjectHeader>
+                <ObjectStatus
+                    class="sapUiSmallMarginTop flowmateSemanticStatus"
+                    title="{i18n>statusLabel}"
+                    text="{path: 'status_code', formatter: '.formatStatusText'}"
+                    state="{path: 'status_code', formatter: '.formatStatusState'}"
+                    inverted="true" />
                 <HBox
                     class="sapUiSmallMarginTop flowmateDetailBlock flowmateStatusRow"
                     alignItems="End">
@@ -98,6 +104,26 @@
                         type="Emphasized"
                         press=".onSaveTaskStatus" />
                 </HBox>
+                <HBox
+                    class="sapUiSmallMarginTop flowmateDetailBlock flowmateStatusRow"
+                    alignItems="End">
+                    <VBox class="flowmateStatusEditor">
+                        <Label text="{i18n>processorLabel}" />
+                        <Input
+                            width="12rem"
+                            value="{processorEdit>/processorName}"
+                            placeholder="{i18n>selectProcessorPlaceholder}"
+                            showValueHelp="true"
+                            valueHelpOnly="true"
+                            valueHelpRequest=".onProcessorValueHelpRequest" />
+                    </VBox>
+                    <Button
+                        class="sapUiTinyMarginBegin"
+                        icon="sap-icon://save"
+                        text="{i18n>saveProcessorButton}"
+                        type="Emphasized"
+                        press=".onSaveTaskProcessor" />
+                </HBox>
                 <VBox class="sapUiSmallMarginTop flowmateDetailBlock flowmateRemarks">
                     <Label text="{i18n>remarksLabel}" />
                     <TextArea
@@ -109,4 +135,35 @@
             </VBox>
         </f:content>
     </f:DynamicPage>
+    <mvc:dependents>
+        <TableSelectDialog
+            id="approvalDetailProcessorValueHelpDialog"
+            title="{i18n>selectProcessorTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            rememberSelections="false"
+            search=".onProcessorValueHelpSearch"
+            confirm=".onProcessorValueHelpConfirm"
+            cancel=".onProcessorValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                    <Text text="{department}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+    </mvc:dependents>
 </mvc:View>
