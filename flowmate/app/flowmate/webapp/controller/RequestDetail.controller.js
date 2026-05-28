@@ -127,10 +127,39 @@ sap.ui.define([
         },
 
         onClose() {
-            this.navTo("RouteMyRequests");
+            this.navTo("RouteMyRequests", {}, true);
+        },
+
+        onRefresh() {
+            this._refreshRequest();
+        },
+
+        onTaskReferencePress(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext();
+            const sTaskId = oContext && oContext.getProperty("ID");
+
+            if (!sTaskId) {
+                MessageToast.show(this.getText("selectTaskMessage"));
+                return;
+            }
+
+            this.navTo("RouteMyTasks", {
+                "?query": {
+                    taskId: sTaskId
+                }
+            });
+        },
+
+        onAttachmentReferencePress(oEvent) {
+            oEvent.cancelBubble?.();
+            this.onViewAttachment(oEvent);
         },
 
         async onViewAttachment(oEvent) {
+            oEvent.cancelBubble?.();
+
             const oContext = oEvent.getSource().getBindingContext();
 
             this.showBusy();
@@ -149,6 +178,8 @@ sap.ui.define([
         },
 
         async onDownloadAttachment(oEvent) {
+            oEvent.cancelBubble?.();
+
             const oContext = oEvent.getSource().getBindingContext();
 
             this.showBusy();

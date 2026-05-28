@@ -7,13 +7,22 @@ service FlowmateService {
     entity TaskStatus as projection on fldb.TaskStatus;
     entity Users as projection on fldb.Users;
     entity Delegations as projection on fldb.Delegations;
-    entity ProcessRequests as projection on fldb.ProcessRequests;
-    entity ProcessTasks as projection on fldb.ProcessTasks;
+    entity ProcessRequests as projection on fldb.ProcessRequests {
+        *,
+        tasks       : redirected to ProcessTasks,
+        attachments : redirected to ProcessAttachments
+    };
+    entity ProcessTasks as projection on fldb.ProcessTasks {
+        *,
+        request : redirected to ProcessRequests
+    };
     entity ProcessInvolvedParties as projection on fldb.ProcessInvolvedParties;
     entity ProcessComments as projection on fldb.ProcessComments;
-    entity ProcessAttachments as projection on fldb.ProcessAttachments;
+    entity ProcessAttachments as projection on fldb.ProcessAttachments {
+        *,
+        request : redirected to ProcessRequests
+    };
     entity ProcessHistory as projection on fldb.ProcessHistory;
-    @requires: 'Admin'
     entity ProcessStepConfig as projection on fldb.ProcessStepConfig;
 
     action submitRequest(requestId: UUID) returns Boolean;

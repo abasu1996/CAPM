@@ -136,7 +136,11 @@ sap.ui.define([
         },
 
         onClose() {
-            this.navTo("RouteMyTasks");
+            this.navBack("RouteMyTasks");
+        },
+
+        onRefresh() {
+            this.getView().getElementBinding()?.refresh();
         },
 
         _filterUsers(oDialog, sQuery) {

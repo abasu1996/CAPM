@@ -40,6 +40,10 @@
                         text="{i18n>delegationsNavButton}"
                         press=".onNavToDelegations" />
                     <Button
+                        icon="sap-icon://refresh"
+                        tooltip="{i18n>refreshButton}"
+                        press=".onRefresh" />
+                    <Button
                         icon="sap-icon://decline"
                         text="{i18n>closeButton}"
                         press=".onClose" />
@@ -156,7 +160,9 @@
                                 <items>
                                     <ColumnListItem>
                                         <cells>
-                                            <Text text="{referenceNumber}" />
+                                            <Link
+                                                text="{referenceNumber}"
+                                                press=".onTaskReferencePress" />
                                             <Text text="{stepNo}" />
                                             <Text text="{taskName}" />
                                             <Text text="{processor}" />
@@ -223,7 +229,9 @@
                                 <items>
                                     <ColumnListItem>
                                         <cells>
-                                            <Text text="{referenceNumber}" />
+                                            <Link
+                                                text="{referenceNumber}"
+                                                press=".onAttachmentReferencePress" />
                                             <Text text="{filename}" />
                                             <Text text="{mimeType}" />
                                             <ObjectStatus

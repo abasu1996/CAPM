@@ -55,6 +55,34 @@ sap.ui.define([
             this._showTaskDetail(oContext);
         },
 
+        onTaskReferencePress(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext();
+
+            if (oContext) {
+                this._showTaskDetail(oContext);
+            }
+        },
+
+        onRelatedRequestPress(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext();
+            const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
+
+            if (!sRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this.navTo("RouteMyRequests", {
+                "?query": {
+                    requestId: sRequestId
+                }
+            });
+        },
+
         onSearch(oEvent) {
             const sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue") || "";
             const oBinding = this.byId("tasksTable").getBinding("items");
@@ -80,7 +108,13 @@ sap.ui.define([
         },
 
         onCloseTaskDetail() {
+            this._sSelectedTaskId = null;
             this._setTasksLayout(fLibrary.LayoutType.OneColumn);
+        },
+
+        onRefreshTaskDetail() {
+            this.byId("taskObjectPage").getElementBinding()?.refresh();
+            this.byId("tasksTable").getBinding("items")?.refresh();
         },
 
         async onSaveTaskStatus() {

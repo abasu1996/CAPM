@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap/m/MessageToast",
-    "sap/ui/core/mvc/Controller"
-], (MessageToast, Controller) => {
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/core/routing/History"
+], (MessageToast, Controller, History) => {
     "use strict";
 
     const SERVICE_V4_URL = "/odata/v4/flowmate/";
@@ -98,8 +99,19 @@ sap.ui.define([
         setTwoColumnLayout() {
         },
 
-        navTo(sRoute, oParameters) {
-            this.getRouter().navTo(sRoute, oParameters || {});
+        navTo(sRoute, oParameters, bReplace) {
+            this.getRouter().navTo(sRoute, oParameters || {}, Boolean(bReplace));
+        },
+
+        navBack(sFallbackRoute, oFallbackParameters) {
+            const sPreviousHash = History.getInstance().getPreviousHash();
+
+            if (sPreviousHash !== undefined) {
+                window.history.go(-1);
+                return;
+            }
+
+            this.navTo(sFallbackRoute, oFallbackParameters || {}, true);
         },
 
         onNavToDashboard() {

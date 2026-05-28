@@ -152,6 +152,7 @@ entity ProcessStepConfig : cuid, managed {
     processType   : Association to ProcessTypes;
     stepNo        : Integer;
     stepName      : String(100);
+    activityDescription : String(500);
     role          : String(100);
     isMandatory   : Boolean default true;
     slaDays       : Integer;

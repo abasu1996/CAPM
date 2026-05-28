@@ -151,7 +151,9 @@
                                         type="Active"
                                         >
                                         <cells>
-                                            <Text text="{referenceNumber}" />
+                                            <Link
+                                                text="{referenceNumber}"
+                                                press=".onRequestReferencePress" />
                                             <ObjectIdentifier
                                                 title="{title}"
                                                 text="{requester}" />
@@ -174,6 +176,7 @@
                                             <Button
                                                 icon="sap-icon://delete"
                                                 type="Transparent"
+                                                enabled="{= ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
                                                 tooltip="{i18n>deleteRequestButton}"
                                                 press=".onDeleteRequest" />
                                         </cells>
@@ -200,6 +203,10 @@
                             <Title text="{title}" />
                         </uxap:snappedHeading>
                         <uxap:actions>
+                            <Button
+                                icon="sap-icon://refresh"
+                                tooltip="{i18n>refreshButton}"
+                                press=".onRefreshRequestDetail" />
                             <Button
                                 icon="{= ${fclState>/midFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen' }"
                                 tooltip="{= ${fclState>/midFullScreen} ? ${i18n>restoreColumnsButton} : ${i18n>expandColumnButton} }"
@@ -265,6 +272,7 @@
                                 <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
                                     <Select
                                         width="11rem"
+                                        enabled="{requestEdit>/editable}"
                                         selectedKey="{statusEdit>/requestStatus}"
                                         items="{/ProcessStatus}">
                                         <core:Item key="{code}" text="{name}" />
@@ -273,6 +281,7 @@
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
                                         type="Emphasized"
+                                        enabled="{requestEdit>/editable}"
                                         tooltip="{i18n>saveStatusButton}"
                                         press=".onSaveRequestStatus" />
                                 </HBox>
@@ -286,15 +295,105 @@
                                         placeholder="{i18n>selectProcessorPlaceholder}"
                                         showValueHelp="true"
                                         valueHelpOnly="true"
+                                        enabled="{requestEdit>/editable}"
                                         valueHelpRequest=".onRequestProcessorValueHelpRequest" />
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
+                                        enabled="{requestEdit>/editable}"
                                         tooltip="{i18n>saveProcessorButton}"
                                         press=".onSaveRequestProcessor" />
                                 </HBox>
                             </VBox>
                         </HBox>
+                        <VBox
+                            class="flowmateProcessGuide"
+                            busy="{processFlow>/loading}"
+                            busyIndicatorDelay="0"
+                            visible="{processFlow>/visible}"
+                            width="100%">
+                            <HBox
+                                alignItems="Center"
+                                justifyContent="SpaceBetween"
+                                width="100%">
+                                <Title text="{i18n>guidedProcessTitle}" />
+                                <ObjectStatus
+                                    class="flowmateSemanticStatus"
+                                    icon="sap-icon://process"
+                                    text="{i18n>guidedProcessSubtitle}"
+                                    state="Information"
+                                    inverted="true" />
+                            </HBox>
+                            <HBox
+                                class="flowmateProcessMilestoneTrack"
+                                items="{processFlow>/steps}"
+                                width="100%"
+                                wrap="Wrap">
+                                <VBox
+                                    class="flowmateProcessMilestone"
+                                    alignItems="Center">
+                                    <Button
+                                        class="flowmateProcessMilestoneButton"
+                                        icon="{processFlow>icon}"
+                                        type="{processFlow>buttonType}"
+                                        tooltip="{processFlow>stepName}"
+                                        press=".onGuideMilestonePress" />
+                                    <Text
+                                        class="flowmateProcessMilestoneLabel"
+                                        text="{processFlow>sequenceText}" />
+                                    <Text
+                                        class="flowmateProcessMilestoneTitle"
+                                        text="{processFlow>stepName}" />
+                                </VBox>
+                            </HBox>
+                            <VBox
+                                class="flowmateProcessStepDetail"
+                                visible="{= ${processFlow>/selectedStep/stepName} ? true : false }">
+                                <HBox
+                                    alignItems="Center"
+                                    justifyContent="SpaceBetween"
+                                    width="100%">
+                                    <VBox>
+                                        <ObjectStatus
+                                            class="flowmateSemanticStatus"
+                                            text="{processFlow>/selectedStep/sequenceText}"
+                                            state="{processFlow>/selectedStep/state}"
+                                            inverted="true" />
+                                        <Title
+                                            class="sapUiTinyMarginTop"
+                                            text="{processFlow>/selectedStep/stepName}" />
+                                    </VBox>
+                                    <ObjectStatus
+                                        class="flowmateSemanticStatus"
+                                        text="{processFlow>/selectedStep/statusText}"
+                                        state="{processFlow>/selectedStep/state}"
+                                        inverted="true" />
+                                </HBox>
+                                <Text
+                                    class="flowmateProcessStepDescription"
+                                    text="{processFlow>/selectedStep/activityDescription}"
+                                    wrapping="true" />
+                                <HBox
+                                    alignItems="Center"
+                                    justifyContent="SpaceBetween"
+                                    width="100%">
+                                    <HBox>
+                                        <ObjectStatus
+                                            text="{processFlow>/selectedStep/mandatoryText}"
+                                            state="{= ${processFlow>/selectedStep/isMandatory} ? 'Warning' : 'None' }" />
+                                        <ObjectStatus
+                                            class="sapUiTinyMarginBegin"
+                                            text="{processFlow>/selectedStep/role}" />
+                                    </HBox>
+                                    <Button
+                                        icon="sap-icon://complete"
+                                        text="{i18n>completeStepButton}"
+                                        type="Emphasized"
+                                        visible="{processFlow>/selectedStep/completeEnabled}"
+                                        press=".onCompleteGuidedStep" />
+                                </HBox>
+                            </VBox>
+                        </VBox>
                     </VBox>
                 </uxap:headerContent>
                 <uxap:sections>
@@ -321,18 +420,20 @@
                                             <Button
                                                 icon="sap-icon://add"
                                                 text="{i18n>addTaskButton}"
+                                                enabled="{requestEdit>/editable}"
                                                 press=".onOpenAddTaskDialog" />
                                             <Button
                                                 icon="sap-icon://delete"
                                                 text="{i18n>deleteSelectedButton}"
                                                 type="Reject"
+                                                enabled="{requestEdit>/editable}"
                                                 press=".onDeleteSelectedRequestTasks" />
                                         </OverflowToolbar>
                                         <Table
                                             id="requestTasksTable"
                                             class="flowmateTable"
                                             noDataText="{i18n>noTasksText}"
-                                            mode="MultiSelect"
+                                            mode="{= ${requestEdit>/editable} ? 'MultiSelect' : 'None' }"
                                             items="{tasks}">
                                             <columns>
                                                 <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
@@ -347,7 +448,9 @@
                                                     type="Active"
                                                     press=".onRequestTaskPress">
                                                     <cells>
-                                                        <Text text="{referenceNumber}" />
+                                                        <Link
+                                                            text="{referenceNumber}"
+                                                            press=".onRequestTaskReferencePress" />
                                                         <Text text="{stepNo}" />
                                                         <Text text="{taskName}" />
                                                         <Text text="{processor}" />
@@ -365,6 +468,7 @@
                                                             <Button
                                                                 icon="sap-icon://delete"
                                                                 type="Transparent"
+                                                                enabled="{requestEdit>/editable}"
                                                                 tooltip="{i18n>deleteTaskButton}"
                                                                 press=".onDeleteRequestTask" />
                                                         </HBox>
@@ -389,18 +493,20 @@
                                                 icon="sap-icon://add-employee"
                                                 text="{i18n>addInvolvedPartyButton}"
                                                 type="Emphasized"
+                                                enabled="{requestEdit>/editable}"
                                                 press=".onOpenAddPartyDialog" />
                                             <Button
                                                 icon="sap-icon://delete"
                                                 text="{i18n>deleteSelectedButton}"
                                                 type="Reject"
+                                                enabled="{requestEdit>/editable}"
                                                 press=".onDeleteSelectedParties" />
                                         </OverflowToolbar>
                                         <Table
                                             id="requestPartiesTable"
                                             class="flowmateTable"
                                             noDataText="{i18n>noInvolvedPartiesText}"
-                                            mode="MultiSelect"
+                                            mode="{= ${requestEdit>/editable} ? 'MultiSelect' : 'None' }"
                                             items="{involvedParties}">
                                             <columns>
                                                 <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
@@ -413,7 +519,7 @@
                                             <items>
                                                 <ColumnListItem type="Active" press=".onRequestPartyPress">
                                                     <cells>
-                                                        <Text text="{referenceNumber}" />
+                                                        <ObjectIdentifier title="{referenceNumber}" />
                                                         <ObjectIdentifier title="{displayName}" />
                                                         <Text text="{department}" />
                                                         <Text text="{email}" />
@@ -426,6 +532,7 @@
                                                             <Button
                                                                 icon="sap-icon://delete"
                                                                 type="Transparent"
+                                                                enabled="{requestEdit>/editable}"
                                                                 tooltip="{i18n>deletePartyButton}"
                                                                 press=".onDeleteParty" />
                                                         </HBox>
@@ -455,12 +562,13 @@
                                                 icon="sap-icon://attachment"
                                                 maximumFileSize="50"
                                                 multiple="true"
-                                                enabled="{= !${uploads>/active} }"
+                                                enabled="{= !${uploads>/active} &amp;&amp; ${requestEdit>/editable} }"
                                                 sameFilenameAllowed="true" />
                                             <Button
                                                 icon="sap-icon://delete"
                                                 text="{i18n>deleteSelectedButton}"
                                                 type="Reject"
+                                                enabled="{requestEdit>/editable}"
                                                 press=".onDeleteSelectedAttachments" />
                                         </OverflowToolbar>
                                         <List
@@ -524,6 +632,7 @@
                                                             <Button
                                                                 icon="sap-icon://delete"
                                                                 type="Transparent"
+                                                                enabled="{requestEdit>/editable}"
                                                                 tooltip="{i18n>deleteAttachmentButton}"
                                                                 press=".onDeleteAttachment" />
                                                         </HBox>
@@ -614,6 +723,10 @@
                         </uxap:snappedHeading>
                         <uxap:actions>
                             <Button
+                                icon="sap-icon://refresh"
+                                tooltip="{i18n>refreshButton}"
+                                press=".onRefreshRequestTaskDetail" />
+                            <Button
                                 icon="{= ${fclState>/endFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen' }"
                                 tooltip="{= ${fclState>/endFullScreen} ? ${i18n>restoreColumnsButton} : ${i18n>expandColumnButton} }"
                                 press=".onToggleRequestTaskFullScreen" />
@@ -624,13 +737,16 @@
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
+                                enabled="{requestEdit>/editable}"
                                 press=".onApproveRequestTask" />
                             <Button
                                 text="{i18n>sendBackButton}"
+                                enabled="{requestEdit>/editable}"
                                 press=".onSendBackRequestTask" />
                             <Button
                                 text="{i18n>rejectButton}"
                                 type="Reject"
+                                enabled="{requestEdit>/editable}"
                                 press=".onRejectRequestTask" />
                             <Button
                                 icon="sap-icon://decline"
@@ -652,7 +768,9 @@
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>requestIdLabel}" />
-                                <Text text="{request/referenceNumber}" />
+                                <Link
+                                    text="{request/referenceNumber}"
+                                    press=".onRelatedRequestPress" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>roleLabel}" />
@@ -681,6 +799,7 @@
                                 <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
                                     <Select
                                         width="11rem"
+                                        enabled="{requestEdit>/editable}"
                                         selectedKey="{statusEdit>/taskStatus}"
                                         items="{/TaskStatus}">
                                         <core:Item key="{code}" text="{name}" />
@@ -689,6 +808,7 @@
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
                                         type="Emphasized"
+                                        enabled="{requestEdit>/editable}"
                                         tooltip="{i18n>saveStatusButton}"
                                         press=".onSaveRequestTaskStatus" />
                                 </HBox>
@@ -702,10 +822,12 @@
                                         placeholder="{i18n>selectProcessorPlaceholder}"
                                         showValueHelp="true"
                                         valueHelpOnly="true"
+                                        enabled="{requestEdit>/editable}"
                                         valueHelpRequest=".onRequestTaskProcessorValueHelpRequest" />
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
+                                        enabled="{requestEdit>/editable}"
                                         tooltip="{i18n>saveProcessorButton}"
                                         press=".onSaveRequestTaskProcessor" />
                                 </HBox>
@@ -719,9 +841,10 @@
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
                                     <VBox class="flowmateDetailBlock">
-                                        <ObjectIdentifier
-                                            title="{request/title}"
-                                            text="{request/referenceNumber}" />
+                                        <ObjectIdentifier title="{request/title}" />
+                                        <Link
+                                            text="{request/referenceNumber}"
+                                            press=".onRelatedRequestPress" />
                                         <Label
                                             class="sapUiSmallMarginTop"
                                             text="{i18n>decisionLabel}" />
@@ -763,6 +886,10 @@
                         </uxap:snappedHeading>
                         <uxap:actions>
                             <Button
+                                icon="sap-icon://refresh"
+                                tooltip="{i18n>refreshButton}"
+                                press=".onRefreshInvolvedPartyDetail" />
+                            <Button
                                 icon="{= ${fclState>/endFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen' }"
                                 tooltip="{= ${fclState>/endFullScreen} ? ${i18n>restoreColumnsButton} : ${i18n>expandColumnButton} }"
                                 press=".onToggleRequestTaskFullScreen" />
@@ -787,7 +914,9 @@
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>requestIdLabel}" />
-                                <Text text="{request/referenceNumber}" />
+                                <Link
+                                    text="{request/referenceNumber}"
+                                    press=".onRelatedRequestPress" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>userNameLabel}" />

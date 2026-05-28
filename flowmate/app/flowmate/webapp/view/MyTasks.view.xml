@@ -98,10 +98,15 @@
                                 <ColumnListItem
                                     type="Active">
                                     <cells>
-                                        <Text text="{referenceNumber}" />
-                                        <ObjectIdentifier
-                                            title="{taskName}"
-                                            text="{request/referenceNumber}" />
+                                        <Link
+                                            text="{referenceNumber}"
+                                            press=".onTaskReferencePress" />
+                                        <VBox>
+                                            <Text text="{taskName}" />
+                                            <Link
+                                                text="{request/referenceNumber}"
+                                                press=".onRelatedRequestPress" />
+                                        </VBox>
                                         <Text text="{stepNo}" />
                                         <Text text="{processor}" />
                                         <Text text="{role}" />
@@ -147,19 +152,26 @@
                         </uxap:snappedHeading>
                         <uxap:actions>
                             <Button
+                                icon="sap-icon://refresh"
+                                tooltip="{i18n>refreshButton}"
+                                press=".onRefreshTaskDetail" />
+                            <Button
                                 icon="sap-icon://email"
                                 text="{i18n>notifyProcessorButton}"
                                 press=".onNotifyProcessor" />
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
+                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                 press=".onApprove" />
                             <Button
                                 text="{i18n>sendBackButton}"
+                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                 press=".onSendBack" />
                             <Button
                                 text="{i18n>rejectButton}"
                                 type="Reject"
+                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                 press=".onReject" />
                             <Button
                                 icon="sap-icon://decline"
@@ -181,7 +193,9 @@
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>requestIdLabel}" />
-                                <Text text="{request/referenceNumber}" />
+                                <Link
+                                    text="{request/referenceNumber}"
+                                    press=".onRelatedRequestPress" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>roleLabel}" />
@@ -210,6 +224,7 @@
                                 <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
                                     <Select
                                         width="11rem"
+                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                         selectedKey="{statusEdit>/taskStatus}"
                                         items="{/TaskStatus}">
                                         <core:Item key="{code}" text="{name}" />
@@ -218,6 +233,7 @@
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
                                         type="Emphasized"
+                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                         tooltip="{i18n>saveStatusButton}"
                                         press=".onSaveTaskStatus" />
                                 </HBox>
@@ -231,10 +247,12 @@
                                         placeholder="{i18n>selectProcessorPlaceholder}"
                                         showValueHelp="true"
                                         valueHelpOnly="true"
+                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                         valueHelpRequest=".onProcessorValueHelpRequest" />
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
+                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                         tooltip="{i18n>saveProcessorButton}"
                                         press=".onSaveTaskProcessor" />
                                 </HBox>
@@ -248,9 +266,10 @@
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
                                     <VBox class="flowmateDetailBlock">
-                                        <ObjectIdentifier
-                                            title="{request/title}"
-                                            text="{request/referenceNumber}" />
+                                        <ObjectIdentifier title="{request/title}" />
+                                        <Link
+                                            text="{request/referenceNumber}"
+                                            press=".onRelatedRequestPress" />
                                         <Label
                                             class="sapUiSmallMarginTop"
                                             text="{i18n>decisionLabel}" />

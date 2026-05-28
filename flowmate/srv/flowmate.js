@@ -9,6 +9,11 @@ const PROCESS_STATUS = {
   COMPLETED: "COMPLETED"
 };
 
+const LOCKED_REQUEST_STATUSES = new Set([
+  PROCESS_STATUS.COMPLETED,
+  PROCESS_STATUS.REJECTED
+]);
+
 const TASK_STATUS = {
   OPEN: "OPEN",
   APPROVED: "APPROVED",
@@ -85,7 +90,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return req.reject(405, "Deactivate users instead of deleting them to preserve workflow history");
     });
 
-    this.before(["READ", "CREATE", "UPDATE", "DELETE"], ProcessStepConfig, (req) => {
+    this.before(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, (req) => {
       if (!this._isAdministrator(req)) {
         return req.reject(403, "Only an administrator can maintain process configuration");
       }
@@ -105,6 +110,29 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.before("CREATE", ProcessStepConfig, async (req) => {
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessStepConfig, "STP");
+    });
+
+    this.before(["CREATE", "UPDATE"], ProcessStepConfig, async (req) => {
+      const sStepId = req.data.ID || req.params?.[0]?.ID;
+      const oExisting = req.event === "UPDATE" && sStepId
+        ? await cds.tx(req).run(SELECT.one.from(ProcessStepConfig).where({ ID: sStepId }))
+        : {};
+      const oStep = { ...oExisting, ...req.data };
+
+      if (!oStep.processType_code || !oStep.stepNo || !oStep.stepName) {
+        return req.reject(400, "Process type, step number, and step name are required");
+      }
+
+      const oDuplicate = await cds.tx(req).run(
+        SELECT.one.from(ProcessStepConfig).where({
+          processType_code: oStep.processType_code,
+          stepNo: oStep.stepNo
+        })
+      );
+
+      if (oDuplicate && oDuplicate.ID !== sStepId) {
+        return req.reject(409, "A process step already exists for this process type and step number");
+      }
     });
 
     this.before("CREATE", ProcessRequests, async (req) => {
@@ -145,6 +173,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       req.data.currentStep ??= 0;
     });
 
+    this.after("CREATE", ProcessRequests, async (request, req) => {
+      await this._ensureInitialGuidedTask(req, request.ID, request, { updateRequest: true });
+    });
+
+    this.before(["UPDATE", "DELETE"], ProcessRequests, async (req) => {
+      const sRequestId = this._requestIdFromReq(req);
+
+      if (sRequestId) {
+        await this._rejectIfRequestLocked(req, sRequestId);
+      }
+    });
+
     this.before("UPDATE", ProcessRequests, async (req) => {
       if (!req.data.processorUser_ID) {
         return;
@@ -160,6 +200,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("CREATE", ProcessTasks, async (req) => {
+      await this._rejectIfRequestLocked(req, req.data.request_ID);
+
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessTasks, "TSK");
 
       // Backend-only compatibility: external clients can still maintain an assignee snapshot.
@@ -185,6 +227,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("UPDATE", ProcessTasks, async (req) => {
+      await this._rejectIfTaskRequestLocked(req);
+
       if (!req.data.processorUser_ID) {
         return;
       }
@@ -198,6 +242,34 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       req.data.processor = this._userDisplayName(oProcessor);
     });
 
+    this.before("DELETE", ProcessTasks, async (req) => {
+      await this._rejectIfTaskRequestLocked(req);
+    });
+
+    this.after("CREATE", ProcessTasks, async (task, req) => {
+      if (!task.request_ID || !task.stepNo || task.status_code === TASK_STATUS.APPROVED) {
+        return;
+      }
+
+      const request = await this._getRequest(req, task.request_ID);
+
+      if (!request || this._isLockedRequest(request)) {
+        return;
+      }
+
+      const steps = await this._getSteps(req, request.processType_code);
+      const step = steps.find((oStep) => Number(oStep.stepNo || 0) === Number(task.stepNo || 0));
+
+      await cds.tx(req).run(
+        UPDATE(ProcessRequests, task.request_ID).set({
+          status_code: PROCESS_STATUS.IN_PROGRESS,
+          currentStep: task.stepNo,
+          dueDate: step ? this._calculateDueDate(step.slaDays) : request.dueDate,
+          completedAt: null
+        })
+      );
+    });
+
     this.before("CREATE", ProcessInvolvedParties, async (req) => {
       if (!req.data.request_ID || !req.data.user_ID) {
         return req.reject(400, "Select a request and an involved party");
@@ -208,6 +280,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!oRequest) {
         return req.reject(400, "Selected request was not found");
+      }
+
+      if (this._isLockedRequest(oRequest)) {
+        return this._rejectLockedRequest(req);
       }
 
       if (!oUser) {
@@ -229,6 +305,28 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       req.data.displayName = this._userDisplayName(oUser);
       req.data.email = oUser.email;
       req.data.department = oUser.department;
+    });
+
+    this.before(["UPDATE", "DELETE"], ProcessInvolvedParties, async (req) => {
+      await this._rejectIfInvolvedPartyRequestLocked(req);
+    });
+
+    this.before("CREATE", ProcessComments, async (req) => {
+      await this._rejectIfRequestLocked(req, req.data.request_ID);
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessComments, "CMT");
+    });
+
+    this.before(["UPDATE", "DELETE"], ProcessComments, async (req) => {
+      await this._rejectIfCommentRequestLocked(req);
+    });
+
+    this.before("CREATE", ProcessAttachments, async (req) => {
+      await this._rejectIfRequestLocked(req, req.data.request_ID);
+      req.data.referenceNumber ??= await this._nextReferenceNumber(req, ProcessAttachments, "ATT");
+    });
+
+    this.before(["UPDATE", "DELETE"], ProcessAttachments, async (req) => {
+      await this._rejectIfAttachmentRequestLocked(req);
     });
 
     this.before("CREATE", Delegations, async (req) => {
@@ -332,14 +430,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
 
-    this.before("CREATE", ProcessAttachments, async (req) => {
-      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessAttachments, "ATT");
-    });
-
-    this.before("CREATE", ProcessComments, async (req) => {
-      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessComments, "CMT");
-    });
-
     this.before("CREATE", ProcessHistory, async (req) => {
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessHistory, "HIS");
     });
@@ -352,8 +442,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Process request ${requestId} was not found`);
       }
 
-      const steps = await this._getSteps(req, request.processType_code);
-      const firstTaskStep = this._getFirstActionableStep(steps);
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+
+      const { firstTaskStep } = await this._ensureInitialGuidedTask(req, requestId, request);
       const oldStatus = request.status_code || PROCESS_STATUS.DRAFT;
 
       await this._writeHistory(req, {
@@ -365,10 +458,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         newStatus: firstTaskStep ? PROCESS_STATUS.IN_PROGRESS : PROCESS_STATUS.SUBMITTED,
         remarks: "Request submitted"
       });
-
-      if (firstTaskStep) {
-        await this._createTask(req, requestId, firstTaskStep);
-      }
 
       await cds.tx(req).run(
         UPDATE(ProcessRequests, requestId).set({
@@ -390,8 +479,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       const request = await this._getRequest(req, task.request_ID);
+
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+
       const steps = await this._getSteps(req, request.processType_code);
       const currentStep = steps.find((step) => step.stepNo === task.stepNo);
+      const oBlockingError = this._getTaskProgressionError(task, request, currentStep);
+
+      if (oBlockingError) {
+        return req.reject(400, oBlockingError);
+      }
+
       const nextStep = this._getNextStep(steps, currentStep, "approve");
       const oldStatus = request.status_code || PROCESS_STATUS.IN_PROGRESS;
 
@@ -404,23 +504,73 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         })
       );
 
-      if (nextStep && !this._isClosingStep(nextStep)) {
-        await this._createTask(req, task.request_ID, nextStep);
+      const bStepStillHasOpenWork = await this._hasIncompleteTasksForStep(req, task.request_ID, task.stepNo);
+
+      if (bStepStillHasOpenWork) {
         await cds.tx(req).run(
           UPDATE(ProcessRequests, task.request_ID).set({
             status_code: PROCESS_STATUS.IN_PROGRESS,
-            currentStep: nextStep.stepNo,
-            dueDate: this._calculateDueDate(nextStep.slaDays)
+            currentStep: task.stepNo,
+            dueDate: currentStep ? this._calculateDueDate(currentStep.slaDays) : request.dueDate,
+            completedAt: null
+          })
+        );
+
+        await this._writeHistory(req, {
+          requestId: task.request_ID,
+          stepNo: task.stepNo,
+          action: "APPROVED",
+          actor: req.user?.id,
+          oldStatus,
+          newStatus: PROCESS_STATUS.IN_PROGRESS,
+          remarks
+        });
+
+        return true;
+      }
+
+      const mandatoryStep = await this._findIncompleteMandatoryStep(req, task.request_ID, steps, {
+        afterStepNo: task.stepNo,
+        beforeStepNo: nextStep?.stepNo,
+        assumeCompletedStepNo: task.stepNo
+      });
+      const guidedNextStep = mandatoryStep || nextStep;
+      let sNewRequestStatus = PROCESS_STATUS.COMPLETED;
+
+      if (guidedNextStep && !this._isClosingStep(guidedNextStep)) {
+        await this._createTask(req, task.request_ID, guidedNextStep);
+        sNewRequestStatus = PROCESS_STATUS.IN_PROGRESS;
+        await cds.tx(req).run(
+          UPDATE(ProcessRequests, task.request_ID).set({
+            status_code: sNewRequestStatus,
+            currentStep: guidedNextStep.stepNo,
+            dueDate: this._calculateDueDate(guidedNextStep.slaDays)
           })
         );
       } else {
-        await cds.tx(req).run(
-          UPDATE(ProcessRequests, task.request_ID).set({
-            status_code: PROCESS_STATUS.COMPLETED,
-            currentStep: nextStep?.stepNo || task.stepNo,
-            completedAt: this._now()
-          })
-        );
+        const incompleteStep = await this._findIncompleteMandatoryStep(req, task.request_ID, steps, {
+          assumeCompletedStepNo: task.stepNo
+        });
+
+        if (incompleteStep) {
+          await this._createTask(req, task.request_ID, incompleteStep);
+          sNewRequestStatus = PROCESS_STATUS.IN_PROGRESS;
+          await cds.tx(req).run(
+            UPDATE(ProcessRequests, task.request_ID).set({
+              status_code: sNewRequestStatus,
+              currentStep: incompleteStep.stepNo,
+              dueDate: this._calculateDueDate(incompleteStep.slaDays)
+            })
+          );
+        } else {
+          await cds.tx(req).run(
+            UPDATE(ProcessRequests, task.request_ID).set({
+              status_code: sNewRequestStatus,
+              currentStep: guidedNextStep?.stepNo || task.stepNo,
+              completedAt: this._now()
+            })
+          );
+        }
       }
 
       await this._writeHistory(req, {
@@ -429,7 +579,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         action: "APPROVED",
         actor: req.user?.id,
         oldStatus,
-        newStatus: nextStep && !this._isClosingStep(nextStep) ? PROCESS_STATUS.IN_PROGRESS : PROCESS_STATUS.COMPLETED,
+        newStatus: sNewRequestStatus,
         remarks
       });
 
@@ -445,6 +595,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       const request = await this._getRequest(req, task.request_ID);
+
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
 
       await cds.tx(req).run([
         UPDATE(ProcessTasks, taskId).set({
@@ -481,6 +635,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       const request = await this._getRequest(req, task.request_ID);
+
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+
       const steps = await this._getSteps(req, request.processType_code);
       const currentStep = steps.find((step) => step.stepNo === task.stepNo);
       const sendBackStep = this._getNextStep(steps, currentStep, "reject") || this._getPreviousStep(steps, task.stepNo);
@@ -527,12 +686,25 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Process request ${requestId} was not found`);
       }
 
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+
       if (!await this._isConfiguredStatus(req, ProcessStatus, statusCode)) {
         return req.reject(400, "Select a valid request status");
       }
 
       if (request.status_code === statusCode) {
         return true;
+      }
+
+      if (statusCode === PROCESS_STATUS.COMPLETED) {
+        const steps = await this._getSteps(req, request.processType_code);
+        const incompleteStep = await this._findIncompleteMandatoryStep(req, requestId, steps);
+
+        if (incompleteStep) {
+          return req.reject(400, `Complete mandatory step ${incompleteStep.stepNo} - ${incompleteStep.stepName} before completing this request`);
+        }
       }
 
       await cds.tx(req).run(
@@ -560,12 +732,24 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Task ${taskId} was not found`);
       }
 
+      await this._rejectIfRequestLocked(req, task.request_ID);
+
       if (!await this._isConfiguredStatus(req, TaskStatus, statusCode)) {
         return req.reject(400, "Select a valid task status");
       }
 
       if (task.status_code === statusCode) {
         return true;
+      }
+
+      if (statusCode === TASK_STATUS.APPROVED) {
+        const request = await this._getRequest(req, task.request_ID);
+        const steps = request ? await this._getSteps(req, request.processType_code) : [];
+        const currentStep = steps.find((step) => Number(step.stepNo || 0) === Number(task.stepNo || 0));
+
+        if (currentStep?.isMandatory) {
+          return req.reject(400, `Complete mandatory step ${currentStep.stepNo} - ${currentStep.stepName} from the task action`);
+        }
       }
 
       await cds.tx(req).run(
@@ -591,6 +775,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!request) {
         return req.reject(404, `Process request ${requestId} was not found`);
+      }
+
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
       }
 
       const oProcessor = await this._getUser(req, processorUserId, Users);
@@ -632,6 +820,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!task) {
         return req.reject(404, `Task ${taskId} was not found`);
       }
+
+      await this._rejectIfRequestLocked(req, task.request_ID);
 
       const oProcessor = await this._getUser(req, processorUserId, Users);
 
@@ -744,6 +934,64 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return cds.tx(req).run(SELECT.one.from(this.entities.ProcessRequests).where({ ID: requestId }));
   }
 
+  _requestIdFromReq(req) {
+    return req.data?.ID || req.params?.[0]?.ID || req.params?.[0];
+  }
+
+  _isLockedRequest(request) {
+    return LOCKED_REQUEST_STATUSES.has(request?.status_code);
+  }
+
+  _rejectLockedRequest(req) {
+    return req.reject(403, "Completed or rejected requests are locked and cannot be modified");
+  }
+
+  async _rejectIfRequestLocked(req, requestId) {
+    if (!requestId) {
+      return;
+    }
+
+    const request = await this._getRequest(req, requestId);
+
+    if (this._isLockedRequest(request)) {
+      return this._rejectLockedRequest(req);
+    }
+  }
+
+  async _rejectIfTaskRequestLocked(req) {
+    const taskId = this._requestIdFromReq(req);
+    const task = taskId ? await this._getTask(req, taskId) : null;
+
+    await this._rejectIfRequestLocked(req, task?.request_ID || req.data?.request_ID);
+  }
+
+  async _rejectIfInvolvedPartyRequestLocked(req) {
+    const partyId = this._requestIdFromReq(req);
+    const party = partyId
+      ? await cds.tx(req).run(SELECT.one.from(this.entities.ProcessInvolvedParties).where({ ID: partyId }))
+      : null;
+
+    await this._rejectIfRequestLocked(req, party?.request_ID || req.data?.request_ID);
+  }
+
+  async _rejectIfCommentRequestLocked(req) {
+    const commentId = this._requestIdFromReq(req);
+    const comment = commentId
+      ? await cds.tx(req).run(SELECT.one.from(this.entities.ProcessComments).where({ ID: commentId }))
+      : null;
+
+    await this._rejectIfRequestLocked(req, comment?.request_ID || req.data?.request_ID);
+  }
+
+  async _rejectIfAttachmentRequestLocked(req) {
+    const attachmentId = this._requestIdFromReq(req);
+    const attachment = attachmentId
+      ? await cds.tx(req).run(SELECT.one.from(this.entities.ProcessAttachments).where({ ID: attachmentId }))
+      : null;
+
+    await this._rejectIfRequestLocked(req, attachment?.request_ID || req.data?.request_ID);
+  }
+
   async _getUser(req, userId, Users) {
     return cds.tx(req).run(SELECT.one.from(Users).where({ ID: userId, isActive: true }));
   }
@@ -760,15 +1008,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     await oPrevious;
 
     try {
-      const aReferences = await cds.tx(req).run(
-        SELECT.from(entity).columns("referenceNumber").where({
+      const oLastReference = await cds.tx(req).run(
+        SELECT.one.from(entity).columns("referenceNumber").where({
           referenceNumber: { like: `${prefix}-%` }
-        })
+        }).orderBy("referenceNumber desc")
       );
-      const iLastNumber = aReferences.reduce((iHighest, oEntry) => {
-        const iNumber = Number((oEntry.referenceNumber || "").slice(prefix.length + 1));
-        return Number.isFinite(iNumber) ? Math.max(iHighest, iNumber) : iHighest;
-      }, 0);
+      const iLastNumber = Number((oLastReference?.referenceNumber || "").slice(prefix.length + 1)) || 0;
 
       return `${prefix}-${String(iLastNumber + 1).padStart(6, "0")}`;
     } finally {
@@ -859,19 +1104,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     );
   }
 
-  _getFirstActionableStep(steps) {
+  _getInitialGuidedStep(steps) {
     if (!steps.length) {
       return null;
     }
 
-    const submitStep = steps[0];
-    const nextStepNo = submitStep.nextOnApprove;
-
-    if (nextStepNo) {
-      return steps.find((step) => step.stepNo === nextStepNo) || submitStep;
-    }
-
-    return /submit/i.test(submitStep.stepName || "") ? steps[1] || submitStep : submitStep;
+    return steps.find((step) => !this._isClosingStep(step)) || null;
   }
 
   _getNextStep(steps, currentStep, decision) {
@@ -894,11 +1132,105 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return previousSteps[previousSteps.length - 1] || null;
   }
 
+  _getTaskProgressionError(task, request, currentStep) {
+    if (task.status_code !== TASK_STATUS.OPEN) {
+      return "Only open tasks can be completed";
+    }
+
+    if (!currentStep) {
+      return null;
+    }
+
+    if (Number(request.currentStep || 0) !== Number(task.stepNo || 0)) {
+      return `Complete the current guided step ${request.currentStep} before processing step ${task.stepNo}`;
+    }
+
+    return null;
+  }
+
+  async _findIncompleteMandatoryStep(req, requestId, steps, options = {}) {
+    const aMandatorySteps = steps
+      .filter((step) => step.isMandatory)
+      .filter((step) => options.afterStepNo == null || step.stepNo > options.afterStepNo)
+      .filter((step) => options.beforeStepNo == null || step.stepNo < options.beforeStepNo);
+
+    if (!aMandatorySteps.length) {
+      return null;
+    }
+
+    const aTasks = await cds.tx(req).run(
+      SELECT.from(this.entities.ProcessTasks).where({ request_ID: requestId })
+    );
+    const mTasksByStep = aTasks.reduce((mResult, task) => {
+      const sStepNo = String(Number(task.stepNo || 0));
+      const aStepTasks = mResult.get(sStepNo) || [];
+
+      aStepTasks.push(task);
+      mResult.set(sStepNo, aStepTasks);
+      return mResult;
+    }, new Map());
+
+    return aMandatorySteps.find((step) => {
+      const aStepTasks = mTasksByStep.get(String(Number(step.stepNo || 0))) || [];
+
+      return !this._areStepTasksComplete(aStepTasks);
+    }) || null;
+  }
+
+  _areStepTasksComplete(tasks) {
+    return Boolean(tasks.length) && tasks.every((task) => task.status_code === TASK_STATUS.APPROVED);
+  }
+
+  async _hasIncompleteTasksForStep(req, requestId, stepNo) {
+    const aTasks = await cds.tx(req).run(
+      SELECT.from(this.entities.ProcessTasks)
+        .columns("status_code")
+        .where({ request_ID: requestId, stepNo })
+    );
+
+    return Boolean(aTasks.length) && !this._areStepTasksComplete(aTasks);
+  }
+
   _isClosingStep(step) {
     return /closed|complete|completed/i.test(step.stepName || "") || Number(step.slaDays || 0) === 0 && !step.nextOnApprove;
   }
 
-  async _createTask(req, requestId, step) {
+  async _ensureInitialGuidedTask(req, requestId, request, options = {}) {
+    const steps = await this._getSteps(req, request.processType_code);
+    const firstTaskStep = this._getInitialGuidedStep(steps);
+
+    if (firstTaskStep) {
+      await this._createTask(req, requestId, firstTaskStep, { skipIfExistingStep: true });
+
+      if (options.updateRequest && Number(request.currentStep || 0) !== Number(firstTaskStep.stepNo || 0)) {
+        await cds.tx(req).run(
+          UPDATE(this.entities.ProcessRequests, requestId).set({
+            currentStep: firstTaskStep.stepNo,
+            dueDate: this._calculateDueDate(firstTaskStep.slaDays)
+          })
+        );
+      }
+    }
+
+    return {
+      steps,
+      firstTaskStep
+    };
+  }
+
+  async _createTask(req, requestId, step, options = {}) {
+    const oExistingTask = await cds.tx(req).run(
+      SELECT.one.from(this.entities.ProcessTasks).where(
+        options.skipIfExistingStep
+          ? { request_ID: requestId, stepNo: step.stepNo }
+          : { request_ID: requestId, stepNo: step.stepNo, status_code: TASK_STATUS.OPEN }
+      )
+    );
+
+    if (oExistingTask) {
+      return;
+    }
+
     const sReferenceNumber = await this._nextReferenceNumber(req, this.entities.ProcessTasks, "TSK");
 
     await cds.tx(req).run(

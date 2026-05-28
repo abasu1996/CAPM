@@ -41,23 +41,39 @@ sap.ui.define([
         },
 
         _loadDashboardCounts() {
-            this._readCount("/ProcessRequests", "/requestsCount", "/requestsState");
-            this._readCount("/ProcessTasks", "/tasksCount", "/tasksState");
-        },
-
-        _readCount(sPath, sPropertyPath, sStatePath) {
-            const oModel = this.getModel();
             const oDashboardModel = this.getView().getModel("dashboard");
 
-            oDashboardModel.setProperty(sStatePath, "Loading");
-            oModel.read(`${sPath}/$count`, {
-                success: (sCount) => {
-                    oDashboardModel.setProperty(sPropertyPath, Number(sCount));
-                    oDashboardModel.setProperty(sStatePath, "Loaded");
-                },
-                error: () => {
-                    oDashboardModel.setProperty(sStatePath, "Failed");
+            oDashboardModel.setProperty("/requestsState", "Loading");
+            oDashboardModel.setProperty("/tasksState", "Loading");
+
+            Promise.allSettled([
+                this._readCount("/ProcessRequests"),
+                this._readCount("/ProcessTasks")
+            ]).then(([oRequestsResult, oTasksResult]) => {
+                if (oRequestsResult.status === "fulfilled") {
+                    oDashboardModel.setProperty("/requestsCount", oRequestsResult.value);
+                    oDashboardModel.setProperty("/requestsState", "Loaded");
+                } else {
+                    oDashboardModel.setProperty("/requestsState", "Failed");
                 }
+
+                if (oTasksResult.status === "fulfilled") {
+                    oDashboardModel.setProperty("/tasksCount", oTasksResult.value);
+                    oDashboardModel.setProperty("/tasksState", "Loaded");
+                } else {
+                    oDashboardModel.setProperty("/tasksState", "Failed");
+                }
+            });
+        },
+
+        _readCount(sPath) {
+            const oModel = this.getModel();
+
+            return new Promise((resolve, reject) => {
+                oModel.read(`${sPath}/$count`, {
+                    success: (sCount) => resolve(Number(sCount)),
+                    error: reject
+                });
             });
         }
     });

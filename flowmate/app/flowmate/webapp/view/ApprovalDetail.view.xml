@@ -40,19 +40,26 @@
                         text="{i18n>delegationsNavButton}"
                         press=".onNavToDelegations" />
                     <Button
+                        icon="sap-icon://refresh"
+                        tooltip="{i18n>refreshButton}"
+                        press=".onRefresh" />
+                    <Button
                         icon="sap-icon://email"
                         text="{i18n>notifyProcessorButton}"
                         press=".onNotifyProcessor" />
                     <Button
                         text="{i18n>approveButton}"
                         type="Accept"
+                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                         press=".onApprove" />
                     <Button
                         text="{i18n>sendBackButton}"
+                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                         press=".onSendBack" />
                     <Button
                         text="{i18n>rejectButton}"
                         type="Reject"
+                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                         press=".onReject" />
                     <Button
                         icon="sap-icon://decline"
@@ -92,6 +99,7 @@
                         <Label text="{i18n>statusLabel}" />
                         <Select
                             width="12rem"
+                            enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                             selectedKey="{statusEdit>/taskStatus}"
                             items="{/TaskStatus}">
                             <core:Item key="{code}" text="{name}" />
@@ -102,6 +110,7 @@
                         icon="sap-icon://save"
                         text="{i18n>saveStatusButton}"
                         type="Emphasized"
+                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                         press=".onSaveTaskStatus" />
                 </HBox>
                 <HBox
@@ -115,6 +124,7 @@
                             placeholder="{i18n>selectProcessorPlaceholder}"
                             showValueHelp="true"
                             valueHelpOnly="true"
+                            enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                             valueHelpRequest=".onProcessorValueHelpRequest" />
                     </VBox>
                     <Button
@@ -122,6 +132,7 @@
                         icon="sap-icon://save"
                         text="{i18n>saveProcessorButton}"
                         type="Emphasized"
+                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                         press=".onSaveTaskProcessor" />
                 </HBox>
                 <VBox class="sapUiSmallMarginTop flowmateDetailBlock flowmateRemarks">

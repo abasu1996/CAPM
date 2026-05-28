@@ -35,6 +35,14 @@ sap.ui.define([
                 midFullScreen: false,
                 endFullScreen: false
             }), "fclState");
+            this.getView().setModel(new JSONModel({
+                editable: true
+            }), "requestEdit");
+            this.getView().setModel(new JSONModel({
+                visible: false,
+                loading: false,
+                steps: []
+            }), "processFlow");
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -96,6 +104,16 @@ sap.ui.define([
             this._openRequest(oItem.getBindingContext());
         },
 
+        onRequestReferencePress(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext();
+
+            if (oContext) {
+                this._openRequest(oContext);
+            }
+        },
+
         onRequestTaskPress(oEvent) {
             const oContext = oEvent.getSource().getBindingContext();
             const sTaskId = oContext && oContext.getProperty("ID");
@@ -106,6 +124,27 @@ sap.ui.define([
             }
 
             this._showRequestTaskDetail(sTaskId);
+        },
+
+        onRequestTaskReferencePress(oEvent) {
+            oEvent.cancelBubble?.();
+            this.onRequestTaskPress(oEvent);
+        },
+
+        onRelatedRequestPress(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext();
+            const sRequestId = oContext?.getProperty("request/ID")
+                || oContext?.getProperty("request_ID")
+                || this._sSelectedRequestId;
+
+            if (!sRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this._showRequestDetailById(sRequestId);
         },
 
         onRequestPartyPress(oEvent) {
@@ -159,15 +198,33 @@ sap.ui.define([
         },
 
         onCloseRequestDetail() {
-            this._setRequestsLayout(fLibrary.LayoutType.OneColumn);
+            this._resetRequestSelection();
+            this.navTo("RouteMyRequests", {}, true);
         },
 
         onCloseRequestTaskDetail() {
+            this._sSelectedTaskId = null;
             this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
         },
 
         onCloseInvolvedPartyDetail() {
-            this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
+            this._resetRequestSelection();
+            this.navTo("RouteMyRequests", {}, true);
+        },
+
+        onRefreshRequestDetail() {
+            this._refreshSelectedRequest();
+            this.byId("requestsTable").getBinding("items")?.refresh();
+        },
+
+        onRefreshRequestTaskDetail() {
+            this.byId("requestTaskObjectPage").getElementBinding()?.refresh();
+            this._refreshSelectedRequest();
+        },
+
+        onRefreshInvolvedPartyDetail() {
+            this.byId("requestPartyObjectPage").getElementBinding()?.refresh();
+            this._refreshSelectedRequest();
         },
 
         onToggleRequestFullScreen() {
@@ -599,6 +656,8 @@ sap.ui.define([
         },
 
         async onViewAttachment(oEvent) {
+            oEvent.cancelBubble?.();
+
             const oContext = oEvent.getSource().getBindingContext();
 
             this.showBusy();
@@ -616,7 +675,14 @@ sap.ui.define([
             }
         },
 
+        onAttachmentReferencePress(oEvent) {
+            oEvent.cancelBubble?.();
+            this.onViewAttachment(oEvent);
+        },
+
         async onDownloadAttachment(oEvent) {
+            oEvent.cancelBubble?.();
+
             const oContext = oEvent.getSource().getBindingContext();
 
             this.showBusy();
@@ -893,18 +959,26 @@ sap.ui.define([
                     dataRequested: this.onDataRequested.bind(this),
                     dataReceived: () => {
                         this.onDataReceived();
+                        const oRequestContext = this.byId("requestObjectPage").getBindingContext();
+                        const oRequest = oRequestContext?.getObject();
+
                         this.getView().getModel("statusEdit").setProperty(
                             "/requestStatus",
-                            this.byId("requestObjectPage").getBindingContext()?.getProperty("status_code") || ""
+                            oRequest?.status_code || ""
+                        );
+                        this.getView().getModel("requestEdit").setProperty(
+                            "/editable",
+                            this._isRequestEditable(oRequest)
                         );
                         this.getView().getModel("processorEdit").setProperty(
                             "/requestProcessorUser_ID",
-                            this.byId("requestObjectPage").getBindingContext()?.getProperty("processorUser_ID") || ""
+                            oRequest?.processorUser_ID || ""
                         );
                         this.getView().getModel("processorEdit").setProperty(
                             "/requestProcessorName",
-                            this.byId("requestObjectPage").getBindingContext()?.getProperty("processor") || ""
+                            oRequest?.processor || ""
                         );
+                        this._loadProcessFlow(sRequestId, oRequest);
                     }
                 }
             });
@@ -916,6 +990,19 @@ sap.ui.define([
             this.getView().getModel("fclState").setData({
                 midFullScreen: sLayout === fLibrary.LayoutType.MidColumnFullScreen,
                 endFullScreen: sLayout === fLibrary.LayoutType.EndColumnFullScreen
+            });
+        },
+
+        _resetRequestSelection() {
+            this._sSelectedRequestId = null;
+            this._sSelectedTaskId = null;
+            this._sSelectedPartyId = null;
+            this._setRequestsLayout(fLibrary.LayoutType.OneColumn);
+            this.getView().getModel("requestEdit").setProperty("/editable", true);
+            this.getView().getModel("processFlow").setData({
+                visible: false,
+                loading: false,
+                steps: []
             });
         },
 
@@ -989,6 +1076,36 @@ sap.ui.define([
             }
         },
 
+        async onCompleteGuidedStep(oEvent) {
+            const oStep = oEvent.getSource().getBindingContext("processFlow")?.getObject()
+                || this.getView().getModel("processFlow").getProperty("/selectedStep");
+            const sTaskId = oStep?.taskId;
+
+            if (!sTaskId) {
+                MessageToast.show(this.getText("selectTaskMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("approveTask", {
+                    taskId: sTaskId,
+                    remarks: this.getText("completeStepButton")
+                });
+                MessageToast.show(this.getText("guidedStepCompletedMessage"));
+                this._refreshSelectedRequest();
+
+                if (this._sSelectedTaskId === sTaskId) {
+                    this.byId("requestTaskObjectPage").getElementBinding()?.refresh();
+                }
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("guidedStepCompleteErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
         _createEmptyTask() {
             return {
                 taskName: "",
@@ -1037,6 +1154,177 @@ sap.ui.define([
             if (oBinding) {
                 oBinding.refresh();
             }
+
+            if (this._sSelectedRequestId) {
+                this._loadProcessFlow(this._sSelectedRequestId);
+            }
+        },
+
+        async _loadProcessFlow(sRequestId, oBoundRequest) {
+            const oProcessFlowModel = this.getView().getModel("processFlow");
+
+            if (!sRequestId) {
+                oProcessFlowModel.setData({ visible: false, loading: false, steps: [] });
+                return;
+            }
+
+            oProcessFlowModel.setProperty("/loading", true);
+
+            try {
+                const oRequest = oBoundRequest && Object.prototype.hasOwnProperty.call(oBoundRequest, "tasks")
+                    ? oBoundRequest
+                    : await this._readEntry(`/ProcessRequests(guid'${sRequestId}')`, {
+                    urlParameters: {
+                        "$expand": "tasks"
+                    }
+                });
+                const aSteps = await this._readList("/ProcessStepConfig", {
+                    filters: [new Filter("processType_code", FilterOperator.EQ, oRequest.processType_code)]
+                });
+
+                aSteps.sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0));
+                const aProcessSteps = this._buildProcessFlowSteps(aSteps, oRequest);
+                const oSelectedStep = aProcessSteps.find((oStep) => oStep.isCurrent)
+                    || aProcessSteps.find((oStep) => oStep.completeEnabled)
+                    || aProcessSteps.find((oStep) => oStep.state !== "Success")
+                    || aProcessSteps[0]
+                    || {};
+
+                this._markSelectedProcessStep(aProcessSteps, oSelectedStep.stepNo);
+
+                oProcessFlowModel.setData({
+                    visible: Boolean(aSteps.length),
+                    loading: false,
+                    steps: aProcessSteps,
+                    selectedStep: oSelectedStep
+                });
+            } catch (oError) {
+                oProcessFlowModel.setData({ visible: false, loading: false, steps: [] });
+            }
+        },
+
+        onGuideMilestonePress(oEvent) {
+            const oStep = oEvent.getSource().getBindingContext("processFlow")?.getObject();
+
+            if (!oStep) {
+                return;
+            }
+
+            const oProcessFlowModel = this.getView().getModel("processFlow");
+            const aSteps = oProcessFlowModel.getProperty("/steps") || [];
+
+            this._markSelectedProcessStep(aSteps, oStep.stepNo);
+            oProcessFlowModel.setProperty("/steps", aSteps);
+            oProcessFlowModel.setProperty("/selectedStep", {
+                ...oStep,
+                selected: true
+            });
+        },
+
+        _buildProcessFlowSteps(aSteps, oRequest) {
+            const aTasks = oRequest.tasks?.results || oRequest.tasks || [];
+            const iCurrentStep = Number(oRequest.currentStep || 0);
+            const bRequestEditable = this._isRequestEditable(oRequest);
+            const mTasksByStep = aTasks.reduce((mResult, oTask) => {
+                const sStepNo = String(Number(oTask.stepNo || 0));
+                const aStepTasks = mResult.get(sStepNo) || [];
+
+                aStepTasks.push(oTask);
+                mResult.set(sStepNo, aStepTasks);
+                return mResult;
+            }, new Map());
+
+            return aSteps.map((oStep) => {
+                const aStepTasks = mTasksByStep.get(String(Number(oStep.stepNo || 0))) || [];
+                const bMandatory = this._isTruthy(oStep.isMandatory);
+                const oOpenTask = aStepTasks.find((oTask) => oTask.status_code === "OPEN");
+                const bCompleted = Boolean(aStepTasks.length) && aStepTasks.every((oTask) => oTask.status_code === "APPROVED");
+                const bRejected = aStepTasks.some((oTask) => oTask.status_code === "REJECTED");
+                const bSentBack = aStepTasks.some((oTask) => oTask.status_code === "SENT_BACK");
+                const bCurrent = Number(oStep.stepNo || 0) === iCurrentStep && !bCompleted;
+                let sState = "None";
+                let sStatusText = this.getText("processStepPendingLabel");
+                let sIcon = "sap-icon://circle-task";
+                let sButtonType = "Transparent";
+
+                if (bRejected) {
+                    sState = "Error";
+                    sStatusText = this.getText("processStepRejectedLabel");
+                    sIcon = "sap-icon://decline";
+                    sButtonType = "Reject";
+                } else if (bSentBack) {
+                    sState = "Warning";
+                    sStatusText = this.getText("processStepSentBackLabel");
+                    sIcon = "sap-icon://undo";
+                    sButtonType = "Default";
+                } else if (bCompleted) {
+                    sState = "Success";
+                    sStatusText = this.getText("processStepCompletedLabel");
+                    sIcon = "sap-icon://accept";
+                    sButtonType = "Accept";
+                } else if (bCurrent) {
+                    sState = "Information";
+                    sStatusText = this.getText("processStepCurrentLabel");
+                    sIcon = "sap-icon://process";
+                    sButtonType = "Emphasized";
+                }
+
+                return {
+                    stepNo: oStep.stepNo,
+                    stepName: oStep.stepName,
+                    activityDescription: oStep.activityDescription,
+                    role: oStep.role,
+                    isMandatory: bMandatory,
+                    mandatoryText: bMandatory ? this.getText("mandatoryLabel") : this.getText("optionalLabel"),
+                    sequenceText: this.getText("processStepNumberLabel", [oStep.stepNo]),
+                    statusText: sStatusText,
+                    state: sState,
+                    icon: sIcon,
+                    buttonType: sButtonType,
+                    isCurrent: bCurrent,
+                    selected: false,
+                    taskId: oOpenTask?.ID || "",
+                    completeEnabled: bRequestEditable && !bMandatory && Boolean(oOpenTask)
+                };
+            });
+        },
+
+        _isRequestEditable(oRequest) {
+            return !["COMPLETED", "REJECTED"].includes(oRequest?.status_code);
+        },
+
+        _isTruthy(vValue) {
+            if (typeof vValue === "string") {
+                return vValue.toLowerCase() === "true" || vValue === "1";
+            }
+
+            return Boolean(vValue);
+        },
+
+        _markSelectedProcessStep(aSteps, iSelectedStepNo) {
+            aSteps.forEach((oStep) => {
+                oStep.selected = Number(oStep.stepNo || 0) === Number(iSelectedStepNo || 0);
+            });
+        },
+
+        _readEntry(sPath, oParameters) {
+            return new Promise((resolve, reject) => {
+                this.getModel().read(sPath, {
+                    ...(oParameters || {}),
+                    success: resolve,
+                    error: reject
+                });
+            });
+        },
+
+        _readList(sPath, oParameters) {
+            return new Promise((resolve, reject) => {
+                this.getModel().read(sPath, {
+                    ...(oParameters || {}),
+                    success: (oData) => resolve(oData.results || []),
+                    error: reject
+                });
+            });
         },
 
         _confirmDelete(sMessageKey, aArguments) {
