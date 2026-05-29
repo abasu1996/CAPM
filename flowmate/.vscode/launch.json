@@ -1,17 +1,94 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${file}"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug CAP Local (SQLite)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "cds",
+        "watch",
+        "--in-memory",
+        "--debug",
+        "127.0.0.1:9229",
+        "--port",
+        "4004",
+        "--livereload",
+        "false",
+        "--open",
+        "flowmate/webapp/index.html?sap-ui-xx-viewCache=false"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug CAP Hybrid (HANA)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "cds",
+        "bind",
+        "--profile",
+        "hybrid",
+        "--exec",
+        "--",
+        "npx",
+        "cds",
+        "watch",
+        "--profile",
+        "hybrid",
+        "--debug",
+        "127.0.0.1:9230",
+        "--port",
+        "4004",
+        "--livereload",
+        "false",
+        "--open",
+        "flowmate/webapp/index.html?sap-ui-xx-viewCache=false"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "autoAttachChildProcesses": true,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to CAP Debugger",
+      "address": "127.0.0.1",
+      "port": 9229,
+      "restart": true,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
+      "name": "Launch Flowmate UI",
+      "url": "http://localhost:4004/flowmate/webapp/index.html?sap-ui-xx-viewCache=false",
+      "webRoot": "${workspaceFolder}/app/flowmate/webapp",
+      "sourceMaps": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug CAP Local + UI",
+      "configurations": [
+        "Debug CAP Local (SQLite)",
+        "Launch Flowmate UI"
+      ],
+      "stopAll": true
+    }
+  ]
 }

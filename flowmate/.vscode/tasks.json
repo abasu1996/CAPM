@@ -3,8 +3,23 @@
   "tasks": [
     {
       "type": "shell",
-      "label": "cds watch",
-      "command": "cds watch",
+      "label": "cds watch local",
+      "command": "npx cds watch --in-memory --livereload false --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "type": "shell",
+      "label": "cds watch hybrid",
+      "command": "npx cds bind --profile hybrid --exec -- npx cds watch --profile hybrid --livereload false --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": []
     }
   ]
 }

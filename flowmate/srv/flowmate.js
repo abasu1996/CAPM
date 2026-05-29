@@ -1086,49 +1086,75 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     );
     const aRequestIds = aRequests
       .filter((request) => !request.reservedBy || this._isReservedByCurrentUser(request, oReservationUser))
-      .map((request) => request.ID);
+      .map((request) => this._toQueryString(request.ID))
+      .filter(Boolean);
 
     if (!aRequestIds.length) {
-      req.query.where("1 = 0");
+      req.query.where(this._alwaysFalsePredicate());
       return;
     }
 
-    req.query.where({ [requestFieldName]: { in: aRequestIds } });
+    req.query.where(this._inStringListPredicate(requestFieldName, aRequestIds));
   }
 
   async _filterByAssignedTasks(req, Users) {
     const oReservationUser = await this._currentReservationUser(req, Users);
+    const aPredicates = [];
 
     if (oReservationUser.user?.ID) {
-      req.query.where(
-        "(processorUser_ID =",
-        oReservationUser.user.ID,
-        "or assignedUser_ID =",
-        oReservationUser.user.ID,
-        "or processor =",
-        oReservationUser.displayName,
-        "or assignedTo =",
-        oReservationUser.displayName,
-        "or processor =",
-        oReservationUser.principal,
-        "or assignedTo =",
-        oReservationUser.principal,
-        ")"
-      );
+      this._addStringEqualsPredicate(aPredicates, "processorUser_ID", oReservationUser.user.ID);
+      this._addStringEqualsPredicate(aPredicates, "assignedUser_ID", oReservationUser.user.ID);
+    }
+
+    this._addStringEqualsPredicate(aPredicates, "processor", oReservationUser.displayName);
+    this._addStringEqualsPredicate(aPredicates, "assignedTo", oReservationUser.displayName);
+    this._addStringEqualsPredicate(aPredicates, "processor", oReservationUser.principal);
+    this._addStringEqualsPredicate(aPredicates, "assignedTo", oReservationUser.principal);
+
+    if (!aPredicates.length) {
+      req.query.where(this._alwaysFalsePredicate());
       return;
     }
 
-    req.query.where(
-      "(processor =",
-      oReservationUser.displayName,
-      "or assignedTo =",
-      oReservationUser.displayName,
-      "or processor =",
-      oReservationUser.principal,
-      "or assignedTo =",
-      oReservationUser.principal,
-      ")"
-    );
+    req.query.where({ xpr: aPredicates });
+  }
+
+  _toQueryString(value) {
+    if (value === undefined || value === null || value === "") {
+      return "";
+    }
+
+    return String(value);
+  }
+
+  _inStringListPredicate(fieldName, values) {
+    return [
+      { ref: [fieldName] },
+      "in",
+      { list: values.map((value) => ({ val: this._toQueryString(value) })) }
+    ];
+  }
+
+  _addStringEqualsPredicate(predicates, fieldName, value) {
+    const sValue = this._toQueryString(value);
+
+    if (!sValue) {
+      return;
+    }
+
+    if (predicates.length) {
+      predicates.push("or");
+    }
+
+    predicates.push({ ref: [fieldName] }, "=", { val: sValue });
+  }
+
+  _alwaysFalsePredicate() {
+    return [
+      { val: "1" },
+      "=",
+      { val: "0" }
+    ];
   }
 
   _filterExpandedTasksByAssignment(data, reservationUser) {
