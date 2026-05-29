@@ -7,8 +7,10 @@ sap.ui.define([
     return BaseController.extend("flowmate.controller.MainView", {
         onInit() {
             this.getView().setModel(new JSONModel({
-                requestsCount: 0,
-                requestsState: "Loading",
+                reservedRequestsCount: 0,
+                reservedRequestsState: "Loading",
+                unreservedRequestsCount: 0,
+                unreservedRequestsState: "Loading",
                 tasksCount: 0,
                 tasksState: "Loading"
             }), "dashboard");
@@ -20,8 +22,20 @@ sap.ui.define([
             this._loadDashboardCounts();
         },
 
-        onOpenRequests() {
-            this.navTo("RouteMyRequests");
+        onOpenReservedRequests() {
+            this.navTo("RouteMyRequests", {
+                "?query": {
+                    reserved: "true"
+                }
+            });
+        },
+
+        onOpenUnreservedRequests() {
+            this.navTo("RouteMyRequests", {
+                "?query": {
+                    unreserved: "true"
+                }
+            });
         },
 
         onOpenTasks() {
@@ -43,18 +57,22 @@ sap.ui.define([
         _loadDashboardCounts() {
             const oDashboardModel = this.getView().getModel("dashboard");
 
-            oDashboardModel.setProperty("/requestsState", "Loading");
+            oDashboardModel.setProperty("/reservedRequestsState", "Loading");
+            oDashboardModel.setProperty("/unreservedRequestsState", "Loading");
             oDashboardModel.setProperty("/tasksState", "Loading");
 
             Promise.allSettled([
-                this._readCount("/ProcessRequests"),
+                this._readReservationCounts(),
                 this._readCount("/ProcessTasks")
-            ]).then(([oRequestsResult, oTasksResult]) => {
-                if (oRequestsResult.status === "fulfilled") {
-                    oDashboardModel.setProperty("/requestsCount", oRequestsResult.value);
-                    oDashboardModel.setProperty("/requestsState", "Loaded");
+            ]).then(([oReservationResult, oTasksResult]) => {
+                if (oReservationResult.status === "fulfilled") {
+                    oDashboardModel.setProperty("/reservedRequestsCount", oReservationResult.value.reservedRequests);
+                    oDashboardModel.setProperty("/unreservedRequestsCount", oReservationResult.value.unreservedRequests);
+                    oDashboardModel.setProperty("/reservedRequestsState", "Loaded");
+                    oDashboardModel.setProperty("/unreservedRequestsState", "Loaded");
                 } else {
-                    oDashboardModel.setProperty("/requestsState", "Failed");
+                    oDashboardModel.setProperty("/reservedRequestsState", "Failed");
+                    oDashboardModel.setProperty("/unreservedRequestsState", "Failed");
                 }
 
                 if (oTasksResult.status === "fulfilled") {
@@ -66,14 +84,30 @@ sap.ui.define([
             });
         },
 
-        _readCount(sPath) {
+        _readCount(sPath, sFilter) {
             const oModel = this.getModel();
 
             return new Promise((resolve, reject) => {
                 oModel.read(`${sPath}/$count`, {
+                    urlParameters: sFilter ? { "$filter": sFilter } : undefined,
                     success: (sCount) => resolve(Number(sCount)),
                     error: reject
                 });
+            });
+        },
+
+        _readReservationCounts() {
+            return fetch("/odata/v4/flowmate/getRequestReservationCounts()", {
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }).then((oResponse) => {
+                if (!oResponse.ok) {
+                    throw new Error("Reservation counts could not be loaded");
+                }
+
+                return oResponse.json();
             });
         }
     });

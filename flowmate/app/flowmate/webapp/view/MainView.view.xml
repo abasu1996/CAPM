@@ -2,10 +2,11 @@
     controllerName="flowmate.controller.MainView"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:f="sap.f">
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="dashboardPage"
-        class="flowmatePage"
+        class="flowmatePage flowmateDashboardPage"
         toggleHeaderOnTitleClick="false">
         <f:title>
             <f:DynamicPageTitle>
@@ -38,28 +39,46 @@
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <VBox class="flowmateContent">
-                <Title
-                    class="sapUiTinyMarginBottom"
-                    text="{i18n>workspaceTitle}" />
+            <VBox class="flowmateContent flowmateDashboardContent">
+                <HBox
+                    class="flowmateDashboardHero"
+                    width="100%"
+                    alignItems="Center"
+                    wrap="Wrap">
+                    <HBox
+                        class="flowmateDashboardHeroTitle"
+                        alignItems="Center">
+                        <core:Icon
+                            class="flowmateDashboardHeroIcon"
+                            src="sap-icon://business-objects-experience" />
+                        <VBox>
+                            <Title
+                                level="H2"
+                                text="{i18n>workspaceTitle}" />
+                            <Text
+                                class="flowmateDashboardHeroText"
+                                text="{i18n>workspaceSubtitle}" />
+                        </VBox>
+                    </HBox>
+                </HBox>
                 <HBox
                     wrap="Wrap"
                     renderType="Bare"
                     class="flowmateTiles">
                     <GenericTile
-                        class="flowmateTile"
-                        header="{i18n>myRequestsTitle}"
-                        subheader="{i18n>myRequestsSubtitle}"
-                        state="{dashboard>/requestsState}"
-                        press=".onOpenRequests">
+                        class="flowmateTile flowmateTileReserved"
+                        header="{i18n>myReservedRequestsTitle}"
+                        subheader="{i18n>myReservedRequestsSubtitle}"
+                        state="{dashboard>/reservedRequestsState}"
+                        press=".onOpenReservedRequests">
                         <TileContent>
                             <NumericContent
-                                icon="sap-icon://request"
-                                value="{dashboard>/requestsCount}" />
+                                icon="sap-icon://locked"
+                                value="{dashboard>/reservedRequestsCount}" />
                         </TileContent>
                     </GenericTile>
                     <GenericTile
-                        class="flowmateTile"
+                        class="flowmateTile flowmateTileTasks"
                         header="{i18n>myTasksTitle}"
                         subheader="{i18n>myTasksSubtitle}"
                         state="{dashboard>/tasksState}"
@@ -71,7 +90,19 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
-                        class="flowmateTile"
+                        class="flowmateTile flowmateTileUnreserved"
+                        header="{i18n>unreservedRequestsTitle}"
+                        subheader="{i18n>unreservedRequestsSubtitle}"
+                        state="{dashboard>/unreservedRequestsState}"
+                        press=".onOpenUnreservedRequests">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://unlocked"
+                                value="{dashboard>/unreservedRequestsCount}" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="flowmateTile flowmateTileCreate"
                         header="{i18n>createRequestTitle}"
                         subheader="{i18n>createRequestSubtitle}"
                         press=".onCreateRequest">
@@ -80,7 +111,7 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
-                        class="flowmateTile"
+                        class="flowmateTile flowmateTileAdmin"
                         header="{i18n>adminConfigTitle}"
                         subheader="{i18n>adminConfigSubtitle}"
                         visible="{permissions>/isAdmin}"
@@ -90,7 +121,7 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
-                        class="flowmateTile"
+                        class="flowmateTile flowmateTileDelegations"
                         header="{i18n>delegationsTitle}"
                         subheader="{i18n>delegationsSubtitle}"
                         press=".onOpenDelegations">

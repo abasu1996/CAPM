@@ -1,13 +1,79 @@
+:root,
+.flowmatePage,
+.flowmateObjectPage {
+    --flowmateBlue: #0a6ed1;
+    --flowmateBlueDark: #064f9e;
+    --flowmateGreen: #2f7d5a;
+    --flowmateTeal: #0f766e;
+    --flowmateAmber: #d97706;
+    --flowmatePurple: #7c3aed;
+    --flowmateRed: #c2410c;
+    --flowmateText: #1d2d3e;
+    --flowmateMuted: #536b7d;
+    --flowmateLine: #d9e2ec;
+    --flowmateSoftBlue: #f2f8ff;
+    --flowmateSoftGreen: #f0f8f4;
+    --flowmateSoftAmber: #fff7ed;
+}
+
 .flowmatePage .sapFDynamicPageContent,
 .flowmateObjectPage .sapUxAPObjectPageContainer {
-    background: #f5f7f9;
+    background:
+        linear-gradient(115deg, rgba(10, 110, 209, 0.055) 0, rgba(10, 110, 209, 0) 28rem),
+        linear-gradient(245deg, rgba(15, 118, 110, 0.055) 0, rgba(15, 118, 110, 0) 26rem),
+        #f5f7f9;
 }
 
 .flowmatePage .sapFDynamicPageTitle,
 .flowmateObjectPage .sapUxAPObjectPageHeaderTitle,
 .flowmateObjectPage .sapUxAPObjectPageHeaderContent {
+    background:
+        linear-gradient(90deg, rgba(242, 248, 255, 0.95), rgba(255, 255, 255, 0.95) 42%, rgba(240, 248, 244, 0.7)),
+        #ffffff;
+    box-shadow: inset 0 -0.0625rem 0 var(--flowmateLine);
+}
+
+.flowmatePage .sapFDynamicPageTitleMainActions .sapMBtn,
+.flowmateObjectPage .sapFDynamicPageTitleMainActions .sapMBtn {
+    margin-left: 0.25rem;
+}
+
+.flowmatePage .sapFDynamicPageTitleMainActions .sapMBtnInner,
+.flowmateObjectPage .sapFDynamicPageTitleMainActions .sapMBtnInner {
+    height: 2.25rem;
+    padding-right: 0.875rem;
+    padding-left: 0.875rem;
     background: #ffffff;
-    box-shadow: inset 0 -0.0625rem 0 #d9e2ec;
+    border: 0.0625rem solid #d9e2ec;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.375rem rgba(34, 54, 73, 0.08);
+    transition: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.flowmatePage .sapFDynamicPageTitleMainActions .sapMBtnIcon,
+.flowmateObjectPage .sapFDynamicPageTitleMainActions .sapMBtnIcon {
+    color: var(--flowmateBlue);
+    transition: color 0.16s ease, transform 0.16s ease;
+}
+
+.flowmatePage .sapFDynamicPageTitleMainActions .sapMBtnContent,
+.flowmateObjectPage .sapFDynamicPageTitleMainActions .sapMBtnContent {
+    color: var(--flowmateText);
+    font-weight: 600;
+}
+
+.flowmatePage .sapFDynamicPageTitleMainActions .sapMBtn:hover .sapMBtnInner,
+.flowmateObjectPage .sapFDynamicPageTitleMainActions .sapMBtn:hover .sapMBtnInner {
+    background: var(--flowmateSoftBlue);
+    border-color: #8cc5ff;
+    box-shadow: 0 0.375rem 0.875rem rgba(10, 110, 209, 0.16);
+    transform: translateY(-0.0625rem);
+}
+
+.flowmatePage .sapFDynamicPageTitleMainActions .sapMBtn:hover .sapMBtnIcon,
+.flowmateObjectPage .sapFDynamicPageTitleMainActions .sapMBtn:hover .sapMBtnIcon {
+    color: var(--flowmateBlueDark);
+    transform: scale(1.06);
 }
 
 .flowmateContent {
@@ -15,6 +81,18 @@
     max-width: 92rem;
     margin: 0 auto;
     padding: 1.25rem 1.5rem 2rem;
+    animation: flowmateFadeIn 0.22s ease-out both;
+}
+
+.flowmateDashboardPage .sapFDynamicPageContent {
+    background:
+        linear-gradient(115deg, rgba(10, 110, 209, 0.08) 0, rgba(10, 110, 209, 0) 34rem),
+        linear-gradient(245deg, rgba(47, 125, 90, 0.08) 0, rgba(47, 125, 90, 0) 30rem),
+        #f5f7f9;
+}
+
+.flowmateDashboardContent {
+    padding-top: 1rem;
 }
 
 .flowmateNarrowContent {
@@ -22,11 +100,26 @@
 }
 
 .flowmateSurface {
+    position: relative;
     overflow: hidden;
-    background: #ffffff;
-    border: 0.0625rem solid #d9e2ec;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.94)),
+        #ffffff;
+    border: 0.0625rem solid var(--flowmateLine);
     border-radius: 0.5rem;
-    box-shadow: 0 0.0625rem 0.1875rem rgba(34, 54, 73, 0.06);
+    box-shadow: 0 0.375rem 1rem rgba(34, 54, 73, 0.08);
+    animation: flowmateRiseIn 0.22s ease-out both;
+}
+
+.flowmateSurface::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 0.25rem;
+    background: linear-gradient(90deg, var(--flowmateBlue), var(--flowmateGreen), var(--flowmateAmber));
+    z-index: 1;
 }
 
 .flowmateSurface.sapMOH {
@@ -42,22 +135,48 @@
     height: 3.25rem;
     padding: 0 1rem;
     border-bottom: 0.0625rem solid #e5ebf0;
-    background: #ffffff;
+    background:
+        linear-gradient(90deg, rgba(242, 248, 255, 0.95), rgba(255, 255, 255, 0.95) 58%, rgba(255, 247, 237, 0.75)),
+        #ffffff;
 }
 
 .flowmateToolbar .sapMTitle {
-    color: #1d2d3e;
+    color: var(--flowmateText);
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
+}
+
+.flowmateToolbar .sapMTitle::before {
+    content: "";
+    display: inline-block;
+    width: 0.25rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+    vertical-align: -0.125rem;
+    background: var(--flowmateBlue);
+    border-radius: 999rem;
 }
 
 .flowmateToolbar .sapMSFF {
-    background: #f7f9fb;
+    background: #ffffff;
+    border: 0.0625rem solid #d9e2ec;
     border-radius: 0.375rem;
 }
 
+.flowmateToolbar .sapMBtnInner {
+    border-radius: 0.375rem;
+    transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.flowmateToolbar .sapMBtn:hover .sapMBtnInner {
+    background: var(--flowmateSoftBlue);
+    border-color: #8cc5ff;
+    transform: translateY(-0.0625rem);
+}
+
 .flowmateTable .sapMListTblHeaderCell {
-    background: #f7f9fb;
+    background:
+        linear-gradient(180deg, #f7fbff, #f2f8ff);
     border-bottom: 0.0625rem solid #d9e2ec;
 }
 
@@ -76,10 +195,17 @@
 
 .flowmateTable .sapMLIB {
     background: #ffffff;
+    transition: background-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .flowmateTable .sapMLIBHoverable:hover {
-    background: #f2f7fb;
+    background: #f2f8ff;
+    box-shadow: inset 0.1875rem 0 0 var(--flowmateBlue);
+}
+
+.flowmateTable .sapMLIBSelected {
+    background: #eef7ff;
+    box-shadow: inset 0.1875rem 0 0 var(--flowmateBlue);
 }
 
 .flowmateSemanticStatus {
@@ -109,6 +235,9 @@
 
 .flowmateRequestHeader.sapMOH {
     padding: 1rem 1.25rem;
+    background:
+        linear-gradient(90deg, rgba(242, 248, 255, 0.96), rgba(255, 255, 255, 0.96) 48%, rgba(240, 248, 244, 0.72)),
+        #ffffff;
 }
 
 .flowmateRequestHeader .sapMOHNumber {
@@ -159,12 +288,18 @@
     min-width: 9.5rem;
     min-height: 3.5rem;
     padding: 0.5rem 0.75rem;
-    background: #f7f9fb;
-    border-radius: 0.375rem;
+    background:
+        linear-gradient(180deg, #ffffff, #f7f9fb);
+    border: 0.0625rem solid #e5ebf0;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.375rem rgba(34, 54, 73, 0.04);
 }
 
 .flowmateHeaderReference {
-    border-left: 0.1875rem solid #0a6ed1;
+    border-left: 0.25rem solid var(--flowmateBlue);
+    background:
+        linear-gradient(90deg, rgba(10, 110, 209, 0.08), rgba(255, 255, 255, 0.96)),
+        #ffffff;
 }
 
 .flowmateHeaderReference .sapMLabel,
@@ -195,7 +330,7 @@
     flex-basis: 15.5rem;
     min-width: 15.5rem;
     background: #ffffff;
-    border: 0.0625rem solid #e5ebf0;
+    border: 0.0625rem solid #cfe0ee;
 }
 
 .flowmateHeaderInputRow .sapMSlt {
@@ -212,9 +347,12 @@
     box-sizing: border-box;
     margin-top: 0.875rem;
     padding: 0.875rem 1rem;
-    background: #ffffff;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(242, 248, 255, 0.88)),
+        #ffffff;
     border: 0.0625rem solid #d9e2ec;
     border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(34, 54, 73, 0.07);
 }
 
 .flowmateProcessMilestoneTrack {
@@ -228,17 +366,50 @@
 }
 
 .flowmateProcessMilestone {
+    position: relative;
     box-sizing: border-box;
     flex: 1 1 8rem;
     min-width: 8rem;
 }
 
+.flowmateProcessMilestone[data-current="true"]::before {
+    content: "";
+    position: absolute;
+    top: 1.55rem;
+    left: 0;
+    width: 100%;
+    height: 0.1875rem;
+    background: #0a6ed1;
+    border-radius: 999rem;
+    z-index: 0;
+}
+
 .flowmateProcessMilestoneButton.sapMBtn {
+    position: relative;
     min-width: 2.75rem;
+    z-index: 1;
 }
 
 .flowmateProcessMilestoneButton .sapMBtnInner {
     border-radius: 999rem;
+}
+
+.flowmateProcessMilestone[data-current="true"] .flowmateProcessMilestoneButton .sapMBtnInner,
+.flowmateProcessMilestoneButton .sapMBtnEmphasized {
+    background: #0a6ed1;
+    border-color: #0a6ed1;
+    box-shadow: 0 0 0 0.25rem rgba(10, 110, 209, 0.14), 0 0.25rem 0.75rem rgba(10, 110, 209, 0.22);
+}
+
+.flowmateProcessMilestone[data-current="true"] .flowmateProcessMilestoneButton .sapMBtnIcon,
+.flowmateProcessMilestoneButton .sapMBtnEmphasized .sapMBtnIcon {
+    color: #ffffff;
+}
+
+.flowmateProcessMilestone[data-current="true"] .flowmateProcessMilestoneLabel,
+.flowmateProcessMilestone[data-current="true"] .flowmateProcessMilestoneTitle {
+    color: #0a6ed1;
+    font-weight: 700;
 }
 
 .flowmateProcessMilestoneLabel {
@@ -260,7 +431,9 @@
     box-sizing: border-box;
     margin-top: 1rem;
     padding: 0.875rem 1rem;
-    background: #f7f9fb;
+    background:
+        linear-gradient(90deg, rgba(242, 248, 255, 0.92), rgba(255, 255, 255, 0.94)),
+        #f7f9fb;
     border: 0.0625rem solid #d9e2ec;
     border-radius: 0.375rem;
 }
@@ -273,49 +446,298 @@
 
 .flowmateSmartTable .sapUiCompSmartTableToolbar {
     border-bottom: 0.0625rem solid #e5ebf0;
-    background: #ffffff;
+    background:
+        linear-gradient(90deg, rgba(242, 248, 255, 0.95), rgba(255, 255, 255, 0.95) 58%, rgba(240, 248, 244, 0.75)),
+        #ffffff;
+}
+
+.flowmateAdminConfig.sapMITB {
+    padding: 0 0.75rem 0.75rem;
+}
+
+.flowmateAdminConfig .sapMITBHead {
+    gap: 0.375rem;
+    padding: 0.875rem 0.25rem 0.625rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.flowmateAdminConfig .sapMITBFilter {
+    width: auto;
+    min-width: 8.75rem;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.flowmateAdminConfig .sapMITBText {
+    max-width: none;
+    white-space: normal;
+    line-height: 1.2;
+}
+
+.flowmateAdminConfig .sapMITBContent {
+    padding: 1rem;
+    background:
+        linear-gradient(180deg, #ffffff, #f8fbfd);
+    border-top: 0.0625rem solid #e5ebf0;
+}
+
+.flowmateAdminConfig .flowmateToolbar.sapMTB {
+    height: auto;
+    min-height: 3.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border: 0.0625rem solid #d9e2ec;
+    border-radius: 0.5rem;
+}
+
+.flowmateAdminConfig .flowmateToolbar .sapMTitle {
+    min-width: 10rem;
+    white-space: normal;
+}
+
+.flowmateAdminConfig .flowmateTable {
+    border: 0.0625rem solid #d9e2ec;
+    border-radius: 0.5rem;
+}
+
+.flowmateAdminConfig .flowmateTable .sapMListTblHeaderCell {
+    height: auto;
+    min-height: 2.875rem;
+}
+
+.flowmateAdminConfig .flowmateTable .sapMListTblCell {
+    padding-top: 0.875rem;
+    padding-bottom: 0.875rem;
+}
+
+.flowmateAdminConfig .flowmateTable .sapMText {
+    line-height: 1.35;
+}
+
+.flowmateDashboardHero {
+    box-sizing: border-box;
+    gap: 1rem;
+    margin-bottom: 0.875rem;
+    padding: 0.875rem 1rem;
+    background:
+        linear-gradient(100deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.9)),
+        linear-gradient(90deg, rgba(10, 110, 209, 0.13), rgba(47, 125, 90, 0.1) 48%, rgba(217, 119, 6, 0.1));
+    border: 0.0625rem solid rgba(53, 76, 96, 0.14);
+    border-left: 0.375rem solid #0a6ed1;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.25rem rgba(34, 54, 73, 0.09);
+}
+
+.flowmateDashboardHeroTitle {
+    gap: 0.875rem;
+    min-width: 18rem;
+}
+
+.flowmateDashboardHeroTitle .sapMTitle {
+    color: #1d2d3e;
+    font-size: 1.375rem;
+    font-weight: 800;
+}
+
+.flowmateDashboardHeroIcon {
+    box-sizing: border-box;
+    width: 3rem;
+    height: 3rem;
+    padding-top: 0.7rem;
+    color: #0a6ed1;
+    font-size: 1.5rem;
+    text-align: center;
+    background: #eaf4ff;
+    border: 0.0625rem solid #b8daf8;
+    border-radius: 0.5rem;
+}
+
+.flowmateDashboardHeroText {
+    margin-top: 0.25rem;
+    color: #536b7d;
+    font-size: 0.875rem;
 }
 
 .flowmateTiles {
-    gap: 0.75rem;
+    gap: 1rem;
+    align-items: stretch;
 }
 
 .flowmateTile.sapMGT {
-    border: 0.0625rem solid #d9e2ec;
+    position: relative;
+    overflow: hidden;
+    min-width: 14.75rem;
+    min-height: 10.25rem;
+    border: 0.0625rem solid rgba(53, 76, 96, 0.16);
     border-radius: 0.5rem;
-    box-shadow: 0 0.0625rem 0.1875rem rgba(34, 54, 73, 0.08);
+    background: #ffffff;
+    box-shadow: 0 0.375rem 1rem rgba(34, 54, 73, 0.1);
+    animation: flowmateRiseIn 0.24s ease-out both;
+    transition: box-shadow 0.16s ease, transform 0.16s ease, border-color 0.16s ease;
+}
+
+.flowmateTile.sapMGT::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 0.35rem;
+    background: var(--flowmateTileAccent, #0a6ed1);
+}
+
+.flowmateTile.sapMGT::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3.75rem;
+    background: var(--flowmateTileWash, linear-gradient(135deg, rgba(10, 110, 209, 0.08), rgba(10, 110, 209, 0)));
+    pointer-events: none;
 }
 
 .flowmateTile.sapMGT:hover {
-    box-shadow: 0 0.25rem 0.75rem rgba(53, 123, 89, 0.13);
+    border-color: var(--flowmateTileAccent, #0a6ed1);
+    box-shadow: 0 0.625rem 1.5rem rgba(34, 54, 73, 0.17);
+    transform: translateY(-0.125rem);
 }
 
 .flowmateTile .sapMGTHeaderText {
     color: #1d2d3e;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.flowmateTile .sapMGTSubHdrTxt {
+    color: #536b7d;
+    font-size: 0.8125rem;
+}
+
+.flowmateTile .sapMGTContent {
+    position: relative;
+    z-index: 1;
+    padding-top: 0.35rem;
+}
+
+.flowmateTile .sapMNCInner {
+    align-items: flex-end;
+}
+
+.flowmateTile .sapMNCIconImage {
+    color: var(--flowmateTileAccent, #0a6ed1);
+    opacity: 0.9;
 }
 
 .flowmateTile .sapMNCValue {
-    font-weight: 600;
+    color: var(--flowmateTileAccentDark, #0a6ed1);
+    font-size: 2.05rem;
+    font-weight: 800;
+}
+
+.flowmateTileReserved {
+    --flowmateTileAccent: #0a6ed1;
+    --flowmateTileAccentDark: #064f9e;
+    --flowmateTileWash: linear-gradient(135deg, rgba(10, 110, 209, 0.14), rgba(10, 110, 209, 0));
+}
+
+.flowmateTileTasks {
+    --flowmateTileAccent: #2f7d5a;
+    --flowmateTileAccentDark: #1f5c41;
+    --flowmateTileWash: linear-gradient(135deg, rgba(47, 125, 90, 0.15), rgba(47, 125, 90, 0));
+}
+
+.flowmateTileUnreserved {
+    --flowmateTileAccent: #d97706;
+    --flowmateTileAccentDark: #9a5200;
+    --flowmateTileWash: linear-gradient(135deg, rgba(217, 119, 6, 0.16), rgba(217, 119, 6, 0));
+}
+
+.flowmateTileCreate {
+    --flowmateTileAccent: #0f766e;
+    --flowmateTileAccentDark: #115e59;
+    --flowmateTileWash: linear-gradient(135deg, rgba(15, 118, 110, 0.15), rgba(15, 118, 110, 0));
+}
+
+.flowmateTileAdmin {
+    --flowmateTileAccent: #7c3aed;
+    --flowmateTileAccentDark: #5b21b6;
+    --flowmateTileWash: linear-gradient(135deg, rgba(124, 58, 237, 0.13), rgba(124, 58, 237, 0));
+}
+
+.flowmateTileDelegations {
+    --flowmateTileAccent: #c2410c;
+    --flowmateTileAccentDark: #8a2c08;
+    --flowmateTileWash: linear-gradient(135deg, rgba(194, 65, 12, 0.14), rgba(194, 65, 12, 0));
+}
+
+@keyframes flowmateFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(0.25rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes flowmateRiseIn {
+    from {
+        opacity: 0;
+        transform: translateY(0.375rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flowmateContent,
+    .flowmateSurface,
+    .flowmateTile.sapMGT {
+        animation: none;
+    }
+
+    .flowmatePage .sapFDynamicPageTitleMainActions .sapMBtnInner,
+    .flowmateObjectPage .sapFDynamicPageTitleMainActions .sapMBtnInner,
+    .flowmatePage .sapFDynamicPageTitleMainActions .sapMBtnIcon,
+    .flowmateObjectPage .sapFDynamicPageTitleMainActions .sapMBtnIcon,
+    .flowmateToolbar .sapMBtnInner,
+    .flowmateTile.sapMGT {
+        transition: none;
+    }
 }
 
 .flowmateObjectPage .sapUxAPObjectPageSectionHeaderTitle,
 .flowmateObjectPage .sapUxAPObjectPageSectionTitle {
-    color: #1d2d3e;
-    font-weight: 600;
+    color: var(--flowmateText);
+    font-weight: 700;
 }
 
 .flowmateObjectPage .sapUxAPObjectPageSubSection {
     padding-top: 0.5rem;
 }
 
+.flowmateObjectPage .sapUxAPObjectPageSectionHeader {
+    background:
+        linear-gradient(90deg, rgba(242, 248, 255, 0.72), rgba(255, 255, 255, 0));
+}
+
 .flowmateDetailBlock {
     box-sizing: border-box;
     width: 100%;
     padding: 1rem;
-    background: #ffffff;
+    background:
+        linear-gradient(180deg, #ffffff, #f8fbfd);
     border: 0.0625rem solid #e5ebf0;
+    border-left: 0.25rem solid var(--flowmateGreen);
     border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(34, 54, 73, 0.06);
 }
 
 .flowmateDetailBlock .sapMLabel {
@@ -337,12 +759,26 @@
 }
 
 .flowmateFormSurface {
+    position: relative;
+    overflow: hidden;
     box-sizing: border-box;
     padding: 1.25rem 1.5rem;
-    background: #ffffff;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 253, 0.94)),
+        #ffffff;
     border: 0.0625rem solid #d9e2ec;
     border-radius: 0.5rem;
-    box-shadow: 0 0.0625rem 0.1875rem rgba(34, 54, 73, 0.06);
+    box-shadow: 0 0.5rem 1.25rem rgba(34, 54, 73, 0.08);
+}
+
+.flowmateFormSurface::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 0.25rem;
+    background: linear-gradient(90deg, var(--flowmateTeal), var(--flowmateBlue), var(--flowmatePurple));
 }
 
 .flowmateFormSurface .sapMLabel {
@@ -352,8 +788,10 @@
 
 .flowmateAttachmentList {
     overflow: hidden;
-    border: 0.0625rem solid #e5ebf0;
+    border: 0.0625rem solid #d9e2ec;
     border-radius: 0.375rem;
+    background: #ffffff;
+    box-shadow: 0 0.125rem 0.375rem rgba(34, 54, 73, 0.05);
 }
 
 .flowmateUploadQueue {
@@ -361,7 +799,9 @@
     overflow: hidden;
     border: 0.0625rem solid #d9e2ec;
     border-radius: 0.375rem;
-    background: #f7f9fb;
+    background:
+        linear-gradient(90deg, rgba(242, 248, 255, 0.9), rgba(255, 247, 237, 0.55)),
+        #f7f9fb;
 }
 
 .flowmateUploadItem {
@@ -372,15 +812,69 @@
 
 .flowmateDialogContent {
     padding: 1.25rem 1.5rem 1rem;
+    background:
+        linear-gradient(135deg, rgba(242, 248, 255, 0.95), rgba(255, 255, 255, 0.96) 44%, rgba(240, 248, 244, 0.76)),
+        #ffffff;
 }
 
 .flowmateDialogContent .sapUiFormResGridCont {
     padding-bottom: 0;
 }
 
+.flowmateDialogContent .sapMLabel {
+    color: var(--flowmateMuted);
+    font-weight: 600;
+}
+
+.flowmateDialogContent .sapMInputBaseContentWrapper,
+.flowmateDialogContent .sapMSlt {
+    border-radius: 0.375rem;
+}
+
+.flowmatePage .sapMInputBaseContentWrapper,
+.flowmateObjectPage .sapMInputBaseContentWrapper,
+.flowmatePage .sapMSlt,
+.flowmateObjectPage .sapMSlt,
+.flowmatePage .sapMTextAreaInner,
+.flowmateObjectPage .sapMTextAreaInner {
+    border-radius: 0.375rem;
+}
+
+.flowmatePage .sapMInputBaseContentWrapper:hover,
+.flowmateObjectPage .sapMInputBaseContentWrapper:hover,
+.flowmatePage .sapMSlt:hover,
+.flowmateObjectPage .sapMSlt:hover {
+    border-color: #8cc5ff;
+}
+
+.flowmatePage .sapMITBSelected .sapMITBText,
+.flowmateObjectPage .sapMITBSelected .sapMITBText {
+    color: var(--flowmateBlue);
+    font-weight: 700;
+}
+
+.flowmatePage .sapMITBSelected .sapMITBFilterDefault,
+.flowmateObjectPage .sapMITBSelected .sapMITBFilterDefault {
+    color: var(--flowmateBlue);
+}
+
 @media (max-width: 47.99rem) {
     .flowmateContent {
         padding: 0.75rem 0.5rem 1rem;
+    }
+
+    .flowmateDashboardHero {
+        padding: 0.875rem;
+    }
+
+    .flowmateDashboardHeroTitle {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .flowmateTile.sapMGT {
+        width: 100%;
+        min-width: 100%;
     }
 
     .flowmateHeaderCell,

@@ -29,6 +29,7 @@ service FlowmateService {
     action approveTask(taskId: UUID, remarks: String) returns Boolean;
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
     action sendBack(taskId: UUID, remarks: String) returns Boolean;
+    action reserveRequest(requestId: UUID) returns Boolean;
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;
     action assignRequestProcessor(requestId: UUID, processorUserId: UUID) returns Boolean;
@@ -53,6 +54,10 @@ service FlowmateService {
     };
     action getUserAdministrationCapabilities() returns {
         canMaintainUsers : Boolean;
+    };
+    function getRequestReservationCounts() returns {
+        unreservedRequests : Integer;
+        reservedRequests   : Integer;
     };
     function getApplicationCapabilities() returns {
         isAdmin             : Boolean;

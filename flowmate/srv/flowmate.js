@@ -49,6 +49,37 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
 
+    this.before("READ", ProcessRequests, async (req) => {
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      this._applyVisibleRequestsWhere(req.query, oReservationUser);
+    });
+
+    this.after("READ", ProcessRequests, async (data, req) => {
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      this._filterExpandedTasksByAssignment(data, oReservationUser);
+    });
+
+    this.before("READ", ProcessTasks, async (req) => {
+      await this._filterByVisibleRequests(req, Users, "request_ID");
+      await this._filterByAssignedTasks(req, Users);
+    });
+
+    this.before("READ", ProcessInvolvedParties, async (req) => {
+      await this._filterByVisibleRequests(req, Users, "request_ID");
+    });
+
+    this.before("READ", ProcessAttachments, async (req) => {
+      await this._filterByVisibleRequests(req, Users, "request_ID");
+    });
+
+    this.before("READ", ProcessComments, async (req) => {
+      await this._filterByVisibleRequests(req, Users, "request_ID");
+    });
+
+    this.before("READ", ProcessHistory, async (req) => {
+      await this._filterByVisibleRequests(req, Users, "request_ID");
+    });
+
     this.before(["CREATE", "UPDATE"], Users, async (req) => {
       if (!this._isAdministrator(req)) {
         return req.reject(403, "Only a user administrator can maintain users");
@@ -442,6 +473,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Process request ${requestId} was not found`);
       }
 
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
+
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
       }
@@ -478,7 +511,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Task ${taskId} was not found`);
       }
 
+      await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
+
       const request = await this._getRequest(req, task.request_ID);
+
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
@@ -594,7 +631,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Task ${taskId} was not found`);
       }
 
+      await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
+
       const request = await this._getRequest(req, task.request_ID);
+
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
@@ -634,7 +675,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Task ${taskId} was not found`);
       }
 
+      await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
+
       const request = await this._getRequest(req, task.request_ID);
+
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
@@ -678,6 +723,59 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return true;
     });
 
+    this.on("reserveRequest", async (req) => {
+      const { requestId } = req.data;
+      const request = await this._getRequest(req, requestId);
+
+      if (!request) {
+        return req.reject(404, `Process request ${requestId} was not found`);
+      }
+
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+
+      if (request.reservedBy) {
+        await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
+        return true;
+      }
+
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      const oCurrentUser = oReservationUser.user;
+      const sReservedBy = oReservationUser.displayName;
+
+      await cds.tx(req).run(
+        UPDATE(ProcessRequests, requestId).set({
+          reservedByUser_ID: oCurrentUser?.ID || null,
+          reservedBy: sReservedBy,
+          reservedAt: this._now(),
+          processorUser_ID: oCurrentUser?.ID || null,
+          processor: sReservedBy
+        })
+      );
+
+      await cds.tx(req).run(
+        UPDATE(ProcessTasks)
+          .set({
+            processorUser_ID: oCurrentUser?.ID || null,
+            processor: sReservedBy
+          })
+          .where("request_ID =", requestId, "and processorUser_ID is null")
+      );
+
+      await this._writeHistory(req, {
+        requestId,
+        stepNo: request.currentStep || 0,
+        action: "RESERVED",
+        actor: req.user?.id,
+        oldStatus: request.status_code,
+        newStatus: request.status_code,
+        remarks: `Request reserved by ${sReservedBy} and assigned to ${sReservedBy}`
+      });
+
+      return true;
+    });
+
     this.on("updateRequestStatus", async (req) => {
       const { requestId, statusCode } = req.data;
       const request = await this._getRequest(req, requestId);
@@ -685,6 +783,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!request) {
         return req.reject(404, `Process request ${requestId} was not found`);
       }
+
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
@@ -732,7 +832,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Task ${taskId} was not found`);
       }
 
+      await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
+
       await this._rejectIfRequestLocked(req, task.request_ID);
+      await this._rejectIfRequestReservedByAnotherUser(req, await this._getRequest(req, task.request_ID), Users);
 
       if (!await this._isConfiguredStatus(req, TaskStatus, statusCode)) {
         return req.reject(400, "Select a valid task status");
@@ -776,6 +879,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!request) {
         return req.reject(404, `Process request ${requestId} was not found`);
       }
+
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
@@ -821,7 +926,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Task ${taskId} was not found`);
       }
 
+      await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
+
       await this._rejectIfRequestLocked(req, task.request_ID);
+      await this._rejectIfRequestReservedByAnotherUser(req, await this._getRequest(req, task.request_ID), Users);
 
       const oProcessor = await this._getUser(req, processorUserId, Users);
 
@@ -911,6 +1019,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       canMaintainUsers: this._isAdministrator(req)
     }));
 
+    this.on("getRequestReservationCounts", async (req) => {
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      const aRequests = await cds.tx(req).run(
+        SELECT.from(ProcessRequests).columns("ID", "reservedBy", "reservedByUser_ID")
+      );
+      const bReservedByMe = (request) => this._isReservedByCurrentUser(request, oReservationUser);
+
+      return {
+        unreservedRequests: aRequests.filter((request) => !request.reservedBy).length,
+        reservedRequests: aRequests.filter(bReservedByMe).length
+      };
+    });
+
     this.on("getApplicationCapabilities", (req) => ({
       isAdmin: this._isAdministrator(req),
       canMaintainUsers: this._isAdministrator(req),
@@ -946,6 +1067,143 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return req.reject(403, "Completed or rejected requests are locked and cannot be modified");
   }
 
+  async _rejectIfRequestReservedByAnotherUser(req, request, Users = this.entities.Users) {
+    if (!request?.reservedBy) {
+      return;
+    }
+
+    const oReservationUser = await this._currentReservationUser(req, Users);
+
+    if (!this._isReservedByCurrentUser(request, oReservationUser)) {
+      return req.reject(403, `Request is reserved by ${request.reservedBy} and cannot be modified by another user`);
+    }
+  }
+
+  async _filterByVisibleRequests(req, Users, requestFieldName) {
+    const oReservationUser = await this._currentReservationUser(req, Users);
+    const aRequests = await cds.tx(req).run(
+      SELECT.from(this.entities.ProcessRequests).columns("ID", "reservedBy", "reservedByUser_ID")
+    );
+    const aRequestIds = aRequests
+      .filter((request) => !request.reservedBy || this._isReservedByCurrentUser(request, oReservationUser))
+      .map((request) => request.ID);
+
+    if (!aRequestIds.length) {
+      req.query.where("1 = 0");
+      return;
+    }
+
+    req.query.where({ [requestFieldName]: { in: aRequestIds } });
+  }
+
+  async _filterByAssignedTasks(req, Users) {
+    const oReservationUser = await this._currentReservationUser(req, Users);
+
+    if (oReservationUser.user?.ID) {
+      req.query.where(
+        "(processorUser_ID =",
+        oReservationUser.user.ID,
+        "or assignedUser_ID =",
+        oReservationUser.user.ID,
+        "or processor =",
+        oReservationUser.displayName,
+        "or assignedTo =",
+        oReservationUser.displayName,
+        "or processor =",
+        oReservationUser.principal,
+        "or assignedTo =",
+        oReservationUser.principal,
+        ")"
+      );
+      return;
+    }
+
+    req.query.where(
+      "(processor =",
+      oReservationUser.displayName,
+      "or assignedTo =",
+      oReservationUser.displayName,
+      "or processor =",
+      oReservationUser.principal,
+      "or assignedTo =",
+      oReservationUser.principal,
+      ")"
+    );
+  }
+
+  _filterExpandedTasksByAssignment(data, reservationUser) {
+    const aRequests = Array.isArray(data) ? data : [data];
+
+    aRequests.filter(Boolean).forEach((request) => {
+      if (!request.tasks) {
+        return;
+      }
+
+      if (Array.isArray(request.tasks)) {
+        request.tasks = request.tasks.filter((task) => this._isTaskAssignedToCurrentUser(task, reservationUser));
+        return;
+      }
+
+      if (Array.isArray(request.tasks.results)) {
+        request.tasks.results = request.tasks.results.filter((task) => this._isTaskAssignedToCurrentUser(task, reservationUser));
+      }
+    });
+  }
+
+  async _rejectIfTaskAssignedToAnotherUser(req, task, Users = this.entities.Users) {
+    if (!task || this._isTaskAssignedToCurrentUser(task, await this._currentReservationUser(req, Users))) {
+      return;
+    }
+
+    return req.reject(403, "Task is assigned to another user and cannot be accessed or modified");
+  }
+
+  async _currentReservationUser(req, Users = this.entities.Users) {
+    const sPrincipal = req.user?.id || "anonymous";
+    const oUser = await this._findUserByPrincipal(req, sPrincipal, Users);
+
+    return {
+      user: oUser,
+      principal: sPrincipal,
+      displayName: oUser ? this._userDisplayName(oUser) : sPrincipal
+    };
+  }
+
+  _applyVisibleRequestsWhere(query, reservationUser) {
+    if (reservationUser.user?.ID) {
+      query.where("(reservedBy is null or reservedByUser_ID =", reservationUser.user.ID, ")");
+      return;
+    }
+
+    query.where("(reservedBy is null or reservedBy =", reservationUser.displayName, ")");
+  }
+
+  _isReservedByCurrentUser(request, reservationUser) {
+    if (!request?.reservedBy) {
+      return false;
+    }
+
+    if (request.reservedByUser_ID && reservationUser.user?.ID) {
+      return request.reservedByUser_ID === reservationUser.user.ID;
+    }
+
+    return request.reservedBy === reservationUser.displayName || request.reservedBy === reservationUser.principal;
+  }
+
+  _isTaskAssignedToCurrentUser(task, reservationUser) {
+    if (task.processorUser_ID || task.assignedUser_ID) {
+      return Boolean(
+        reservationUser.user?.ID &&
+        (task.processorUser_ID === reservationUser.user.ID || task.assignedUser_ID === reservationUser.user.ID)
+      );
+    }
+
+    return [task.processor, task.assignedTo].some((sOwner) =>
+      sOwner === reservationUser.displayName ||
+      sOwner === reservationUser.principal
+    );
+  }
+
   async _rejectIfRequestLocked(req, requestId) {
     if (!requestId) {
       return;
@@ -956,6 +1214,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (this._isLockedRequest(request)) {
       return this._rejectLockedRequest(req);
     }
+
+    await this._rejectIfRequestReservedByAnotherUser(req, request);
   }
 
   async _rejectIfTaskRequestLocked(req) {
@@ -1219,6 +1479,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _createTask(req, requestId, step, options = {}) {
+    const request = await this._getRequest(req, requestId);
     const oExistingTask = await cds.tx(req).run(
       SELECT.one.from(this.entities.ProcessTasks).where(
         options.skipIfExistingStep
@@ -1237,10 +1498,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       INSERT.into(this.entities.ProcessTasks).entries({
         referenceNumber: sReferenceNumber,
         request_ID: requestId,
+        processorUser_ID: request?.processorUser_ID || null,
         stepNo: step.stepNo,
         taskName: step.stepName,
         // Kept for workflow compatibility; assignee details are no longer presented by the UI.
         assignedTo: step.role,
+        processor: request?.processor || null,
         role: step.role,
         status_code: TASK_STATUS.OPEN
       })

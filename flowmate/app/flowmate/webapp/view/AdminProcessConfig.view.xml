@@ -27,7 +27,7 @@
         </f:title>
         <f:content>
             <VBox class="flowmateContent">
-                <IconTabBar class="flowmateSurface" expandable="false">
+                <IconTabBar class="flowmateSurface flowmateAdminConfig" expandable="false">
                     <items>
                         <IconTabFilter icon="sap-icon://process" text="{i18n>processConfigTableHeader}">
                             <OverflowToolbar class="flowmateToolbar">
@@ -47,16 +47,16 @@
                                 growingScrollToLoad="true"
                                 items="{path: '/ProcessStepConfig', events: {dataRequested: '.onDataRequested', dataReceived: '.onDataReceived'}}">
                                 <columns>
-                                    <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
-                                    <Column><Text text="{i18n>processTypeLabel}" /></Column>
-                                    <Column><Text text="{i18n>stepLabel}" /></Column>
-                                    <Column><Text text="{i18n>stepNameLabel}" /></Column>
-                                    <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>activityDescriptionLabel}" /></Column>
-                                    <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
-                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>mandatoryLabel}" /></Column>
-                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>slaDaysLabel}" /></Column>
-                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextApproveLabel}" /></Column>
-                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextRejectLabel}" /></Column>
+                                    <Column width="8rem"><Text text="{i18n>referenceNumberLabel}" wrapping="true" /></Column>
+                                    <Column width="9rem"><Text text="{i18n>processTypeLabel}" wrapping="true" /></Column>
+                                    <Column width="5rem"><Text text="{i18n>stepLabel}" wrapping="true" /></Column>
+                                    <Column width="10rem"><Text text="{i18n>stepNameLabel}" wrapping="true" /></Column>
+                                    <Column width="16rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
+                                    <Column width="8rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" wrapping="true" /></Column>
+                                    <Column width="7rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>mandatoryLabel}" wrapping="true" /></Column>
+                                    <Column width="6rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>slaDaysLabel}" wrapping="true" /></Column>
+                                    <Column width="8rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextApproveLabel}" wrapping="true" /></Column>
+                                    <Column width="8rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>nextRejectLabel}" wrapping="true" /></Column>
                                     <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items>
@@ -94,14 +94,14 @@
                             </OverflowToolbar>
                             <Table id="processTypesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/ProcessTypes}">
                                 <columns>
-                                    <Column><Text text="{i18n>configCodeLabel}" /></Column>
-                                    <Column><Text text="{i18n>configNameLabel}" /></Column>
-                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column>
+                                    <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                                    <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
                                     <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items>
                                     <ColumnListItem><cells>
-                                        <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                        <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
                                         <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
                                             <customData><core:CustomData key="entitySet" value="ProcessTypes" /></customData>
                                         </Button>
@@ -125,11 +125,11 @@
                             </OverflowToolbar>
                             <Table id="processStatusTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/ProcessStatus}">
                                 <columns>
-                                    <Column><Text text="{i18n>configCodeLabel}" /></Column><Column><Text text="{i18n>configNameLabel}" /></Column>
-                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                    <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column><Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items><ColumnListItem><cells>
-                                    <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                    <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
                                     <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
                                         <customData><core:CustomData key="entitySet" value="ProcessStatus" /></customData>
                                     </Button>
@@ -152,11 +152,11 @@
                             </OverflowToolbar>
                             <Table id="taskStatusTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/TaskStatus}">
                                 <columns>
-                                    <Column><Text text="{i18n>configCodeLabel}" /></Column><Column><Text text="{i18n>configNameLabel}" /></Column>
-                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                    <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column><Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items><ColumnListItem><cells>
-                                    <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                    <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
                                     <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
                                         <customData><core:CustomData key="entitySet" value="TaskStatus" /></customData>
                                     </Button>
@@ -179,11 +179,11 @@
                             </OverflowToolbar>
                             <Table id="requestDropDownTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/RequestDropDown}">
                                 <columns>
-                                    <Column><Text text="{i18n>configCodeLabel}" /></Column><Column><Text text="{i18n>configNameLabel}" /></Column>
-                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                    <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column><Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column><Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items><ColumnListItem><cells>
-                                    <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                    <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
                                     <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
                                         <customData><core:CustomData key="entitySet" value="RequestDropDown" /></customData>
                                     </Button>

@@ -24,7 +24,7 @@
     "requires": {
       "[development]": {
         "auth": {
-          "kind": "dummy",
+          "kind": "mocked",
           "users": {
             "*": false,
             "alice": false,
@@ -35,13 +35,28 @@
             "fred": false,
             "me": false,
             "yves": false,
-            "alex.johnson@flowmate.demo": {
+            "liam.patel@flowmate.demo": {
               "password": "FlowmateAdmin1!",
               "roles": [
                 "Admin"
               ]
             },
+            "alex.johnson@flowmate.demo": {
+              "password": "FlowmateUser1!"
+            },
             "priya.sharma@flowmate.demo": {
+              "password": "FlowmateUser1!"
+            },
+            "daniel.kim@flowmate.demo": {
+              "password": "FlowmateUser1!"
+            },
+            "maya.perera@flowmate.demo": {
+              "password": "FlowmateUser1!"
+            },
+            "sophia.fernando@flowmate.demo": {
+              "password": "FlowmateUser1!"
+            },
+            "emma.silva@flowmate.demo": {
               "password": "FlowmateUser1!"
             }
           }

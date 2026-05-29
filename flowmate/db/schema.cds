@@ -63,10 +63,13 @@ entity ProcessRequests : cuid, managed {
     processType : Association to ProcessTypes;
     requesterUser : Association to Users;
     processorUser : Association to Users;
+    reservedByUser : Association to Users;
     title       : String(255);
     description : LargeString;
     requester   : String(100);
     processor   : String(255);
+    reservedBy  : String(255);
+    reservedAt  : DateTime;
     department  : String(100);
     status      : Association to ProcessStatus;
     priority    : String(20);

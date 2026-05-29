@@ -17,7 +17,11 @@ sap.ui.define([
             this.getRouter().getRoute("RouteRequestCreate").attachPatternMatched(this.onRouteMatched, this);
         },
 
-        onRouteMatched() {
+        onRouteMatched(oEvent) {
+            const oQuery = oEvent.getParameter("arguments")["?query"] || {};
+
+            this._bReturnToUnreservedOnly = oQuery.unreserved === "true";
+            this._bReturnToReservedOnly = oQuery.reserved === "true";
             this.setTwoColumnLayout();
             this._aAttachmentFiles = [];
             this.getView().setModel(new JSONModel({
@@ -73,11 +77,9 @@ sap.ui.define([
                 }
 
                 MessageToast.show(this.getText("requestCreatedMessage"));
-                this.navTo("RouteMyRequests", {
-                    "?query": {
-                        requestId: oCreated.ID
-                    }
-                });
+                this.navTo("RouteMyRequests", this._getRequestListRouteParameters({
+                    requestId: oCreated.ID
+                }));
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("requestCreateFailedMessage"));
             } finally {
@@ -86,7 +88,7 @@ sap.ui.define([
         },
 
         onCancel() {
-            this.navTo("RouteMyRequests");
+            this.navTo("RouteMyRequests", this._getRequestListRouteParameters(), true);
         },
 
         onAttachmentsSelected(oEvent) {
@@ -240,6 +242,22 @@ sap.ui.define([
                     and: false
                 })
             ]);
+        },
+
+        _getRequestListRouteParameters(oExtraQuery = {}) {
+            const oQuery = { ...oExtraQuery };
+
+            if (this._bReturnToUnreservedOnly) {
+                oQuery.unreserved = "true";
+            }
+
+            if (this._bReturnToReservedOnly) {
+                oQuery.reserved = "true";
+            }
+
+            return Object.keys(oQuery).length
+                ? { "?query": oQuery }
+                : {};
         },
 
         _syncAttachmentModel() {

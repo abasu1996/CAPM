@@ -79,7 +79,7 @@
                             showRowCount="true"
                             enableAutoBinding="false"
                             beforeRebindTable=".onBeforeRebindRequestsTable"
-                            initiallyVisibleFields="referenceNumber,title,processor,processType_code,status_code,priority,department,dueDate">
+                            initiallyVisibleFields="referenceNumber,title,processor,reservedBy,processType_code,status_code,priority,department,dueDate">
                             <Table
                                 id="requestsTable"
                                 class="flowmateTable"
@@ -107,6 +107,12 @@
                                             <core:CustomData key="p13nData" value='\{"columnKey":"processor","leadingProperty":"processor","sortProperty":"processor","filterProperty":"processor"}' />
                                         </customData>
                                         <Text text="{i18n>processorLabel}" />
+                                    </Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet">
+                                        <customData>
+                                            <core:CustomData key="p13nData" value='\{"columnKey":"reservedBy","leadingProperty":"reservedBy","sortProperty":"reservedBy","filterProperty":"reservedBy"}' />
+                                        </customData>
+                                        <Text text="{i18n>reservedByLabel}" />
                                     </Column>
                                     <Column>
                                         <customData>
@@ -158,6 +164,9 @@
                                                 title="{title}"
                                                 text="{requester}" />
                                             <Text text="{processor}" />
+                                            <ObjectStatus
+                                                text="{= ${reservedBy} || ${i18n>unreservedLabel} }"
+                                                state="{= ${reservedBy} ? 'Success' : 'Information' }" />
                                             <ObjectIdentifier
                                                 title="{processType/name}"
                                                  />
@@ -173,12 +182,20 @@
                                                 inverted="true" />
                                             <Text text="{department}" />
                                             <Text text="{dueDate}" />
-                                            <Button
-                                                icon="sap-icon://delete"
-                                                type="Transparent"
-                                                enabled="{= ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
-                                                tooltip="{i18n>deleteRequestButton}"
-                                                press=".onDeleteRequest" />
+                                            <HBox justifyContent="End">
+                                                <Button
+                                                    icon="sap-icon://locked"
+                                                    type="Transparent"
+                                                    visible="{= !${reservedBy} }"
+                                                    tooltip="{i18n>reserveRequestButton}"
+                                                    press=".onReserveRequest" />
+                                                <Button
+                                                    icon="sap-icon://delete"
+                                                    type="Transparent"
+                                                    enabled="{= ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
+                                                    tooltip="{i18n>deleteRequestButton}"
+                                                    press=".onDeleteRequest" />
+                                            </HBox>
                                         </cells>
                                     </ColumnListItem>
                                 </items>
@@ -212,6 +229,12 @@
                                 tooltip="{= ${fclState>/midFullScreen} ? ${i18n>restoreColumnsButton} : ${i18n>expandColumnButton} }"
                                 press=".onToggleRequestFullScreen" />
                             <Button
+                                icon="sap-icon://locked"
+                                text="{i18n>reserveRequestButton}"
+                                type="Emphasized"
+                                visible="{= !${reservedBy} }"
+                                press=".onReserveRequest" />
+                            <Button
                                 icon="sap-icon://decline"
                                 text="{i18n>closeButton}"
                                 press=".onCloseRequestDetail" />
@@ -236,6 +259,12 @@
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>requesterLabel}" />
                                 <Text text="{requester}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>reservedByLabel}" />
+                                <ObjectStatus
+                                    text="{= ${reservedBy} || ${i18n>unreservedLabel} }"
+                                    state="{= ${reservedBy} ? 'Success' : 'Information' }" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
                                 <Label text="{i18n>statusLabel}" />
@@ -332,6 +361,9 @@
                                 <VBox
                                     class="flowmateProcessMilestone"
                                     alignItems="Center">
+                                    <customData>
+                                        <core:CustomData key="current" value="{processFlow>isCurrent}" writeToDom="true" />
+                                    </customData>
                                     <Button
                                         class="flowmateProcessMilestoneButton"
                                         icon="{processFlow>icon}"

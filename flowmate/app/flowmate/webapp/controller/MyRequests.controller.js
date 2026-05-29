@@ -50,6 +50,8 @@ sap.ui.define([
             const oQuery = oEvent.getParameter("arguments")["?query"];
             const sRequestId = oQuery && oQuery.requestId;
 
+            this._bShowUnreservedOnly = oQuery?.unreserved === "true";
+            this._bShowReservedOnly = oQuery?.reserved === "true";
             this.setOneColumnLayout();
             this._rebindRequestsTable();
 
@@ -62,7 +64,7 @@ sap.ui.define([
         },
 
         onCreateRequest() {
-            this.navTo("RouteRequestCreate");
+            this.navTo("RouteRequestCreate", this._getRequestListRouteParameters());
         },
 
         onBeforeRebindRequestsTable(oEvent) {
@@ -73,9 +75,16 @@ sap.ui.define([
             const sExpand = oBindingParams.parameters.expand || "";
 
             oBindingParams.events = oEvents;
+            oBindingParams.filters = oBindingParams.filters || [];
             oBindingParams.parameters.expand = sExpand
                 ? `${sExpand},processType`
                 : "processType";
+            if (this._bShowUnreservedOnly) {
+                oBindingParams.filters.push(new Filter("reservedBy", FilterOperator.EQ, null));
+            }
+            if (this._bShowReservedOnly) {
+                oBindingParams.filters.push(new Filter("reservedBy", FilterOperator.NE, null));
+            }
             oEvents.dataRequested = (...aArgs) => {
                 fnDataRequested?.(...aArgs);
                 this.onDataRequested();
@@ -171,6 +180,33 @@ sap.ui.define([
             this._showRequestDetail(oContext);
         },
 
+        async onReserveRequest(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext() || this.byId("requestObjectPage").getBindingContext();
+            const sRequestId = oContext?.getProperty("ID") || this._sSelectedRequestId;
+
+            if (!sRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("reserveRequest", {
+                    requestId: sRequestId
+                });
+                MessageToast.show(this.getText("requestReservedMessage"));
+                this._refreshSelectedRequest();
+                this.byId("requestsTable").getBinding("items")?.refresh();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("requestReserveErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
         onSearch(oEvent) {
             const sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue") || "";
             const oBinding = this.byId("requestsTable").getBinding("items");
@@ -199,7 +235,7 @@ sap.ui.define([
 
         onCloseRequestDetail() {
             this._resetRequestSelection();
-            this.navTo("RouteMyRequests", {}, true);
+            this.navTo("RouteMyRequests", this._getRequestListRouteParameters(), true);
         },
 
         onCloseRequestTaskDetail() {
@@ -209,7 +245,7 @@ sap.ui.define([
 
         onCloseInvolvedPartyDetail() {
             this._resetRequestSelection();
-            this.navTo("RouteMyRequests", {}, true);
+            this.navTo("RouteMyRequests", this._getRequestListRouteParameters(), true);
         },
 
         onRefreshRequestDetail() {
@@ -991,6 +1027,22 @@ sap.ui.define([
                 midFullScreen: sLayout === fLibrary.LayoutType.MidColumnFullScreen,
                 endFullScreen: sLayout === fLibrary.LayoutType.EndColumnFullScreen
             });
+        },
+
+        _getRequestListRouteParameters(oExtraQuery = {}) {
+            const oQuery = { ...oExtraQuery };
+
+            if (this._bShowUnreservedOnly) {
+                oQuery.unreserved = "true";
+            }
+
+            if (this._bShowReservedOnly) {
+                oQuery.reserved = "true";
+            }
+
+            return Object.keys(oQuery).length
+                ? { "?query": oQuery }
+                : {};
         },
 
         _resetRequestSelection() {
