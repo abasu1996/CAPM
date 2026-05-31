@@ -257,6 +257,10 @@
                                 <Text text="{processType/name}" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>subProcessTypeLabel}" />
+                                <Text text="{subProcessType/name}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>requesterLabel}" />
                                 <Text text="{requester}" />
                             </VBox>
@@ -436,6 +440,113 @@
                                     <VBox class="flowmateDetailBlock">
                                         <Label text="{i18n>descriptionLabel}" />
                                         <Text text="{description}" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="{i18n>ivFieldsTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox class="flowmateSurface flowmateIvFieldsTab">
+                                        <OverflowToolbar class="flowmateToolbar">
+                                            <Title text="{i18n>ivFieldsTitle}" />
+                                            <ToolbarSpacer />
+                                            <ObjectStatus
+                                                class="flowmateSemanticStatus"
+                                                icon="sap-icon://form"
+                                                text="{i18n>configuredFieldsLabel}"
+                                                state="Information"
+                                                inverted="true" />
+                                            <Button
+                                                icon="sap-icon://save"
+                                                tooltip="{i18n>saveIvFieldsButton}"
+                                                type="Emphasized"
+                                                enabled="{requestEdit>/editable}"
+                                                press=".onSaveIvFieldValues" />
+                                        </OverflowToolbar>
+                                        <Text
+                                            class="flowmateSectionHelpText"
+                                            text="{i18n>ivFieldValuesDescriptionText}"
+                                            wrapping="true" />
+                                        <FlexBox
+                                            class="flowmateIvFieldGrid"
+                                            wrap="Wrap"
+                                            alignItems="Stretch"
+                                            items="{ivFieldValues}">
+                                            <items>
+                                                <VBox class="flowmateIvFieldCard">
+                                                    <HBox
+                                                        alignItems="Center"
+                                                        justifyContent="SpaceBetween"
+                                                        wrap="Wrap">
+                                                        <Label
+                                                            text="{field/label}"
+                                                            wrapping="true" />
+                                                        <ObjectStatus
+                                                            text="{field/dataType}"
+                                                            state="Information" />
+                                                    </HBox>
+                                                    <ObjectIdentifier
+                                                        class="sapUiTinyMarginTop flowmateIvFieldValue"
+                                                        visible="{= !${requestEdit>/editable} }"
+                                                        title="{
+                                                            parts: [
+                                                                'value',
+                                                                'numberValue',
+                                                                'dateValue',
+                                                                'booleanValue',
+                                                                'field/dataType',
+                                                                'field/options'
+                                                            ],
+                                                            formatter: '.formatDynamicFieldDisplayValue'
+                                                        }"
+                                                        text="{field_fieldName}" />
+                                                    <ObjectStatus
+                                                        class="sapUiTinyMarginTop"
+                                                        visible="{= !${requestEdit>/editable} &amp;&amp; ${field/dataType} === 'List' &amp;&amp; !!${value} }"
+                                                        text="{value}"
+                                                        state="None" />
+                                                    <Select
+                                                        class="sapUiTinyMarginTop"
+                                                        width="100%"
+                                                        visible="{= ${requestEdit>/editable} &amp;&amp; ${field/dataType} === 'List' }"
+                                                        selectedKey="{value}"
+                                                        items="{field/options}">
+                                                        <core:Item key="{code}" text="{text}" />
+                                                    </Select>
+                                                    <Select
+                                                        class="sapUiTinyMarginTop"
+                                                        width="100%"
+                                                        visible="{= ${requestEdit>/editable} &amp;&amp; ${field/dataType} === 'Boolean' }"
+                                                        selectedKey="{value}">
+                                                        <core:Item key="" text="" />
+                                                        <core:Item key="true" text="{i18n>yesText}" />
+                                                        <core:Item key="false" text="{i18n>noText}" />
+                                                    </Select>
+                                                    <DatePicker
+                                                        class="sapUiTinyMarginTop"
+                                                        width="100%"
+                                                        visible="{= ${requestEdit>/editable} &amp;&amp; ${field/dataType} === 'Date' }"
+                                                        value="{value}"
+                                                        valueFormat="yyyy-MM-dd"
+                                                        displayFormat="medium" />
+                                                    <TextArea
+                                                        class="sapUiTinyMarginTop"
+                                                        width="100%"
+                                                        rows="3"
+                                                        visible="{= ${requestEdit>/editable} &amp;&amp; ${field/inputHint} === 'DocumentReference' }"
+                                                        value="{value}" />
+                                                    <Input
+                                                        class="sapUiTinyMarginTop"
+                                                        width="100%"
+                                                        visible="{= ${requestEdit>/editable} &amp;&amp; ${field/dataType} !== 'Date' &amp;&amp; ${field/dataType} !== 'List' &amp;&amp; ${field/dataType} !== 'Boolean' &amp;&amp; ${field/inputHint} !== 'DocumentReference' }"
+                                                        value="{value}"
+                                                        type="{= ${field/dataType} === 'Decimal' ? 'Number' : 'Text' }" />
+                                                </VBox>
+                                            </items>
+                                        </FlexBox>
                                     </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>

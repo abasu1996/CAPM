@@ -29,7 +29,7 @@ sap.ui.define([
             this.getView().bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,tasks,comments,attachments,history"
+                    expand: "processType,subProcessType,ivFieldValues/field/options,tasks,comments,attachments,history"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -50,6 +50,13 @@ sap.ui.define([
                     }
                 }
             });
+            const oBinding = this.getView().getElementBinding();
+
+            if (oBinding) {
+
+                oBinding.refresh();
+
+                }
         },
 
         async onSaveRequestStatus() {
@@ -132,6 +139,45 @@ sap.ui.define([
 
         onRefresh() {
             this._refreshRequest();
+        },
+
+        formatDynamicFieldValue(sValue, sNumberValue, sDateValue, sBooleanValue) {
+            if (sDateValue) {
+                return sDateValue;
+            }
+
+            if (sNumberValue !== undefined && sNumberValue !== null && sNumberValue !== "") {
+                return sNumberValue;
+            }
+
+            if (sBooleanValue !== undefined && sBooleanValue !== null && sBooleanValue !== "") {
+                return this._isTruthy(sBooleanValue) ? this.getText("yesText") : this.getText("noText");
+            }
+
+            return sValue || "";
+        },
+
+        formatDynamicFieldDisplayValue(sValue, sNumberValue, sDateValue, sBooleanValue, sDataType, aOptions) {
+            const sFormattedValue = this.formatDynamicFieldValue(sValue, sNumberValue, sDateValue, sBooleanValue);
+
+            if (sDataType !== "List") {
+                return sFormattedValue;
+            }
+
+            return this._resolveDynamicFieldOptionText(sFormattedValue, aOptions);
+        },
+
+        formatDynamicFieldCodeVisible(sValue, sDataType) {
+            return sDataType === "List" && Boolean(sValue);
+        },
+
+        _resolveDynamicFieldOptionText(sCode, aOptions) {
+            const aNormalizedOptions = Array.isArray(aOptions)
+                ? aOptions
+                : aOptions?.results || [];
+            const oOption = aNormalizedOptions.find((oItem) => oItem.code === sCode);
+
+            return oOption?.text || sCode || "";
         },
 
         onTaskReferencePress(oEvent) {
@@ -355,6 +401,14 @@ sap.ui.define([
                     and: false
                 })
             ]);
+        },
+
+        _isTruthy(vValue) {
+            if (typeof vValue === "string") {
+                return vValue.toLowerCase() === "true" || vValue === "1";
+            }
+
+            return Boolean(vValue);
         },
 
         async _fetchAttachmentContent(oContext) {

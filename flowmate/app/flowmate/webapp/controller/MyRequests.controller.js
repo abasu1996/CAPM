@@ -107,10 +107,17 @@ sap.ui.define([
                 oSmartTable.rebindTable(true);
             });
         },
+        _refreshRequest() {
+            const oBinding = this.getView().getElementBinding();
 
+            if (oBinding) {
+                oBinding.refresh(true);
+            }
+        },
         onRequestPress(oEvent) {
             const oItem = oEvent.getParameter("listItem") || oEvent.getSource();
             this._openRequest(oItem.getBindingContext());
+            this._refreshRequest();
         },
 
         onRequestReferencePress(oEvent) {
@@ -403,6 +410,42 @@ sap.ui.define([
                 this._refreshSelectedRequest();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onSaveIvFieldValues() {
+            const oRequestContext = this.byId("requestObjectPage").getBindingContext();
+            const oRequest = oRequestContext?.getObject();
+            const aFieldValues = this._normalizeCollection(oRequest?.ivFieldValues);
+
+            if (!this._sSelectedRequestId || !this._isRequestEditable(oRequest)) {
+                MessageToast.show(this.getText("requestNotEditableMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await Promise.all(aFieldValues.map((oFieldValue) => {
+                    const oPayload = this._buildIvFieldValuePayload(this._sSelectedRequestId, oFieldValue);
+
+                    if (oFieldValue.ID && !this._isSyntheticIvFieldValueId(oFieldValue.ID)) {
+                        return this.updateEntry(`/ProcessRequestFieldValues(guid'${oFieldValue.ID}')`, oPayload);
+                    }
+
+                    if (!String(oPayload.value || "").trim()) {
+                        return Promise.resolve();
+                    }
+
+                    return this.createEntry("/ProcessRequestFieldValues", oPayload);
+                }));
+
+                MessageToast.show(this.getText("ivFieldsUpdatedMessage"));
+                this._refreshSelectedRequest();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("ivFieldsUpdateErrorMessage"));
             } finally {
                 this.hideBusy();
             }
@@ -976,6 +1019,45 @@ sap.ui.define([
             }
         },
 
+        formatDynamicFieldValue(sValue, sNumberValue, sDateValue, sBooleanValue) {
+            if (sDateValue) {
+                return sDateValue;
+            }
+
+            if (sNumberValue !== undefined && sNumberValue !== null && sNumberValue !== "") {
+                return sNumberValue;
+            }
+
+            if (sBooleanValue !== undefined && sBooleanValue !== null && sBooleanValue !== "") {
+                return this._isTruthy(sBooleanValue) ? this.getText("yesText") : this.getText("noText");
+            }
+
+            return sValue || "";
+        },
+
+        formatDynamicFieldDisplayValue(sValue, sNumberValue, sDateValue, sBooleanValue, sDataType, aOptions) {
+            const sFormattedValue = this.formatDynamicFieldValue(sValue, sNumberValue, sDateValue, sBooleanValue);
+
+            if (sDataType !== "List") {
+                return sFormattedValue;
+            }
+
+            return this._resolveDynamicFieldOptionText(sFormattedValue, aOptions);
+        },
+
+        formatDynamicFieldCodeVisible(sValue, sDataType) {
+            return sDataType === "List" && Boolean(sValue);
+        },
+
+        _resolveDynamicFieldOptionText(sCode, aOptions) {
+            const aNormalizedOptions = Array.isArray(aOptions)
+                ? aOptions
+                : aOptions?.results || [];
+            const oOption = aNormalizedOptions.find((oItem) => oItem.code === sCode);
+
+            return oOption?.text || sCode || "";
+        },
+
         _openRequest(oContext) {
             this._showRequestDetail(oContext);
         },
@@ -989,7 +1071,7 @@ sap.ui.define([
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,tasks,involvedParties,comments,attachments,history"
+                    expand: "processType,subProcessType,ivFieldValues/field/options,tasks,involvedParties,comments,attachments,history"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -1019,6 +1101,7 @@ sap.ui.define([
                 }
             });
             this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
+            this._refreshRequest();
         },
 
         _setRequestsLayout(sLayout) {
@@ -1342,7 +1425,42 @@ sap.ui.define([
         },
 
         _isRequestEditable(oRequest) {
-            return !["COMPLETED", "REJECTED"].includes(oRequest?.status_code);
+            return Boolean(oRequest?.reservedBy) && !["COMPLETED", "REJECTED"].includes(oRequest?.status_code);
+        },
+
+        _buildIvFieldValuePayload(sRequestId, oFieldValue) {
+            const sDataType = oFieldValue.field?.dataType || "String";
+            const sValue = String(oFieldValue.value ?? "").trim();
+            const oPayload = {
+                request_ID: sRequestId,
+                field_fieldName: oFieldValue.field_fieldName,
+                value: sValue,
+                numberValue: null,
+                dateValue: null,
+                booleanValue: null
+            };
+
+            if (sDataType === "Decimal" && sValue) {
+                oPayload.numberValue = Number(sValue);
+            } else if (sDataType === "Date" && sValue) {
+                oPayload.dateValue = sValue;
+            } else if (sDataType === "Boolean" && sValue) {
+                oPayload.booleanValue = sValue === "true";
+            }
+
+            return oPayload;
+        },
+
+        _isSyntheticIvFieldValueId(sId) {
+            return /^00000000-0000-4000-8000-/.test(sId || "");
+        },
+
+        _normalizeCollection(vCollection) {
+            if (Array.isArray(vCollection)) {
+                return vCollection;
+            }
+
+            return vCollection?.results || [];
         },
 
         _isTruthy(vValue) {

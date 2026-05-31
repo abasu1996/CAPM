@@ -1,4 +1,5 @@
 const cds = require("@sap/cds");
+const crypto = require("crypto");
 
 const PROCESS_STATUS = {
   DRAFT: "DRAFT",
@@ -30,7 +31,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessComments,
       ProcessAttachments,
       ProcessHistory,
+      ProcessRequestFieldValues,
       ProcessStepConfig,
+      ProcessRequestFieldCatalog,
+      ProcessRequestFieldMappings,
+      ProcessRequestFieldOptions,
       ProcessTypes,
       ProcessStatus,
       TaskStatus,
@@ -57,6 +62,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     this.after("READ", ProcessRequests, async (data, req) => {
       const oReservationUser = await this._currentReservationUser(req, Users);
       this._filterExpandedTasksByAssignment(data, oReservationUser);
+      await this._addVisibleIvFieldsToRequests(data, req, {
+        fieldCatalog: ProcessRequestFieldCatalog,
+        fieldMappings: ProcessRequestFieldMappings,
+        fieldOptions: ProcessRequestFieldOptions
+      });
     });
 
     this.before("READ", ProcessTasks, async (req) => {
@@ -206,6 +216,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.after("CREATE", ProcessRequests, async (request, req) => {
       await this._ensureInitialGuidedTask(req, request.ID, request, { updateRequest: true });
+    });
+
+    this.before("CREATE", ProcessRequestFieldValues, async (req) => {
+      await this._rejectIfRequestLocked(req, req.data.request_ID);
+    });
+
+    this.before(["UPDATE", "DELETE"], ProcessRequestFieldValues, async (req) => {
+      await this._rejectIfIvFieldRequestLocked(req);
     });
 
     this.before(["UPDATE", "DELETE"], ProcessRequests, async (req) => {
@@ -1274,6 +1292,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     await this._rejectIfRequestLocked(req, attachment?.request_ID || req.data?.request_ID);
   }
 
+  async _rejectIfIvFieldRequestLocked(req) {
+    const fieldValueId = this._requestIdFromReq(req);
+    const fieldValue = fieldValueId
+      ? await cds.tx(req).run(SELECT.one.from(this.entities.ProcessRequestFieldValues).where({ ID: fieldValueId }))
+      : null;
+
+    await this._rejectIfRequestLocked(req, fieldValue?.request_ID || req.data?.request_ID);
+  }
+
   async _getUser(req, userId, Users) {
     return cds.tx(req).run(SELECT.one.from(Users).where({ ID: userId, isActive: true }));
   }
@@ -1344,6 +1371,139 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return Boolean(await cds.tx(req).run(
       SELECT.one.from(StatusEntity).where({ code: statusCode })
     ));
+  }
+
+  async _addVisibleIvFieldsToRequests(data, req, entities) {
+    const requests = (Array.isArray(data) ? data : [data])
+      .filter(Boolean)
+      .filter((request) => Array.isArray(request.ivFieldValues));
+
+    if (!requests.length) {
+      return;
+    }
+
+    const processTypes = [...new Set(requests.map((request) => request.processType_code).filter(Boolean))];
+
+    if (!processTypes.length) {
+      return;
+    }
+
+    const tx = cds.tx(req);
+    const mappings = await tx.run(
+      SELECT.from(entities.fieldMappings)
+        .where({
+          processType_code: { in: processTypes },
+          isVisible: true
+        })
+        .orderBy("processType_code", "processSubType_code", "sequence")
+    );
+    const fieldNames = [...new Set(mappings.map((mapping) => mapping.field_fieldName).filter(Boolean))];
+
+    if (!fieldNames.length) {
+      return;
+    }
+
+    const [fields, options] = await Promise.all([
+      tx.run(SELECT.from(entities.fieldCatalog).where({ fieldName: { in: fieldNames } })),
+      tx.run(
+        SELECT.from(entities.fieldOptions)
+          .where({ field_fieldName: { in: fieldNames }, isActive: true })
+          .orderBy("field_fieldName", "sequence")
+      )
+    ]);
+    const fieldsByName = new Map(fields.map((field) => [field.fieldName, field]));
+    const optionsByField = options.reduce((result, option) => {
+      const fieldOptions = result.get(option.field_fieldName) || [];
+
+      fieldOptions.push(option);
+      result.set(option.field_fieldName, fieldOptions);
+      return result;
+    }, new Map());
+    const mappingsByProcessType = mappings.reduce((result, mapping) => {
+      const typeMappings = result.get(mapping.processType_code) || [];
+
+      typeMappings.push(mapping);
+      result.set(mapping.processType_code, typeMappings);
+      return result;
+    }, new Map());
+
+    requests.forEach((request) => {
+      const existingValuesByField = new Map(
+        request.ivFieldValues
+          .filter((fieldValue) => fieldValue.field_fieldName)
+          .map((fieldValue) => [fieldValue.field_fieldName, fieldValue])
+      );
+      const visibleMappings = this._visibleIvFieldMappingsForRequest(
+        request,
+        mappingsByProcessType.get(request.processType_code) || []
+      );
+
+      if (!visibleMappings.length) {
+        return;
+      }
+
+      const visibleFieldValues = visibleMappings.map((mapping) => {
+        const fieldName = mapping.field_fieldName;
+        const field = fieldsByName.get(fieldName) || {
+          fieldName,
+          label: mapping.fieldLabel || fieldName,
+          dataType: "String"
+        };
+        const existingValue = existingValuesByField.get(fieldName) || {
+          ID: this._syntheticIvFieldValueId(request.ID, fieldName),
+          request_ID: request.ID,
+          field_fieldName: fieldName,
+          value: ""
+        };
+
+        return {
+          ...existingValue,
+          field_fieldName: fieldName,
+          field: {
+            ...field,
+            label: mapping.fieldLabel || field.label || fieldName,
+            options: optionsByField.get(fieldName) || []
+          }
+        };
+      });
+      const visibleFieldNames = new Set(visibleMappings.map((mapping) => mapping.field_fieldName));
+      const unmappedValues = request.ivFieldValues.filter((fieldValue) =>
+        fieldValue.field_fieldName && !visibleFieldNames.has(fieldValue.field_fieldName)
+      );
+
+      request.ivFieldValues = [...visibleFieldValues, ...unmappedValues];
+    });
+  }
+
+  _visibleIvFieldMappingsForRequest(request, mappings) {
+    const mappingsByField = new Map();
+
+    mappings
+      .filter((mapping) =>
+        !mapping.processSubType_code ||
+        mapping.processSubType_code === request.subProcessType_code
+      )
+      .forEach((mapping) => {
+        const existing = mappingsByField.get(mapping.field_fieldName);
+
+        if (!existing || mapping.processSubType_code && !existing.processSubType_code) {
+          mappingsByField.set(mapping.field_fieldName, mapping);
+        }
+      });
+
+    return [...mappingsByField.values()].sort((left, right) =>
+      Number(left.sequence || 9999) - Number(right.sequence || 9999)
+    );
+  }
+
+  _syntheticIvFieldValueId(requestId, fieldName) {
+    const hash = crypto
+      .createHash("sha1")
+      .update(`${requestId || "request"}:${fieldName || "field"}`)
+      .digest("hex")
+      .slice(0, 12);
+
+    return `00000000-0000-4000-8000-${hash}`;
   }
 
   async _resolveDelegatedRecipient(req, originalRecipient, Delegations) {

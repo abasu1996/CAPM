@@ -27,6 +27,13 @@ sap.ui.define([
             this.getView().setModel(new JSONModel({
                 processType_code: "",
                 processTypeName: "",
+                subProcessType_code: "",
+                subProcessTypeName: "",
+                hasSubProcessTypes: false,
+                dynamicFieldsVisible: false,
+                dynamicFieldsLoading: false,
+                dynamicFields: [],
+                dynamicFieldsCount: 0,
                 title: "",
                 description: "",
                 requesterUser_ID: "",
@@ -38,6 +45,7 @@ sap.ui.define([
                 department: "",
                 priority: "Medium",
                 autoSubmit: true,
+                creating: false,
                 uploading: false,
                 attachments: []
             }), "create");
@@ -51,12 +59,27 @@ sap.ui.define([
                 return;
             }
 
+            if (oPayload.hasSubProcessTypes && !oPayload.subProcessType_code) {
+                MessageBox.warning(this.getText("subProcessTypeRequiredMessage"));
+                return;
+            }
+
+            const oMissingField = (oPayload.dynamicFields || []).find((oField) =>
+                oField.required && !String(oField.value || "").trim()
+            );
+
+            if (oMissingField) {
+                MessageBox.warning(this.getText("dynamicFieldRequiredMessage", [oMissingField.label]));
+                return;
+            }
+
             const oCreateModel = this.getView().getModel("create");
-            oCreateModel.setProperty("/uploading", true);
+            oCreateModel.setProperty("/creating", true);
 
             try {
                 const oCreated = await this.createEntry("/ProcessRequests", {
                     processType_code: oPayload.processType_code,
+                    subProcessType_code: oPayload.subProcessType_code || undefined,
                     title: oPayload.title,
                     description: oPayload.description,
                     requesterUser_ID: oPayload.requesterUser_ID || undefined,
@@ -68,7 +91,7 @@ sap.ui.define([
                     status_code: "DRAFT"
                 });
 
-                await this._uploadAttachments(oCreated.ID);
+                await this._saveDynamicFieldValues(oCreated.ID, oPayload.dynamicFields || []);
 
                 if (oPayload.autoSubmit) {
                     await this.callAction("submitRequest", {
@@ -76,14 +99,20 @@ sap.ui.define([
                     });
                 }
 
-                MessageToast.show(this.getText("requestCreatedMessage"));
+                if (this._aAttachmentFiles.length) {
+                    this._startAttachmentUploadInBackground(oCreated.ID, [...this._aAttachmentFiles]);
+                    MessageToast.show(this.getText("requestCreatedAttachmentUploadStartedMessage"));
+                } else {
+                    MessageToast.show(this.getText("requestCreatedMessage"));
+                }
+
                 this.navTo("RouteMyRequests", this._getRequestListRouteParameters({
                     requestId: oCreated.ID
                 }));
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("requestCreateFailedMessage"));
             } finally {
-                oCreateModel.setProperty("/uploading", false);
+                oCreateModel.setProperty("/creating", false);
             }
         },
 
@@ -145,7 +174,7 @@ sap.ui.define([
             ]);
         },
 
-        onProcessTypeValueHelpConfirm(oEvent) {
+        async onProcessTypeValueHelpConfirm(oEvent) {
             const oSelectedItem = oEvent.getParameter("selectedItem");
             const oContext = oSelectedItem && oSelectedItem.getBindingContext();
 
@@ -155,6 +184,7 @@ sap.ui.define([
 
             this.getView().getModel("create").setProperty("/processType_code", oContext.getProperty("code"));
             this.getView().getModel("create").setProperty("/processTypeName", oContext.getProperty("name"));
+            await this._onProcessSelectionChanged();
             this.onProcessTypeValueHelpClose(oEvent);
         },
 
@@ -223,6 +253,41 @@ sap.ui.define([
             oEvent.getSource().getBinding("items")?.filter([]);
         },
 
+        onSubProcessTypeValueHelpRequest() {
+            const sProcessTypeCode = this.getView().getModel("create").getProperty("/processType_code");
+
+            if (!sProcessTypeCode) {
+                MessageToast.show(this.getText("selectProcessTypeFirstMessage"));
+                return;
+            }
+
+            const oDialog = this.byId("subProcessTypeValueHelpDialog");
+            this._filterSubProcessTypeDialog(oDialog, "");
+            oDialog.open();
+        },
+
+        onSubProcessTypeValueHelpSearch(oEvent) {
+            this._filterSubProcessTypeDialog(oEvent.getSource(), oEvent.getParameter("value") || "");
+        },
+
+        async onSubProcessTypeValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (!oContext) {
+                return;
+            }
+
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/subProcessType_code", oContext.getProperty("code"));
+            oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
+            await this._loadDynamicFieldMappings();
+            this.onSubProcessTypeValueHelpClose(oEvent);
+        },
+
+        onSubProcessTypeValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
         _filterUsers(oDialog, sQuery) {
             const oBinding = oDialog.getBinding("items");
 
@@ -242,6 +307,179 @@ sap.ui.define([
                     and: false
                 })
             ]);
+        },
+
+        _filterSubProcessTypeDialog(oDialog, sQuery) {
+            const sProcessTypeCode = this.getView().getModel("create").getProperty("/processType_code");
+            const oBinding = oDialog.getBinding("items");
+            const aFilters = [
+                new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)
+            ];
+
+            if (sQuery) {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("code", FilterOperator.Contains, sQuery),
+                        new Filter("name", FilterOperator.Contains, sQuery),
+                        new Filter("descr", FilterOperator.Contains, sQuery),
+                        new Filter("processOwner", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                }));
+            }
+
+            oBinding.filter(aFilters);
+        },
+
+        async _onProcessSelectionChanged() {
+            const oCreateModel = this.getView().getModel("create");
+
+            oCreateModel.setProperty("/subProcessType_code", "");
+            oCreateModel.setProperty("/subProcessTypeName", "");
+            oCreateModel.setProperty("/dynamicFields", []);
+            oCreateModel.setProperty("/dynamicFieldsCount", 0);
+            oCreateModel.setProperty("/dynamicFieldsVisible", false);
+
+            const aSubTypes = await this._readList("/ProcessSubTypes", {
+                filters: [new Filter("processType_code", FilterOperator.EQ, oCreateModel.getProperty("/processType_code"))],
+                sorters: []
+            });
+
+            oCreateModel.setProperty("/hasSubProcessTypes", aSubTypes.length > 0);
+
+            if (!aSubTypes.length) {
+                await this._loadDynamicFieldMappings();
+            }
+        },
+
+        async _loadDynamicFieldMappings() {
+            const oCreateModel = this.getView().getModel("create");
+            const sProcessTypeCode = oCreateModel.getProperty("/processType_code");
+            const sSubProcessTypeCode = oCreateModel.getProperty("/subProcessType_code");
+
+            if (!sProcessTypeCode || (oCreateModel.getProperty("/hasSubProcessTypes") && !sSubProcessTypeCode)) {
+                oCreateModel.setProperty("/dynamicFields", []);
+                oCreateModel.setProperty("/dynamicFieldsCount", 0);
+                oCreateModel.setProperty("/dynamicFieldsVisible", false);
+                return;
+            }
+
+            oCreateModel.setProperty("/dynamicFieldsLoading", true);
+
+            try {
+                const aFilters = [
+                    new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode),
+                    new Filter("isVisible", FilterOperator.EQ, true)
+                ];
+
+                if (sSubProcessTypeCode) {
+                    aFilters.push(new Filter("processSubType_code", FilterOperator.EQ, sSubProcessTypeCode));
+                }
+
+                const aMappings = await this._readList("/ProcessRequestFieldMappings", {
+                    filters: aFilters,
+                    urlParameters: {
+                        "$expand": "field",
+                        "$orderby": "sequence asc"
+                    }
+                });
+                const aListFieldNames = aMappings
+                    .filter((oMapping) => (oMapping.field?.dataType || "String") === "List")
+                    .map((oMapping) => oMapping.field_fieldName);
+                const mOptions = await this._loadFieldOptions(aListFieldNames);
+
+                const aDynamicFields = aMappings.map((oMapping) => ({
+                    fieldName: oMapping.field_fieldName,
+                    label: oMapping.fieldLabel || oMapping.field?.label || oMapping.field_fieldName,
+                    dataType: oMapping.field?.dataType || "String",
+                    defaultValue: oMapping.field?.defaultValue || "",
+                    placeholder: oMapping.field?.placeholder || "",
+                    inputHint: oMapping.field?.inputHint || "",
+                    sourceColumn: oMapping.sourceColumn,
+                    required: this._isTruthy(oMapping.isMandatory),
+                    options: mOptions[oMapping.field_fieldName] || [],
+                    value: oMapping.field?.defaultValue || ""
+                }));
+
+                oCreateModel.setProperty("/dynamicFields", aDynamicFields);
+                oCreateModel.setProperty("/dynamicFieldsCount", aDynamicFields.length);
+                oCreateModel.setProperty("/dynamicFieldsVisible", aMappings.length > 0);
+            } finally {
+                oCreateModel.setProperty("/dynamicFieldsLoading", false);
+            }
+        },
+
+        async _loadFieldOptions(aFieldNames) {
+            const aUniqueFieldNames = [...new Set(aFieldNames)].filter(Boolean);
+
+            if (!aUniqueFieldNames.length) {
+                return {};
+            }
+
+            const aOptions = await this._readList("/ProcessRequestFieldOptions", {
+                filters: [
+                    new Filter({
+                        filters: aUniqueFieldNames.map((sFieldName) =>
+                            new Filter("field_fieldName", FilterOperator.EQ, sFieldName)
+                        ),
+                        and: false
+                    }),
+                    new Filter("isActive", FilterOperator.EQ, true)
+                ],
+                urlParameters: {
+                    "$orderby": "field_fieldName asc,sequence asc"
+                }
+            });
+
+            return aOptions.reduce((mResult, oOption) => {
+                if (!mResult[oOption.field_fieldName]) {
+                    mResult[oOption.field_fieldName] = [];
+                }
+
+                mResult[oOption.field_fieldName].push({
+                    code: oOption.code,
+                    text: oOption.text || oOption.code
+                });
+                return mResult;
+            }, {});
+        },
+
+        async _saveDynamicFieldValues(sRequestId, aFields) {
+            const aFilledFields = aFields.filter((oField) => String(oField.value || "").trim());
+
+            await Promise.all(aFilledFields.map((oField) => {
+                const oPayload = {
+                    request_ID: sRequestId,
+                    field_fieldName: oField.fieldName,
+                    value: String(oField.value || "")
+                };
+
+                if (oField.dataType === "Decimal") {
+                    oPayload.numberValue = Number(oField.value) || undefined;
+                } else if (oField.dataType === "Date") {
+                    oPayload.dateValue = oField.value;
+                }
+
+                return this.createEntry("/ProcessRequestFieldValues", oPayload);
+            }));
+        },
+
+        _readList(sPath, oParameters) {
+            return new Promise((resolve, reject) => {
+                this.getModel().read(sPath, {
+                    ...(oParameters || {}),
+                    success: (oData) => resolve(oData.results || []),
+                    error: reject
+                });
+            });
+        },
+
+        _isTruthy(vValue) {
+            if (typeof vValue === "string") {
+                return vValue.toLowerCase() === "true" || vValue === "1";
+            }
+
+            return Boolean(vValue);
         },
 
         _getRequestListRouteParameters(oExtraQuery = {}) {
@@ -269,7 +507,7 @@ sap.ui.define([
                 sizeText: this._formatFileSize(oFile.size),
                 progress: aCurrentAttachments[iIndex]?.progress || 0,
                 progressText: aCurrentAttachments[iIndex]?.progressText || "0%",
-                statusText: aCurrentAttachments[iIndex]?.statusText || this.getText("attachmentQueuedStatus"),
+                statusText: aCurrentAttachments[iIndex]?.statusText || this.getText("attachmentSelectedStatus"),
                 statusState: aCurrentAttachments[iIndex]?.statusState || "None",
                 showProgress: aCurrentAttachments[iIndex]?.showProgress || false
             })));
@@ -306,15 +544,31 @@ sap.ui.define([
             return `${iSize.toFixed(iUnitIndex ? 1 : 0)} ${aUnits[iUnitIndex]}`;
         },
 
-        async _uploadAttachments(sRequestId) {
-            if (!this._aAttachmentFiles.length) {
+        _startAttachmentUploadInBackground(sRequestId, aFiles) {
+            const oCreateModel = this.getView().getModel("create");
+
+            oCreateModel.setProperty("/uploading", true);
+            this._uploadAttachments(sRequestId, aFiles)
+                .then(() => {
+                    MessageToast.show(this.getText("attachmentsUploadedMessage"));
+                })
+                .catch((oError) => {
+                    MessageBox.error(oError.message || this.getText("attachmentBackgroundUploadErrorMessage"));
+                })
+                .finally(() => {
+                    oCreateModel.setProperty("/uploading", false);
+                });
+        },
+
+        async _uploadAttachments(sRequestId, aFiles = this._aAttachmentFiles) {
+            if (!aFiles.length) {
                 return;
             }
 
             const sToken = await this._fetchCsrfToken();
 
-            for (let iIndex = 0; iIndex < this._aAttachmentFiles.length; iIndex += 1) {
-                const oFile = this._aAttachmentFiles[iIndex];
+            for (let iIndex = 0; iIndex < aFiles.length; iIndex += 1) {
+                const oFile = aFiles[iIndex];
 
                 this._setAttachmentUploadStatus(iIndex, {
                     statusText: this.getText("attachmentUploadingStatus"),

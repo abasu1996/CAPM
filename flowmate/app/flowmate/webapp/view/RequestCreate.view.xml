@@ -38,133 +38,294 @@
                         text="{i18n>delegationsNavButton}"
                         press=".onNavToDelegations" />
                     <Button
+                        icon="sap-icon://save"
                         text="{i18n>createButton}"
                         type="Emphasized"
-                        enabled="{= !${create>/uploading} }"
+                        enabled="{= !${create>/creating} }"
                         press=".onCreate" />
                     <Button
+                        icon="sap-icon://decline"
                         text="{i18n>cancelButton}"
-                        enabled="{= !${create>/uploading} }"
+                        enabled="{= !${create>/creating} }"
                         press=".onCancel" />
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <VBox class="flowmateContent flowmateNarrowContent">
-                <form:SimpleForm
-                class="flowmateFormSurface"
-                editable="true"
-                layout="ResponsiveGridLayout"
-                labelSpanXL="3"
-                labelSpanL="3"
-                labelSpanM="4"
-                adjustLabelSpan="false">
-                <Label
-                    text="{i18n>processTypeLabel}"
-                    required="true" />
-                <Input
-                    value="{create>/processTypeName}"
-                    placeholder="{i18n>chooseProcessTypePlaceholder}"
-                    showValueHelp="true"
-                    valueHelpOnly="true"
-                    valueHelpRequest=".onProcessTypeValueHelpRequest"
-                    required="true" />
-                <Label
-                    text="{i18n>requestTitleLabel}"
-                    required="true" />
-                <Input
-                    value="{create>/title}"
-                    maxLength="255"
-                    required="true" />
-                <Label text="{i18n>requesterLabel}" />
-                <Input
-                    value="{create>/requesterName}"
-                    placeholder="{i18n>chooseUserPlaceholder}"
-                    showValueHelp="true"
-                    valueHelpOnly="true"
-                    valueHelpRequest=".onRequesterValueHelpRequest" />
-                <Label text="{i18n>processorLabel}" />
-                <Input
-                    value="{create>/processorName}"
-                    placeholder="{i18n>selectProcessorPlaceholder}"
-                    showValueHelp="true"
-                    valueHelpOnly="true"
-                    valueHelpRequest=".onProcessorValueHelpRequest" />
-                <Label text="{i18n>departmentLabel}" />
-                <Input
-                    value="{create>/department}"
-                    maxLength="100" />
-                <Label text="{i18n>priorityLabel}" />
-                <Select selectedKey="{create>/priority}">
-                    <core:Item
-                        key="Low"
-                        text="{i18n>priorityLow}" />
-                    <core:Item
-                        key="Medium"
-                        text="{i18n>priorityMedium}" />
-                    <core:Item
-                        key="High"
-                        text="{i18n>priorityHigh}" />
-                    <core:Item
-                        key="Critical"
-                        text="{i18n>priorityCritical}" />
-                </Select>
-                <Label text="{i18n>descriptionLabel}" />
-                <TextArea
-                    value="{create>/description}"
-                    rows="6"
-                    width="100%" />
-                <Label text="{i18n>autoSubmitLabel}" />
-                <Switch state="{create>/autoSubmit}" />
-                <Label text="{i18n>attachmentsTitle}" />
-                <VBox>
-                    <u:FileUploader
-                        id="attachmentsUploader"
-                        buttonOnly="true"
-                        buttonText="{i18n>chooseDocumentsButton}"
-                        change=".onAttachmentsSelected"
-                        fileSizeExceed=".onAttachmentFileSizeExceed"
-                        icon="sap-icon://attachment"
-                        maximumFileSize="400"
-                        multiple="true"
-                        enabled="{= !${create>/uploading} }"
-                        sameFilenameAllowed="true" />
-                    <List
-                        class="sapUiSmallMarginTop flowmateAttachmentList"
-                        noDataText="{i18n>noAttachmentsSelectedText}"
-                        items="{create>/attachments}">
-                        <CustomListItem>
-                            <VBox class="flowmateUploadItem">
-                                <HBox
-                                    alignItems="Center"
-                                    justifyContent="SpaceBetween">
-                                    <ObjectIdentifier
-                                        title="{create>name}"
-                                        text="{create>sizeText}" />
-                                    <HBox alignItems="Center">
-                                        <ObjectStatus
-                                            class="flowmateSemanticStatus"
-                                            text="{create>statusText}"
-                                            state="{create>statusState}"
-                                            inverted="true" />
-                                        <Button
-                                            icon="sap-icon://decline"
-                                            enabled="{= !${create>/uploading} }"
-                                            tooltip="{i18n>removeAttachmentButton}"
-                                            press=".onRemoveAttachment" />
-                                    </HBox>
-                                </HBox>
-                                <ProgressIndicator
-                                    class="sapUiTinyMarginTop"
-                                    visible="{create>showProgress}"
-                                    percentValue="{create>progress}"
-                                    displayValue="{create>progressText}"
-                                    state="{create>statusState}" />
-                            </VBox>
-                        </CustomListItem>
-                    </List>
+            <VBox
+                class="flowmateContent flowmateNarrowContent flowmateCreateRequest"
+                busy="{create>/creating}"
+                busyIndicatorDelay="0">
+                <VBox class="flowmateCreateIntro">
+                    <ObjectStatus
+                        text="{i18n>requestCreateTitle}"
+                        state="Information"
+                        inverted="true" />
+                    <Title
+                        text="{i18n>requestOverviewSectionTitle}"
+                        level="H2" />
+                    <Text
+                        text="{i18n>requestCreateIntroText}"
+                        wrapping="true" />
                 </VBox>
-                </form:SimpleForm>
+
+                <Panel
+                    class="flowmateCreateSection flowmateCreateSectionPrimary"
+                    backgroundDesign="Transparent"
+                    expandable="false">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <core:Icon src="sap-icon://request" />
+                            <Title text="{i18n>requestOverviewSectionTitle}" level="H3" />
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <content>
+                        <form:SimpleForm
+                            class="flowmateCreateForm"
+                            editable="true"
+                            layout="ResponsiveGridLayout"
+                            labelSpanXL="3"
+                            labelSpanL="3"
+                            labelSpanM="4"
+                            columnsXL="2"
+                            columnsL="2"
+                            columnsM="1"
+                            adjustLabelSpan="false">
+                            <Label text="{i18n>processTypeLabel}" required="true" />
+                            <Input
+                                value="{create>/processTypeName}"
+                                placeholder="{i18n>chooseProcessTypePlaceholder}"
+                                showValueHelp="true"
+                                valueHelpOnly="true"
+                                valueHelpRequest=".onProcessTypeValueHelpRequest"
+                                required="true" />
+                            <Label text="{i18n>subProcessTypeLabel}" visible="{create>/hasSubProcessTypes}" />
+                            <Input
+                                value="{create>/subProcessTypeName}"
+                                placeholder="{i18n>chooseSubProcessTypePlaceholder}"
+                                showValueHelp="true"
+                                valueHelpOnly="true"
+                                visible="{create>/hasSubProcessTypes}"
+                                valueHelpRequest=".onSubProcessTypeValueHelpRequest" />
+                            <Label text="{i18n>requestTitleLabel}" required="true" />
+                            <Input value="{create>/title}" maxLength="255" required="true" />
+                            <Label text="{i18n>priorityLabel}" />
+                            <Select selectedKey="{create>/priority}">
+                                <core:Item key="Low" text="{i18n>priorityLow}" />
+                                <core:Item key="Medium" text="{i18n>priorityMedium}" />
+                                <core:Item key="High" text="{i18n>priorityHigh}" />
+                                <core:Item key="Critical" text="{i18n>priorityCritical}" />
+                            </Select>
+                            <Label text="{i18n>departmentLabel}" />
+                            <Input value="{create>/department}" maxLength="100" />
+                            <Label text="{i18n>descriptionLabel}" />
+                            <TextArea value="{create>/description}" rows="5" width="100%" />
+                        </form:SimpleForm>
+                    </content>
+                </Panel>
+
+                <Panel
+                    class="flowmateCreateSection"
+                    backgroundDesign="Transparent"
+                    expandable="false">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <core:Icon src="sap-icon://group" />
+                            <Title text="{i18n>requestPeopleSectionTitle}" level="H3" />
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <content>
+                        <form:SimpleForm
+                            class="flowmateCreateForm"
+                            editable="true"
+                            layout="ResponsiveGridLayout"
+                            labelSpanXL="3"
+                            labelSpanL="3"
+                            labelSpanM="4"
+                            columnsXL="2"
+                            columnsL="2"
+                            columnsM="1"
+                            adjustLabelSpan="false">
+                            <Label text="{i18n>requesterLabel}" />
+                            <Input
+                                value="{create>/requesterName}"
+                                placeholder="{i18n>chooseUserPlaceholder}"
+                                showValueHelp="true"
+                                valueHelpOnly="true"
+                                valueHelpRequest=".onRequesterValueHelpRequest" />
+                            <Label text="{i18n>processorLabel}" />
+                            <Input
+                                value="{create>/processorName}"
+                                placeholder="{i18n>selectProcessorPlaceholder}"
+                                showValueHelp="true"
+                                valueHelpOnly="true"
+                                valueHelpRequest=".onProcessorValueHelpRequest" />
+                        </form:SimpleForm>
+                    </content>
+                </Panel>
+
+                <Panel
+                    class="flowmateCreateSection flowmateDynamicFieldsSection"
+                    backgroundDesign="Transparent"
+                    expandable="false"
+                    visible="{create>/dynamicFieldsVisible}"
+                    busy="{create>/dynamicFieldsLoading}"
+                    busyIndicatorDelay="0">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <core:Icon src="sap-icon://form" />
+                            <Title text="{i18n>ivFieldsTitle}" level="H3" />
+                            <ToolbarSpacer />
+                            <ObjectStatus
+                                text="{= ${create>/dynamicFieldsCount} + ' fields' }"
+                                state="Information"
+                                inverted="true" />
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <content>
+                        <Text
+                            class="flowmateSectionHelpText"
+                            text="{i18n>ivFieldsDescriptionText}"
+                            wrapping="true" />
+                        <FlexBox
+                            class="flowmateDynamicFieldsGrid"
+                            wrap="Wrap"
+                            alignItems="Stretch"
+                            items="{create>/dynamicFields}">
+                            <items>
+                                <VBox class="flowmateDynamicFieldCard">
+                                    <HBox
+                                        alignItems="Center"
+                                        justifyContent="SpaceBetween"
+                                        wrap="Wrap">
+                                        <Label
+                                            text="{create>label}"
+                                            required="{create>required}" />
+                                        <ObjectStatus
+                                            visible="{= !!${create>sourceColumn} }"
+                                            text="{create>sourceColumn}"
+                                            state="Information" />
+                                    </HBox>
+                                    <Select
+                                        class="sapUiTinyMarginTop"
+                                        selectedKey="{create>value}"
+                                        width="100%"
+                                        visible="{= ${create>dataType} === 'List' }"
+                                        items="{create>options}">
+                                        <core:Item key="{create>code}" text="{create>text}" />
+                                    </Select>
+                                    <Input
+                                        class="sapUiTinyMarginTop"
+                                        value="{create>value}"
+                                        placeholder="{create>placeholder}"
+                                        visible="{= ${create>dataType} !== 'Date' &amp;&amp; ${create>dataType} !== 'List' &amp;&amp; ${create>inputHint} !== 'DocumentReference' }"
+                                        type="{= ${create>dataType} === 'Decimal' ? 'Number' : 'Text' }" />
+                                    <DatePicker
+                                        class="sapUiTinyMarginTop"
+                                        value="{create>value}"
+                                        placeholder="{create>placeholder}"
+                                        valueFormat="yyyy-MM-dd"
+                                        displayFormat="medium"
+                                        visible="{= ${create>dataType} === 'Date' }" />
+                                    <TextArea
+                                        class="sapUiTinyMarginTop"
+                                        value="{create>value}"
+                                        placeholder="{create>placeholder}"
+                                        rows="3"
+                                        width="100%"
+                                        visible="{= ${create>inputHint} === 'DocumentReference' }" />
+                                </VBox>
+                            </items>
+                        </FlexBox>
+                    </content>
+                </Panel>
+
+                <Panel
+                    class="flowmateCreateSection"
+                    backgroundDesign="Transparent"
+                    expandable="false">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <core:Icon src="sap-icon://attachment" />
+                            <Title text="{i18n>attachmentsTitle}" level="H3" />
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <content>
+                        <VBox class="flowmateAttachmentDropZone">
+                            <Text
+                                class="flowmateSectionHelpText"
+                                text="{i18n>asyncAttachmentHelpText}"
+                                wrapping="true" />
+                            <u:FileUploader
+                                id="attachmentsUploader"
+                                buttonOnly="true"
+                                buttonText="{i18n>chooseDocumentsButton}"
+                                change=".onAttachmentsSelected"
+                                fileSizeExceed=".onAttachmentFileSizeExceed"
+                                icon="sap-icon://attachment"
+                                maximumFileSize="400"
+                                multiple="true"
+                                enabled="{= !${create>/creating} }"
+                                sameFilenameAllowed="true" />
+                            <List
+                                class="sapUiSmallMarginTop flowmateAttachmentList"
+                                noDataText="{i18n>noAttachmentsSelectedText}"
+                                items="{create>/attachments}">
+                                <CustomListItem>
+                                    <VBox class="flowmateUploadItem">
+                                        <HBox
+                                            alignItems="Center"
+                                            justifyContent="SpaceBetween"
+                                            wrap="Wrap">
+                                            <ObjectIdentifier
+                                                title="{create>name}"
+                                                text="{create>sizeText}" />
+                                            <HBox alignItems="Center">
+                                                <ObjectStatus
+                                                    class="flowmateSemanticStatus"
+                                                    text="{create>statusText}"
+                                                    state="{create>statusState}"
+                                                    inverted="true" />
+                                                <Button
+                                                    icon="sap-icon://decline"
+                                                    enabled="{= !${create>/creating} &amp;&amp; !${create>/uploading} }"
+                                                    tooltip="{i18n>removeAttachmentButton}"
+                                                    press=".onRemoveAttachment" />
+                                            </HBox>
+                                        </HBox>
+                                        <ProgressIndicator
+                                            class="sapUiTinyMarginTop"
+                                            visible="{create>showProgress}"
+                                            percentValue="{create>progress}"
+                                            displayValue="{create>progressText}"
+                                            state="{create>statusState}" />
+                                    </VBox>
+                                </CustomListItem>
+                            </List>
+                        </VBox>
+                    </content>
+                </Panel>
+
+                <Panel
+                    class="flowmateCreateSection flowmateCreateSubmitSection"
+                    backgroundDesign="Transparent"
+                    expandable="false">
+                    <content>
+                        <HBox
+                            alignItems="Center"
+                            justifyContent="SpaceBetween"
+                            wrap="Wrap">
+                            <VBox>
+                                <Title text="{i18n>requestSubmitSectionTitle}" level="H3" />
+                                <Text text="{i18n>requestSubmitHelpText}" wrapping="true" />
+                            </VBox>
+                            <Switch
+                                state="{create>/autoSubmit}"
+                                customTextOn="{i18n>yesText}"
+                                customTextOff="{i18n>noText}" />
+                        </HBox>
+                    </content>
+                </Panel>
             </VBox>
         </f:content>
     </f:DynamicPage>
@@ -231,6 +392,36 @@
                     <Text text="{displayName}" />
                     <Text text="{email}" />
                     <Text text="{department}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+        <TableSelectDialog
+            id="subProcessTypeValueHelpDialog"
+            title="{i18n>subProcessTypeLabel}"
+            noDataText="{i18n>noSubProcessTypesFoundText}"
+            rememberSelections="false"
+            search=".onSubProcessTypeValueHelpSearch"
+            confirm=".onSubProcessTypeValueHelpConfirm"
+            cancel=".onSubProcessTypeValueHelpClose"
+            items="{
+                path: '/ProcessSubTypes',
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>processTypeCodeLabel}" /></Column>
+                <Column><Text text="{i18n>processTypeNameLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>processOwnerLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>sapTCodeLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{descr}" />
+                    <Text text="{name}" />
+                    <Text text="{processOwner}" />
+                    <Text text="{sapTCode}" />
                 </cells>
             </ColumnListItem>
         </TableSelectDialog>

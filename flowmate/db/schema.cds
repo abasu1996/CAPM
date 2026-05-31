@@ -35,6 +35,45 @@ entity TaskStatus : CodeList {
     key code : String(20);
 }
 
+entity ProcessSubTypes : CodeList {
+    key code : String(30);
+    processType : Association to ProcessTypes;
+    processOwner : String(100);
+    activityDescription : String(500);
+    sapTCode : String(100);
+}
+
+entity ProcessRequestFieldCatalog {
+    key fieldName : String(80);
+    label         : String(500);
+    dataType      : String(30) default 'String';
+    defaultValue  : String(500);
+    placeholder   : String(255);
+    inputHint     : String(100);
+    options       : Composition of many ProcessRequestFieldOptions
+                    on options.field = $self;
+}
+
+entity ProcessRequestFieldOptions : cuid, managed {
+    field    : Association to ProcessRequestFieldCatalog;
+    code     : String(80);
+    text     : String(255);
+    sequence : Integer;
+    isActive : Boolean default true;
+}
+
+entity ProcessRequestFieldMappings : cuid, managed {
+    processType    : Association to ProcessTypes;
+    processSubType : Association to ProcessSubTypes;
+    field          : Association to ProcessRequestFieldCatalog;
+    fieldLabel     : String(500);
+    sourceColumn   : String(30);
+    section        : String(50);
+    sequence       : Integer;
+    isMandatory    : Boolean default false;
+    isVisible      : Boolean default true;
+}
+
 entity Users : cuid, managed {
     referenceNumber   : String(30);
     azureObjectId     : String(100);
@@ -61,6 +100,7 @@ entity Delegations : cuid, managed {
 entity ProcessRequests : cuid, managed {
     referenceNumber : String(30);
     processType : Association to ProcessTypes;
+    subProcessType : Association to ProcessSubTypes;
     requesterUser : Association to Users;
     processorUser : Association to Users;
     reservedByUser : Association to Users;
@@ -76,6 +116,8 @@ entity ProcessRequests : cuid, managed {
     currentStep : Integer;
     dueDate     : Date;
     completedAt : DateTime;
+    ivFieldValues : Composition of many ProcessRequestFieldValues
+                    on ivFieldValues.request = $self;
     tasks       : Composition of many ProcessTasks
                     on tasks.request = $self;
     involvedParties : Composition of many ProcessInvolvedParties
@@ -86,6 +128,15 @@ entity ProcessRequests : cuid, managed {
                     on attachments.request = $self;
     history     : Composition of many ProcessHistory
                     on history.request = $self;
+}
+
+entity ProcessRequestFieldValues : cuid, managed {
+    request     : Association to ProcessRequests;
+    field       : Association to ProcessRequestFieldCatalog;
+    value       : LargeString;
+    numberValue : Decimal(15, 2);
+    dateValue   : Date;
+    booleanValue: Boolean;
 }
 
 entity ProcessTasks : cuid, managed {

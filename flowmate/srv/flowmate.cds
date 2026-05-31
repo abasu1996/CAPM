@@ -3,14 +3,23 @@ using { flowmate.db as fldb } from '../db/schema';
 @requires: 'authenticated-user'
 service FlowmateService {
     entity ProcessTypes as projection on fldb.ProcessTypes;
+    entity ProcessSubTypes as projection on fldb.ProcessSubTypes;
     entity ProcessStatus as projection on fldb.ProcessStatus;
     entity TaskStatus as projection on fldb.TaskStatus;
+    entity ProcessRequestFieldCatalog as projection on fldb.ProcessRequestFieldCatalog;
+    entity ProcessRequestFieldOptions as projection on fldb.ProcessRequestFieldOptions;
+    entity ProcessRequestFieldMappings as projection on fldb.ProcessRequestFieldMappings;
     entity Users as projection on fldb.Users;
     entity Delegations as projection on fldb.Delegations;
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
+        ivFieldValues : redirected to ProcessRequestFieldValues,
         tasks       : redirected to ProcessTasks,
         attachments : redirected to ProcessAttachments
+    };
+    entity ProcessRequestFieldValues as projection on fldb.ProcessRequestFieldValues {
+        *,
+        request : redirected to ProcessRequests
     };
     entity ProcessTasks as projection on fldb.ProcessTasks {
         *,

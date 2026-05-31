@@ -1,0 +1,257 @@
+ID,processType_code,processSubType_code,field_fieldName,fieldLabel,sourceColumn,section,sequence,isMandatory,isVisible
+95e26886-24cc-5f1b-9c18-b3ce6d5f23d9,PAYMENT_REQUEST,IV_1,poNumber,PO number,User,IV_REQUEST_SUBMISSION,1,false,true
+dae87608-1748-5b31-a58a-6f202b24f3e8,PAYMENT_REQUEST,IV_1,entityDapDbnDtvDttDnsDbsTelecard,Entity (DAP/DBN/DTV/DTT/DNS/DBS/Telecard/Hone),SAP,IV_REQUEST_SUBMISSION,2,false,true
+79b90256-d47f-59e4-9e54-54d27396ace7,PAYMENT_REQUEST,IV_1,paymentModePoSetOff,Payment mode (PO/ Set-off),User,IV_REQUEST_SUBMISSION,3,false,true
+aa821122-29ca-5e19-8bfa-e4793ead12d3,PAYMENT_REQUEST,IV_1,paymentTypeInvoiceDebitNoteCreditNote,Payment type (Invoice/debit note/credit note),User,IV_REQUEST_SUBMISSION,4,false,true
+7ce0e3f7-f0e6-5386-88ae-d87e7c0ac880,PAYMENT_REQUEST,IV_1,paymentCategoryLocalForeign,Payment category (Local/ Foreign),User,IV_REQUEST_SUBMISSION,5,false,true
+8f1e69a3-f2ee-59e1-ac3c-301d98155e29,PAYMENT_REQUEST,IV_1,beneficiaryName,Beneficiary name,SAP,IV_REQUEST_SUBMISSION,6,false,true
+49f2a76a-8325-5987-ae6b-8bbc14adcd62,PAYMENT_REQUEST,IV_1,financeOfficer,Finance officer,User,IV_REQUEST_SUBMISSION,7,false,true
+b381003c-561f-5eac-85a0-44b3cf0267af,PAYMENT_REQUEST,IV_1,requesterInfomatePoCreationTeamMember,Requester (Infomate PO creation team member),Auto,IV_REQUEST_SUBMISSION,8,false,true
+9afa83fe-ac31-5037-b924-a26298198e87,PAYMENT_REQUEST,IV_1,userDivisionRepresentative,User division representative,Auto,IV_REQUEST_SUBMISSION,9,false,true
+a17a6ecc-7f17-570c-95de-c827e2758f53,PAYMENT_REQUEST,IV_1,poCreator,PO Creator,SAP,IV_REQUEST_SUBMISSION,10,false,true
+295f5695-09ff-5fa6-922d-19b654c161b9,PAYMENT_REQUEST,IV_1,invoiceNumber,Invoice Number,User,IV_REQUEST_SUBMISSION,11,false,true
+bf42fb64-33c1-5bcc-bf29-e95ab4e75de9,PAYMENT_REQUEST,IV_1,invoiceAmount,Invoice amount,User,IV_REQUEST_SUBMISSION,12,false,true
+84850b18-1e2f-5d61-98ef-610202a2eee5,PAYMENT_REQUEST,IV_1,sesReference,SES reference,SAP,IV_REQUEST_SUBMISSION,13,false,true
+2edad23a-6a89-55e7-9423-a7371b6dc0b5,PAYMENT_REQUEST,IV_1,currency,Currency,SAP,IV_REQUEST_SUBMISSION,14,false,true
+5a877956-733f-5a70-8592-ae837a5175e0,PAYMENT_REQUEST,IV_1,additionalRemarks,Additional remarks,User,IV_REQUEST_SUBMISSION,15,false,true
+0a81e54b-0841-5303-b44e-8d50a50c37a4,PAYMENT_REQUEST,IV_1,paymentMethodChequeBankDraftFundTransfer,Payment method (Cheque/ Bank Draft/ Fund Transfer),User,IV_REQUEST_SUBMISSION,16,false,true
+d23bdad2-8d75-55c3-8a89-4f56582f599d,PAYMENT_REQUEST,IV_1,whtCerficateReferenceOnlyApplicableForForeignPayments,WHT cerficate reference (only applicable for foreign payments),User,IV_REQUEST_SUBMISSION,17,false,true
+01dc78de-eadb-5671-98bb-6320b21c9742,PAYMENT_REQUEST,IV_1,supportingDocumentsInvoiceDebitNoteCreditNoteUac,Supporting Documents - (Invoice/debit note/credit note/ UAC for FTK service),User,IV_REQUEST_SUBMISSION,18,false,true
+dd252924-bed8-5d19-aa94-877fb1fdd4e0,PAYMENT_REQUEST,IV_1_1,entityDapDbnDtvDttDnsDbsTelecard,Entity (DAP/DBN/DTV/DTT/DNS/DBS/Telecard/Hone),,IV_REQUEST_SUBMISSION,1,false,true
+3411a803-537d-5774-926e-8d975bcd2bb5,PAYMENT_REQUEST,IV_1_1_1,paymentModePoAdvancePoAdvanceSettlementFtk,Payment mode (PO Advance/ PO Advance settlement / FTK Duty Reimbursement),,IV_REQUEST_SUBMISSION,1,false,true
+7449df7a-8684-5494-8041-12fa541c8183,PAYMENT_REQUEST,IV_1_1_1,paymentCategoryLocalForeign,Payment category (Local/ Foreign),,IV_REQUEST_SUBMISSION,2,false,true
+dc5d0d2c-e42d-5e6b-8f0a-75cf05efa23a,PAYMENT_REQUEST,IV_1_1_1,beneficiaryName,Beneficiary name,,IV_REQUEST_SUBMISSION,3,false,true
+487796f6-ab0f-5e52-8eb4-40028ff6a4ce,PAYMENT_REQUEST,IV_1_1_1,performaInvoiceNumberSettlementInvoiceNumberDebitNote,Performa Invoice Number / Settlement Invoice number/ Debit note number,,IV_REQUEST_SUBMISSION,4,false,true
+b661553b-0762-5bcd-82be-9ae99ef2e386,PAYMENT_REQUEST,IV_1_1_1,requestingAmountSettlingAmount,Requesting amount/Settling amount,,IV_REQUEST_SUBMISSION,5,false,true
+f0e8c64b-b527-540a-a15b-a74b1ed4b74d,PAYMENT_REQUEST,IV_1_1_1,poNumber,PO number,,IV_REQUEST_SUBMISSION,6,false,true
+4e82634d-ee8c-5bba-8b43-fd55ebdf42b7,PAYMENT_REQUEST,IV_1_1_1,currency,Currency,,IV_REQUEST_SUBMISSION,7,false,true
+d21f4017-3b92-5992-9c48-4a901e84303d,PAYMENT_REQUEST,IV_1_1_1,additionalRemarks,Additional remarks,,IV_REQUEST_SUBMISSION,8,false,true
+ebf9bb42-98a2-5980-b030-7f0ed6ee23ec,PAYMENT_REQUEST,IV_1_1_1,supportingDocumentsPoInvoiceBankStatementCusdecAssessment,"Supporting Documents (PO/Invoice/Bank statement/ Cusdec , assessment notice , commercial invoice for FTK duty reimbursements )",,IV_REQUEST_SUBMISSION,9,false,true
+87a603de-9eeb-5f3c-b211-916c1da127db,PAYMENT_REQUEST,IV_1_1_1,financeOfficer,Finance officer,,IV_REQUEST_SUBMISSION,10,false,true
+bdf1e572-46bb-5fe9-b51b-236b49b8b2f7,PAYMENT_REQUEST,IV_1_1_2,entityDapDbnDtvDttDnsDbsTelecard,Entity (DAP/DBN/DTV/DTT/DNS/DBS/Telecard/Hone),,IV_REQUEST_SUBMISSION,1,false,true
+1402e616-9b4e-55c7-8e4c-d4055e25e98a,PAYMENT_REQUEST,IV_1_1_2,paymentModePoAdvancePoAdvanceSettlement,Payment mode (PO Advance/ PO Advance settlement),,IV_REQUEST_SUBMISSION,2,false,true
+844ee55d-bb38-593b-be11-f8c684177f89,PAYMENT_REQUEST,IV_1_1_2,paymentCategoryLocalForeign,Payment category (Local/ Foreign),,IV_REQUEST_SUBMISSION,3,false,true
+8958c434-49d1-5c9c-8846-ad92f252cb40,PAYMENT_REQUEST,IV_1_1_2,beneficiaryName,Beneficiary name,,IV_REQUEST_SUBMISSION,4,false,true
+cb571a6d-0c9c-591b-9b07-de27e4b425b7,PAYMENT_REQUEST,IV_1_1_2,performaInvoiceNumberSettlementInvoiceNumber,Performa Invoice Number / Settlement Invoice number,,IV_REQUEST_SUBMISSION,5,false,true
+5cff1c67-33db-5ae2-ae0a-4d33050cd6a1,PAYMENT_REQUEST,IV_1_1_2,requestingAmountSettlingAmount,Requesting amount/Settling amount,,IV_REQUEST_SUBMISSION,6,false,true
+b8c9a843-872c-5e94-be08-709bfa0c7aaf,PAYMENT_REQUEST,IV_1_1_2,financeOfficer,Finance officer,,IV_REQUEST_SUBMISSION,7,false,true
+d6240bd4-b392-5e03-9ec7-dd62cba20aae,PAYMENT_REQUEST,IV_1_1_2,poNumber,PO number,,IV_REQUEST_SUBMISSION,8,false,true
+85ccf320-2840-5059-a35c-660704636e44,PAYMENT_REQUEST,IV_1_1_2,currency,Currency,,IV_REQUEST_SUBMISSION,9,false,true
+b62667dd-ec9b-523a-881e-ddb97bee8fcb,PAYMENT_REQUEST,IV_1_1_2,sesReference,SES Reference,,IV_REQUEST_SUBMISSION,10,false,true
+62460c3f-6cf5-5026-be6e-67c044e207e7,PAYMENT_REQUEST,IV_1_1_2,additionalRemarks,Additional remarks,,IV_REQUEST_SUBMISSION,11,false,true
+75490b6e-c80e-5f4a-a2d2-d0b996438e4e,PAYMENT_REQUEST,IV_1_1_2,supportingDocumentsPoInvoiceBankStatement,Supporting Documents (PO/Invoice/Bank statement),,IV_REQUEST_SUBMISSION,12,false,true
+3e23dc34-7a13-5a97-9f4c-6ff92be88b23,PAYMENT_REQUEST,IV_1_2,entityDapDbnDtvDttDnsDbsTelecard,Entity (DAP/DBN/DTV/DTT/DNS/DBS/Telecard/Hone),,IV_REQUEST_SUBMISSION,1,false,true
+e5baaeff-cd29-59fe-b0f9-f74c46506a02,PAYMENT_REQUEST,IV_1_2,paymentModePo,Payment mode (PO),,IV_REQUEST_SUBMISSION,2,false,true
+4922b52f-c3aa-545b-900c-2a3cbd423567,PAYMENT_REQUEST,IV_1_2,paymentTypeInvoiceDebitNoteCreditNote,Payment type (Invoice/debit note/credit note),,IV_REQUEST_SUBMISSION,3,false,true
+86797afb-8e34-5f77-99e0-1b2d8251316c,PAYMENT_REQUEST,IV_1_2,paymentCategoryLocalForeign,Payment category (Local/ Foreign),,IV_REQUEST_SUBMISSION,4,false,true
+61326da5-ad1e-5c69-962e-685dfc16ccea,PAYMENT_REQUEST,IV_1_2,beneficiaryName,Beneficiary name,,IV_REQUEST_SUBMISSION,5,false,true
+f0814b99-06e3-53db-9fb6-15aeb0f911ca,PAYMENT_REQUEST,IV_1_2,financeOfficer,Finance officer,,IV_REQUEST_SUBMISSION,6,false,true
+2a1347b6-f7ea-5b0e-8b96-ba16f8936941,PAYMENT_REQUEST,IV_1_2,requesterInfomatePoCreationTeamMember,Requester (Infomate PO creation team member),,IV_REQUEST_SUBMISSION,7,false,true
+ac86cde3-1947-59e9-8c0c-c23f86f00280,PAYMENT_REQUEST,IV_1_2,userDivisionRepresentative,User division representative,,IV_REQUEST_SUBMISSION,8,false,true
+c5dee728-0999-56c5-895f-be56a48ab567,PAYMENT_REQUEST,IV_1_2,invoiceNumber,Invoice Number,,IV_REQUEST_SUBMISSION,9,false,true
+cc96d733-d1fa-58c7-809d-2dce735b7593,PAYMENT_REQUEST,IV_1_2,invoiceAmount,Invoice amount,,IV_REQUEST_SUBMISSION,10,false,true
+4bcd5a6d-3a6c-56f9-92a5-dfd5e5b322e1,PAYMENT_REQUEST,IV_1_2,relevantCreditNoteNumber,Relevant credit note number,,IV_REQUEST_SUBMISSION,11,false,true
+0b09a1bd-784b-56f2-afbc-f4d69c981028,PAYMENT_REQUEST,IV_1_2,poNumber,PO number,,IV_REQUEST_SUBMISSION,12,false,true
+6d9946cc-e316-5abc-9169-3970045b5bcf,PAYMENT_REQUEST,IV_1_2,sesReference,SES reference,,IV_REQUEST_SUBMISSION,13,false,true
+9872c85f-1880-59bc-ad52-8b82fea30ea8,PAYMENT_REQUEST,IV_1_2,currency,Currency,,IV_REQUEST_SUBMISSION,14,false,true
+c6d2ef57-92cd-5beb-951f-43c341cf398f,PAYMENT_REQUEST,IV_1_2,additionalRemarks,Additional remarks,,IV_REQUEST_SUBMISSION,15,false,true
+cc083469-7a1a-5019-8694-e81b238905fd,PAYMENT_REQUEST,IV_1_2,paymentMethodChequeNonCheque,Payment method (Cheque/ Non-cheque),,IV_REQUEST_SUBMISSION,16,false,true
+e332eef9-7782-541b-9ac6-a2c84157e8c7,PAYMENT_REQUEST,IV_1_2,supportingDocumentsInvoiceDebitNoteCreditNote,Supporting Documents - (Invoice/debit note/credit note),,IV_REQUEST_SUBMISSION,17,false,true
+6cb0539a-0317-5da4-8f04-b87d36a8ee3b,PAYMENT_REQUEST,IV_2,setNumber,Set number,,IV_REQUEST_SUBMISSION,1,false,true
+115db1b8-81ed-5404-8ca8-cb6032a34f44,PAYMENT_REQUEST,IV_2,poNumber,PO Number,,IV_REQUEST_SUBMISSION,2,false,true
+96b5e2c7-a91f-5387-a9ab-bea735c87099,PAYMENT_REQUEST,IV_2,poCurrency,PO Currency,,IV_REQUEST_SUBMISSION,3,false,true
+3084cd5c-b1dc-5f5e-abb2-d681a2f5e3aa,PAYMENT_REQUEST,IV_2,entity,Entity,,IV_REQUEST_SUBMISSION,4,false,true
+aca3760a-f194-558f-b5dd-7fd4fc2a6f32,PAYMENT_REQUEST,IV_2,ciNumber,CI Number,,IV_REQUEST_SUBMISSION,5,false,true
+9a87996d-acb9-5a9a-a28c-e8f115463c23,PAYMENT_REQUEST,IV_2,ciCurrency,CI Currency,,IV_REQUEST_SUBMISSION,6,false,true
+8c7cbd95-1ae1-5fb4-a7f3-b50d80679a67,PAYMENT_REQUEST,IV_2,ciTypeSwHw,CI Type (SW / HW),,IV_REQUEST_SUBMISSION,7,false,true
+c56a524c-8e4c-5a87-99d4-3e4fb5a59f4f,PAYMENT_REQUEST,IV_2,poContributionFromCommercialInvoice,PO Contribution from Commercial Invoice,,IV_REQUEST_SUBMISSION,8,false,true
+383731c5-e024-5b7a-b4f8-978223669778,PAYMENT_REQUEST,IV_2,poNumberPoLineItems,PO Number (PO Line items),,IV_REQUEST_SUBMISSION,9,false,true
+1943ca70-e647-5f0d-ab2b-e561cf6c8341,PAYMENT_REQUEST,IV_2,poValue,PO Value,,IV_REQUEST_SUBMISSION,10,false,true
+dd53e1a3-78d6-56a4-a9d2-73019564ba44,PAYMENT_REQUEST,IV_2,sesNumber,SES Number,,IV_REQUEST_SUBMISSION,11,false,true
+2c6fd1f1-540a-5c9a-a322-bd8db80bd09c,PAYMENT_REQUEST,IV_2,sesValue,SES Value,,IV_REQUEST_SUBMISSION,12,false,true
+ac20be5e-3188-5b71-ada7-153a76795f49,PAYMENT_REQUEST,IV_2,paymentTerm,Payment term,,IV_REQUEST_SUBMISSION,13,false,true
+db278e1b-c03d-5cba-b5da-5d95e36cf340,PAYMENT_REQUEST,IV_2,uacValue,UAC Value,,IV_REQUEST_SUBMISSION,14,false,true
+06160f93-0313-5292-af09-68b851e44f23,PAYMENT_REQUEST,IV_2,commercialInvoiceNumberS,Commercial Invoice Number/s,,IV_REQUEST_SUBMISSION,15,false,true
+b064a5d0-afab-5735-a723-63bc649e5c23,PAYMENT_REQUEST,IV_2,commercialInvoiceValue,Commercial Invoice Value,,IV_REQUEST_SUBMISSION,16,false,true
+97117fee-2af2-55e8-815a-83795ff2eb66,PAYMENT_REQUEST,IV_2,uacContributionOnCommercialInvoice,UAC contribution on Commercial Invoice,,IV_REQUEST_SUBMISSION,17,false,true
+1c12b9dd-0be6-5e81-ab55-4a7d608b4d29,PAYMENT_REQUEST,IV_2,paymentDueDate,Payment Due Date,,IV_REQUEST_SUBMISSION,18,false,true
+434ca222-8ad8-52d7-8062-86153dacb644,PAYMENT_REQUEST,IV_2,currencyInvoiceAndUac,Currency (Invoice & UAC),,IV_REQUEST_SUBMISSION,19,false,true
+b221255a-27c0-5658-9138-292f933ae8ee,PAYMENT_REQUEST,IV_2,verificationExcel,Verification Excel,,IV_REQUEST_SUBMISSION,20,false,true
+707f77bb-260d-538d-b437-050eec9b2c07,PAYMENT_REQUEST,IV_2,entityDapDbn,Entity (DAP/DBN),,IV_REQUEST_SUBMISSION,21,false,true
+c9595e19-96ff-5726-90c7-ff1e3b083fb4,PAYMENT_REQUEST,IV_2,invoiceAcceptanceConfrimation,Invoice Acceptance Confrimation,,IV_REQUEST_SUBMISSION,22,false,true
+10dfcf41-e284-50b8-8d51-2ceaae003176,PAYMENT_REQUEST,IV_2,paymentTypeFtkFactoringFtkNonFactoring,Payment type (FTK Factoring / FTK Non Factoring),,IV_REQUEST_SUBMISSION,23,false,true
+c1dd619b-43ae-56af-b725-d882fb6213a0,PAYMENT_REQUEST,IV_2,paymentCategoryLocalForeign2,Payment category ( Local/ Foreign),,IV_REQUEST_SUBMISSION,24,false,true
+f47e70cb-94df-5093-a75e-42c89e98a0a9,PAYMENT_REQUEST,IV_2,paymentClassificationHardwareSoftware,Payment classification ( Hardware/ Software),,IV_REQUEST_SUBMISSION,25,false,true
+8d14f4e9-8abb-5158-9c79-ecb16f270491,PAYMENT_REQUEST,IV_2,beneficiaryName,Beneficiary name,,IV_REQUEST_SUBMISSION,26,false,true
+b6338055-ead1-57dc-b4ff-e5696ceeabab,PAYMENT_REQUEST,IV_2,requesterVendor,Requester (Vendor),,IV_REQUEST_SUBMISSION,27,false,true
+43449340-c2cb-50cd-802c-deeb0f792ce5,PAYMENT_REQUEST,IV_2,additionalRemarks,Additional remarks,,IV_REQUEST_SUBMISSION,28,false,true
+56ae864c-7928-5ea9-9f41-b45476988892,PAYMENT_REQUEST,IV_2,paymentMethodDaTt,Payment method (DA/ TT),,IV_REQUEST_SUBMISSION,29,false,true
+4b1569e2-5687-5b31-980e-d3170a799f9b,PAYMENT_REQUEST,IV_2,supportingDocumentsCommercialInvoiceUacUacCoverExcel,Supporting Documents - (Commercial Invoice/UAC / UAC Cover/ Excel),,IV_REQUEST_SUBMISSION,30,false,true
+cfa79b5d-36f0-5440-9980-d02e4f846e3c,PAYMENT_REQUEST,IV_2,siteName,Site Name,,IV_REQUEST_SUBMISSION,31,false,true
+71655871-5ccf-5336-b860-9cddbbb5396a,PAYMENT_REQUEST,IV_2,siteId,Site ID,,IV_REQUEST_SUBMISSION,32,false,true
+daabe62c-4dbf-515f-a746-f0a94f5cabce,PAYMENT_REQUEST,IV_2,uacReceivedDate,UAC received Date,,IV_REQUEST_SUBMISSION,33,false,true
+fa774dcf-0648-5942-ae26-63371a3fe660,PAYMENT_REQUEST,IV_2,bank,Bank,,IV_REQUEST_SUBMISSION,34,false,true
+593e5af0-d95a-50aa-86e2-55dd1693afa4,PAYMENT_REQUEST,IV_2,bankReferenceDaReferenceOnlyForHw,Bank Reference ( DA Reference) (Only for HW),,IV_REQUEST_SUBMISSION,35,false,true
+08e07281-9be2-5fa0-9737-cb4861e0b415,PAYMENT_REQUEST,IV_2,nAIdealIfThisCanBeAuto,N/A (Ideal if this can be auto generated via WH comparing the liabilities against the payments debited as per bank statement),,IV_REQUEST_SUBMISSION,36,false,true
+83f3a0a8-5608-5340-b59e-7ce6a4433b43,PAYMENT_REQUEST,IV_3,sameAsFtkFactoring,Same as FTK Factoring,,IV_REQUEST_SUBMISSION,1,false,true
+134db241-ed0f-5698-80f9-b60db0286d1f,PAYMENT_REQUEST,IV_4,creditCardHolderName,Credit card holder name,,IV_REQUEST_SUBMISSION,1,false,true
+9e11c96e-fe19-57ca-b9a9-3870daacc330,PAYMENT_REQUEST,IV_4,creditCardNumber,Credit card number,,IV_REQUEST_SUBMISSION,2,false,true
+ed04a8c3-453a-5de5-b52c-8dc50dbdc9dc,PAYMENT_REQUEST,IV_4,creditCardIssuingBank,Credit card issuing bank,,IV_REQUEST_SUBMISSION,3,false,true
+478614b3-297e-544c-bdc0-ef6b53065264,PAYMENT_REQUEST,IV_4,tableWithSubjectVendorNameDescriptionPoNumber,"Table with Subject, vendor name, description, PO number, SES, Forex value, LKR value, payment date, Annual Fee ,Late payment Fee, Stamp duty, Interest charges & Other payments debited)",,IV_REQUEST_SUBMISSION,4,false,true
+62137c70-170c-5c1a-98d8-a3630b5053e5,PAYMENT_REQUEST,IV_4,supportingDocumentsCreditCardStatmentInvoicesEtc,"Supporting documents (Credit card statment, Invoices etc.)",,IV_REQUEST_SUBMISSION,5,false,true
+717139b8-385a-53e2-932b-2d0b1b6e8c69,PAYMENT_REQUEST,IV_5,entityDap,Entity (DAP),,IV_REQUEST_SUBMISSION,1,false,true
+5eb53f32-8a2d-5c8a-8705-4f102743f18d,PAYMENT_REQUEST,IV_5,requester,Requester,,IV_REQUEST_SUBMISSION,2,false,true
+73f379fb-0966-5d41-8eeb-eb8c68ea7a84,PAYMENT_REQUEST,IV_5,paymentApprovalMailsUdApprovalShouldBeIncorporated,Payment approval mails (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,3,false,true
+63a4a830-a1c1-5e65-aeea-2bade9ce1f93,PAYMENT_REQUEST,IV_5,merchantFilesExcelSheets,Merchant files- Excel Sheets,,IV_REQUEST_SUBMISSION,4,false,true
+b066a2dd-fec4-5e93-a9e0-7a2d37099ba8,PAYMENT_REQUEST,IV_6,entityDapDbn,Entity (DAP/DBN),,IV_REQUEST_SUBMISSION,1,false,true
+aaa9727a-0a4b-556f-a543-38066b0b8b5c,PAYMENT_REQUEST,IV_6,customerNameAndSapCode,Customer name & SAP Code,,IV_REQUEST_SUBMISSION,2,false,true
+7beffa5c-4e67-5881-ade4-9c1bdffd37ce,PAYMENT_REQUEST,IV_6,billingPeriod,Billing period,,IV_REQUEST_SUBMISSION,3,false,true
+ebec2b03-5ccb-5874-ba74-5827e31e9c4a,PAYMENT_REQUEST,IV_6,invoiceDate,Invoice date,,IV_REQUEST_SUBMISSION,4,false,true
+ad6e1171-1e42-5cec-b221-439cba02f2df,PAYMENT_REQUEST,IV_6,invoiceNumber,Invoice Number,,IV_REQUEST_SUBMISSION,5,false,true
+55ad430b-b7f3-587a-aea5-11c710e16ffb,PAYMENT_REQUEST,IV_6,amount,Amount,,IV_REQUEST_SUBMISSION,6,false,true
+2aaceb30-acca-5446-a4f5-c0b5fa1f0a3d,PAYMENT_REQUEST,IV_6,currency,Currency,,IV_REQUEST_SUBMISSION,7,false,true
+e132ec84-c7ce-5fd9-b045-1819a592f711,PAYMENT_REQUEST,IV_6,supportingDocumentsInvoiceVarianceStatusReportDetailSummary,Supporting Documents ( Invoice / Variance status report / Detail summary report ),,IV_REQUEST_SUBMISSION,8,false,true
+54701805-4675-5d87-91bd-844d51173c13,PAYMENT_REQUEST,IV_6,entityDapDbnDtvDttDnsDbsTelecard,Entity (DAP/DBN/DTV/DTT/DNS/DBS/Telecard/Hone),,IV_REQUEST_SUBMISSION,9,false,true
+7fbc809f-206b-52e2-8e94-23f046c0fbf4,PAYMENT_REQUEST,IV_6,paymentModeInterConnection,Payment mode (Inter-connection),,IV_REQUEST_SUBMISSION,10,false,true
+efb4b446-742f-5c98-b419-94020cfb2c8b,PAYMENT_REQUEST,IV_6,paymentTypeInvoiceDebitNoteCreditNote,Payment type (Invoice/debit note/credit note),,IV_REQUEST_SUBMISSION,11,false,true
+3d3c38f9-a910-5d87-ac3c-bc56413d842a,PAYMENT_REQUEST,IV_6,paymentCategoryLocalForeign,Payment category (Local/ Foreign),,IV_REQUEST_SUBMISSION,12,false,true
+f8d7ca04-055b-5f5d-b7f0-84c3438d2b2c,PAYMENT_REQUEST,IV_6,beneficiaryName,Beneficiary name,,IV_REQUEST_SUBMISSION,13,false,true
+da97a376-f225-5e23-b73f-d159c13013f1,PAYMENT_REQUEST,IV_6,financeOfficer,Finance officer,,IV_REQUEST_SUBMISSION,14,false,true
+1285e696-2773-5a6e-8e1a-58fe6202f362,PAYMENT_REQUEST,IV_6,requesterGroupCreditOperationsTeam,Requester (Group credit operations team),,IV_REQUEST_SUBMISSION,15,false,true
+65110f7c-f63f-5382-b71e-a6df02946f42,PAYMENT_REQUEST,IV_6,invoiceNumber,Invoice Number,,IV_REQUEST_SUBMISSION,16,false,true
+514a4de9-c5e4-5932-914d-2627fde6b133,PAYMENT_REQUEST,IV_6,invoiceAmount,Invoice amount,,IV_REQUEST_SUBMISSION,17,false,true
+e3889c37-4392-54b6-97cd-5b00fb928ff6,PAYMENT_REQUEST,IV_6,currency,Currency,,IV_REQUEST_SUBMISSION,18,false,true
+ca1980c9-5778-5b52-8536-1ffd5145ecb3,PAYMENT_REQUEST,IV_6,additionalRemarks,Additional remarks,,IV_REQUEST_SUBMISSION,19,false,true
+9be25bb6-c7bf-5d41-aada-88881f8de5c0,PAYMENT_REQUEST,IV_6,paymentMethodTt,Payment method (TT),,IV_REQUEST_SUBMISSION,20,false,true
+77447e79-ddfd-5201-a099-1c0f58245b47,PAYMENT_REQUEST,IV_6,whtCerficateReference,WHT cerficate reference,,IV_REQUEST_SUBMISSION,21,false,true
+d728bb34-679a-522c-9230-81f949edfc09,PAYMENT_REQUEST,IV_6,supportingDocumentsMemoInvoiceDebitNoteCreditNote,Supporting Documents - (Memo/Invoice/debit note/credit note),,IV_REQUEST_SUBMISSION,22,false,true
+c0581430-c8bd-576e-8216-6aabfa86f416,PAYMENT_REQUEST,IV_6,paymentApprovalMailsUdApprovalShouldBeIncorporated,Payment approval mails (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,23,false,true
+f541cf99-e18e-5fbd-a4ac-0ad28930d757,PAYMENT_REQUEST,IV_7_1,approvalEmailWithDulyFiledWinscpFormatsFor,Approval Email with duly filed WinSCP formats for Less than 100k / More than 100k/Ideamart BRC/ Retention,,IV_REQUEST_SUBMISSION,1,false,true
+a5aa1b70-e946-5118-958b-db06c2ecd5ad,PAYMENT_REQUEST,IV_7_2,approvalEmailWithDulyFiledWinscpFormatsFor2,Approval Email with duly filed WinSCP formats for Less than 100k / More than 100k/Retention,,IV_REQUEST_SUBMISSION,1,false,true
+a6bc0457-4ed9-5800-938e-019f645c2a40,PAYMENT_REQUEST,IV_8,entityDapDbn,Entity (DAP/DBN),,IV_REQUEST_SUBMISSION,1,false,true
+8f3d24e4-4bef-5542-99e3-0a448ac8b5f2,PAYMENT_REQUEST,IV_8,vendorName,Vendor name,,IV_REQUEST_SUBMISSION,2,false,true
+891ed6b1-57e8-5883-a75e-9a10e6ebf483,PAYMENT_REQUEST,IV_8,sapVendorCode,SAP Vendor code,,IV_REQUEST_SUBMISSION,3,false,true
+38b43b54-e4f6-5189-88d1-277d8dfe7bcb,PAYMENT_REQUEST,IV_8,paymentApprovalMailsUdApprovalShouldBeIncorporated,Payment approval mails (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,4,false,true
+ae7b9971-4df9-5d5b-a82a-6788695cdad0,PAYMENT_REQUEST,IV_8,supportingDocumentsInvoiceWorkingSheetEtc,"Supporting documents (Invoice , Working sheet etc.)",,IV_REQUEST_SUBMISSION,5,false,true
+11d4d806-5f98-5ff3-86c6-670b17bc40c9,PAYMENT_REQUEST,IV_9,dap,DAP,,IV_REQUEST_SUBMISSION,1,false,true
+e84a73ea-905a-544b-a6e7-b9e6c51a7a8d,PAYMENT_REQUEST,IV_9,approvalEmailWithDulyFiledBotUploadingFormats,Approval Email with duly filed BOT Uploading formats,,IV_REQUEST_SUBMISSION,2,false,true
+afb04e0a-a5ea-5a9f-be09-e5dc3e58a891,PAYMENT_REQUEST,IV_9,dbn,DBN,,IV_REQUEST_SUBMISSION,3,false,true
+cf851803-7a42-5da4-b3f5-584e0e130b15,PAYMENT_REQUEST,IV_9,approvalEmailWithDulyFiledBotUploadingFormats,Approval Email with duly filed BOT Uploading formats,,IV_REQUEST_SUBMISSION,4,false,true
+20a04960-6317-5142-8c75-b57fd0d1da2f,PAYMENT_REQUEST,IV_9,dtv,DTV,,IV_REQUEST_SUBMISSION,5,false,true
+662bc197-d0a9-54e4-834c-2560761f1552,PAYMENT_REQUEST,IV_9,approvalEmailWithDulyFiledBotUploadingFormats,Approval Email with duly filed BOT Uploading formats,,IV_REQUEST_SUBMISSION,6,false,true
+a891d48b-8637-551b-ad6f-75501ca78a32,PAYMENT_REQUEST,IV_9,at,AT,,IV_REQUEST_SUBMISSION,7,false,true
+d2d699e7-d594-5661-8d32-774157049dbc,PAYMENT_REQUEST,IV_9,approvalEmailWithDulyFiledBotUploadingFormats,Approval Email with duly filed BOT Uploading formats,,IV_REQUEST_SUBMISSION,8,false,true
+5265e49b-b1b7-5a6d-af78-9e082a499b5e,PAYMENT_REQUEST,IV_10,entity,Entity,,IV_REQUEST_SUBMISSION,1,false,true
+072d42e4-7644-5a39-a0b0-50debe142a2e,PAYMENT_REQUEST,IV_10,realizationConfirmationDebitGlCreditGlInThe,"Realization confirmation , Debit GL , Credit GL in the event if the credit entry goes to a GL instead of vendor account (Ex. Laptop buy back) (To be obtained from Bank rec. team via workflow)",,IV_REQUEST_SUBMISSION,2,false,true
+6b33e492-e783-57db-8035-b57b3613649e,PAYMENT_REQUEST,IV_10,vendorOrCustomerCode,Vendor or customer code,,IV_REQUEST_SUBMISSION,3,false,true
+c9ac6d54-05b0-576f-ba52-426211dc5026,PAYMENT_REQUEST,IV_10,amount,Amount,,IV_REQUEST_SUBMISSION,4,false,true
+94f1c0ce-ee0e-5f6a-8a6b-ae6d503f9ce2,PAYMENT_REQUEST,IV_11,paymentApprovalMailsUdApprovalShouldBeIncorporated,Payment approval mails (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,1,false,true
+83228cee-9550-5645-a9ab-3be52391427d,PAYMENT_REQUEST,IV_11,supportingDocumentsExcelTableWithTheDetailsOf,Supporting documents (Excel table with the details of total and document number),,IV_REQUEST_SUBMISSION,2,false,true
+9c9dd6de-1ec7-580b-bee7-3ac9b17dcc1d,PAYMENT_REQUEST,IV_12_1,entityDapDbnDtvDdtDnsDbsTelecard,Entity (DAP/DBN/DTV/DDT/DNS/DBS/Telecard),,IV_REQUEST_SUBMISSION,1,false,true
+7a874c2e-bddb-5cd1-874c-1e8fd3ff3fd8,PAYMENT_REQUEST,IV_12_1,taxType,TAX type,,IV_REQUEST_SUBMISSION,2,false,true
+0fce3255-6a06-5227-88b7-49a4c9feee6b,PAYMENT_REQUEST,IV_12_1,period,Period,,IV_REQUEST_SUBMISSION,3,false,true
+1d0dd6f5-0221-504e-82b1-9e167b5778e5,PAYMENT_REQUEST,IV_12_1,amount,Amount,,IV_REQUEST_SUBMISSION,4,false,true
+18f0cd5e-8212-5b45-894c-11fcd855a13b,PAYMENT_REQUEST,IV_12_1,sapVendorCode,SAP vendor code,,IV_REQUEST_SUBMISSION,5,false,true
+401654d7-9527-57eb-b816-a0edfb01a9c6,PAYMENT_REQUEST,IV_12_1,glCode,GL Code,,IV_REQUEST_SUBMISSION,6,false,true
+78c6abd5-d11b-5c23-9606-fc9c88e9e598,PAYMENT_REQUEST,IV_12_1,profitCenter,Profit center,,IV_REQUEST_SUBMISSION,7,false,true
+f2c68bd3-0a64-5f2f-8971-5fa9028aed37,PAYMENT_REQUEST,IV_12_1,udApprovalShouldBeIncorporatedToTheWf,(UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,8,false,true
+13793c1e-89b2-52c8-8225-39c5acfc4025,PAYMENT_REQUEST,IV_12_1,supportingDocumentsMemoWithApproval,Supporting Documents ( Memo with approval),,IV_REQUEST_SUBMISSION,9,false,true
+c102fc03-afba-5b75-b832-0e664a779d3f,PAYMENT_REQUEST,IV_12_2,entityDapDbnDtvHOne,Entity (DAP/DBN/DTV/H-ONE),,IV_REQUEST_SUBMISSION,1,false,true
+c5b7f55e-7f62-5f13-b40c-7b6f7c4f8648,PAYMENT_REQUEST,IV_12_2,taxType,TAX type,,IV_REQUEST_SUBMISSION,2,false,true
+79abfc60-90f0-55e3-a167-4bc45df8d29d,PAYMENT_REQUEST,IV_12_2,memoDate,Memo date,,IV_REQUEST_SUBMISSION,3,false,true
+c1934fa8-d3e0-5fbf-a231-e35742d1052c,PAYMENT_REQUEST,IV_12_2,approvals,Approvals,,IV_REQUEST_SUBMISSION,4,false,true
+e30adf2b-1ba7-5e8e-bc33-a14ef52fc881,PAYMENT_REQUEST,IV_12_2,amount,Amount,,IV_REQUEST_SUBMISSION,5,false,true
+275894f3-7db6-5a08-a91d-6ec7bb984547,PAYMENT_REQUEST,IV_12_2,sapVendorCode,SAP vendor code,,IV_REQUEST_SUBMISSION,6,false,true
+b53be5d0-79bd-5cfa-8334-c291bc9cc151,PAYMENT_REQUEST,IV_12_2,glCodeAndProfitCenter,GL Code & profit center,,IV_REQUEST_SUBMISSION,7,false,true
+22084a19-3faa-5cc2-9282-48acdab23c80,PAYMENT_REQUEST,IV_12_2,profitCenter,Profit center,,IV_REQUEST_SUBMISSION,8,false,true
+0792eff9-c00e-50e5-9b98-3e0971dd6e9a,PAYMENT_REQUEST,IV_12_2,tinNumbers,TIN numbers,,IV_REQUEST_SUBMISSION,9,false,true
+06f2fcbb-2917-511a-b8ae-897905cb7328,PAYMENT_REQUEST,IV_12_2,dinNumbers,DIN numbers,,IV_REQUEST_SUBMISSION,10,false,true
+0011ffd4-8d09-5a49-b8ce-b953d9233b30,PAYMENT_REQUEST,IV_13_1,entityDapDbnDtvDdt,Entity (DAP | DBN | DTV | DDT),,IV_REQUEST_SUBMISSION,1,false,true
+4340e635-6d8e-59a8-a8c3-95e1a5bb3294,PAYMENT_REQUEST,IV_13_1,poNumber,PO Number,,IV_REQUEST_SUBMISSION,2,false,true
+41bb3a8b-5a4b-554f-ad9a-80eacba156d3,PAYMENT_REQUEST,IV_13_1,budgetCode,Budget code,,IV_REQUEST_SUBMISSION,3,false,true
+11d73611-b52a-5130-9416-0a20251a327c,PAYMENT_REQUEST,IV_13_1,totalAmount,Total amount,,IV_REQUEST_SUBMISSION,4,false,true
+a40107a8-79e6-5bdb-ba22-8f9023d1ad55,PAYMENT_REQUEST,IV_13_1,approvalFromRimazHassanForBelow1Mn,Approval from Rimaz Hassan for below 1 Mn. and Munesh David for above 1 Mn. (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,5,false,true
+3b317e3f-dc8a-5918-8ece-0474d7768cab,PAYMENT_REQUEST,IV_13_1,supportingDocumentAdvanceRequestFormCommercialProformaInvoice,"Supporting document (Advance request form, Commercial / Proforma Invoice)",,IV_REQUEST_SUBMISSION,6,false,true
+e49feca6-5589-5556-b243-956248240b8c,PAYMENT_REQUEST,IV_13_1,taxInvoice,Tax Invoice,,IV_REQUEST_SUBMISSION,7,false,true
+7905209d-4250-5b31-9ae4-8880f05bc3d4,PAYMENT_REQUEST,IV_13_2,entityDapDbnDtvDdt,Entity (DAP | DBN | DTV | DDT),,IV_REQUEST_SUBMISSION,1,false,true
+ce9e2127-aa1a-5526-837a-4f4acc2666b8,PAYMENT_REQUEST,IV_13_2,poNumberBudgetCode,PO Number / Budget code,,IV_REQUEST_SUBMISSION,2,false,true
+ad3ee81f-73b1-553b-8cf2-58ffb29cae35,PAYMENT_REQUEST,IV_13_2,totalAmount,Total amount,,IV_REQUEST_SUBMISSION,3,false,true
+bf6f1f76-029f-588c-88e5-31ded5f11725,PAYMENT_REQUEST,IV_13_2,approvalFromRimazHassanForBelow1Mn,Approval from Rimaz Hassan for below 1 Mn. and Munesh David for above 1 Mn. (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,4,false,true
+855c64de-a42d-5ae6-bf9e-63cf781672df,PAYMENT_REQUEST,IV_13_2,supportingDocumentAdvanceRequestFormCommercialProformaInvoice2,"Supporting document (Advance request form, Commercial / Proforma Invoice , Paying in Voucher)",,IV_REQUEST_SUBMISSION,5,false,true
+bfc84497-68fc-5c1e-ac52-b6dc27ee75f1,PAYMENT_REQUEST,IV_13_3,entityDapDbnDtvDdt,Entity (DAP | DBN | DTV | DDT),,IV_REQUEST_SUBMISSION,1,false,true
+2321bf57-6c47-5c36-a1ab-f1741a3318ff,PAYMENT_REQUEST,IV_13_3,poNumber,PO Number,,IV_REQUEST_SUBMISSION,2,false,true
+d6732a57-db16-503c-9e4a-4ceee22a7d8b,PAYMENT_REQUEST,IV_13_3,budgetCode,Budget code,,IV_REQUEST_SUBMISSION,3,false,true
+d2c0a1e2-088c-5d39-b1f3-428b9b029180,PAYMENT_REQUEST,IV_13_3,totalAmountAndVatAmountSeparately,Total amount and VAT amount separately,,IV_REQUEST_SUBMISSION,4,false,true
+b0ee8fbf-3d0d-5341-89b8-2a7a272ac639,PAYMENT_REQUEST,IV_13_3,approvalFromRimazHassanForBelow1Mn,Approval from Rimaz Hassan for below 1 Mn. and Munesh David for above 1 Mn. (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,5,false,true
+34fdce1e-851f-5eee-8740-5e580dc8d5cf,PAYMENT_REQUEST,IV_13_3,supportingDocumentCommercialProformaInvoiceAssessmentNoticeCusdec,"Supporting document (Commercial / Proforma Invoice , Assessment Notice ,Cusdec)",,IV_REQUEST_SUBMISSION,6,false,true
+e4c71bae-74a3-5080-8ef2-ae7e095012da,PAYMENT_REQUEST,IV_13_3,advanceClearanceReportConfirmingTheGrnStatusFrom,Advance clearance report confirming the GRN status (From GRIR Team),,IV_REQUEST_SUBMISSION,7,false,true
+bcee44dc-e670-5f4f-88c5-56702592adb1,PAYMENT_REQUEST,IV_14,supportingDocumentsMemoBgFormatIfThereIs,"Supporting documents (Memo , BG format if there is a specific format specified by the beneficiary)",,IV_REQUEST_SUBMISSION,1,false,true
+53978ad9-333a-57cf-8a4c-f90dd0d37a3e,PAYMENT_REQUEST,IV_14,beneficiaryNameAndAddress,Beneficiary name and address,,IV_REQUEST_SUBMISSION,2,false,true
+1f6b0ccb-7994-5838-a6c5-ddd8cd3716ed,PAYMENT_REQUEST,IV_14,entity,Entity,,IV_REQUEST_SUBMISSION,3,false,true
+a029f885-8a39-5569-ada3-6ab32eaa3d7a,PAYMENT_REQUEST,IV_14,amountAndCurrency,Amount and currency,,IV_REQUEST_SUBMISSION,4,false,true
+e57c35a8-ff35-5250-a8f7-483c51cba0a6,PAYMENT_REQUEST,IV_14,bgPurpose,BG purpose,,IV_REQUEST_SUBMISSION,5,false,true
+7424fd5e-749c-5e20-b621-0b77b8527477,PAYMENT_REQUEST,IV_14,bgReference,BG Reference,,IV_REQUEST_SUBMISSION,6,false,true
+1026fd91-3863-5ec7-9abc-efa9b09d9f1a,PAYMENT_REQUEST,IV_14,commencingDateAndEndingDate,Commencing date and ending date,,IV_REQUEST_SUBMISSION,7,false,true
+868a10ee-021d-5e75-a538-b8534920905c,PAYMENT_REQUEST,IV_14,bgTypeBidbondAdvanceGuaranteePerformanceGuaranteeNon,"BG type (Bidbond/Advance guarantee, Performance Guarantee, Non financial guarantee)",,IV_REQUEST_SUBMISSION,8,false,true
+dbb2b851-3a7c-501e-9bfe-4fd70b04f158,PAYMENT_REQUEST,IV_14,approvalUdApprovalToBeIncorporatedToWh,Approval (UD approval to be incorporated to WH workflow),,IV_REQUEST_SUBMISSION,9,false,true
+99bf049c-2c0e-5ca3-acc2-f595ff0d984e,PAYMENT_REQUEST,IV_14,ifAThirdPartyIsInvolvedNameAnd,"If a third party is involved, name & address of the third party",,IV_REQUEST_SUBMISSION,10,false,true
+79d0cb36-ed20-55cc-a4bd-409beec9fca9,PAYMENT_REQUEST,IV_14,remarks,Remarks,,IV_REQUEST_SUBMISSION,11,false,true
+c32f6ef8-b2c8-5730-9a8a-faf07cbd0b44,PAYMENT_REQUEST,IV_15_1,entityDap2,Entity(DAP),,IV_REQUEST_SUBMISSION,1,false,true
+e89925d0-e048-50c7-8095-38d89523fc5c,PAYMENT_REQUEST,IV_15_1,supportingDocumentMemoDebitNoteCreditNote,"Supporting document (Memo , Debit note/Credit note)",,IV_REQUEST_SUBMISSION,2,false,true
+63bb5828-7d4c-5883-a3fe-8353f719c3ea,PAYMENT_REQUEST,IV_15_1,approvalUdApprovalToBeIncorporatedToWh,Approval (UD approval to be incorporated to WH workflow),,IV_REQUEST_SUBMISSION,3,false,true
+b465746d-4703-5459-93f2-4d768319f86f,PAYMENT_REQUEST,IV_15_1,customerOperatorNameAndCustomerCode,Customer(Operator) name & Customer code,,IV_REQUEST_SUBMISSION,4,false,true
+9303dafd-dc81-5517-a558-b60a83dfd10d,PAYMENT_REQUEST,IV_15_1,operatorPlmnCode,Operator PLMN code,,IV_REQUEST_SUBMISSION,5,false,true
+3b10690d-b95e-5b54-bf3c-a0804054d7e3,PAYMENT_REQUEST,IV_15_1,operatorAddress,Operator address,,IV_REQUEST_SUBMISSION,6,false,true
+c3e70e6b-3308-5ce9-85a0-d36eb6f93303,PAYMENT_REQUEST,IV_15_1,amount,Amount,,IV_REQUEST_SUBMISSION,7,false,true
+6e0a19d5-949b-5394-a630-97163a0aa2c8,PAYMENT_REQUEST,IV_15_1,currency,Currency,,IV_REQUEST_SUBMISSION,8,false,true
+45af63cd-7751-53b6-9d45-e96fd895d074,PAYMENT_REQUEST,IV_15_1,discountedPeriod,Discounted period,,IV_REQUEST_SUBMISSION,9,false,true
+507c39e0-e98f-54f2-ace4-f4bcc897a7af,PAYMENT_REQUEST,IV_15_2,entityDapDbnDtvDttDnsDbsTelecard,Entity (DAP/DBN/DTV/DTT/DNS/DBS/Telecard/Hone),,IV_REQUEST_SUBMISSION,1,false,true
+d33a48a7-55b1-5e13-b7aa-d6e223fe106d,PAYMENT_REQUEST,IV_15_2,paymentModeRoaming,Payment mode (Roaming),,IV_REQUEST_SUBMISSION,2,false,true
+6e1ecccc-7b4e-5d01-8e3b-94ccbadd8908,PAYMENT_REQUEST,IV_15_2,paymentTypeInvoiceDebitNoteCreditNote,Payment type (Invoice/debit note/credit note),,IV_REQUEST_SUBMISSION,3,false,true
+834a1668-ef87-5cb5-848c-ca991e78c3e9,PAYMENT_REQUEST,IV_15_2,paymentCategoryLocalForeign,Payment category (Local/ Foreign),,IV_REQUEST_SUBMISSION,4,false,true
+3a2079d0-362d-5e70-acfa-6a08f0efc5ab,PAYMENT_REQUEST,IV_15_2,beneficiaryName,Beneficiary name,,IV_REQUEST_SUBMISSION,5,false,true
+fff5f5b8-6d93-535d-b918-4c61153b29d7,PAYMENT_REQUEST,IV_15_2,financeOfficer,Finance officer,,IV_REQUEST_SUBMISSION,6,false,true
+65ef3f2b-9ca3-5d91-b90f-90c06c9fd71c,PAYMENT_REQUEST,IV_15_2,requesterGroupCreditOperationsTeam,Requester (Group credit operations team),,IV_REQUEST_SUBMISSION,7,false,true
+7c969e55-4599-5b85-800a-dd1685eb25f9,PAYMENT_REQUEST,IV_15_2,invoiceNumber,Invoice Number,,IV_REQUEST_SUBMISSION,8,false,true
+499f631d-647c-5643-a697-0808f9dffedb,PAYMENT_REQUEST,IV_15_2,invoiceAmount,Invoice amount,,IV_REQUEST_SUBMISSION,9,false,true
+525be28f-b2af-59a9-90c0-bf6b8396eebd,PAYMENT_REQUEST,IV_15_2,currency,Currency,,IV_REQUEST_SUBMISSION,10,false,true
+c3d9636f-c2b8-5c11-b06f-af30499d5f94,PAYMENT_REQUEST,IV_15_2,additionalRemarks,Additional remarks,,IV_REQUEST_SUBMISSION,11,false,true
+136fe1bb-7f8f-560f-b08c-e1b827e140b9,PAYMENT_REQUEST,IV_15_2,paymentMethodTt,Payment method (TT),,IV_REQUEST_SUBMISSION,12,false,true
+2f8abd9f-9b4e-5707-95f7-b3567000e985,PAYMENT_REQUEST,IV_15_2,whtCerficateReference,WHT cerficate reference,,IV_REQUEST_SUBMISSION,13,false,true
+42a5aa30-ef73-5abe-92f2-4df6cdf028fb,PAYMENT_REQUEST,IV_15_2,supportingDocumentsMemoInvoiceDebitNoteCreditNote,Supporting Documents - (Memo/Invoice/debit note/credit note),,IV_REQUEST_SUBMISSION,14,false,true
+1c5cdc64-3de8-58b1-a42c-5357c64b4e26,PAYMENT_REQUEST,IV_15_2,paymentApprovalMailsUdApprovalShouldBeIncorporated,Payment approval mails (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,15,false,true
+b187dfb0-5e30-58a9-ac29-202917fd168c,PAYMENT_REQUEST,IV_16,paymentApprovalMailsUdApprovalShouldBeIncorporated,Payment approval mails (UD approval should be incorporated to the WF),,IV_REQUEST_SUBMISSION,1,false,true
+1c7fa3d5-f272-549e-a045-683546cfcb9d,PAYMENT_REQUEST,IV_16,sapDocumentNumber,SAP document number,,IV_REQUEST_SUBMISSION,2,false,true
+2f87fc14-1728-5fff-a326-0df897260669,PAYMENT_REQUEST,IV_16,supportingDocumentsInvoice,Supporting documents (Invoice),,IV_REQUEST_SUBMISSION,3,false,true
+8e426437-efad-5ab2-8f83-98b1e8fedd08,PAYMENT_REQUEST,IV_17,zeroivRequestEmail,ZEROIV request / Email,,IV_REQUEST_SUBMISSION,1,false,true
+3b94c346-0570-5739-8d0f-8cdca58c3b8b,PAYMENT_REQUEST,IV_17,zeroIvExcelSheet,ZERO IV Excel Sheet,,IV_REQUEST_SUBMISSION,2,false,true
+fccc6c11-50b9-5654-b423-259f9e9bca73,PAYMENT_REQUEST,IV_17,entity,Entity,,IV_REQUEST_SUBMISSION,3,false,true
+99ef68f8-0c3f-5ce2-a8ef-bbd4a42f1d59,PAYMENT_REQUEST,IV_17,userName,User Name,,IV_REQUEST_SUBMISSION,4,false,true
+3ac9ecfa-752a-5220-92b1-63c8e8022277,PAYMENT_REQUEST,IV_17,gLAcct,G/L Acct,,IV_REQUEST_SUBMISSION,5,false,true
+c2153ebb-d477-52c5-a15a-ed71c74cb14a,PAYMENT_REQUEST,IV_17,documentNo,Document No,,IV_REQUEST_SUBMISSION,6,false,true
+8895e51d-ffa0-5b72-a116-375de4d1de75,PAYMENT_REQUEST,IV_17,type,Type,,IV_REQUEST_SUBMISSION,7,false,true
+43a58f34-b313-5090-9251-2f1620a9467a,PAYMENT_REQUEST,IV_17,docDate,Doc. Date,,IV_REQUEST_SUBMISSION,8,false,true
+fb3a6e72-1961-51f6-a4eb-132ccbe55445,PAYMENT_REQUEST,IV_17,postingDate,Posting Date,,IV_REQUEST_SUBMISSION,9,false,true
+2b08d8c8-c2da-5c42-ae1c-4ed335864473,PAYMENT_REQUEST,IV_17,poNumber,PO Number,,IV_REQUEST_SUBMISSION,10,false,true
+c5536281-6193-55ec-bc73-9c19730fafe1,PAYMENT_REQUEST,IV_17,item,Item,,IV_REQUEST_SUBMISSION,11,false,true
+3c9f52e2-89e1-5e7b-9b3a-c5e8face1b3e,PAYMENT_REQUEST,IV_17,amountInLocalCrcy,Amount in Local Crcy,,IV_REQUEST_SUBMISSION,12,false,true
+3dc7bcff-0bb4-53cc-852e-5bb5690ce914,PAYMENT_REQUEST,IV_17,amountInDocCurr,Amount in Doc. Curr.,,IV_REQUEST_SUBMISSION,13,false,true
+db87a00f-4265-5b80-99ad-7f9c50d48849,PAYMENT_REQUEST,IV_17,text,Text,,IV_REQUEST_SUBMISSION,14,false,true
+178dc5a1-5ad3-5c74-9194-cc90c10bac13,PAYMENT_REQUEST,IV_17,vendor,Vendor,,IV_REQUEST_SUBMISSION,15,false,true
+70ec7092-69a6-58fd-809e-ef6ae68771d6,PAYMENT_REQUEST,IV_17,vendorName,Vendor Name,,IV_REQUEST_SUBMISSION,16,false,true
+fb13eed0-7156-5143-b26b-b3f1ca03e2fa,PAYMENT_REQUEST,IV_18,entityDap2,Entity(DAP),,IV_REQUEST_SUBMISSION,1,false,true
+24bff94f-5dc3-5544-836a-ad5abe1acfa9,PAYMENT_REQUEST,IV_18,excel,Excel,,IV_REQUEST_SUBMISSION,2,false,true
+b76b2ac7-b9e3-58e1-acc4-3027fae8c332,PAYMENT_REQUEST,IV_18,approval,Approval,,IV_REQUEST_SUBMISSION,3,false,true
+cd642bde-442b-58da-9430-f7ca6aec7a2e,PAYMENT_REQUEST,IV_18,ramisSchedule,Ramis schedule,,IV_REQUEST_SUBMISSION,4,false,true
+9b4f3bec-932f-5cba-bf4d-e4b4fd220aab,PAYMENT_REQUEST,IV_19,similarToPoAdvance,Similar to PO Advance,,IV_REQUEST_SUBMISSION,1,false,true
+5452d1de-b9d4-5214-bd97-f01ecd6a82e3,PAYMENT_REQUEST,IV_20,entity,Entity,,IV_REQUEST_SUBMISSION,1,false,true
+09654290-4273-5960-a08a-7616b6253dd2,PAYMENT_REQUEST,IV_20,supportingDocumentsInvoicePaymentAcknowledgementMemoFundTransfer,"Supporting documents (Invoice , Payment Acknowledgement , Memo, Fund transfer confirmation)",,IV_REQUEST_SUBMISSION,2,false,true
+62a35037-2dd2-5c76-8d10-15e96c63da5b,PAYMENT_REQUEST,IV_20,paymentCategoryRentSupRefDep,Payment Category (Rent /Sup:/ Ref Dep),,IV_REQUEST_SUBMISSION,3,false,true
+0d51805a-19a3-59c1-bf03-ee988c476784,PAYMENT_REQUEST,IV_20,tableIncludingSeperateValuesForRentSupervisionRefundable,"Table including seperate values for Rent, Supervision, Refundable deposit and OFN reference",,IV_REQUEST_SUBMISSION,4,false,true
+074815a4-4164-5894-b507-c4f735ecb3c6,PAYMENT_REQUEST,IV_20,wbsElementApplicableForSupervisionCharges,WBS Element (Applicable for supervision charges),,IV_REQUEST_SUBMISSION,5,false,true
+605453b7-9d33-5c2b-be63-5c743710742f,PAYMENT_REQUEST,IV_20,costCenterApplicableOnlyForRent,Cost Center (Applicable only for rent),,IV_REQUEST_SUBMISSION,6,false,true
+740989af-03fc-5f1d-b7d8-478e3a522a52,PAYMENT_REQUEST,IV_20,paymentApprovalMailsUdApprovalShouldBeIncorporated2,"Payment approval mails (UD approval should be incorporated to the WF - Since operational float ownership is with Saleem & Nalin M. , these requests have to be approved by Ruchira Yasarathna)",,IV_REQUEST_SUBMISSION,7,false,true
+010300fb-b9fa-523c-91dc-1ffdf3759418,PAYMENT_REQUEST,IV_21,entity,Entity,,IV_REQUEST_SUBMISSION,1,false,true
+4e81dd1a-2422-5b31-ac29-857a2b15e260,PAYMENT_REQUEST,IV_21,ctmFormWithApproval,CTM form with approval,,IV_REQUEST_SUBMISSION,2,false,true
+274646b7-6eeb-535c-ad7f-7793494c3608,PAYMENT_REQUEST,IV_22,entity,Entity,,IV_REQUEST_SUBMISSION,1,false,true
+53a37629-804f-570b-8b74-782cf8eaf28d,PAYMENT_REQUEST,IV_22,checkPeridiumReimbursementFormWithApproval,Check Peridium- Reimbursement form with approval,,IV_REQUEST_SUBMISSION,2,false,true

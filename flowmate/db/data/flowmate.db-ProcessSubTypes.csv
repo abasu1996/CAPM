@@ -1,0 +1,36 @@
+code,name,descr,processType_code,processOwner,activityDescription,sapTCode
+IV_1,PO Base Payment,1,PAYMENT_REQUEST,Rishadha,PO Base Payment Process Initiation,MIRO
+IV_1_1,Advance Payment / Settlement Process,1.1,PAYMENT_REQUEST,Rishadha,PO Base Payment Process Initiation,F-47
+IV_1_1_1,PO Based Advance Payment,1.1.1,PAYMENT_REQUEST,Rishadha,PO Base Payment Process Initiation,F-47
+IV_1_1_2,PO Based Advance Settlement,1.1.2,PAYMENT_REQUEST,Rishadha,PO Base Payment Process Initiation,MIRO
+IV_1_2,Credit note,1.2,PAYMENT_REQUEST,Rishadha,PO Base Payment Process Initiation,F-65
+IV_2,FTK Payment Factoring,2,PAYMENT_REQUEST,Nishara,PO Validation,ME23N/ ME2L
+IV_3,FTK Payment Non-Factoring,3,PAYMENT_REQUEST,Nishara,UAC & Invoice Verification,MIRO (Processed through BOT)
+IV_4,Credit Card Payment,4,PAYMENT_REQUEST,Dilani,Liability Booking- Manul,MIRO
+IV_5,Ez Cash Merchant Settlement,5,PAYMENT_REQUEST,Chathuri,Settlement file received by user division via email,N/A
+IV_6,Interconnection,6,PAYMENT_REQUEST,Kaveesha,Liability Booking,N/A
+IV_7,IdeaMart & AppMaker Payment,7,PAYMENT_REQUEST,Punsasee,Arranging payment,ZHSBC
+IV_7_1,IdeaMart & AppMaker Payment,7.1,PAYMENT_REQUEST,Punsasee,IdeaMart,WinSCP / ZINT001 (Liability is automated through these T codes)
+IV_7_2,IdeaMart & AppMaker Payment,7.2,PAYMENT_REQUEST,Punsasee,AppMaker,WinSCP / ZINT001 (Liability is automated through these T codes)
+IV_8,Site Sharing Payment,8,PAYMENT_REQUEST,Sheika,Receive validated site sharing invoices from UD,FV60
+IV_9,Customer Refunds,9,PAYMENT_REQUEST,Punsasee,Receive payment request via email,F-44
+IV_10,Miscellaneous Receipts,10,PAYMENT_REQUEST,Imasha,Receive receipt request via email from the user,F-52 (Receipt to Vendor)
+IV_11,Star Point Payments,11,PAYMENT_REQUEST,Erandi,Receive the approval and payment summary sheet from the user via email,F-28 (Receipt to Customer)
+IV_12,IRD Tax Payments,12,PAYMENT_REQUEST,Kaveesha,Obtain signatory approval,F-28 (Receipt to Customer)
+IV_12_1,IRD Tax Payments (Pay Orders),12.1,PAYMENT_REQUEST,Kaveesha,Receive memo for payable amount via email from tax team with LoA approval,FV60
+IV_12_2,IRD Tax Payments - HNB/HSBC (OTTP Method),12.2,PAYMENT_REQUEST,Kaveesha,Receive memo for payable amount via email from tax team with LoA approval,FV60
+IV_13,Import Related Payment (TRC / ICL/DGC),13,PAYMENT_REQUEST,Kaveesha,Perform sent to bank,Bank portal upload
+IV_13_1,TRC,13.1,PAYMENT_REQUEST,Hakeem,Receive payment request via email,F-47 (Advance payment)
+IV_13_2,ICL,13.2,PAYMENT_REQUEST,Hakeem,Payment requisition via email,Same as TRC
+IV_13_3,DGC,13.3,PAYMENT_REQUEST,Hakeem,Payment requisition via email,F-47
+IV_14,BGs,14,PAYMENT_REQUEST,Imasha,Receive request from user with approved memo,F-44
+IV_15,Roaming,15,PAYMENT_REQUEST,Imasha,Signatory approval,F-44
+IV_15_1,Pass debit/credit note entries,15.1,PAYMENT_REQUEST,Kaveesha,Receive the approved memo from UD (Global Business),FV70 (DN)
+IV_15_2,Arranging payment,15.2,PAYMENT_REQUEST,Sathmi,Receive the request via PTS (Group Credit Operation),F110
+IV_16,Stelacom consignment payments/ Intercompany settlement,16,PAYMENT_REQUEST,Imasha/ Rishadha,Book liability in vendor account (GBC),ZHSBC (If payment is released from HSBC)
+IV_17,Zero IV,17,PAYMENT_REQUEST,Punsasee,Send ZERO IV Request,MIRO
+IV_18,Staff Fuel & Generator Fuel,18,PAYMENT_REQUEST,Dilsha,Receive the request from UD via email.,Winscip - ZINT001 (Auto posting)
+IV_19,FTK Duty Reimbursement,19,PAYMENT_REQUEST,Dilsha,Receive the request via PTS & PAYDD,F-44-Clearing Entry
+IV_20,Authority payments-Reimbursement,20,PAYMENT_REQUEST,Hakeem,Receive the request via Mail,FV60 (Rent & Supervision charges)
+IV_21,Per Diem – Foreign Travel Process,21,PAYMENT_REQUEST,Imasha,Receive the request via Mail,FV60
+IV_22,Per Diem –Reimbursement,22,PAYMENT_REQUEST,Imasha,Receive the request via Mail,FV60
