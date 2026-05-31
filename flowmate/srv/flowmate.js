@@ -1021,14 +1021,24 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.on("getRequestReservationCounts", async (req) => {
       const oReservationUser = await this._currentReservationUser(req, Users);
-      const aRequests = await cds.tx(req).run(
-        SELECT.from(ProcessRequests).columns("ID", "reservedBy", "reservedByUser_ID")
-      );
-      const bReservedByMe = (request) => this._isReservedByCurrentUser(request, oReservationUser);
+      const qReservedByMe = SELECT.one.from(ProcessRequests).columns("count(1) as count");
+
+      if (oReservationUser.user?.ID) {
+        qReservedByMe.where({ reservedByUser_ID: oReservationUser.user.ID });
+      } else {
+        qReservedByMe.where({ reservedBy: { in: [oReservationUser.displayName, oReservationUser.principal] } });
+      }
+
+      const [oUnreserved, oReserved] = await Promise.all([
+        cds.tx(req).run(
+          SELECT.one.from(ProcessRequests).columns("count(1) as count").where({ reservedBy: null })
+        ),
+        cds.tx(req).run(qReservedByMe)
+      ]);
 
       return {
-        unreservedRequests: aRequests.filter((request) => !request.reservedBy).length,
-        reservedRequests: aRequests.filter(bReservedByMe).length
+        unreservedRequests: Number(oUnreserved?.count || oUnreserved?.COUNT || 0),
+        reservedRequests: Number(oReserved?.count || oReserved?.COUNT || 0)
       };
     });
 
@@ -1081,20 +1091,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _filterByVisibleRequests(req, Users, requestFieldName) {
     const oReservationUser = await this._currentReservationUser(req, Users);
-    const aRequests = await cds.tx(req).run(
-      SELECT.from(this.entities.ProcessRequests).columns("ID", "reservedBy", "reservedByUser_ID")
-    );
-    const aRequestIds = aRequests
-      .filter((request) => !request.reservedBy || this._isReservedByCurrentUser(request, oReservationUser))
-      .map((request) => this._toQueryString(request.ID))
-      .filter(Boolean);
+    const qVisibleRequests = SELECT.from(this.entities.ProcessRequests).columns("ID");
 
-    if (!aRequestIds.length) {
-      req.query.where(this._alwaysFalsePredicate());
-      return;
-    }
-
-    req.query.where(this._inStringListPredicate(requestFieldName, aRequestIds));
+    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser);
+    req.query.where([
+      { ref: [requestFieldName] },
+      "in",
+      qVisibleRequests
+    ]);
   }
 
   async _filterByAssignedTasks(req, Users) {
@@ -1125,14 +1129,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
 
     return String(value);
-  }
-
-  _inStringListPredicate(fieldName, values) {
-    return [
-      { ref: [fieldName] },
-      "in",
-      { list: values.map((value) => ({ val: this._toQueryString(value) })) }
-    ];
   }
 
   _addStringEqualsPredicate(predicates, fieldName, value) {

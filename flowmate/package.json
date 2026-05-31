@@ -17,7 +17,9 @@
     "start": "cds-serve",
     "serve-flowmate": "cds serve --in-memory",
     "watch-flowmate": "cds serve --in-memory",
-    "watch-flowmate-hybrid": "cds watch --profile hybrid --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false"
+    "watch-flowmate-hybrid": "cds watch --profile hybrid --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "seed:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js",
+    "delete:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js --delete"
   },
   "private": true,
   "cds": {
