@@ -75,7 +75,7 @@
                             growingScrollToLoad="true"
                             itemPress=".onTaskPress"
                             items="{
-                                path: '/ProcessTasks',
+                                path: '/MyAssignedTasks',
                                 parameters: {
                                     expand: 'request'
                                 },

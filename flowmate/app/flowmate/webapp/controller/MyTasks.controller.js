@@ -281,7 +281,7 @@ sap.ui.define([
         _showTaskDetailById(sTaskId) {
             this._sSelectedTaskId = sTaskId;
             this.byId("taskObjectPage").bindElement({
-                path: `/ProcessTasks(guid'${sTaskId}')`,
+                path: `/MyAssignedTasks(guid'${sTaskId}')`,
                 parameters: {
                     expand: "request"
                 },

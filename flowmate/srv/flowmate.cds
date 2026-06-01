@@ -2,26 +2,32 @@ using { flowmate.db as fldb } from '../db/schema';
 
 @requires: 'authenticated-user'
 service FlowmateService {
+    type GuidedProcessTask {
+        ID          : UUID;
+        stepNo      : Integer;
+        status_code : String(30);
+    }
+
     entity ProcessTypes as projection on fldb.ProcessTypes;
     entity ProcessSubTypes as projection on fldb.ProcessSubTypes;
     entity ProcessStatus as projection on fldb.ProcessStatus;
     entity TaskStatus as projection on fldb.TaskStatus;
-    entity ProcessRequestFieldCatalog as projection on fldb.ProcessRequestFieldCatalog;
-    entity ProcessRequestFieldOptions as projection on fldb.ProcessRequestFieldOptions;
-    entity ProcessRequestFieldMappings as projection on fldb.ProcessRequestFieldMappings;
     entity Users as projection on fldb.Users;
     entity Delegations as projection on fldb.Delegations;
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
-        ivFieldValues : redirected to ProcessRequestFieldValues,
         tasks       : redirected to ProcessTasks,
         attachments : redirected to ProcessAttachments
     };
-    entity ProcessRequestFieldValues as projection on fldb.ProcessRequestFieldValues {
+    entity ProcessTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests
     };
-    entity ProcessTasks as projection on fldb.ProcessTasks {
+    entity MyAssignedTasks as projection on fldb.ProcessTasks {
+        *,
+        request : redirected to ProcessRequests
+    };
+    entity RequestDetailTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests
     };
@@ -36,6 +42,23 @@ service FlowmateService {
 
     action submitRequest(requestId: UUID) returns Boolean;
     action approveTask(taskId: UUID, remarks: String) returns Boolean;
+    action analyzeGuidedTaskCompletion(taskId: UUID) returns {
+        requiresDecision   : Boolean;
+        nextStepNo         : Integer;
+        nextStepName       : String(100);
+        incompleteStepNo   : Integer;
+        incompleteStepName : String(100);
+    };
+    action completeGuidedTask(taskId: UUID, remarks: String, progressionMode: String(30)) returns Boolean;
+    action analyzeGuidedStepCompletion(requestId: UUID, stepNo: Integer) returns {
+        requiresDecision   : Boolean;
+        nextStepNo         : Integer;
+        nextStepName       : String(100);
+        incompleteStepNo   : Integer;
+        incompleteStepName : String(100);
+    };
+    action completeGuidedStep(requestId: UUID, stepNo: Integer, remarks: String, progressionMode: String(30)) returns Boolean;
+    action getGuidedProcessTasks(requestId: UUID) returns many GuidedProcessTask;
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
     action sendBack(taskId: UUID, remarks: String) returns Boolean;
     action reserveRequest(requestId: UUID) returns Boolean;
@@ -68,6 +91,7 @@ service FlowmateService {
         unreservedRequests : Integer;
         reservedRequests   : Integer;
     };
+    function getMyTaskCount() returns Integer;
     function getApplicationCapabilities() returns {
         isAdmin             : Boolean;
         canMaintainUsers    : Boolean;

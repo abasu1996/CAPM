@@ -63,7 +63,7 @@ sap.ui.define([
 
             Promise.allSettled([
                 this._readReservationCounts(),
-                this._readCount("/ProcessTasks")
+                this._readMyTaskCount()
             ]).then(([oReservationResult, oTasksResult]) => {
                 if (oReservationResult.status === "fulfilled") {
                     oDashboardModel.setProperty("/reservedRequestsCount", oReservationResult.value.reservedRequests);
@@ -109,6 +109,21 @@ sap.ui.define([
 
                 return oResponse.json();
             });
+        },
+
+        _readMyTaskCount() {
+            return fetch("/odata/v4/flowmate/getMyTaskCount()", {
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }).then((oResponse) => {
+                if (!oResponse.ok) {
+                    throw new Error("Task count could not be loaded");
+                }
+
+                return oResponse.json();
+            }).then((vResult) => Number(vResult?.value ?? vResult ?? 0));
         }
     });
 });

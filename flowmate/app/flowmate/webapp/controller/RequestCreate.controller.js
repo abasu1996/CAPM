@@ -30,10 +30,6 @@ sap.ui.define([
                 subProcessType_code: "",
                 subProcessTypeName: "",
                 hasSubProcessTypes: false,
-                dynamicFieldsVisible: false,
-                dynamicFieldsLoading: false,
-                dynamicFields: [],
-                dynamicFieldsCount: 0,
                 title: "",
                 description: "",
                 requesterUser_ID: "",
@@ -64,15 +60,6 @@ sap.ui.define([
                 return;
             }
 
-            const oMissingField = (oPayload.dynamicFields || []).find((oField) =>
-                oField.required && !String(oField.value || "").trim()
-            );
-
-            if (oMissingField) {
-                MessageBox.warning(this.getText("dynamicFieldRequiredMessage", [oMissingField.label]));
-                return;
-            }
-
             const oCreateModel = this.getView().getModel("create");
             oCreateModel.setProperty("/creating", true);
 
@@ -90,8 +77,6 @@ sap.ui.define([
                     priority: oPayload.priority,
                     status_code: "DRAFT"
                 });
-
-                await this._saveDynamicFieldValues(oCreated.ID, oPayload.dynamicFields || []);
 
                 if (oPayload.autoSubmit) {
                     await this.callAction("submitRequest", {
@@ -280,7 +265,6 @@ sap.ui.define([
             const oCreateModel = this.getView().getModel("create");
             oCreateModel.setProperty("/subProcessType_code", oContext.getProperty("code"));
             oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
-            await this._loadDynamicFieldMappings();
             this.onSubProcessTypeValueHelpClose(oEvent);
         },
 
@@ -336,9 +320,6 @@ sap.ui.define([
 
             oCreateModel.setProperty("/subProcessType_code", "");
             oCreateModel.setProperty("/subProcessTypeName", "");
-            oCreateModel.setProperty("/dynamicFields", []);
-            oCreateModel.setProperty("/dynamicFieldsCount", 0);
-            oCreateModel.setProperty("/dynamicFieldsVisible", false);
 
             const aSubTypes = await this._readList("/ProcessSubTypes", {
                 filters: [new Filter("processType_code", FilterOperator.EQ, oCreateModel.getProperty("/processType_code"))],
@@ -346,122 +327,6 @@ sap.ui.define([
             });
 
             oCreateModel.setProperty("/hasSubProcessTypes", aSubTypes.length > 0);
-
-            if (!aSubTypes.length) {
-                await this._loadDynamicFieldMappings();
-            }
-        },
-
-        async _loadDynamicFieldMappings() {
-            const oCreateModel = this.getView().getModel("create");
-            const sProcessTypeCode = oCreateModel.getProperty("/processType_code");
-            const sSubProcessTypeCode = oCreateModel.getProperty("/subProcessType_code");
-
-            if (!sProcessTypeCode || (oCreateModel.getProperty("/hasSubProcessTypes") && !sSubProcessTypeCode)) {
-                oCreateModel.setProperty("/dynamicFields", []);
-                oCreateModel.setProperty("/dynamicFieldsCount", 0);
-                oCreateModel.setProperty("/dynamicFieldsVisible", false);
-                return;
-            }
-
-            oCreateModel.setProperty("/dynamicFieldsLoading", true);
-
-            try {
-                const aFilters = [
-                    new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode),
-                    new Filter("isVisible", FilterOperator.EQ, true)
-                ];
-
-                if (sSubProcessTypeCode) {
-                    aFilters.push(new Filter("processSubType_code", FilterOperator.EQ, sSubProcessTypeCode));
-                }
-
-                const aMappings = await this._readList("/ProcessRequestFieldMappings", {
-                    filters: aFilters,
-                    urlParameters: {
-                        "$expand": "field",
-                        "$orderby": "sequence asc"
-                    }
-                });
-                const aListFieldNames = aMappings
-                    .filter((oMapping) => (oMapping.field?.dataType || "String") === "List")
-                    .map((oMapping) => oMapping.field_fieldName);
-                const mOptions = await this._loadFieldOptions(aListFieldNames);
-
-                const aDynamicFields = aMappings.map((oMapping) => ({
-                    fieldName: oMapping.field_fieldName,
-                    label: oMapping.fieldLabel || oMapping.field?.label || oMapping.field_fieldName,
-                    dataType: oMapping.field?.dataType || "String",
-                    defaultValue: oMapping.field?.defaultValue || "",
-                    placeholder: oMapping.field?.placeholder || "",
-                    inputHint: oMapping.field?.inputHint || "",
-                    sourceColumn: oMapping.sourceColumn,
-                    required: this._isTruthy(oMapping.isMandatory),
-                    options: mOptions[oMapping.field_fieldName] || [],
-                    value: oMapping.field?.defaultValue || ""
-                }));
-
-                oCreateModel.setProperty("/dynamicFields", aDynamicFields);
-                oCreateModel.setProperty("/dynamicFieldsCount", aDynamicFields.length);
-                oCreateModel.setProperty("/dynamicFieldsVisible", aMappings.length > 0);
-            } finally {
-                oCreateModel.setProperty("/dynamicFieldsLoading", false);
-            }
-        },
-
-        async _loadFieldOptions(aFieldNames) {
-            const aUniqueFieldNames = [...new Set(aFieldNames)].filter(Boolean);
-
-            if (!aUniqueFieldNames.length) {
-                return {};
-            }
-
-            const aOptions = await this._readList("/ProcessRequestFieldOptions", {
-                filters: [
-                    new Filter({
-                        filters: aUniqueFieldNames.map((sFieldName) =>
-                            new Filter("field_fieldName", FilterOperator.EQ, sFieldName)
-                        ),
-                        and: false
-                    }),
-                    new Filter("isActive", FilterOperator.EQ, true)
-                ],
-                urlParameters: {
-                    "$orderby": "field_fieldName asc,sequence asc"
-                }
-            });
-
-            return aOptions.reduce((mResult, oOption) => {
-                if (!mResult[oOption.field_fieldName]) {
-                    mResult[oOption.field_fieldName] = [];
-                }
-
-                mResult[oOption.field_fieldName].push({
-                    code: oOption.code,
-                    text: oOption.text || oOption.code
-                });
-                return mResult;
-            }, {});
-        },
-
-        async _saveDynamicFieldValues(sRequestId, aFields) {
-            const aFilledFields = aFields.filter((oField) => String(oField.value || "").trim());
-
-            await Promise.all(aFilledFields.map((oField) => {
-                const oPayload = {
-                    request_ID: sRequestId,
-                    field_fieldName: oField.fieldName,
-                    value: String(oField.value || "")
-                };
-
-                if (oField.dataType === "Decimal") {
-                    oPayload.numberValue = Number(oField.value) || undefined;
-                } else if (oField.dataType === "Date") {
-                    oPayload.dateValue = oField.value;
-                }
-
-                return this.createEntry("/ProcessRequestFieldValues", oPayload);
-            }));
         },
 
         _readList(sPath, oParameters) {
@@ -472,14 +337,6 @@ sap.ui.define([
                     error: reject
                 });
             });
-        },
-
-        _isTruthy(vValue) {
-            if (typeof vValue === "string") {
-                return vValue.toLowerCase() === "true" || vValue === "1";
-            }
-
-            return Boolean(vValue);
         },
 
         _getRequestListRouteParameters(oExtraQuery = {}) {

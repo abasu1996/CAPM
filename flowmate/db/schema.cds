@@ -43,37 +43,6 @@ entity ProcessSubTypes : CodeList {
     sapTCode : String(100);
 }
 
-entity ProcessRequestFieldCatalog {
-    key fieldName : String(80);
-    label         : String(500);
-    dataType      : String(30) default 'String';
-    defaultValue  : String(500);
-    placeholder   : String(255);
-    inputHint     : String(100);
-    options       : Composition of many ProcessRequestFieldOptions
-                    on options.field = $self;
-}
-
-entity ProcessRequestFieldOptions : cuid, managed {
-    field    : Association to ProcessRequestFieldCatalog;
-    code     : String(80);
-    text     : String(255);
-    sequence : Integer;
-    isActive : Boolean default true;
-}
-
-entity ProcessRequestFieldMappings : cuid, managed {
-    processType    : Association to ProcessTypes;
-    processSubType : Association to ProcessSubTypes;
-    field          : Association to ProcessRequestFieldCatalog;
-    fieldLabel     : String(500);
-    sourceColumn   : String(30);
-    section        : String(50);
-    sequence       : Integer;
-    isMandatory    : Boolean default false;
-    isVisible      : Boolean default true;
-}
-
 entity Users : cuid, managed {
     referenceNumber   : String(30);
     azureObjectId     : String(100);
@@ -108,6 +77,7 @@ entity ProcessRequests : cuid, managed {
     description : LargeString;
     requester   : String(100);
     processor   : String(255);
+    processorEmail : String(255);
     reservedBy  : String(255);
     reservedAt  : DateTime;
     department  : String(100);
@@ -116,8 +86,6 @@ entity ProcessRequests : cuid, managed {
     currentStep : Integer;
     dueDate     : Date;
     completedAt : DateTime;
-    ivFieldValues : Composition of many ProcessRequestFieldValues
-                    on ivFieldValues.request = $self;
     tasks       : Composition of many ProcessTasks
                     on tasks.request = $self;
     involvedParties : Composition of many ProcessInvolvedParties
@@ -130,15 +98,6 @@ entity ProcessRequests : cuid, managed {
                     on history.request = $self;
 }
 
-entity ProcessRequestFieldValues : cuid, managed {
-    request     : Association to ProcessRequests;
-    field       : Association to ProcessRequestFieldCatalog;
-    value       : LargeString;
-    numberValue : Decimal(15, 2);
-    dateValue   : Date;
-    booleanValue: Boolean;
-}
-
 entity ProcessTasks : cuid, managed {
     referenceNumber : String(30);
     request     : Association to ProcessRequests;
@@ -148,6 +107,7 @@ entity ProcessTasks : cuid, managed {
     taskName    : String(100);
     assignedTo  : String(100);
     processor   : String(255);
+    processorEmail : String(255);
     role        : String(100);
     status      : Association to TaskStatus;
     decision    : String(30);
@@ -210,8 +170,6 @@ entity ProcessStepConfig : cuid, managed {
     role          : String(100);
     isMandatory   : Boolean default true;
     slaDays       : Integer;
-    nextOnApprove : Integer;
-    nextOnReject  : Integer;
 }
 
 entity RequestType: cuid, managed{

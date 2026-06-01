@@ -107,17 +107,9 @@ sap.ui.define([
                 oSmartTable.rebindTable(true);
             });
         },
-        _refreshRequest() {
-            const oBinding = this.getView().getElementBinding();
-
-            if (oBinding) {
-                oBinding.refresh(true);
-            }
-        },
         onRequestPress(oEvent) {
             const oItem = oEvent.getParameter("listItem") || oEvent.getSource();
             this._openRequest(oItem.getBindingContext());
-            this._refreshRequest();
         },
 
         onRequestReferencePress(oEvent) {
@@ -205,7 +197,7 @@ sap.ui.define([
                     requestId: sRequestId
                 });
                 MessageToast.show(this.getText("requestReservedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshRequestHeader();
                 this.byId("requestsTable").getBinding("items")?.refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("requestReserveErrorMessage"));
@@ -251,23 +243,23 @@ sap.ui.define([
         },
 
         onCloseInvolvedPartyDetail() {
-            this._resetRequestSelection();
-            this.navTo("RouteMyRequests", this._getRequestListRouteParameters(), true);
+            this._sSelectedPartyId = null;
+            this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
         },
 
         onRefreshRequestDetail() {
-            this._refreshSelectedRequest();
+            this._refreshAllRequestSections();
             this.byId("requestsTable").getBinding("items")?.refresh();
         },
 
         onRefreshRequestTaskDetail() {
             this.byId("requestTaskObjectPage").getElementBinding()?.refresh();
-            this._refreshSelectedRequest();
+            this._refreshAfterTaskChange();
         },
 
         onRefreshInvolvedPartyDetail() {
             this.byId("requestPartyObjectPage").getElementBinding()?.refresh();
-            this._refreshSelectedRequest();
+            this._refreshPartySection();
         },
 
         onToggleRequestFullScreen() {
@@ -309,7 +301,8 @@ sap.ui.define([
                     statusCode: sStatusCode
                 });
                 MessageToast.show(this.getText("requestStatusUpdatedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshRequestHeader();
+                this._refreshHistorySection();
                 this.byId("requestsTable").getBinding("items").refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
@@ -333,7 +326,7 @@ sap.ui.define([
                     statusCode: sStatusCode
                 });
                 MessageToast.show(this.getText("taskStatusUpdatedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshAfterTaskChange();
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
@@ -370,12 +363,14 @@ sap.ui.define([
 
             const sId = oContext.getProperty("ID");
             const sName = oContext.getProperty("displayName");
+            const sEmail = oContext.getProperty("email") || oContext.getProperty("userPrincipalName");
 
             if (this._sProcessorValueHelpTarget === "newTask") {
                 const oTaskModel = this.getView().getModel("newTask");
                 oTaskModel.setProperty("/processorUser_ID", sId);
                 oTaskModel.setProperty("/processorName", sName);
                 oTaskModel.setProperty("/processor", sName);
+                oTaskModel.setProperty("/processorEmail", sEmail);
             } else {
                 const oProcessorModel = this.getView().getModel("processorEdit");
                 const sPrefix = this._sProcessorValueHelpTarget === "request" ? "request" : "task";
@@ -407,45 +402,11 @@ sap.ui.define([
                     processorUserId: sProcessorUserId
                 });
                 MessageToast.show(this.getText("requestProcessorUpdatedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshRequestHeader();
+                this._refreshTaskSection();
+                this._refreshHistorySection();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
-            } finally {
-                this.hideBusy();
-            }
-        },
-
-        async onSaveIvFieldValues() {
-            const oRequestContext = this.byId("requestObjectPage").getBindingContext();
-            const oRequest = oRequestContext?.getObject();
-            const aFieldValues = this._normalizeCollection(oRequest?.ivFieldValues);
-
-            if (!this._sSelectedRequestId || !this._isRequestEditable(oRequest)) {
-                MessageToast.show(this.getText("requestNotEditableMessage"));
-                return;
-            }
-
-            this.showBusy();
-
-            try {
-                await Promise.all(aFieldValues.map((oFieldValue) => {
-                    const oPayload = this._buildIvFieldValuePayload(this._sSelectedRequestId, oFieldValue);
-
-                    if (oFieldValue.ID && !this._isSyntheticIvFieldValueId(oFieldValue.ID)) {
-                        return this.updateEntry(`/ProcessRequestFieldValues(guid'${oFieldValue.ID}')`, oPayload);
-                    }
-
-                    if (!String(oPayload.value || "").trim()) {
-                        return Promise.resolve();
-                    }
-
-                    return this.createEntry("/ProcessRequestFieldValues", oPayload);
-                }));
-
-                MessageToast.show(this.getText("ivFieldsUpdatedMessage"));
-                this._refreshSelectedRequest();
-            } catch (oError) {
-                MessageBox.error(oError.message || this.getText("ivFieldsUpdateErrorMessage"));
             } finally {
                 this.hideBusy();
             }
@@ -467,7 +428,8 @@ sap.ui.define([
                     processorUserId: sProcessorUserId
                 });
                 MessageToast.show(this.getText("taskProcessorUpdatedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshTaskSection();
+                this._refreshHistorySection();
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
@@ -513,18 +475,21 @@ sap.ui.define([
             this.showBusy();
 
             try {
+                const iStepNo = Number(oTask.stepNo);
+
                 await this.createEntry("/ProcessTasks", {
                     request_ID: this._sSelectedRequestId,
-                    stepNo: Number(oTask.stepNo),
+                    stepNo: iStepNo,
                     taskName: oTask.taskName,
                     processorUser_ID: oTask.processorUser_ID || undefined,
                     processor: oTask.processor,
+                    processorEmail: oTask.processorEmail,
                     role: oTask.role,
                     status_code: "OPEN"
                 });
                 this.byId("addTaskDialog").close();
                 MessageToast.show(this.getText("taskCreatedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshAfterTaskChange(iStepNo);
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("taskCreateErrorMessage"));
             } finally {
@@ -590,7 +555,7 @@ sap.ui.define([
                 });
                 this.byId("addPartyDialog").close();
                 MessageToast.show(this.getText("partyCreatedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshPartySection();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("partyCreateErrorMessage"));
             } finally {
@@ -654,7 +619,7 @@ sap.ui.define([
                     this.onCloseInvolvedPartyDetail();
                 }
 
-                this._refreshSelectedRequest();
+                this._refreshPartySection();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("partyDeleteErrorMessage"));
             } finally {
@@ -687,7 +652,7 @@ sap.ui.define([
                 }
 
                 oTable.removeSelections(true);
-                this._refreshSelectedRequest();
+                this._refreshPartySection();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("partyDeleteErrorMessage"));
             } finally {
@@ -718,7 +683,7 @@ sap.ui.define([
             try {
                 await this._uploadAttachments(this._sSelectedRequestId, aFiles);
                 MessageToast.show(this.getText("attachmentsUploadedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshAttachmentSection();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentContentErrorMessage", [""]));
             } finally {
@@ -813,7 +778,7 @@ sap.ui.define([
                     this.onCloseRequestTaskDetail();
                 }
 
-                this._refreshSelectedRequest();
+                this._refreshAfterTaskChange();
                 this.byId("requestsTable").getBinding("items").refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
@@ -849,7 +814,7 @@ sap.ui.define([
                 }
 
                 oTable.removeSelections(true);
-                this._refreshSelectedRequest();
+                this._refreshAfterTaskChange();
                 this.byId("requestsTable").getBinding("items").refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
@@ -952,7 +917,7 @@ sap.ui.define([
             try {
                 await this.removeEntry(`/ProcessAttachments(guid'${sAttachmentId}')`);
                 MessageToast.show(this.getText("attachmentDeletedMessage"));
-                this._refreshSelectedRequest();
+                this._refreshAttachmentSection();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentDeleteErrorMessage"));
             } finally {
@@ -981,7 +946,7 @@ sap.ui.define([
                 await Promise.all(aAttachmentIds.map((sAttachmentId) => this.removeEntry(`/ProcessAttachments(guid'${sAttachmentId}')`)));
                 MessageToast.show(this.getText("selectedAttachmentsDeletedMessage", [aAttachmentIds.length]));
                 oTable.removeSelections(true);
-                this._refreshSelectedRequest();
+                this._refreshAttachmentSection();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("attachmentDeleteErrorMessage"));
             } finally {
@@ -1019,45 +984,6 @@ sap.ui.define([
             }
         },
 
-        formatDynamicFieldValue(sValue, sNumberValue, sDateValue, sBooleanValue) {
-            if (sDateValue) {
-                return sDateValue;
-            }
-
-            if (sNumberValue !== undefined && sNumberValue !== null && sNumberValue !== "") {
-                return sNumberValue;
-            }
-
-            if (sBooleanValue !== undefined && sBooleanValue !== null && sBooleanValue !== "") {
-                return this._isTruthy(sBooleanValue) ? this.getText("yesText") : this.getText("noText");
-            }
-
-            return sValue || "";
-        },
-
-        formatDynamicFieldDisplayValue(sValue, sNumberValue, sDateValue, sBooleanValue, sDataType, aOptions) {
-            const sFormattedValue = this.formatDynamicFieldValue(sValue, sNumberValue, sDateValue, sBooleanValue);
-
-            if (sDataType !== "List") {
-                return sFormattedValue;
-            }
-
-            return this._resolveDynamicFieldOptionText(sFormattedValue, aOptions);
-        },
-
-        formatDynamicFieldCodeVisible(sValue, sDataType) {
-            return sDataType === "List" && Boolean(sValue);
-        },
-
-        _resolveDynamicFieldOptionText(sCode, aOptions) {
-            const aNormalizedOptions = Array.isArray(aOptions)
-                ? aOptions
-                : aOptions?.results || [];
-            const oOption = aNormalizedOptions.find((oItem) => oItem.code === sCode);
-
-            return oOption?.text || sCode || "";
-        },
-
         _openRequest(oContext) {
             this._showRequestDetail(oContext);
         },
@@ -1071,7 +997,7 @@ sap.ui.define([
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,ivFieldValues/field/options,tasks,involvedParties,comments,attachments,history"
+                    expand: "processType,subProcessType"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -1096,12 +1022,12 @@ sap.ui.define([
                             "/requestProcessorName",
                             oRequest?.processor || ""
                         );
-                        this._loadProcessFlow(sRequestId, oRequest);
                     }
                 }
             });
+            this._bindRequestSectionTables(sRequestId);
             this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
-            this._refreshRequest();
+            this._refreshProcessFlow();
         },
 
         _setRequestsLayout(sLayout) {
@@ -1109,6 +1035,38 @@ sap.ui.define([
             this.getView().getModel("fclState").setData({
                 midFullScreen: sLayout === fLibrary.LayoutType.MidColumnFullScreen,
                 endFullScreen: sLayout === fLibrary.LayoutType.EndColumnFullScreen
+            });
+        },
+
+        _bindRequestSectionTables(sRequestId) {
+            this._bindRequestSectionTable("requestTasksTable", "/RequestDetailTasks", sRequestId);
+            this._bindRequestSectionTable("requestPartiesTable", "/ProcessInvolvedParties", sRequestId);
+            this._bindRequestSectionTable("requestAttachmentsTable", "/ProcessAttachments", sRequestId);
+            this._bindRequestSectionTable("requestHistoryTable", "/ProcessHistory", sRequestId);
+        },
+
+        _bindRequestSectionTable(sTableId, sPath, sRequestId) {
+            const oTable = this.byId(sTableId);
+            const oBindingInfo = oTable?.getBindingInfo("items");
+
+            if (!oTable || !oBindingInfo?.template) {
+                return;
+            }
+
+            oTable.bindItems({
+                path: sPath,
+                template: oBindingInfo.template,
+                templateShareable: true,
+                filters: [new Filter("request_ID", FilterOperator.EQ, sRequestId)],
+                events: {
+                    dataRequested: () => {
+                        oTable.setBusyIndicatorDelay(0);
+                        oTable.setBusy(true);
+                    },
+                    dataReceived: () => {
+                        oTable.setBusy(false);
+                    }
+                }
             });
         },
 
@@ -1145,7 +1103,7 @@ sap.ui.define([
             this._sSelectedTaskId = sTaskId;
             this.byId("requestsFlexibleColumnLayout").toEndColumnPage(this.byId("requestTaskObjectPage").getId());
             this.byId("requestTaskObjectPage").bindElement({
-                path: `/ProcessTasks(guid'${sTaskId}')`,
+                path: `/RequestDetailTasks(guid'${sTaskId}')`,
                 parameters: {
                     expand: "request"
                 },
@@ -1196,13 +1154,25 @@ sap.ui.define([
             this.showBusy();
 
             try {
-                await this.callAction(sAction, {
-                    taskId: this._sSelectedTaskId,
-                    remarks: this.byId("requestTaskRemarksTextArea").getValue()
-                });
+                const sRemarks = this.byId("requestTaskRemarksTextArea").getValue();
+                let bCompleted = true;
+
+                if (sAction === "approveTask") {
+                    bCompleted = await this._approveTaskWithGuidedDecision(this._sSelectedTaskId, sRemarks);
+                } else {
+                    await this.callAction(sAction, {
+                        taskId: this._sSelectedTaskId,
+                        remarks: sRemarks
+                    });
+                }
+
+                if (!bCompleted) {
+                    return;
+                }
+
                 MessageToast.show(this.getText(sSuccessTextKey));
                 this.byId("requestTaskRemarksTextArea").setValue("");
-                this._refreshSelectedRequest();
+                this._refreshAfterTaskChange();
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("actionFailedMessage"));
@@ -1211,34 +1181,102 @@ sap.ui.define([
             }
         },
 
+        async _approveTaskWithGuidedDecision(sTaskId, sRemarks) {
+            await this.callAction("approveTask", {
+                taskId: sTaskId,
+                remarks: sRemarks
+            });
+
+            return true;
+        },
+
+        async _completeGuidedStepWithDecision(iStepNo, sRemarks) {
+            let sProgressionMode = "retriggerNext";
+            const oAnalysisResponse = await this.callAction("analyzeGuidedStepCompletion", {
+                requestId: this._sSelectedRequestId,
+                stepNo: iStepNo
+            });
+            const oAnalysis = oAnalysisResponse.value || oAnalysisResponse;
+
+            this.hideBusy();
+
+            if (oAnalysis.requiresDecision) {
+                sProgressionMode = await this._chooseGuidedProgression(oAnalysis);
+
+                if (!sProgressionMode) {
+                    return false;
+                }
+            }
+
+            this.showBusy();
+            await this.callAction("completeGuidedStep", {
+                requestId: this._sSelectedRequestId,
+                stepNo: iStepNo,
+                remarks: sRemarks,
+                progressionMode: sProgressionMode
+            });
+
+            return true;
+        },
+
         async onCompleteGuidedStep(oEvent) {
             const oStep = oEvent.getSource().getBindingContext("processFlow")?.getObject()
                 || this.getView().getModel("processFlow").getProperty("/selectedStep");
-            const sTaskId = oStep?.taskId;
+            const iStepNo = Number(oStep?.stepNo || 0);
 
-            if (!sTaskId) {
-                MessageToast.show(this.getText("selectTaskMessage"));
+            if (!this._sSelectedRequestId || !iStepNo) {
+                MessageToast.show(this.getText("selectRequestMessage"));
                 return;
             }
 
             this.showBusy();
 
             try {
-                await this.callAction("approveTask", {
-                    taskId: sTaskId,
-                    remarks: this.getText("completeStepButton")
-                });
-                MessageToast.show(this.getText("guidedStepCompletedMessage"));
-                this._refreshSelectedRequest();
+                const bCompleted = await this._completeGuidedStepWithDecision(
+                    iStepNo,
+                    this.getText("completeStepButton")
+                );
 
-                if (this._sSelectedTaskId === sTaskId) {
-                    this.byId("requestTaskObjectPage").getElementBinding()?.refresh();
+                if (!bCompleted) {
+                    return;
                 }
+
+                MessageToast.show(this.getText("guidedStepCompletedMessage"));
+                this._refreshAfterTaskChange();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("guidedStepCompleteErrorMessage"));
             } finally {
                 this.hideBusy();
             }
+        },
+
+        _chooseGuidedProgression(oAnalysis) {
+            return new Promise((resolve) => {
+                const sRetrigger = this.getText("retriggerNextStepButton");
+                const sJump = this.getText("jumpToIncompleteStepButton");
+                const sCancel = MessageBox.Action.CANCEL;
+
+                MessageBox.warning(this.getText("guidedStepAlreadyCompletedMessage", [
+                    oAnalysis.nextStepName || oAnalysis.nextStepNo,
+                    oAnalysis.incompleteStepName || oAnalysis.incompleteStepNo
+                ]), {
+                    actions: [sJump, sRetrigger, sCancel],
+                    emphasizedAction: sJump,
+                    onClose: (sAction) => {
+                        if (sAction === sJump) {
+                            resolve("jumpIncomplete");
+                            return;
+                        }
+
+                        if (sAction === sRetrigger) {
+                            resolve("retriggerNext");
+                            return;
+                        }
+
+                        resolve(null);
+                    }
+                });
+            });
         },
 
         _createEmptyTask() {
@@ -1248,6 +1286,7 @@ sap.ui.define([
                 processorUser_ID: "",
                 processorName: "",
                 processor: "",
+                processorEmail: "",
                 role: ""
             };
         },
@@ -1283,19 +1322,60 @@ sap.ui.define([
             ]);
         },
 
-        _refreshSelectedRequest() {
+        _refreshRequestDetailBinding() {
             const oBinding = this.byId("requestObjectPage").getElementBinding();
 
             if (oBinding) {
-                oBinding.refresh();
-            }
-
-            if (this._sSelectedRequestId) {
-                this._loadProcessFlow(this._sSelectedRequestId);
+                oBinding.refresh(true);
             }
         },
 
-        async _loadProcessFlow(sRequestId, oBoundRequest) {
+        _refreshRequestHeader() {
+            this._refreshRequestDetailBinding();
+        },
+
+        _refreshProcessFlow(iPreferredStepNo) {
+            if (this._sSelectedRequestId) {
+                this._loadProcessFlow(this._sSelectedRequestId, null, iPreferredStepNo);
+            }
+        },
+
+        _refreshSectionTable(sTableId) {
+            this.byId(sTableId)?.getBinding("items")?.refresh(true);
+        },
+
+        _refreshTaskSection() {
+            this._refreshSectionTable("requestTasksTable");
+        },
+
+        _refreshPartySection() {
+            this._refreshSectionTable("requestPartiesTable");
+        },
+
+        _refreshAttachmentSection() {
+            this._refreshSectionTable("requestAttachmentsTable");
+        },
+
+        _refreshHistorySection() {
+            this._refreshSectionTable("requestHistoryTable");
+        },
+
+        _refreshAllRequestSections() {
+            this._refreshRequestHeader();
+            this._refreshTaskSection();
+            this._refreshPartySection();
+            this._refreshAttachmentSection();
+            this._refreshHistorySection();
+        },
+
+        _refreshAfterTaskChange(iPreferredStepNo) {
+            this._refreshRequestHeader();
+            this._refreshTaskSection();
+            this._refreshHistorySection();
+            this._refreshProcessFlow(iPreferredStepNo);
+        },
+
+        async _loadProcessFlow(sRequestId, oBoundRequest, iPreferredStepNo) {
             const oProcessFlowModel = this.getView().getModel("processFlow");
 
             if (!sRequestId) {
@@ -1306,20 +1386,25 @@ sap.ui.define([
             oProcessFlowModel.setProperty("/loading", true);
 
             try {
-                const oRequest = oBoundRequest && Object.prototype.hasOwnProperty.call(oBoundRequest, "tasks")
-                    ? oBoundRequest
-                    : await this._readEntry(`/ProcessRequests(guid'${sRequestId}')`, {
-                    urlParameters: {
-                        "$expand": "tasks"
-                    }
+                const oRequest = oBoundRequest?.processType_code
+                    ? { ...oBoundRequest }
+                    : await this._readEntry(`/ProcessRequests(guid'${sRequestId}')`);
+                const oTaskResponse = await this.callAction("getGuidedProcessTasks", {
+                    requestId: sRequestId
                 });
+
+                oRequest.tasks = oTaskResponse.value || oTaskResponse || [];
                 const aSteps = await this._readList("/ProcessStepConfig", {
                     filters: [new Filter("processType_code", FilterOperator.EQ, oRequest.processType_code)]
                 });
 
                 aSteps.sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0));
-                const aProcessSteps = this._buildProcessFlowSteps(aSteps, oRequest);
-                const oSelectedStep = aProcessSteps.find((oStep) => oStep.isCurrent)
+                const aProcessSteps = this._buildProcessFlowSteps(aSteps, oRequest, iPreferredStepNo);
+                const oPreferredStep = iPreferredStepNo == null
+                    ? null
+                    : aProcessSteps.find((oStep) => Number(oStep.stepNo || 0) === Number(iPreferredStepNo || 0));
+                const oSelectedStep = oPreferredStep
+                    || aProcessSteps.find((oStep) => oStep.isCurrent)
                     || aProcessSteps.find((oStep) => oStep.completeEnabled)
                     || aProcessSteps.find((oStep) => oStep.state !== "Success")
                     || aProcessSteps[0]
@@ -1356,9 +1441,9 @@ sap.ui.define([
             });
         },
 
-        _buildProcessFlowSteps(aSteps, oRequest) {
-            const aTasks = oRequest.tasks?.results || oRequest.tasks || [];
-            const iCurrentStep = Number(oRequest.currentStep || 0);
+        _buildProcessFlowSteps(aSteps, oRequest, iPreferredStepNo) {
+            const aTasks = this._normalizeCollection(oRequest.tasks);
+            const iCurrentStep = Number(iPreferredStepNo || oRequest.currentStep || 0);
             const bRequestEditable = this._isRequestEditable(oRequest);
             const mTasksByStep = aTasks.reduce((mResult, oTask) => {
                 const sStepNo = String(Number(oTask.stepNo || 0));
@@ -1373,10 +1458,11 @@ sap.ui.define([
                 const aStepTasks = mTasksByStep.get(String(Number(oStep.stepNo || 0))) || [];
                 const bMandatory = this._isTruthy(oStep.isMandatory);
                 const oOpenTask = aStepTasks.find((oTask) => oTask.status_code === "OPEN");
-                const bCompleted = Boolean(aStepTasks.length) && aStepTasks.every((oTask) => oTask.status_code === "APPROVED");
+                const bAllTasksApproved = Boolean(aStepTasks.length)
+                    && aStepTasks.every((oTask) => oTask.status_code === "APPROVED");
                 const bRejected = aStepTasks.some((oTask) => oTask.status_code === "REJECTED");
                 const bSentBack = aStepTasks.some((oTask) => oTask.status_code === "SENT_BACK");
-                const bCurrent = Number(oStep.stepNo || 0) === iCurrentStep && !bCompleted;
+                const bCurrent = Number(oStep.stepNo || 0) === iCurrentStep;
                 let sState = "None";
                 let sStatusText = this.getText("processStepPendingLabel");
                 let sIcon = "sap-icon://circle-task";
@@ -1392,16 +1478,18 @@ sap.ui.define([
                     sStatusText = this.getText("processStepSentBackLabel");
                     sIcon = "sap-icon://undo";
                     sButtonType = "Default";
-                } else if (bCompleted) {
+                } else if (bCurrent) {
+                    sState = "Information";
+                    sStatusText = bAllTasksApproved
+                        ? this.getText("processStepReadyLabel")
+                        : this.getText("processStepPendingLabel");
+                    sIcon = "sap-icon://process";
+                    sButtonType = "Emphasized";
+                } else if (bAllTasksApproved) {
                     sState = "Success";
                     sStatusText = this.getText("processStepCompletedLabel");
                     sIcon = "sap-icon://accept";
                     sButtonType = "Accept";
-                } else if (bCurrent) {
-                    sState = "Information";
-                    sStatusText = this.getText("processStepCurrentLabel");
-                    sIcon = "sap-icon://process";
-                    sButtonType = "Emphasized";
                 }
 
                 return {
@@ -1419,40 +1507,13 @@ sap.ui.define([
                     isCurrent: bCurrent,
                     selected: false,
                     taskId: oOpenTask?.ID || "",
-                    completeEnabled: bRequestEditable && !bMandatory && Boolean(oOpenTask)
+                    completeEnabled: bRequestEditable && bCurrent && bAllTasksApproved
                 };
             });
         },
 
         _isRequestEditable(oRequest) {
             return Boolean(oRequest?.reservedBy) && !["COMPLETED", "REJECTED"].includes(oRequest?.status_code);
-        },
-
-        _buildIvFieldValuePayload(sRequestId, oFieldValue) {
-            const sDataType = oFieldValue.field?.dataType || "String";
-            const sValue = String(oFieldValue.value ?? "").trim();
-            const oPayload = {
-                request_ID: sRequestId,
-                field_fieldName: oFieldValue.field_fieldName,
-                value: sValue,
-                numberValue: null,
-                dateValue: null,
-                booleanValue: null
-            };
-
-            if (sDataType === "Decimal" && sValue) {
-                oPayload.numberValue = Number(sValue);
-            } else if (sDataType === "Date" && sValue) {
-                oPayload.dateValue = sValue;
-            } else if (sDataType === "Boolean" && sValue) {
-                oPayload.booleanValue = sValue === "true";
-            }
-
-            return oPayload;
-        },
-
-        _isSyntheticIvFieldValueId(sId) {
-            return /^00000000-0000-4000-8000-/.test(sId || "");
         },
 
         _normalizeCollection(vCollection) {
