@@ -1250,6 +1250,73 @@ sap.ui.define([
             }
         },
 
+        async onSendBackGuidedStep(oEvent) {
+            const oStep = oEvent.getSource().getBindingContext("processFlow")?.getObject()
+                || this.getView().getModel("processFlow").getProperty("/selectedStep");
+            const iStepNo = Number(oStep?.stepNo || 0);
+
+            if (!this._sSelectedRequestId || !iStepNo) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            const bConfirmed = await this._confirmSendBackGuidedStep(oStep);
+
+            if (!bConfirmed) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("sendBackGuidedStep", {
+                    requestId: this._sSelectedRequestId,
+                    stepNo: iStepNo,
+                    remarks: this.getText("sendBackStepButton")
+                });
+                MessageToast.show(this.getText("guidedStepSentBackMessage"));
+                this._refreshAfterTaskChange();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("guidedStepSendBackErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onProceedGuidedStepAfterSendBack(oEvent) {
+            const oStep = oEvent.getSource().getBindingContext("processFlow")?.getObject()
+                || this.getView().getModel("processFlow").getProperty("/selectedStep");
+            const iStepNo = Number(oStep?.stepNo || 0);
+
+            if (!this._sSelectedRequestId || !iStepNo) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            const bConfirmed = await this._confirmProceedAfterSendBack(oStep);
+
+            if (!bConfirmed) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("proceedGuidedStepAfterSendBack", {
+                    requestId: this._sSelectedRequestId,
+                    stepNo: iStepNo,
+                    remarks: this.getText("proceedAfterSendBackButton"),
+                    progressionMode: "retriggerNext"
+                });
+                MessageToast.show(this.getText("guidedStepProceededMessage"));
+                this._refreshAfterTaskChange();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("guidedStepProceedErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
         _chooseGuidedProgression(oAnalysis) {
             return new Promise((resolve) => {
                 const sRetrigger = this.getText("retriggerNextStepButton");
@@ -1275,6 +1342,30 @@ sap.ui.define([
 
                         resolve(null);
                     }
+                });
+            });
+        },
+
+        _confirmSendBackGuidedStep(oStep) {
+            return new Promise((resolve) => {
+                MessageBox.warning(this.getText("sendBackGuidedStepConfirmMessage", [
+                    oStep?.stepName || oStep?.stepNo || ""
+                ]), {
+                    actions: [this.getText("sendBackStepButton"), MessageBox.Action.CANCEL],
+                    emphasizedAction: this.getText("sendBackStepButton"),
+                    onClose: (sAction) => resolve(sAction === this.getText("sendBackStepButton"))
+                });
+            });
+        },
+
+        _confirmProceedAfterSendBack(oStep) {
+            return new Promise((resolve) => {
+                MessageBox.warning(this.getText("proceedAfterSendBackConfirmMessage", [
+                    oStep?.stepName || oStep?.stepNo || ""
+                ]), {
+                    actions: [this.getText("proceedAfterSendBackButton"), MessageBox.Action.CANCEL],
+                    emphasizedAction: this.getText("proceedAfterSendBackButton"),
+                    onClose: (sAction) => resolve(sAction === this.getText("proceedAfterSendBackButton"))
                 });
             });
         },
@@ -1445,6 +1536,7 @@ sap.ui.define([
             const aTasks = this._normalizeCollection(oRequest.tasks);
             const iCurrentStep = Number(iPreferredStepNo || oRequest.currentStep || 0);
             const bRequestEditable = this._isRequestEditable(oRequest);
+            const bRequestCompleted = oRequest.status_code === "COMPLETED";
             const mTasksByStep = aTasks.reduce((mResult, oTask) => {
                 const sStepNo = String(Number(oTask.stepNo || 0));
                 const aStepTasks = mResult.get(sStepNo) || [];
@@ -1457,18 +1549,23 @@ sap.ui.define([
             return aSteps.map((oStep) => {
                 const aStepTasks = mTasksByStep.get(String(Number(oStep.stepNo || 0))) || [];
                 const bMandatory = this._isTruthy(oStep.isMandatory);
-                const oOpenTask = aStepTasks.find((oTask) => oTask.status_code === "OPEN");
+                const oOpenTask = aStepTasks.find((oTask) => this._taskStatusCode(oTask) === "OPEN");
                 const bAllTasksApproved = Boolean(aStepTasks.length)
-                    && aStepTasks.every((oTask) => oTask.status_code === "APPROVED");
-                const bRejected = aStepTasks.some((oTask) => oTask.status_code === "REJECTED");
-                const bSentBack = aStepTasks.some((oTask) => oTask.status_code === "SENT_BACK");
+                    && aStepTasks.every((oTask) => this._taskStatusCode(oTask) === "APPROVED");
+                const bRejected = aStepTasks.some((oTask) => this._taskStatusCode(oTask) === "REJECTED");
+                const bSentBack = aStepTasks.some((oTask) => this._taskStatusCode(oTask) === "SENT_BACK");
                 const bCurrent = Number(oStep.stepNo || 0) === iCurrentStep;
                 let sState = "None";
                 let sStatusText = this.getText("processStepPendingLabel");
                 let sIcon = "sap-icon://circle-task";
                 let sButtonType = "Transparent";
 
-                if (bRejected) {
+                if (bRequestCompleted) {
+                    sState = "Success";
+                    sStatusText = this.getText("processStepCompletedLabel");
+                    sIcon = "sap-icon://accept";
+                    sButtonType = "Accept";
+                } else if (bRejected) {
                     sState = "Error";
                     sStatusText = this.getText("processStepRejectedLabel");
                     sIcon = "sap-icon://decline";
@@ -1504,12 +1601,20 @@ sap.ui.define([
                     state: sState,
                     icon: sIcon,
                     buttonType: sButtonType,
-                    isCurrent: bCurrent,
+                    isCurrent: bCurrent && !bRequestCompleted,
                     selected: false,
                     taskId: oOpenTask?.ID || "",
-                    completeEnabled: bRequestEditable && bCurrent && bAllTasksApproved
+                    completeEnabled: bRequestEditable && bCurrent && bAllTasksApproved,
+                    sendBackEnabled: bRequestEditable && bCurrent && bSentBack,
+                    proceedAfterSendBackEnabled: bRequestEditable && bCurrent && bSentBack
                 };
             });
+        },
+
+        _taskStatusCode(oTask) {
+            const vStatus = oTask?.status_code;
+
+            return String(vStatus?.code || vStatus || "").toUpperCase();
         },
 
         _isRequestEditable(oRequest) {

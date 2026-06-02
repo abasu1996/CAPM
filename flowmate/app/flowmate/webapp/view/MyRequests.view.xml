@@ -346,6 +346,7 @@
                             visible="{processFlow>/visible}"
                             width="100%">
                             <HBox
+                                class="flowmateProcessGuideHeader"
                                 alignItems="Center"
                                 justifyContent="SpaceBetween"
                                 width="100%">
@@ -367,6 +368,7 @@
                                     alignItems="Center">
                                     <customData>
                                         <core:CustomData key="current" value="{processFlow>isCurrent}" writeToDom="true" />
+                                        <core:CustomData key="state" value="{processFlow>state}" writeToDom="true" />
                                     </customData>
                                     <Button
                                         class="flowmateProcessMilestoneButton"
@@ -386,6 +388,7 @@
                                 class="flowmateProcessStepDetail"
                                 visible="{= ${processFlow>/selectedStep/stepName} ? true : false }">
                                 <HBox
+                                    class="flowmateProcessStepDetailHeader"
                                     alignItems="Center"
                                     justifyContent="SpaceBetween"
                                     width="100%">
@@ -421,12 +424,28 @@
                                             class="sapUiTinyMarginBegin"
                                             text="{processFlow>/selectedStep/role}" />
                                     </HBox>
-                                    <Button
-                                        icon="sap-icon://complete"
-                                        text="{i18n>completeStepButton}"
-                                        type="Emphasized"
-                                        visible="{processFlow>/selectedStep/completeEnabled}"
-                                        press=".onCompleteGuidedStep" />
+                                    <HBox class="flowmateProcessActionBar" alignItems="Center">
+                                        <Button
+                                            icon="sap-icon://undo"
+                                            text="{i18n>sendBackStepButton}"
+                                            type="Default"
+                                            visible="{processFlow>/selectedStep/sendBackEnabled}"
+                                            press=".onSendBackGuidedStep" />
+                                        <Button
+                                            class="sapUiTinyMarginBegin"
+                                            icon="sap-icon://step"
+                                            text="{i18n>proceedAfterSendBackButton}"
+                                            type="Emphasized"
+                                            visible="{processFlow>/selectedStep/proceedAfterSendBackEnabled}"
+                                            press=".onProceedGuidedStepAfterSendBack" />
+                                        <Button
+                                            class="sapUiTinyMarginBegin"
+                                            icon="sap-icon://complete"
+                                            text="{i18n>completeStepButton}"
+                                            type="Emphasized"
+                                            visible="{processFlow>/selectedStep/completeEnabled}"
+                                            press=".onCompleteGuidedStep" />
+                                    </HBox>
                                 </HBox>
                             </VBox>
                         </VBox>

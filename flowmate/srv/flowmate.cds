@@ -61,6 +61,8 @@ service FlowmateService {
     action getGuidedProcessTasks(requestId: UUID) returns many GuidedProcessTask;
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
     action sendBack(taskId: UUID, remarks: String) returns Boolean;
+    action sendBackGuidedStep(requestId: UUID, stepNo: Integer, remarks: String) returns Boolean;
+    action proceedGuidedStepAfterSendBack(requestId: UUID, stepNo: Integer, remarks: String, progressionMode: String(30)) returns Boolean;
     action reserveRequest(requestId: UUID) returns Boolean;
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;

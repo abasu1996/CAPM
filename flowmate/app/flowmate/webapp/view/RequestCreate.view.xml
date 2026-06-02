@@ -233,7 +233,8 @@
                 <Panel
                     class="flowmateCreateSection flowmateCreateSubmitSection"
                     backgroundDesign="Transparent"
-                    expandable="false">
+                    expandable="false"
+                    visible="false">
                     <content>
                         <HBox
                             alignItems="Center"

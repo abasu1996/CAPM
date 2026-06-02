@@ -588,7 +588,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       return cds.tx(req).run(
-        SELECT.from(ProcessTasks)
+        SELECT.from(this._dbProcessTasksEntity())
           .columns("ID", "stepNo", "status_code")
           .where({ request_ID: requestId })
       );
@@ -650,15 +650,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const request = await this._getRequest(req, task.request_ID);
 
-      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
-
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
       }
-
-      const steps = await this._getSteps(req, request.processType_code);
-      const currentStep = this._findStepByNo(steps, task.stepNo);
-      const sendBackStep = this._getPreviousStep(steps, task.stepNo);
 
       await cds.tx(req).run(
         UPDATE(ProcessTasks, taskId).set({
@@ -669,29 +663,32 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         })
       );
 
-      if (sendBackStep) {
-        await this._createTask(req, task.request_ID, sendBackStep);
-      }
-
-      await cds.tx(req).run(
-        UPDATE(ProcessRequests, task.request_ID).set({
-          status_code: PROCESS_STATUS.SENT_BACK,
-          currentStep: sendBackStep?.stepNo || task.stepNo,
-          dueDate: sendBackStep ? this._calculateDueDate(sendBackStep.slaDays) : request.dueDate
-        })
-      );
-
       await this._writeHistory(req, {
         requestId: task.request_ID,
         stepNo: task.stepNo,
         action: "SENT_BACK",
         actor: req.user?.id,
         oldStatus: request.status_code,
-        newStatus: PROCESS_STATUS.SENT_BACK,
+        newStatus: request.status_code,
         remarks
       });
 
       return true;
+    });
+
+    this.on("sendBackGuidedStep", async (req) => {
+      return this._sendBackGuidedStep(req, req.data.requestId, req.data.stepNo, req.data.remarks, Users);
+    });
+
+    this.on("proceedGuidedStepAfterSendBack", async (req) => {
+      return this._proceedGuidedStepAfterSendBack(
+        req,
+        req.data.requestId,
+        req.data.stepNo,
+        req.data.remarks,
+        req.data.progressionMode || "retriggerNext",
+        Users
+      );
     });
 
     this.on("reserveRequest", async (req) => {
@@ -1531,6 +1528,26 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     await this._rejectUnlessStepTasksApproved(req, requestId, currentStep.stepNo);
 
+    return this._advanceGuidedStep(req, requestId, request, steps, currentStep, remarks, progressionMode, {
+      action: "STEP_COMPLETED",
+      jumpedAction: "STEP_COMPLETED_JUMPED"
+    });
+  }
+
+  async _proceedGuidedStepAfterSendBack(req, requestId, stepNo, remarks, progressionMode = "retriggerNext", Users = this.entities.Users) {
+    const { request, steps, currentStep } = await this._getStepCompletionContext(req, requestId, stepNo, Users);
+
+    await this._rejectUnlessStepHasSentBackTask(req, requestId, currentStep.stepNo);
+    await this._rejectIfStepHasOpenTask(req, requestId, currentStep.stepNo);
+    await this._resolveSentBackTasksForProceed(req, requestId, currentStep.stepNo, remarks);
+
+    return this._advanceGuidedStep(req, requestId, request, steps, currentStep, remarks, progressionMode, {
+      action: "STEP_PROCEEDED_AFTER_SENT_BACK",
+      jumpedAction: "STEP_PROCEEDED_AFTER_SENT_BACK_JUMPED"
+    });
+  }
+
+  async _advanceGuidedStep(req, requestId, request, steps, currentStep, remarks, progressionMode, actionNames) {
     const nextStep = this._getNextStep(steps, currentStep);
     const oldStatus = request.status_code || PROCESS_STATUS.IN_PROGRESS;
     const mandatoryStep = await this._findIncompleteMandatoryStep(req, requestId, steps, {
@@ -1557,6 +1574,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       );
     } else {
       const incompleteStep = await this._findIncompleteMandatoryStep(req, requestId, steps, {
+        afterStepNo: currentStep.stepNo,
         assumeCompletedStepNo: currentStep.stepNo
       });
 
@@ -1575,7 +1593,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         await cds.tx(req).run(
           UPDATE(this.entities.ProcessRequests, requestId).set({
             status_code: sNewRequestStatus,
-            currentStep: guidedNextStep?.stepNo || currentStep.stepNo,
+            currentStep: this._completionStepNo(steps, currentStep),
             completedAt: this._now()
           })
         );
@@ -1585,10 +1603,43 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     await this._writeHistory(req, {
       requestId,
       stepNo: currentStep.stepNo,
-      action: progressionMode === "jumpIncomplete" ? "STEP_COMPLETED_JUMPED" : "STEP_COMPLETED",
+      action: progressionMode === "jumpIncomplete" ? actionNames.jumpedAction : actionNames.action,
       actor: req.user?.id,
       oldStatus,
       newStatus: sNewRequestStatus,
+      remarks
+    });
+
+    return true;
+  }
+
+  async _sendBackGuidedStep(req, requestId, stepNo, remarks, Users = this.entities.Users) {
+    const { request, steps, currentStep } = await this._getStepCompletionContext(req, requestId, stepNo, Users);
+    const sendBackStep = this._getPreviousStep(steps, currentStep.stepNo);
+
+    if (!sendBackStep) {
+      return req.reject(400, "There is no previous guided step to send back to");
+    }
+
+    await this._rejectUnlessStepHasSentBackTask(req, requestId, currentStep.stepNo);
+    await this._createTask(req, requestId, sendBackStep);
+
+    await cds.tx(req).run(
+      UPDATE(this.entities.ProcessRequests, requestId).set({
+        status_code: PROCESS_STATUS.SENT_BACK,
+        currentStep: sendBackStep.stepNo,
+        dueDate: this._calculateDueDate(sendBackStep.slaDays),
+        completedAt: null
+      })
+    );
+
+    await this._writeHistory(req, {
+      requestId,
+      stepNo: currentStep.stepNo,
+      action: "STEP_SENT_BACK",
+      actor: req.user?.id,
+      oldStatus: request.status_code,
+      newStatus: PROCESS_STATUS.SENT_BACK,
       remarks
     });
 
@@ -1636,6 +1687,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return previousSteps[previousSteps.length - 1] || null;
   }
 
+  _completionStepNo(steps, currentStep) {
+    return steps[steps.length - 1]?.stepNo || currentStep.stepNo;
+  }
+
   _getTaskProgressionError(task, request, currentStep) {
     if (task.status_code !== TASK_STATUS.OPEN) {
       return "Only open tasks can be completed";
@@ -1656,7 +1711,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
 
     const aTasks = await cds.tx(req).run(
-      SELECT.from(this.entities.ProcessTasks).where({ request_ID: requestId })
+      SELECT.from(this._dbProcessTasksEntity()).where({ request_ID: requestId })
     );
     const mTasksByStep = aTasks.reduce((mResult, task) => {
       const sStepNo = String(Number(task.stepNo || 0));
@@ -1689,7 +1744,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
 
     const aTasks = await cds.tx(req).run(
-      SELECT.from(this.entities.ProcessTasks).where({ request_ID: requestId })
+      SELECT.from(this._dbProcessTasksEntity()).where({ request_ID: requestId })
     );
     const mTasksByStep = this._tasksByStep(aTasks);
     const aNextStepTasks = mTasksByStep.get(String(Number(nextStep.stepNo || 0))) || [];
@@ -1738,12 +1793,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   _areStepTasksComplete(tasks) {
-    return Boolean(tasks.length) && tasks.every((task) => task.status_code === TASK_STATUS.APPROVED);
+    return Boolean(tasks.length) && tasks.every((task) => this._taskStatusCode(task) === TASK_STATUS.APPROVED);
+  }
+
+  _taskStatusCode(task) {
+    return String(task?.status_code?.code || task?.status_code || "").toUpperCase();
+  }
+
+  _dbProcessTasksEntity() {
+    return cds.entities("flowmate.db").ProcessTasks;
   }
 
   async _hasIncompleteTasksForStep(req, requestId, stepNo) {
     const aTasks = await cds.tx(req).run(
-      SELECT.from(this.entities.ProcessTasks)
+      SELECT.from(this._dbProcessTasksEntity())
         .columns("status_code")
         .where({ request_ID: requestId, stepNo })
     );
@@ -1753,7 +1816,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _rejectUnlessStepTasksApproved(req, requestId, stepNo) {
     const aTasks = await cds.tx(req).run(
-      SELECT.from(this.entities.ProcessTasks)
+      SELECT.from(this._dbProcessTasksEntity())
         .columns("status_code")
         .where({ request_ID: requestId, stepNo })
     );
@@ -1761,6 +1824,49 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (!this._areStepTasksComplete(aTasks)) {
       return req.reject(400, `Approve all tasks for step ${stepNo} before completing the guided step`);
     }
+  }
+
+  async _rejectUnlessStepHasSentBackTask(req, requestId, stepNo) {
+    const aTasks = await cds.tx(req).run(
+      SELECT.from(this._dbProcessTasksEntity())
+        .columns("status_code")
+        .where({ request_ID: requestId, stepNo })
+    );
+    const bHasSentBackTask = aTasks.some((task) => this._taskStatusCode(task) === TASK_STATUS.SENT_BACK);
+
+    if (!bHasSentBackTask) {
+      return req.reject(400, `At least one task for step ${stepNo} must be sent back before sending back the guided step`);
+    }
+  }
+
+  async _rejectIfStepHasOpenTask(req, requestId, stepNo) {
+    const aTasks = await cds.tx(req).run(
+      SELECT.from(this._dbProcessTasksEntity())
+        .columns("status_code")
+        .where({ request_ID: requestId, stepNo })
+    );
+    const bHasOpenTask = aTasks.some((task) => this._taskStatusCode(task) === TASK_STATUS.OPEN);
+
+    if (bHasOpenTask) {
+      return req.reject(400, `Close all open tasks for step ${stepNo} before proceeding further`);
+    }
+  }
+
+  async _resolveSentBackTasksForProceed(req, requestId, stepNo, remarks) {
+    await cds.tx(req).run(
+      UPDATE(this._dbProcessTasksEntity())
+        .set({
+          status_code: TASK_STATUS.APPROVED,
+          decision: "PROCEEDED_AFTER_SEND_BACK",
+          remarks,
+          completedAt: this._now()
+        })
+        .where({
+          request_ID: requestId,
+          stepNo,
+          status_code: TASK_STATUS.SENT_BACK
+        })
+    );
   }
 
   _isClosingStep(step) {
