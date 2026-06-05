@@ -88,6 +88,7 @@
                                 <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                                 <Column><Text text="{i18n>taskNameLabel}" /></Column>
                                 <Column><Text text="{i18n>stepLabel}" /></Column>
+                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>mandatoryLabel}" /></Column>
                                 <Column><Text text="{i18n>processorLabel}" /></Column>
                                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
                                 <Column><Text text="{i18n>statusLabel}" /></Column>
@@ -108,6 +109,9 @@
                                                 press=".onRelatedRequestPress" />
                                         </VBox>
                                         <Text text="{stepNo}" />
+                                        <ObjectStatus
+                                            text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }"
+                                            state="{= ${isMandatory} ? 'Warning' : 'None' }" />
                                         <Text text="{processor}" />
                                         <Text text="{role}" />
                                         <ObjectStatus
@@ -204,6 +208,12 @@
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>stepLabel}" />
                                 <Text text="{stepNo}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                                <Label text="{i18n>mandatoryLabel}" />
+                                <ObjectStatus
+                                    text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }"
+                                    state="{= ${isMandatory} ? 'Warning' : 'None' }" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
                                 <Label text="{i18n>statusLabel}" />

@@ -17,14 +17,17 @@ sap.ui.define([
             this.getRouter().getRoute("RouteRequestCreate").attachPatternMatched(this.onRouteMatched, this);
         },
 
-        onRouteMatched(oEvent) {
+        async onRouteMatched(oEvent) {
             const oQuery = oEvent.getParameter("arguments")["?query"] || {};
 
             this._bReturnToUnreservedOnly = oQuery.unreserved === "true";
             this._bReturnToReservedOnly = oQuery.reserved === "true";
+            this._sPredecessorId = oQuery.predecessorId || "";
             this.setTwoColumnLayout();
             this._aAttachmentFiles = [];
             this.getView().setModel(new JSONModel({
+                predecessor_ID: this._sPredecessorId,
+                predecessorReferenceNumber: "",
                 processType_code: "",
                 processTypeName: "",
                 subProcessType_code: "",
@@ -45,6 +48,10 @@ sap.ui.define([
                 uploading: false,
                 attachments: []
             }), "create");
+
+            if (this._sPredecessorId) {
+                await this._prefillFromPredecessor(this._sPredecessorId);
+            }
         },
 
         async onCreate() {
@@ -73,6 +80,7 @@ sap.ui.define([
                     requester: oPayload.requester,
                     processorUser_ID: oPayload.processorUser_ID || undefined,
                     processor: oPayload.processor,
+                    predecessor_ID: oPayload.predecessor_ID || undefined,
                     department: oPayload.department,
                     priority: oPayload.priority,
                     status_code: "DRAFT"
@@ -327,6 +335,62 @@ sap.ui.define([
             });
 
             oCreateModel.setProperty("/hasSubProcessTypes", aSubTypes.length > 0);
+        },
+
+        async _prefillFromPredecessor(sPredecessorId) {
+            const oCreateModel = this.getView().getModel("create");
+
+            oCreateModel.setProperty("/creating", true);
+
+            try {
+                const oPredecessor = await this._readEntry(`/ProcessRequests(guid'${sPredecessorId}')`, {
+                    urlParameters: {
+                        "$expand": "processType,subProcessType,requesterUser,processorUser"
+                    }
+                });
+
+                oCreateModel.setProperty("/predecessor_ID", oPredecessor.ID);
+                oCreateModel.setProperty("/predecessorReferenceNumber", oPredecessor.referenceNumber || "");
+                oCreateModel.setProperty("/processType_code", oPredecessor.processType_code || "");
+                oCreateModel.setProperty("/processTypeName", oPredecessor.processType?.name || oPredecessor.processType_code || "");
+                oCreateModel.setProperty("/subProcessType_code", oPredecessor.subProcessType_code || "");
+                oCreateModel.setProperty("/subProcessTypeName", oPredecessor.subProcessType?.name || oPredecessor.subProcessType_code || "");
+                oCreateModel.setProperty("/title", this.getText("successorRequestTitlePrefix", [
+                    oPredecessor.referenceNumber || oPredecessor.title || ""
+                ]));
+                oCreateModel.setProperty("/description", oPredecessor.description || "");
+                oCreateModel.setProperty("/requesterUser_ID", oPredecessor.requesterUser_ID || "");
+                oCreateModel.setProperty("/requesterName", oPredecessor.requester || "");
+                oCreateModel.setProperty("/requester", oPredecessor.requester || "");
+                oCreateModel.setProperty("/processorUser_ID", oPredecessor.processorUser_ID || "");
+                oCreateModel.setProperty("/processorName", oPredecessor.processor || "");
+                oCreateModel.setProperty("/processor", oPredecessor.processor || "");
+                oCreateModel.setProperty("/department", oPredecessor.department || "");
+                oCreateModel.setProperty("/priority", oPredecessor.priority || "Medium");
+
+                if (oPredecessor.processType_code) {
+                    const aSubTypes = await this._readList("/ProcessSubTypes", {
+                        filters: [new Filter("processType_code", FilterOperator.EQ, oPredecessor.processType_code)],
+                        sorters: []
+                    });
+
+                    oCreateModel.setProperty("/hasSubProcessTypes", aSubTypes.length > 0);
+                }
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("predecessorLoadFailedMessage"));
+            } finally {
+                oCreateModel.setProperty("/creating", false);
+            }
+        },
+
+        _readEntry(sPath, oParameters) {
+            return new Promise((resolve, reject) => {
+                this.getModel().read(sPath, {
+                    ...(oParameters || {}),
+                    success: resolve,
+                    error: reject
+                });
+            });
         },
 
         _readList(sPath, oParameters) {

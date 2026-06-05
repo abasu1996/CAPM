@@ -364,6 +364,12 @@
     font-weight: 700;
 }
 
+.flowmateProcessGuideHeaderActions {
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .flowmateProcessMilestoneTrack {
     gap: 0.75rem 0;
     margin-top: 1rem;
@@ -631,6 +637,11 @@
     .flowmateProcessGuideHeader,
     .flowmateProcessStepDetailHeader {
         flex-wrap: wrap;
+    }
+
+    .flowmateProcessGuideHeaderActions {
+        width: 100%;
+        justify-content: flex-start;
     }
 
     .flowmateProcessMilestoneTrack {
@@ -1149,6 +1160,49 @@
     color: var(--flowmateBlue);
 }
 
+.flowmateQueueFilterPanel {
+    margin-bottom: 0.875rem;
+    padding: 0.875rem 1rem 1rem;
+    border: 0.0625rem solid #d9e8f7;
+    border-radius: 0.5rem;
+    background:
+        linear-gradient(135deg, rgba(239, 247, 255, 0.98), rgba(255, 255, 255, 0.96) 58%, rgba(240, 248, 244, 0.82)),
+        #ffffff;
+    box-shadow: 0 0.375rem 1rem rgba(23, 43, 77, 0.07);
+}
+
+.flowmateQueueFilterToolbar.sapMTB {
+    height: auto;
+    min-height: 2.75rem;
+    padding: 0;
+    border-bottom: 0;
+    background: transparent;
+}
+
+.flowmateQueueFilterToolbar .sapMTitle {
+    color: #0f3d61;
+    font-weight: 700;
+}
+
+.flowmateQueueFilterFields {
+    gap: 0.875rem;
+    padding-top: 0.625rem;
+}
+
+.flowmateQueueFilterField {
+    min-width: 14rem;
+}
+
+.flowmateQueueSearchField {
+    min-width: 16rem;
+}
+
+.flowmateQueueFilterField .sapMLabel {
+    margin-bottom: 0.25rem;
+    color: var(--flowmateMuted);
+    font-weight: 700;
+}
+
 @media (max-width: 47.99rem) {
     .flowmateContent {
         padding: 0.75rem 0.5rem 1rem;
@@ -1177,5 +1231,17 @@
     .flowmateHeaderInputRow .sapMSlt {
         flex: 1 1 auto;
         min-width: 9rem;
+    }
+
+    .flowmateQueueFilterPanel {
+        padding: 0.75rem;
+    }
+
+    .flowmateQueueFilterField,
+    .flowmateQueueSearchField,
+    .flowmateQueueFilterField .sapMComboBox,
+    .flowmateQueueSearchField .sapMSF {
+        width: 100% !important;
+        min-width: 100%;
     }
 }

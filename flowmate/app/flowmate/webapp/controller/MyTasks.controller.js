@@ -1,12 +1,17 @@
 sap.ui.define([
     "flowmate/controller/BaseController",
     "sap/f/library",
+    "sap/m/Button",
+    "sap/m/Dialog",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
+    "sap/m/Select",
+    "sap/m/Text",
+    "sap/ui/core/Item",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/json/JSONModel"
-], (BaseController, fLibrary, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     return BaseController.extend("flowmate.controller.MyTasks", {
@@ -14,6 +19,10 @@ sap.ui.define([
             this.getView().setModel(new JSONModel({
                 taskStatus: ""
             }), "statusEdit");
+            this.getView().setModel(new JSONModel({
+                sendBackStepNo: "",
+                steps: []
+            }), "taskAction");
             this.getView().setModel(new JSONModel({
                 processorUser_ID: "",
                 processorName: ""
@@ -301,6 +310,7 @@ sap.ui.define([
                             "/processorName",
                             this.byId("taskObjectPage").getBindingContext()?.getProperty("processor") || ""
                         );
+                        this._loadTaskStepOptions();
                     }
                 }
             });
@@ -347,13 +357,29 @@ sap.ui.define([
                 return;
             }
 
+            let iSendBackStepNo;
+
+            if (sAction === "sendBack") {
+                iSendBackStepNo = await this._chooseSendBackStep();
+
+                if (!iSendBackStepNo) {
+                    return;
+                }
+            }
+
             this.showBusy();
 
             try {
-                await this.callAction(sAction, {
+                const oPayload = {
                     taskId: this._sSelectedTaskId,
                     remarks: this.byId("taskRemarksTextArea").getValue()
-                });
+                };
+
+                if (sAction === "sendBack") {
+                    oPayload.targetStepNo = iSendBackStepNo;
+                }
+
+                await this.callAction(sAction, oPayload);
                 MessageToast.show(this.getText(sSuccessTextKey));
                 this.byId("taskRemarksTextArea").setValue("");
                 this.byId("tasksTable").getBinding("items").refresh();
@@ -363,6 +389,102 @@ sap.ui.define([
             } finally {
                 this.hideBusy();
             }
+        },
+
+        async _loadTaskStepOptions() {
+            const oTaskActionModel = this.getView().getModel("taskAction");
+            const oContext = this.byId("taskObjectPage")?.getBindingContext();
+            const sProcessTypeCode = oContext?.getProperty("request/processType_code");
+            const iCurrentStepNo = Number(oContext?.getProperty("stepNo") || 0);
+
+            oTaskActionModel.setData({
+                sendBackStepNo: "",
+                steps: []
+            });
+
+            if (!sProcessTypeCode) {
+                return;
+            }
+
+            try {
+                const aSteps = await this._readList("/ProcessStepConfig", {
+                    filters: [new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)]
+                });
+                const aStepItems = aSteps
+                    .sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0))
+                    .filter((oStep) => Number(oStep.stepNo || 0) < iCurrentStepNo)
+                    .map((oStep) => ({
+                        stepNo: String(oStep.stepNo),
+                        text: this.getText("sendBackStepOptionText", [oStep.stepNo, oStep.stepName || ""])
+                    }));
+
+                oTaskActionModel.setData({
+                    sendBackStepNo: aStepItems[0]?.stepNo || "",
+                    steps: aStepItems
+                });
+            } catch (oError) {
+                MessageToast.show(this.getText("sendBackStepsLoadErrorMessage"));
+            }
+        },
+
+        _chooseSendBackStep() {
+            const aSteps = this.getView().getModel("taskAction").getProperty("/steps") || [];
+
+            if (!aSteps.length) {
+                MessageBox.warning(this.getText("noPreviousSendBackStepsMessage"));
+                return Promise.resolve(null);
+            }
+
+            return new Promise((resolve) => {
+                const oSelect = new Select({
+                    width: "100%",
+                    selectedKey: aSteps[0].stepNo,
+                    items: aSteps.map((oStep) => new Item({
+                        key: oStep.stepNo,
+                        text: oStep.text
+                    }))
+                });
+                const oDialog = new Dialog({
+                    title: this.getText("sendBackTargetStepDialogTitle"),
+                    contentWidth: "24rem",
+                    content: [
+                        new Text({
+                            text: this.getText("sendBackTargetStepDialogText"),
+                            wrapping: true
+                        }),
+                        oSelect
+                    ],
+                    beginButton: new Button({
+                        text: this.getText("sendBackButton"),
+                        type: "Emphasized",
+                        press: () => {
+                            resolve(Number(oSelect.getSelectedKey()));
+                            oDialog.close();
+                        }
+                    }),
+                    endButton: new Button({
+                        text: this.getText("cancelButton"),
+                        press: () => {
+                            resolve(null);
+                            oDialog.close();
+                        }
+                    })
+                });
+
+                oDialog.attachAfterClose(() => oDialog.destroy());
+                this.getView().addDependent(oDialog);
+                oDialog.open();
+            });
+        },
+
+        _readList(sPath, oParameters) {
+            return new Promise((resolve, reject) => {
+                this.getModel().read(sPath, {
+                    ...(oParameters || {}),
+                    success: (oData) => resolve(oData.results || []),
+                    error: reject
+                });
+            });
         }
     });
 });

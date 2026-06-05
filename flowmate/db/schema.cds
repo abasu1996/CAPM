@@ -73,6 +73,9 @@ entity ProcessRequests : cuid, managed {
     requesterUser : Association to Users;
     processorUser : Association to Users;
     reservedByUser : Association to Users;
+    predecessor : Association to ProcessRequests;
+    successors  : Association to many ProcessRequests
+                    on successors.predecessor = $self;
     title       : String(255);
     description : LargeString;
     requester   : String(100);
@@ -109,6 +112,7 @@ entity ProcessTasks : cuid, managed {
     processor   : String(255);
     processorEmail : String(255);
     role        : String(100);
+    isMandatory : Boolean default false;
     status      : Association to TaskStatus;
     decision    : String(30);
     remarks     : LargeString;
@@ -168,8 +172,16 @@ entity ProcessStepConfig : cuid, managed {
     stepName      : String(100);
     activityDescription : String(500);
     role          : String(100);
-    isMandatory   : Boolean default true;
     slaDays       : Integer;
+}
+
+entity RequestFilterQueries : cuid, managed {
+    referenceNumber     : String(30);
+    owner               : String(255);
+    name                : String(100);
+    processType_code    : String(30);
+    subProcessType_code : String(30);
+    search              : String(255);
 }
 
 entity RequestType: cuid, managed{

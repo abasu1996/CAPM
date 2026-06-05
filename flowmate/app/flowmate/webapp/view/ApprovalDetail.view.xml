@@ -82,6 +82,9 @@
                             title="{i18n>stepLabel}"
                             text="{stepNo}" />
                         <ObjectAttribute
+                            title="{i18n>mandatoryLabel}"
+                            text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }" />
+                        <ObjectAttribute
                             title="{i18n>roleLabel}"
                             text="{role}" />
                     </attributes>

@@ -67,6 +67,12 @@
                     <Text
                         text="{i18n>requestCreateIntroText}"
                         wrapping="true" />
+                    <ObjectStatus
+                        class="sapUiTinyMarginTop"
+                        icon="sap-icon://chain-link"
+                        text="{= ${create>/predecessorReferenceNumber} ? ${i18n>successorOfRequestLabel} + ' ' + ${create>/predecessorReferenceNumber} : '' }"
+                        state="Information"
+                        visible="{= !!${create>/predecessorReferenceNumber} }" />
                 </VBox>
 
                 <Panel

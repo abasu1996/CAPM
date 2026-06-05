@@ -29,7 +29,7 @@ sap.ui.define([
             this.getView().bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,tasks,comments,attachments,history"
+                    expand: "processType,subProcessType,predecessor,successors,tasks,comments,attachments,history"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -137,6 +137,40 @@ sap.ui.define([
 
         onRefresh() {
             this._refreshRequest();
+        },
+
+        onCreateSuccessorRequest() {
+            const sRequestId = this.getView().getBindingContext()?.getProperty("ID");
+
+            if (!sRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this.navTo("RouteRequestCreate", {
+                "?query": {
+                    predecessorId: sRequestId
+                }
+            });
+        },
+
+        onRelatedRequestPress(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext();
+            const sRequestId = oContext?.getProperty("predecessor/ID")
+                || oContext?.getProperty("ID");
+
+            if (!sRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this.navTo("RouteMyRequests", {
+                "?query": {
+                    requestId: sRequestId
+                }
+            });
         },
 
         onTaskReferencePress(oEvent) {

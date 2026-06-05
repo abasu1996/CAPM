@@ -1,12 +1,17 @@
 sap.ui.define([
     "flowmate/controller/BaseController",
     "sap/f/library",
+    "sap/m/Button",
+    "sap/m/Dialog",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
+    "sap/m/Select",
+    "sap/m/Text",
+    "sap/ui/core/Item",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/json/JSONModel"
-], (BaseController, fLibrary, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     const SERVICE_V4_URL = "/odata/v4/flowmate/";
@@ -26,6 +31,10 @@ sap.ui.define([
                 taskStatus: ""
             }), "statusEdit");
             this.getView().setModel(new JSONModel({
+                sendBackStepNo: "",
+                steps: []
+            }), "taskAction");
+            this.getView().setModel(new JSONModel({
                 requestProcessorUser_ID: "",
                 requestProcessorName: "",
                 taskProcessorUser_ID: "",
@@ -43,6 +52,21 @@ sap.ui.define([
                 loading: false,
                 steps: []
             }), "processFlow");
+            this.getView().setModel(new JSONModel({
+                showUnreservedOnly: false
+            }), "viewState");
+            this.getView().setModel(new JSONModel({
+                processType_code: "",
+                subProcessType_code: "",
+                search: ""
+            }), "requestQueueFilter");
+            this.getView().setModel(new JSONModel({
+                selectedKey: "",
+                items: []
+            }), "requestQueueQueries");
+            this.getView().setModel(new JSONModel({
+                name: ""
+            }), "newRequestQuery");
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -52,6 +76,13 @@ sap.ui.define([
 
             this._bShowUnreservedOnly = oQuery?.unreserved === "true";
             this._bShowReservedOnly = oQuery?.reserved === "true";
+            this.getView().getModel("viewState").setProperty("/showUnreservedOnly", this._bShowUnreservedOnly);
+            if (this._bShowUnreservedOnly) {
+                this._loadRequestFilterQueries();
+            }
+            if (!this._bShowUnreservedOnly) {
+                this._clearUnreservedQueueFilterState();
+            }
             this.setOneColumnLayout();
             this._rebindRequestsTable();
 
@@ -67,6 +98,17 @@ sap.ui.define([
             this.navTo("RouteRequestCreate", this._getRequestListRouteParameters());
         },
 
+        onCreateSuccessorRequest() {
+            if (!this._sSelectedRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this.navTo("RouteRequestCreate", this._getRequestListRouteParameters({
+                predecessorId: this._sSelectedRequestId
+            }));
+        },
+
         onBeforeRebindRequestsTable(oEvent) {
             const oBindingParams = oEvent.getParameter("bindingParams");
             const oEvents = oBindingParams.events || {};
@@ -77,14 +119,16 @@ sap.ui.define([
             oBindingParams.events = oEvents;
             oBindingParams.filters = oBindingParams.filters || [];
             oBindingParams.parameters.expand = sExpand
-                ? `${sExpand},processType`
-                : "processType";
+                ? `${sExpand},processType,subProcessType`
+                : "processType,subProcessType";
             if (this._bShowUnreservedOnly) {
                 oBindingParams.filters.push(new Filter("reservedBy", FilterOperator.EQ, null));
+                this._addUnreservedQueueFilters(oBindingParams.filters);
             }
             if (this._bShowReservedOnly) {
                 oBindingParams.filters.push(new Filter("reservedBy", FilterOperator.NE, null));
             }
+            this._addRequestSearchFilter(oBindingParams.filters);
             oEvents.dataRequested = (...aArgs) => {
                 fnDataRequested?.(...aArgs);
                 this.onDataRequested();
@@ -107,6 +151,28 @@ sap.ui.define([
                 oSmartTable.rebindTable(true);
             });
         },
+
+        onUnreservedQueueFilterSearch() {
+            if (this._bShowUnreservedOnly) {
+                this._syncUnreservedQueueFilterModelFromControls();
+                this._filterUnreservedSubProcessTypes();
+                this._rebindRequestsTable();
+            }
+        },
+
+        onUnreservedProcessTypeChange() {
+            this.getView().getModel("requestQueueFilter").setProperty("/subProcessType_code", "");
+            this.byId("unreservedSubProcessTypeFilter")?.setSelectedKey("");
+            this._filterUnreservedSubProcessTypes();
+            this.onUnreservedQueueFilterSearch();
+        },
+
+        onClearUnreservedQueueFilters() {
+            this._clearUnreservedQueueFilterState();
+            this._filterUnreservedSubProcessTypes();
+            this.onUnreservedQueueFilterSearch();
+        },
+
         onRequestPress(oEvent) {
             const oItem = oEvent.getParameter("listItem") || oEvent.getSource();
             this._openRequest(oItem.getBindingContext());
@@ -145,6 +211,8 @@ sap.ui.define([
             const oContext = oEvent.getSource().getBindingContext();
             const sRequestId = oContext?.getProperty("request/ID")
                 || oContext?.getProperty("request_ID")
+                || oContext?.getProperty("predecessor/ID")
+                || oContext?.getProperty("ID")
                 || this._sSelectedRequestId;
 
             if (!sRequestId) {
@@ -208,28 +276,108 @@ sap.ui.define([
 
         onSearch(oEvent) {
             const sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue") || "";
-            const oBinding = this.byId("requestsTable").getBinding("items");
 
-            if (!sQuery) {
-                oBinding.filter([]);
+            this.getView().getModel("requestQueueFilter").setProperty("/search", sQuery);
+            this._rebindRequestsTable();
+        },
+
+        onSavedRequestQueryChange(oEvent) {
+            const sQueryId = oEvent.getSource().getSelectedKey();
+            const aQueries = this.getView().getModel("requestQueueQueries").getProperty("/items") || [];
+            const oQuery = aQueries.find((oItem) => oItem.ID === sQueryId);
+
+            if (!oQuery) {
                 return;
             }
 
-            oBinding.filter([
-                new Filter({
-                    filters: [
-                        new Filter("referenceNumber", FilterOperator.Contains, sQuery),
-                        new Filter("title", FilterOperator.Contains, sQuery),
-                        new Filter("processor", FilterOperator.Contains, sQuery),
-                        new Filter("processType_code", FilterOperator.Contains, sQuery),
-                        new Filter("processType/descr", FilterOperator.Contains, sQuery),
-                        new Filter("status_code", FilterOperator.Contains, sQuery),
-                        new Filter("department", FilterOperator.Contains, sQuery),
-                        new Filter("priority", FilterOperator.Contains, sQuery)
-                    ],
-                    and: false
-                })
-            ]);
+            this._applyRequestFilterQuery(oQuery);
+        },
+
+        onOpenSaveQueryDialog() {
+            const sSelectedQueryId = this.getView().getModel("requestQueueQueries").getProperty("/selectedKey");
+            const aQueries = this.getView().getModel("requestQueueQueries").getProperty("/items") || [];
+            const oSelectedQuery = aQueries.find((oItem) => oItem.ID === sSelectedQueryId);
+
+            this._syncUnreservedQueueFilterModelFromControls();
+            this.getView().getModel("newRequestQuery").setProperty("/name", oSelectedQuery?.name || "");
+            this.byId("saveRequestQueryDialog").open();
+        },
+
+        onCloseSaveQueryDialog() {
+            this.byId("saveRequestQueryDialog").close();
+        },
+
+        async onSaveRequestQuery() {
+            const oNameModel = this.getView().getModel("newRequestQuery");
+            const sName = (oNameModel.getProperty("/name") || "").trim();
+
+            if (!sName) {
+                MessageBox.error(this.getText("queryNameRequiredMessage"));
+                return;
+            }
+
+            this._syncUnreservedQueueFilterModelFromControls();
+
+            const oFilterData = this.getView().getModel("requestQueueFilter").getData();
+            const oPayload = {
+                name: sName,
+                processType_code: oFilterData.processType_code || null,
+                subProcessType_code: oFilterData.subProcessType_code || null,
+                search: oFilterData.search || null
+            };
+            const oQueryModel = this.getView().getModel("requestQueueQueries");
+            const sSelectedQueryId = oQueryModel.getProperty("/selectedKey");
+
+            this.showBusy();
+
+            try {
+                if (sSelectedQueryId) {
+                    await this.updateEntry(this._requestFilterQueryPath(sSelectedQueryId), oPayload);
+                } else {
+                    const oCreated = await this.createEntry("/RequestFilterQueries", oPayload);
+                    oQueryModel.setProperty("/selectedKey", oCreated.ID || "");
+                }
+
+                await this._loadRequestFilterQueries(oQueryModel.getProperty("/selectedKey"));
+                this.byId("saveRequestQueryDialog").close();
+                MessageToast.show(this.getText("querySavedMessage"));
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("querySaveErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onDeleteSavedRequestQuery() {
+            const oQueryModel = this.getView().getModel("requestQueueQueries");
+            const sQueryId = oQueryModel.getProperty("/selectedKey");
+
+            if (!sQueryId) {
+                return;
+            }
+
+            const bConfirmed = await new Promise((resolve) => {
+                MessageBox.confirm(this.getText("deleteSavedQueryConfirmMessage"), {
+                    onClose: (sAction) => resolve(sAction === MessageBox.Action.OK)
+                });
+            });
+
+            if (!bConfirmed) {
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.removeEntry(this._requestFilterQueryPath(sQueryId));
+                oQueryModel.setProperty("/selectedKey", "");
+                await this._loadRequestFilterQueries();
+                MessageToast.show(this.getText("queryDeletedMessage"));
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("queryDeleteErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
         },
 
         onCloseRequestDetail() {
@@ -485,6 +633,7 @@ sap.ui.define([
                     processor: oTask.processor,
                     processorEmail: oTask.processorEmail,
                     role: oTask.role,
+                    isMandatory: Boolean(oTask.isMandatory),
                     status_code: "OPEN"
                 });
                 this.byId("addTaskDialog").close();
@@ -984,6 +1133,130 @@ sap.ui.define([
             }
         },
 
+        _addUnreservedQueueFilters(aFilters) {
+            const oFilterData = this._getUnreservedQueueFilterData();
+
+            if (oFilterData.processType_code) {
+                aFilters.push(new Filter("processType_code", FilterOperator.EQ, oFilterData.processType_code));
+            }
+
+            if (oFilterData.subProcessType_code) {
+                aFilters.push(new Filter("subProcessType_code", FilterOperator.EQ, oFilterData.subProcessType_code));
+            }
+        },
+
+        _getUnreservedQueueFilterData() {
+            return {
+                processType_code: this.byId("unreservedProcessTypeFilter")?.getSelectedKey()
+                    || this.getView().getModel("requestQueueFilter").getProperty("/processType_code")
+                    || "",
+                subProcessType_code: this.byId("unreservedSubProcessTypeFilter")?.getSelectedKey()
+                    || this.getView().getModel("requestQueueFilter").getProperty("/subProcessType_code")
+                    || ""
+            };
+        },
+
+        _syncUnreservedQueueFilterModelFromControls() {
+            const oFilterData = this._getUnreservedQueueFilterData();
+            const oFilterModel = this.getView().getModel("requestQueueFilter");
+
+            oFilterModel.setProperty("/processType_code", oFilterData.processType_code);
+            oFilterModel.setProperty("/subProcessType_code", oFilterData.subProcessType_code);
+        },
+
+        async _loadRequestFilterQueries(sSelectedQueryId) {
+            try {
+                const oData = await new Promise((resolve, reject) => {
+                    this.getModel().read("/RequestFilterQueries", {
+                        success: resolve,
+                        error: reject
+                    });
+                });
+                const aQueries = (oData.results || []).sort((oFirst, oSecond) =>
+                    (oFirst.name || "").localeCompare(oSecond.name || "")
+                );
+                const sSelectedKey = sSelectedQueryId && aQueries.some((oQuery) => oQuery.ID === sSelectedQueryId)
+                    ? sSelectedQueryId
+                    : "";
+
+                this.getView().getModel("requestQueueQueries").setData({
+                    selectedKey: sSelectedKey,
+                    items: aQueries
+                });
+            } catch (oError) {
+                MessageToast.show(this.getText("queryLoadErrorMessage"));
+            }
+        },
+
+        _applyRequestFilterQuery(oQuery) {
+            const oFilterModel = this.getView().getModel("requestQueueFilter");
+            const sProcessTypeCode = oQuery.processType_code || "";
+            const sSubProcessTypeCode = oQuery.subProcessType_code || "";
+
+            oFilterModel.setData({
+                processType_code: sProcessTypeCode,
+                subProcessType_code: sSubProcessTypeCode,
+                search: oQuery.search || ""
+            });
+            this.byId("unreservedProcessTypeFilter")?.setSelectedKey(sProcessTypeCode);
+            this.byId("unreservedSubProcessTypeFilter")?.setSelectedKey(sSubProcessTypeCode);
+            this._filterUnreservedSubProcessTypes();
+            this._rebindRequestsTable();
+        },
+
+        _requestFilterQueryPath(sQueryId) {
+            return `/RequestFilterQueries(guid'${sQueryId}')`;
+        },
+
+        _addRequestSearchFilter(aFilters) {
+            const sQuery = this.getView().getModel("requestQueueFilter").getProperty("/search");
+
+            if (!sQuery) {
+                return;
+            }
+
+            aFilters.push(new Filter({
+                filters: [
+                    new Filter("referenceNumber", FilterOperator.Contains, sQuery),
+                    new Filter("title", FilterOperator.Contains, sQuery),
+                    new Filter("processor", FilterOperator.Contains, sQuery),
+                    new Filter("processType_code", FilterOperator.Contains, sQuery),
+                    new Filter("processType/name", FilterOperator.Contains, sQuery),
+                    new Filter("subProcessType_code", FilterOperator.Contains, sQuery),
+                    new Filter("subProcessType/name", FilterOperator.Contains, sQuery),
+                    new Filter("status_code", FilterOperator.Contains, sQuery),
+                    new Filter("department", FilterOperator.Contains, sQuery),
+                    new Filter("priority", FilterOperator.Contains, sQuery)
+                ],
+                and: false
+            }));
+        },
+
+        _clearUnreservedQueueFilterState() {
+            this.getView().getModel("requestQueueFilter").setData({
+                processType_code: "",
+                subProcessType_code: "",
+                search: ""
+            });
+            this.getView().getModel("requestQueueQueries")?.setProperty("/selectedKey", "");
+            this.byId("unreservedProcessTypeFilter")?.setSelectedKey("");
+            this.byId("unreservedSubProcessTypeFilter")?.setSelectedKey("");
+        },
+
+        _filterUnreservedSubProcessTypes() {
+            const sProcessTypeCode = this.getView().getModel("requestQueueFilter").getProperty("/processType_code");
+            const oSubProcessTypeFilter = this.byId("unreservedSubProcessTypeFilter");
+            const oBinding = oSubProcessTypeFilter?.getBinding("items");
+
+            if (!oBinding) {
+                return;
+            }
+
+            oBinding.filter(sProcessTypeCode
+                ? [new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)]
+                : []);
+        },
+
         _openRequest(oContext) {
             this._showRequestDetail(oContext);
         },
@@ -997,7 +1270,7 @@ sap.ui.define([
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType"
+                    expand: "processType,subProcessType,predecessor,successors"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -1123,6 +1396,7 @@ sap.ui.define([
                             "/taskProcessorName",
                             this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("processor") || ""
                         );
+                        this._loadTaskStepOptions("requestTaskObjectPage");
                     }
                 }
             });
@@ -1151,19 +1425,35 @@ sap.ui.define([
                 return;
             }
 
+            const sRemarks = this.byId("requestTaskRemarksTextArea").getValue();
+            let iSendBackStepNo;
+
+            if (sAction === "sendBack") {
+                iSendBackStepNo = await this._chooseSendBackStep();
+
+                if (!iSendBackStepNo) {
+                    return;
+                }
+            }
+
             this.showBusy();
 
             try {
-                const sRemarks = this.byId("requestTaskRemarksTextArea").getValue();
                 let bCompleted = true;
 
                 if (sAction === "approveTask") {
                     bCompleted = await this._approveTaskWithGuidedDecision(this._sSelectedTaskId, sRemarks);
                 } else {
-                    await this.callAction(sAction, {
+                    const oPayload = {
                         taskId: this._sSelectedTaskId,
                         remarks: sRemarks
-                    });
+                    };
+
+                    if (sAction === "sendBack") {
+                        oPayload.targetStepNo = iSendBackStepNo;
+                    }
+
+                    await this.callAction(sAction, oPayload);
                 }
 
                 if (!bCompleted) {
@@ -1191,7 +1481,7 @@ sap.ui.define([
         },
 
         async _completeGuidedStepWithDecision(iStepNo, sRemarks) {
-            let sProgressionMode = "retriggerNext";
+            let sProgressionMode = "continue";
             const oAnalysisResponse = await this.callAction("analyzeGuidedStepCompletion", {
                 requestId: this._sSelectedRequestId,
                 stepNo: iStepNo
@@ -1250,73 +1540,6 @@ sap.ui.define([
             }
         },
 
-        async onSendBackGuidedStep(oEvent) {
-            const oStep = oEvent.getSource().getBindingContext("processFlow")?.getObject()
-                || this.getView().getModel("processFlow").getProperty("/selectedStep");
-            const iStepNo = Number(oStep?.stepNo || 0);
-
-            if (!this._sSelectedRequestId || !iStepNo) {
-                MessageToast.show(this.getText("selectRequestMessage"));
-                return;
-            }
-
-            const bConfirmed = await this._confirmSendBackGuidedStep(oStep);
-
-            if (!bConfirmed) {
-                return;
-            }
-
-            this.showBusy();
-
-            try {
-                await this.callAction("sendBackGuidedStep", {
-                    requestId: this._sSelectedRequestId,
-                    stepNo: iStepNo,
-                    remarks: this.getText("sendBackStepButton")
-                });
-                MessageToast.show(this.getText("guidedStepSentBackMessage"));
-                this._refreshAfterTaskChange();
-            } catch (oError) {
-                MessageBox.error(oError.message || this.getText("guidedStepSendBackErrorMessage"));
-            } finally {
-                this.hideBusy();
-            }
-        },
-
-        async onProceedGuidedStepAfterSendBack(oEvent) {
-            const oStep = oEvent.getSource().getBindingContext("processFlow")?.getObject()
-                || this.getView().getModel("processFlow").getProperty("/selectedStep");
-            const iStepNo = Number(oStep?.stepNo || 0);
-
-            if (!this._sSelectedRequestId || !iStepNo) {
-                MessageToast.show(this.getText("selectRequestMessage"));
-                return;
-            }
-
-            const bConfirmed = await this._confirmProceedAfterSendBack(oStep);
-
-            if (!bConfirmed) {
-                return;
-            }
-
-            this.showBusy();
-
-            try {
-                await this.callAction("proceedGuidedStepAfterSendBack", {
-                    requestId: this._sSelectedRequestId,
-                    stepNo: iStepNo,
-                    remarks: this.getText("proceedAfterSendBackButton"),
-                    progressionMode: "retriggerNext"
-                });
-                MessageToast.show(this.getText("guidedStepProceededMessage"));
-                this._refreshAfterTaskChange();
-            } catch (oError) {
-                MessageBox.error(oError.message || this.getText("guidedStepProceedErrorMessage"));
-            } finally {
-                this.hideBusy();
-            }
-        },
-
         _chooseGuidedProgression(oAnalysis) {
             return new Promise((resolve) => {
                 const sRetrigger = this.getText("retriggerNextStepButton");
@@ -1346,30 +1569,6 @@ sap.ui.define([
             });
         },
 
-        _confirmSendBackGuidedStep(oStep) {
-            return new Promise((resolve) => {
-                MessageBox.warning(this.getText("sendBackGuidedStepConfirmMessage", [
-                    oStep?.stepName || oStep?.stepNo || ""
-                ]), {
-                    actions: [this.getText("sendBackStepButton"), MessageBox.Action.CANCEL],
-                    emphasizedAction: this.getText("sendBackStepButton"),
-                    onClose: (sAction) => resolve(sAction === this.getText("sendBackStepButton"))
-                });
-            });
-        },
-
-        _confirmProceedAfterSendBack(oStep) {
-            return new Promise((resolve) => {
-                MessageBox.warning(this.getText("proceedAfterSendBackConfirmMessage", [
-                    oStep?.stepName || oStep?.stepNo || ""
-                ]), {
-                    actions: [this.getText("proceedAfterSendBackButton"), MessageBox.Action.CANCEL],
-                    emphasizedAction: this.getText("proceedAfterSendBackButton"),
-                    onClose: (sAction) => resolve(sAction === this.getText("proceedAfterSendBackButton"))
-                });
-            });
-        },
-
         _createEmptyTask() {
             return {
                 taskName: "",
@@ -1378,7 +1577,8 @@ sap.ui.define([
                 processorName: "",
                 processor: "",
                 processorEmail: "",
-                role: ""
+                role: "",
+                isMandatory: false
             };
         },
 
@@ -1521,6 +1721,39 @@ sap.ui.define([
                 return;
             }
 
+            this._selectGuidedProcessStep(oStep);
+        },
+
+        onShowPreviousGuidedStep() {
+            this._selectAdjacentGuidedProcessStep(-1);
+        },
+
+        onShowNextGuidedStep() {
+            this._selectAdjacentGuidedProcessStep(1);
+        },
+
+        _selectAdjacentGuidedProcessStep(iDirection) {
+            const oProcessFlowModel = this.getView().getModel("processFlow");
+            const aSteps = oProcessFlowModel.getProperty("/steps") || [];
+            const oSelectedStep = oProcessFlowModel.getProperty("/selectedStep") || {};
+
+            if (!aSteps.length) {
+                return;
+            }
+
+            const iCurrentIndex = Math.max(0, aSteps.findIndex((oStep) =>
+                Number(oStep.stepNo || 0) === Number(oSelectedStep.stepNo || 0)
+            ));
+            const iNextIndex = (iCurrentIndex + iDirection + aSteps.length) % aSteps.length;
+
+            this._selectGuidedProcessStep(aSteps[iNextIndex]);
+        },
+
+        _selectGuidedProcessStep(oStep) {
+            if (!oStep) {
+                return;
+            }
+
             const oProcessFlowModel = this.getView().getModel("processFlow");
             const aSteps = oProcessFlowModel.getProperty("/steps") || [];
 
@@ -1546,15 +1779,26 @@ sap.ui.define([
                 return mResult;
             }, new Map());
 
-            return aSteps.map((oStep) => {
+            const bAllProcessTasksApproved = Boolean(aTasks.length)
+                && aTasks.every((oTask) => this._taskStatusCode(oTask) === "APPROVED");
+
+            return aSteps.map((oStep, iIndex) => {
                 const aStepTasks = mTasksByStep.get(String(Number(oStep.stepNo || 0))) || [];
-                const bMandatory = this._isTruthy(oStep.isMandatory);
-                const oOpenTask = aStepTasks.find((oTask) => this._taskStatusCode(oTask) === "OPEN");
+                const aMandatoryTasks = aStepTasks.filter((oTask) => this._isTruthy(oTask.isMandatory));
+                const bMandatory = aMandatoryTasks.some((oTask) => this._taskStatusCode(oTask) !== "APPROVED");
+                const bMandatoryTasksApproved = Boolean(aMandatoryTasks.length)
+                    && aMandatoryTasks.every((oTask) => this._taskStatusCode(oTask) === "APPROVED");
+                const oOpenTask = aStepTasks.find((oTask) => this._isOpenLikeTask(oTask));
                 const bAllTasksApproved = Boolean(aStepTasks.length)
                     && aStepTasks.every((oTask) => this._taskStatusCode(oTask) === "APPROVED");
                 const bRejected = aStepTasks.some((oTask) => this._taskStatusCode(oTask) === "REJECTED");
                 const bSentBack = aStepTasks.some((oTask) => this._taskStatusCode(oTask) === "SENT_BACK");
                 const bCurrent = Number(oStep.stepNo || 0) === iCurrentStep;
+                const oNextStep = aSteps[iIndex + 1];
+                const bFinalStep = !oNextStep;
+                const bCanCompleteStep = bFinalStep
+                    ? bAllProcessTasksApproved
+                    : (!bMandatory || bMandatoryTasksApproved);
                 let sState = "None";
                 let sStatusText = this.getText("processStepPendingLabel");
                 let sIcon = "sap-icon://circle-task";
@@ -1604,17 +1848,109 @@ sap.ui.define([
                     isCurrent: bCurrent && !bRequestCompleted,
                     selected: false,
                     taskId: oOpenTask?.ID || "",
-                    completeEnabled: bRequestEditable && bCurrent && bAllTasksApproved,
-                    sendBackEnabled: bRequestEditable && bCurrent && bSentBack,
-                    proceedAfterSendBackEnabled: bRequestEditable && bCurrent && bSentBack
+                    completeEnabled: bRequestEditable && bCurrent && bCanCompleteStep
                 };
             });
+        },
+
+        _isClosingProcessStep(oStep) {
+            return /closed|complete|completed/i.test(oStep?.stepName || "");
         },
 
         _taskStatusCode(oTask) {
             const vStatus = oTask?.status_code;
 
             return String(vStatus?.code || vStatus || "").toUpperCase();
+        },
+
+        _isOpenLikeTask(oTask) {
+            return ["OPEN", "SENT_BACK"].includes(this._taskStatusCode(oTask));
+        },
+
+        async _loadTaskStepOptions(sObjectPageId) {
+            const oTaskActionModel = this.getView().getModel("taskAction");
+            const oContext = this.byId(sObjectPageId)?.getBindingContext();
+            const sProcessTypeCode = oContext?.getProperty("request/processType_code");
+            const iCurrentStepNo = Number(oContext?.getProperty("stepNo") || 0);
+
+            oTaskActionModel.setData({
+                sendBackStepNo: "",
+                steps: []
+            });
+
+            if (!sProcessTypeCode) {
+                return;
+            }
+
+            try {
+                const aSteps = await this._readList("/ProcessStepConfig", {
+                    filters: [new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)]
+                });
+                const aStepItems = aSteps
+                    .sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0))
+                    .filter((oStep) => Number(oStep.stepNo || 0) < iCurrentStepNo)
+                    .map((oStep) => ({
+                        stepNo: String(oStep.stepNo),
+                        text: this.getText("sendBackStepOptionText", [oStep.stepNo, oStep.stepName || ""])
+                    }));
+
+                oTaskActionModel.setData({
+                    sendBackStepNo: aStepItems[0]?.stepNo || "",
+                    steps: aStepItems
+                });
+            } catch (oError) {
+                MessageToast.show(this.getText("sendBackStepsLoadErrorMessage"));
+            }
+        },
+
+        _chooseSendBackStep() {
+            const aSteps = this.getView().getModel("taskAction").getProperty("/steps") || [];
+
+            if (!aSteps.length) {
+                MessageBox.warning(this.getText("noPreviousSendBackStepsMessage"));
+                return Promise.resolve(null);
+            }
+
+            return new Promise((resolve) => {
+                const oSelect = new Select({
+                    width: "100%",
+                    selectedKey: aSteps[0].stepNo,
+                    items: aSteps.map((oStep) => new Item({
+                        key: oStep.stepNo,
+                        text: oStep.text
+                    }))
+                });
+                const oDialog = new Dialog({
+                    title: this.getText("sendBackTargetStepDialogTitle"),
+                    contentWidth: "24rem",
+                    content: [
+                        new Text({
+                            text: this.getText("sendBackTargetStepDialogText"),
+                            wrapping: true
+                        }),
+                        oSelect
+                    ],
+                    beginButton: new Button({
+                        text: this.getText("sendBackButton"),
+                        type: "Emphasized",
+                        press: () => {
+                            resolve(Number(oSelect.getSelectedKey()));
+                            oDialog.close();
+                        }
+                    }),
+                    endButton: new Button({
+                        text: this.getText("cancelButton"),
+                        press: () => {
+                            resolve(null);
+                            oDialog.close();
+                        }
+                    })
+                });
+
+                oDialog.attachAfterClose(() => oDialog.destroy());
+                this.getView().addDependent(oDialog);
+                oDialog.open();
+            });
         },
 
         _isRequestEditable(oRequest) {

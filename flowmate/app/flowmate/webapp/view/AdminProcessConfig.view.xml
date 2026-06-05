@@ -53,7 +53,6 @@
                                     <Column width="10rem"><Text text="{i18n>stepNameLabel}" wrapping="true" /></Column>
                                     <Column width="16rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
                                     <Column width="8rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" wrapping="true" /></Column>
-                                    <Column width="7rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>mandatoryLabel}" wrapping="true" /></Column>
                                     <Column width="6rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>slaDaysLabel}" wrapping="true" /></Column>
                                     <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
@@ -66,7 +65,6 @@
                                             <ObjectIdentifier title="{stepName}" />
                                             <Text text="{activityDescription}" wrapping="true" />
                                             <Text text="{role}" />
-                                            <ObjectStatus text="{= ${isMandatory} ? 'Yes' : 'No' }" state="{= ${isMandatory} ? 'Success' : 'None' }" />
                                             <Text text="{slaDays}" />
                                             <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editProcessStepButton}" press=".onEditProcessStep" />
                                         </cells>
@@ -285,8 +283,6 @@
                     <TextArea value="{stepEdit>/activityDescription}" maxLength="500" rows="4" />
                     <Label text="{i18n>roleLabel}" />
                     <Input value="{stepEdit>/role}" maxLength="100" />
-                    <Label text="{i18n>mandatoryLabel}" />
-                    <Switch state="{stepEdit>/isMandatory}" />
                     <Label text="{i18n>slaDaysLabel}" />
                     <Input value="{stepEdit>/slaDays}" type="Number" />
                 </form:SimpleForm>

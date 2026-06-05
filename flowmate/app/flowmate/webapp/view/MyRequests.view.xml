@@ -55,11 +55,74 @@
                 </f:title>
                 <f:content>
                     <VBox class="flowmateContent flowmateSurface">
+                        <VBox class="flowmateQueueFilterPanel" visible="{viewState>/showUnreservedOnly}">
+                            <OverflowToolbar class="flowmateQueueFilterToolbar">
+                                <Title text="{i18n>unreservedQueueFiltersTitle}" level="H3" />
+                                <ToolbarSpacer />
+                                <Label text="{i18n>savedQueryLabel}" />
+                                <Select
+                                    width="14rem"
+                                    forceSelection="false"
+                                    selectedKey="{requestQueueQueries>/selectedKey}"
+                                    change=".onSavedRequestQueryChange"
+                                    items="{requestQueueQueries>/items}">
+                                    <core:Item key="{requestQueueQueries>ID}" text="{requestQueueQueries>name}" />
+                                </Select>
+                                <Button
+                                    icon="sap-icon://save"
+                                    text="{i18n>saveQueryButton}"
+                                    type="Emphasized"
+                                    press=".onOpenSaveQueryDialog" />
+                                <Button
+                                    icon="sap-icon://delete"
+                                    tooltip="{i18n>deleteQueryButton}"
+                                    enabled="{= !!${requestQueueQueries>/selectedKey} }"
+                                    press=".onDeleteSavedRequestQuery" />
+                                <Button
+                                    icon="sap-icon://clear-filter"
+                                    text="{i18n>clearFiltersButton}"
+                                    press=".onClearUnreservedQueueFilters" />
+                            </OverflowToolbar>
+                            <HBox class="flowmateQueueFilterFields" wrap="Wrap" alignItems="End">
+                                <VBox class="flowmateQueueFilterField">
+                                    <Label text="{i18n>processTypeLabel}" />
+                                    <ComboBox
+                                        id="unreservedProcessTypeFilter"
+                                        width="16rem"
+                                        selectedKey="{requestQueueFilter>/processType_code}"
+                                        selectionChange=".onUnreservedProcessTypeChange"
+                                        items="{/ProcessTypes}">
+                                        <core:Item key="{code}" text="{name}" />
+                                    </ComboBox>
+                                </VBox>
+                                <VBox class="flowmateQueueFilterField">
+                                    <Label text="{i18n>subProcessTypeLabel}" />
+                                    <ComboBox
+                                        id="unreservedSubProcessTypeFilter"
+                                        width="16rem"
+                                        selectedKey="{requestQueueFilter>/subProcessType_code}"
+                                        selectionChange=".onUnreservedQueueFilterSearch"
+                                        items="{/ProcessSubTypes}">
+                                        <core:Item key="{code}" text="{name}" />
+                                    </ComboBox>
+                                </VBox>
+                                <VBox class="flowmateQueueFilterField flowmateQueueSearchField">
+                                    <Label text="{i18n>searchLabel}" />
+                                    <SearchField
+                                        width="18rem"
+                                        value="{requestQueueFilter>/search}"
+                                        search=".onSearch"
+                                        liveChange=".onSearch" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
                         <OverflowToolbar class="flowmateToolbar">
                             <Title text="{i18n>requestsTableHeader}" />
                             <ToolbarSpacer />
                             <SearchField
                                 width="18rem"
+                                visible="{= !${viewState>/showUnreservedOnly} }"
+                                value="{requestQueueFilter>/search}"
                                 search=".onSearch"
                                 liveChange=".onSearch" />
                             <Button
@@ -235,6 +298,11 @@
                                 visible="{= !${reservedBy} }"
                                 press=".onReserveRequest" />
                             <Button
+                                icon="sap-icon://chain-link"
+                                text="{i18n>createSuccessorRequestButton}"
+                                type="Emphasized"
+                                press=".onCreateSuccessorRequest" />
+                            <Button
                                 icon="sap-icon://decline"
                                 text="{i18n>closeButton}"
                                 press=".onCloseRequestDetail" />
@@ -351,12 +419,32 @@
                                 justifyContent="SpaceBetween"
                                 width="100%">
                                 <Title text="{i18n>guidedProcessTitle}" />
-                                <ObjectStatus
-                                    class="flowmateSemanticStatus"
-                                    icon="sap-icon://process"
-                                    text="{i18n>guidedProcessSubtitle}"
-                                    state="Information"
-                                    inverted="true" />
+                                <HBox class="flowmateProcessGuideHeaderActions" alignItems="Center">
+                                    <ObjectStatus
+                                        class="flowmateSemanticStatus"
+                                        icon="sap-icon://process"
+                                        text="{i18n>guidedProcessSubtitle}"
+                                        state="Information"
+                                        inverted="true" />
+                                    <HBox class="flowmateProcessActionBar sapUiTinyMarginBegin" alignItems="Center">
+                                        <Button
+                                            icon="sap-icon://navigation-left-arrow"
+                                            text="{i18n>previousStepButton}"
+                                            type="Transparent"
+                                            press=".onShowPreviousGuidedStep" />
+                                        <Button
+                                            icon="sap-icon://navigation-right-arrow"
+                                            text="{i18n>nextStepButton}"
+                                            type="Transparent"
+                                            press=".onShowNextGuidedStep" />
+                                        <Button
+                                            icon="sap-icon://complete"
+                                            text="{i18n>completeStepButton}"
+                                            type="Emphasized"
+                                            visible="{processFlow>/selectedStep/completeEnabled}"
+                                            press=".onCompleteGuidedStep" />
+                                    </HBox>
+                                </HBox>
                             </HBox>
                             <HBox
                                 class="flowmateProcessMilestoneTrack"
@@ -424,28 +512,6 @@
                                             class="sapUiTinyMarginBegin"
                                             text="{processFlow>/selectedStep/role}" />
                                     </HBox>
-                                    <HBox class="flowmateProcessActionBar" alignItems="Center">
-                                        <Button
-                                            icon="sap-icon://undo"
-                                            text="{i18n>sendBackStepButton}"
-                                            type="Default"
-                                            visible="{processFlow>/selectedStep/sendBackEnabled}"
-                                            press=".onSendBackGuidedStep" />
-                                        <Button
-                                            class="sapUiTinyMarginBegin"
-                                            icon="sap-icon://step"
-                                            text="{i18n>proceedAfterSendBackButton}"
-                                            type="Emphasized"
-                                            visible="{processFlow>/selectedStep/proceedAfterSendBackEnabled}"
-                                            press=".onProceedGuidedStepAfterSendBack" />
-                                        <Button
-                                            class="sapUiTinyMarginBegin"
-                                            icon="sap-icon://complete"
-                                            text="{i18n>completeStepButton}"
-                                            type="Emphasized"
-                                            visible="{processFlow>/selectedStep/completeEnabled}"
-                                            press=".onCompleteGuidedStep" />
-                                    </HBox>
                                 </HBox>
                             </VBox>
                         </VBox>
@@ -459,6 +525,63 @@
                                     <VBox class="flowmateDetailBlock">
                                         <Label text="{i18n>descriptionLabel}" />
                                         <Text text="{description}" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="{i18n>requestRelationsTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox class="flowmateSurface">
+                                        <OverflowToolbar class="flowmateToolbar">
+                                            <Title text="{i18n>requestRelationsTitle}" />
+                                            <ToolbarSpacer />
+                                            <ObjectStatus
+                                                class="flowmateSemanticStatus"
+                                                icon="sap-icon://chain-link"
+                                                text="{i18n>requestRelationsSubtitle}"
+                                                state="Information"
+                                                inverted="true" />
+                                        </OverflowToolbar>
+                                        <VBox class="flowmateDetailBlock">
+                                            <Label text="{i18n>predecessorRequestLabel}" />
+                                            <Link
+                                                text="{= ${predecessor/referenceNumber} || ${i18n>noPredecessorRequestText} }"
+                                                enabled="{= !!${predecessor/ID} }"
+                                                press=".onRelatedRequestPress" />
+                                        </VBox>
+                                        <Table
+                                            id="requestSuccessorsTable"
+                                            class="flowmateTable"
+                                            noDataText="{i18n>noSuccessorRequestsText}"
+                                            items="{successors}">
+                                            <columns>
+                                                <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
+                                                <Column><Text text="{i18n>requestTitleLabel}" /></Column>
+                                                <Column><Text text="{i18n>statusLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>priorityLabel}" /></Column>
+                                            </columns>
+                                            <items>
+                                                <ColumnListItem type="Active" press=".onRequestPress">
+                                                    <cells>
+                                                        <Link
+                                                            text="{referenceNumber}"
+                                                            press=".onRequestReferencePress" />
+                                                        <Text text="{title}" />
+                                                        <ObjectStatus
+                                                            class="flowmateSemanticStatus"
+                                                            text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                                            state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                                            inverted="true" />
+                                                        <ObjectStatus
+                                                            text="{priority}"
+                                                            state="{path: 'priority', formatter: '.formatPriorityState'}" />
+                                                    </cells>
+                                                </ColumnListItem>
+                                            </items>
+                                        </Table>
                                     </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
@@ -494,6 +617,7 @@
                                                 <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                                                 <Column><Text text="{i18n>stepLabel}" /></Column>
                                                 <Column><Text text="{i18n>taskNameLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>mandatoryLabel}" /></Column>
                                                 <Column><Text text="{i18n>processorLabel}" /></Column>
                                                 <Column><Text text="{i18n>statusLabel}" /></Column>
                                                 <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
@@ -508,6 +632,9 @@
                                                             press=".onRequestTaskReferencePress" />
                                                         <Text text="{stepNo}" />
                                                         <Text text="{taskName}" />
+                                                        <ObjectStatus
+                                                            text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }"
+                                                            state="{= ${isMandatory} ? 'Warning' : 'None' }" />
                                                         <Text text="{processor}" />
                                                         <ObjectStatus
                                                             class="flowmateSemanticStatus"
@@ -837,6 +964,12 @@
                                 <Text text="{stepNo}" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                                <Label text="{i18n>mandatoryLabel}" />
+                                <ObjectStatus
+                                    text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }"
+                                    state="{= ${isMandatory} ? 'Warning' : 'None' }" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
                                 <Label text="{i18n>statusLabel}" />
                                 <ObjectStatus
                                     class="flowmateSemanticStatus"
@@ -1062,6 +1195,10 @@
                             value="{newTask>/role}"
                             maxLength="100"
                             placeholder="{i18n>rolePlaceholder}" />
+                        <Label text="{i18n>mandatoryLabel}" />
+                        <CheckBox
+                            selected="{newTask>/isMandatory}"
+                            text="{i18n>mandatoryTaskCheckboxText}" />
                     </form:SimpleForm>
                 </VBox>
             </content>
@@ -1075,6 +1212,33 @@
                 <Button
                     text="{i18n>cancelButton}"
                     press=".onAddTaskCancel" />
+            </endButton>
+        </Dialog>
+        <Dialog
+            id="saveRequestQueryDialog"
+            contentWidth="28rem"
+            draggable="true"
+            resizable="true"
+            title="{i18n>saveQueryDialogTitle}">
+            <content>
+                <VBox class="sapUiSmallMargin">
+                    <Label text="{i18n>queryNameLabel}" required="true" />
+                    <Input
+                        value="{newRequestQuery>/name}"
+                        maxLength="100"
+                        placeholder="{i18n>queryNamePlaceholder}" />
+                </VBox>
+            </content>
+            <beginButton>
+                <Button
+                    text="{i18n>saveButton}"
+                    type="Emphasized"
+                    press=".onSaveRequestQuery" />
+            </beginButton>
+            <endButton>
+                <Button
+                    text="{i18n>cancelButton}"
+                    press=".onCloseSaveQueryDialog" />
             </endButton>
         </Dialog>
         <Dialog

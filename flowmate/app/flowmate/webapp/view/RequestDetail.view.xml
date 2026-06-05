@@ -44,6 +44,11 @@
                         tooltip="{i18n>refreshButton}"
                         press=".onRefresh" />
                     <Button
+                        icon="sap-icon://chain-link"
+                        text="{i18n>createSuccessorRequestButton}"
+                        type="Emphasized"
+                        press=".onCreateSuccessorRequest" />
+                    <Button
                         icon="sap-icon://decline"
                         text="{i18n>closeButton}"
                         press=".onClose" />
@@ -133,6 +138,46 @@
                     expandable="false">
                     <items>
                         <IconTabFilter
+                            icon="sap-icon://chain-link"
+                            text="{i18n>requestRelationsTitle}">
+                            <VBox class="flowmateDetailBlock">
+                                <Label text="{i18n>predecessorRequestLabel}" />
+                                <Link
+                                    text="{= ${predecessor/referenceNumber} || ${i18n>noPredecessorRequestText} }"
+                                    enabled="{= !!${predecessor/ID} }"
+                                    press=".onRelatedRequestPress" />
+                            </VBox>
+                            <Table
+                                class="flowmateTable"
+                                noDataText="{i18n>noSuccessorRequestsText}"
+                                items="{successors}">
+                                <columns>
+                                    <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
+                                    <Column><Text text="{i18n>requestTitleLabel}" /></Column>
+                                    <Column><Text text="{i18n>statusLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>priorityLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem type="Active" press=".onRelatedRequestPress">
+                                        <cells>
+                                            <Link
+                                                text="{referenceNumber}"
+                                                press=".onRelatedRequestPress" />
+                                            <Text text="{title}" />
+                                            <ObjectStatus
+                                                class="flowmateSemanticStatus"
+                                                text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                                state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                                inverted="true" />
+                                            <ObjectStatus
+                                                text="{priority}"
+                                                state="{path: 'priority', formatter: '.formatPriorityState'}" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter
                             icon="sap-icon://workflow-tasks"
                             text="{i18n>tasksTitle}">
                             <Table
@@ -156,6 +201,7 @@
                                     <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                                     <Column><Text text="{i18n>stepLabel}" /></Column>
                                     <Column><Text text="{i18n>taskNameLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>mandatoryLabel}" /></Column>
                                     <Column><Text text="{i18n>processorLabel}" /></Column>
                                     <Column><Text text="{i18n>statusLabel}" /></Column>
                                     <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
@@ -168,6 +214,9 @@
                                                 press=".onTaskReferencePress" />
                                             <Text text="{stepNo}" />
                                             <Text text="{taskName}" />
+                                            <ObjectStatus
+                                                text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }"
+                                                state="{= ${isMandatory} ? 'Warning' : 'None' }" />
                                             <Text text="{processor}" />
                                             <ObjectStatus
                                                 class="flowmateSemanticStatus"

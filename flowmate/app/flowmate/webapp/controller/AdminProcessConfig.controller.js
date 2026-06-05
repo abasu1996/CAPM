@@ -219,7 +219,6 @@ sap.ui.define([
                 stepName: oEntry.stepName,
                 activityDescription: oEntry.activityDescription,
                 role: oEntry.role,
-                isMandatory: Boolean(oEntry.isMandatory),
                 slaDays: this._optionalNumber(oEntry.slaDays)
             };
 
@@ -357,7 +356,6 @@ sap.ui.define([
                 stepName: "",
                 activityDescription: "",
                 role: "",
-                isMandatory: true,
                 slaDays: ""
             };
         },

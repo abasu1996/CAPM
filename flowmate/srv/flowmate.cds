@@ -6,6 +6,7 @@ service FlowmateService {
         ID          : UUID;
         stepNo      : Integer;
         status_code : String(30);
+        isMandatory : Boolean;
     }
 
     entity ProcessTypes as projection on fldb.ProcessTypes;
@@ -39,6 +40,7 @@ service FlowmateService {
     };
     entity ProcessHistory as projection on fldb.ProcessHistory;
     entity ProcessStepConfig as projection on fldb.ProcessStepConfig;
+    entity RequestFilterQueries as projection on fldb.RequestFilterQueries;
 
     action submitRequest(requestId: UUID) returns Boolean;
     action approveTask(taskId: UUID, remarks: String) returns Boolean;
@@ -60,9 +62,7 @@ service FlowmateService {
     action completeGuidedStep(requestId: UUID, stepNo: Integer, remarks: String, progressionMode: String(30)) returns Boolean;
     action getGuidedProcessTasks(requestId: UUID) returns many GuidedProcessTask;
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
-    action sendBack(taskId: UUID, remarks: String) returns Boolean;
-    action sendBackGuidedStep(requestId: UUID, stepNo: Integer, remarks: String) returns Boolean;
-    action proceedGuidedStepAfterSendBack(requestId: UUID, stepNo: Integer, remarks: String, progressionMode: String(30)) returns Boolean;
+    action sendBack(taskId: UUID, remarks: String, targetStepNo: Integer) returns Boolean;
     action reserveRequest(requestId: UUID) returns Boolean;
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;
