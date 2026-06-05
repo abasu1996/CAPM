@@ -1440,12 +1440,12 @@ sap.ui.define([
             this._bindRequestSectionTable("requestTasksTable", "/RequestDetailTasks", sRequestId);
             this._bindRequestSectionTable("requestPartiesTable", "/ProcessInvolvedParties", sRequestId);
             this._bindRequestSectionTable("requestAttachmentsTable", "/ProcessAttachments", sRequestId);
-            this._bindRequestSectionTable("requestEmailsTable", "/ProcessEmailMessages", sRequestId, {
-                parameters: {
-                    expand: "attachments"
-                }
-            });
             this._bindRequestSectionTable("requestHistoryTable", "/ProcessHistory", sRequestId);
+            // this._bindRequestSectionTable("requestEmailsTable", "/RequestEmails", sRequestId,{
+            //     parameters:{
+            //         expand: "attachments"
+            //     }
+            // });
         },
 
         _bindRequestSectionTable(sTableId, sPath, sRequestId, oParameters = {}) {
