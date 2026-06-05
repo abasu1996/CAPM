@@ -303,6 +303,11 @@
                                 type="Emphasized"
                                 press=".onCreateSuccessorRequest" />
                             <Button
+                                icon="sap-icon://email"
+                                text="{i18n>sendRequestEmailButton}"
+                                visible="false"
+                                press=".onOpenRequestEmailDialog" />
+                            <Button
                                 icon="sap-icon://decline"
                                 text="{i18n>closeButton}"
                                 press=".onCloseRequestDetail" />
@@ -827,6 +832,62 @@
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        title="{i18n>emailsTitle}"
+                        visible="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox class="flowmateSurface">
+                                        <OverflowToolbar class="flowmateToolbar">
+                                            <Title text="{i18n>emailsTitle}" />
+                                            <ToolbarSpacer />
+                                            <ObjectStatus
+                                                class="flowmateSemanticStatus"
+                                                icon="sap-icon://email"
+                                                text="{i18n>emailOutboxSubtitle}"
+                                                state="Information"
+                                                inverted="true" />
+                                        </OverflowToolbar>
+                                        <Table
+                                            id="requestEmailsTable"
+                                            class="flowmateTable"
+                                            noDataText="{i18n>noEmailsText}"
+                                            items="{emailMessages}">
+                                            <columns>
+                                                <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
+                                                <Column><Text text="{i18n>emailSubjectLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>emailToLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>emailCcLabel}" /></Column>
+                                                <Column><Text text="{i18n>statusLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>queuedAtLabel}" /></Column>
+                                                <Column demandPopin="true" minScreenWidth="Desktop" hAlign="End"><Text text="{i18n>attachmentsTitle}" /></Column>
+                                            </columns>
+                                            <items>
+                                                <ColumnListItem>
+                                                    <cells>
+                                                        <Text text="{referenceNumber}" />
+                                                        <Text text="{subject}" />
+                                                        <Text text="{toRecipients}" wrapping="true" />
+                                                        <Text text="{ccRecipients}" wrapping="true" />
+                                                        <ObjectStatus
+                                                            class="flowmateSemanticStatus"
+                                                            text="{path: 'status', formatter: '.formatStatusText'}"
+                                                            state="{path: 'status', formatter: '.formatStatusState'}"
+                                                            inverted="true" />
+                                                        <Text text="{queuedAt}" />
+                                                        <ObjectNumber
+                                                            number="{path: 'attachments', formatter: '.formatCollectionCount'}"
+                                                            unit="{i18n>attachmentsTitle}" />
+                                                    </cells>
+                                                </ColumnListItem>
+                                            </items>
+                                        </Table>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection title="{i18n>historyTitle}">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
@@ -1285,6 +1346,141 @@
                 <Button text="{i18n>cancelButton}" press=".onAddPartyCancel" />
             </endButton>
         </Dialog>
+        <Dialog
+            id="requestEmailDialog"
+            contentWidth="56rem"
+            contentHeight="42rem"
+            draggable="true"
+            resizable="true"
+            title="{i18n>requestEmailDialogTitle}">
+            <content>
+                <VBox class="flowmateDialogContent">
+                    <Text
+                        class="sapUiSmallMarginBottom"
+                        text="{i18n>requestEmailDialogDescription}" />
+                    <form:SimpleForm
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="2"
+                        labelSpanL="2"
+                        labelSpanM="3"
+                        labelSpanS="12"
+                        adjustLabelSpan="false"
+                        columnsXL="1"
+                        columnsL="1"
+                        columnsM="1">
+                        <Label text="{i18n>emailToLabel}" required="true" />
+                        <MultiInput
+                            showValueHelp="true"
+                            valueHelpOnly="true"
+                            valueHelpRequest=".onEmailToUserValueHelpRequest"
+                            tokenUpdate=".onEmailToTokenUpdate"
+                            placeholder="{i18n>emailRecipientsPlaceholder}"
+                            required="true"
+                            tokens="{emailDraft>/toTokens}">
+                            <tokens>
+                                <Token
+                                    key="{emailDraft>email}"
+                                    text="{emailDraft>text}" />
+                            </tokens>
+                        </MultiInput>
+                        <Label text="{i18n>emailCcLabel}" />
+                        <Input
+                            value="{emailDraft>/ccRecipients}"
+                            placeholder="{i18n>emailRecipientsPlaceholder}" />
+                        <Label text="{i18n>emailSubjectLabel}" />
+                        <Input
+                            value="{emailDraft>/subject}"
+                            maxLength="255" />
+                        <Label text="{i18n>emailBodyLabel}" required="true" />
+                        <TextArea
+                            value="{emailDraft>/body}"
+                            rows="8"
+                            growing="true"
+                            required="true" />
+                    </form:SimpleForm>
+                    <OverflowToolbar class="flowmateToolbar sapUiSmallMarginTop">
+                        <Title text="{i18n>emailAttachmentsTitle}" />
+                        <ToolbarSpacer />
+                        <ObjectStatus
+                            class="flowmateSemanticStatus"
+                            text="{i18n>emailAttachmentsAutoLoadedText}"
+                            state="Information"
+                            inverted="true" />
+                    </OverflowToolbar>
+                    <Table
+                        id="requestEmailAttachmentsTable"
+                        class="flowmateTable"
+                        noDataText="{i18n>noAttachmentsText}"
+                        items="{emailDraft>/attachments}">
+                        <columns>
+                            <Column width="5rem" hAlign="Center"><Text text="{i18n>includeLabel}" /></Column>
+                            <Column><Text text="{i18n>fileNameLabel}" /></Column>
+                            <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>mimeTypeLabel}" /></Column>
+                            <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>statusLabel}" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <CheckBox selected="{emailDraft>include}" />
+                                    <ObjectIdentifier
+                                        title="{emailDraft>filename}"
+                                        text="{emailDraft>referenceNumber}" />
+                                    <Text text="{emailDraft>mimeType}" />
+                                    <ObjectStatus
+                                        class="flowmateSemanticStatus"
+                                        text="{emailDraft>status}"
+                                        state="{path: 'emailDraft>status', formatter: '.formatStatusState'}"
+                                        inverted="true" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
+            </content>
+            <beginButton>
+                <Button
+                    icon="sap-icon://email"
+                    text="{i18n>sendEmailButton}"
+                    type="Emphasized"
+                    press=".onSendRequestEmail" />
+            </beginButton>
+            <endButton>
+                <Button
+                    text="{i18n>cancelButton}"
+                    press=".onCloseRequestEmailDialog" />
+            </endButton>
+        </Dialog>
+        <TableSelectDialog
+            id="requestEmailToUserDialog"
+            title="{i18n>selectEmailRecipientsTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            multiSelect="true"
+            rememberSelections="false"
+            search=".onEmailToUserValueHelpSearch"
+            confirm=".onEmailToUserValueHelpConfirm"
+            cancel=".onEmailToUserValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                    <Text text="{department}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
         <TableSelectDialog
             id="involvedPartyValueHelpDialog"
             title="{i18n>addInvolvedPartyButton}"

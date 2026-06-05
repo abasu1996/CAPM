@@ -18,7 +18,8 @@ service FlowmateService {
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
         tasks       : redirected to ProcessTasks,
-        attachments : redirected to ProcessAttachments
+        attachments : redirected to ProcessAttachments,
+        emailMessages : redirected to ProcessEmailMessages
     };
     entity ProcessTasks as projection on fldb.ProcessTasks {
         *,
@@ -37,6 +38,16 @@ service FlowmateService {
     entity ProcessAttachments as projection on fldb.ProcessAttachments {
         *,
         request : redirected to ProcessRequests
+    };
+    entity ProcessEmailMessages as projection on fldb.ProcessEmailMessages {
+        *,
+        request     : redirected to ProcessRequests,
+        attachments : redirected to ProcessEmailAttachments
+    };
+    entity ProcessEmailAttachments as projection on fldb.ProcessEmailAttachments {
+        *,
+        emailMessage : redirected to ProcessEmailMessages,
+        attachment   : redirected to ProcessAttachments
     };
     entity ProcessHistory as projection on fldb.ProcessHistory;
     entity ProcessStepConfig as projection on fldb.ProcessStepConfig;
@@ -63,6 +74,18 @@ service FlowmateService {
     action getGuidedProcessTasks(requestId: UUID) returns many GuidedProcessTask;
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
     action sendBack(taskId: UUID, remarks: String, targetStepNo: Integer) returns Boolean;
+    action sendRequestEmail(
+        requestId: UUID,
+        toRecipients: LargeString,
+        ccRecipients: LargeString,
+        subject: String(255),
+        body: LargeString,
+        attachmentIds: LargeString
+    ) returns {
+        emailId         : UUID;
+        status          : String(30);
+        attachmentCount : Integer;
+    };
     action reserveRequest(requestId: UUID) returns Boolean;
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;

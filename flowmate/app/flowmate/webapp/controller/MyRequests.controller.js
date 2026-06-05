@@ -26,6 +26,7 @@ sap.ui.define([
                 active: false,
                 items: []
             }), "uploads");
+            this.getView().setModel(new JSONModel(this._createEmptyEmailDraft()), "emailDraft");
             this.getView().setModel(new JSONModel({
                 requestStatus: "",
                 taskStatus: ""
@@ -596,6 +597,130 @@ sap.ui.define([
 
         async onSendBackRequestTask() {
             await this._completeRequestTask("sendBack", "taskSentBackMessage");
+        },
+
+        async onOpenRequestEmailDialog() {
+            if (!this._sSelectedRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            const oContext = this.byId("requestObjectPage").getBindingContext();
+            const oRequest = oContext?.getObject() || {};
+            const sReferenceNumber = oRequest.referenceNumber || "";
+            const sTitle = oRequest.title || "";
+
+            this.showBusy();
+
+            try {
+                const aAttachments = await this._readList("/ProcessAttachments", {
+                    filters: [new Filter("request_ID", FilterOperator.EQ, this._sSelectedRequestId)]
+                });
+
+                this.getView().getModel("emailDraft").setData({
+                    requestId: this._sSelectedRequestId,
+                    toRecipients: "",
+                    toTokens: [],
+                    ccRecipients: "",
+                    subject: this.getText("requestEmailDefaultSubject", [sReferenceNumber, sTitle]),
+                    body: this.getText("requestEmailDefaultBody", [sReferenceNumber, sTitle, window.location.href]),
+                    attachments: aAttachments.map((oAttachment) => ({
+                        ID: oAttachment.ID,
+                        referenceNumber: oAttachment.referenceNumber,
+                        filename: oAttachment.filename,
+                        mimeType: oAttachment.mimeType,
+                        status: oAttachment.status,
+                        include: true
+                    }))
+                });
+                this.byId("requestEmailDialog").open();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("requestEmailAttachmentLoadErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        onCloseRequestEmailDialog() {
+            this.byId("requestEmailDialog").close();
+        },
+
+        onEmailToUserValueHelpRequest() {
+            this.byId("requestEmailToUserDialog").open();
+        },
+
+        onEmailToUserValueHelpSearch(oEvent) {
+            this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
+        },
+
+        onEmailToUserValueHelpConfirm(oEvent) {
+            const aContexts = oEvent.getParameter("selectedContexts")
+                || (oEvent.getParameter("selectedItems") || [])
+                    .map((oItem) => oItem.getBindingContext())
+                    .filter(Boolean);
+
+            if (aContexts.length) {
+                this._addEmailToRecipients(aContexts.map((oContext) => ({
+                    email: oContext.getProperty("email"),
+                    displayName: oContext.getProperty("displayName")
+                })));
+            }
+
+            this.onEmailToUserValueHelpClose(oEvent);
+        },
+
+        onEmailToUserValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
+        onEmailToTokenUpdate(oEvent) {
+            const aRemovedKeys = (oEvent.getParameter("removedTokens") || []).map((oToken) => oToken.getKey());
+
+            if (!aRemovedKeys.length) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("emailDraft");
+            const aTokens = (oModel.getProperty("/toTokens") || [])
+                .filter((oToken) => !aRemovedKeys.includes(oToken.email));
+
+            this._setEmailToTokens(aTokens);
+        },
+
+        async onSendRequestEmail() {
+            const oEmail = this.getView().getModel("emailDraft").getData();
+
+            if (!oEmail.toRecipients || !oEmail.body) {
+                MessageBox.warning(this.getText("requestEmailRequiredMessage"));
+                return;
+            }
+
+            const aAttachmentIds = (oEmail.attachments || [])
+                .filter((oAttachment) => oAttachment.include)
+                .map((oAttachment) => oAttachment.ID);
+
+            this.showBusy();
+
+            try {
+                const oResult = await this.callAction("sendRequestEmail", {
+                    requestId: this._sSelectedRequestId,
+                    toRecipients: oEmail.toRecipients,
+                    ccRecipients: oEmail.ccRecipients,
+                    subject: oEmail.subject,
+                    body: oEmail.body,
+                    attachmentIds: JSON.stringify(aAttachmentIds)
+                });
+                const oValue = oResult.value || oResult;
+
+                this.byId("requestEmailDialog").close();
+                MessageToast.show(this.getText("requestEmailQueuedMessage", [oValue.attachmentCount || 0]));
+                this._refreshEmailSection();
+                this._refreshHistorySection();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("requestEmailQueueErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
         },
 
         onOpenAddTaskDialog() {
@@ -1315,10 +1440,15 @@ sap.ui.define([
             this._bindRequestSectionTable("requestTasksTable", "/RequestDetailTasks", sRequestId);
             this._bindRequestSectionTable("requestPartiesTable", "/ProcessInvolvedParties", sRequestId);
             this._bindRequestSectionTable("requestAttachmentsTable", "/ProcessAttachments", sRequestId);
+            this._bindRequestSectionTable("requestEmailsTable", "/ProcessEmailMessages", sRequestId, {
+                parameters: {
+                    expand: "attachments"
+                }
+            });
             this._bindRequestSectionTable("requestHistoryTable", "/ProcessHistory", sRequestId);
         },
 
-        _bindRequestSectionTable(sTableId, sPath, sRequestId) {
+        _bindRequestSectionTable(sTableId, sPath, sRequestId, oParameters = {}) {
             const oTable = this.byId(sTableId);
             const oBindingInfo = oTable?.getBindingInfo("items");
 
@@ -1331,6 +1461,7 @@ sap.ui.define([
                 template: oBindingInfo.template,
                 templateShareable: true,
                 filters: [new Filter("request_ID", FilterOperator.EQ, sRequestId)],
+                ...(oParameters || {}),
                 events: {
                     dataRequested: () => {
                         oTable.setBusyIndicatorDelay(0);
@@ -1592,6 +1723,49 @@ sap.ui.define([
             };
         },
 
+        _createEmptyEmailDraft() {
+            return {
+                requestId: "",
+                toRecipients: "",
+                toTokens: [],
+                ccRecipients: "",
+                subject: "",
+                body: "",
+                attachments: []
+            };
+        },
+
+        _addEmailToRecipients(aUsers) {
+            const oModel = this.getView().getModel("emailDraft");
+            const aTokens = [...(oModel.getProperty("/toTokens") || [])];
+            const mExisting = new Map(aTokens.map((oToken) => [String(oToken.email || "").toLowerCase(), oToken]));
+
+            aUsers
+                .filter((oUser) => oUser.email)
+                .forEach((oUser) => {
+                    const sEmail = String(oUser.email).trim();
+                    const sKey = sEmail.toLowerCase();
+
+                    if (!mExisting.has(sKey)) {
+                        mExisting.set(sKey, {
+                            email: sEmail,
+                            text: oUser.displayName
+                                ? `${oUser.displayName} <${sEmail}>`
+                                : sEmail
+                        });
+                    }
+                });
+
+            this._setEmailToTokens([...mExisting.values()]);
+        },
+
+        _setEmailToTokens(aTokens) {
+            const oModel = this.getView().getModel("emailDraft");
+
+            oModel.setProperty("/toTokens", aTokens);
+            oModel.setProperty("/toRecipients", aTokens.map((oToken) => oToken.email).join(", "));
+        },
+
         _filterUsers(oDialog, sQuery) {
             const oBinding = oDialog.getBinding("items");
 
@@ -1649,6 +1823,10 @@ sap.ui.define([
 
         _refreshHistorySection() {
             this._refreshSectionTable("requestHistoryTable");
+        },
+
+        _refreshEmailSection() {
+            this._refreshSectionTable("requestEmailsTable");
         },
 
         _refreshAllRequestSections() {
@@ -1963,6 +2141,10 @@ sap.ui.define([
             }
 
             return vCollection?.results || [];
+        },
+
+        formatCollectionCount(vCollection) {
+            return this._normalizeCollection(vCollection).length;
         },
 
         _isTruthy(vValue) {

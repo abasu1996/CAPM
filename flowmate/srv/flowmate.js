@@ -36,6 +36,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessInvolvedParties,
       ProcessComments,
       ProcessAttachments,
+      ProcessEmailMessages,
+      ProcessEmailAttachments,
       ProcessHistory,
       ProcessStepConfig,
       ProcessTypes,
@@ -86,6 +88,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.before("READ", ProcessAttachments, async (req) => {
       await this._filterByVisibleRequests(req, Users, "request_ID");
+    });
+
+    this.before("READ", ProcessEmailMessages, async (req) => {
+      await this._filterByVisibleRequests(req, Users, "request_ID");
+    });
+
+    this.before("READ", ProcessEmailAttachments, async (req) => {
+      await this._filterByVisibleEmails(req, Users, ProcessEmailMessages);
     });
 
     this.before("READ", ProcessComments, async (req) => {
@@ -419,6 +429,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.before(["UPDATE", "DELETE"], ProcessAttachments, async (req) => {
       await this._rejectIfAttachmentRequestLocked(req);
+    });
+
+    this.before(["CREATE", "UPDATE", "DELETE"], ProcessEmailMessages, (req) => {
+      return req.reject(405, "Use the request email action to create or change email interface records");
+    });
+
+    this.before(["CREATE", "UPDATE", "DELETE"], ProcessEmailAttachments, (req) => {
+      return req.reject(405, "Email attachment interface records are maintained by the request email action");
     });
 
     this.before("CREATE", Delegations, async (req) => {
@@ -1031,6 +1049,81 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return this._resolveDelegatedRecipient(req, oUser.email, Delegations);
     });
 
+    this.on("sendRequestEmail", async (req) => {
+      const { requestId, toRecipients, ccRecipients, subject, body, attachmentIds } = req.data;
+      const request = await this._getRequest(req, requestId);
+
+      if (!request) {
+        return req.reject(404, `Process request ${requestId} was not found`);
+      }
+
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
+
+      const aToRecipients = this._parseEmailRecipients(toRecipients);
+      const aCcRecipients = this._parseEmailRecipients(ccRecipients);
+
+      this._rejectInvalidEmailRecipients(req, aToRecipients, "To");
+      this._rejectInvalidEmailRecipients(req, aCcRecipients, "CC");
+
+      if (!aToRecipients.length) {
+        return req.reject(400, "At least one To recipient is required");
+      }
+
+      if (!body) {
+        return req.reject(400, "Email body is required");
+      }
+
+      const aAttachmentIds = this._parseAttachmentIds(attachmentIds);
+      const aAttachments = await this._getEmailAttachmentRows(req, requestId, aAttachmentIds, ProcessAttachments);
+      const sEmailId = cds.utils.uuid();
+      const sReferenceNumber = await this._nextReferenceNumber(req, ProcessEmailMessages, "EML");
+      const sStatus = "QUEUED";
+
+      await cds.tx(req).run(
+        INSERT.into(ProcessEmailMessages).entries({
+          ID: sEmailId,
+          referenceNumber: sReferenceNumber,
+          request_ID: requestId,
+          toRecipients: aToRecipients.join(", "),
+          ccRecipients: aCcRecipients.join(", "),
+          subject: subject || `Flowmate request ${request.referenceNumber || ""}`.trim(),
+          body,
+          status: sStatus,
+          interfaceSystem: "EMAIL",
+          queuedAt: this._now()
+        })
+      );
+
+      if (aAttachments.length) {
+        await cds.tx(req).run(
+          INSERT.into(ProcessEmailAttachments).entries(aAttachments.map((oAttachment) => ({
+            ID: cds.utils.uuid(),
+            referenceNumber: oAttachment.referenceNumber || null,
+            emailMessage_ID: sEmailId,
+            attachment_ID: oAttachment.ID,
+            filename: oAttachment.filename,
+            mimeType: oAttachment.mimeType
+          })))
+        );
+      }
+
+      await this._writeHistory(req, {
+        requestId,
+        stepNo: request.currentStep || 0,
+        action: "EMAIL_QUEUED",
+        actor: req.user?.id,
+        oldStatus: request.status_code,
+        newStatus: request.status_code,
+        remarks: `Email queued to ${aToRecipients.join(", ")} with ${aAttachments.length} attachment(s)`
+      });
+
+      return {
+        emailId: sEmailId,
+        status: sStatus,
+        attachmentCount: aAttachments.length
+      };
+    });
+
     this.on("getUserAdministrationCapabilities", (req) => ({
       canMaintainUsers: this._isAdministrator(req)
     }));
@@ -1131,6 +1224,24 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       { ref: [requestFieldName] },
       "in",
       qVisibleRequests
+    ]);
+  }
+
+  async _filterByVisibleEmails(req, Users, ProcessEmailMessages = this.entities.ProcessEmailMessages) {
+    const oReservationUser = await this._currentReservationUser(req, Users);
+    const qVisibleRequests = SELECT.from(this.entities.ProcessRequests).columns("ID");
+    const qVisibleEmails = SELECT.from(ProcessEmailMessages).columns("ID");
+
+    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser);
+    qVisibleEmails.where([
+      { ref: ["request_ID"] },
+      "in",
+      qVisibleRequests
+    ]);
+    req.query.where([
+      { ref: ["emailMessage_ID"] },
+      "in",
+      qVisibleEmails
     ]);
   }
 
@@ -1393,6 +1504,63 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _queryOwner(req) {
     return this._emailFromAuthenticatedUser(req.user) || req.user?.id || "anonymous";
+  }
+
+  _parseEmailRecipients(value) {
+    return [...new Set(String(value || "")
+      .split(/[;,\n]+/)
+      .map((sRecipient) => sRecipient.trim())
+      .filter(Boolean))];
+  }
+
+  _rejectInvalidEmailRecipients(req, recipients, label) {
+    const sInvalidRecipient = recipients.find((sRecipient) => !this._looksLikeEmail(sRecipient));
+
+    if (sInvalidRecipient) {
+      return req.reject(400, `${label} contains an invalid email address: ${sInvalidRecipient}`);
+    }
+  }
+
+  _parseAttachmentIds(value) {
+    if (value == null || value === "") {
+      return null;
+    }
+
+    try {
+      const vParsed = JSON.parse(value);
+
+      if (Array.isArray(vParsed)) {
+        return [...new Set(vParsed.map((sId) => String(sId || "").trim()).filter(Boolean))];
+      }
+    } catch (oError) {
+      // Fall back to comma-separated IDs.
+    }
+
+    return [...new Set(String(value)
+      .split(/[;,\n]+/)
+      .map((sId) => sId.trim())
+      .filter(Boolean))];
+  }
+
+  async _getEmailAttachmentRows(req, requestId, attachmentIds, ProcessAttachments = this.entities.ProcessAttachments) {
+    const aAttachments = await cds.tx(req).run(
+      SELECT.from(ProcessAttachments)
+        .columns("ID", "referenceNumber", "filename", "mimeType", "status")
+        .where({ request_ID: requestId })
+    );
+
+    if (attachmentIds === null) {
+      return aAttachments;
+    }
+
+    const mAttachments = new Map(aAttachments.map((oAttachment) => [oAttachment.ID, oAttachment]));
+    const sMissingAttachmentId = attachmentIds.find((sAttachmentId) => !mAttachments.has(sAttachmentId));
+
+    if (sMissingAttachmentId) {
+      return req.reject(400, `Attachment ${sMissingAttachmentId} does not belong to this request`);
+    }
+
+    return attachmentIds.map((sAttachmentId) => mAttachments.get(sAttachmentId));
   }
 
   async _rejectIfRequestFilterQueryOwnedByAnotherUser(req, RequestFilterQueries = this.entities.RequestFilterQueries) {

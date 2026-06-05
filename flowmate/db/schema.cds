@@ -97,6 +97,8 @@ entity ProcessRequests : cuid, managed {
                     on comments.request = $self;
     attachments : Composition of many ProcessAttachments
                     on attachments.request = $self;
+    emailMessages : Composition of many ProcessEmailMessages
+                    on emailMessages.request = $self;
     history     : Composition of many ProcessHistory
                     on history.request = $self;
 }
@@ -139,6 +141,30 @@ entity ProcessComments : cuid, managed {
 entity ProcessAttachments : Attachments {
     referenceNumber : String(30);
     request : Association to ProcessRequests;
+}
+
+entity ProcessEmailMessages : cuid, managed {
+    referenceNumber : String(30);
+    request         : Association to ProcessRequests;
+    toRecipients    : LargeString;
+    ccRecipients    : LargeString;
+    subject         : String(255);
+    body            : LargeString;
+    status          : String(30) default 'QUEUED';
+    interfaceSystem : String(100) default 'EMAIL';
+    queuedAt        : DateTime;
+    sentAt          : DateTime;
+    errorMessage    : LargeString;
+    attachments     : Composition of many ProcessEmailAttachments
+                      on attachments.emailMessage = $self;
+}
+
+entity ProcessEmailAttachments : cuid, managed {
+    referenceNumber : String(30);
+    emailMessage    : Association to ProcessEmailMessages;
+    attachment      : Association to ProcessAttachments;
+    filename        : String(255);
+    mimeType        : String(255);
 }
 
 annotate ProcessAttachments with {
