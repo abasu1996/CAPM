@@ -31,6 +31,8 @@
           "semanticObject": "flowmate",
           "action": "openflowmate",
           "title": "{{flowmate-openflowmate.flpTitle}}",
+          "subTitle": "{{flowmate-openflowmate.flpSubtitle}}",
+          "icon": "sap-icon://workflow-tasks",
           "signature": {
             "parameters": {},
             "additionalParameters": "allowed"
@@ -38,6 +40,10 @@
         }
       }
     }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "flowmate.service"
   },
   "sap.ui": {
     "technology": "UI5",

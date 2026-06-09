@@ -115,6 +115,23 @@
                                 valueHelpRequest=".onSubProcessTypeValueHelpRequest" />
                             <Label text="{i18n>requestTitleLabel}" required="true" />
                             <Input value="{create>/title}" maxLength="255" required="true" />
+                            <Label text="{i18n>linkedRequestLabel}" />
+                            <HBox
+                                alignItems="Center"
+                                width="100%">
+                                <Input
+                                    value="{= ${create>/predecessorReferenceNumber} ? ${create>/predecessorReferenceNumber} + (${create>/predecessorTitle} ? ' - ' + ${create>/predecessorTitle} : '') : '' }"
+                                    placeholder="{i18n>linkedRequestPlaceholder}"
+                                    showValueHelp="true"
+                                    valueHelpOnly="true"
+                                    valueHelpRequest=".onPredecessorRequestValueHelpRequest"
+                                    width="100%" />
+                                <Button
+                                    icon="sap-icon://decline"
+                                    tooltip="{i18n>clearLinkedRequestButton}"
+                                    enabled="{= !!${create>/predecessor_ID} }"
+                                    press=".onClearPredecessorRequest" />
+                            </HBox>
                             <Label text="{i18n>priorityLabel}" />
                             <Select selectedKey="{create>/priority}">
                                 <core:Item key="Low" text="{i18n>priorityLow}" />
@@ -261,6 +278,43 @@
         </f:content>
     </f:DynamicPage>
     <mvc:dependents>
+        <TableSelectDialog
+            id="predecessorRequestValueHelpDialog"
+            title="{i18n>selectLinkedRequestTitle}"
+            noDataText="{i18n>noRequestsText}"
+            rememberSelections="false"
+            search=".onPredecessorRequestValueHelpSearch"
+            confirm=".onPredecessorRequestValueHelpConfirm"
+            cancel=".onPredecessorRequestValueHelpClose"
+            items="{
+                path: '/ProcessRequests',
+                parameters: {
+                    expand: 'processType,subProcessType'
+                },
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
+                <Column><Text text="{i18n>requestTitleLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>processTypeLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>subProcessTypeLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>statusLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>reservedByLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{referenceNumber}" />
+                    <Text text="{title}" />
+                    <Text text="{= ${processType/name} || ${processType_code} }" />
+                    <Text text="{= ${subProcessType/name} || ${subProcessType_code} }" />
+                    <Text text="{status_code}" />
+                    <Text text="{reservedBy}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
         <TableSelectDialog
             id="processTypeValueHelpDialog"
             title="{i18n>processTypeLabel}"

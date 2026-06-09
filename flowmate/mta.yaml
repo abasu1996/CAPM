@@ -4,17 +4,41 @@ version: 1.0.0
 description: "A simple CAP project."
 parameters:
   enable-parallel-deployments: true
+  deploy_mode: html5-repo
 build-parameters:
   before-all:
     - builder: custom
       commands:
         - npm ci
         - npx cds build --production
-        - mkdir -p gen/router/webapp
-        - cp router/package.json gen/router/package.json
-        - cp router/xs-app.json gen/router/xs-app.json
-        - cp -R app/flowmate/webapp/. gen/router/webapp
+        - mkdir -p gen/router
 modules:
+  - name: flowmate-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: flowmate-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - flowmate_app-content.zip
+          name: flowmate_app
+          target-path: resources/
+
+  - name: flowmate_app
+    type: html5
+    path: app/flowmate
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
   - name: flowmate-approuter
     type: nodejs
     path: gen/router
@@ -26,9 +50,17 @@ modules:
     properties:
       INCOMING_CONNECTION_TIMEOUT: 600000
     build-parameters:
-      builder: npm
+      builder: custom
+      commands:
+        - mkdir -p webapp
+        - cp ../../router/package.json package.json
+        - cp ../../router/xs-app.json xs-app.json
+        - cp -R ../../app/flowmate/webapp/. webapp
+        - npm install
     requires:
       - name: flowmate-auth
+      - name: flowmate-html5-runtime
+      - name: flowmate-destination
       - name: srv-api
         group: destinations
         properties:
@@ -61,7 +93,69 @@ modules:
     requires:
       - name: flowmate-db
 
+  - name: flowmate-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: flowmate-auth
+        parameters:
+          service-key:
+            name: flowmate-auth-key
+      - name: flowmate-html5-repo-host
+        parameters:
+          service-key:
+            name: flowmate-html5-repo-host-key
+      - name: srv-api
+      - name: flowmate-destination
+        parameters:
+          content-target: true
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: srv-api
+              TokenServiceInstanceName: flowmate-auth
+              TokenServiceKeyName: flowmate-auth-key
+              URL: ~{srv-api/srv-url}
+              HTML5.Timeout: 600000
+            - Name: flowmate-html5-repo-host
+              ServiceInstanceName: flowmate-html5-repo-host
+              ServiceKeyName: flowmate-html5-repo-host-key
+              sap.cloud.service: flowmate.service
+            - Authentication: OAuth2UserTokenExchange
+              Name: flowmate-auth
+              ServiceInstanceName: flowmate-auth
+              ServiceKeyName: flowmate-auth-key
+              sap.cloud.service: flowmate.service
+          existing_destinations_policy: update
+    build-parameters:
+      no-source: true
+
 resources:
+  - name: flowmate-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations: []
+            existing_destinations_policy: update
+      service: destination
+      service-plan: lite
+
+  - name: flowmate-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
+
+  - name: flowmate-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+
   - name: flowmate-auth
     type: org.cloudfoundry.managed-service
     parameters:
