@@ -52,6 +52,7 @@
                                     <Column width="5rem"><Text text="{i18n>stepLabel}" wrapping="true" /></Column>
                                     <Column width="10rem"><Text text="{i18n>stepNameLabel}" wrapping="true" /></Column>
                                     <Column width="16rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
+                                    <Column width="12rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>processorTeamLabel}" wrapping="true" /></Column>
                                     <Column width="8rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" wrapping="true" /></Column>
                                     <Column width="6rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>slaDaysLabel}" wrapping="true" /></Column>
                                     <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
@@ -64,6 +65,7 @@
                                             <Text text="{stepNo}" />
                                             <ObjectIdentifier title="{stepName}" />
                                             <Text text="{activityDescription}" wrapping="true" />
+                                            <Text text="{processorTeamName}" wrapping="true" />
                                             <Text text="{role}" />
                                             <Text text="{slaDays}" />
                                             <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editProcessStepButton}" press=".onEditProcessStep" />
@@ -281,6 +283,22 @@
                     <Input value="{stepEdit>/stepName}" maxLength="100" required="true" />
                     <Label text="{i18n>activityDescriptionLabel}" />
                     <TextArea value="{stepEdit>/activityDescription}" maxLength="500" rows="4" />
+                    <Label text="{i18n>processorTeamLabel}" />
+                    <HBox width="100%" alignItems="Center">
+                        <Input
+                            value="{stepEdit>/processorTeamName}"
+                            placeholder="{i18n>selectTeamPlaceholder}"
+                            showValueHelp="true"
+                            valueHelpOnly="true"
+                            valueHelpRequest=".onStepTeamValueHelpRequest"
+                            width="100%" />
+                        <Button
+                            class="sapUiTinyMarginBegin"
+                            icon="sap-icon://decline"
+                            tooltip="{i18n>clearButton}"
+                            enabled="{= !!${stepEdit>/processorTeam_ID} }"
+                            press=".onClearStepProcessorTeam" />
+                    </HBox>
                     <Label text="{i18n>roleLabel}" />
                     <Input value="{stepEdit>/role}" maxLength="100" />
                     <Label text="{i18n>slaDaysLabel}" />
@@ -290,5 +308,32 @@
             <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveProcessStep" /></beginButton>
             <endButton><Button text="{i18n>cancelButton}" press=".onCloseProcessStepDialog" /></endButton>
         </Dialog>
+        <TableSelectDialog
+            id="processStepTeamValueHelpDialog"
+            title="{i18n>selectTeamTitle}"
+            noDataText="{i18n>noTeamsFoundText}"
+            rememberSelections="false"
+            search=".onStepTeamValueHelpSearch"
+            confirm=".onStepTeamValueHelpConfirm"
+            cancel=".onStepTeamValueHelpClose"
+            items="{
+                path: '/Teams',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>teamCodeLabel}" /></Column>
+                <Column><Text text="{i18n>teamNameLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{teamCode}" />
+                    <Text text="{name}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
     </mvc:dependents>
 </mvc:View>

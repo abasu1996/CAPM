@@ -65,6 +65,33 @@ sap.ui.define([
             }
         },
 
+        formatTeamMemberSummary(vTeamMembers) {
+            const aMembers = this._normalizeExpandedCollection(vTeamMembers);
+            const aNames = [...new Set(aMembers
+                .map((oMember) => oMember.displayName || oMember.email)
+                .filter(Boolean))];
+
+            return aNames.join(", ");
+        },
+
+        _normalizeExpandedCollection(vCollection) {
+            if (Array.isArray(vCollection)) {
+                return vCollection;
+            }
+
+            if (Array.isArray(vCollection?.results)) {
+                return vCollection.results;
+            }
+
+            if (Array.isArray(vCollection?.__list)) {
+                return vCollection.__list
+                    .map((sPath) => this.getModel().getProperty(`/${sPath}`))
+                    .filter(Boolean);
+            }
+
+            return [];
+        },
+
         onDataRequested() {
             this._iPendingDataRequests = (this._iPendingDataRequests || 0) + 1;
             this._updateBusyState();
@@ -206,10 +233,56 @@ sap.ui.define([
             window.location.href = `mailto:${encodeURIComponent(sRecipient)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
         },
 
+        async onNotifyTaskTeamMembers(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext();
+            const sTaskId = oContext && oContext.getProperty("ID");
+
+            if (!sTaskId) {
+                MessageToast.show(this.getText("selectTaskMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                const oResolvedRecipients = await this.callAction("resolveTaskTeamNotificationRecipients", {
+                    taskId: sTaskId
+                });
+                const oValue = oResolvedRecipients.value || oResolvedRecipients;
+                const sRecipients = oValue.recipients || "";
+
+                if (!sRecipients) {
+                    MessageToast.show(this.getText("teamMembersEmailMissingMessage"));
+                    return;
+                }
+
+                if (oValue.delegatedCount) {
+                    MessageToast.show(this.getText("teamNotificationDelegatedMessage", [oValue.delegatedCount]));
+                }
+
+                const sTaskName = oContext.getProperty("taskName") || this.getText("taskFallbackName");
+                const sRequestTitle = oContext.getProperty("request/title") || oContext.getProperty("request/referenceNumber") || "";
+                const sSubject = this.getText("taskNotificationSubject", [sTaskName]);
+                const sBody = this.getText("taskNotificationBody", [
+                    sTaskName,
+                    sRequestTitle,
+                    window.location.href
+                ]);
+
+                window.location.href = `mailto:${encodeURIComponent(sRecipients)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
+            } catch (oError) {
+                MessageToast.show(oError.message || this.getText("teamMembersEmailMissingMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
         createEntry(sPath, oPayload) {
             return new Promise((resolve, reject) => {
                 this.getModel().create(sPath, oPayload, {
-                    success: resolve,
+                    success: (oData) => resolve(oData || oPayload),
                     error: reject
                 });
             });

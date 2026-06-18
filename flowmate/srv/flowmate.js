@@ -32,7 +32,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessRequests,
       ProcessTasks,
       MyAssignedTasks,
+      MyTeamTasks,
       RequestDetailTasks,
+      ProcessTaskTeamMembers,
       ProcessInvolvedParties,
       ProcessComments,
       ProcessAttachments,
@@ -43,6 +45,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessTypes,
       ProcessStatus,
       TaskStatus,
+      Teams,
+      TeamMembers,
       RequestDropDown,
       RequestFilterQueries,
       Users,
@@ -78,8 +82,23 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await this._filterByAssignedTasks(req, Users);
     });
 
+    this.before("READ", MyTeamTasks, async (req) => {
+      await this._filterByTeamTasks(req, Users, ProcessTaskTeamMembers);
+    });
+
     this.before("READ", RequestDetailTasks, async (req) => {
       await this._filterByVisibleRequests(req, Users, "request_ID");
+    });
+
+    const fnClearUnassignedTeamTaskProcessor = (data) => {
+      this._clearUnassignedTeamTaskProcessor(data);
+    };
+    this.after("READ", ProcessTasks, fnClearUnassignedTeamTaskProcessor);
+    this.after("READ", MyTeamTasks, fnClearUnassignedTeamTaskProcessor);
+    this.after("READ", RequestDetailTasks, fnClearUnassignedTeamTaskProcessor);
+
+    this.before("READ", ProcessTaskTeamMembers, async (req) => {
+      await this._filterByVisibleTaskMembers(req, Users, ProcessTaskTeamMembers, RequestDetailTasks);
     });
 
     this.before("READ", ProcessInvolvedParties, async (req) => {
@@ -167,11 +186,97 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       this.after(["CREATE", "UPDATE", "DELETE"], oCodeList, () => this._clearConfigCache());
     });
 
+    this.before(["CREATE", "UPDATE", "DELETE"], Teams, async (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain teams");
+      }
+
+      if (req.event === "DELETE") {
+        return;
+      }
+
+      const sTeamId = req.data.ID || req.params?.[0]?.ID;
+      const oExisting = req.event === "UPDATE" && sTeamId
+        ? await cds.tx(req).run(SELECT.one.from(Teams).where({ ID: sTeamId }))
+        : {};
+      const oTeam = { ...oExisting, ...req.data };
+
+      if (!oTeam.teamCode || !oTeam.name) {
+        return req.reject(400, "Team code and team name are required");
+      }
+
+      const oDuplicate = await cds.tx(req).run(
+        SELECT.one.from(Teams).where({ teamCode: oTeam.teamCode })
+      );
+
+      if (oDuplicate && oDuplicate.ID !== sTeamId) {
+        return req.reject(409, "A team already exists with the same team code");
+      }
+
+    });
+
+    this.before("CREATE", Teams, async (req) => {
+      req.data.referenceNumber = await this._nextReferenceNumber(req, Teams, "TEM");
+    });
+
+    this.before(["CREATE", "UPDATE", "DELETE"], TeamMembers, async (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain team members");
+      }
+    });
+
+    this.before("CREATE", TeamMembers, async (req) => {
+      if (!req.data.team_ID || !req.data.user_ID) {
+        return req.reject(400, "Select a team and a user");
+      }
+
+      const oTeam = await this._getTeam(req, req.data.team_ID, Teams);
+      const oUser = await this._getUser(req, req.data.user_ID, Users);
+
+      if (!oTeam) {
+        return req.reject(400, "Selected team was not found");
+      }
+
+      if (!oUser) {
+        return req.reject(400, "Selected user was not found");
+      }
+
+      const oExisting = await cds.tx(req).run(
+        SELECT.one.from(TeamMembers).where({
+          team_ID: req.data.team_ID,
+          user_ID: req.data.user_ID
+        })
+      );
+
+      if (oExisting) {
+        return req.reject(409, "This user is already maintained under the team");
+      }
+
+      req.data.referenceNumber = await this._nextReferenceNumber(req, TeamMembers, "TMM");
+      this._setTeamMemberSnapshot(req.data, oUser);
+    });
+
+    this.before("UPDATE", TeamMembers, async (req) => {
+      if (req.data.user_ID) {
+        const oUser = await this._getUser(req, req.data.user_ID, Users);
+
+        if (!oUser) {
+          return req.reject(400, "Selected user was not found");
+        }
+
+        this._setTeamMemberSnapshot(req.data, oUser);
+      }
+    });
+
     this.before("CREATE", ProcessStepConfig, async (req) => {
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessStepConfig, "STP");
     });
 
     this.before(["CREATE", "UPDATE"], ProcessStepConfig, async (req) => {
+      if (req.data.processorTeam_ID === "") {
+        req.data.processorTeam_ID = null;
+      }
+
       const sStepId = req.data.ID || req.params?.[0]?.ID;
       const oExisting = req.event === "UPDATE" && sStepId
         ? await cds.tx(req).run(SELECT.one.from(ProcessStepConfig).where({ ID: sStepId }))
@@ -191,6 +296,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (oDuplicate && oDuplicate.ID !== sStepId) {
         return req.reject(409, "A process step already exists for this process type and step number");
+      }
+
+      if (oStep.processorTeam_ID) {
+        const oTeam = await this._getTeam(req, oStep.processorTeam_ID, Teams);
+
+        if (!oTeam) {
+          return req.reject(400, "Selected processor team was not found");
+        }
+
+        req.data.processorTeamName = oTeam.name || oTeam.teamCode;
+      } else if (Object.prototype.hasOwnProperty.call(req.data, "processorTeam_ID")) {
+        req.data.processorTeamName = null;
       }
     });
 
@@ -225,6 +342,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.before("CREATE", ProcessRequests, async (req) => {
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessRequests, "REQ");
+      const oReservationUser = await this._currentReservationUser(req, Users);
 
       if (req.data.requesterUser_ID) {
         const oRequester = await this._getUser(req, req.data.requesterUser_ID, Users);
@@ -236,7 +354,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         req.data.requester = this._userDisplayName(oRequester);
         req.data.department ||= oRequester.department;
       } else {
-        const oCurrentUser = await this._findUserByPrincipal(req, req.user?.id, Users);
+        const oCurrentUser = oReservationUser.user;
 
         if (oCurrentUser) {
           req.data.requesterUser_ID = oCurrentUser.ID;
@@ -255,8 +373,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         this._setProcessorSnapshot(req.data, oProcessor);
       }
 
+      if (req.data.processorTeam_ID) {
+        const oTeam = await this._getTeam(req, req.data.processorTeam_ID, Teams);
+
+        if (!oTeam) {
+          return req.reject(400, "Selected processor team was not found");
+        }
+
+        this._setProcessorTeamSnapshot(req.data, oTeam);
+      }
+
       req.data.status_code ??= PROCESS_STATUS.DRAFT;
-      req.data.requester ??= req.user?.id || "anonymous";
+      req.data.requester ??= oReservationUser.displayName || req.user?.id || "anonymous";
       req.data.priority ??= "Medium";
       req.data.currentStep ??= 0;
     });
@@ -275,17 +403,25 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("UPDATE", ProcessRequests, async (req) => {
-      if (!req.data.processorUser_ID) {
-        return;
+      if (req.data.processorUser_ID) {
+        const oProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
+
+        if (!oProcessor) {
+          return req.reject(400, "Selected processor was not found");
+        }
+
+        this._setProcessorSnapshot(req.data, oProcessor);
       }
 
-      const oProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
+      if (req.data.processorTeam_ID) {
+        const oTeam = await this._getTeam(req, req.data.processorTeam_ID, Teams);
 
-      if (!oProcessor) {
-        return req.reject(400, "Selected processor was not found");
+        if (!oTeam) {
+          return req.reject(400, "Selected processor team was not found");
+        }
+
+        this._setProcessorTeamSnapshot(req.data, oTeam);
       }
-
-      this._setProcessorSnapshot(req.data, oProcessor);
     });
 
     this.before("CREATE", ProcessTasks, async (req) => {
@@ -314,7 +450,17 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         this._setProcessorSnapshot(req.data, oProcessor);
       }
 
-      if (!req.data.processorUser_ID && !req.data.assignedUser_ID && !req.data.processor && !req.data.assignedTo) {
+      if (req.data.processorTeam_ID) {
+        const oTeam = await this._getTeam(req, req.data.processorTeam_ID, Teams);
+
+        if (!oTeam) {
+          return req.reject(400, "Selected processor team was not found");
+        }
+
+        this._setTaskProcessorTeamSnapshot(req.data, oTeam);
+      }
+
+      if (!req.data.isTeamTask && !req.data.processorUser_ID && !req.data.assignedUser_ID && !req.data.processor && !req.data.assignedTo) {
         const oReservationUser = await this._currentReservationUser(req, Users);
         const oCurrentUser = oReservationUser.user;
 
@@ -326,6 +472,68 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           req.data.processorEmail = oReservationUser.email || null;
         }
       }
+    });
+
+    this.after("CREATE", ProcessTasks, async (task, req) => {
+      if (task.processorTeam_ID) {
+        await this._syncTaskTeamMembersFromTeam(req, task.ID, task.processorTeam_ID, ProcessTaskTeamMembers, TeamMembers);
+      }
+    });
+
+    this.before("CREATE", ProcessTaskTeamMembers, async (req) => {
+      if (!req.data.task_ID || !req.data.user_ID) {
+        return req.reject(400, "Select a task and a team member");
+      }
+
+      const oTask = await this._getTask(req, req.data.task_ID);
+      const oUser = await this._getUser(req, req.data.user_ID, Users);
+
+      if (!oTask) {
+        return req.reject(400, "Selected task was not found");
+      }
+
+      await this._rejectIfRequestLocked(req, oTask.request_ID);
+
+      if (oTask.processorUser_ID || oTask.processorEmail || (!oTask.isTeamTask && oTask.processor)) {
+        return req.reject(400, "Team members can only be added to unassigned team tasks");
+      }
+
+      if (!oUser) {
+        return req.reject(400, "Selected team member was not found");
+      }
+
+      const oExisting = await cds.tx(req).run(
+        SELECT.one.from(ProcessTaskTeamMembers).where({
+          task_ID: req.data.task_ID,
+          user_ID: req.data.user_ID
+        })
+      );
+
+      if (oExisting) {
+        return req.reject(409, "This user is already assigned as a team candidate for the task");
+      }
+
+      req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessTaskTeamMembers, "TMB");
+      req.data.displayName = this._userDisplayName(oUser);
+      req.data.email = this._userEmail(oUser);
+
+      await cds.tx(req).run(
+        UPDATE(ProcessTasks, req.data.task_ID).set({ isTeamTask: true })
+      );
+    });
+
+    this.before(["UPDATE", "DELETE"], ProcessTaskTeamMembers, async (req) => {
+      const sMemberId = this._requestIdFromReq(req);
+      const oMember = sMemberId
+        ? await cds.tx(req).run(SELECT.one.from(ProcessTaskTeamMembers).where({ ID: sMemberId }))
+        : null;
+
+      if (!oMember) {
+        return;
+      }
+
+      const oTask = await this._getTask(req, oMember.task_ID);
+      await this._rejectIfRequestLocked(req, oTask?.request_ID);
     });
 
     this.before("UPDATE", ProcessTasks, async (req) => {
@@ -932,6 +1140,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await cds.tx(req).run(
         UPDATE(ProcessRequests, requestId).set({
           processorUser_ID: processorUserId,
+          processorTeam_ID: null,
+          processorTeamName: null,
           processor: sProcessor,
           processorEmail: sProcessorEmail
         })
@@ -945,6 +1155,48 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         oldStatus: request.status_code,
         newStatus: request.status_code,
         remarks: `Request processor assigned: ${sProcessor}`
+      });
+
+      return true;
+    });
+
+    this.on("assignRequestTeam", async (req) => {
+      const { requestId, teamId } = req.data;
+      const request = await this._getRequest(req, requestId);
+
+      if (!request) {
+        return req.reject(404, `Process request ${requestId} was not found`);
+      }
+
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
+
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+
+      const oTeam = await this._getTeam(req, teamId, Teams);
+
+      if (!oTeam) {
+        return req.reject(400, "Select an active processor team");
+      }
+
+      const oPayload = {};
+      this._setProcessorTeamSnapshot(oPayload, oTeam);
+      oPayload.processorUser_ID = null;
+      oPayload.processorEmail = null;
+
+      await cds.tx(req).run(
+        UPDATE(ProcessRequests, requestId).set(oPayload)
+      );
+
+      await this._writeHistory(req, {
+        requestId,
+        stepNo: request.currentStep || 0,
+        action: "TEAM_ASSIGNED",
+        actor: req.user?.id,
+        oldStatus: request.status_code,
+        newStatus: request.status_code,
+        remarks: `Request team assigned: ${oTeam.name}`
       });
 
       return true;
@@ -979,9 +1231,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await cds.tx(req).run(
         UPDATE(ProcessTasks, taskId).set({
           processorUser_ID: processorUserId,
+          processorTeam_ID: null,
+          processorTeamName: null,
+          isTeamTask: false,
           processor: sProcessor,
           processorEmail: sProcessorEmail
         })
+      );
+      await cds.tx(req).run(
+        DELETE.from(ProcessTaskTeamMembers).where({ task_ID: taskId })
       );
 
       await this._writeHistory(req, {
@@ -995,6 +1253,122 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       });
 
       return true;
+    });
+
+    this.on("assignTaskTeam", async (req) => {
+      const { taskId, teamId } = req.data;
+      const task = await this._getTask(req, taskId);
+
+      if (!task) {
+        return req.reject(404, `Task ${taskId} was not found`);
+      }
+
+      await this._rejectIfRequestLocked(req, task.request_ID);
+      await this._rejectIfRequestReservedByAnotherUser(req, await this._getRequest(req, task.request_ID), Users);
+
+      const oTeam = await this._getTeam(req, teamId, Teams);
+
+      if (!oTeam) {
+        return req.reject(400, "Select an active task team");
+      }
+
+      const oPayload = {
+        isTeamTask: true,
+        assignedUser_ID: null,
+        processorUser_ID: null,
+        assignedTo: null,
+        processor: null,
+        processorEmail: null
+      };
+      this._setTaskProcessorTeamSnapshot(oPayload, oTeam);
+
+      await cds.tx(req).run(
+        UPDATE(ProcessTasks, taskId).set(oPayload)
+      );
+      await this._syncTaskTeamMembersFromTeam(req, taskId, teamId, ProcessTaskTeamMembers, TeamMembers);
+
+      await this._writeHistory(req, {
+        requestId: task.request_ID,
+        stepNo: task.stepNo,
+        action: "TASK_TEAM_ASSIGNED",
+        actor: req.user?.id,
+        oldStatus: task.status_code,
+        newStatus: task.status_code,
+        remarks: `Task team assigned: ${oTeam.name}`
+      });
+
+      return true;
+    });
+
+    this.on("assignTeamTaskToMe", async (req) => {
+      const { taskId } = req.data;
+      const task = await this._getTask(req, taskId);
+
+      if (!task) {
+        return req.reject(404, `Task ${taskId} was not found`);
+      }
+
+      const request = await this._getRequest(req, task.request_ID);
+
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      const oCurrentUser = oReservationUser.user;
+
+      if (!oCurrentUser) {
+        return req.reject(403, "Your logged-in user must exist in the user table before a team task can be assigned");
+      }
+
+      if (task.processorUser_ID || task.processorEmail || (!task.isTeamTask && task.processor)) {
+        if (this._isTaskAssignedToCurrentUser(task, oReservationUser)) {
+          return true;
+        }
+
+        return req.reject(409, "This team task is already assigned to another user");
+      }
+
+      const bVisibleTeamTask = await this._isTeamTaskVisibleForUser(req, taskId, oReservationUser, ProcessTaskTeamMembers);
+
+      if (!bVisibleTeamTask) {
+        return req.reject(403, "This team task is not available for your team membership");
+      }
+
+      await cds.tx(req).run(
+        UPDATE(ProcessTasks, taskId).set({
+          assignedUser_ID: oCurrentUser.ID,
+          processorUser_ID: oCurrentUser.ID,
+          assignedTo: this._userDisplayName(oCurrentUser),
+          processor: this._userDisplayName(oCurrentUser),
+          processorEmail: this._userEmail(oCurrentUser)
+        })
+      );
+
+      await this._writeHistory(req, {
+        requestId: task.request_ID,
+        stepNo: task.stepNo,
+        action: "TEAM_TASK_ASSIGNED",
+        actor: req.user?.id,
+        oldStatus: task.status_code,
+        newStatus: task.status_code,
+        remarks: `Team task assigned to ${this._userDisplayName(oCurrentUser)}`
+      });
+
+      return true;
+    });
+
+    this.on("getCurrentUserDetails", async (req) => {
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      const oUser = oReservationUser.user;
+
+      return {
+        ID: oUser?.ID || null,
+        displayName: oUser ? this._userDisplayName(oUser) : oReservationUser.displayName,
+        email: oUser ? this._userEmail(oUser) : oReservationUser.email,
+        userPrincipalName: oUser?.userPrincipalName || "",
+        department: oUser?.department || ""
+      };
     });
 
     this.on("resolveNotificationRecipient", async (req) => {
@@ -1027,6 +1401,50 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       return this._resolveDelegatedRecipient(req, oProcessor.email, Delegations);
+    });
+
+    this.on("resolveTaskTeamNotificationRecipients", async (req) => {
+      const task = await this._getTask(req, req.data.taskId);
+
+      if (!task) {
+        return req.reject(404, `Task ${req.data.taskId} was not found`);
+      }
+
+      const aMembers = await cds.tx(req).run(
+        SELECT.from(ProcessTaskTeamMembers).where({ task_ID: req.data.taskId })
+      );
+
+      const aEmails = [...new Set(aMembers
+        .map((oMember) => oMember.email)
+        .filter(Boolean))];
+
+      if (!aEmails.length) {
+        return req.reject(400, "Please maintain at least one team member email first.");
+      }
+
+      const aRecipients = [];
+      let iDelegatedCount = 0;
+
+      for (const sEmail of aEmails) {
+        const oResolved = await this._resolveDelegatedRecipient(req, sEmail, Delegations);
+        aRecipients.push(oResolved.recipient);
+
+        if (oResolved.delegated) {
+          iDelegatedCount += 1;
+        }
+      }
+
+      await cds.tx(req).run(
+        UPDATE(ProcessTaskTeamMembers)
+          .set({ notifiedAt: this._now() })
+          .where({ task_ID: req.data.taskId })
+      );
+
+      return {
+        recipients: [...new Set(aRecipients)].join(","),
+        recipientCount: aRecipients.length,
+        delegatedCount: iDelegatedCount
+      };
     });
 
     this.on("resolveInvolvedPartyNotificationRecipient", async (req) => {
@@ -1168,6 +1586,28 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return Number(oTaskCount?.count || oTaskCount?.COUNT || 0);
     });
 
+    this.on("getMyTeamTaskCount", async (req) => {
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      const qTeamTasks = this._teamTaskMembershipQuery(oReservationUser, ProcessTaskTeamMembers);
+
+      if (!qTeamTasks) {
+        return 0;
+      }
+
+      const oTaskCount = await cds.tx(req).run(
+        SELECT.one.from(ProcessTasks)
+          .columns("count(1) as count")
+          .where({ isTeamTask: true })
+          .where([
+            { ref: ["processorUser_ID"] }, "is", "null",
+            "and", { ref: ["processorEmail"] }, "is", "null",
+            "and", { ref: ["ID"] }, "in", qTeamTasks
+          ])
+      );
+
+      return Number(oTaskCount?.count || oTaskCount?.COUNT || 0);
+    });
+
     this.on("getApplicationCapabilities", (req) => ({
       isAdmin: this._isAdministrator(req),
       canMaintainUsers: this._isAdministrator(req),
@@ -1257,6 +1697,78 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     req.query.where({ xpr: aPredicates });
   }
 
+  async _filterByTeamTasks(req, Users, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers) {
+    const oReservationUser = await this._currentReservationUser(req, Users);
+    const qTeamTasks = this._teamTaskMembershipQuery(oReservationUser, ProcessTaskTeamMembers);
+
+    if (!qTeamTasks) {
+      req.query.where(this._alwaysFalsePredicate());
+      return;
+    }
+
+    req.query
+      .where({ isTeamTask: true })
+      .where([
+        { ref: ["processorUser_ID"] }, "is", "null",
+        "and", { ref: ["processorEmail"] }, "is", "null",
+        "and", { ref: ["ID"] }, "in", qTeamTasks
+      ]);
+  }
+
+  async _filterByVisibleTaskMembers(req, Users, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers) {
+    const qVisibleTasks = SELECT.from(this.entities.RequestDetailTasks).columns("ID");
+
+    await this._filterByVisibleRequests({ query: qVisibleTasks }, Users, "request_ID");
+
+    req.query.where([
+      { ref: ["task_ID"] },
+      "in",
+      qVisibleTasks
+    ]);
+
+    // Team-member row visibility follows the parent task/request visibility.
+    // The My Team Tasks queue is filtered separately by explicit user membership.
+  }
+
+  _teamTaskMembershipQuery(reservationUser, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers) {
+    const qTeamTasks = SELECT.from(ProcessTaskTeamMembers).columns("task_ID");
+    const aPredicates = this._teamTaskMembershipPredicates(reservationUser);
+
+    if (!aPredicates.length) {
+      return null;
+    }
+
+    qTeamTasks.where({ xpr: aPredicates });
+    return qTeamTasks;
+  }
+
+  async _isTeamTaskVisibleForUser(req, taskId, reservationUser, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers) {
+    const aPredicates = this._teamTaskMembershipPredicates(reservationUser);
+
+    if (!aPredicates.length) {
+      return false;
+    }
+
+    const oMember = await cds.tx(req).run(
+      SELECT.one.from(ProcessTaskTeamMembers)
+        .columns("ID")
+        .where({ task_ID: taskId })
+        .where({ xpr: aPredicates })
+    );
+
+    return Boolean(oMember);
+  }
+
+  _teamTaskMembershipPredicates(reservationUser) {
+    const aPredicates = [];
+
+    if (reservationUser.user?.ID) {
+      this._addStringEqualsPredicate(aPredicates, "user_ID", reservationUser.user.ID);
+    }
+
+    return aPredicates;
+  }
+
   _taskAssignmentPredicates(reservationUser) {
     const aPredicates = [];
 
@@ -1315,11 +1827,23 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (Array.isArray(request.tasks)) {
         request.tasks = request.tasks.filter((task) => this._isTaskVisibleForRequest(task, request, reservationUser));
+        this._clearUnassignedTeamTaskProcessor(request.tasks);
         return;
       }
 
       if (Array.isArray(request.tasks.results)) {
         request.tasks.results = request.tasks.results.filter((task) => this._isTaskVisibleForRequest(task, request, reservationUser));
+        this._clearUnassignedTeamTaskProcessor(request.tasks.results);
+      }
+    });
+  }
+
+  _clearUnassignedTeamTaskProcessor(data) {
+    const aTasks = Array.isArray(data) ? data : [data];
+
+    aTasks.filter(Boolean).forEach((task) => {
+      if (task.isTeamTask && !task.processorUser_ID && !task.processorEmail) {
+        task.processor = null;
       }
     });
   }
@@ -1457,6 +1981,44 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _getUser(req, userId, Users) {
     return cds.tx(req).run(SELECT.one.from(Users).where({ ID: userId, isActive: true }));
+  }
+
+  async _getTeam(req, teamId, Teams = this.entities.Teams) {
+    return cds.tx(req).run(SELECT.one.from(Teams).where({ ID: teamId, isActive: true }));
+  }
+
+  async _syncTaskTeamMembersFromTeam(req, taskId, teamId, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers, TeamMembers = this.entities.TeamMembers) {
+    const aTeamMembers = await cds.tx(req).run(
+      SELECT.from(TeamMembers).where({ team_ID: teamId, isActive: true })
+    );
+
+    if (!aTeamMembers.length) {
+      return;
+    }
+
+    for (const oMember of aTeamMembers) {
+      const oExisting = await cds.tx(req).run(
+        SELECT.one.from(ProcessTaskTeamMembers).where({
+          task_ID: taskId,
+          user_ID: oMember.user_ID
+        })
+      );
+
+      if (oExisting) {
+        continue;
+      }
+
+      await cds.tx(req).run(
+        INSERT.into(ProcessTaskTeamMembers).entries({
+          ID: cds.utils.uuid(),
+          referenceNumber: await this._nextReferenceNumber(req, ProcessTaskTeamMembers, "TMB"),
+          task_ID: taskId,
+          user_ID: oMember.user_ID,
+          displayName: oMember.displayName,
+          email: oMember.email
+        })
+      );
+    }
   }
 
   async _nextReferenceNumber(req, entity, prefix) {
@@ -1618,6 +2180,27 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   _setProcessorSnapshot(target, user) {
     target.processor = this._userDisplayName(user);
     target.processorEmail = this._userEmail(user);
+  }
+
+  _setProcessorTeamSnapshot(target, team) {
+    target.processorTeamName = team.name || team.teamCode;
+    target.processor = team.name || team.teamCode;
+    target.processorEmail = null;
+  }
+
+  _setTaskProcessorTeamSnapshot(target, team) {
+    target.processorTeamName = team.name || team.teamCode;
+    target.processor = null;
+    target.processorEmail = null;
+    target.processorUser_ID = null;
+    target.assignedUser_ID = null;
+    target.assignedTo = null;
+    target.isTeamTask = true;
+  }
+
+  _setTeamMemberSnapshot(target, user) {
+    target.displayName = this._userDisplayName(user);
+    target.email = this._userEmail(user);
   }
 
   _getConfigCacheTtlMs() {
@@ -2225,17 +2808,24 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     if (oExistingTask) {
       await this._ensureExistingTaskOwnership(req, oExistingTask, oTaskOwnership);
+      if (oTaskOwnership.processorTeam_ID) {
+        await this._syncTaskTeamMembersFromTeam(req, oExistingTask.ID, oTaskOwnership.processorTeam_ID);
+      }
       return;
     }
 
+    const sTaskId = cds.utils.uuid();
     const sReferenceNumber = await this._nextReferenceNumber(req, this.entities.ProcessTasks, "TSK");
 
     await cds.tx(req).run(
       INSERT.into(this.entities.ProcessTasks).entries({
+        ID: sTaskId,
         referenceNumber: sReferenceNumber,
         request_ID: requestId,
         assignedUser_ID: oTaskOwnership.assignedUser_ID,
         processorUser_ID: oTaskOwnership.processorUser_ID,
+        processorTeam_ID: oTaskOwnership.processorTeam_ID,
+        processorTeamName: oTaskOwnership.processorTeamName,
         processorEmail: oTaskOwnership.processorEmail,
         stepNo: step.stepNo,
         taskName: step.stepName,
@@ -2244,9 +2834,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         processor: oTaskOwnership.processor,
         role: step.role,
         isMandatory: true,
+        isTeamTask: Boolean(oTaskOwnership.processorTeam_ID),
         status_code: TASK_STATUS.OPEN
       })
     );
+
+    if (oTaskOwnership.processorTeam_ID) {
+      await this._syncTaskTeamMembersFromTeam(req, sTaskId, oTaskOwnership.processorTeam_ID);
+    }
   }
 
   _taskOwnershipForStep(request, step) {
@@ -2255,10 +2850,36 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const sProcessorName = request?.processor || null;
     const sProcessorEmail = request?.processorEmail || null;
 
+    if (step?.processorTeam_ID) {
+      return {
+        assignedUser_ID: null,
+        processorUser_ID: null,
+        processorTeam_ID: step.processorTeam_ID,
+        processorTeamName: step.processorTeamName || null,
+        assignedTo: step?.role || null,
+        processor: null,
+        processorEmail: null
+      };
+    }
+
+    if (request?.processorTeam_ID) {
+      return {
+        assignedUser_ID: null,
+        processorUser_ID: null,
+        processorTeam_ID: request.processorTeam_ID,
+        processorTeamName: request.processorTeamName || null,
+        assignedTo: step?.role || null,
+        processor: null,
+        processorEmail: null
+      };
+    }
+
     if (bRequesterStep && (request?.requesterUser_ID || sRequesterName)) {
       return {
         assignedUser_ID: request?.requesterUser_ID || null,
         processorUser_ID: null,
+        processorTeam_ID: null,
+        processorTeamName: null,
         assignedTo: sRequesterName || step?.role || null,
         processor: null,
         processorEmail: null
@@ -2269,6 +2890,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return {
         assignedUser_ID: null,
         processorUser_ID: request?.processorUser_ID || null,
+        processorTeam_ID: request?.processorTeam_ID || null,
+        processorTeamName: request?.processorTeamName || null,
         assignedTo: step?.role || null,
         processor: sProcessorName || null,
         processorEmail: sProcessorEmail
@@ -2278,6 +2901,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return {
       assignedUser_ID: request?.requesterUser_ID || null,
       processorUser_ID: null,
+      processorTeam_ID: null,
+      processorTeamName: null,
       assignedTo: sRequesterName || step?.role || null,
       processor: null,
       processorEmail: null
@@ -2285,7 +2910,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _ensureExistingTaskOwnership(req, task, ownership) {
-    if ((task.assignedUser_ID || task.processorUser_ID || task.processor) && task.processorEmail) {
+    if (task.assignedUser_ID || task.processorUser_ID || task.processorTeam_ID || task.processorEmail || task.processor) {
       return;
     }
 
@@ -2293,9 +2918,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       UPDATE(this.entities.ProcessTasks, task.ID).set({
         assignedUser_ID: ownership.assignedUser_ID,
         processorUser_ID: ownership.processorUser_ID,
+        processorTeam_ID: ownership.processorTeam_ID,
+        processorTeamName: ownership.processorTeamName,
         assignedTo: ownership.assignedTo,
         processor: ownership.processor,
-        processorEmail: ownership.processorEmail
+        processorEmail: ownership.processorEmail,
+        isTeamTask: Boolean(ownership.processorTeam_ID)
       })
     );
   }

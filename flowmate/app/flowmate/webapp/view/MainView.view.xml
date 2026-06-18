@@ -90,6 +90,18 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
+                        class="flowmateTile flowmateTileTeamTasks"
+                        header="{i18n>myTeamTasksTitle}"
+                        subheader="{i18n>myTeamTasksSubtitle}"
+                        state="{dashboard>/teamTasksState}"
+                        press=".onOpenTeamTasks">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://group"
+                                value="{dashboard>/teamTasksCount}" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
                         class="flowmateTile flowmateTileUnreserved"
                         header="{i18n>unreservedRequestsTitle}"
                         subheader="{i18n>unreservedRequestsSubtitle}"

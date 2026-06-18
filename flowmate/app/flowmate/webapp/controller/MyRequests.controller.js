@@ -38,8 +38,12 @@ sap.ui.define([
             this.getView().setModel(new JSONModel({
                 requestProcessorUser_ID: "",
                 requestProcessorName: "",
+                requestTeam_ID: "",
+                requestTeamName: "",
                 taskProcessorUser_ID: "",
-                taskProcessorName: ""
+                taskProcessorName: "",
+                taskTeam_ID: "",
+                taskTeamName: ""
             }), "processorEdit");
             this.getView().setModel(new JSONModel({
                 midFullScreen: false,
@@ -75,6 +79,8 @@ sap.ui.define([
             const oQuery = oEvent.getParameter("arguments")["?query"];
             const sRequestId = oQuery && oQuery.requestId;
 
+            this._iPendingDataRequests = 0;
+            this._updateBusyState();
             this._bShowUnreservedOnly = oQuery?.unreserved === "true";
             this._bShowReservedOnly = oQuery?.reserved === "true";
             this.getView().getModel("viewState").setProperty("/showUnreservedOnly", this._bShowUnreservedOnly);
@@ -499,6 +505,80 @@ sap.ui.define([
             this.byId("myRequestsProcessorValueHelpDialog").open();
         },
 
+        onRequestTeamValueHelpRequest() {
+            this._sTeamValueHelpTarget = "request";
+            this.byId("myRequestsTeamValueHelpDialog").open();
+        },
+
+        onRequestTaskTeamValueHelpRequest() {
+            this._sTeamValueHelpTarget = "task";
+            this.byId("myRequestsTeamValueHelpDialog").open();
+        },
+
+        onNewTaskTeamValueHelpRequest() {
+            this._sTeamValueHelpTarget = "newTask";
+            this.byId("myRequestsTeamValueHelpDialog").open();
+        },
+
+        onTeamValueHelpSearch(oEvent) {
+            const sQuery = oEvent.getParameter("value") || "";
+            const oBinding = oEvent.getSource().getBinding("items");
+
+            if (!sQuery) {
+                oBinding.filter([]);
+                return;
+            }
+
+            oBinding.filter([
+                new Filter({
+                    filters: [
+                        new Filter("teamCode", FilterOperator.Contains, sQuery),
+                        new Filter("name", FilterOperator.Contains, sQuery),
+                        new Filter("description", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                })
+            ]);
+        },
+
+        onTeamValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (!oContext) {
+                return;
+            }
+
+            const sTeamId = oContext.getProperty("ID");
+            const sTeamName = oContext.getProperty("name");
+
+            if (this._sTeamValueHelpTarget === "newTask") {
+                const oTaskModel = this.getView().getModel("newTask");
+                oTaskModel.setProperty("/processorTeam_ID", sTeamId);
+                oTaskModel.setProperty("/processorTeamName", sTeamName);
+                oTaskModel.setProperty("/processorUser_ID", "");
+                oTaskModel.setProperty("/processorName", "");
+                oTaskModel.setProperty("/processor", "");
+                oTaskModel.setProperty("/processorEmail", "");
+            } else {
+                const oProcessorModel = this.getView().getModel("processorEdit");
+                const sPrefix = this._sTeamValueHelpTarget === "request" ? "request" : "task";
+
+                oProcessorModel.setProperty(`/${sPrefix}Team_ID`, sTeamId);
+                oProcessorModel.setProperty(`/${sPrefix}TeamName`, sTeamName);
+
+                if (sPrefix === "task") {
+                    oProcessorModel.setProperty("/taskProcessorUser_ID", "");
+                    oProcessorModel.setProperty("/taskProcessorName", "");
+                }
+            }
+
+            this.onTeamValueHelpClose(oEvent);
+        },
+
+        onTeamValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
         onProcessorValueHelpSearch(oEvent) {
             this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
         },
@@ -520,12 +600,19 @@ sap.ui.define([
                 oTaskModel.setProperty("/processorName", sName);
                 oTaskModel.setProperty("/processor", sName);
                 oTaskModel.setProperty("/processorEmail", sEmail);
+                oTaskModel.setProperty("/processorTeam_ID", "");
+                oTaskModel.setProperty("/processorTeamName", "");
             } else {
                 const oProcessorModel = this.getView().getModel("processorEdit");
                 const sPrefix = this._sProcessorValueHelpTarget === "request" ? "request" : "task";
 
                 oProcessorModel.setProperty(`/${sPrefix}ProcessorUser_ID`, sId);
                 oProcessorModel.setProperty(`/${sPrefix}ProcessorName`, sName);
+
+                if (sPrefix === "task") {
+                    oProcessorModel.setProperty("/taskTeam_ID", "");
+                    oProcessorModel.setProperty("/taskTeamName", "");
+                }
             }
 
             this.onProcessorValueHelpClose(oEvent);
@@ -561,6 +648,31 @@ sap.ui.define([
             }
         },
 
+        async onSaveRequestTeam() {
+            const sTeamId = this.getView().getModel("processorEdit").getProperty("/requestTeam_ID");
+
+            if (!this._sSelectedRequestId || !sTeamId) {
+                MessageToast.show(this.getText("selectTeamMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("assignRequestTeam", {
+                    requestId: this._sSelectedRequestId,
+                    teamId: sTeamId
+                });
+                MessageToast.show(this.getText("requestTeamUpdatedMessage"));
+                this._refreshRequestHeader();
+                this._refreshHistorySection();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("teamUpdateErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
         async onSaveRequestTaskProcessor() {
             const sProcessorUserId = this.getView().getModel("processorEdit").getProperty("/taskProcessorUser_ID");
 
@@ -582,6 +694,32 @@ sap.ui.define([
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {
                 MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onSaveRequestTaskTeam() {
+            const sTeamId = this.getView().getModel("processorEdit").getProperty("/taskTeam_ID");
+
+            if (!this._sSelectedTaskId || !sTeamId) {
+                MessageToast.show(this.getText("selectTeamMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("assignTaskTeam", {
+                    taskId: this._sSelectedTaskId,
+                    teamId: sTeamId
+                });
+                MessageToast.show(this.getText("taskTeamUpdatedMessage"));
+                this._refreshTaskSection();
+                this._refreshHistorySection();
+                this.byId("requestTaskObjectPage").getElementBinding().refresh();
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("teamUpdateErrorMessage"));
             } finally {
                 this.hideBusy();
             }
@@ -755,12 +893,14 @@ sap.ui.define([
                     stepNo: iStepNo,
                     taskName: oTask.taskName,
                     processorUser_ID: oTask.processorUser_ID || undefined,
+                    processorTeam_ID: oTask.processorTeam_ID || undefined,
                     processor: oTask.processor,
                     processorEmail: oTask.processorEmail,
                     role: oTask.role,
                     isMandatory: Boolean(oTask.isMandatory),
                     status_code: "OPEN"
                 });
+
                 this.byId("addTaskDialog").close();
                 MessageToast.show(this.getText("taskCreatedMessage"));
                 this._refreshAfterTaskChange(iStepNo);
@@ -1420,6 +1560,14 @@ sap.ui.define([
                             "/requestProcessorName",
                             oRequest?.processor || ""
                         );
+                        this.getView().getModel("processorEdit").setProperty(
+                            "/requestTeam_ID",
+                            oRequest?.processorTeam_ID || ""
+                        );
+                        this.getView().getModel("processorEdit").setProperty(
+                            "/requestTeamName",
+                            oRequest?.processorTeamName || ""
+                        );
                     }
                 }
             });
@@ -1526,6 +1674,14 @@ sap.ui.define([
                         this.getView().getModel("processorEdit").setProperty(
                             "/taskProcessorName",
                             this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("processor") || ""
+                        );
+                        this.getView().getModel("processorEdit").setProperty(
+                            "/taskTeam_ID",
+                            this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("processorTeam_ID") || ""
+                        );
+                        this.getView().getModel("processorEdit").setProperty(
+                            "/taskTeamName",
+                            this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("processorTeamName") || ""
                         );
                         this._loadTaskStepOptions("requestTaskObjectPage");
                     }
@@ -1708,6 +1864,8 @@ sap.ui.define([
                 processorName: "",
                 processor: "",
                 processorEmail: "",
+                processorTeam_ID: "",
+                processorTeamName: "",
                 role: "",
                 isMandatory: false
             };
@@ -1779,8 +1937,7 @@ sap.ui.define([
                     filters: [
                         new Filter("displayName", FilterOperator.Contains, sQuery),
                         new Filter("email", FilterOperator.Contains, sQuery),
-                        new Filter("userPrincipalName", FilterOperator.Contains, sQuery),
-                        new Filter("department", FilterOperator.Contains, sQuery)
+                        new Filter("userPrincipalName", FilterOperator.Contains, sQuery)
                     ],
                     and: false
                 })

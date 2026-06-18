@@ -12,7 +12,9 @@ sap.ui.define([
                 unreservedRequestsCount: 0,
                 unreservedRequestsState: "Loading",
                 tasksCount: 0,
-                tasksState: "Loading"
+                tasksState: "Loading",
+                teamTasksCount: 0,
+                teamTasksState: "Loading"
             }), "dashboard");
             this.getRouter().getRoute("RouteDashboard").attachPatternMatched(this.onRouteMatched, this);
         },
@@ -42,6 +44,14 @@ sap.ui.define([
             this.navTo("RouteMyTasks");
         },
 
+        onOpenTeamTasks() {
+            this.navTo("RouteMyTasks", {
+                "?query": {
+                    team: "true"
+                }
+            });
+        },
+
         onCreateRequest() {
             this.navTo("RouteRequestCreate");
         },
@@ -60,28 +70,37 @@ sap.ui.define([
             oDashboardModel.setProperty("/reservedRequestsState", "Loading");
             oDashboardModel.setProperty("/unreservedRequestsState", "Loading");
             oDashboardModel.setProperty("/tasksState", "Loading");
+            oDashboardModel.setProperty("/teamTasksState", "Loading");
 
-            Promise.allSettled([
-                this._readReservationCounts(),
-                this._readMyTaskCount()
-            ]).then(([oReservationResult, oTasksResult]) => {
-                if (oReservationResult.status === "fulfilled") {
-                    oDashboardModel.setProperty("/reservedRequestsCount", oReservationResult.value.reservedRequests);
-                    oDashboardModel.setProperty("/unreservedRequestsCount", oReservationResult.value.unreservedRequests);
+            this._readReservationCounts()
+                .then((oCounts) => {
+                    oDashboardModel.setProperty("/reservedRequestsCount", oCounts.reservedRequests);
+                    oDashboardModel.setProperty("/unreservedRequestsCount", oCounts.unreservedRequests);
                     oDashboardModel.setProperty("/reservedRequestsState", "Loaded");
                     oDashboardModel.setProperty("/unreservedRequestsState", "Loaded");
-                } else {
+                })
+                .catch(() => {
                     oDashboardModel.setProperty("/reservedRequestsState", "Failed");
                     oDashboardModel.setProperty("/unreservedRequestsState", "Failed");
-                }
+                });
 
-                if (oTasksResult.status === "fulfilled") {
-                    oDashboardModel.setProperty("/tasksCount", oTasksResult.value);
+            this._readMyTaskCount()
+                .then((iCount) => {
+                    oDashboardModel.setProperty("/tasksCount", iCount);
                     oDashboardModel.setProperty("/tasksState", "Loaded");
-                } else {
+                })
+                .catch(() => {
                     oDashboardModel.setProperty("/tasksState", "Failed");
-                }
-            });
+                });
+
+            this._readMyTeamTaskCount()
+                .then((iCount) => {
+                    oDashboardModel.setProperty("/teamTasksCount", iCount);
+                    oDashboardModel.setProperty("/teamTasksState", "Loaded");
+                })
+                .catch(() => {
+                    oDashboardModel.setProperty("/teamTasksState", "Failed");
+                });
         },
 
         _readCount(sPath, sFilter) {
@@ -97,33 +116,45 @@ sap.ui.define([
         },
 
         _readReservationCounts() {
-            return fetch("/odata/v4/flowmate/getRequestReservationCounts()", {
-                credentials: "same-origin",
-                headers: {
-                    "Accept": "application/json"
-                }
-            }).then((oResponse) => {
-                if (!oResponse.ok) {
-                    throw new Error("Reservation counts could not be loaded");
-                }
-
-                return oResponse.json();
-            });
+            return this._fetchJsonWithTimeout(
+                "/odata/v4/flowmate/getRequestReservationCounts()",
+                "Reservation counts could not be loaded"
+            );
         },
 
         _readMyTaskCount() {
-            return fetch("/odata/v4/flowmate/getMyTaskCount()", {
+            return this._fetchJsonWithTimeout(
+                "/odata/v4/flowmate/getMyTaskCount()",
+                "Task count could not be loaded"
+            ).then((vResult) => Number(vResult?.value ?? vResult ?? 0));
+        },
+
+        _readMyTeamTaskCount() {
+            return this._fetchJsonWithTimeout(
+                "/odata/v4/flowmate/getMyTeamTaskCount()",
+                "Team task count could not be loaded"
+            ).then((vResult) => Number(vResult?.value ?? vResult ?? 0));
+        },
+
+        _fetchJsonWithTimeout(sUrl, sErrorMessage) {
+            const oAbortController = new AbortController();
+            const iTimeout = setTimeout(() => oAbortController.abort(), 15000);
+
+            return fetch(sUrl, {
                 credentials: "same-origin",
                 headers: {
                     "Accept": "application/json"
-                }
+                },
+                signal: oAbortController.signal
             }).then((oResponse) => {
                 if (!oResponse.ok) {
-                    throw new Error("Task count could not be loaded");
+                    throw new Error(sErrorMessage);
                 }
 
                 return oResponse.json();
-            }).then((vResult) => Number(vResult?.value ?? vResult ?? 0));
+            }).finally(() => {
+                clearTimeout(iTimeout);
+            });
         }
     });
 });

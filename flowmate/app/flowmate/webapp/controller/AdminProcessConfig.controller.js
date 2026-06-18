@@ -46,6 +46,7 @@ sap.ui.define([
                         new Filter("referenceNumber", FilterOperator.Contains, sQuery),
                         new Filter("processType_code", FilterOperator.Contains, sQuery),
                         new Filter("stepName", FilterOperator.Contains, sQuery),
+                        new Filter("processorTeamName", FilterOperator.Contains, sQuery),
                         new Filter("role", FilterOperator.Contains, sQuery)
                     ],
                     and: false
@@ -218,6 +219,8 @@ sap.ui.define([
                 stepNo: Number(oEntry.stepNo),
                 stepName: oEntry.stepName,
                 activityDescription: oEntry.activityDescription,
+                processorTeam_ID: oEntry.processorTeam_ID || null,
+                processorTeamName: oEntry.processorTeamName || null,
                 role: oEntry.role,
                 slaDays: this._optionalNumber(oEntry.slaDays)
             };
@@ -269,6 +272,54 @@ sap.ui.define([
             } finally {
                 this.hideBusy();
             }
+        },
+
+        onStepTeamValueHelpRequest() {
+            this.byId("processStepTeamValueHelpDialog").open();
+        },
+
+        onStepTeamValueHelpSearch(oEvent) {
+            const sQuery = oEvent.getParameter("value") || "";
+            const oBinding = oEvent.getSource().getBinding("items");
+
+            if (!sQuery) {
+                oBinding.filter([]);
+                return;
+            }
+
+            oBinding.filter([
+                new Filter({
+                    filters: [
+                        new Filter("teamCode", FilterOperator.Contains, sQuery),
+                        new Filter("name", FilterOperator.Contains, sQuery),
+                        new Filter("description", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                })
+            ]);
+        },
+
+        onStepTeamValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (!oContext) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("stepEdit");
+            oModel.setProperty("/processorTeam_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/processorTeamName", oContext.getProperty("name"));
+            this.onStepTeamValueHelpClose(oEvent);
+        },
+
+        onStepTeamValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
+        onClearStepProcessorTeam() {
+            const oModel = this.getView().getModel("stepEdit");
+            oModel.setProperty("/processorTeam_ID", "");
+            oModel.setProperty("/processorTeamName", "");
         },
 
         onAddSubType() {
@@ -355,6 +406,8 @@ sap.ui.define([
                 stepNo: "",
                 stepName: "",
                 activityDescription: "",
+                processorTeam_ID: "",
+                processorTeamName: "",
                 role: "",
                 slaDays: ""
             };

@@ -172,17 +172,14 @@
                             <Label text="{i18n>requesterLabel}" />
                             <Input
                                 value="{create>/requesterName}"
-                                placeholder="{i18n>chooseUserPlaceholder}"
-                                showValueHelp="true"
-                                valueHelpOnly="true"
-                                valueHelpRequest=".onRequesterValueHelpRequest" />
-                            <Label text="{i18n>processorLabel}" />
+                                editable="false" />
+                            <Label text="{i18n>processorTeamLabel}" />
                             <Input
-                                value="{create>/processorName}"
-                                placeholder="{i18n>selectProcessorPlaceholder}"
+                                value="{create>/processorTeamName}"
+                                placeholder="{i18n>selectTeamPlaceholder}"
                                 showValueHelp="true"
                                 valueHelpOnly="true"
-                                valueHelpRequest=".onProcessorValueHelpRequest" />
+                                valueHelpRequest=".onCreateTeamValueHelpRequest" />
                         </form:SimpleForm>
                     </content>
                 </Panel>
@@ -352,35 +349,6 @@
             </ColumnListItem>
         </TableSelectDialog>
         <TableSelectDialog
-            id="requesterValueHelpDialog"
-            title="{i18n>selectRequesterTitle}"
-            noDataText="{i18n>noUsersFoundText}"
-            rememberSelections="false"
-            search=".onRequesterValueHelpSearch"
-            confirm=".onRequesterValueHelpConfirm"
-            cancel=".onRequesterValueHelpClose"
-            items="{
-                path: '/Users',
-                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
-                events: {
-                    dataRequested: '.onDataRequested',
-                    dataReceived: '.onDataReceived'
-                }
-            }">
-            <columns>
-                <Column><Text text="{i18n>userNameLabel}" /></Column>
-                <Column><Text text="{i18n>emailLabel}" /></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
-            </columns>
-            <ColumnListItem type="Active">
-                <cells>
-                    <Text text="{displayName}" />
-                    <Text text="{email}" />
-                    <Text text="{department}" />
-                </cells>
-            </ColumnListItem>
-        </TableSelectDialog>
-        <TableSelectDialog
             id="subProcessTypeValueHelpDialog"
             title="{i18n>subProcessTypeLabel}"
             noDataText="{i18n>noSubProcessTypesFoundText}"
@@ -411,15 +379,15 @@
             </ColumnListItem>
         </TableSelectDialog>
         <TableSelectDialog
-            id="requestCreateProcessorValueHelpDialog"
-            title="{i18n>selectProcessorTitle}"
-            noDataText="{i18n>noUsersFoundText}"
+            id="requestCreateTeamValueHelpDialog"
+            title="{i18n>selectTeamTitle}"
+            noDataText="{i18n>noTeamsFoundText}"
             rememberSelections="false"
-            search=".onProcessorValueHelpSearch"
-            confirm=".onProcessorValueHelpConfirm"
-            cancel=".onProcessorValueHelpClose"
+            search=".onCreateTeamValueHelpSearch"
+            confirm=".onCreateTeamValueHelpConfirm"
+            cancel=".onCreateTeamValueHelpClose"
             items="{
-                path: '/Users',
+                path: '/Teams',
                 filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
                 events: {
                     dataRequested: '.onDataRequested',
@@ -427,15 +395,13 @@
                 }
             }">
             <columns>
-                <Column><Text text="{i18n>userNameLabel}" /></Column>
-                <Column><Text text="{i18n>emailLabel}" /></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+                <Column><Text text="{i18n>teamCodeLabel}" /></Column>
+                <Column><Text text="{i18n>teamNameLabel}" /></Column>
             </columns>
             <ColumnListItem type="Active">
                 <cells>
-                    <Text text="{displayName}" />
-                    <Text text="{email}" />
-                    <Text text="{department}" />
+                    <Text text="{teamCode}" />
+                    <Text text="{name}" />
                 </cells>
             </ColumnListItem>
         </TableSelectDialog>

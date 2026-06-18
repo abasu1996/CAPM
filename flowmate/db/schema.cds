@@ -53,6 +53,25 @@ entity Users : cuid, managed {
     isActive          : Boolean default true;
 }
 
+entity Teams : cuid, managed {
+    referenceNumber : String(30);
+    teamCode        : String(30);
+    name            : String(150);
+    description     : String(500);
+    isActive        : Boolean default true;
+    members         : Composition of many TeamMembers
+                      on members.team = $self;
+}
+
+entity TeamMembers : cuid, managed {
+    referenceNumber : String(30);
+    team            : Association to Teams;
+    user            : Association to Users;
+    displayName     : String(150);
+    email           : String(255);
+    isActive        : Boolean default true;
+}
+
 entity Delegations : cuid, managed {
     referenceNumber      : String(30);
     delegatorUser        : Association to Users;
@@ -72,6 +91,7 @@ entity ProcessRequests : cuid, managed {
     subProcessType : Association to ProcessSubTypes;
     requesterUser : Association to Users;
     processorUser : Association to Users;
+    processorTeam : Association to Teams;
     reservedByUser : Association to Users;
     predecessor : Association to ProcessRequests;
     successors  : Association to many ProcessRequests
@@ -81,6 +101,7 @@ entity ProcessRequests : cuid, managed {
     requester   : String(100);
     processor   : String(255);
     processorEmail : String(255);
+    processorTeamName : String(150);
     reservedBy  : String(255);
     reservedAt  : DateTime;
     department  : String(100);
@@ -108,17 +129,31 @@ entity ProcessTasks : cuid, managed {
     request     : Association to ProcessRequests;
     assignedUser : Association to Users;
     processorUser : Association to Users;
+    processorTeam : Association to Teams;
     stepNo      : Integer;
     taskName    : String(100);
     assignedTo  : String(100);
     processor   : String(255);
     processorEmail : String(255);
+    processorTeamName : String(150);
     role        : String(100);
     isMandatory : Boolean default false;
+    isTeamTask  : Boolean default false;
     status      : Association to TaskStatus;
     decision    : String(30);
     remarks     : LargeString;
     completedAt : DateTime;
+    teamMembers : Composition of many ProcessTaskTeamMembers
+                    on teamMembers.task = $self;
+}
+
+entity ProcessTaskTeamMembers : cuid, managed {
+    referenceNumber : String(30);
+    task            : Association to ProcessTasks;
+    user            : Association to Users;
+    displayName     : String(150);
+    email           : String(255);
+    notifiedAt      : DateTime;
 }
 
 entity ProcessInvolvedParties : cuid, managed {
@@ -194,6 +229,8 @@ entity ProcessHistory : cuid, managed {
 entity ProcessStepConfig : cuid, managed {
     referenceNumber : String(30);
     processType   : Association to ProcessTypes;
+    processorTeam : Association to Teams;
+    processorTeamName : String(150);
     stepNo        : Integer;
     stepName      : String(100);
     activityDescription : String(500);

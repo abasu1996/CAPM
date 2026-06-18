@@ -18,7 +18,7 @@
                 <f:title>
                     <f:DynamicPageTitle>
                         <f:heading>
-                            <Title text="{i18n>myTasksTitle}" />
+                            <Title text="{taskView>/title}" />
                         </f:heading>
                         <f:actions>
                             <Button
@@ -53,7 +53,7 @@
                 <f:content>
                     <VBox class="flowmateContent flowmateSurface">
                         <OverflowToolbar class="flowmateToolbar">
-                            <Title text="{i18n>tasksTableHeader}" />
+                            <Title text="{taskView>/tableHeader}" />
                             <ToolbarSpacer />
                             <SearchField
                                 width="18rem"
@@ -63,6 +63,7 @@
                                 icon="sap-icon://delete"
                                 text="{i18n>deleteSelectedButton}"
                                 type="Reject"
+                                visible="{= !${taskView>/teamMode} }"
                                 press=".onDeleteSelectedTasks" />
                         </OverflowToolbar>
                         <Table
@@ -73,17 +74,7 @@
                             mode="MultiSelect"
                             growing="true"
                             growingScrollToLoad="true"
-                            itemPress=".onTaskPress"
-                            items="{
-                                path: '/MyAssignedTasks',
-                                parameters: {
-                                    expand: 'request'
-                                },
-                                events: {
-                                    dataRequested: '.onDataRequested',
-                                    dataReceived: '.onDataReceived'
-                                }
-                            }">
+                            itemPress=".onTaskPress">
                             <columns>
                                 <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                                 <Column><Text text="{i18n>taskNameLabel}" /></Column>
@@ -125,11 +116,19 @@
                                                 icon="sap-icon://email"
                                                 type="Transparent"
                                                 tooltip="{i18n>notifyProcessorButton}"
+                                                visible="{= !${taskView>/teamMode} }"
                                                 press=".onNotifyProcessor" />
+                                            <Button
+                                                icon="sap-icon://employee-approvals"
+                                                type="Transparent"
+                                                tooltip="{i18n>assignTeamTaskToMeButton}"
+                                                visible="{taskView>/teamMode}"
+                                                press=".onAssignTeamTaskToMe" />
                                             <Button
                                                 icon="sap-icon://delete"
                                                 type="Transparent"
                                                 tooltip="{i18n>deleteTaskButton}"
+                                                visible="{= !${taskView>/teamMode} }"
                                                 press=".onDeleteTask" />
                                         </HBox>
                                     </cells>
@@ -162,19 +161,29 @@
                             <Button
                                 icon="sap-icon://email"
                                 text="{i18n>notifyProcessorButton}"
+                                visible="{= !${taskView>/teamMode} }"
                                 press=".onNotifyProcessor" />
+                            <Button
+                                icon="sap-icon://employee-approvals"
+                                text="{i18n>assignTeamTaskToMeButton}"
+                                type="Emphasized"
+                                visible="{taskView>/teamMode}"
+                                press=".onAssignTeamTaskToMe" />
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
+                                visible="{= !${taskView>/teamMode} }"
                                 enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                 press=".onApprove" />
                             <Button
                                 text="{i18n>sendBackButton}"
+                                visible="{= !${taskView>/teamMode} }"
                                 enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                 press=".onSendBack" />
                             <Button
                                 text="{i18n>rejectButton}"
                                 type="Reject"
+                                visible="{= !${taskView>/teamMode} }"
                                 enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                 press=".onReject" />
                             <Button
@@ -328,13 +337,11 @@
             <columns>
                 <Column><Text text="{i18n>userNameLabel}" /></Column>
                 <Column><Text text="{i18n>emailLabel}" /></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
             </columns>
             <ColumnListItem type="Active">
                 <cells>
                     <Text text="{displayName}" />
                     <Text text="{email}" />
-                    <Text text="{department}" />
                 </cells>
             </ColumnListItem>
         </TableSelectDialog>

@@ -14,6 +14,15 @@ service FlowmateService {
     entity ProcessStatus as projection on fldb.ProcessStatus;
     entity TaskStatus as projection on fldb.TaskStatus;
     entity Users as projection on fldb.Users;
+    entity Teams as projection on fldb.Teams {
+        *,
+        members : redirected to TeamMembers
+    };
+    entity TeamMembers as projection on fldb.TeamMembers {
+        *,
+        team : redirected to Teams,
+        user : redirected to Users
+    };
     entity Delegations as projection on fldb.Delegations;
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
@@ -21,17 +30,29 @@ service FlowmateService {
         attachments : redirected to ProcessAttachments,
         emailMessages : redirected to ProcessEmailMessages
     };
+    @cds.redirection.target
     entity ProcessTasks as projection on fldb.ProcessTasks {
         *,
-        request : redirected to ProcessRequests
+        request : redirected to ProcessRequests,
+        teamMembers : redirected to ProcessTaskTeamMembers
     };
     entity MyAssignedTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests
     };
+    entity MyTeamTasks as projection on fldb.ProcessTasks {
+        *,
+        request : redirected to ProcessRequests,
+        teamMembers : redirected to ProcessTaskTeamMembers
+    };
     entity RequestDetailTasks as projection on fldb.ProcessTasks {
         *,
-        request : redirected to ProcessRequests
+        request : redirected to ProcessRequests,
+        teamMembers : redirected to ProcessTaskTeamMembers
+    };
+    entity ProcessTaskTeamMembers as projection on fldb.ProcessTaskTeamMembers {
+        *,
+        task : redirected to ProcessTasks
     };
     entity ProcessInvolvedParties as projection on fldb.ProcessInvolvedParties;
     entity ProcessComments as projection on fldb.ProcessComments;
@@ -50,7 +71,10 @@ service FlowmateService {
         attachment   : redirected to ProcessAttachments
     };
     entity ProcessHistory as projection on fldb.ProcessHistory;
-    entity ProcessStepConfig as projection on fldb.ProcessStepConfig;
+    entity ProcessStepConfig as projection on fldb.ProcessStepConfig {
+        *,
+        processorTeam : redirected to Teams
+    };
     entity RequestFilterQueries as projection on fldb.RequestFilterQueries;
 
     action submitRequest(requestId: UUID) returns Boolean;
@@ -90,7 +114,17 @@ service FlowmateService {
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;
     action assignRequestProcessor(requestId: UUID, processorUserId: UUID) returns Boolean;
+    action assignRequestTeam(requestId: UUID, teamId: UUID) returns Boolean;
     action assignTaskProcessor(taskId: UUID, processorUserId: UUID) returns Boolean;
+    action assignTaskTeam(taskId: UUID, teamId: UUID) returns Boolean;
+    action assignTeamTaskToMe(taskId: UUID) returns Boolean;
+    action getCurrentUserDetails() returns {
+        ID                : UUID;
+        displayName       : String(150);
+        email             : String(255);
+        userPrincipalName : String(255);
+        department        : String(100);
+    };
     action resolveNotificationRecipient(userId: String(100)) returns {
         originalRecipient : String(100);
         recipient         : String(100);
@@ -102,6 +136,11 @@ service FlowmateService {
         recipient         : String(255);
         delegated         : Boolean;
         delegationId      : UUID;
+    };
+    action resolveTaskTeamNotificationRecipients(taskId: UUID) returns {
+        recipients      : LargeString;
+        recipientCount  : Integer;
+        delegatedCount  : Integer;
     };
     action resolveInvolvedPartyNotificationRecipient(partyId: UUID) returns {
         originalRecipient : String(255);
@@ -117,6 +156,7 @@ service FlowmateService {
         reservedRequests   : Integer;
     };
     function getMyTaskCount() returns Integer;
+    function getMyTeamTaskCount() returns Integer;
     function getApplicationCapabilities() returns {
         isAdmin             : Boolean;
         canMaintainUsers    : Boolean;

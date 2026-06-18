@@ -27,12 +27,28 @@ sap.ui.define([
                 processorUser_ID: "",
                 processorName: ""
             }), "processorEdit");
+            this.getView().setModel(new JSONModel({
+                teamMode: false,
+                title: this.getText("myTasksTitle"),
+                tableHeader: this.getText("tasksTableHeader")
+            }), "taskView");
             this.getRouter().getRoute("RouteMyTasks").attachPatternMatched(this.onRouteMatched, this);
         },
 
         onRouteMatched(oEvent) {
             const oQuery = oEvent.getParameter("arguments")["?query"];
             const sTaskId = oQuery && oQuery.taskId;
+            const bTeamMode = oQuery?.team === "true";
+
+            this._iPendingDataRequests = 0;
+            this._updateBusyState();
+            this._bTeamMode = bTeamMode;
+            this.getView().getModel("taskView").setData({
+                teamMode: bTeamMode,
+                title: this.getText(bTeamMode ? "myTeamTasksTitle" : "myTasksTitle"),
+                tableHeader: this.getText(bTeamMode ? "myTeamTasksTableHeader" : "tasksTableHeader")
+            });
+            this._bindTasksTable();
 
             this.setOneColumnLayout();
 
@@ -124,6 +140,37 @@ sap.ui.define([
         onRefreshTaskDetail() {
             this.byId("taskObjectPage").getElementBinding()?.refresh();
             this.byId("tasksTable").getBinding("items")?.refresh();
+        },
+
+        async onAssignTeamTaskToMe(oEvent) {
+            oEvent.cancelBubble?.();
+
+            const oContext = oEvent.getSource().getBindingContext();
+            const sTaskId = oContext?.getProperty("ID");
+
+            if (!sTaskId) {
+                MessageToast.show(this.getText("selectTaskMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("assignTeamTaskToMe", {
+                    taskId: sTaskId
+                });
+                MessageToast.show(this.getText("teamTaskAssignedToMeMessage"));
+                this.byId("tasksTable").getBinding("items")?.refresh();
+
+                if (this._sSelectedTaskId === sTaskId) {
+                    this._sSelectedTaskId = null;
+                    this._setTasksLayout(fLibrary.LayoutType.OneColumn);
+                }
+            } catch (oError) {
+                MessageBox.error(oError.message || this.getText("teamTaskAssignErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
         },
 
         async onSaveTaskStatus() {
@@ -290,7 +337,7 @@ sap.ui.define([
         _showTaskDetailById(sTaskId) {
             this._sSelectedTaskId = sTaskId;
             this.byId("taskObjectPage").bindElement({
-                path: `/MyAssignedTasks(guid'${sTaskId}')`,
+                path: `${this._taskCollectionPath()}(guid'${sTaskId}')`,
                 parameters: {
                     expand: "request"
                 },
@@ -321,6 +368,38 @@ sap.ui.define([
             this.byId("tasksFlexibleColumnLayout").setLayout(sLayout);
         },
 
+        _taskCollectionPath() {
+            return this._bTeamMode ? "/MyTeamTasks" : "/MyAssignedTasks";
+        },
+
+        _bindTasksTable() {
+            const oTable = this.byId("tasksTable");
+            const oBindingInfo = oTable?.getBindingInfo("items");
+            const oTemplate = oBindingInfo?.template || this._oTasksTableTemplate || oTable?.getItems()[0];
+
+            if (!oTable || !oTemplate) {
+                return;
+            }
+
+            if (!this._oTasksTableTemplate) {
+                this._oTasksTableTemplate = oTemplate;
+                oTable.removeAllItems();
+            }
+
+            oTable.bindItems({
+                path: this._taskCollectionPath(),
+                parameters: {
+                    expand: "request"
+                },
+                template: this._oTasksTableTemplate,
+                templateShareable: true,
+                events: {
+                    dataRequested: this.onDataRequested.bind(this),
+                    dataReceived: this.onDataReceived.bind(this)
+                }
+            });
+        },
+
         _filterUsers(oDialog, sQuery) {
             const oBinding = oDialog.getBinding("items");
 
@@ -334,7 +413,7 @@ sap.ui.define([
                     filters: [
                         new Filter("displayName", FilterOperator.Contains, sQuery),
                         new Filter("email", FilterOperator.Contains, sQuery),
-                        new Filter("department", FilterOperator.Contains, sQuery)
+                        new Filter("userPrincipalName", FilterOperator.Contains, sQuery)
                     ],
                     and: false
                 })

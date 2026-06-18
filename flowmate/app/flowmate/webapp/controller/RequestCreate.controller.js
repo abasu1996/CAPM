@@ -39,9 +39,8 @@ sap.ui.define([
                 requesterUser_ID: "",
                 requesterName: "",
                 requester: "",
-                processorUser_ID: "",
-                processorName: "",
-                processor: "",
+                processorTeam_ID: "",
+                processorTeamName: "",
                 department: "",
                 priority: "Medium",
                 autoSubmit: true,
@@ -50,8 +49,11 @@ sap.ui.define([
                 attachments: []
             }), "create");
 
+            await this._populateCurrentRequester();
+
             if (this._sPredecessorId) {
                 await this._prefillFromPredecessor(this._sPredecessorId);
+                await this._populateCurrentRequester();
             }
         },
 
@@ -79,8 +81,8 @@ sap.ui.define([
                     description: oPayload.description,
                     requesterUser_ID: oPayload.requesterUser_ID || undefined,
                     requester: oPayload.requester,
-                    processorUser_ID: oPayload.processorUser_ID || undefined,
-                    processor: oPayload.processor,
+                    processorTeam_ID: oPayload.processorTeam_ID || undefined,
+                    processorTeamName: oPayload.processorTeamName,
                     predecessor_ID: oPayload.predecessor_ID || undefined,
                     department: oPayload.department,
                     priority: oPayload.priority,
@@ -190,63 +192,6 @@ sap.ui.define([
             }
         },
 
-        onRequesterValueHelpRequest() {
-            this.byId("requesterValueHelpDialog").open();
-        },
-
-        onRequesterValueHelpSearch(oEvent) {
-            this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
-        },
-
-        onRequesterValueHelpConfirm(oEvent) {
-            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
-
-            if (!oContext) {
-                return;
-            }
-
-            const oCreateModel = this.getView().getModel("create");
-            oCreateModel.setProperty("/requesterUser_ID", oContext.getProperty("ID"));
-            oCreateModel.setProperty("/requesterName", oContext.getProperty("displayName"));
-            oCreateModel.setProperty("/requester", oContext.getProperty("displayName"));
-
-            if (!oCreateModel.getProperty("/department")) {
-                oCreateModel.setProperty("/department", oContext.getProperty("department"));
-            }
-
-            this.onRequesterValueHelpClose(oEvent);
-        },
-
-        onRequesterValueHelpClose(oEvent) {
-            oEvent.getSource().getBinding("items")?.filter([]);
-        },
-
-        onProcessorValueHelpRequest() {
-            this.byId("requestCreateProcessorValueHelpDialog").open();
-        },
-
-        onProcessorValueHelpSearch(oEvent) {
-            this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
-        },
-
-        onProcessorValueHelpConfirm(oEvent) {
-            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
-
-            if (!oContext) {
-                return;
-            }
-
-            const oCreateModel = this.getView().getModel("create");
-            oCreateModel.setProperty("/processorUser_ID", oContext.getProperty("ID"));
-            oCreateModel.setProperty("/processorName", oContext.getProperty("displayName"));
-            oCreateModel.setProperty("/processor", oContext.getProperty("displayName"));
-            this.onProcessorValueHelpClose(oEvent);
-        },
-
-        onProcessorValueHelpClose(oEvent) {
-            oEvent.getSource().getBinding("items")?.filter([]);
-        },
-
         onPredecessorRequestValueHelpRequest() {
             this.byId("predecessorRequestValueHelpDialog").open();
         },
@@ -336,8 +281,13 @@ sap.ui.define([
             oEvent.getSource().getBinding("items")?.filter([]);
         },
 
-        _filterUsers(oDialog, sQuery) {
-            const oBinding = oDialog.getBinding("items");
+        onCreateTeamValueHelpRequest() {
+            this.byId("requestCreateTeamValueHelpDialog").open();
+        },
+
+        onCreateTeamValueHelpSearch(oEvent) {
+            const sQuery = oEvent.getParameter("value") || "";
+            const oBinding = oEvent.getSource().getBinding("items");
 
             if (!sQuery) {
                 oBinding.filter([]);
@@ -347,14 +297,30 @@ sap.ui.define([
             oBinding.filter([
                 new Filter({
                     filters: [
-                        new Filter("displayName", FilterOperator.Contains, sQuery),
-                        new Filter("email", FilterOperator.Contains, sQuery),
-                        new Filter("userPrincipalName", FilterOperator.Contains, sQuery),
-                        new Filter("department", FilterOperator.Contains, sQuery)
+                        new Filter("teamCode", FilterOperator.Contains, sQuery),
+                        new Filter("name", FilterOperator.Contains, sQuery),
+                        new Filter("description", FilterOperator.Contains, sQuery)
                     ],
                     and: false
                 })
             ]);
+        },
+
+        onCreateTeamValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (!oContext) {
+                return;
+            }
+
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/processorTeam_ID", oContext.getProperty("ID"));
+            oCreateModel.setProperty("/processorTeamName", oContext.getProperty("name"));
+            this.onCreateTeamValueHelpClose(oEvent);
+        },
+
+        onCreateTeamValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
         },
 
         _filterSubProcessTypeDialog(oDialog, sQuery) {
@@ -416,12 +382,6 @@ sap.ui.define([
                     oPredecessor.referenceNumber || oPredecessor.title || ""
                 ]));
                 oCreateModel.setProperty("/description", oPredecessor.description || "");
-                oCreateModel.setProperty("/requesterUser_ID", oPredecessor.requesterUser_ID || "");
-                oCreateModel.setProperty("/requesterName", oPredecessor.requester || "");
-                oCreateModel.setProperty("/requester", oPredecessor.requester || "");
-                oCreateModel.setProperty("/processorUser_ID", oPredecessor.processorUser_ID || "");
-                oCreateModel.setProperty("/processorName", oPredecessor.processor || "");
-                oCreateModel.setProperty("/processor", oPredecessor.processor || "");
                 oCreateModel.setProperty("/department", oPredecessor.department || "");
                 oCreateModel.setProperty("/priority", oPredecessor.priority || "Medium");
 
@@ -437,6 +397,32 @@ sap.ui.define([
                 MessageBox.error(oError.message || this.getText("predecessorLoadFailedMessage"));
             } finally {
                 oCreateModel.setProperty("/creating", false);
+            }
+        },
+
+        async _populateCurrentRequester() {
+            const oCreateModel = this.getView().getModel("create");
+
+            if (!oCreateModel) {
+                return;
+            }
+
+            try {
+                const oResponse = await this.callAction("getCurrentUserDetails");
+                const oUser = oResponse.value || oResponse;
+                const sRequesterName = oUser.displayName || oUser.email || oUser.userPrincipalName || "";
+
+                oCreateModel.setProperty("/requesterUser_ID", oUser.ID || "");
+                oCreateModel.setProperty("/requesterName", sRequesterName);
+                oCreateModel.setProperty("/requester", sRequesterName);
+
+                if (oUser.department) {
+                    oCreateModel.setProperty("/department", oUser.department);
+                }
+            } catch (oError) {
+                oCreateModel.setProperty("/requesterUser_ID", "");
+                oCreateModel.setProperty("/requesterName", "");
+                oCreateModel.setProperty("/requester", "");
             }
         },
 

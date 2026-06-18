@@ -3,7 +3,8 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.f"
-    xmlns:form="sap.ui.layout.form">
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="userAdministrationPage"
         class="flowmatePage"
@@ -15,87 +16,126 @@
                     <Title text="{i18n>userAdministrationTitle}" />
                 </f:heading>
                 <f:actions>
-                    <Button
-                        icon="sap-icon://home"
-                        text="{i18n>dashboardNavButton}"
-                        press=".onNavToDashboard" />
-                    <Button
-                        icon="sap-icon://action-settings"
-                        text="{i18n>adminNavButton}"
-                        visible="{permissions>/isAdmin}"
-                        press=".onNavToAdminConfig" />
-                    <Button
-                        icon="sap-icon://employee"
-                        text="{i18n>delegationsNavButton}"
-                        press=".onNavToDelegations" />
+                    <Button icon="sap-icon://home" text="{i18n>dashboardNavButton}" press=".onNavToDashboard" />
+                    <Button icon="sap-icon://action-settings" text="{i18n>adminNavButton}" visible="{permissions>/isAdmin}" press=".onNavToAdminConfig" />
+                    <Button icon="sap-icon://employee" text="{i18n>delegationsNavButton}" press=".onNavToDelegations" />
                 </f:actions>
             </f:DynamicPageTitle>
         </f:title>
         <f:content>
-            <VBox class="flowmateContent flowmateSurface">
-                <OverflowToolbar class="flowmateToolbar">
-                    <Title text="{i18n>usersTableHeader}" />
-                    <ToolbarSpacer />
-                    <SearchField
-                        width="18rem"
-                        search=".onSearch"
-                        liveChange=".onSearch" />
-                    <Button
-                        icon="sap-icon://add"
-                        text="{i18n>addUserButton}"
-                        visible="{userAdmin>/canMaintainUsers}"
-                        type="Emphasized"
-                        press=".onOpenCreateDialog" />
-                </OverflowToolbar>
-                <Table
-                    id="usersTable"
-                    class="flowmateTable"
-                    noDataText="{i18n>noUsersFoundText}"
-                    busyIndicatorDelay="0"
-                    growing="true"
-                    growingScrollToLoad="true"
-                    items="{
-                        path: '/Users',
-                        sorter: {
-                            path: 'displayName'
-                        },
-                        events: {
-                            dataRequested: '.onDataRequested',
-                            dataReceived: '.onDataReceived'
-                        }
-                    }">
-                    <columns>
-                        <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
-                        <Column><Text text="{i18n>userNameLabel}" /></Column>
-                        <Column><Text text="{i18n>emailLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>userPrincipalNameLabel}" /></Column>
-                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
-                        <Column><Text text="{i18n>statusLabel}" /></Column>
-                        <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
-                    </columns>
+            <VBox class="flowmateContent">
+                <IconTabBar class="flowmateSurface" expandable="false">
                     <items>
-                        <ColumnListItem>
-                            <cells>
-                                <Text text="{referenceNumber}" />
-                                <ObjectIdentifier title="{displayName}" text="{azureObjectId}" />
-                                <Text text="{email}" />
-                                <Text text="{userPrincipalName}" />
-                                <Text text="{department}" />
-                                <ObjectStatus
-                                    class="flowmateSemanticStatus"
-                                    text="{path: 'isActive', formatter: '.formatActiveText'}"
-                                    state="{path: 'isActive', formatter: '.formatActiveState'}"
-                                    inverted="true" />
+                        <IconTabFilter icon="sap-icon://employee" text="{i18n>usersTableHeader}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>usersTableHeader}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearch" liveChange=".onSearch" />
                                 <Button
-                                    icon="sap-icon://edit"
-                                    tooltip="{i18n>editUserButton}"
+                                    icon="sap-icon://add"
+                                    text="{i18n>addUserButton}"
                                     visible="{userAdmin>/canMaintainUsers}"
-                                    type="Transparent"
-                                    press=".onOpenEditDialog" />
-                            </cells>
-                        </ColumnListItem>
+                                    type="Emphasized"
+                                    press=".onOpenCreateDialog" />
+                            </OverflowToolbar>
+                            <Table
+                                id="usersTable"
+                                class="flowmateTable"
+                                noDataText="{i18n>noUsersFoundText}"
+                                busyIndicatorDelay="0"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                items="{
+                                    path: '/Users',
+                                    sorter: { path: 'displayName' },
+                                    events: {
+                                        dataRequested: '.onDataRequested',
+                                        dataReceived: '.onDataReceived'
+                                    }
+                                }">
+                                <columns>
+                                    <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
+                                    <Column><Text text="{i18n>userNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>emailLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>userPrincipalNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>statusLabel}" /></Column>
+                                    <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Text text="{referenceNumber}" />
+                                            <ObjectIdentifier title="{displayName}" text="{azureObjectId}" />
+                                            <Text text="{email}" />
+                                            <Text text="{userPrincipalName}" />
+                                            <ObjectStatus
+                                                class="flowmateSemanticStatus"
+                                                text="{path: 'isActive', formatter: '.formatActiveText'}"
+                                                state="{path: 'isActive', formatter: '.formatActiveState'}"
+                                                inverted="true" />
+                                            <Button
+                                                icon="sap-icon://edit"
+                                                tooltip="{i18n>editUserButton}"
+                                                visible="{userAdmin>/canMaintainUsers}"
+                                                type="Transparent"
+                                                press=".onOpenEditDialog" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://org-chart" text="{i18n>teamsTableHeader}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>teamsTableHeader}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchTeams" liveChange=".onSearchTeams" />
+                                <Button icon="sap-icon://add" text="{i18n>addTeamButton}" visible="{userAdmin>/canMaintainUsers}" type="Emphasized" press=".onOpenCreateTeamDialog" />
+                            </OverflowToolbar>
+                            <Tree
+                                id="teamsTree"
+                                class="flowmateTable"
+                                noDataText="{i18n>noTeamsFoundText}"
+                                items="{
+                                    path: 'orgTree>/nodes',
+                                    parameters: { arrayNames: ['nodes'] }
+                                }">
+                                <items>
+                                    <CustomTreeItem>
+                                        <HBox alignItems="Center" renderType="Bare" width="100%" class="sapUiTinyMarginTopBottom">
+                                            <core:Icon src="{orgTree>icon}" class="sapUiSmallMarginEnd" />
+                                            <ObjectIdentifier
+                                                title="{orgTree>title}"
+                                                text="{orgTree>subtitle}" />
+                                            <ToolbarSpacer />
+                                            <ObjectStatus
+                                                visible="{path: 'orgTree>type', formatter: '.formatOrgTreeStatusVisible'}"
+                                                class="flowmateSemanticStatus sapUiTinyMarginEnd"
+                                                text="{orgTree>statusText}"
+                                                state="{orgTree>statusState}"
+                                                inverted="true" />
+                                            <Text
+                                                visible="{= ${orgTree>type} === 'team' }"
+                                                class="sapUiSmallMarginEnd"
+                                                text="{path: 'orgTree>memberCount', formatter: '.formatOrgTreeMemberCount'}" />
+                                            <Button
+                                                visible="{= ${orgTree>type} === 'team' &amp;&amp; ${userAdmin>/canMaintainUsers} }"
+                                                icon="sap-icon://group"
+                                                type="Transparent"
+                                                tooltip="{i18n>maintainTeamMembersButton}"
+                                                press=".onOpenTeamMembersDialog" />
+                                            <Button
+                                                visible="{= ${orgTree>type} === 'team' &amp;&amp; ${userAdmin>/canMaintainUsers} }"
+                                                icon="sap-icon://edit"
+                                                type="Transparent"
+                                                tooltip="{i18n>editTeamButton}"
+                                                press=".onOpenEditTeamDialog" />
+                                        </HBox>
+                                    </CustomTreeItem>
+                                </items>
+                            </Tree>
+                        </IconTabFilter>
                     </items>
-                </Table>
+                </IconTabBar>
             </VBox>
         </f:content>
     </f:DynamicPage>
@@ -121,24 +161,131 @@
                     <Input value="{userEdit>/userPrincipalName}" required="true" maxLength="255" />
                     <Label text="{i18n>azureObjectIdLabel}" />
                     <Input value="{userEdit>/azureObjectId}" maxLength="100" />
-                    <Label text="{i18n>departmentLabel}" />
-                    <Input value="{userEdit>/department}" maxLength="100" />
+                    <Label text="{i18n>teamLabel}" />
+                    <HBox renderType="Bare">
+                        <Input
+                            value="{userEdit>/teamName}"
+                            showValueHelp="true"
+                            valueHelpOnly="true"
+                            valueHelpRequest=".onOpenUserTeamValueHelpRequest"
+                            placeholder="{i18n>selectTeamPlaceholder}" />
+                        <Button
+                            icon="sap-icon://decline"
+                            type="Transparent"
+                            tooltip="{i18n>clearTeamButton}"
+                            press=".onClearUserTeam" />
+                    </HBox>
                     <Label text="{i18n>activeLabel}" />
                     <Switch state="{userEdit>/isActive}" />
                 </form:SimpleForm>
             </content>
             <beginButton>
-                <Button
-                    icon="sap-icon://save"
-                    text="{i18n>saveButton}"
-                    type="Emphasized"
-                    press=".onSaveUser" />
+                <Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveUser" />
             </beginButton>
             <endButton>
-                <Button
-                    text="{i18n>cancelButton}"
-                    press=".onCloseDialog" />
+                <Button text="{i18n>cancelButton}" press=".onCloseDialog" />
             </endButton>
         </Dialog>
+        <Dialog id="teamDialog" title="{= ${teamEdit>/isEdit} ? ${i18n>editTeamButton} : ${i18n>addTeamButton} }" contentWidth="42rem" stretchOnPhone="true">
+            <content>
+                <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
+                    <Label text="{i18n>teamCodeLabel}" required="true" />
+                    <Input value="{teamEdit>/teamCode}" enabled="{= !${teamEdit>/isEdit} }" maxLength="30" required="true" />
+                    <Label text="{i18n>teamNameLabel}" required="true" />
+                    <Input value="{teamEdit>/name}" maxLength="150" required="true" />
+                    <Label text="{i18n>configDescriptionLabel}" />
+                    <TextArea value="{teamEdit>/description}" rows="4" maxLength="500" />
+                    <Label text="{i18n>activeLabel}" />
+                    <Switch state="{teamEdit>/isActive}" />
+                </form:SimpleForm>
+            </content>
+            <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveTeam" /></beginButton>
+            <endButton><Button text="{i18n>cancelButton}" press=".onCloseTeamDialog" /></endButton>
+        </Dialog>
+        <Dialog id="teamMembersDialog" title="{i18n>maintainTeamMembersButton}" contentWidth="56rem" stretchOnPhone="true">
+            <content>
+                <VBox class="flowmateDialogContent">
+                    <ObjectIdentifier title="{teamMembers>/teamName}" />
+                    <OverflowToolbar class="flowmateToolbar">
+                        <Title text="{i18n>teamMembersLabel}" />
+                        <ToolbarSpacer />
+                        <Button icon="sap-icon://add" text="{i18n>addTeamMemberButton}" type="Emphasized" press=".onOpenTeamMemberUserValueHelp" />
+                        <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedTeamMembers" />
+                    </OverflowToolbar>
+                    <Table
+                        id="teamMembersTable"
+                        class="flowmateTable"
+                        mode="MultiSelect"
+                        noDataText="{i18n>noTeamMembersFoundText}"
+                        items="{teamMembers>/members}">
+                        <columns>
+                            <Column><Text text="{i18n>userNameLabel}" /></Column>
+                            <Column><Text text="{i18n>emailLabel}" /></Column>
+                            <Column><Text text="{i18n>statusLabel}" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{teamMembers>displayName}" />
+                                    <Text text="{teamMembers>email}" />
+                                    <ObjectStatus
+                                        text="{path: 'teamMembers>isActive', formatter: '.formatActiveText'}"
+                                        state="{path: 'teamMembers>isActive', formatter: '.formatActiveState'}"
+                                        inverted="true" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
+            </content>
+            <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveTeamMembers" /></beginButton>
+            <endButton><Button text="{i18n>closeButton}" press=".onCloseTeamMembersDialog" /></endButton>
+        </Dialog>
+        <TableSelectDialog
+            id="userTeamValueHelpDialog"
+            title="{i18n>selectTeamTitle}"
+            noDataText="{i18n>noTeamsFoundText}"
+            search=".onUserTeamValueHelpSearch"
+            confirm=".onUserTeamValueHelpConfirm"
+            cancel=".onUserTeamValueHelpClose"
+            items="{
+                path: '/Teams',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }]
+            }">
+            <columns>
+                <Column><Text text="{i18n>teamCodeLabel}" /></Column>
+                <Column><Text text="{i18n>teamNameLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>configDescriptionLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{teamCode}" />
+                    <Text text="{name}" />
+                    <Text text="{description}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+        <TableSelectDialog
+            id="teamMemberUserValueHelpDialog"
+            title="{i18n>selectTeamMemberTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            search=".onTeamMemberUserValueHelpSearch"
+            confirm=".onTeamMemberUserValueHelpConfirm"
+            cancel=".onTeamMemberUserValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }]
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
     </mvc:dependents>
 </mvc:View>
