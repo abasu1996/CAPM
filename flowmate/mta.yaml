@@ -118,6 +118,9 @@ modules:
               TokenServiceKeyName: flowmate-auth-key
               URL: ~{srv-api/srv-url}
               HTML5.Timeout: 600000
+              HTML5.DynamicDestination: true
+              HTML5.ForwardAuthToken: true
+              sap.cloud.service: flowmate.service
             - Name: flowmate-html5-repo-host
               ServiceInstanceName: flowmate-html5-repo-host
               ServiceKeyName: flowmate-html5-repo-host-key

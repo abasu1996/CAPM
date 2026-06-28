@@ -22,6 +22,7 @@
     ],
     "redirect-uris": [
       "https://brainbox-consulting-bv-brainboxconsultingig-dev-flowmate7c2aa8e.cfapps.eu10-005.hana.ondemand.com/login/callback",
+      "https://dialog-axiata-plc-arize-qas-9339ozek-org-a-qas-org-b-te3bf718a2.cfapps.ap11.hana.ondemand.com/login/callback",
       "http://localhost:5000/login/callback",
       "http://localhost:5001/login/callback"
     ]
