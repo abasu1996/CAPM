@@ -120,7 +120,6 @@ modules:
               HTML5.Timeout: 600000
               HTML5.DynamicDestination: true
               HTML5.ForwardAuthToken: true
-              sap.cloud.service: flowmate.service
             - Name: flowmate-html5-repo-host
               ServiceInstanceName: flowmate-html5-repo-host
               ServiceKeyName: flowmate-html5-repo-host-key
@@ -129,7 +128,6 @@ modules:
               Name: flowmate-auth
               ServiceInstanceName: flowmate-auth
               ServiceKeyName: flowmate-auth-key
-              sap.cloud.service: flowmate.service
           existing_destinations_policy: update
     build-parameters:
       no-source: true

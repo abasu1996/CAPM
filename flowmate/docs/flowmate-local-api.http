@@ -1,0 +1,648 @@
+@host = http://localhost:4004
+@service = {{host}}/odata/v4/flowmate
+@adminUser = liam.patel@flowmate.demo
+@adminPassword = FlowmateAdmin1!
+@user = alex.johnson@flowmate.demo
+@userPassword = FlowmateUser1!
+
+# Replace these after running the list/read calls below.
+@requestId = 00000000-0000-0000-0000-000000000000
+@taskId = 00000000-0000-0000-0000-000000000000
+@userId = 00000000-0000-0000-0000-000000000000
+@teamId = 00000000-0000-0000-0000-000000000000
+@partyId = 00000000-0000-0000-0000-000000000000
+@attachmentId = 00000000-0000-0000-0000-000000000000
+
+### Service metadata
+GET {{service}}/$metadata
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Current user details
+POST {{service}}/getCurrentUserDetails
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{}
+
+### Application capabilities
+GET {{service}}/getApplicationCapabilities()
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### User administration capabilities
+POST {{service}}/getUserAdministrationCapabilities
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{}
+
+### Request reservation tile counts
+GET {{service}}/getRequestReservationCounts()
+Authorization: Basic {{user}} {{userPassword}}
+
+### My task tile count
+GET {{service}}/getMyTaskCount()
+Authorization: Basic {{user}} {{userPassword}}
+
+### My team task tile count
+GET {{service}}/getMyTeamTaskCount()
+Authorization: Basic {{user}} {{userPassword}}
+
+
+### ------------------------------------------------------------------------
+### Code Lists / Configuration
+### ------------------------------------------------------------------------
+
+### Process types
+GET {{service}}/ProcessTypes?$top=20&$orderby=code
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Process sub types
+GET {{service}}/ProcessSubTypes?$top=20&$orderby=code
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Process status
+GET {{service}}/ProcessStatus?$top=20&$orderby=code
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Task status
+GET {{service}}/TaskStatus?$top=20&$orderby=code
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Request dropdown values
+GET {{service}}/RequestDropDown?$top=50&$orderby=code
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Request type config
+GET {{service}}/RequestType?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Process step config
+GET {{service}}/ProcessStepConfig?$top=50&$orderby=processType_code,stepNo
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Create process step config
+POST {{service}}/ProcessStepConfig
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "processType_code": "PURCHASE",
+  "stepNo": 1,
+  "stepName": "Review",
+  "activityDescription": "Review the request details.",
+  "role": "Reviewer",
+  "slaDays": 2,
+  "processorTeam_ID": "{{teamId}}",
+  "processorTeamName": "Procurement"
+}
+
+
+### ------------------------------------------------------------------------
+### Users / Teams
+### ------------------------------------------------------------------------
+
+### Users
+GET {{service}}/Users?$top=50&$orderby=displayName
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Create user
+POST {{service}}/Users
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "userId": "new.user@flowmate.demo",
+  "displayName": "New User",
+  "email": "new.user@flowmate.demo",
+  "userPrincipalName": "new.user@flowmate.demo",
+  "team_ID": "{{teamId}}",
+  "teamName": "Procurement",
+  "active": true
+}
+
+### Teams with members
+GET {{service}}/Teams?$top=50&$expand=members
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Create team
+POST {{service}}/Teams
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "name": "Procurement",
+  "description": "Procurement team",
+  "active": true
+}
+
+### Team members
+GET {{service}}/TeamMembers?$top=50&$expand=team,user
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Add team member
+POST {{service}}/TeamMembers
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "team_ID": "{{teamId}}",
+  "user_ID": "{{userId}}",
+  "displayName": "Alex Johnson",
+  "email": "alex.johnson@flowmate.demo"
+}
+
+
+### ------------------------------------------------------------------------
+### Requests
+### ------------------------------------------------------------------------
+
+### Process requests
+GET {{service}}/ProcessRequests?$top=20&$orderby=createdAt desc
+Authorization: Basic {{user}} {{userPassword}}
+
+### Process requests with related data
+GET {{service}}/ProcessRequests?$top=10&$expand=tasks,attachments,emailMessages
+Authorization: Basic {{user}} {{userPassword}}
+
+### Single request
+GET {{service}}/ProcessRequests(guid'{{requestId}}')
+Authorization: Basic {{user}} {{userPassword}}
+
+### Create request
+POST {{service}}/ProcessRequests
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "title": "API test request",
+  "description": "Created from docs/flowmate-local-api.http",
+  "processType_code": "PURCHASE",
+  "subProcessType_code": "STANDARD",
+  "priority": "Medium",
+  "status_code": "OPEN",
+  "processorTeam_ID": "{{teamId}}",
+  "processorTeamName": "Procurement"
+}
+
+### Submit request
+POST {{service}}/submitRequest
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}"
+}
+
+### Reserve request
+POST {{service}}/reserveRequest
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}"
+}
+
+### Update request status
+POST {{service}}/updateRequestStatus
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}",
+  "statusCode": "IN_PROGRESS"
+}
+
+### Assign request processor
+POST {{service}}/assignRequestProcessor
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}",
+  "processorUserId": "{{userId}}"
+}
+
+### Assign request team
+POST {{service}}/assignRequestTeam
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}",
+  "teamId": "{{teamId}}"
+}
+
+
+### ------------------------------------------------------------------------
+### Tasks
+### ------------------------------------------------------------------------
+
+### All process tasks
+GET {{service}}/ProcessTasks?$top=20&$orderby=createdAt desc&$expand=request,teamMembers
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### My assigned tasks
+GET {{service}}/MyAssignedTasks?$top=20&$orderby=createdAt desc&$expand=request
+Authorization: Basic {{user}} {{userPassword}}
+
+### My team tasks
+GET {{service}}/MyTeamTasks?$top=20&$orderby=createdAt desc&$expand=request,teamMembers
+Authorization: Basic {{user}} {{userPassword}}
+
+### Request detail tasks
+GET {{service}}/RequestDetailTasks?$filter=request_ID eq guid'{{requestId}}'&$orderby=stepNo,createdAt&$expand=teamMembers
+Authorization: Basic {{user}} {{userPassword}}
+
+### Single task
+GET {{service}}/ProcessTasks(guid'{{taskId}}')
+Authorization: Basic {{user}} {{userPassword}}
+
+### Create task
+POST {{service}}/ProcessTasks
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "request_ID": "{{requestId}}",
+  "stepNo": 1,
+  "taskName": "API test task",
+  "role": "Processor",
+  "isMandatory": true,
+  "isTeamTask": true,
+  "status_code": "OPEN",
+  "processorTeam_ID": "{{teamId}}",
+  "processorTeamName": "Procurement",
+  "remarks": "Created from API test file"
+}
+
+### Task team members
+GET {{service}}/ProcessTaskTeamMembers?$top=50&$filter=task_ID eq guid'{{taskId}}'
+Authorization: Basic {{user}} {{userPassword}}
+
+### Add task team member
+POST {{service}}/ProcessTaskTeamMembers
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "task_ID": "{{taskId}}",
+  "user_ID": "{{userId}}",
+  "displayName": "Alex Johnson",
+  "email": "alex.johnson@flowmate.demo"
+}
+
+### Assign team task to me
+POST {{service}}/assignTeamTaskToMe
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}"
+}
+
+### Assign task processor
+POST {{service}}/assignTaskProcessor
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}",
+  "processorUserId": "{{userId}}"
+}
+
+### Assign task team
+POST {{service}}/assignTaskTeam
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}",
+  "teamId": "{{teamId}}"
+}
+
+### Update task status
+POST {{service}}/updateTaskStatus
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}",
+  "statusCode": "OPEN"
+}
+
+### Approve task
+POST {{service}}/approveTask
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}",
+  "remarks": "Approved from API test file"
+}
+
+### Reject task
+POST {{service}}/rejectTask
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}",
+  "remarks": "Rejected from API test file"
+}
+
+### Send task back to previous step
+POST {{service}}/sendBack
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}",
+  "remarks": "Needs correction",
+  "targetStepNo": 1
+}
+
+
+### ------------------------------------------------------------------------
+### Guided Process
+### ------------------------------------------------------------------------
+
+### Guided process tasks
+POST {{service}}/getGuidedProcessTasks
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}"
+}
+
+### Analyze guided task completion
+POST {{service}}/analyzeGuidedTaskCompletion
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}"
+}
+
+### Complete guided task
+POST {{service}}/completeGuidedTask
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}",
+  "remarks": "Completed from API test file",
+  "progressionMode": "NEXT"
+}
+
+### Analyze guided step completion
+POST {{service}}/analyzeGuidedStepCompletion
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}",
+  "stepNo": 1
+}
+
+### Complete guided step
+POST {{service}}/completeGuidedStep
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}",
+  "stepNo": 1,
+  "remarks": "Step completed from API test file",
+  "progressionMode": "NEXT"
+}
+
+
+### ------------------------------------------------------------------------
+### Involved Parties / Comments / History
+### ------------------------------------------------------------------------
+
+### Involved parties
+GET {{service}}/ProcessInvolvedParties?$filter=request_ID eq guid'{{requestId}}'&$top=50
+Authorization: Basic {{user}} {{userPassword}}
+
+### Add involved party
+POST {{service}}/ProcessInvolvedParties
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "request_ID": "{{requestId}}",
+  "user_ID": "{{userId}}",
+  "displayName": "Alex Johnson",
+  "email": "alex.johnson@flowmate.demo",
+  "purpose": "FYI"
+}
+
+### Comments
+GET {{service}}/ProcessComments?$filter=request_ID eq guid'{{requestId}}'&$top=50
+Authorization: Basic {{user}} {{userPassword}}
+
+### Add comment
+POST {{service}}/ProcessComments
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "request_ID": "{{requestId}}",
+  "comment": "API test comment"
+}
+
+### History
+GET {{service}}/ProcessHistory?$filter=request_ID eq guid'{{requestId}}'&$orderby=createdAt desc
+Authorization: Basic {{user}} {{userPassword}}
+
+
+### ------------------------------------------------------------------------
+### Attachments / Email
+### ------------------------------------------------------------------------
+
+### Attachments for request
+GET {{service}}/ProcessAttachments?$filter=request_ID eq guid'{{requestId}}'&$top=50
+Authorization: Basic {{user}} {{userPassword}}
+
+### Attachment metadata
+GET {{service}}/ProcessAttachments(guid'{{attachmentId}}')
+Authorization: Basic {{user}} {{userPassword}}
+
+### Download attachment content
+GET {{service}}/ProcessAttachments(guid'{{attachmentId}}')/content
+Authorization: Basic {{user}} {{userPassword}}
+
+### Email messages
+GET {{service}}/ProcessEmailMessages?$filter=request_ID eq guid'{{requestId}}'&$top=50&$expand=attachments
+Authorization: Basic {{user}} {{userPassword}}
+
+### Email attachments
+GET {{service}}/ProcessEmailAttachments?$top=50
+Authorization: Basic {{user}} {{userPassword}}
+
+### Queue request email
+POST {{service}}/sendRequestEmail
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "requestId": "{{requestId}}",
+  "toRecipients": "[{\"email\":\"alex.johnson@flowmate.demo\",\"displayName\":\"Alex Johnson\"}]",
+  "ccRecipients": "[]",
+  "subject": "Flowmate API test email",
+  "body": "This email was queued from docs/flowmate-local-api.http.",
+  "attachmentIds": "[]"
+}
+
+
+### ------------------------------------------------------------------------
+### Delegations / Notifications
+### ------------------------------------------------------------------------
+
+### Delegations
+GET {{service}}/Delegations?$top=50&$orderby=createdAt desc
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Create delegation
+POST {{service}}/Delegations
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "delegator": "alex.johnson@flowmate.demo",
+  "delegate": "priya.sharma@flowmate.demo",
+  "startDate": "2026-06-29",
+  "endDate": "2026-07-05",
+  "forwardNotifications": true,
+  "enabled": true,
+  "createdOnBehalf": true
+}
+
+### Resolve notification recipient
+POST {{service}}/resolveNotificationRecipient
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "userId": "alex.johnson@flowmate.demo"
+}
+
+### Resolve task notification recipient
+POST {{service}}/resolveTaskNotificationRecipient
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}"
+}
+
+### Resolve task team notification recipients
+POST {{service}}/resolveTaskTeamNotificationRecipients
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "taskId": "{{taskId}}"
+}
+
+### Resolve involved party notification recipient
+POST {{service}}/resolveInvolvedPartyNotificationRecipient
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "partyId": "{{partyId}}"
+}
+
+
+### ------------------------------------------------------------------------
+### Filter Queries
+### ------------------------------------------------------------------------
+
+### Request filter queries
+GET {{service}}/RequestFilterQueries?$top=50
+Authorization: Basic {{user}} {{userPassword}}
+
+### Save request filter query
+POST {{service}}/RequestFilterQueries
+Authorization: Basic {{user}} {{userPassword}}
+Content-Type: application/json
+
+{
+  "name": "My purchase queue",
+  "processType_code": "PURCHASE",
+  "subProcessType_code": "",
+  "search": "purchase"
+}
+
+
+### ------------------------------------------------------------------------
+### Legacy / Value Help Tables
+### ------------------------------------------------------------------------
+
+### Flows
+GET {{service}}/Flows?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Project code
+GET {{service}}/projectCode?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Material code
+GET {{service}}/materialCode?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Service code
+GET {{service}}/serviceCode?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Equipment code
+GET {{service}}/equipmentCode?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Service entry sheet
+GET {{service}}/serviceEntrySheet?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Material reservation
+GET {{service}}/materialReservation?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Civil RR
+GET {{service}}/civilRR?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Power RR
+GET {{service}}/powerRR?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Outline contract
+GET {{service}}/outlineContract?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Centralized PO
+GET {{service}}/centralizedPO?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Inhouse PO process
+GET {{service}}/inhousePOProcess?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### DNS process
+GET {{service}}/DNSProcess?$top=20
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+
+### ------------------------------------------------------------------------
+### Delete Examples - use carefully
+### ------------------------------------------------------------------------
+
+### Delete task
+DELETE {{service}}/ProcessTasks(guid'{{taskId}}')
+Authorization: Basic {{adminUser}} {{adminPassword}}
+
+### Delete request
+DELETE {{service}}/ProcessRequests(guid'{{requestId}}')
+Authorization: Basic {{adminUser}} {{adminPassword}}
