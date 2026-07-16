@@ -13,7 +13,10 @@ service FlowmateService {
     entity ProcessSubTypes as projection on fldb.ProcessSubTypes;
     entity ProcessStatus as projection on fldb.ProcessStatus;
     entity TaskStatus as projection on fldb.TaskStatus;
-    entity Users as projection on fldb.Users;
+    entity Users as projection on fldb.Users {
+        *,
+        manager : redirected to Users
+    };
     entity Teams as projection on fldb.Teams {
         *,
         members : redirected to TeamMembers
@@ -77,6 +80,16 @@ service FlowmateService {
     };
     entity RequestFilterQueries as projection on fldb.RequestFilterQueries;
 
+    action createUserWithTeams(
+        userId: UUID,
+        azureObjectId: String(100),
+        userPrincipalName: String(255),
+        displayName: String(150),
+        email: String(255),
+        managerId: UUID,
+        teamIds: many UUID,
+        isActive: Boolean
+    ) returns Users;
     action submitRequest(requestId: UUID) returns Boolean;
     action approveTask(taskId: UUID, remarks: String) returns Boolean;
     action analyzeGuidedTaskCompletion(taskId: UUID) returns {

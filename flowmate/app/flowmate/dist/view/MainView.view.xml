@@ -1,0 +1,148 @@
+<mvc:View
+    controllerName="flowmate.controller.MainView"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
+    <f:DynamicPage
+        id="dashboardPage"
+        class="flowmatePage flowmateDashboardPage"
+        toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="{i18n>dashboardTitle}" />
+                </f:heading>
+                <f:actions>
+                    <Button
+                        icon="sap-icon://request"
+                        text="{i18n>requestsNavButton}"
+                        press=".onNavToRequests" />
+                    <Button
+                        icon="sap-icon://workflow-tasks"
+                        text="{i18n>tasksNavButton}"
+                        press=".onNavToTasks" />
+                    <Button
+                        icon="sap-icon://add-document"
+                        text="{i18n>createRequestButton}"
+                        press=".onNavToCreateRequest" />
+                    <Button
+                        icon="sap-icon://action-settings"
+                        text="{i18n>adminNavButton}"
+                        visible="{permissions>/isAdmin}"
+                        press=".onNavToAdminConfig" />
+                    <Button
+                        icon="sap-icon://employee"
+                        text="{i18n>delegationsNavButton}"
+                        press=".onNavToDelegations" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="flowmateContent flowmateDashboardContent">
+                <HBox
+                    class="flowmateDashboardHero"
+                    width="100%"
+                    alignItems="Center"
+                    wrap="Wrap">
+                    <HBox
+                        class="flowmateDashboardHeroTitle"
+                        alignItems="Center">
+                        <core:Icon
+                            class="flowmateDashboardHeroIcon"
+                            src="sap-icon://business-objects-experience" />
+                        <VBox>
+                            <Title
+                                level="H2"
+                                text="{i18n>workspaceTitle}" />
+                            <Text
+                                class="flowmateDashboardHeroText"
+                                text="{i18n>workspaceSubtitle}" />
+                        </VBox>
+                    </HBox>
+                </HBox>
+                <HBox
+                    wrap="Wrap"
+                    renderType="Bare"
+                    class="flowmateTiles">
+                    <GenericTile
+                        class="flowmateTile flowmateTileReserved"
+                        header="{i18n>myReservedRequestsTitle}"
+                        subheader="{i18n>myReservedRequestsSubtitle}"
+                        state="{dashboard>/reservedRequestsState}"
+                        press=".onOpenReservedRequests">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://locked"
+                                value="{dashboard>/reservedRequestsCount}" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="flowmateTile flowmateTileTasks"
+                        header="{i18n>myTasksTitle}"
+                        subheader="{i18n>myTasksSubtitle}"
+                        state="{dashboard>/tasksState}"
+                        press=".onOpenTasks">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://workflow-tasks"
+                                value="{dashboard>/tasksCount}" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="flowmateTile flowmateTileTeamTasks"
+                        header="{i18n>myTeamTasksTitle}"
+                        subheader="{i18n>myTeamTasksSubtitle}"
+                        state="{dashboard>/teamTasksState}"
+                        press=".onOpenTeamTasks">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://group"
+                                value="{dashboard>/teamTasksCount}" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="flowmateTile flowmateTileUnreserved"
+                        header="{i18n>unreservedRequestsTitle}"
+                        subheader="{i18n>unreservedRequestsSubtitle}"
+                        state="{dashboard>/unreservedRequestsState}"
+                        press=".onOpenUnreservedRequests">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://unlocked"
+                                value="{dashboard>/unreservedRequestsCount}" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="flowmateTile flowmateTileCreate"
+                        header="{i18n>createRequestTitle}"
+                        subheader="{i18n>createRequestSubtitle}"
+                        press=".onCreateRequest">
+                        <TileContent>
+                            <NumericContent icon="sap-icon://add-document" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="flowmateTile flowmateTileAdmin"
+                        header="{i18n>adminConfigTitle}"
+                        subheader="{i18n>adminConfigSubtitle}"
+                        visible="{permissions>/isAdmin}"
+                        press=".onOpenConfig">
+                        <TileContent>
+                            <NumericContent icon="sap-icon://action-settings" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
+                        class="flowmateTile flowmateTileDelegations"
+                        header="{i18n>delegationsTitle}"
+                        subheader="{i18n>delegationsSubtitle}"
+                        press=".onOpenDelegations">
+                        <TileContent>
+                            <NumericContent icon="sap-icon://employee" />
+                        </TileContent>
+                    </GenericTile>
+                </HBox>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

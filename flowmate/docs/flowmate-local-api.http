@@ -9,6 +9,7 @@
 @requestId = 00000000-0000-0000-0000-000000000000
 @taskId = 00000000-0000-0000-0000-000000000000
 @userId = 00000000-0000-0000-0000-000000000000
+@managerId = 00000000-0000-0000-0000-000000000000
 @teamId = 00000000-0000-0000-0000-000000000000
 @partyId = 00000000-0000-0000-0000-000000000000
 @attachmentId = 00000000-0000-0000-0000-000000000000
@@ -105,19 +106,36 @@ Content-Type: application/json
 GET {{service}}/Users?$top=50&$orderby=displayName
 Authorization: Basic {{adminUser}} {{adminPassword}}
 
-### Create user
-POST {{service}}/Users
+### Create user, assign manager, and create team memberships atomically
+POST {{service}}/createUserWithTeams
 Authorization: Basic {{adminUser}} {{adminPassword}}
 Content-Type: application/json
 
 {
-  "userId": "new.user@flowmate.demo",
+  "userId": null,
+  "azureObjectId": null,
   "displayName": "New User",
   "email": "new.user@flowmate.demo",
   "userPrincipalName": "new.user@flowmate.demo",
-  "team_ID": "{{teamId}}",
-  "teamName": "Procurement",
-  "active": true
+  "managerId": "{{managerId}}",
+  "teamIds": ["{{teamId}}"],
+  "isActive": true
+}
+
+### Update user, manager, and synchronize the complete team membership list
+POST {{service}}/createUserWithTeams
+Authorization: Basic {{adminUser}} {{adminPassword}}
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "azureObjectId": "azure-object-id",
+  "displayName": "Updated User Name",
+  "email": "updated.user@flowmate.demo",
+  "userPrincipalName": "updated.user@flowmate.demo",
+  "managerId": "{{managerId}}",
+  "teamIds": ["{{teamId}}"],
+  "isActive": true
 }
 
 ### Teams with members

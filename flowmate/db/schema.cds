@@ -50,6 +50,10 @@ entity Users : cuid, managed {
     displayName       : String(150);
     email             : String(255);
     department        : String(100);
+    @title: 'Manager'
+    @Common.Text: (manager.displayName)
+    @Common.TextArrangement: #TextOnly
+    manager           : Association to one Users @assert.target;
     isActive          : Boolean default true;
 }
 

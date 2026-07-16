@@ -89,15 +89,6 @@
           ],
           "fallbackLocale": ""
         }
-      },
-      "": {
-        "dataSource": "mainService",
-        "preload": true,
-        "settings": {
-          "operationMode": "Server",
-          "defaultCountMode": "Inline",
-          "useBatch": true
-        }
       }
     },
     "resources": {

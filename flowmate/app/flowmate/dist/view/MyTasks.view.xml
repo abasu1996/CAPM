@@ -1,0 +1,349 @@
+<mvc:View
+    controllerName="flowmate.controller.MyTasks"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:uxap="sap.uxap"
+    xmlns:core="sap.ui.core">
+    <f:FlexibleColumnLayout
+        id="tasksFlexibleColumnLayout"
+        layout="OneColumn"
+        backgroundDesign="Solid">
+        <f:beginColumnPages>
+            <f:DynamicPage
+                id="myTasksPage"
+                class="flowmatePage"
+                fitContent="true"
+                toggleHeaderOnTitleClick="false">
+                <f:title>
+                    <f:DynamicPageTitle>
+                        <f:heading>
+                            <Title text="{taskView>/title}" />
+                        </f:heading>
+                        <f:actions>
+                            <Button
+                                icon="sap-icon://home"
+                                text="{i18n>dashboardNavButton}"
+                                press=".onNavToDashboard" />
+                            <Button
+                                icon="sap-icon://request"
+                                text="{i18n>requestsNavButton}"
+                                press=".onNavToRequests" />
+                            <Button
+                                icon="sap-icon://add-document"
+                                text="{i18n>createRequestButton}"
+                                press=".onNavToCreateRequest" />
+                            <Button
+                                icon="sap-icon://action-settings"
+                                text="{i18n>adminNavButton}"
+                                visible="{permissions>/isAdmin}"
+                                press=".onNavToAdminConfig" />
+                            <Button
+                                icon="sap-icon://employee"
+                                text="{i18n>delegationsNavButton}"
+                                press=".onNavToDelegations" />
+                            <Button
+                                icon="sap-icon://accept"
+                                text="{i18n>openTaskButton}"
+                                type="Emphasized"
+                                press=".onOpenSelectedTask" />
+                        </f:actions>
+                    </f:DynamicPageTitle>
+                </f:title>
+                <f:content>
+                    <VBox class="flowmateContent flowmateSurface">
+                        <OverflowToolbar class="flowmateToolbar">
+                            <Title text="{taskView>/tableHeader}" />
+                            <ToolbarSpacer />
+                            <SearchField
+                                width="18rem"
+                                search=".onSearch"
+                                liveChange=".onSearch" />
+                            <Button
+                                icon="sap-icon://delete"
+                                text="{i18n>deleteSelectedButton}"
+                                type="Reject"
+                                visible="{= !${taskView>/teamMode} }"
+                                press=".onDeleteSelectedTasks" />
+                        </OverflowToolbar>
+                        <Table
+                            id="tasksTable"
+                            class="flowmateTable"
+                            noDataText="{i18n>noTasksText}"
+                            busyIndicatorDelay="0"
+                            mode="MultiSelect"
+                            growing="true"
+                            growingScrollToLoad="true"
+                            itemPress=".onTaskPress">
+                            <columns>
+                                <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
+                                <Column><Text text="{i18n>taskNameLabel}" /></Column>
+                                <Column><Text text="{i18n>stepLabel}" /></Column>
+                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>mandatoryLabel}" /></Column>
+                                <Column><Text text="{i18n>processorLabel}" /></Column>
+                                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
+                                <Column><Text text="{i18n>statusLabel}" /></Column>
+                                <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>decisionLabel}" /></Column>
+                                <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem
+                                    type="Active">
+                                    <cells>
+                                        <Link
+                                            text="{referenceNumber}"
+                                            press=".onTaskReferencePress" />
+                                        <VBox>
+                                            <Text text="{taskName}" />
+                                            <Link
+                                                text="{request/referenceNumber}"
+                                                press=".onRelatedRequestPress" />
+                                        </VBox>
+                                        <Text text="{stepNo}" />
+                                        <ObjectStatus
+                                            text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }"
+                                            state="{= ${isMandatory} ? 'Warning' : 'None' }" />
+                                        <Text text="{processor}" />
+                                        <Text text="{role}" />
+                                        <ObjectStatus
+                                            class="flowmateSemanticStatus"
+                                            text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                            state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                            inverted="true" />
+                                        <Text text="{decision}" />
+                                        <HBox justifyContent="End">
+                                            <Button
+                                                icon="sap-icon://email"
+                                                type="Transparent"
+                                                tooltip="{i18n>notifyProcessorButton}"
+                                                visible="{= !${taskView>/teamMode} }"
+                                                press=".onNotifyProcessor" />
+                                            <Button
+                                                icon="sap-icon://employee-approvals"
+                                                type="Transparent"
+                                                tooltip="{i18n>assignTeamTaskToMeButton}"
+                                                visible="{taskView>/teamMode}"
+                                                press=".onAssignTeamTaskToMe" />
+                                            <Button
+                                                icon="sap-icon://delete"
+                                                type="Transparent"
+                                                tooltip="{i18n>deleteTaskButton}"
+                                                visible="{= !${taskView>/teamMode} }"
+                                                press=".onDeleteTask" />
+                                        </HBox>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </VBox>
+                </f:content>
+            </f:DynamicPage>
+        </f:beginColumnPages>
+        <f:midColumnPages>
+            <uxap:ObjectPageLayout
+                id="taskObjectPage"
+                class="flowmateObjectPage"
+                showTitleInHeaderContent="true"
+                enableLazyLoading="false">
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:expandedHeading>
+                            <Title text="{taskName}" />
+                        </uxap:expandedHeading>
+                        <uxap:snappedHeading>
+                            <Title text="{taskName}" />
+                        </uxap:snappedHeading>
+                        <uxap:actions>
+                            <Button
+                                icon="sap-icon://refresh"
+                                tooltip="{i18n>refreshButton}"
+                                press=".onRefreshTaskDetail" />
+                            <Button
+                                icon="sap-icon://email"
+                                text="{i18n>notifyProcessorButton}"
+                                visible="{= !${taskView>/teamMode} }"
+                                press=".onNotifyProcessor" />
+                            <Button
+                                icon="sap-icon://employee-approvals"
+                                text="{i18n>assignTeamTaskToMeButton}"
+                                type="Emphasized"
+                                visible="{taskView>/teamMode}"
+                                press=".onAssignTeamTaskToMe" />
+                            <Button
+                                text="{i18n>approveButton}"
+                                type="Accept"
+                                visible="{= !${taskView>/teamMode} }"
+                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                press=".onApprove" />
+                            <Button
+                                text="{i18n>sendBackButton}"
+                                visible="{= !${taskView>/teamMode} }"
+                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                press=".onSendBack" />
+                            <Button
+                                text="{i18n>rejectButton}"
+                                type="Reject"
+                                visible="{= !${taskView>/teamMode} }"
+                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                press=".onReject" />
+                            <Button
+                                icon="sap-icon://decline"
+                                text="{i18n>closeButton}"
+                                press=".onCloseTaskDetail" />
+                        </uxap:actions>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+                <uxap:headerContent>
+                    <VBox class="flowmateHeaderLayout" width="100%">
+                        <HBox
+                            class="flowmateHeaderRow"
+                            width="100%"
+                            wrap="Wrap"
+                            alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderReference">
+                                <Label text="{i18n>taskIdLabel}" />
+                                <ObjectIdentifier title="{referenceNumber}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>requestIdLabel}" />
+                                <Link
+                                    text="{request/referenceNumber}"
+                                    press=".onRelatedRequestPress" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>roleLabel}" />
+                                <Text text="{role}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>stepLabel}" />
+                                <Text text="{stepNo}" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                                <Label text="{i18n>mandatoryLabel}" />
+                                <ObjectStatus
+                                    text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }"
+                                    state="{= ${isMandatory} ? 'Warning' : 'None' }" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                                <Label text="{i18n>statusLabel}" />
+                                <ObjectStatus
+                                    class="flowmateSemanticStatus"
+                                    text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                    state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                    inverted="true" />
+                            </VBox>
+                        </HBox>
+                        <HBox
+                            class="flowmateHeaderRow flowmateHeaderActionRow"
+                            width="100%"
+                            wrap="Wrap"
+                            alignItems="Start">
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                                <Label text="{i18n>statusLabel}" />
+                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                    <Select
+                                        width="11rem"
+                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                        selectedKey="{statusEdit>/taskStatus}"
+                                        items="{/TaskStatus}">
+                                        <core:Item key="{code}" text="{name}" />
+                                    </Select>
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        type="Emphasized"
+                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                        tooltip="{i18n>saveStatusButton}"
+                                        press=".onSaveTaskStatus" />
+                                </HBox>
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                                <Label text="{i18n>processorLabel}" />
+                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                    <Input
+                                        width="100%"
+                                        value="{processorEdit>/processorName}"
+                                        placeholder="{i18n>selectProcessorPlaceholder}"
+                                        showValueHelp="true"
+                                        valueHelpOnly="true"
+                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                        valueHelpRequest=".onProcessorValueHelpRequest" />
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                        tooltip="{i18n>saveProcessorButton}"
+                                        press=".onSaveTaskProcessor" />
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </uxap:headerContent>
+                <uxap:sections>
+                    <uxap:ObjectPageSection title="{i18n>taskDetailsTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox class="flowmateDetailBlock">
+                                        <ObjectIdentifier title="{request/title}" />
+                                        <Link
+                                            text="{request/referenceNumber}"
+                                            press=".onRelatedRequestPress" />
+                                        <Label
+                                            class="sapUiSmallMarginTop"
+                                            text="{i18n>decisionLabel}" />
+                                        <Text text="{decision}" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="{i18n>taskActionsTitle}">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <VBox class="flowmateDetailBlock flowmateRemarks">
+                                        <Label text="{i18n>remarksLabel}" />
+                                        <TextArea
+                                            id="taskRemarksTextArea"
+                                            rows="6"
+                                            width="100%" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
+        </f:midColumnPages>
+    </f:FlexibleColumnLayout>
+    <mvc:dependents>
+        <TableSelectDialog
+            id="myTasksProcessorValueHelpDialog"
+            title="{i18n>selectProcessorTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            rememberSelections="false"
+            search=".onProcessorValueHelpSearch"
+            confirm=".onProcessorValueHelpConfirm"
+            cancel=".onProcessorValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+    </mvc:dependents>
+</mvc:View>

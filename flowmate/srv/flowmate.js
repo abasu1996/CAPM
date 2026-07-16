@@ -43,6 +43,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessHistory,
       ProcessStepConfig,
       ProcessTypes,
+      ProcessSubTypes,
       ProcessStatus,
       TaskStatus,
       Teams,
@@ -138,24 +139,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         ? await cds.tx(req).run(SELECT.one.from(Users).where({ ID: req.data.ID }))
         : {};
       const oUser = { ...oExisting, ...req.data };
-
-      if (!oUser.displayName || !oUser.email || !oUser.userPrincipalName) {
-        return req.reject(400, "Name, email, and user principal name are required");
-      }
-
-      const aUsers = await cds.tx(req).run(SELECT.from(Users));
-      const sEmail = oUser.email.toLowerCase();
-      const sPrincipal = oUser.userPrincipalName.toLowerCase();
-      const bDuplicate = aUsers.some((oOther) =>
-        oOther.ID !== oUser.ID &&
-        (oOther.email?.toLowerCase() === sEmail ||
-          oOther.userPrincipalName?.toLowerCase() === sPrincipal ||
-          oUser.azureObjectId && oOther.azureObjectId === oUser.azureObjectId)
-      );
-
-      if (bDuplicate) {
-        return req.reject(409, "A user already exists with the same email, principal name, or Azure object ID");
-      }
+      await this._validateMaintainedUser(req, oUser, Users);
     });
 
     this.before("DELETE", Users, (req) => {
@@ -164,6 +148,110 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       return req.reject(405, "Deactivate users instead of deleting them to preserve workflow history");
+    });
+
+    this.on("createUserWithTeams", async (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only a user administrator can maintain users");
+      }
+
+      const sUserId = req.data.userId || null;
+      const tx = cds.tx(req);
+      const oExistingUser = sUserId
+        ? await tx.run(SELECT.one.from(Users).where({ ID: sUserId }))
+        : null;
+
+      if (sUserId && !oExistingUser) {
+        return req.reject(404, "User was not found");
+      }
+
+      const aExistingMemberships = oExistingUser
+        ? await tx.run(SELECT.from(TeamMembers).where({ user_ID: sUserId }))
+        : [];
+      const bTeamIdsProvided = Object.prototype.hasOwnProperty.call(req.data, "teamIds");
+      const aRequestedTeamIds = bTeamIdsProvided
+        ? req.data.teamIds || []
+        : aExistingMemberships.map((oMembership) => oMembership.team_ID);
+      const aTeamIds = [...new Set(aRequestedTeamIds
+        .map((vTeamId) => typeof vTeamId === "string" ? vTeamId : vTeamId?.ID || vTeamId?.teamId)
+        .filter(Boolean))];
+      const oUser = {
+        ID: oExistingUser?.ID || cds.utils.uuid(),
+        referenceNumber: oExistingUser?.referenceNumber || await this._nextReferenceNumber(req, Users, "USR"),
+        azureObjectId: Object.prototype.hasOwnProperty.call(req.data, "azureObjectId")
+          ? req.data.azureObjectId || null
+          : oExistingUser?.azureObjectId || null,
+        userPrincipalName: req.data.userPrincipalName?.trim() || oExistingUser?.userPrincipalName,
+        displayName: req.data.displayName?.trim() || oExistingUser?.displayName,
+        email: req.data.email?.trim() || oExistingUser?.email,
+        manager_ID: Object.prototype.hasOwnProperty.call(req.data, "managerId")
+          ? req.data.managerId || null
+          : oExistingUser?.manager_ID || null,
+        isActive: typeof req.data.isActive === "boolean"
+          ? req.data.isActive
+          : oExistingUser?.isActive !== false
+      };
+
+      await this._validateMaintainedUser(req, oUser, Users);
+
+      const aTeams = [];
+      for (const sTeamId of aTeamIds) {
+        const oTeam = await this._getTeam(req, sTeamId, Teams);
+
+        if (!oTeam) {
+          return req.reject(400, `Active team ${sTeamId} was not found`);
+        }
+
+        aTeams.push(oTeam);
+      }
+
+      if (oExistingUser) {
+        await tx.run(UPDATE(Users, oUser.ID).set({
+          azureObjectId: oUser.azureObjectId,
+          userPrincipalName: oUser.userPrincipalName,
+          displayName: oUser.displayName,
+          email: oUser.email,
+          manager_ID: oUser.manager_ID,
+          isActive: oUser.isActive
+        }));
+      } else {
+        await tx.run(INSERT.into(Users).entries(oUser));
+      }
+
+      const mExistingMemberships = new Map(
+        aExistingMemberships.map((oMembership) => [oMembership.team_ID, oMembership])
+      );
+      const oRequestedTeamIds = new Set(aTeamIds);
+
+      for (const oMembership of aExistingMemberships) {
+        if (!oRequestedTeamIds.has(oMembership.team_ID)) {
+          await tx.run(DELETE.from(TeamMembers).where({ ID: oMembership.ID }));
+        }
+      }
+
+      for (const oTeam of aTeams) {
+        const oMembership = mExistingMemberships.get(oTeam.ID);
+
+        if (oMembership) {
+          await tx.run(UPDATE(TeamMembers, oMembership.ID).set({
+            displayName: oUser.displayName,
+            email: oUser.email,
+            isActive: oUser.isActive
+          }));
+        } else {
+          await tx.run(INSERT.into(TeamMembers).entries({
+            ID: cds.utils.uuid(),
+            referenceNumber: await this._nextReferenceNumber(req, TeamMembers, "TMM"),
+            team_ID: oTeam.ID,
+            user_ID: oUser.ID,
+            displayName: oUser.displayName,
+            email: oUser.email,
+            isActive: oUser.isActive
+          }));
+        }
+      }
+
+      return tx.run(SELECT.one.from(Users).where({ ID: oUser.ID }));
     });
 
     this.before(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, (req) => {
@@ -338,6 +426,64 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.before("DELETE", RequestFilterQueries, async (req) => {
       await this._rejectIfRequestFilterQueryOwnedByAnotherUser(req, RequestFilterQueries);
+    });
+
+    this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
+      const bProcessSelectionChanged = req.event === "CREATE" ||
+        Object.prototype.hasOwnProperty.call(req.data, "processType_code") ||
+        Object.prototype.hasOwnProperty.call(req.data, "subProcessType_code");
+
+      if (!bProcessSelectionChanged) {
+        return;
+      }
+
+      const sRequestId = this._requestIdFromReq(req);
+      const oExisting = req.event === "UPDATE" && sRequestId
+        ? await cds.tx(req).run(
+          SELECT.one.from(ProcessRequests)
+            .columns("processType_code", "subProcessType_code")
+            .where({ ID: sRequestId })
+        )
+        : {};
+      const sProcessTypeCode = Object.prototype.hasOwnProperty.call(req.data, "processType_code")
+        ? req.data.processType_code
+        : oExisting?.processType_code;
+      const sSubProcessTypeCode = Object.prototype.hasOwnProperty.call(req.data, "subProcessType_code")
+        ? req.data.subProcessType_code
+        : oExisting?.subProcessType_code;
+
+      if (!sProcessTypeCode) {
+        return req.reject(400, "Process type is required");
+      }
+
+      const [oProcessType, oConfiguredSubType] = await Promise.all([
+        cds.tx(req).run(SELECT.one.from(ProcessTypes).columns("code").where({ code: sProcessTypeCode })),
+        cds.tx(req).run(
+          SELECT.one.from(ProcessSubTypes)
+            .columns("code")
+            .where({ processType_code: sProcessTypeCode })
+        )
+      ]);
+
+      if (!oProcessType) {
+        return req.reject(400, "Selected process type was not found");
+      }
+
+      if (oConfiguredSubType && !sSubProcessTypeCode) {
+        return req.reject(400, "Select a process subtype for the selected process type");
+      }
+
+      if (sSubProcessTypeCode) {
+        const oMatchingSubType = await cds.tx(req).run(
+          SELECT.one.from(ProcessSubTypes)
+            .columns("code")
+            .where({ code: sSubProcessTypeCode, processType_code: sProcessTypeCode })
+        );
+
+        if (!oMatchingSubType) {
+          return req.reject(400, "Selected process subtype does not belong to the selected process type");
+        }
+      }
     });
 
     this.before("CREATE", ProcessRequests, async (req) => {
@@ -1981,6 +2127,40 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _getUser(req, userId, Users) {
     return cds.tx(req).run(SELECT.one.from(Users).where({ ID: userId, isActive: true }));
+  }
+
+  async _validateMaintainedUser(req, user, Users = this.entities.Users) {
+    if (!user.displayName || !user.email || !user.userPrincipalName) {
+      return req.reject(400, "Name, email, and user principal name are required");
+    }
+
+    if (user.manager_ID && user.manager_ID === user.ID) {
+      return req.reject(400, "A user cannot be assigned as their own manager");
+    }
+
+    if (user.manager_ID) {
+      const oManager = await cds.tx(req).run(
+        SELECT.one.from(Users).columns("ID").where({ ID: user.manager_ID, isActive: true })
+      );
+
+      if (!oManager) {
+        return req.reject(400, "Select an active user as the manager");
+      }
+    }
+
+    const aUsers = await cds.tx(req).run(SELECT.from(Users));
+    const sEmail = user.email.toLowerCase();
+    const sPrincipal = user.userPrincipalName.toLowerCase();
+    const bDuplicate = aUsers.some((oOther) =>
+      oOther.ID !== user.ID &&
+      (oOther.email?.toLowerCase() === sEmail ||
+        oOther.userPrincipalName?.toLowerCase() === sPrincipal ||
+        user.azureObjectId && oOther.azureObjectId === user.azureObjectId)
+    );
+
+    if (bDuplicate) {
+      return req.reject(409, "A user already exists with the same email, principal name, or Azure object ID");
+    }
   }
 
   async _getTeam(req, teamId, Teams = this.entities.Teams) {

@@ -1,6 +1,4 @@
 code,name,descr
-PURCHASE_REQUEST,Purchase Request,Purchase request with manager finance and procurement review
-DOCUMENT_REVIEW,Document Review,Document review and approval workflow
-ACCESS_REQUEST,Access Request,Access request with owner approval and fulfillment
-EXCEPTION_REQUEST,Exception Request,Exception or escalation workflow
-PAYMENT_REQUEST,Payment Request,Invoice verification and payment request workflow
+FTK,FTK,FTK payment flows
+PO,PO,Purchase order payment flows
+NON_PO,Non-PO,Non-purchase-order payment flows

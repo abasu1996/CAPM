@@ -1,0 +1,238 @@
+{
+	"_version": "1.84.0",
+	"sap.app": {
+		"id": "flowmate",
+		"type": "application",
+		"i18n": {
+			"bundleUrl": "i18n/i18n.properties",
+			"supportedLocales": [
+				""
+			]
+		},
+		"applicationVersion": {
+			"version": "0.0.1"
+		},
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"resources": "resources.json",
+		"sourceTemplate": {
+			"id": "@sap/generator-fiori:basic",
+			"version": "1.24.0",
+			"toolsId": "850842c4-21e4-4355-b405-2f86440c44d6"
+		},
+		"dataSources": {
+			"mainService": {
+				"uri": "odata/v2/flowmate/",
+				"type": "OData",
+				"settings": {
+					"annotations": [],
+					"odataVersion": "2.0"
+				}
+			}
+		},
+		"crossNavigation": {
+			"inbounds": {
+				"flowmate-openflowmate": {
+					"semanticObject": "flowmate",
+					"action": "openflowmate",
+					"title": "{{flowmate-openflowmate.flpTitle}}",
+					"subTitle": "{{flowmate-openflowmate.flpSubtitle}}",
+					"icon": "sap-icon://workflow-tasks",
+					"signature": {
+						"parameters": {},
+						"additionalParameters": "allowed"
+					}
+				}
+			}
+		}
+	},
+	"sap.cloud": {
+		"public": true,
+		"service": "flowmate.service"
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"flexEnabled": false,
+		"dependencies": {
+			"minUI5Version": "1.148.0",
+			"libs": {
+				"sap.m": {},
+				"sap.ui.layout": {},
+				"sap.ui.core": {},
+				"sap.ui.comp": {},
+				"sap.ui.unified": {},
+				"sap.uxap": {},
+				"sap.f": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "flowmate.i18n.i18n",
+					"supportedLocales": [
+						""
+					],
+					"fallbackLocale": ""
+				}
+			}
+		},
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css"
+				}
+			]
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"controlAggregation": "pages",
+				"controlId": "app",
+				"transition": "slide",
+				"type": "View",
+				"viewType": "XML",
+				"path": "flowmate.view",
+				"async": true
+			},
+			"routes": [
+				{
+					"name": "RouteDashboard",
+					"pattern": ":?query:",
+					"target": [
+						"TargetDashboard"
+					]
+				},
+				{
+					"name": "RouteMyRequests",
+					"pattern": "requests:?query:",
+					"target": [
+						"TargetMyRequests"
+					]
+				},
+				{
+					"name": "RouteMyTasks",
+					"pattern": "tasks:?query:",
+					"target": [
+						"TargetMyTasks"
+					]
+				},
+				{
+					"name": "RouteAdminProcessConfig",
+					"pattern": "admin/process-config:?query:",
+					"target": [
+						"TargetAdminProcessConfig"
+					]
+				},
+				{
+					"name": "RouteDelegations",
+					"pattern": "delegations:?query:",
+					"target": [
+						"TargetDelegations"
+					]
+				},
+				{
+					"name": "RouteUserAdministration",
+					"pattern": "admin/users:?query:",
+					"target": [
+						"TargetUserAdministration"
+					]
+				},
+				{
+					"name": "RouteRequestCreate",
+					"pattern": "requests/create:?query:",
+					"target": [
+						"TargetRequestCreate"
+					]
+				},
+				{
+					"name": "RouteRequestDetail",
+					"pattern": "requests/{requestId}:?query:",
+					"target": [
+						"TargetRequestDetail"
+					]
+				},
+				{
+					"name": "RouteApprovalDetail",
+					"pattern": "tasks/{taskId}:?query:",
+					"target": [
+						"TargetApprovalDetail"
+					]
+				}
+			],
+			"targets": {
+				"TargetDashboard": {
+					"id": "MainView",
+					"name": "MainView",
+					"controlAggregation": "pages"
+				},
+				"TargetMyRequests": {
+					"id": "MyRequests",
+					"name": "MyRequests",
+					"controlAggregation": "pages"
+				},
+				"TargetMyTasks": {
+					"id": "MyTasks",
+					"name": "MyTasks",
+					"controlAggregation": "pages"
+				},
+				"TargetRequestCreate": {
+					"id": "RequestCreate",
+					"name": "RequestCreate",
+					"controlAggregation": "pages"
+				},
+				"TargetRequestDetail": {
+					"id": "RequestDetail",
+					"name": "RequestDetail",
+					"controlAggregation": "pages"
+				},
+				"TargetApprovalDetail": {
+					"id": "ApprovalDetail",
+					"name": "ApprovalDetail",
+					"controlAggregation": "pages"
+				},
+				"TargetAdminProcessConfig": {
+					"id": "AdminProcessConfig",
+					"name": "AdminProcessConfig",
+					"controlAggregation": "pages"
+				},
+				"TargetDelegations": {
+					"id": "Delegations",
+					"name": "Delegations",
+					"controlAggregation": "pages"
+				},
+				"TargetUserAdministration": {
+					"id": "UserAdministration",
+					"name": "UserAdministration",
+					"controlAggregation": "pages"
+				}
+			}
+		},
+		"rootView": {
+			"viewName": "flowmate.view.App",
+			"type": "XML",
+			"id": "fcl",
+			"async": true
+		},
+		"flexBundle": false
+	}
+}

@@ -15,9 +15,13 @@
   },
   "scripts": {
     "start": "cds-serve",
-    "serve-flowmate": "cds serve --in-memory",
-    "watch-flowmate": "cds serve --in-memory",
-    "watch-flowmate-hybrid": "cds watch --profile hybrid --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "serve-flowmate": "cds serve --in-memory --port 4004",
+    "watch-flowmate": "cds watch --in-memory --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-flowmate-hybrid": "cds bind --profile hybrid --exec -- cds watch --profile hybrid --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-flowmate-dialog": "cds bind --profile Dialog-Hybrid --exec -- cds watch --profile Dialog-Hybrid --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-flowmate-flp": "cds watch --in-memory --port 4004 --open \"flowmate/webapp/test/flpSandbox.html#flowmate-openflowmate\" --livereload false",
+    "watch-flowmate-flp-hybrid": "cds bind --profile hybrid --exec -- cds watch --profile hybrid --port 4004 --open \"flowmate/webapp/test/flpSandbox.html#flowmate-openflowmate\" --livereload false",
+    "watch-flowmate-flp-dialog": "cds bind --profile Dialog-Hybrid --exec -- cds watch --profile Dialog-Hybrid --port 4004 --open \"flowmate/webapp/test/flpSandbox.html#flowmate-openflowmate\" --livereload false",
     "seed:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js",
     "delete:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js --delete"
   },
