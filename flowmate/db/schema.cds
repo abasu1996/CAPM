@@ -67,6 +67,13 @@ entity Teams : cuid, managed {
                       on members.team = $self;
 }
 
+@assert.unique.vendorCode: [vendorCode]
+entity Vendors : cuid, managed {
+    vendorCode  : String(30) not null;
+    vendorName  : String(150) not null;
+    vendorEmail : String(255);
+}
+
 entity TeamMembers : cuid, managed {
     referenceNumber : String(30);
     team            : Association to Teams;

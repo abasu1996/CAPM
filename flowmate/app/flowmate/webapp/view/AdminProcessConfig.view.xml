@@ -226,6 +226,63 @@
                                 </cells></ColumnListItem></items>
                             </Table>
                         </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://supplier" text="{i18n>vendorMasterTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>vendorMasterTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField
+                                    width="18rem"
+                                    placeholder="{i18n>searchVendorsPlaceholder}"
+                                    search=".onSearchVendors"
+                                    liveChange=".onSearchVendors" />
+                                <Button
+                                    icon="sap-icon://add"
+                                    text="{i18n>addVendorButton}"
+                                    type="Emphasized"
+                                    press=".onAddVendor" />
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>deleteSelectedButton}"
+                                    type="Reject"
+                                    press=".onDeleteSelectedVendors" />
+                            </OverflowToolbar>
+                            <Table
+                                id="vendorsTable"
+                                class="flowmateTable"
+                                mode="MultiSelect"
+                                noDataText="{i18n>noVendorsText}"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                items="{
+                                    path: '/Vendors',
+                                    sorter: { path: 'vendorName' },
+                                    events: {
+                                        dataRequested: '.onDataRequested',
+                                        dataReceived: '.onDataReceived'
+                                    }
+                                }">
+                                <columns>
+                                    <Column width="12rem"><Text text="{i18n>vendorCodeLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>vendorNameLabel}" wrapping="true" /></Column>
+                                    <Column width="20rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>vendorEmailLabel}" wrapping="true" /></Column>
+                                    <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem vAlign="Middle">
+                                        <cells>
+                                            <ObjectIdentifier title="{vendorCode}" />
+                                            <Text text="{vendorName}" wrapping="true" />
+                                            <Link text="{vendorEmail}" href="{= ${vendorEmail} ? 'mailto:' + ${vendorEmail} : '' }" />
+                                            <Button
+                                                icon="sap-icon://edit"
+                                                type="Transparent"
+                                                tooltip="{i18n>editVendorButton}"
+                                                press=".onEditVendor" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
                     </items>
                 </IconTabBar>
             </VBox>
@@ -245,6 +302,38 @@
             </content>
             <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveCodeList" /></beginButton>
             <endButton><Button text="{i18n>cancelButton}" press=".onCloseCodeListDialog" /></endButton>
+        </Dialog>
+        <Dialog id="vendorDialog" title="{vendorEdit>/dialogTitle}" contentWidth="42rem" stretchOnPhone="true">
+            <content>
+                <form:SimpleForm
+                    class="flowmateDialogContent"
+                    editable="true"
+                    layout="ResponsiveGridLayout"
+                    labelSpanXL="4"
+                    labelSpanL="4"
+                    labelSpanM="4"
+                    labelSpanS="12"
+                    columnsXL="1"
+                    columnsL="1"
+                    columnsM="1">
+                    <Label text="{i18n>vendorCodeLabel}" required="true" />
+                    <Input value="{vendorEdit>/vendorCode}" maxLength="30" required="true" />
+                    <Label text="{i18n>vendorNameLabel}" required="true" />
+                    <Input value="{vendorEdit>/vendorName}" maxLength="150" required="true" />
+                    <Label text="{i18n>vendorEmailLabel}" />
+                    <Input
+                        value="{vendorEdit>/vendorEmail}"
+                        type="Email"
+                        maxLength="255"
+                        placeholder="{i18n>vendorEmailPlaceholder}" />
+                </form:SimpleForm>
+            </content>
+            <beginButton>
+                <Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveVendor" />
+            </beginButton>
+            <endButton>
+                <Button text="{i18n>cancelButton}" press=".onCloseVendorDialog" />
+            </endButton>
         </Dialog>
         <Dialog id="processSubTypeDialog" title="{subTypeEdit>/dialogTitle}" contentWidth="52rem" stretchOnPhone="true">
             <content>

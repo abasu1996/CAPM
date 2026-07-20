@@ -47,6 +47,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessStatus,
       TaskStatus,
       Teams,
+      Vendors,
       TeamMembers,
       RequestDropDown,
       RequestFilterQueries,
@@ -272,6 +273,38 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         }
       });
       this.after(["CREATE", "UPDATE", "DELETE"], oCodeList, () => this._clearConfigCache());
+    });
+
+    this.before(["CREATE", "UPDATE", "DELETE"], Vendors, async (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain vendors");
+      }
+
+      if (req.event === "DELETE") {
+        return;
+      }
+
+      const sVendorId = req.data.ID || req.params?.[0]?.ID;
+      const oExisting = req.event === "UPDATE" && sVendorId
+        ? await cds.tx(req).run(SELECT.one.from(Vendors).where({ ID: sVendorId }))
+        : {};
+      const oVendor = { ...oExisting, ...req.data };
+
+      oVendor.vendorCode = oVendor.vendorCode?.trim();
+      oVendor.vendorName = oVendor.vendorName?.trim();
+      oVendor.vendorEmail = oVendor.vendorEmail?.trim() || null;
+
+      if (!oVendor.vendorCode || !oVendor.vendorName) {
+        return req.reject(400, "Vendor code and vendor name are required");
+      }
+
+      if (oVendor.vendorEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(oVendor.vendorEmail)) {
+        return req.reject(400, "Enter a valid vendor email address");
+      }
+
+      req.data.vendorCode = oVendor.vendorCode;
+      req.data.vendorName = oVendor.vendorName;
+      req.data.vendorEmail = oVendor.vendorEmail;
     });
 
     this.before(["CREATE", "UPDATE", "DELETE"], Teams, async (req) => {

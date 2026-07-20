@@ -21,6 +21,7 @@ service FlowmateService {
         *,
         members : redirected to TeamMembers
     };
+    entity Vendors as projection on fldb.Vendors;
     entity TeamMembers as projection on fldb.TeamMembers {
         *,
         team : redirected to Teams,

@@ -20,6 +20,7 @@ sap.ui.define([
             this.getView().setModel(new JSONModel(this._emptyCodeList()), "configEdit");
             this.getView().setModel(new JSONModel(this._emptyProcessStep()), "stepEdit");
             this.getView().setModel(new JSONModel(this._emptySubType()), "subTypeEdit");
+            this.getView().setModel(new JSONModel(this._emptyVendor()), "vendorEdit");
             this.getRouter().getRoute("RouteAdminProcessConfig").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -86,6 +87,81 @@ sap.ui.define([
                 "activityDescription",
                 "sapTCode"
             ]);
+        },
+
+        onSearchVendors(oEvent) {
+            this._filterTable(oEvent, "vendorsTable", [
+                "vendorCode",
+                "vendorName",
+                "vendorEmail"
+            ]);
+        },
+
+        onAddVendor() {
+            const oEntry = this._emptyVendor();
+
+            oEntry.dialogTitle = this.getText("addVendorButton");
+            this.getView().getModel("vendorEdit").setData(oEntry);
+            this.byId("vendorDialog").open();
+        },
+
+        onEditVendor(oEvent) {
+            const oEntry = oEvent.getSource().getBindingContext().getObject();
+
+            this.getView().getModel("vendorEdit").setData({
+                ...oEntry,
+                isEdit: true,
+                dialogTitle: this.getText("editVendorButton")
+            });
+            this.byId("vendorDialog").open();
+        },
+
+        onCloseVendorDialog() {
+            this.byId("vendorDialog").close();
+        },
+
+        async onSaveVendor() {
+            const oEntry = this.getView().getModel("vendorEdit").getData();
+            const sVendorCode = String(oEntry.vendorCode || "").trim();
+            const sVendorName = String(oEntry.vendorName || "").trim();
+            const sVendorEmail = String(oEntry.vendorEmail || "").trim();
+
+            if (!sVendorCode || !sVendorName) {
+                MessageBox.warning(this.getText("vendorRequiredMessage"));
+                return;
+            }
+
+            if (sVendorEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sVendorEmail)) {
+                MessageBox.warning(this.getText("vendorEmailInvalidMessage"));
+                return;
+            }
+
+            await this._saveConfigEntity({
+                isEdit: oEntry.isEdit,
+                createPath: "/Vendors",
+                updatePath: `/Vendors(guid'${oEntry.ID}')`,
+                payload: {
+                    vendorCode: sVendorCode,
+                    vendorName: sVendorName,
+                    vendorEmail: sVendorEmail || null
+                },
+                successCreateKey: "vendorCreatedMessage",
+                successUpdateKey: "vendorUpdatedMessage",
+                errorKey: "vendorSaveErrorMessage",
+                tableId: "vendorsTable",
+                close: () => this.onCloseVendorDialog()
+            });
+        },
+
+        async onDeleteSelectedVendors() {
+            await this._deleteSelectedByKey({
+                tableId: "vendorsTable",
+                path: (sId) => `/Vendors(guid'${sId}')`,
+                keyProperty: "ID",
+                confirmKey: "deleteSelectedVendorsConfirmMessage",
+                successKey: "selectedVendorsDeletedMessage",
+                errorKey: "vendorDeleteErrorMessage"
+            });
         },
 
         onAddCodeList(oEvent) {
@@ -443,6 +519,17 @@ sap.ui.define([
             };
         },
 
+        _emptyVendor() {
+            return {
+                dialogTitle: "",
+                isEdit: false,
+                ID: "",
+                vendorCode: "",
+                vendorName: "",
+                vendorEmail: ""
+            };
+        },
+
         _codeListPath(sEntitySet, sCode) {
             return `/${sEntitySet}('${String(sCode).replace(/'/g, "''")}')`;
         },
@@ -466,7 +553,12 @@ sap.ui.define([
 
             oBinding.filter([
                 new Filter({
-                    filters: aProperties.map((sProperty) => new Filter(sProperty, FilterOperator.Contains, sQuery)),
+                    filters: aProperties.map((sProperty) => new Filter({
+                        path: sProperty,
+                        operator: FilterOperator.Contains,
+                        value1: sQuery,
+                        caseSensitive: false
+                    })),
                     and: false
                 })
             ]);
