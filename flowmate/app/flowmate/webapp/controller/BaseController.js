@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/m/MessageToast",
     "sap/ui/core/mvc/Controller",
-    "sap/ui/core/routing/History"
-], (MessageToast, Controller, History) => {
+    "sap/ui/core/routing/History",
+    "flowmate/model/serviceUrl"
+], (MessageToast, Controller, History, serviceUrl) => {
     "use strict";
 
     const SERVICE_V4_URL = "odata/v4/flowmate/";
@@ -21,7 +22,7 @@ sap.ui.define([
         },
 
         resolveAppUri(sUri) {
-            return sap.ui.require.toUrl(`flowmate/${sUri}`);
+            return serviceUrl.resolve(sUri);
         },
 
         getServiceV4Url(sPath) {

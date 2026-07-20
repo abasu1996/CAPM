@@ -1,12 +1,13 @@
 sap.ui.define([
     "sap/ui/core/UIComponent",
     "flowmate/model/models",
+    "flowmate/model/serviceUrl",
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/odata/v2/ODataModel"
-], (UIComponent, models, JSONModel, ODataModel) => {
+], (UIComponent, models, serviceUrl, JSONModel, ODataModel) => {
     "use strict";
 
-    const SERVICE_V2_MODULE_PATH = "flowmate/odata/v2/flowmate/";
+    const SERVICE_V2_URL = "odata/v2/flowmate/";
     const SERVICE_V4_URL = "odata/v4/flowmate/";
 
     return UIComponent.extend("flowmate.Component", {
@@ -23,7 +24,7 @@ sap.ui.define([
 
             // set the device model
             this.setModel(models.createDeviceModel(), "device");
-            this.setModel(new ODataModel(sap.ui.require.toUrl(SERVICE_V2_MODULE_PATH), {
+            this.setModel(new ODataModel(serviceUrl.resolve(SERVICE_V2_URL), {
                 defaultCountMode: "Inline",
                 defaultOperationMode: "Server",
                 useBatch: true
@@ -62,7 +63,7 @@ sap.ui.define([
         },
 
         _resolveAppUri(sUri) {
-            return sap.ui.require.toUrl(`flowmate/${sUri}`);
+            return serviceUrl.resolve(sUri);
         }
     });
 });

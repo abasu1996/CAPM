@@ -1,0 +1,13 @@
+{
+  "xsappname": "flowmate-api-client",
+  "tenant-mode": "dedicated",
+  "authorities": [
+    "$ACCEPT_GRANTED_AUTHORITIES"
+  ],
+  "oauth2-configuration": {
+    "credential-types": [
+      "binding-secret",
+      "x509"
+    ]
+  }
+}

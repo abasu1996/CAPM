@@ -1,0 +1,2 @@
+sap.ui.define([],()=>{"use strict";const e=/\/flowmate\/webapp\/?$/;function t(t){const n=String(t||"").replace(/^\/+/,"");const r=new URL(sap.ui.require.toUrl("flowmate/"),window.location.href);if(e.test(r.pathname)){return new URL(`/${n}`,r.origin).toString()}return new URL(n,r).toString()}return{resolve:t}});
+//# sourceMappingURL=serviceUrl.js.map

@@ -151,8 +151,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.on("createUserWithTeams", async (req) => {
-      if (!this._isAdministrator(req)) {
-        return req.reject(403, "Only a user administrator can maintain users");
+      if (!this._canProvisionUsers(req)) {
+        return req.reject(403, "User administration or user provisioning authority is required");
       }
 
       const sUserId = req.data.userId || null;
@@ -2474,6 +2474,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _isAdministrator(req) {
     return Boolean(req.user?.is("Admin") || req.user?.is("admin"));
+  }
+
+  _canProvisionUsers(req) {
+    return Boolean(this._isAdministrator(req) || req.user?.is("UserProvisioning"));
   }
 
   async _getTaskCompletionContext(req, taskId, Users = this.entities.Users) {

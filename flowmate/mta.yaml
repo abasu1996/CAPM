@@ -165,6 +165,13 @@ resources:
       config:
         xsappname: flowmate-${space}
         tenant-mode: dedicated
+  - name: flowmate-api-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      service-name: flowmate-api-auth
+      path: ./xs-security-api.json
   - name: flowmate-db
     type: com.sap.xs.hdi-container
     parameters:

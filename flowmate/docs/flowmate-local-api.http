@@ -14,6 +14,37 @@
 @partyId = 00000000-0000-0000-0000-000000000000
 @attachmentId = 00000000-0000-0000-0000-000000000000
 
+# Deployed technical-client values. Retrieve these from the dedicated
+# flowmate-external-api-key service key; never commit the actual secret.
+@deployedService = https://dialog-axiata-plc-arize-qas-9339ozek-org-a-qas-org-b-te48c9fbef.cfapps.ap11.hana.ondemand.com/odata/v4/flowmate
+@tokenUrl = https://arize-qas-9339ozek.authentication.ap11.hana.ondemand.com/oauth/token
+@apiClientId = replace-with-client-id
+@apiClientSecret = replace-with-client-secret
+
+### Obtain a technical-client token carrying UserProvisioning
+# @name technicalToken
+POST {{tokenUrl}}
+Authorization: Basic {{apiClientId}} {{apiClientSecret}}
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+
+### Verify the technical client can create a user and synchronize assignments
+POST {{deployedService}}/createUserWithTeams
+Authorization: Bearer {{technicalToken.response.body.access_token}}
+Content-Type: application/json
+
+{
+  "userId": null,
+  "azureObjectId": null,
+  "displayName": "API Provisioned User",
+  "email": "api.provisioned.user@flowmate.demo",
+  "userPrincipalName": "api.provisioned.user@flowmate.demo",
+  "managerId": "{{managerId}}",
+  "teamIds": ["{{teamId}}"],
+  "isActive": true
+}
+
 ### Service metadata
 GET {{service}}/$metadata
 Authorization: Basic {{adminUser}} {{adminPassword}}

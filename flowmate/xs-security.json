@@ -3,6 +3,13 @@
     {
       "name": "$XSAPPNAME.Admin",
       "description": "Administer Flowmate configuration, users, and delegate assignments"
+    },
+    {
+      "name": "$XSAPPNAME.UserProvisioning",
+      "description": "Create and update Flowmate users, managers, and team memberships through the integration API",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
     }
   ],
   "attributes": [],
