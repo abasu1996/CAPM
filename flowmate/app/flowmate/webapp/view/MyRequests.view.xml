@@ -401,9 +401,19 @@
                                         value="{processorEdit>/requestProcessorName}"
                                         placeholder="{i18n>selectProcessorPlaceholder}"
                                         showValueHelp="true"
-                                        valueHelpOnly="true"
+                                        showSuggestion="true"
+                                        startSuggestion="1"
+                                        filterSuggests="false"
+                                        suggest=".onUserSuggest"
+                                        suggestionItemSelected=".onRequestProcessorSuggestionSelected"
+                                        liveChange=".onRequestProcessorLiveChange"
                                         enabled="{requestEdit>/editable}"
-                                        valueHelpRequest=".onRequestProcessorValueHelpRequest" />
+                                        valueHelpRequest=".onRequestProcessorValueHelpRequest"
+                                        suggestionItems="{/Users}">
+                                        <suggestionItems>
+                                            <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                                        </suggestionItems>
+                                    </Input>
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
@@ -420,9 +430,19 @@
                                         value="{processorEdit>/requestTeamName}"
                                         placeholder="{i18n>selectTeamPlaceholder}"
                                         showValueHelp="true"
-                                        valueHelpOnly="true"
+                                        showSuggestion="true"
+                                        startSuggestion="1"
+                                        filterSuggests="false"
+                                        suggest=".onTeamSuggest"
+                                        suggestionItemSelected=".onRequestTeamSuggestionSelected"
+                                        liveChange=".onRequestTeamLiveChange"
                                         enabled="{requestEdit>/editable}"
-                                        valueHelpRequest=".onRequestTeamValueHelpRequest" />
+                                        valueHelpRequest=".onRequestTeamValueHelpRequest"
+                                        suggestionItems="{/Teams}">
+                                        <suggestionItems>
+                                            <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                                        </suggestionItems>
+                                    </Input>
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
@@ -1091,9 +1111,19 @@
                                         value="{processorEdit>/taskProcessorName}"
                                         placeholder="{i18n>selectProcessorPlaceholder}"
                                         showValueHelp="true"
-                                        valueHelpOnly="true"
+                                        showSuggestion="true"
+                                        startSuggestion="1"
+                                        filterSuggests="false"
+                                        suggest=".onUserSuggest"
+                                        suggestionItemSelected=".onRequestTaskProcessorSuggestionSelected"
+                                        liveChange=".onRequestTaskProcessorLiveChange"
                                         enabled="{requestEdit>/editable}"
-                                        valueHelpRequest=".onRequestTaskProcessorValueHelpRequest" />
+                                        valueHelpRequest=".onRequestTaskProcessorValueHelpRequest"
+                                        suggestionItems="{/Users}">
+                                        <suggestionItems>
+                                            <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                                        </suggestionItems>
+                                    </Input>
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
@@ -1110,9 +1140,19 @@
                                         value="{processorEdit>/taskTeamName}"
                                         placeholder="{i18n>selectTeamPlaceholder}"
                                         showValueHelp="true"
-                                        valueHelpOnly="true"
+                                        showSuggestion="true"
+                                        startSuggestion="1"
+                                        filterSuggests="false"
+                                        suggest=".onTeamSuggest"
+                                        suggestionItemSelected=".onRequestTaskTeamSuggestionSelected"
+                                        liveChange=".onRequestTaskTeamLiveChange"
                                         enabled="{requestEdit>/editable}"
-                                        valueHelpRequest=".onRequestTaskTeamValueHelpRequest" />
+                                        valueHelpRequest=".onRequestTaskTeamValueHelpRequest"
+                                        suggestionItems="{/Teams}">
+                                        <suggestionItems>
+                                            <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                                        </suggestionItems>
+                                    </Input>
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
@@ -1288,15 +1328,35 @@
                             value="{newTask>/processorName}"
                             placeholder="{i18n>selectProcessorPlaceholder}"
                             showValueHelp="true"
-                            valueHelpOnly="true"
-                            valueHelpRequest=".onNewTaskProcessorValueHelpRequest" />
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onUserSuggest"
+                            suggestionItemSelected=".onNewTaskProcessorSuggestionSelected"
+                            liveChange=".onNewTaskProcessorLiveChange"
+                            valueHelpRequest=".onNewTaskProcessorValueHelpRequest"
+                            suggestionItems="{/Users}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
                         <Label text="{i18n>processorTeamLabel}" />
                         <Input
                             value="{newTask>/processorTeamName}"
                             placeholder="{i18n>selectTeamPlaceholder}"
                             showValueHelp="true"
-                            valueHelpOnly="true"
-                            valueHelpRequest=".onNewTaskTeamValueHelpRequest" />
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onTeamSuggest"
+                            suggestionItemSelected=".onNewTaskTeamSuggestionSelected"
+                            liveChange=".onNewTaskTeamLiveChange"
+                            valueHelpRequest=".onNewTaskTeamValueHelpRequest"
+                            suggestionItems="{/Teams}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                            </suggestionItems>
+                        </Input>
                         <Label text="{i18n>roleLabel}" />
                         <Input
                             value="{newTask>/role}"
@@ -1373,9 +1433,19 @@
                             value="{newParty>/displayName}"
                             placeholder="{i18n>chooseUserPlaceholder}"
                             showValueHelp="true"
-                            valueHelpOnly="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onUserSuggest"
+                            suggestionItemSelected=".onPartySuggestionSelected"
+                            liveChange=".onPartyLiveChange"
                             required="true"
-                            valueHelpRequest=".onPartyValueHelpRequest" />
+                            valueHelpRequest=".onPartyValueHelpRequest"
+                            suggestionItems="{/Users}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
                         <Label text="{i18n>departmentLabel}" />
                         <Text text="{newParty>/department}" />
                         <Label text="{i18n>emailLabel}" />
@@ -1418,12 +1488,20 @@
                         <Label text="{i18n>emailToLabel}" required="true" />
                         <MultiInput
                             showValueHelp="true"
-                            valueHelpOnly="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onUserSuggest"
+                            suggestionItemSelected=".onEmailToSuggestionSelected"
                             valueHelpRequest=".onEmailToUserValueHelpRequest"
                             tokenUpdate=".onEmailToTokenUpdate"
                             placeholder="{i18n>emailRecipientsPlaceholder}"
                             required="true"
-                            tokens="{emailDraft>/toTokens}">
+                            tokens="{emailDraft>/toTokens}"
+                            suggestionItems="{/Users}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
                             <tokens>
                                 <Token
                                     key="{emailDraft>email}"

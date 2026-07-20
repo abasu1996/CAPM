@@ -96,6 +96,26 @@ sap.ui.define([
             this.byId("delegateValueHelpDialog").open();
         },
 
+        onDelegatorSuggestionSelected(oEvent) {
+            this._applySelectedUserContext(this._getSuggestionContext(oEvent), "delegator");
+        },
+
+        onDelegateSuggestionSelected(oEvent) {
+            this._applySelectedUserContext(this._getSuggestionContext(oEvent), "delegate");
+        },
+
+        onDelegatorLiveChange() {
+            const oModel = this.getView().getModel("newDelegation");
+            oModel.setProperty("/delegatorUser_ID", "");
+            oModel.setProperty("/delegator", "");
+        },
+
+        onDelegateLiveChange() {
+            const oModel = this.getView().getModel("newDelegation");
+            oModel.setProperty("/delegateUser_ID", "");
+            oModel.setProperty("/delegate", "");
+        },
+
         onUserValueHelpSearch(oEvent) {
             const sQuery = oEvent.getParameter("value") || "";
             const oBinding = oEvent.getSource().getBinding("items");
@@ -231,11 +251,19 @@ sap.ui.define([
                 return;
             }
 
+            this._applySelectedUserContext(oContext, sRole);
+            this.onUserValueHelpClose(oEvent);
+        },
+
+        _applySelectedUserContext(oContext, sRole) {
+            if (!oContext) {
+                return;
+            }
+
             const oModel = this.getView().getModel("newDelegation");
             oModel.setProperty(`/${sRole}User_ID`, oContext.getProperty("ID"));
             oModel.setProperty(`/${sRole}Name`, oContext.getProperty("displayName"));
             oModel.setProperty(`/${sRole}`, oContext.getProperty("email") || oContext.getProperty("userPrincipalName"));
-            this.onUserValueHelpClose(oEvent);
         },
 
         _confirmDelete(sMessageKey = "deleteDelegationConfirmMessage", aArguments) {

@@ -123,8 +123,18 @@
                             value="{processorEdit>/processorName}"
                             placeholder="{i18n>selectProcessorPlaceholder}"
                             showValueHelp="true"
-                            valueHelpOnly="true"
-                            valueHelpRequest=".onProcessorValueHelpRequest" />
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onUserSuggest"
+                            suggestionItemSelected=".onProcessorSuggestionSelected"
+                            liveChange=".onProcessorLiveChange"
+                            valueHelpRequest=".onProcessorValueHelpRequest"
+                            suggestionItems="{/Users}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
                     </VBox>
                     <Button
                         class="sapUiTinyMarginBegin"

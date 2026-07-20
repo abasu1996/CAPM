@@ -519,6 +519,57 @@ sap.ui.define([
             this.byId("myRequestsTeamValueHelpDialog").open();
         },
 
+        onRequestProcessorSuggestionSelected(oEvent) {
+            this._applyProcessorSelection(this._getSuggestionContext(oEvent), "request");
+        },
+
+        onRequestTaskProcessorSuggestionSelected(oEvent) {
+            this._applyProcessorSelection(this._getSuggestionContext(oEvent), "task");
+        },
+
+        onNewTaskProcessorSuggestionSelected(oEvent) {
+            this._applyProcessorSelection(this._getSuggestionContext(oEvent), "newTask");
+        },
+
+        onRequestTeamSuggestionSelected(oEvent) {
+            this._applyTeamSelection(this._getSuggestionContext(oEvent), "request");
+        },
+
+        onRequestTaskTeamSuggestionSelected(oEvent) {
+            this._applyTeamSelection(this._getSuggestionContext(oEvent), "task");
+        },
+
+        onNewTaskTeamSuggestionSelected(oEvent) {
+            this._applyTeamSelection(this._getSuggestionContext(oEvent), "newTask");
+        },
+
+        onRequestProcessorLiveChange() {
+            this.getView().getModel("processorEdit").setProperty("/requestProcessorUser_ID", "");
+        },
+
+        onRequestTaskProcessorLiveChange() {
+            this.getView().getModel("processorEdit").setProperty("/taskProcessorUser_ID", "");
+        },
+
+        onNewTaskProcessorLiveChange() {
+            const oModel = this.getView().getModel("newTask");
+            oModel.setProperty("/processorUser_ID", "");
+            oModel.setProperty("/processor", "");
+            oModel.setProperty("/processorEmail", "");
+        },
+
+        onRequestTeamLiveChange() {
+            this.getView().getModel("processorEdit").setProperty("/requestTeam_ID", "");
+        },
+
+        onRequestTaskTeamLiveChange() {
+            this.getView().getModel("processorEdit").setProperty("/taskTeam_ID", "");
+        },
+
+        onNewTaskTeamLiveChange() {
+            this.getView().getModel("newTask").setProperty("/processorTeam_ID", "");
+        },
+
         onTeamValueHelpSearch(oEvent) {
             const sQuery = oEvent.getParameter("value") || "";
             const oBinding = oEvent.getSource().getBinding("items");
@@ -547,29 +598,7 @@ sap.ui.define([
                 return;
             }
 
-            const sTeamId = oContext.getProperty("ID");
-            const sTeamName = oContext.getProperty("name");
-
-            if (this._sTeamValueHelpTarget === "newTask") {
-                const oTaskModel = this.getView().getModel("newTask");
-                oTaskModel.setProperty("/processorTeam_ID", sTeamId);
-                oTaskModel.setProperty("/processorTeamName", sTeamName);
-                oTaskModel.setProperty("/processorUser_ID", "");
-                oTaskModel.setProperty("/processorName", "");
-                oTaskModel.setProperty("/processor", "");
-                oTaskModel.setProperty("/processorEmail", "");
-            } else {
-                const oProcessorModel = this.getView().getModel("processorEdit");
-                const sPrefix = this._sTeamValueHelpTarget === "request" ? "request" : "task";
-
-                oProcessorModel.setProperty(`/${sPrefix}Team_ID`, sTeamId);
-                oProcessorModel.setProperty(`/${sPrefix}TeamName`, sTeamName);
-
-                if (sPrefix === "task") {
-                    oProcessorModel.setProperty("/taskProcessorUser_ID", "");
-                    oProcessorModel.setProperty("/taskProcessorName", "");
-                }
-            }
+            this._applyTeamSelection(oContext, this._sTeamValueHelpTarget);
 
             this.onTeamValueHelpClose(oEvent);
         },
@@ -589,30 +618,7 @@ sap.ui.define([
                 return;
             }
 
-            const sId = oContext.getProperty("ID");
-            const sName = oContext.getProperty("displayName");
-            const sEmail = oContext.getProperty("email") || oContext.getProperty("userPrincipalName");
-
-            if (this._sProcessorValueHelpTarget === "newTask") {
-                const oTaskModel = this.getView().getModel("newTask");
-                oTaskModel.setProperty("/processorUser_ID", sId);
-                oTaskModel.setProperty("/processorName", sName);
-                oTaskModel.setProperty("/processor", sName);
-                oTaskModel.setProperty("/processorEmail", sEmail);
-                oTaskModel.setProperty("/processorTeam_ID", "");
-                oTaskModel.setProperty("/processorTeamName", "");
-            } else {
-                const oProcessorModel = this.getView().getModel("processorEdit");
-                const sPrefix = this._sProcessorValueHelpTarget === "request" ? "request" : "task";
-
-                oProcessorModel.setProperty(`/${sPrefix}ProcessorUser_ID`, sId);
-                oProcessorModel.setProperty(`/${sPrefix}ProcessorName`, sName);
-
-                if (sPrefix === "task") {
-                    oProcessorModel.setProperty("/taskTeam_ID", "");
-                    oProcessorModel.setProperty("/taskTeamName", "");
-                }
-            }
+            this._applyProcessorSelection(oContext, this._sProcessorValueHelpTarget);
 
             this.onProcessorValueHelpClose(oEvent);
         },
@@ -786,6 +792,20 @@ sap.ui.define([
             this.byId("requestEmailToUserDialog").open();
         },
 
+        onEmailToSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            this._addEmailToRecipients([{
+                email: oContext.getProperty("email") || oContext.getProperty("userPrincipalName"),
+                displayName: oContext.getProperty("displayName")
+            }]);
+            oEvent.getSource().setValue("");
+        },
+
         onEmailToUserValueHelpSearch(oEvent) {
             this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
         },
@@ -928,6 +948,17 @@ sap.ui.define([
             this.byId("involvedPartyValueHelpDialog").open();
         },
 
+        onPartySuggestionSelected(oEvent) {
+            this._applyPartySelection(this._getSuggestionContext(oEvent));
+        },
+
+        onPartyLiveChange() {
+            const oModel = this.getView().getModel("newParty");
+            oModel.setProperty("/user_ID", "");
+            oModel.setProperty("/email", "");
+            oModel.setProperty("/department", "");
+        },
+
         onPartyValueHelpSearch(oEvent) {
             this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
         },
@@ -935,13 +966,7 @@ sap.ui.define([
         onPartyValueHelpConfirm(oEvent) {
             const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
 
-            if (oContext) {
-                const oModel = this.getView().getModel("newParty");
-                oModel.setProperty("/user_ID", oContext.getProperty("ID"));
-                oModel.setProperty("/displayName", oContext.getProperty("displayName"));
-                oModel.setProperty("/email", oContext.getProperty("email"));
-                oModel.setProperty("/department", oContext.getProperty("department"));
-            }
+            this._applyPartySelection(oContext);
 
             this.onPartyValueHelpClose(oEvent);
         },
@@ -1890,6 +1915,81 @@ sap.ui.define([
                 body: "",
                 attachments: []
             };
+        },
+
+        _applyProcessorSelection(oContext, sTarget) {
+            if (!oContext) {
+                return;
+            }
+
+            const sId = oContext.getProperty("ID");
+            const sName = oContext.getProperty("displayName");
+            const sEmail = oContext.getProperty("email") || oContext.getProperty("userPrincipalName");
+
+            if (sTarget === "newTask") {
+                const oTaskModel = this.getView().getModel("newTask");
+                oTaskModel.setProperty("/processorUser_ID", sId);
+                oTaskModel.setProperty("/processorName", sName);
+                oTaskModel.setProperty("/processor", sName);
+                oTaskModel.setProperty("/processorEmail", sEmail);
+                oTaskModel.setProperty("/processorTeam_ID", "");
+                oTaskModel.setProperty("/processorTeamName", "");
+                return;
+            }
+
+            const oProcessorModel = this.getView().getModel("processorEdit");
+            const sPrefix = sTarget === "request" ? "request" : "task";
+
+            oProcessorModel.setProperty(`/${sPrefix}ProcessorUser_ID`, sId);
+            oProcessorModel.setProperty(`/${sPrefix}ProcessorName`, sName);
+
+            if (sPrefix === "task") {
+                oProcessorModel.setProperty("/taskTeam_ID", "");
+                oProcessorModel.setProperty("/taskTeamName", "");
+            }
+        },
+
+        _applyTeamSelection(oContext, sTarget) {
+            if (!oContext) {
+                return;
+            }
+
+            const sTeamId = oContext.getProperty("ID");
+            const sTeamName = oContext.getProperty("name");
+
+            if (sTarget === "newTask") {
+                const oTaskModel = this.getView().getModel("newTask");
+                oTaskModel.setProperty("/processorTeam_ID", sTeamId);
+                oTaskModel.setProperty("/processorTeamName", sTeamName);
+                oTaskModel.setProperty("/processorUser_ID", "");
+                oTaskModel.setProperty("/processorName", "");
+                oTaskModel.setProperty("/processor", "");
+                oTaskModel.setProperty("/processorEmail", "");
+                return;
+            }
+
+            const oProcessorModel = this.getView().getModel("processorEdit");
+            const sPrefix = sTarget === "request" ? "request" : "task";
+
+            oProcessorModel.setProperty(`/${sPrefix}Team_ID`, sTeamId);
+            oProcessorModel.setProperty(`/${sPrefix}TeamName`, sTeamName);
+
+            if (sPrefix === "task") {
+                oProcessorModel.setProperty("/taskProcessorUser_ID", "");
+                oProcessorModel.setProperty("/taskProcessorName", "");
+            }
+        },
+
+        _applyPartySelection(oContext) {
+            if (!oContext) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("newParty");
+            oModel.setProperty("/user_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/displayName", oContext.getProperty("displayName"));
+            oModel.setProperty("/email", oContext.getProperty("email"));
+            oModel.setProperty("/department", oContext.getProperty("department"));
         },
 
         _addEmailToRecipients(aUsers) {

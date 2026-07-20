@@ -289,9 +289,19 @@
                             value="{stepEdit>/processorTeamName}"
                             placeholder="{i18n>selectTeamPlaceholder}"
                             showValueHelp="true"
-                            valueHelpOnly="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onTeamSuggest"
+                            suggestionItemSelected=".onStepTeamSuggestionSelected"
+                            liveChange=".onStepTeamLiveChange"
                             valueHelpRequest=".onStepTeamValueHelpRequest"
-                            width="100%" />
+                            width="100%"
+                            suggestionItems="{/Teams}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                            </suggestionItems>
+                        </Input>
                         <Button
                             class="sapUiTinyMarginBegin"
                             icon="sap-icon://decline"

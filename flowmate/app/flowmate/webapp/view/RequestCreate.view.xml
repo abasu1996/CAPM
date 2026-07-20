@@ -102,18 +102,38 @@
                                 value="{create>/processTypeName}"
                                 placeholder="{i18n>chooseProcessTypePlaceholder}"
                                 showValueHelp="true"
-                                valueHelpOnly="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onProcessTypeSuggest"
+                                suggestionItemSelected=".onProcessTypeSuggestionSelected"
+                                liveChange=".onProcessTypeLiveChange"
                                 valueHelpRequest=".onProcessTypeValueHelpRequest"
-                                required="true" />
+                                required="true"
+                                suggestionItems="{/ProcessTypes}">
+                                <suggestionItems>
+                                    <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
+                                </suggestionItems>
+                            </Input>
                             <Label text="{i18n>subProcessTypeLabel}" visible="{create>/hasSubProcessTypes}" required="true" />
                             <Input
                                 value="{create>/subProcessTypeName}"
                                 placeholder="{i18n>chooseSubProcessTypePlaceholder}"
                                 showValueHelp="true"
-                                valueHelpOnly="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onSubProcessTypeSuggest"
+                                suggestionItemSelected=".onSubProcessTypeSuggestionSelected"
+                                liveChange=".onSubProcessTypeLiveChange"
                                 required="true"
                                 visible="{create>/hasSubProcessTypes}"
-                                valueHelpRequest=".onSubProcessTypeValueHelpRequest" />
+                                valueHelpRequest=".onSubProcessTypeValueHelpRequest"
+                                suggestionItems="{/ProcessSubTypes}">
+                                <suggestionItems>
+                                    <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
+                                </suggestionItems>
+                            </Input>
                             <Label text="{i18n>requestTitleLabel}" required="true" />
                             <Input value="{create>/title}" maxLength="255" required="true" />
                             <Label text="{i18n>linkedRequestLabel}" />
@@ -121,12 +141,22 @@
                                 alignItems="Center"
                                 width="100%">
                                 <Input
-                                    value="{= ${create>/predecessorReferenceNumber} ? ${create>/predecessorReferenceNumber} + (${create>/predecessorTitle} ? ' - ' + ${create>/predecessorTitle} : '') : '' }"
+                                    value="{create>/predecessorDisplay}"
                                     placeholder="{i18n>linkedRequestPlaceholder}"
                                     showValueHelp="true"
-                                    valueHelpOnly="true"
+                                    showSuggestion="true"
+                                    startSuggestion="1"
+                                    filterSuggests="false"
+                                    suggest=".onPredecessorRequestSuggest"
+                                    suggestionItemSelected=".onPredecessorRequestSuggestionSelected"
+                                    liveChange=".onPredecessorRequestLiveChange"
                                     valueHelpRequest=".onPredecessorRequestValueHelpRequest"
-                                    width="100%" />
+                                    width="100%"
+                                    suggestionItems="{/ProcessRequests}">
+                                    <suggestionItems>
+                                        <core:ListItem key="{ID}" text="{referenceNumber}" additionalText="{title}" />
+                                    </suggestionItems>
+                                </Input>
                                 <Button
                                     icon="sap-icon://decline"
                                     tooltip="{i18n>clearLinkedRequestButton}"
@@ -179,8 +209,18 @@
                                 value="{create>/processorTeamName}"
                                 placeholder="{i18n>selectTeamPlaceholder}"
                                 showValueHelp="true"
-                                valueHelpOnly="true"
-                                valueHelpRequest=".onCreateTeamValueHelpRequest" />
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onTeamSuggest"
+                                suggestionItemSelected=".onCreateTeamSuggestionSelected"
+                                liveChange=".onCreateTeamLiveChange"
+                                valueHelpRequest=".onCreateTeamValueHelpRequest"
+                                suggestionItems="{/Teams}">
+                                <suggestionItems>
+                                    <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                                </suggestionItems>
+                            </Input>
                         </form:SimpleForm>
                     </content>
                 </Panel>

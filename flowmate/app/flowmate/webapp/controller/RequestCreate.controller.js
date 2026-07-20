@@ -28,6 +28,7 @@ sap.ui.define([
                 predecessor_ID: this._sPredecessorId,
                 predecessorReferenceNumber: "",
                 predecessorTitle: "",
+                predecessorDisplay: "",
                 processType_code: "",
                 processTypeName: "",
                 subProcessType_code: "",
@@ -148,6 +149,31 @@ sap.ui.define([
             this.byId("processTypeValueHelpDialog").open();
         },
 
+        onProcessTypeSuggest(oEvent) {
+            this._filterSuggestionItems(oEvent, ["code", "name", "descr"]);
+        },
+
+        async onProcessTypeSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/processType_code", oContext.getProperty("code"));
+            oCreateModel.setProperty("/processTypeName", oContext.getProperty("name"));
+            await this._onProcessSelectionChanged();
+        },
+
+        onProcessTypeLiveChange() {
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/processType_code", "");
+            oCreateModel.setProperty("/subProcessType_code", "");
+            oCreateModel.setProperty("/subProcessTypeName", "");
+            oCreateModel.setProperty("/hasSubProcessTypes", false);
+        },
+
         onProcessTypeValueHelpSearch(oEvent) {
             const sQuery = oEvent.getParameter("value") || "";
             const oBinding = oEvent.getSource().getBinding("items");
@@ -195,6 +221,34 @@ sap.ui.define([
             this.byId("predecessorRequestValueHelpDialog").open();
         },
 
+        onPredecessorRequestSuggest(oEvent) {
+            this._filterSuggestionItems(oEvent, [
+                "referenceNumber",
+                "title",
+                "processType_code",
+                "subProcessType_code",
+                "requester",
+                "processor"
+            ]);
+        },
+
+        onPredecessorRequestSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            this._setPredecessor(oContext);
+        },
+
+        onPredecessorRequestLiveChange() {
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/predecessor_ID", "");
+            oCreateModel.setProperty("/predecessorReferenceNumber", "");
+            oCreateModel.setProperty("/predecessorTitle", "");
+        },
+
         onPredecessorRequestValueHelpSearch(oEvent) {
             const sQuery = oEvent.getParameter("value") || "";
             const oBinding = oEvent.getSource().getBinding("items");
@@ -228,10 +282,7 @@ sap.ui.define([
                 return;
             }
 
-            const oCreateModel = this.getView().getModel("create");
-            oCreateModel.setProperty("/predecessor_ID", oContext.getProperty("ID"));
-            oCreateModel.setProperty("/predecessorReferenceNumber", oContext.getProperty("referenceNumber") || "");
-            oCreateModel.setProperty("/predecessorTitle", oContext.getProperty("title") || "");
+            this._setPredecessor(oContext);
             this.onPredecessorRequestValueHelpClose(oEvent);
         },
 
@@ -244,6 +295,7 @@ sap.ui.define([
             oCreateModel.setProperty("/predecessor_ID", "");
             oCreateModel.setProperty("/predecessorReferenceNumber", "");
             oCreateModel.setProperty("/predecessorTitle", "");
+            oCreateModel.setProperty("/predecessorDisplay", "");
         },
 
         onSubProcessTypeValueHelpRequest() {
@@ -257,6 +309,31 @@ sap.ui.define([
             const oDialog = this.byId("subProcessTypeValueHelpDialog");
             this._filterSubProcessTypeDialog(oDialog, "");
             oDialog.open();
+        },
+
+        onSubProcessTypeSuggest(oEvent) {
+            const sProcessTypeCode = this.getView().getModel("create").getProperty("/processType_code");
+            const aFixedFilters = sProcessTypeCode
+                ? [new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)]
+                : [];
+
+            this._filterSuggestionItems(oEvent, ["code", "name", "descr", "processOwner"], aFixedFilters);
+        },
+
+        onSubProcessTypeSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/subProcessType_code", oContext.getProperty("code"));
+            oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
+        },
+
+        onSubProcessTypeLiveChange() {
+            this.getView().getModel("create").setProperty("/subProcessType_code", "");
         },
 
         onSubProcessTypeValueHelpSearch(oEvent) {
@@ -282,6 +359,22 @@ sap.ui.define([
 
         onCreateTeamValueHelpRequest() {
             this.byId("requestCreateTeamValueHelpDialog").open();
+        },
+
+        onCreateTeamSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/processorTeam_ID", oContext.getProperty("ID"));
+            oCreateModel.setProperty("/processorTeamName", oContext.getProperty("name"));
+        },
+
+        onCreateTeamLiveChange() {
+            this.getView().getModel("create").setProperty("/processorTeam_ID", "");
         },
 
         onCreateTeamValueHelpSearch(oEvent) {
@@ -344,6 +437,17 @@ sap.ui.define([
             oBinding.filter(aFilters);
         },
 
+        _setPredecessor(oContext) {
+            const oCreateModel = this.getView().getModel("create");
+            const sReferenceNumber = oContext.getProperty("referenceNumber") || "";
+            const sTitle = oContext.getProperty("title") || "";
+
+            oCreateModel.setProperty("/predecessor_ID", oContext.getProperty("ID"));
+            oCreateModel.setProperty("/predecessorReferenceNumber", sReferenceNumber);
+            oCreateModel.setProperty("/predecessorTitle", sTitle);
+            oCreateModel.setProperty("/predecessorDisplay", [sReferenceNumber, sTitle].filter(Boolean).join(" - "));
+        },
+
         async _onProcessSelectionChanged() {
             const oCreateModel = this.getView().getModel("create");
 
@@ -373,6 +477,10 @@ sap.ui.define([
                 oCreateModel.setProperty("/predecessor_ID", oPredecessor.ID);
                 oCreateModel.setProperty("/predecessorReferenceNumber", oPredecessor.referenceNumber || "");
                 oCreateModel.setProperty("/predecessorTitle", oPredecessor.title || "");
+                oCreateModel.setProperty("/predecessorDisplay", [
+                    oPredecessor.referenceNumber,
+                    oPredecessor.title
+                ].filter(Boolean).join(" - "));
                 oCreateModel.setProperty("/processType_code", oPredecessor.processType_code || "");
                 oCreateModel.setProperty("/processTypeName", oPredecessor.processType?.name || oPredecessor.processType_code || "");
                 oCreateModel.setProperty("/subProcessType_code", oPredecessor.subProcessType_code || "");

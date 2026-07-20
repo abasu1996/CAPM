@@ -83,6 +83,22 @@ sap.ui.define([
             this.byId("requestDetailProcessorValueHelpDialog").open();
         },
 
+        onProcessorSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("processorEdit");
+            oModel.setProperty("/processorUser_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/processorName", oContext.getProperty("displayName"));
+        },
+
+        onProcessorLiveChange() {
+            this.getView().getModel("processorEdit").setProperty("/processorUser_ID", "");
+        },
+
         onProcessorValueHelpSearch(oEvent) {
             this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
         },

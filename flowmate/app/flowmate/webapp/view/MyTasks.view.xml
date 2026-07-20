@@ -265,9 +265,19 @@
                                         value="{processorEdit>/processorName}"
                                         placeholder="{i18n>selectProcessorPlaceholder}"
                                         showValueHelp="true"
-                                        valueHelpOnly="true"
+                                        showSuggestion="true"
+                                        startSuggestion="1"
+                                        filterSuggests="false"
+                                        suggest=".onUserSuggest"
+                                        suggestionItemSelected=".onProcessorSuggestionSelected"
+                                        liveChange=".onProcessorLiveChange"
                                         enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
-                                        valueHelpRequest=".onProcessorValueHelpRequest" />
+                                        valueHelpRequest=".onProcessorValueHelpRequest"
+                                        suggestionItems="{/Users}">
+                                        <suggestionItems>
+                                            <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                                        </suggestionItems>
+                                    </Input>
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"

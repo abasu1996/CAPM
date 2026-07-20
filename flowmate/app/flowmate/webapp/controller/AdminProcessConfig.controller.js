@@ -278,6 +278,22 @@ sap.ui.define([
             this.byId("processStepTeamValueHelpDialog").open();
         },
 
+        onStepTeamSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("stepEdit");
+            oModel.setProperty("/processorTeam_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/processorTeamName", oContext.getProperty("name"));
+        },
+
+        onStepTeamLiveChange() {
+            this.getView().getModel("stepEdit").setProperty("/processorTeam_ID", "");
+        },
+
         onStepTeamValueHelpSearch(oEvent) {
             const sQuery = oEvent.getParameter("value") || "";
             const oBinding = oEvent.getSource().getBinding("items");
