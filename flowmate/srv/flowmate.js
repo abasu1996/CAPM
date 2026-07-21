@@ -133,7 +133,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       if (req.event === "CREATE") {
-        req.data.referenceNumber = await this._nextReferenceNumber(req, Users, "USR");
+        req.data.referenceNumber = await this._nextReferenceNumber(req, Users, "USR");//check with I2P team for number preference
       }
 
       const oExisting = req.event === "UPDATE"

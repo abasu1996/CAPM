@@ -45,7 +45,7 @@ entity ProcessSubTypes : CodeList {
 
 entity Users : cuid, managed {
     referenceNumber   : String(30);
-    azureObjectId     : String(100);
+    azureObjectId     : String(100);//Azure ID from microsoft graph API
     userPrincipalName : String(255);
     displayName       : String(150);
     email             : String(255);
