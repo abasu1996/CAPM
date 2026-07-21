@@ -5,8 +5,10 @@
     "@cap-js-community/odata-v2-adapter": "^1.15.12",
     "@cap-js/attachments": "^3.12.2",
     "@cap-js/hana": "^2",
+    "@cap-js/openapi": "^1.5.0",
     "@sap/cds": "^9",
-    "@sap/xssec": "^4"
+    "@sap/xssec": "^4",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2",
@@ -22,6 +24,9 @@
     "watch-flowmate-flp": "cds watch --in-memory --port 4004 --open \"flowmate/webapp/test/flpSandbox.html#flowmate-openflowmate\" --livereload false",
     "watch-flowmate-flp-hybrid": "cds bind --profile hybrid --exec -- cds watch --profile hybrid --port 4004 --open \"flowmate/webapp/test/flpSandbox.html#flowmate-openflowmate\" --livereload false",
     "watch-flowmate-flp-dialog": "cds bind --profile Dialog-Hybrid --exec -- cds watch --profile Dialog-Hybrid --port 4004 --open \"flowmate/webapp/test/flpSandbox.html#flowmate-openflowmate\" --livereload false",
+    "swagger": "cds watch --in-memory --port 4004 --open api-docs",
+    "swagger:hybrid": "cds bind --profile hybrid --exec -- cds watch --profile hybrid --port 4004 --open api-docs",
+    "swagger:dialog": "cds bind --profile Dialog-Hybrid --exec -- cds watch --profile Dialog-Hybrid --port 4004 --open api-docs",
     "seed:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js",
     "delete:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js --delete",
     "setup:api-key": "bash scripts/create-flowmate-api-key.sh"
