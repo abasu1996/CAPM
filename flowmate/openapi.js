@@ -33,6 +33,18 @@ function createOpenApiDocument(oModel) {
     { basicAuth: [] }
   ];
 
+  [
+    oDocument.paths?.["/Vendors"]?.post,
+    oDocument.paths?.["/Vendors({ID})"]?.patch,
+    oDocument.paths?.["/Vendors({ID})"]?.delete
+  ].filter(Boolean).forEach((oOperation) => {
+    oOperation.description = [
+      oOperation.description,
+      "Requires the Admin role or VendorProvisioning authority."
+    ].filter(Boolean).join("\n\n");
+    oOperation["x-required-authorities"] = ["Admin", "VendorProvisioning"];
+  });
+
   return oDocument;
 }
 

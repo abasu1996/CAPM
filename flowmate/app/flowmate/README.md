@@ -39,7 +39,8 @@ Start it locally with `npm run swagger`. Use `npm run swagger:hybrid` or
 `npm run swagger:dialog` when the corresponding HANA binding is required.
 Regenerate the checked-in OpenAPI file after service-model changes with
 `npm run swagger:generate`.
-Access is restricted to users with the `Admin` or `UserProvisioning` role.
+Access is restricted to users with the `Admin`, `UserProvisioning`, or
+`VendorProvisioning` authority.
 
 #### Pre-requisites:
 

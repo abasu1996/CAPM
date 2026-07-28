@@ -19966,7 +19966,12 @@
           "4XX": {
             "$ref": "#/components/responses/error"
           }
-        }
+        },
+        "description": "Requires the Admin role or VendorProvisioning authority.",
+        "x-required-authorities": [
+          "Admin",
+          "VendorProvisioning"
+        ]
       }
     },
     "/Vendors({ID})": {
@@ -20052,7 +20057,12 @@
           "4XX": {
             "$ref": "#/components/responses/error"
           }
-        }
+        },
+        "description": "Requires the Admin role or VendorProvisioning authority.",
+        "x-required-authorities": [
+          "Admin",
+          "VendorProvisioning"
+        ]
       },
       "delete": {
         "summary": "Deletes a single vendor.",
@@ -20066,7 +20076,12 @@
           "4XX": {
             "$ref": "#/components/responses/error"
           }
-        }
+        },
+        "description": "Requires the Admin role or VendorProvisioning authority.",
+        "x-required-authorities": [
+          "Admin",
+          "VendorProvisioning"
+        ]
       }
     },
     "/analyzeGuidedStepCompletion": {

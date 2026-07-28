@@ -12,14 +12,18 @@ cds.on("served", () => {
   const fnAuthorize = (req, res, next) => {
     const oUser = cds.context?.user || req.user;
 
-    if (oUser?.is?.("Admin") || oUser?.is?.("UserProvisioning")) {
+    if (
+      oUser?.is?.("Admin")
+      || oUser?.is?.("UserProvisioning")
+      || oUser?.is?.("VendorProvisioning")
+    ) {
       return next();
     }
 
     return res.status(403).json({
       error: {
         code: "403",
-        message: "Administrator or user provisioning authority is required to access API documentation"
+        message: "Administrator or provisioning authority is required to access API documentation"
       }
     });
   };

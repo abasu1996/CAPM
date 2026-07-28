@@ -1,5 +1,7 @@
 code,name,descr,processType_code,processOwner,activityDescription,sapTCode
-FTK_FACTORING,Factoring,Factoring under FTK,FTK,,,
+FTK_FACTORING,Factoring - PO Validation,Factoring with PO validation under FTK,FTK,,,
+FTK_FACTORING_WITH_UAC,Factoring - With UAC,Factoring with UAC under FTK,FTK,,,
+FTK_FACTORING_WITHOUT_UAC,Factoring - Without UAC,Factoring without UAC under FTK,FTK,,,
 FTK_NON_FACTORING,Non-factoring,Non-factoring under FTK,FTK,,,
 FTK_SERVICE,Service,Service under FTK,FTK,,,
 FTK_DUTY_REIMBURSEMENT,Duty reimbursement,Duty reimbursement under FTK,FTK,,,

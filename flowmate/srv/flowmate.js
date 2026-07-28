@@ -21,7 +21,11 @@ const TASK_STATUS = {
   SENT_BACK: "SENT_BACK"
 };
 
-const FTK_FACTORING_SUBTYPE = "FTK_FACTORING";
+const FTK_FACTORING_SUBTYPES = new Set([
+  "FTK_FACTORING",
+  "FTK_FACTORING_WITH_UAC",
+  "FTK_FACTORING_WITHOUT_UAC"
+]);
 const DEFAULT_CONFIG_CACHE_TTL_MS = 60 * 1000;
 
 module.exports = class FlowmateService extends cds.ApplicationService {
@@ -280,8 +284,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before(["CREATE", "UPDATE", "DELETE"], Vendors, async (req) => {
-      if (!this._isAdministrator(req)) {
-        return req.reject(403, "Only an administrator can maintain vendors");
+      if (!this._canProvisionVendors(req)) {
+        return req.reject(403, "Vendor administration or vendor provisioning authority is required");
       }
 
       if (req.event === "DELETE") {
@@ -550,7 +554,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         sSubProcessTypeCode = oExisting?.subProcessType_code;
       }
 
-      if (sSubProcessTypeCode !== FTK_FACTORING_SUBTYPE) {
+      if (!FTK_FACTORING_SUBTYPES.has(sSubProcessTypeCode)) {
         return req.reject(400, "FTK Factoring fields are only available for the Factoring subprocess");
       }
 
@@ -2613,6 +2617,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _canProvisionUsers(req) {
     return Boolean(this._isAdministrator(req) || req.user?.is("UserProvisioning"));
+  }
+
+  _canProvisionVendors(req) {
+    return Boolean(this._isAdministrator(req) || req.user?.is("VendorProvisioning"));
   }
 
   async _getTaskCompletionContext(req, taskId, Users = this.entities.Users) {

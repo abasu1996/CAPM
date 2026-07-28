@@ -528,7 +528,15 @@ sap.ui.define([
 
             oCreateModel.setProperty("/subProcessType_code", sCode);
             oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
-            this._setFtkFactoringMode(sCode === "FTK_FACTORING");
+            this._setFtkFactoringMode(this._isFtkFactoringSubtype(sCode));
+        },
+
+        _isFtkFactoringSubtype(sCode) {
+            return [
+                "FTK_FACTORING",
+                "FTK_FACTORING_WITH_UAC",
+                "FTK_FACTORING_WITHOUT_UAC"
+            ].includes(sCode);
         },
 
         _setFtkFactoringMode(bEnabled) {
@@ -595,7 +603,7 @@ sap.ui.define([
                 oCreateModel.setProperty("/processTypeName", oPredecessor.processType?.name || oPredecessor.processType_code || "");
                 oCreateModel.setProperty("/subProcessType_code", oPredecessor.subProcessType_code || "");
                 oCreateModel.setProperty("/subProcessTypeName", oPredecessor.subProcessType?.name || oPredecessor.subProcessType_code || "");
-                this._setFtkFactoringMode(oPredecessor.subProcessType_code === "FTK_FACTORING");
+                this._setFtkFactoringMode(this._isFtkFactoringSubtype(oPredecessor.subProcessType_code));
                 oCreateModel.setProperty("/paymentCategory_code", oPredecessor.paymentCategory_code || "");
                 oCreateModel.setProperty("/businessEntity_code", oPredecessor.businessEntity_code || "");
                 oCreateModel.setProperty("/taskLevelFlow", oPredecessor.taskLevelFlow || "");

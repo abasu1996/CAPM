@@ -10,6 +10,13 @@
       "grant-as-authority-to-apps": [
         "$XSAPPNAME(application,flowmate-api-client)"
       ]
+    },
+    {
+      "name": "$XSAPPNAME.VendorProvisioning",
+      "description": "Create, update, and delete Flowmate vendors through the integration API",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
     }
   ],
   "attributes": [],

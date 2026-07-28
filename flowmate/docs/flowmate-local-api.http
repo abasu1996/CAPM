@@ -11,6 +11,7 @@
 @userId = 00000000-0000-0000-0000-000000000000
 @managerId = 00000000-0000-0000-0000-000000000000
 @teamId = 00000000-0000-0000-0000-000000000000
+@vendorId = 00000000-0000-0000-0000-000000000000
 @partyId = 00000000-0000-0000-0000-000000000000
 @attachmentId = 00000000-0000-0000-0000-000000000000
 
@@ -21,7 +22,7 @@
 @apiClientId = replace-with-client-id
 @apiClientSecret = replace-with-client-secret
 
-### Obtain a technical-client token carrying UserProvisioning
+### Obtain a technical-client token carrying UserProvisioning and VendorProvisioning
 # @name technicalToken
 POST {{tokenUrl}}
 Authorization: Basic {{apiClientId}} {{apiClientSecret}}
@@ -44,6 +45,31 @@ Content-Type: application/json
   "teamIds": ["{{teamId}}"],
   "isActive": true
 }
+
+### Create a vendor using the technical client
+POST {{deployedService}}/Vendors
+Authorization: Bearer {{technicalToken.response.body.access_token}}
+Content-Type: application/json
+
+{
+  "vendorCode": "VENDOR-001",
+  "vendorName": "API Provisioned Vendor",
+  "vendorEmail": "vendor@example.com"
+}
+
+### Update a vendor using the technical client
+PATCH {{deployedService}}/Vendors({{vendorId}})
+Authorization: Bearer {{technicalToken.response.body.access_token}}
+Content-Type: application/json
+
+{
+  "vendorName": "Updated API Vendor",
+  "vendorEmail": "updated.vendor@example.com"
+}
+
+### Delete a vendor using the technical client
+DELETE {{deployedService}}/Vendors({{vendorId}})
+Authorization: Bearer {{technicalToken.response.body.access_token}}
 
 ### Service metadata
 GET {{service}}/$metadata
