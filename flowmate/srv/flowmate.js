@@ -2623,6 +2623,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return Boolean(this._isAdministrator(req) || req.user?.is("VendorProvisioning"));
   }
 
+  _canProvisionPaymentCategories(req){
+    return Boolean(this._isAdministrator(req) || req.user?.is("PaymentCategoryProvisioning"));
+  }
+
   async _getTaskCompletionContext(req, taskId, Users = this.entities.Users) {
     const task = await this._getTask(req, taskId);
 
