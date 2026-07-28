@@ -575,6 +575,40 @@
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        title="{i18n>ftkFactoringDetailsTitle}"
+                        visible="{= ${subProcessType_code} === 'FTK_FACTORING' }">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        class="flowmateDetailBlock flowmateFactoringDetailForm"
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanXL="3"
+                                        labelSpanL="3"
+                                        labelSpanM="4"
+                                        columnsXL="2"
+                                        columnsL="2"
+                                        columnsM="1"
+                                        adjustLabelSpan="false">
+                                        <Label text="{i18n>paymentCategoryLabel}" />
+                                        <Text text="{paymentCategory/name}" />
+                                        <Label text="{i18n>entityLabel}" />
+                                        <Text text="{businessEntity/name}" />
+                                        <Label text="{i18n>taskLevelFlowLabel}" />
+                                        <Text text="{taskLevelFlow}" wrapping="true" />
+                                        <Label text="{i18n>vendorCodeLabel}" />
+                                        <Text text="{vendorCode}" />
+                                        <Label text="{i18n>vendorNameLabel}" />
+                                        <Text text="{vendorName}" wrapping="true" />
+                                        <Label text="{i18n>remarksLabel}" />
+                                        <Text text="{remarks}" wrapping="true" />
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection title="{i18n>requestRelationsTitle}">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>

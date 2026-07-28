@@ -1,0 +1,3 @@
+code,name,descr
+LOCAL,Local,Payment processed locally
+FOREIGN,Foreign,Payment processed in a foreign currency or country

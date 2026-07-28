@@ -21,6 +21,7 @@ const TASK_STATUS = {
   SENT_BACK: "SENT_BACK"
 };
 
+const FTK_FACTORING_SUBTYPE = "FTK_FACTORING";
 const DEFAULT_CONFIG_CACHE_TTL_MS = 60 * 1000;
 
 module.exports = class FlowmateService extends cds.ApplicationService {
@@ -44,6 +45,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessStepConfig,
       ProcessTypes,
       ProcessSubTypes,
+      PaymentCategories,
+      FtkEntities,
+      Priorities,
       ProcessStatus,
       TaskStatus,
       Teams,
@@ -262,7 +266,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
     this.after(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, () => this._clearConfigCache());
 
-    [ProcessTypes, ProcessStatus, TaskStatus, RequestDropDown].forEach((oCodeList) => {
+    [ProcessTypes, PaymentCategories, FtkEntities, Priorities, ProcessStatus, TaskStatus, RequestDropDown].forEach((oCodeList) => {
       this.before(["CREATE", "UPDATE", "DELETE"], oCodeList, (req) => {
         if (!this._isAdministrator(req)) {
           return req.reject(403, "Only an administrator can maintain configuration code lists");
@@ -517,11 +521,57 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           return req.reject(400, "Selected process subtype does not belong to the selected process type");
         }
       }
+
+    });
+
+    this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
+      const aFactoringFields = [
+        "paymentCategory_code",
+        "businessEntity_code",
+        "taskLevelFlow",
+        "vendor_ID",
+        "remarks"
+      ];
+
+      if (!aFactoringFields.some((sField) => Object.prototype.hasOwnProperty.call(req.data, sField))) {
+        return;
+      }
+
+      let sSubProcessTypeCode = req.data.subProcessType_code;
+
+      if (!sSubProcessTypeCode && req.event === "UPDATE") {
+        const sRequestId = this._requestIdFromReq(req);
+        const oExisting = sRequestId && await cds.tx(req).run(
+          SELECT.one.from(ProcessRequests)
+            .columns("subProcessType_code")
+            .where({ ID: sRequestId })
+        );
+
+        sSubProcessTypeCode = oExisting?.subProcessType_code;
+      }
+
+      if (sSubProcessTypeCode !== FTK_FACTORING_SUBTYPE) {
+        return req.reject(400, "FTK Factoring fields are only available for the Factoring subprocess");
+      }
+
     });
 
     this.before("CREATE", ProcessRequests, async (req) => {
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessRequests, "REQ");
       const oReservationUser = await this._currentReservationUser(req, Users);
+
+      req.data.priorityConfig_code ??= "MEDIUM";
+      const oPriority = await cds.tx(req).run(
+        SELECT.one.from(Priorities)
+          .columns("code", "name")
+          .where({ code: req.data.priorityConfig_code })
+      );
+
+      if (!oPriority) {
+        return req.reject(400, "Selected priority was not found");
+      }
+
+      req.data.priority = oPriority.name || oPriority.code;
 
       if (req.data.requesterUser_ID) {
         const oRequester = await this._getUser(req, req.data.requesterUser_ID, Users);
@@ -562,9 +612,22 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         this._setProcessorTeamSnapshot(req.data, oTeam);
       }
 
+      if (req.data.vendor_ID) {
+        const oVendor = await cds.tx(req).run(
+          SELECT.one.from(Vendors)
+            .columns("ID", "vendorCode", "vendorName")
+            .where({ ID: req.data.vendor_ID })
+        );
+
+        if (!oVendor) {
+          return req.reject(400, "Selected vendor was not found");
+        }
+
+        this._setVendorSnapshot(req.data, oVendor);
+      }
+
       req.data.status_code ??= PROCESS_STATUS.DRAFT;
       req.data.requester ??= oReservationUser.displayName || req.user?.id || "anonymous";
-      req.data.priority ??= "Medium";
       req.data.currentStep ??= 0;
     });
 
@@ -582,6 +645,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("UPDATE", ProcessRequests, async (req) => {
+      if (Object.prototype.hasOwnProperty.call(req.data, "priorityConfig_code")) {
+        const oPriority = await cds.tx(req).run(
+          SELECT.one.from(Priorities)
+            .columns("code", "name")
+            .where({ code: req.data.priorityConfig_code })
+        );
+
+        if (!oPriority) {
+          return req.reject(400, "Selected priority was not found");
+        }
+
+        req.data.priority = oPriority.name || oPriority.code;
+      }
+
       if (req.data.processorUser_ID) {
         const oProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
 
@@ -600,6 +677,26 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         }
 
         this._setProcessorTeamSnapshot(req.data, oTeam);
+      }
+
+      if (Object.prototype.hasOwnProperty.call(req.data, "vendor_ID")) {
+        if (!req.data.vendor_ID) {
+          req.data.vendor_ID = null;
+          req.data.vendorCode = null;
+          req.data.vendorName = null;
+        } else {
+          const oVendor = await cds.tx(req).run(
+            SELECT.one.from(Vendors)
+              .columns("ID", "vendorCode", "vendorName")
+              .where({ ID: req.data.vendor_ID })
+          );
+
+          if (!oVendor) {
+            return req.reject(400, "Selected vendor was not found");
+          }
+
+          this._setVendorSnapshot(req.data, oVendor);
+        }
       }
     });
 
@@ -2399,6 +2496,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     target.processorTeamName = team.name || team.teamCode;
     target.processor = team.name || team.teamCode;
     target.processorEmail = null;
+  }
+
+  _setVendorSnapshot(target, vendor) {
+    target.vendorCode = vendor.vendorCode;
+    target.vendorName = vendor.vendorName;
   }
 
   _setTaskProcessorTeamSnapshot(target, team) {

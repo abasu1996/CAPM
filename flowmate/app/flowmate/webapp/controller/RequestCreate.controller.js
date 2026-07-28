@@ -34,6 +34,14 @@ sap.ui.define([
                 subProcessType_code: "",
                 subProcessTypeName: "",
                 hasSubProcessTypes: false,
+                isFtkFactoring: false,
+                paymentCategory_code: "",
+                businessEntity_code: "",
+                taskLevelFlow: "",
+                vendor_ID: "",
+                vendorCode: "",
+                vendorName: "",
+                remarks: "",
                 title: "",
                 description: "",
                 requesterUser_ID: "",
@@ -42,7 +50,7 @@ sap.ui.define([
                 processorTeam_ID: "",
                 processorTeamName: "",
                 department: "",
-                priority: "Medium",
+                priorityConfig_code: "MEDIUM",
                 autoSubmit: true,
                 creating: false,
                 uploading: false,
@@ -85,7 +93,14 @@ sap.ui.define([
                     processorTeamName: oPayload.processorTeamName,
                     predecessor_ID: oPayload.predecessor_ID || undefined,
                     department: oPayload.department,
-                    priority: oPayload.priority,
+                    priorityConfig_code: oPayload.priorityConfig_code || "MEDIUM",
+                    ...(oPayload.isFtkFactoring ? {
+                        paymentCategory_code: oPayload.paymentCategory_code || undefined,
+                        businessEntity_code: oPayload.businessEntity_code || undefined,
+                        taskLevelFlow: oPayload.taskLevelFlow,
+                        vendor_ID: oPayload.vendor_ID || undefined,
+                        remarks: oPayload.remarks
+                    } : {}),
                     status_code: "DRAFT"
                 });
 
@@ -172,6 +187,7 @@ sap.ui.define([
             oCreateModel.setProperty("/subProcessType_code", "");
             oCreateModel.setProperty("/subProcessTypeName", "");
             oCreateModel.setProperty("/hasSubProcessTypes", false);
+            this._setFtkFactoringMode(false);
         },
 
         onProcessTypeValueHelpSearch(oEvent) {
@@ -327,13 +343,14 @@ sap.ui.define([
                 return;
             }
 
-            const oCreateModel = this.getView().getModel("create");
-            oCreateModel.setProperty("/subProcessType_code", oContext.getProperty("code"));
-            oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
+            this._setSubProcessType(oContext);
         },
 
         onSubProcessTypeLiveChange() {
-            this.getView().getModel("create").setProperty("/subProcessType_code", "");
+            const oCreateModel = this.getView().getModel("create");
+
+            oCreateModel.setProperty("/subProcessType_code", "");
+            this._setFtkFactoringMode(false);
         },
 
         onSubProcessTypeValueHelpSearch(oEvent) {
@@ -347,9 +364,7 @@ sap.ui.define([
                 return;
             }
 
-            const oCreateModel = this.getView().getModel("create");
-            oCreateModel.setProperty("/subProcessType_code", oContext.getProperty("code"));
-            oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
+            this._setSubProcessType(oContext);
             this.onSubProcessTypeValueHelpClose(oEvent);
         },
 
@@ -415,6 +430,65 @@ sap.ui.define([
             oEvent.getSource().getBinding("items")?.filter([]);
         },
 
+        onVendorValueHelpRequest() {
+            this.byId("requestCreateVendorValueHelpDialog").open();
+        },
+
+        onVendorSuggest(oEvent) {
+            this._filterSuggestionItems(oEvent, ["vendorCode", "vendorName", "vendorEmail"]);
+        },
+
+        onVendorSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (oContext) {
+                this._setVendor(oContext);
+            }
+        },
+
+        onVendorLiveChange() {
+            const oCreateModel = this.getView().getModel("create");
+
+            oCreateModel.setProperty("/vendor_ID", "");
+            oCreateModel.setProperty("/vendorName", "");
+        },
+
+        onVendorValueHelpSearch(oEvent) {
+            const sQuery = (oEvent.getParameter("value") || "").trim();
+            const oBinding = oEvent.getSource().getBinding("items");
+
+            if (!sQuery) {
+                oBinding.filter([]);
+                return;
+            }
+
+            oBinding.filter([
+                new Filter({
+                    filters: ["vendorCode", "vendorName", "vendorEmail"].map((sProperty) => new Filter({
+                        path: sProperty,
+                        operator: FilterOperator.Contains,
+                        value1: sQuery,
+                        caseSensitive: false
+                    })),
+                    and: false
+                })
+            ]);
+        },
+
+        onVendorValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (oContext) {
+                this._setVendor(oContext);
+            }
+
+            this.onVendorValueHelpClose(oEvent);
+        },
+
+        onVendorValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
         _filterSubProcessTypeDialog(oDialog, sQuery) {
             const sProcessTypeCode = this.getView().getModel("create").getProperty("/processType_code");
             const oBinding = oDialog.getBinding("items");
@@ -448,11 +522,47 @@ sap.ui.define([
             oCreateModel.setProperty("/predecessorDisplay", [sReferenceNumber, sTitle].filter(Boolean).join(" - "));
         },
 
+        _setSubProcessType(oContext) {
+            const oCreateModel = this.getView().getModel("create");
+            const sCode = oContext.getProperty("code");
+
+            oCreateModel.setProperty("/subProcessType_code", sCode);
+            oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
+            this._setFtkFactoringMode(sCode === "FTK_FACTORING");
+        },
+
+        _setFtkFactoringMode(bEnabled) {
+            const oCreateModel = this.getView().getModel("create");
+
+            oCreateModel.setProperty("/isFtkFactoring", bEnabled);
+
+            if (!bEnabled) {
+                [
+                    "paymentCategory_code",
+                    "businessEntity_code",
+                    "taskLevelFlow",
+                    "vendor_ID",
+                    "vendorCode",
+                    "vendorName",
+                    "remarks"
+                ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
+            }
+        },
+
+        _setVendor(oContext) {
+            const oCreateModel = this.getView().getModel("create");
+
+            oCreateModel.setProperty("/vendor_ID", oContext.getProperty("ID"));
+            oCreateModel.setProperty("/vendorCode", oContext.getProperty("vendorCode"));
+            oCreateModel.setProperty("/vendorName", oContext.getProperty("vendorName"));
+        },
+
         async _onProcessSelectionChanged() {
             const oCreateModel = this.getView().getModel("create");
 
             oCreateModel.setProperty("/subProcessType_code", "");
             oCreateModel.setProperty("/subProcessTypeName", "");
+            this._setFtkFactoringMode(false);
 
             const aSubTypes = await this._readList("/ProcessSubTypes", {
                 filters: [new Filter("processType_code", FilterOperator.EQ, oCreateModel.getProperty("/processType_code"))],
@@ -470,7 +580,7 @@ sap.ui.define([
             try {
                 const oPredecessor = await this._readEntry(`/ProcessRequests(guid'${sPredecessorId}')`, {
                     urlParameters: {
-                        "$expand": "processType,subProcessType,requesterUser,processorUser"
+                        "$expand": "processType,subProcessType,paymentCategory,businessEntity,priorityConfig,requesterUser,processorUser"
                     }
                 });
 
@@ -485,12 +595,23 @@ sap.ui.define([
                 oCreateModel.setProperty("/processTypeName", oPredecessor.processType?.name || oPredecessor.processType_code || "");
                 oCreateModel.setProperty("/subProcessType_code", oPredecessor.subProcessType_code || "");
                 oCreateModel.setProperty("/subProcessTypeName", oPredecessor.subProcessType?.name || oPredecessor.subProcessType_code || "");
+                this._setFtkFactoringMode(oPredecessor.subProcessType_code === "FTK_FACTORING");
+                oCreateModel.setProperty("/paymentCategory_code", oPredecessor.paymentCategory_code || "");
+                oCreateModel.setProperty("/businessEntity_code", oPredecessor.businessEntity_code || "");
+                oCreateModel.setProperty("/taskLevelFlow", oPredecessor.taskLevelFlow || "");
+                oCreateModel.setProperty("/vendor_ID", oPredecessor.vendor_ID || "");
+                oCreateModel.setProperty("/vendorCode", oPredecessor.vendorCode || "");
+                oCreateModel.setProperty("/vendorName", oPredecessor.vendorName || "");
+                oCreateModel.setProperty("/remarks", oPredecessor.remarks || "");
                 oCreateModel.setProperty("/title", this.getText("successorRequestTitlePrefix", [
                     oPredecessor.referenceNumber || oPredecessor.title || ""
                 ]));
                 oCreateModel.setProperty("/description", oPredecessor.description || "");
                 oCreateModel.setProperty("/department", oPredecessor.department || "");
-                oCreateModel.setProperty("/priority", oPredecessor.priority || "Medium");
+                oCreateModel.setProperty(
+                    "/priorityConfig_code",
+                    oPredecessor.priorityConfig_code || String(oPredecessor.priority || "MEDIUM").toUpperCase()
+                );
 
                 if (oPredecessor.processType_code) {
                     const aSubTypes = await this._readList("/ProcessSubTypes", {

@@ -27,7 +27,7 @@ sap.ui.define([
             this.getView().bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,predecessor,successors,tasks,comments,attachments,history"
+                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,tasks,comments,attachments,history"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -81,6 +81,22 @@ sap.ui.define([
 
         onProcessorValueHelpRequest() {
             this.byId("requestDetailProcessorValueHelpDialog").open();
+        },
+
+        onProcessorSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("processorEdit");
+            oModel.setProperty("/processorUser_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/processorName", oContext.getProperty("displayName"));
+        },
+
+        onProcessorLiveChange() {
+            this.getView().getModel("processorEdit").setProperty("/processorUser_ID", "");
         },
 
         onProcessorValueHelpSearch(oEvent) {

@@ -145,6 +145,93 @@
                                 </items>
                             </Table>
                         </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://money-bills" text="{i18n>paymentCategoriesConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>paymentCategoriesConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                    <customData><core:CustomData key="entitySet" value="PaymentCategories" /></customData>
+                                </SearchField>
+                                <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                    <customData><core:CustomData key="entitySet" value="PaymentCategories" /></customData>
+                                </Button>
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                    <customData><core:CustomData key="entitySet" value="PaymentCategories" /></customData>
+                                </Button>
+                            </OverflowToolbar>
+                            <Table id="paymentCategoriesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/PaymentCategories}">
+                                <columns>
+                                    <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                                    <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                                    <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items><ColumnListItem><cells>
+                                    <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                                    <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                        <customData><core:CustomData key="entitySet" value="PaymentCategories" /></customData>
+                                    </Button>
+                                </cells></ColumnListItem></items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://building" text="{i18n>ftkEntitiesConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>ftkEntitiesConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                    <customData><core:CustomData key="entitySet" value="FtkEntities" /></customData>
+                                </SearchField>
+                                <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                    <customData><core:CustomData key="entitySet" value="FtkEntities" /></customData>
+                                </Button>
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                    <customData><core:CustomData key="entitySet" value="FtkEntities" /></customData>
+                                </Button>
+                            </OverflowToolbar>
+                            <Table id="ftkEntitiesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/FtkEntities}">
+                                <columns>
+                                    <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                                    <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                                    <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items><ColumnListItem><cells>
+                                    <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                                    <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                        <customData><core:CustomData key="entitySet" value="FtkEntities" /></customData>
+                                    </Button>
+                                </cells></ColumnListItem></items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://flag" text="{i18n>prioritiesConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>prioritiesConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                    <customData><core:CustomData key="entitySet" value="Priorities" /></customData>
+                                </SearchField>
+                                <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                    <customData><core:CustomData key="entitySet" value="Priorities" /></customData>
+                                </Button>
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                    <customData><core:CustomData key="entitySet" value="Priorities" /></customData>
+                                </Button>
+                            </OverflowToolbar>
+                            <Table id="prioritiesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/Priorities}">
+                                <columns>
+                                    <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                                    <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                                    <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items><ColumnListItem><cells>
+                                    <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                                    <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                        <customData><core:CustomData key="entitySet" value="Priorities" /></customData>
+                                    </Button>
+                                </cells></ColumnListItem></items>
+                            </Table>
+                        </IconTabFilter>
                         <IconTabFilter icon="sap-icon://status-positive" text="{i18n>processStatusesConfigTitle}">
                             <OverflowToolbar class="flowmateToolbar">
                                 <Title text="{i18n>processStatusesConfigTitle}" />

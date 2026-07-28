@@ -3,6 +3,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.f"
+    xmlns:form="sap.ui.layout.form"
     xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="requestDetailPage"
@@ -123,8 +124,18 @@
                             value="{processorEdit>/processorName}"
                             placeholder="{i18n>selectProcessorPlaceholder}"
                             showValueHelp="true"
-                            valueHelpOnly="true"
-                            valueHelpRequest=".onProcessorValueHelpRequest" />
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onUserSuggest"
+                            suggestionItemSelected=".onProcessorSuggestionSelected"
+                            liveChange=".onProcessorLiveChange"
+                            valueHelpRequest=".onProcessorValueHelpRequest"
+                            suggestionItems="{/Users}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
                     </VBox>
                     <Button
                         class="sapUiTinyMarginBegin"
@@ -137,6 +148,35 @@
                     class="sapUiSmallMarginTop flowmateSurface"
                     expandable="false">
                     <items>
+                        <IconTabFilter
+                            icon="sap-icon://business-objects-experience"
+                            text="{i18n>ftkFactoringDetailsTitle}"
+                            visible="{= ${subProcessType_code} === 'FTK_FACTORING' }">
+                            <form:SimpleForm
+                                class="flowmateDetailBlock flowmateFactoringDetailForm"
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="3"
+                                labelSpanL="3"
+                                labelSpanM="4"
+                                columnsXL="2"
+                                columnsL="2"
+                                columnsM="1"
+                                adjustLabelSpan="false">
+                                <Label text="{i18n>paymentCategoryLabel}" />
+                                <Text text="{paymentCategory/name}" />
+                                <Label text="{i18n>entityLabel}" />
+                                <Text text="{businessEntity/name}" />
+                                <Label text="{i18n>taskLevelFlowLabel}" />
+                                <Text text="{taskLevelFlow}" wrapping="true" />
+                                <Label text="{i18n>vendorCodeLabel}" />
+                                <Text text="{vendorCode}" />
+                                <Label text="{i18n>vendorNameLabel}" />
+                                <Text text="{vendorName}" wrapping="true" />
+                                <Label text="{i18n>remarksLabel}" />
+                                <Text text="{remarks}" wrapping="true" />
+                            </form:SimpleForm>
+                        </IconTabFilter>
                         <IconTabFilter
                             icon="sap-icon://chain-link"
                             text="{i18n>requestRelationsTitle}">

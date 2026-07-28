@@ -11,6 +11,9 @@ service FlowmateService {
 
     entity ProcessTypes as projection on fldb.ProcessTypes;
     entity ProcessSubTypes as projection on fldb.ProcessSubTypes;
+    entity PaymentCategories as projection on fldb.PaymentCategories;
+    entity FtkEntities as projection on fldb.FtkEntities;
+    entity Priorities as projection on fldb.Priorities;
     entity ProcessStatus as projection on fldb.ProcessStatus;
     entity TaskStatus as projection on fldb.TaskStatus;
     entity Users as projection on fldb.Users {
@@ -30,6 +33,10 @@ service FlowmateService {
     entity Delegations as projection on fldb.Delegations;
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
+        paymentCategory : redirected to PaymentCategories,
+        businessEntity  : redirected to FtkEntities,
+        priorityConfig  : redirected to Priorities,
+        vendor      : redirected to Vendors,
         tasks       : redirected to ProcessTasks,
         attachments : redirected to ProcessAttachments,
         emailMessages : redirected to ProcessEmailMessages

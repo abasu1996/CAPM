@@ -1559,7 +1559,7 @@ sap.ui.define([
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,predecessor,successors"
+                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),

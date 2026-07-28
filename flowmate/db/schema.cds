@@ -43,6 +43,18 @@ entity ProcessSubTypes : CodeList {
     sapTCode : String(100);
 }
 
+entity PaymentCategories : CodeList {
+    key code : String(20);
+}
+
+entity FtkEntities : CodeList {
+    key code : String(30);
+}
+
+entity Priorities : CodeList {
+    key code : String(20);
+}
+
 entity Users : cuid, managed {
     referenceNumber   : String(30);
     azureObjectId     : String(100);//Azure ID from microsoft graph API
@@ -100,6 +112,10 @@ entity ProcessRequests : cuid, managed {
     referenceNumber : String(30);
     processType : Association to ProcessTypes;
     subProcessType : Association to ProcessSubTypes;
+    paymentCategory : Association to PaymentCategories @assert.target;
+    businessEntity : Association to FtkEntities @assert.target;
+    priorityConfig : Association to Priorities @assert.target;
+    vendor : Association to Vendors;
     requesterUser : Association to Users;
     processorUser : Association to Users;
     processorTeam : Association to Teams;
@@ -109,6 +125,10 @@ entity ProcessRequests : cuid, managed {
                     on successors.predecessor = $self;
     title       : String(255);
     description : LargeString;
+    taskLevelFlow    : String(255);
+    vendorCode       : String(30);
+    vendorName       : String(150);
+    remarks          : LargeString;
     requester   : String(100);
     processor   : String(255);
     processorEmail : String(255);

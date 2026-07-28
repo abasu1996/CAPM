@@ -169,9 +169,19 @@
                         <Input
                             value="{userEdit>/managerName}"
                             showValueHelp="true"
-                            valueHelpOnly="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onManagerSuggest"
+                            suggestionItemSelected=".onManagerSuggestionSelected"
+                            liveChange=".onManagerLiveChange"
                             valueHelpRequest=".onOpenManagerValueHelpRequest"
-                            placeholder="{i18n>selectManagerPlaceholder}" />
+                            placeholder="{i18n>selectManagerPlaceholder}"
+                            suggestionItems="{/Users}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
                         <Button
                             icon="sap-icon://decline"
                             type="Transparent"
@@ -183,9 +193,19 @@
                         <Input
                             value="{userEdit>/teamName}"
                             showValueHelp="true"
-                            valueHelpOnly="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onTeamSuggest"
+                            suggestionItemSelected=".onUserTeamSuggestionSelected"
+                            liveChange=".onUserTeamLiveChange"
                             valueHelpRequest=".onOpenUserTeamValueHelpRequest"
-                            placeholder="{i18n>selectTeamPlaceholder}" />
+                            placeholder="{i18n>selectTeamPlaceholder}"
+                            suggestionItems="{/Teams}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                            </suggestionItems>
+                        </Input>
                         <Button
                             icon="sap-icon://decline"
                             type="Transparent"

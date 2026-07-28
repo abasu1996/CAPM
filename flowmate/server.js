@@ -1,40 +1,11 @@
 const cds = require("@sap/cds");
-const { compile } = require("@cap-js/openapi");
 const swaggerUi = require("swagger-ui-express");
+const { createOpenApiDocument } = require("./openapi");
 
 const DOCS_PATH = "/api-docs";
-const SERVICE_PATH = "/odata/v4/flowmate";
 
 cds.on("served", () => {
-  const oOpenApiDocument = compile(cds.clone(cds.model), { service: "FlowmateService" });
-
-  oOpenApiDocument.info = {
-    title: "Flowmate API",
-    description: "API reference for Flowmate master data, requests, tasks, attachments, administration, and actions.",
-    version: "1.0.0"
-  };
-  oOpenApiDocument.servers = [{
-    url: SERVICE_PATH,
-    description: "Flowmate OData V4 service"
-  }];
-  oOpenApiDocument.components ||= {};
-  oOpenApiDocument.components.securitySchemes = {
-    bearerAuth: {
-      type: "http",
-      scheme: "bearer",
-      bearerFormat: "JWT",
-      description: "BTP XSUAA access token"
-    },
-    basicAuth: {
-      type: "http",
-      scheme: "basic",
-      description: "Local development user credentials"
-    }
-  };
-  oOpenApiDocument.security = [
-    { bearerAuth: [] },
-    { basicAuth: [] }
-  ];
+  const oOpenApiDocument = createOpenApiDocument(cds.clone(cds.model));
 
   const fnContext = cds.middlewares.context();
   const fnAuthenticate = cds.middlewares.auth();

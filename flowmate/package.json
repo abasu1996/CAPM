@@ -27,6 +27,7 @@
     "swagger": "cds watch --in-memory --port 4004 --open api-docs",
     "swagger:hybrid": "cds bind --profile hybrid --exec -- cds watch --profile hybrid --port 4004 --open api-docs",
     "swagger:dialog": "cds bind --profile Dialog-Hybrid --exec -- cds watch --profile Dialog-Hybrid --port 4004 --open api-docs",
+    "swagger:generate": "node scripts/generate-openapi.js",
     "seed:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js",
     "delete:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js --delete",
     "setup:api-key": "bash scripts/create-flowmate-api-key.sh"

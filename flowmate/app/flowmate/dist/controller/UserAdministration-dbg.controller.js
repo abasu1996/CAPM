@@ -167,6 +167,22 @@ sap.ui.define([
             this.byId("userTeamValueHelpDialog").open();
         },
 
+        onUserTeamSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("userEdit");
+            oModel.setProperty("/team_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/teamName", oContext.getProperty("name") || oContext.getProperty("teamCode"));
+        },
+
+        onUserTeamLiveChange() {
+            this.getView().getModel("userEdit").setProperty("/team_ID", "");
+        },
+
         onUserTeamValueHelpSearch(oEvent) {
             this._filterTeams(oEvent.getSource(), oEvent.getParameter("value") || "");
         },
@@ -196,6 +212,37 @@ sap.ui.define([
         onOpenManagerValueHelpRequest() {
             this._filterManagerUsers(this.byId("managerValueHelpDialog"), "");
             this.byId("managerValueHelpDialog").open();
+        },
+
+        onManagerSuggest(oEvent) {
+            const sCurrentUserId = this.getView().getModel("userEdit").getProperty("/ID");
+            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+
+            if (sCurrentUserId) {
+                aFilters.push(new Filter("ID", FilterOperator.NE, sCurrentUserId));
+            }
+
+            this._filterSuggestionItems(oEvent, [
+                "displayName",
+                "email",
+                "userPrincipalName"
+            ], aFilters);
+        },
+
+        onManagerSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (!oContext) {
+                return;
+            }
+
+            const oModel = this.getView().getModel("userEdit");
+            oModel.setProperty("/manager_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/managerName", oContext.getProperty("displayName"));
+        },
+
+        onManagerLiveChange() {
+            this.getView().getModel("userEdit").setProperty("/manager_ID", "");
         },
 
         onManagerValueHelpSearch(oEvent) {

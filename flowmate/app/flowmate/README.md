@@ -33,12 +33,14 @@ The Flowmate OData V4 service is available through an interactive Swagger UI.
 - Local Swagger UI: `http://localhost:4004/api-docs`
 - Local OpenAPI JSON: `http://localhost:4004/api-docs/openapi.json`
 - Deployed Swagger UI: `<approuter-base-url>/api-docs`
+- Shareable OpenAPI file: `docs/flowmate-openapi.json`
 
 Start it locally with `npm run swagger`. Use `npm run swagger:hybrid` or
 `npm run swagger:dialog` when the corresponding HANA binding is required.
+Regenerate the checked-in OpenAPI file after service-model changes with
+`npm run swagger:generate`.
 Access is restricted to users with the `Admin` or `UserProvisioning` role.
 
 #### Pre-requisites:
 
 1. Active NodeJS LTS (Long Term Support) version and associated supported NPM version.  (See https://nodejs.org)
-

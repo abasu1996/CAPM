@@ -10,6 +10,9 @@ sap.ui.define([
 
     const CODE_LISTS = {
         ProcessTypes: { tableId: "processTypesTable", titleKey: "processTypesConfigTitle" },
+        PaymentCategories: { tableId: "paymentCategoriesTable", titleKey: "paymentCategoriesConfigTitle" },
+        FtkEntities: { tableId: "ftkEntitiesTable", titleKey: "ftkEntitiesConfigTitle" },
+        Priorities: { tableId: "prioritiesTable", titleKey: "prioritiesConfigTitle" },
         ProcessStatus: { tableId: "processStatusTable", titleKey: "processStatusesConfigTitle" },
         TaskStatus: { tableId: "taskStatusTable", titleKey: "taskStatusesConfigTitle" },
         RequestDropDown: { tableId: "requestDropDownTable", titleKey: "requestDropdownConfigTitle" }

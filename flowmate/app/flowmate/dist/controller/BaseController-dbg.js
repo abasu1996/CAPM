@@ -2,8 +2,10 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/ui/core/mvc/Controller",
     "sap/ui/core/routing/History",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
     "flowmate/model/serviceUrl"
-], (MessageToast, Controller, History, serviceUrl) => {
+], (MessageToast, Controller, History, Filter, FilterOperator, serviceUrl) => {
     "use strict";
 
     const SERVICE_V4_URL = "odata/v4/flowmate/";
@@ -81,6 +83,51 @@ sap.ui.define([
                 .filter(Boolean))];
 
             return aNames.join(", ");
+        },
+
+        onUserSuggest(oEvent) {
+            this._filterSuggestionItems(oEvent, [
+                "displayName",
+                "email",
+                "userPrincipalName"
+            ], [new Filter("isActive", FilterOperator.EQ, true)]);
+        },
+
+        onTeamSuggest(oEvent) {
+            this._filterSuggestionItems(oEvent, [
+                "teamCode",
+                "name",
+                "description"
+            ], [new Filter("isActive", FilterOperator.EQ, true)]);
+        },
+
+        _filterSuggestionItems(oEvent, aSearchProperties, aFixedFilters = []) {
+            const oBinding = oEvent.getSource().getBinding("suggestionItems");
+
+            if (!oBinding) {
+                return;
+            }
+
+            const sQuery = (oEvent.getParameter("suggestValue") || "").trim();
+            const aFilters = [...aFixedFilters];
+
+            if (sQuery) {
+                aFilters.push(new Filter({
+                    filters: aSearchProperties.map((sProperty) => new Filter({
+                        path: sProperty,
+                        operator: FilterOperator.Contains,
+                        value1: sQuery,
+                        caseSensitive: false
+                    })),
+                    and: false
+                }));
+            }
+
+            oBinding.filter(aFilters);
+        },
+
+        _getSuggestionContext(oEvent) {
+            return oEvent.getParameter("selectedItem")?.getBindingContext();
         },
 
         _normalizeExpandedCollection(vCollection) {

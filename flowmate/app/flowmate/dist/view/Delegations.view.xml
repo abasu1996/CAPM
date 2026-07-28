@@ -3,7 +3,8 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.f"
-    xmlns:form="sap.ui.layout.form">
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
     <f:DynamicPage
         id="delegationsPage"
         class="flowmatePage"
@@ -156,16 +157,36 @@
                         enabled="{newDelegation>/onBehalfOfUser}"
                         required="{newDelegation>/onBehalfOfUser}"
                         showValueHelp="true"
-                        valueHelpOnly="true"
-                        valueHelpRequest=".onDelegatorValueHelpRequest" />
+                        showSuggestion="true"
+                        startSuggestion="1"
+                        filterSuggests="false"
+                        suggest=".onUserSuggest"
+                        suggestionItemSelected=".onDelegatorSuggestionSelected"
+                        liveChange=".onDelegatorLiveChange"
+                        valueHelpRequest=".onDelegatorValueHelpRequest"
+                        suggestionItems="{/Users}">
+                        <suggestionItems>
+                            <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                        </suggestionItems>
+                    </Input>
                     <Label text="{i18n>delegateLabel}" required="true" />
                     <Input
                         value="{newDelegation>/delegateName}"
                         placeholder="{i18n>chooseUserPlaceholder}"
                         required="true"
                         showValueHelp="true"
-                        valueHelpOnly="true"
-                        valueHelpRequest=".onDelegateValueHelpRequest" />
+                        showSuggestion="true"
+                        startSuggestion="1"
+                        filterSuggests="false"
+                        suggest=".onUserSuggest"
+                        suggestionItemSelected=".onDelegateSuggestionSelected"
+                        liveChange=".onDelegateLiveChange"
+                        valueHelpRequest=".onDelegateValueHelpRequest"
+                        suggestionItems="{/Users}">
+                        <suggestionItems>
+                            <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                        </suggestionItems>
+                    </Input>
                     <Label text="{i18n>startDateLabel}" required="true" />
                     <DatePicker
                         value="{newDelegation>/startDate}"
