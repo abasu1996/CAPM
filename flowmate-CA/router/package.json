@@ -1,0 +1,11 @@
+{
+  "name": "flowmate-ca-approuter",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@sap/approuter": "^20"
+  },
+  "scripts": {
+    "start": "node node_modules/@sap/approuter/approuter.js"
+  }
+}

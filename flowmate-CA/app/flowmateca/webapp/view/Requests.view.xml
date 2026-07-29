@@ -1,0 +1,82 @@
+<mvc:View
+  controllerName="flowmateca.controller.Requests"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
+  xmlns="sap.m">
+  <Page class="caPage" showNavButton="true" navButtonPress=".onNavHome" title="{i18n>myRequests}">
+    <headerContent>
+      <Button text="{i18n>createRequest}" icon="sap-icon://add" type="Emphasized" press=".onCreate"/>
+      <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+    </headerContent>
+    <subHeader>
+      <OverflowToolbar class="caFilterBar">
+        <SearchField
+          id="requestSearch"
+          width="18rem"
+          placeholder="Search ID, title or requester"
+          liveChange=".onFilterChange"
+          search=".onFilterChange"/>
+        <ComboBox
+          id="requestTypeFilter"
+          width="15rem"
+          placeholder="Request type"
+          items="{catalog>/requestTypes}"
+          selectionChange=".onRequestTypeChange">
+          <core:Item key="{catalog>code}" text="{catalog>name}"/>
+        </ComboBox>
+        <ComboBox
+          id="requestVariantFilter"
+          width="15rem"
+          placeholder="Process variant"
+          items="{catalog>/filteredVariants}"
+          selectionChange=".onFilterChange">
+          <core:Item key="{catalog>code}" text="{catalog>name}"/>
+        </ComboBox>
+        <Select id="requestStatusFilter" width="11rem" change=".onFilterChange">
+          <core:Item key="" text="All statuses"/>
+          <core:Item key="SUBMITTED" text="Submitted"/>
+          <core:Item key="IN_PROGRESS" text="In Progress"/>
+          <core:Item key="SENT_BACK" text="Sent Back"/>
+          <core:Item key="COMPLETED" text="Completed"/>
+          <core:Item key="REJECTED" text="Rejected"/>
+        </Select>
+        <ToolbarSpacer/>
+        <Button text="Clear" icon="sap-icon://clear-filter" type="Transparent" press=".onClearFilters"/>
+      </OverflowToolbar>
+    </subHeader>
+    <content>
+      <Table
+        id="requestsTable"
+        items="{list>/items}"
+        mode="None"
+        growing="true"
+        growingScrollToLoad="true"
+        noDataText="No requests match the selected filters"
+        itemPress=".onItemPress"
+        class="caWorklistTable">
+        <columns>
+          <Column width="12rem"><Text text="Request ID"/></Column>
+          <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestType}"/></Column>
+          <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestVariant}"/></Column>
+          <Column><Text text="{i18n>title}"/></Column>
+          <Column width="9rem"><Text text="{i18n>status}"/></Column>
+          <Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>priority}"/></Column>
+          <Column width="9rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>dueDate}"/></Column>
+        </columns>
+        <items>
+          <ColumnListItem type="Navigation">
+            <cells>
+              <ObjectIdentifier title="{list>referenceNumber}" text="{list>requesterName}"/>
+              <Text text="{list>requestType/name}"/>
+              <Text text="{list>requestVariant/name}"/>
+              <Text text="{list>title}" maxLines="2"/>
+              <ObjectStatus text="{list>status/name}" state="{path: 'list>status/code', formatter: '.statusState'}"/>
+              <ObjectStatus text="{list>priority/name}" state="{path: 'list>priority/code', formatter: '.priorityState'}"/>
+              <Text text="{path: 'list>dueDate', formatter: '.formatDate'}"/>
+            </cells>
+          </ColumnListItem>
+        </items>
+      </Table>
+    </content>
+  </Page>
+</mvc:View>

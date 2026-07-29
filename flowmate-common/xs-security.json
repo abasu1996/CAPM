@@ -1,0 +1,40 @@
+{
+  "xsappname": "flowmate-common",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.MasterDataRead",
+      "description": "Read shared Flowmate master data"
+    },
+    {
+      "name": "$XSAPPNAME.MasterDataAdmin",
+      "description": "Maintain shared Flowmate master data"
+    }
+  ],
+  "authorities": [
+    "$XSAPPNAME.MasterDataRead",
+    "$XSAPPNAME.MasterDataAdmin"
+  ],
+  "role-templates": [
+    {
+      "name": "MasterDataRead",
+      "description": "Read shared Flowmate master data",
+      "scope-references": [
+        "$XSAPPNAME.MasterDataRead"
+      ]
+    },
+    {
+      "name": "MasterDataAdmin",
+      "description": "Maintain shared Flowmate master data",
+      "scope-references": [
+        "$XSAPPNAME.MasterDataRead",
+        "$XSAPPNAME.MasterDataAdmin"
+      ]
+    }
+  ],
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://*.cfapps.ap11.hana.ondemand.com/**"
+    ]
+  }
+}

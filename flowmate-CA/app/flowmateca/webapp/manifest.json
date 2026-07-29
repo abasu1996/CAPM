@@ -1,0 +1,193 @@
+{
+  "_version": "1.84.0",
+  "sap.app": {
+    "id": "flowmateca",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.1.0"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "dataSources": {
+      "mainService": {
+        "uri": "odata/v4/flowmate-ca/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      },
+      "masterService": {
+        "uri": "odata/v4/flowmate-ca-master/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "FlowmateCA-manage": {
+          "semanticObject": "FlowmateCA",
+          "action": "manage",
+          "title": "{{flpTitle}}",
+          "subTitle": "{{flpSubtitle}}",
+          "icon": "sap-icon://process",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "flowmate.ca.service"
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.f": {},
+        "sap.ui.core": {},
+        "sap.ui.layout": {},
+        "sap.uxap": {},
+        "sap.ui.unified": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "master": {
+        "dataSource": "masterService",
+        "preload": false,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true
+        }
+      },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "flowmateca.i18n.i18n"
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "rootView": {
+      "viewName": "flowmateca.view.App",
+      "type": "XML",
+      "id": "appRoot",
+      "async": true
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "type": "View",
+        "viewType": "XML",
+        "path": "flowmateca.view",
+        "controlId": "app",
+        "controlAggregation": "pages",
+        "transition": "fade",
+        "async": true
+      },
+      "routes": [
+        {
+          "name": "dashboard",
+          "pattern": "",
+          "target": "dashboard"
+        },
+        {
+          "name": "requests",
+          "pattern": "requests:?query:",
+          "target": "requests"
+        },
+        {
+          "name": "requestCreate",
+          "pattern": "requests/create",
+          "target": "requestCreate"
+        },
+        {
+          "name": "requestDetail",
+          "pattern": "requests/{requestId}",
+          "target": "requestDetail"
+        },
+        {
+          "name": "tasks",
+          "pattern": "tasks:?query:",
+          "target": "tasks"
+        },
+        {
+          "name": "taskDetail",
+          "pattern": "tasks/{taskId}",
+          "target": "taskDetail"
+        },
+        {
+          "name": "admin",
+          "pattern": "admin",
+          "target": "admin"
+        }
+      ],
+      "targets": {
+        "dashboard": {
+          "id": "Dashboard",
+          "name": "Dashboard"
+        },
+        "requests": {
+          "id": "Requests",
+          "name": "Requests"
+        },
+        "requestCreate": {
+          "id": "RequestCreate",
+          "name": "RequestCreate"
+        },
+        "requestDetail": {
+          "id": "RequestDetail",
+          "name": "RequestDetail"
+        },
+        "tasks": {
+          "id": "Tasks",
+          "name": "Tasks"
+        },
+        "taskDetail": {
+          "id": "TaskDetail",
+          "name": "TaskDetail"
+        },
+        "admin": {
+          "id": "Admin",
+          "name": "Admin"
+        }
+      }
+    }
+  }
+}

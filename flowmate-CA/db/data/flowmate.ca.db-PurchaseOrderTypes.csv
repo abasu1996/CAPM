@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+CENTRALIZED,Centralized PO,Centralized purchase order,true,10
+CIVIL_RR,Civil R and R,Civil repair and replacement,true,20
+POWER_RR,Power R and R,Power repair and replacement,true,30
+IN_HOUSE,In-house PO,In-house purchase order,true,40

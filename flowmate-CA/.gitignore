@@ -1,0 +1,11 @@
+node_modules/
+gen/
+resources/
+mta_archives/
+*.mtar
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+app/*/dist/
+.cdsrc-private.json
+.DS_Store

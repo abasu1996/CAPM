@@ -1,0 +1,59 @@
+_schema-version: "3.3"
+ID: flowmate-common
+version: 1.0.0
+description: Shared master data for Flowmate applications
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+
+modules:
+  - name: flowmate-common-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+      memory: 256M
+      host: flowmate-common-srv-${space}
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: flowmate-common-api
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: flowmate-common-auth
+      - name: flowmate-common-db
+
+  - name: flowmate-common-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: flowmate-common-db
+
+resources:
+  - name: flowmate-common-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-name: flowmate-common-auth
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: flowmate-common-${space}
+        tenant-mode: dedicated
+
+  - name: flowmate-common-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service-name: flowmate-common-db
+      service: hana
+      service-plan: hdi-shared

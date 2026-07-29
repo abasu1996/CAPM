@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+ENG,Engineering,Engineering materials,true,10
+IT,Information Technology,IT materials,true,20
+ADMIN,Administration,Administrative materials,true,30
+TRADING,Trading,Trading materials,true,40

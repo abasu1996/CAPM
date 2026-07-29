@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+CC100,Telecommunications,Telecommunications commodity,true,10
+CC200,IT Equipment,IT equipment commodity,true,20
+CC300,Professional Services,Professional services commodity,true,30

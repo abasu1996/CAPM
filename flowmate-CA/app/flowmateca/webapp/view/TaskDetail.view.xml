@@ -1,0 +1,136 @@
+<mvc:View
+  controllerName="flowmateca.controller.TaskDetail"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
+  xmlns:form="sap.ui.layout.form"
+  xmlns="sap.m">
+  <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{task>/taskName}">
+    <headerContent>
+      <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+      <Button
+        text="{i18n>claimTask}"
+        icon="sap-icon://employee-approvals"
+        type="Emphasized"
+        visible="{task>/canClaim}"
+        press=".onClaim"/>
+      <Button
+        text="{i18n>approve}"
+        icon="sap-icon://accept"
+        type="Accept"
+        visible="{task>/canProcess}"
+        press=".onApprove"/>
+      <Button
+        text="{i18n>sendBack}"
+        icon="sap-icon://undo"
+        type="Reject"
+        visible="{task>/canSendBack}"
+        press=".onOpenSendBack"/>
+    </headerContent>
+    <content>
+      <VBox>
+        <VBox class="caObjectHeader sapUiResponsiveContentPadding">
+          <HBox justifyContent="SpaceBetween" alignItems="Start" wrap="Wrap">
+            <VBox class="caObjectIdentity">
+              <ObjectStatus text="Task" state="Information" inverted="true"/>
+              <Title text="{task>/referenceNumber}" level="H1"/>
+              <Link text="{task>/request/referenceNumber}" press=".onRequestPress"/>
+            </VBox>
+            <ObjectStatus
+              text="{task>/status/name}"
+              state="{path: 'task>/status/code', formatter: '.statusState'}"
+              inverted="true"/>
+          </HBox>
+          <FlexBox wrap="Wrap" class="caFactGrid">
+            <VBox class="caFact">
+              <Label text="Workflow Step"/>
+              <ObjectNumber number="{task>/stepNo}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="Assigned User"/>
+              <Text text="{task>/assignedName}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="Assigned Team"/>
+              <Text text="{task>/assignedTeamName}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="{i18n>dueDate}"/>
+              <Text text="{path: 'task>/dueDate', formatter: '.formatDate'}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="Mandatory"/>
+              <ObjectStatus text="{= ${task>/isMandatory} ? 'Yes' : 'No' }" state="{= ${task>/isMandatory} ? 'Warning' : 'None' }"/>
+            </VBox>
+          </FlexBox>
+        </VBox>
+
+        <VBox class="sapUiResponsiveContentPadding">
+          <Panel headerText="Activity" class="caFormSection">
+            <content>
+              <form:SimpleForm editable="false" layout="ColumnLayout" columnsXL="2" columnsL="2" columnsM="1">
+                <Label text="Task"/>
+                <Text text="{task>/taskName}"/>
+                <Label text="{i18n>description}"/>
+                <Text text="{task>/description}"/>
+                <Label text="Decision"/>
+                <Text text="{task>/decision}"/>
+                <Label text="Remarks"/>
+                <Text text="{task>/remarks}"/>
+              </form:SimpleForm>
+            </content>
+          </Panel>
+          <Panel headerText="Request Context" class="caFormSection">
+            <content>
+              <form:SimpleForm editable="false" layout="ColumnLayout" columnsXL="2" columnsL="2" columnsM="1">
+                <Label text="Request"/>
+                <Link text="{task>/request/referenceNumber}" press=".onRequestPress"/>
+                <Label text="{i18n>title}"/>
+                <Text text="{task>/request/title}"/>
+                <Label text="{i18n>requester}"/>
+                <Text text="{task>/request/requesterName}"/>
+                <Label text="{i18n>status}"/>
+                <ObjectStatus text="{task>/request/status/name}" state="{path: 'task>/request/status/code', formatter: '.statusState'}"/>
+              </form:SimpleForm>
+            </content>
+          </Panel>
+        </VBox>
+      </VBox>
+    </content>
+
+    <dependents>
+      <Dialog id="decisionDialog" title="{decision>/title}" contentWidth="34rem">
+        <content>
+          <VBox class="sapUiSmallMargin">
+            <Label text="Remarks"/>
+            <TextArea value="{decision>/remarks}" rows="4" width="100%"/>
+          </VBox>
+        </content>
+        <beginButton>
+          <Button text="Confirm" type="Emphasized" press=".onConfirmDecision"/>
+        </beginButton>
+        <endButton>
+          <Button text="{i18n>cancel}" press=".onCloseDecision"/>
+        </endButton>
+      </Dialog>
+
+      <Dialog id="sendBackDialog" title="Send Task Back" contentWidth="38rem">
+        <content>
+          <form:SimpleForm editable="true" layout="ResponsiveGridLayout" class="sapUiSmallMargin">
+            <Label text="Target Step" required="true"/>
+            <ComboBox selectedKey="{sendBack>/targetStepNo}" items="{sendBack>/steps}">
+              <core:Item key="{sendBack>stepNo}" text="{= ${sendBack>stepNo} + '. ' + ${sendBack>stepName} }"/>
+            </ComboBox>
+            <Label text="Reason" required="true"/>
+            <TextArea value="{sendBack>/remarks}" rows="4"/>
+          </form:SimpleForm>
+        </content>
+        <beginButton>
+          <Button text="{i18n>sendBack}" type="Reject" press=".onConfirmSendBack"/>
+        </beginButton>
+        <endButton>
+          <Button text="{i18n>cancel}" press=".onCloseSendBack"/>
+        </endButton>
+      </Dialog>
+    </dependents>
+  </Page>
+</mvc:View>

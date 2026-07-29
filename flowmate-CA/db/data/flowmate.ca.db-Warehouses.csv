@@ -1,0 +1,3 @@
+code,name,description,isActive,sortOrder
+ADVANTIS,Advantis Warehouse,Advantis material reservation,true,10
+ACE,ACE Warehouse,ACE material reservation,true,20

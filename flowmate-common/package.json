@@ -1,0 +1,69 @@
+{
+  "name": "flowmate-common",
+  "version": "1.0.0",
+  "description": "Shared master data service for Flowmate applications",
+  "private": true,
+  "dependencies": {
+    "@cap-js/hana": "^2",
+    "@sap/cds": "9.9.1",
+    "@sap/xssec": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2",
+    "@sap/cds-dk": "9.9.1"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch --port 4020",
+    "build": "cds build --production",
+    "build:mta": "mbt build",
+    "deploy": "cf deploy mta_archives/flowmate-common_1.0.0.mtar",
+    "migrate:flowmate": "node scripts/migrate-flowmate-master-data.js"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite"
+      },
+      "[development]": {
+        "auth": {
+          "kind": "basic",
+          "users": {
+            "*": false,
+            "ca.admin@flowmate.demo": {
+              "password": "FlowmateCAAdmin1!",
+              "roles": [
+                "MasterDataAdmin",
+                "MasterDataRead"
+              ]
+            },
+            "ca.requester@flowmate.demo": {
+              "password": "FlowmateCAUser1!",
+              "roles": [
+                "MasterDataRead"
+              ]
+            },
+            "ca.processor@flowmate.demo": {
+              "password": "FlowmateCAUser1!",
+              "roles": [
+                "MasterDataRead"
+              ]
+            },
+            "ca.finance@flowmate.demo": {
+              "password": "FlowmateCAUser1!",
+              "roles": [
+                "MasterDataRead"
+              ]
+            }
+          }
+        }
+      },
+      "[production]": {
+        "auth": "xsuaa",
+        "db": {
+          "kind": "hana"
+        }
+      }
+    }
+  }
+}

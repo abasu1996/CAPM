@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+LKR,Sri Lankan Rupee,Local currency,true,10
+USD,US Dollar,Foreign currency,true,20
+EUR,Euro,Foreign currency,true,30

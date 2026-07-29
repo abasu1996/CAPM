@@ -1,0 +1,6 @@
+code,name,description,isActive,sortOrder
+OPEN,Open,Task is ready for processing,true,10
+IN_PROGRESS,In Progress,Task has been claimed,true,20
+SENT_BACK,Sent Back,Task was returned for correction,true,30
+APPROVED,Approved,Task has been approved,true,40
+REJECTED,Rejected,Task has been rejected,true,50

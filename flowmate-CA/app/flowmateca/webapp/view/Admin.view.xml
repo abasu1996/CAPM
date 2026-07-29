@@ -1,0 +1,272 @@
+<mvc:View
+  controllerName="flowmateca.controller.Admin"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
+  xmlns="sap.m">
+  <Page class="caPage" title="{i18n>adminConfig}" showNavButton="true" navButtonPress=".onNavHome">
+    <headerContent>
+      <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+    </headerContent>
+    <content>
+      <VBox class="sapUiResponsiveContentPadding">
+        <MessageStrip
+          text="Configuration changes affect newly created requests. Existing request step instances retain their original workflow."
+          type="Information"
+          showIcon="true"
+          class="sapUiSmallMarginBottom"/>
+        <IconTabBar expandable="false" class="caAdminTabs">
+          <items>
+            <IconTabFilter key="steps" text="Process Steps" icon="sap-icon://process">
+              <Toolbar class="caSectionToolbar">
+                <Title text="Workflow Step Configuration" level="H3"/>
+                <ToolbarSpacer/>
+                <Button text="Add Step" icon="sap-icon://add" type="Emphasized" press=".onAddStep"/>
+              </Toolbar>
+              <Table items="{admin>/steps}" growing="true" class="caAdminTable">
+                <columns>
+                  <Column width="13rem"><Text text="{i18n>requestType}"/></Column>
+                  <Column width="14rem"><Text text="{i18n>requestVariant}"/></Column>
+                  <Column width="5rem"><Text text="Step"/></Column>
+                  <Column><Text text="Step Name"/></Column>
+                  <Column minScreenWidth="Desktop" demandPopin="true"><Text text="Processor Team"/></Column>
+                  <Column width="8rem"><Text text="Mandatory"/></Column>
+                  <Column width="6rem"><Text text="SLA"/></Column>
+                  <Column width="6rem"><Text text="Actions"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{admin>requestType/name}"/>
+                      <Text text="{admin>requestVariant/name}"/>
+                      <Input value="{admin>stepNo}" type="Number"/>
+                      <Input value="{admin>stepName}"/>
+                      <ComboBox selectedKey="{admin>processorTeam_ID}" items="{admin>/teams}">
+                        <core:Item key="{admin>ID}" text="{admin>name}"/>
+                      </ComboBox>
+                      <Switch state="{admin>isMandatory}" customTextOn="Yes" customTextOff="No"/>
+                      <StepInput value="{admin>slaDays}" min="1" max="30" width="5rem"/>
+                      <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveStep"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeleteStep"/>
+                      </HBox>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </IconTabFilter>
+
+            <IconTabFilter key="types" text="Process Catalog" icon="sap-icon://list">
+              <Toolbar class="caSectionToolbar">
+                <Title text="Process Types and Variants" level="H3"/>
+                <ToolbarSpacer/>
+                <Button text="Add Variant" icon="sap-icon://add" type="Emphasized" press=".onAddVariant"/>
+              </Toolbar>
+              <Table items="{admin>/variants}" growing="true" class="caAdminTable">
+                <columns>
+                  <Column width="14rem"><Text text="{i18n>requestType}"/></Column>
+                  <Column width="12rem"><Text text="Code"/></Column>
+                  <Column><Text text="Name"/></Column>
+                  <Column><Text text="{i18n>description}"/></Column>
+                  <Column width="7rem"><Text text="Active"/></Column>
+                  <Column width="6rem"><Text text="Actions"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{admin>requestType/name}"/>
+                      <Text text="{admin>code}"/>
+                      <Input value="{admin>name}"/>
+                      <Input value="{admin>description}"/>
+                      <Switch state="{admin>isActive}"/>
+                      <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveVariant"/>
+                        <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteVariant"/>
+                      </HBox>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </IconTabFilter>
+
+            <IconTabFilter key="users" text="Users" icon="sap-icon://employee">
+              <Toolbar class="caSectionToolbar">
+                <Title text="Users" level="H3"/>
+                <ToolbarSpacer/>
+                <Button text="Add User" icon="sap-icon://add-employee" type="Emphasized" press=".onAddUser"/>
+              </Toolbar>
+              <Table items="{admin>/users}" growing="true" class="caAdminTable">
+                <columns>
+                  <Column><Text text="Display Name"/></Column>
+                  <Column><Text text="Email"/></Column>
+                  <Column minScreenWidth="Desktop" demandPopin="true"><Text text="Manager"/></Column>
+                  <Column width="7rem"><Text text="Active"/></Column>
+                  <Column width="6rem"><Text text="Actions"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Input value="{admin>displayName}"/>
+                      <Input value="{admin>email}" type="Email"/>
+                      <ComboBox selectedKey="{admin>manager_ID}" items="{admin>/users}" showSecondaryValues="true">
+                        <core:ListItem key="{admin>ID}" text="{admin>displayName}" additionalText="{admin>email}"/>
+                      </ComboBox>
+                      <Switch state="{admin>isActive}"/>
+                      <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveUser"/>
+                        <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteUser"/>
+                      </HBox>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </IconTabFilter>
+
+            <IconTabFilter key="teams" text="Teams" icon="sap-icon://org-chart">
+              <Toolbar class="caSectionToolbar">
+                <Title text="Team Structure" level="H3"/>
+                <ToolbarSpacer/>
+                <Button text="Add Team" icon="sap-icon://add" type="Emphasized" press=".onAddTeam"/>
+              </Toolbar>
+              <Tree items="{path: 'admin>/teamTree', parameters: {arrayNames: ['children']}}" mode="None" class="caTeamTree">
+                <StandardTreeItem title="{admin>title}" icon="{admin>icon}" type="Inactive"/>
+              </Tree>
+              <Table items="{admin>/teams}" growing="true" class="caAdminTable sapUiSmallMarginTop">
+                <columns>
+                  <Column width="10rem"><Text text="Team Code"/></Column>
+                  <Column><Text text="Team Name"/></Column>
+                  <Column><Text text="{i18n>description}"/></Column>
+                  <Column width="7rem"><Text text="Active"/></Column>
+                  <Column width="6rem"><Text text="Actions"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{admin>teamCode}"/>
+                      <Input value="{admin>name}"/>
+                      <Input value="{admin>description}"/>
+                      <Switch state="{admin>isActive}"/>
+                      <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveTeam"/>
+                        <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteTeam"/>
+                      </HBox>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </IconTabFilter>
+
+            <IconTabFilter key="vendors" text="Vendors" icon="sap-icon://supplier">
+              <Toolbar class="caSectionToolbar">
+                <Title text="Vendor Master" level="H3"/>
+                <ToolbarSpacer/>
+                <Button text="Add Vendor" icon="sap-icon://add" type="Emphasized" press=".onAddVendor"/>
+              </Toolbar>
+              <Table items="{admin>/vendors}" growing="true" class="caAdminTable">
+                <columns>
+                  <Column width="12rem"><Text text="Vendor Code"/></Column>
+                  <Column><Text text="Vendor Name"/></Column>
+                  <Column><Text text="Vendor Email"/></Column>
+                  <Column width="7rem"><Text text="Active"/></Column>
+                  <Column width="6rem"><Text text="Actions"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{admin>vendorCode}"/>
+                      <Input value="{admin>vendorName}"/>
+                      <Input value="{admin>vendorEmail}" type="Email"/>
+                      <Switch state="{admin>isActive}"/>
+                      <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveVendor"/>
+                        <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteVendor"/>
+                      </HBox>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </IconTabFilter>
+          </items>
+        </IconTabBar>
+      </VBox>
+    </content>
+
+    <dependents>
+      <Dialog id="addConfigDialog" title="{newItem>/title}" contentWidth="38rem">
+        <content>
+          <VBox class="sapUiSmallMargin">
+            <VBox visible="{newItem>/isStep}">
+              <Label text="{i18n>requestType}" required="true"/>
+              <ComboBox selectedKey="{newItem>/requestTypeCode}" items="{admin>/requestTypes}" selectionChange=".onNewStepTypeChange">
+                <core:Item key="{admin>code}" text="{admin>name}"/>
+              </ComboBox>
+              <Label text="{i18n>requestVariant}" required="true" class="sapUiSmallMarginTop"/>
+              <ComboBox selectedKey="{newItem>/requestVariantCode}" items="{newItem>/variants}">
+                <core:Item key="{newItem>code}" text="{newItem>name}"/>
+              </ComboBox>
+              <Label text="Step Number" required="true" class="sapUiSmallMarginTop"/>
+              <StepInput value="{newItem>/stepNo}" min="1" max="50"/>
+              <Label text="Step Name" required="true" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/name}"/>
+              <Label text="Activity Description" class="sapUiSmallMarginTop"/>
+              <TextArea value="{newItem>/description}" rows="3"/>
+              <Label text="Processor Team" class="sapUiSmallMarginTop"/>
+              <ComboBox selectedKey="{newItem>/teamId}" items="{admin>/teams}">
+                <core:Item key="{admin>ID}" text="{admin>name}"/>
+              </ComboBox>
+              <Label text="Task Name" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/taskName}"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isVariant}">
+              <Label text="{i18n>requestType}" required="true"/>
+              <ComboBox selectedKey="{newItem>/requestTypeCode}" items="{admin>/requestTypes}">
+                <core:Item key="{admin>code}" text="{admin>name}"/>
+              </ComboBox>
+              <Label text="Variant Code" required="true" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/code}"/>
+              <Label text="Name" required="true" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/name}"/>
+              <Label text="{i18n>description}" class="sapUiSmallMarginTop"/>
+              <TextArea value="{newItem>/description}" rows="3"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isUser}">
+              <Label text="Display Name" required="true"/>
+              <Input value="{newItem>/name}"/>
+              <Label text="Email" required="true" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/email}" type="Email"/>
+              <Label text="Manager" class="sapUiSmallMarginTop"/>
+              <ComboBox selectedKey="{newItem>/managerId}" items="{admin>/users}" showSecondaryValues="true">
+                <core:ListItem key="{admin>ID}" text="{admin>displayName}" additionalText="{admin>email}"/>
+              </ComboBox>
+            </VBox>
+
+            <VBox visible="{newItem>/isTeam}">
+              <Label text="Team Code" required="true"/>
+              <Input value="{newItem>/code}"/>
+              <Label text="Team Name" required="true" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/name}"/>
+              <Label text="{i18n>description}" class="sapUiSmallMarginTop"/>
+              <TextArea value="{newItem>/description}" rows="3"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isVendor}">
+              <Label text="Vendor Code" required="true"/>
+              <Input value="{newItem>/code}"/>
+              <Label text="Vendor Name" required="true" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/name}"/>
+              <Label text="Vendor Email" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/email}" type="Email"/>
+            </VBox>
+          </VBox>
+        </content>
+        <beginButton>
+          <Button text="{i18n>add}" type="Emphasized" press=".onCreateConfigItem"/>
+        </beginButton>
+        <endButton>
+          <Button text="{i18n>cancel}" press=".onCloseConfigDialog"/>
+        </endButton>
+      </Dialog>
+    </dependents>
+  </Page>
+</mvc:View>

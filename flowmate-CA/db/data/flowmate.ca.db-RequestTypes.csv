@@ -1,0 +1,9 @@
+code,name,description,isActive,sortOrder,icon
+MATERIAL_CODE,Material Code Creation,Create or modify engineering admin consumable and trading material codes,true,10,sap-icon://product
+SERVICE_CODE,Service Code Creation,Create or modify service codes,true,20,sap-icon://technical-object
+EQUIPMENT_CODE,Equipment Code Creation,Create or update equipment master codes,true,30,sap-icon://machine
+PROJECT_CODE,Project Code Creation,Create or modify project function-location and activity codes,true,40,sap-icon://project-definition-triangle-2
+MATERIAL_RESERVATION,Material Reservation,Reserve and issue warehouse or direct-delivery materials,true,50,sap-icon://inventory
+OUTLINE_CONTRACT,Outline Contract,Create or amend outline contracts,true,60,sap-icon://contract
+PURCHASE_ORDER,Purchase Order Creation,Create centralized purchase orders,true,70,sap-icon://purchase-order
+SERVICE_ENTRY_SHEET,Service Entry Sheet,Create or modify service entry sheets,true,80,sap-icon://receipt

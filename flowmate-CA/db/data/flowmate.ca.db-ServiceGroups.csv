@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+SG100,Technical Services,Technical service group,true,10
+SG200,Professional Services,Professional service group,true,20
+SG300,Maintenance Services,Maintenance service group,true,30

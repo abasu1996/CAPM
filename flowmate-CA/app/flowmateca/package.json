@@ -1,0 +1,14 @@
+{
+  "name": "flowmateca",
+  "version": "0.1.0",
+  "description": "Flowmate CA SAPUI5 application",
+  "private": true,
+  "devDependencies": {
+    "@sap/ux-ui5-tooling": "^1.18.1",
+    "@ui5/cli": "^4.0.33"
+  },
+  "scripts": {
+    "build": "ui5 build --dest dist --clean-dest && cp xs-app.json dist/xs-app.json",
+    "build:cf": "npm run build && cd dist && zip -rq flowmateca_app-content.zip . -x flowmateca_app-content.zip"
+  }
+}

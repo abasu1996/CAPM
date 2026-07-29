@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+3000,Trading Goods,Trading goods valuation,true,10
+3100,Raw Materials,Raw materials valuation,true,20
+3200,Services,Service valuation,true,30

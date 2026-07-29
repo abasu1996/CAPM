@@ -1,0 +1,65 @@
+{
+  "xsappname": "flowmate-ca",
+  "tenant-mode": "dedicated",
+  "description": "Flowmate CA authorization model",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.CARequester",
+      "description": "Create and track Commerce Automation requests"
+    },
+    {
+      "name": "$XSAPPNAME.CAProcessor",
+      "description": "Process Commerce Automation tasks"
+    },
+    {
+      "name": "$XSAPPNAME.CASupervisor",
+      "description": "Supervise queues and maintain delegations"
+    },
+    {
+      "name": "$XSAPPNAME.CAAdmin",
+      "description": "Maintain Flowmate CA configuration and master data"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "CARequester",
+      "description": "Flowmate CA requester",
+      "scope-references": [
+        "$XSAPPNAME.CARequester"
+      ]
+    },
+    {
+      "name": "CAProcessor",
+      "description": "Flowmate CA processor",
+      "scope-references": [
+        "$XSAPPNAME.CAProcessor"
+      ]
+    },
+    {
+      "name": "CASupervisor",
+      "description": "Flowmate CA supervisor",
+      "scope-references": [
+        "$XSAPPNAME.CASupervisor",
+        "$XSAPPNAME.CAProcessor"
+      ]
+    },
+    {
+      "name": "CAAdmin",
+      "description": "Flowmate CA administrator",
+      "scope-references": [
+        "$XSAPPNAME.CAAdmin",
+        "$XSAPPNAME.CARequester",
+        "$XSAPPNAME.CAProcessor",
+        "$XSAPPNAME.CASupervisor"
+      ]
+    }
+  ],
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://*.cfapps.*.hana.ondemand.com/**",
+      "https://*.launchpad.cfapps.*.hana.ondemand.com/**",
+      "https://*.workzone.cfapps.*.hana.ondemand.com/**",
+      "http://localhost:*/**"
+    ]
+  }
+}

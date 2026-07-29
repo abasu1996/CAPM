@@ -1,0 +1,3 @@
+code,name,description,isActive,sortOrder
+PC100,Corporate,Corporate profit center,true,10
+PC200,Network,Network profit center,true,20

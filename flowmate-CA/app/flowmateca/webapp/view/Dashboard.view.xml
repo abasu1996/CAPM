@@ -1,0 +1,105 @@
+<mvc:View
+  controllerName="flowmateca.controller.Dashboard"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
+  xmlns="sap.m">
+  <Page class="caPage" showHeader="true">
+    <customHeader>
+      <OverflowToolbar class="caTopBar">
+        <Title text="Flowmate CA" level="H2"/>
+        <ToolbarSpacer/>
+        <Button icon="sap-icon://home" type="Transparent" tooltip="Workspace"/>
+        <Button icon="sap-icon://documents" type="Transparent" tooltip="Requests" press=".onRequests"/>
+        <Button icon="sap-icon://task" type="Transparent" tooltip="Tasks" press=".onTasks"/>
+        <Button
+          icon="sap-icon://action-settings"
+          type="Transparent"
+          tooltip="Administration"
+          visible="{app>/currentUser/isAdmin}"
+          press=".onAdmin"/>
+        <ToolbarSeparator/>
+        <Avatar displaySize="XS" initials="CA"/>
+        <Text text="{app>/currentUser/displayName}"/>
+      </OverflowToolbar>
+    </customHeader>
+    <content>
+      <VBox class="caDashboard sapUiResponsiveContentPadding">
+        <HBox alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap" class="caDashboardIntro">
+          <VBox>
+            <Title text="{i18n>dashboardTitle}" level="H1"/>
+            <Text text="Create, process and monitor supply-chain requests across Dialog and SAP teams."/>
+          </VBox>
+          <Button
+            text="{i18n>createRequest}"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onCreateRequest"/>
+        </HBox>
+
+        <FlexBox wrap="Wrap" class="caTileGrid" renderType="Div">
+          <GenericTile class="caTile caTileBlue" header="{i18n>myRequests}" subheader="Requests raised by you" press=".onMyRequests">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/myRequests}" icon="sap-icon://documents" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileTeal" header="{i18n>myTasks}" subheader="Tasks assigned to you" press=".onMyTasks">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/myOpenTasks}" icon="sap-icon://task" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileGold" header="{i18n>teamTasks}" subheader="Available in your teams" press=".onTeamTasks">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/myTeamTasks}" icon="sap-icon://group" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileOrange" header="{i18n>sentBack}" subheader="Waiting for correction" press=".onSentBack">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/sentBackRequests}" icon="sap-icon://undo" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileIndigo" header="{i18n>pendingApproval}" subheader="Approval tasks assigned to you" press=".onPendingApproval">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/pendingApproval}" icon="sap-icon://approvals" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileGreen" header="{i18n>completed}" subheader="Your completed requests" press=".onCompleted">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/completedRequests}" icon="sap-icon://complete" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+        </FlexBox>
+
+        <Toolbar class="caSectionToolbar">
+          <Title text="Commerce Automation Processes" level="H2"/>
+          <ToolbarSpacer/>
+          <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+        </Toolbar>
+        <List items="{path: '/RequestTypes', sorter: {path: 'sortOrder'}}" class="caProcessList" growing="true">
+          <CustomListItem type="Active" press=".onProcessPress">
+            <HBox alignItems="Center" class="caProcessRow">
+              <Avatar icon="{icon}" displayShape="Square" displaySize="S" class="caProcessIcon"/>
+              <VBox class="caProcessText">
+                <Title text="{name}" level="H4"/>
+                <Text text="{description}" maxLines="2"/>
+              </VBox>
+              <ToolbarSpacer/>
+              <Button icon="sap-icon://add" type="Transparent" tooltip="Create this request"/>
+            </HBox>
+          </CustomListItem>
+        </List>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

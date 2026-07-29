@@ -1,0 +1,366 @@
+:root {
+  --ca-border: #d9e2ec;
+  --ca-surface: #ffffff;
+  --ca-subtle: #f5f7fa;
+  --ca-text-muted: #526579;
+  --ca-blue: #0a6ed1;
+  --ca-teal: #087f8c;
+  --ca-green: #18864b;
+  --ca-gold: #a15c00;
+}
+
+.caPage,
+.caPage .sapMPageBgStandard {
+  background: #f5f7fa;
+}
+
+.caTopBar.sapMTB {
+  min-height: 3.25rem;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--ca-border);
+  background: #fff;
+}
+
+.caDashboard {
+  max-width: 92rem;
+  margin: 0 auto;
+}
+
+.caDashboardIntro {
+  min-height: 8rem;
+  padding: 1.25rem 0;
+}
+
+.caDashboardIntro .sapMTitle {
+  color: #14273d;
+}
+
+.caDashboardIntro .sapMText {
+  color: var(--ca-text-muted);
+  font-size: 1rem;
+}
+
+.caTileGrid {
+  gap: 1rem;
+  margin: 0 0 1.75rem;
+}
+
+.caTile.sapMGT {
+  width: 16.5rem;
+  height: 10rem;
+  border: 1px solid var(--ca-border);
+  border-radius: 8px;
+  box-shadow: 0 0.125rem 0.45rem rgba(20, 39, 61, 0.08);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.caTile.sapMGT:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.35rem 0.9rem rgba(20, 39, 61, 0.14);
+}
+
+.caTileBlue.sapMGT {
+  background: #eef6ff;
+  border-top: 4px solid #0a6ed1;
+}
+
+.caTileTeal.sapMGT {
+  background: #eaf8f7;
+  border-top: 4px solid #087f8c;
+}
+
+.caTileGold.sapMGT {
+  background: #fff7e6;
+  border-top: 4px solid #b76e00;
+}
+
+.caTileOrange.sapMGT {
+  background: #fff1eb;
+  border-top: 4px solid #d04a02;
+}
+
+.caTileIndigo.sapMGT {
+  background: #f3f1ff;
+  border-top: 4px solid #5c4fb3;
+}
+
+.caTileGreen.sapMGT {
+  background: #edf8f1;
+  border-top: 4px solid #18864b;
+}
+
+.caSectionToolbar.sapMTB {
+  min-height: 3.25rem;
+  padding: 0 0.25rem;
+  background: transparent;
+  border-bottom: 1px solid var(--ca-border);
+}
+
+.caProcessList.sapMList,
+.caWorklistTable.sapMList,
+.caAdminTable.sapMList {
+  border: 1px solid var(--ca-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.caProcessRow {
+  min-height: 4.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.caProcessIcon {
+  margin-right: 1rem;
+  background: #e8f2fd;
+  color: var(--ca-blue);
+}
+
+.caProcessText {
+  min-width: 0;
+  max-width: 56rem;
+}
+
+.caFilterBar.sapMTB {
+  min-height: 3.5rem;
+  padding: 0.35rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid var(--ca-border);
+}
+
+.caWorklistTable .sapMListTblHeaderCell {
+  background: #eef2f6;
+}
+
+.caWorklistTable .sapMListTblRow {
+  transition: background-color 120ms ease;
+}
+
+.caWorklistTable .sapMListTblRow:hover {
+  background: #f4f9ff;
+}
+
+.caCreatePage,
+.caDetailTabs > .sapMITBContainerContent,
+.caAdminTabs > .sapMITBContainerContent {
+  max-width: 96rem;
+  margin: 0 auto;
+}
+
+.caFormSection.sapMPanel {
+  margin-bottom: 1rem;
+  border: 1px solid var(--ca-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ca-surface);
+}
+
+.caFormSection .sapMPanelHdr,
+.caFormSection .sapMPanelWrappingDivTb {
+  background: #eef2f6;
+  border-bottom: 1px solid var(--ca-border);
+}
+
+.caObjectHeader {
+  color: #14273d;
+  background: linear-gradient(90deg, #f1f7fd 0%, #ffffff 62%, #f4f9f6 100%);
+  border-bottom: 1px solid var(--ca-border);
+}
+
+.caObjectIdentity {
+  gap: 0.35rem;
+  min-width: 18rem;
+}
+
+.caObjectIdentity > .sapMTitle {
+  color: #0a4a82;
+}
+
+.caHeaderSubtitle,
+.caMuted {
+  color: var(--ca-text-muted);
+}
+
+.caHeaderActions {
+  gap: 0.5rem;
+}
+
+.caFactGrid {
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.caFact {
+  width: 13rem;
+  min-height: 4.25rem;
+  padding: 0.65rem 0.8rem;
+  border-left: 3px solid #7ba9d6;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.caFact .sapMLabel,
+.caDetailField .sapMLabel {
+  color: var(--ca-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.caProcessPanel.sapMPanel {
+  border-bottom: 1px solid var(--ca-border);
+  background: #fff;
+}
+
+.caProcessFlow {
+  gap: 0;
+  padding: 1.25rem 1rem 0.5rem;
+}
+
+.caStepNode {
+  position: relative;
+  width: 14rem;
+  min-height: 9.5rem;
+  padding: 0 0.75rem 1rem;
+}
+
+.caStepNode::before {
+  position: absolute;
+  z-index: 0;
+  top: 1.55rem;
+  right: 50%;
+  width: 100%;
+  height: 0.3rem;
+  content: "";
+  background: #b7c8d9;
+}
+
+.caStepNode:first-child::before {
+  display: none;
+}
+
+.caMilestone.sapMBtn {
+  z-index: 1;
+  width: 3.2rem;
+  height: 3.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.caMilestone .sapMBtnInner {
+  min-width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+}
+
+.caMilestone .sapMBtnIcon {
+  line-height: 3rem;
+  font-size: 1.2rem;
+}
+
+.caMilestone .sapMBtnInner.sapMBtnAccept {
+  color: #126b3d;
+  border-color: #73c691;
+  background: #dff5e6;
+}
+
+.caMilestone .sapMBtnInner.sapMBtnEmphasized {
+  border-color: #0a6ed1;
+  background: #d9ebff;
+  color: #075aab;
+  box-shadow: 0 0 0 0.25rem rgba(10, 110, 209, 0.14);
+}
+
+.caStepNode .sapMTitle {
+  max-width: 100%;
+  margin-top: 0.45rem;
+  text-align: center;
+}
+
+.caStepNode .sapMText {
+  color: var(--ca-text-muted);
+  font-size: 0.75rem;
+}
+
+.caDetailFieldGrid {
+  gap: 0.75rem;
+  padding: 0.25rem;
+}
+
+.caDetailField {
+  width: calc(33.333% - 0.75rem);
+  min-width: 15rem;
+  min-height: 4.25rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #e2e8ef;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.caCommentComposer {
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.caHistoryList.sapMList {
+  padding: 1rem;
+  background: #fff;
+}
+
+.caHistoryRow {
+  gap: 0.75rem;
+  padding: 0.65rem 0.25rem;
+}
+
+.caAdminTabs .sapMITBHead {
+  min-height: 3.5rem;
+}
+
+.caAdminTabs .sapMITBText {
+  overflow: visible;
+  max-width: none;
+  text-overflow: clip;
+}
+
+.caAdminTable .sapMListTblHeaderCell {
+  background: #eef2f6;
+}
+
+.caTeamTree.sapMTree {
+  max-height: 22rem;
+  overflow-y: auto;
+  border: 1px solid var(--ca-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+@media (max-width: 62rem) {
+  .caTile.sapMGT {
+    width: calc(50% - 0.5rem);
+  }
+
+  .caDetailField {
+    width: calc(50% - 0.75rem);
+  }
+}
+
+@media (max-width: 40rem) {
+  .caTile.sapMGT,
+  .caDetailField {
+    width: 100%;
+  }
+
+  .caStepNode {
+    width: 11rem;
+  }
+
+  .caFact {
+    width: calc(50% - 0.75rem);
+    min-width: 9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caTile.sapMGT,
+  .caWorklistTable .sapMListTblRow {
+    transition: none;
+  }
+}

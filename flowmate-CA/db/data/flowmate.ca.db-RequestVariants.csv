@@ -1,0 +1,20 @@
+code,name,description,isActive,sortOrder,requestType_code
+MAT_ENG_IT,Engineering and IT,Engineering and IT material code,true,10,MATERIAL_CODE
+MAT_ADMIN_CONS,Admin and Consumables,Admin and consumable material code,true,20,MATERIAL_CODE
+MAT_ZTRD_NEW,Trading Material - New,New ZTRD trading material,true,30,MATERIAL_CODE
+MAT_ZTRD_EXISTING,Trading Material - Existing,Change extension or DMS update,true,40,MATERIAL_CODE
+SVC_NEW,New Service Code,Create a new service code,true,10,SERVICE_CODE
+SVC_EXISTING,Existing Service Code,Modify an existing service code,true,20,SERVICE_CODE
+EQP_NEW,New Equipment Code,Create a new equipment code,true,10,EQUIPMENT_CODE
+EQP_EXISTING,Existing Equipment Code,Update an existing equipment code,true,20,EQUIPMENT_CODE
+PROJECT_NEW_MOD,Project New or Modification,Create or modify a project code,true,10,PROJECT_CODE
+PROJECT_FL_ACTIVITY,Function Location or Activity,Create function-location or activity,true,20,PROJECT_CODE
+RES_DIRECT,Direct Delivery,Direct-delivery material reservation,true,10,MATERIAL_RESERVATION
+RES_WAREHOUSE,Warehouse Material,Warehouse material reservation,true,20,MATERIAL_RESERVATION
+CONTRACT_NEW,New Contract,Create a new outline contract,true,10,OUTLINE_CONTRACT
+CONTRACT_MOD,Contract Modification,Amend an existing outline contract,true,20,OUTLINE_CONTRACT
+PO_CAPEX_IM,Capex IM,Capital expenditure IM purchase order,true,10,PURCHASE_ORDER
+PO_CAPEX_FM,Capex FM,Capital expenditure FM purchase order,true,20,PURCHASE_ORDER
+PO_OPEX,Opex,Operating expenditure purchase order,true,30,PURCHASE_ORDER
+SES_NEW,New SES,Create a new service entry sheet,true,10,SERVICE_ENTRY_SHEET
+SES_MOD,SES Modification,Modify an existing service entry sheet,true,20,SERVICE_ENTRY_SHEET

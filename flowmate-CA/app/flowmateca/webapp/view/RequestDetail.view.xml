@@ -1,0 +1,326 @@
+<mvc:View
+  controllerName="flowmateca.controller.RequestDetail"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
+  xmlns:form="sap.ui.layout.form"
+  xmlns:unified="sap.ui.unified"
+  xmlns="sap.m">
+  <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{detail>/title}">
+    <headerContent>
+      <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+      <Button text="Create Successor" icon="sap-icon://chain-link" type="Transparent" press=".onOpenSuccessorDialog"/>
+    </headerContent>
+    <content>
+      <VBox>
+        <VBox class="caObjectHeader sapUiResponsiveContentPadding">
+          <HBox alignItems="Start" justifyContent="SpaceBetween" wrap="Wrap">
+            <VBox class="caObjectIdentity">
+              <ObjectStatus text="{detail>/requestType/name}" state="Information" inverted="true"/>
+              <Title text="{detail>/referenceNumber}" level="H1"/>
+              <Text text="{detail>/requestVariant/name}" class="caHeaderSubtitle"/>
+            </VBox>
+            <HBox wrap="Wrap" class="caHeaderActions">
+              <ObjectStatus
+                text="{detail>/status/name}"
+                state="{path: 'detail>/status/code', formatter: '.statusState'}"
+                inverted="true"/>
+              <ObjectStatus
+                text="{detail>/priority/name}"
+                state="{path: 'detail>/priority/code', formatter: '.priorityState'}"
+                inverted="true"/>
+            </HBox>
+          </HBox>
+          <FlexBox wrap="Wrap" class="caFactGrid">
+            <VBox class="caFact">
+              <Label text="Requester"/>
+              <Text text="{detail>/requesterName}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="Owner Team"/>
+              <Text text="{detail>/ownerTeamName}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="Current Step"/>
+              <ObjectNumber number="{detail>/currentStep}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="Due Date"/>
+              <Text text="{path: 'detail>/dueDate', formatter: '.formatDate'}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="Submitted"/>
+              <Text text="{path: 'detail>/submittedAt', formatter: '.formatDate'}"/>
+            </VBox>
+          </FlexBox>
+        </VBox>
+
+        <Panel headerText="Guided Process" class="caProcessPanel" expandable="true" expanded="true">
+          <headerToolbar>
+            <OverflowToolbar>
+              <Title text="Guided Process" level="H3"/>
+              <ObjectStatus text="{detail>/processStatusText}" state="Information"/>
+              <ToolbarSpacer/>
+              <Button
+                text="{i18n>completeStep}"
+                icon="sap-icon://complete"
+                type="Emphasized"
+                visible="{detail>/canCompleteCurrentStep}"
+                press=".onCompleteCurrentStep"/>
+            </OverflowToolbar>
+          </headerToolbar>
+          <content>
+            <FlexBox
+              items="{detail>/stepInstances}"
+              wrap="Wrap"
+              alignItems="Start"
+              class="caProcessFlow"
+              renderType="Div">
+              <VBox class="caStepNode" alignItems="Center">
+                <Button
+                  icon="{path: 'detail>status', formatter: '.stepIcon'}"
+                  type="{path: 'detail>status', formatter: '.stepButtonType'}"
+                  tooltip="{detail>activityDescription}"
+                  press=".onStepPress"
+                  class="caMilestone"/>
+                <ObjectStatus
+                  text="{detail>status}"
+                  state="{path: 'detail>status', formatter: '.stepState'}"
+                  inverted="true"/>
+                <Title text="{detail>stepName}" level="H5"/>
+                <Text text="{detail>activityDescription}" maxLines="2" textAlign="Center"/>
+              </VBox>
+            </FlexBox>
+          </content>
+        </Panel>
+
+        <IconTabBar selectedKey="overview" class="caDetailTabs" expandable="false">
+          <items>
+            <IconTabFilter key="overview" text="Overview" icon="sap-icon://hint">
+              <VBox class="sapUiResponsiveContentPadding">
+                <Panel headerText="Request Summary" class="caFormSection">
+                  <content>
+                    <form:SimpleForm
+                      editable="false"
+                      layout="ColumnLayout"
+                      columnsXL="3"
+                      columnsL="3"
+                      columnsM="2">
+                      <Label text="{i18n>title}"/>
+                      <Text text="{detail>/title}"/>
+                      <Label text="{i18n>description}"/>
+                      <Text text="{detail>/description}"/>
+                      <Label text="External Object"/>
+                      <Text text="{detail>/externalObjectId}"/>
+                      <Label text="External Status"/>
+                      <Text text="{detail>/externalStatus}"/>
+                    </form:SimpleForm>
+                  </content>
+                </Panel>
+                <Panel headerText="Process-Specific Details" class="caFormSection">
+                  <content>
+                    <FlexBox items="{detail>/detailFields}" wrap="Wrap" renderType="Div" class="caDetailFieldGrid">
+                      <VBox class="caDetailField">
+                        <Label text="{detail>label}"/>
+                        <Text text="{detail>value}" wrapping="true"/>
+                      </VBox>
+                    </FlexBox>
+                  </content>
+                </Panel>
+              </VBox>
+            </IconTabFilter>
+
+            <IconTabFilter key="tasks" text="Tasks" icon="sap-icon://task" count="{detail>/tasks/count}">
+              <VBox class="sapUiResponsiveContentPadding">
+                <Toolbar class="caSectionToolbar">
+                  <Title text="Request Tasks" level="H3"/>
+                  <ToolbarSpacer/>
+                  <Button text="Add Task" icon="sap-icon://add" type="Emphasized" press=".onOpenAddTaskDialog"/>
+                </Toolbar>
+                <Table items="{detail>/tasks}" itemPress=".onTaskPress" class="caWorklistTable">
+                  <columns>
+                    <Column width="12rem"><Text text="Task ID"/></Column>
+                    <Column><Text text="Task"/></Column>
+                    <Column width="6rem"><Text text="Step"/></Column>
+                    <Column width="11rem"><Text text="Assigned To"/></Column>
+                    <Column width="10rem"><Text text="{i18n>status}"/></Column>
+                    <Column width="7rem"><Text text="Mandatory"/></Column>
+                  </columns>
+                  <items>
+                    <ColumnListItem type="Navigation">
+                      <cells>
+                        <ObjectIdentifier title="{detail>referenceNumber}"/>
+                        <ObjectIdentifier title="{detail>taskName}" text="{detail>description}"/>
+                        <ObjectNumber number="{detail>stepNo}"/>
+                        <Text text="{= ${detail>assignedName} || ${detail>assignedTeamName} }"/>
+                        <ObjectStatus text="{detail>status/name}" state="{path: 'detail>status/code', formatter: '.statusState'}"/>
+                        <ObjectStatus text="{= ${detail>isMandatory} ? 'Yes' : 'No' }" state="{= ${detail>isMandatory} ? 'Warning' : 'None' }"/>
+                      </cells>
+                    </ColumnListItem>
+                  </items>
+                </Table>
+              </VBox>
+            </IconTabFilter>
+
+            <IconTabFilter key="attachments" text="Attachments" icon="sap-icon://attachment" count="{detail>/attachments/count}">
+              <VBox class="sapUiResponsiveContentPadding">
+                <Toolbar class="caSectionToolbar">
+                  <Title text="Supporting Documents" level="H3"/>
+                  <ToolbarSpacer/>
+                  <unified:FileUploader
+                    id="detailAttachmentUploader"
+                    multiple="true"
+                    uploadOnChange="false"
+                    change=".onDetailFilesSelected"
+                    buttonOnly="true"
+                    buttonText="Upload"
+                    icon="sap-icon://upload"/>
+                </Toolbar>
+                <List items="{detail>/attachments}" noDataText="No supporting documents">
+                  <StandardListItem
+                    title="{detail>filename}"
+                    description="{detail>mediaType}"
+                    icon="sap-icon://document"
+                    type="Active"
+                    press=".onAttachmentPress"/>
+                </List>
+              </VBox>
+            </IconTabFilter>
+
+            <IconTabFilter key="related" text="Related Requests" icon="sap-icon://chain-link">
+              <VBox class="sapUiResponsiveContentPadding">
+                <Panel headerText="Predecessor" class="caFormSection">
+                  <content>
+                    <Link
+                      text="{detail>/predecessor/referenceNumber}"
+                      visible="{= !!${detail>/predecessor/ID} }"
+                      press=".onRelatedRequestPress"/>
+                    <Text text="No predecessor request" visible="{= !${detail>/predecessor/ID} }"/>
+                  </content>
+                </Panel>
+                <Panel headerText="Successors" class="caFormSection">
+                  <content>
+                    <List items="{detail>/successors}" noDataText="No successor requests">
+                      <StandardListItem
+                        title="{detail>referenceNumber}"
+                        description="{detail>title}"
+                        type="Navigation"
+                        press=".onSuccessorPress"/>
+                    </List>
+                  </content>
+                </Panel>
+              </VBox>
+            </IconTabFilter>
+
+            <IconTabFilter key="comments" text="Comments" icon="sap-icon://discussion-2" count="{detail>/comments/count}">
+              <VBox class="sapUiResponsiveContentPadding">
+                <HBox class="caCommentComposer">
+                  <TextArea id="newComment" rows="2" width="100%" placeholder="Add a comment"/>
+                  <Button icon="sap-icon://paper-plane" type="Emphasized" tooltip="Post comment" press=".onAddComment"/>
+                </HBox>
+                <List items="{detail>/comments}" noDataText="No comments">
+                  <FeedListItem
+                    sender="{detail>authorName}"
+                    text="{detail>comment}"
+                    timestamp="{path: 'detail>createdAt', formatter: '.formatDate'}"
+                    icon="sap-icon://person-placeholder"/>
+                </List>
+              </VBox>
+            </IconTabFilter>
+
+            <IconTabFilter key="history" text="History" icon="sap-icon://history" count="{detail>/history/count}">
+              <List items="{detail>/history}" noDataText="No history entries" class="caHistoryList">
+                <CustomListItem>
+                  <HBox class="caHistoryRow" alignItems="Start">
+                    <Avatar icon="sap-icon://history" displaySize="XS" displayShape="Circle"/>
+                    <VBox>
+                      <ObjectStatus text="{detail>action}" state="Information"/>
+                      <Text text="{detail>remarks}" visible="{= !!${detail>remarks} }"/>
+                      <Text text="{= ${detail>actorName} + ' · Step ' + ${detail>stepNo} }" class="caMuted"/>
+                      <Text text="{path: 'detail>createdAt', formatter: '.formatDate'}" class="caMuted"/>
+                    </VBox>
+                  </HBox>
+                </CustomListItem>
+              </List>
+            </IconTabFilter>
+          </items>
+        </IconTabBar>
+      </VBox>
+    </content>
+
+    <dependents>
+      <Dialog id="stepDialog" title="{step>/stepName}" contentWidth="32rem">
+        <content>
+          <VBox class="sapUiSmallMargin">
+            <ObjectStatus text="{step>/status}" state="{path: 'step>/status', formatter: '.stepState'}" inverted="true"/>
+            <Title text="Activity" level="H4" class="sapUiSmallMarginTop"/>
+            <Text text="{step>/activityDescription}" wrapping="true"/>
+          </VBox>
+        </content>
+        <beginButton>
+          <Button text="Close" press=".onCloseStepDialog"/>
+        </beginButton>
+      </Dialog>
+
+      <Dialog id="addTaskDialog" title="Add Task" contentWidth="42rem">
+        <content>
+          <form:SimpleForm editable="true" layout="ResponsiveGridLayout" class="sapUiSmallMargin">
+            <Label text="Workflow Step" required="true"/>
+            <Select selectedKey="{taskForm>/stepNo}" items="{detail>/stepInstances}">
+              <core:Item key="{detail>stepNo}" text="{= ${detail>stepNo} + '. ' + ${detail>stepName} }"/>
+            </Select>
+            <Label text="Task Name" required="true"/>
+            <Input value="{taskForm>/taskName}"/>
+            <Label text="{i18n>description}"/>
+            <TextArea value="{taskForm>/description}" rows="3"/>
+            <Label text="Assign User"/>
+            <ComboBox
+              selectedKey="{taskForm>/assignedUserId}"
+              items="{catalog>/Users}"
+              showSecondaryValues="true"
+              filterSecondaryValues="true">
+              <core:ListItem key="{catalog>ID}" text="{catalog>displayName}" additionalText="{catalog>email}"/>
+            </ComboBox>
+            <Label text="Assign Team"/>
+            <ComboBox
+              selectedKey="{taskForm>/assignedTeamId}"
+              items="{catalog>/Teams}"
+              showSecondaryValues="true">
+              <core:ListItem key="{catalog>ID}" text="{catalog>name}" additionalText="{catalog>teamCode}"/>
+            </ComboBox>
+            <Label text="Mandatory"/>
+            <CheckBox selected="{taskForm>/isMandatory}"/>
+            <Label text="Approval Task"/>
+            <CheckBox selected="{taskForm>/isApproval}"/>
+            <Label text="{i18n>dueDate}"/>
+            <DatePicker value="{taskForm>/dueDate}" valueFormat="yyyy-MM-dd" displayFormat="medium"/>
+          </form:SimpleForm>
+        </content>
+        <beginButton>
+          <Button text="{i18n>add}" type="Emphasized" press=".onAddTask"/>
+        </beginButton>
+        <endButton>
+          <Button text="{i18n>cancel}" press=".onCloseAddTaskDialog"/>
+        </endButton>
+      </Dialog>
+
+      <Dialog id="successorDialog" title="Create Successor Request" contentWidth="36rem">
+        <content>
+          <form:SimpleForm editable="true" layout="ResponsiveGridLayout" class="sapUiSmallMargin">
+            <Label text="{i18n>requestType}" required="true"/>
+            <ComboBox selectedKey="{successor>/requestTypeCode}" items="{catalog>/RequestTypes}">
+              <core:Item key="{catalog>code}" text="{catalog>name}"/>
+            </ComboBox>
+            <Label text="{i18n>title}" required="true"/>
+            <Input value="{successor>/title}"/>
+          </form:SimpleForm>
+        </content>
+        <beginButton>
+          <Button text="Create" type="Emphasized" press=".onCreateSuccessor"/>
+        </beginButton>
+        <endButton>
+          <Button text="{i18n>cancel}" press=".onCloseSuccessorDialog"/>
+        </endButton>
+      </Dialog>
+    </dependents>
+  </Page>
+</mvc:View>

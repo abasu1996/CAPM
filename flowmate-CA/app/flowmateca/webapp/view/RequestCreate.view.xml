@@ -1,0 +1,117 @@
+<mvc:View
+  controllerName="flowmateca.controller.RequestCreate"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
+  xmlns:form="sap.ui.layout.form"
+  xmlns:unified="sap.ui.unified"
+  xmlns="sap.m">
+  <Page class="caPage" title="{i18n>createRequest}" showNavButton="true" navButtonPress=".onCancel">
+    <headerContent>
+      <Button text="{i18n>cancel}" type="Transparent" press=".onCancel"/>
+      <Button text="{i18n>submit}" icon="sap-icon://paper-plane" type="Emphasized" press=".onSubmit"/>
+    </headerContent>
+    <content>
+      <VBox class="caCreatePage sapUiResponsiveContentPadding">
+        <MessageStrip
+          text="The process variant controls the request fields and the guided workflow that will be created."
+          type="Information"
+          showIcon="true"
+          class="sapUiSmallMarginBottom"/>
+
+        <Panel headerText="Request Classification" expandable="false" class="caFormSection">
+          <content>
+            <form:SimpleForm
+              editable="true"
+              layout="ColumnLayout"
+              columnsXL="3"
+              columnsL="3"
+              columnsM="2"
+              labelSpanXL="12"
+              labelSpanL="12"
+              labelSpanM="12">
+              <Label text="{i18n>requestType}" required="true"/>
+              <ComboBox
+                id="requestType"
+                selectedKey="{form>/requestTypeCode}"
+                items="{catalog>/requestTypes}"
+                selectionChange=".onRequestTypeChange"
+                showSecondaryValues="true">
+                <core:ListItem key="{catalog>code}" text="{catalog>name}" additionalText="{catalog>code}"/>
+              </ComboBox>
+              <Label text="{i18n>requestVariant}" required="true"/>
+              <ComboBox
+                id="requestVariant"
+                selectedKey="{form>/requestVariantCode}"
+                items="{catalog>/filteredVariants}"
+                selectionChange=".onRequestVariantChange"
+                showSecondaryValues="true">
+                <core:ListItem key="{catalog>code}" text="{catalog>name}" additionalText="{catalog>code}"/>
+              </ComboBox>
+              <Label text="{i18n>priority}" required="true"/>
+              <ComboBox selectedKey="{form>/priorityCode}" items="{catalog>/priorities}">
+                <core:Item key="{catalog>code}" text="{catalog>name}"/>
+              </ComboBox>
+              <Label text="{i18n>title}" required="true"/>
+              <Input value="{form>/title}" maxLength="255" placeholder="Briefly describe the required outcome"/>
+              <Label text="{i18n>dueDate}"/>
+              <DatePicker value="{form>/dueDate}" valueFormat="yyyy-MM-dd" displayFormat="medium"/>
+              <Label text="Link to Existing Request"/>
+              <ComboBox
+                selectedKey="{form>/predecessorId}"
+                items="{catalog>/myRequests}"
+                showSecondaryValues="true"
+                placeholder="Optional predecessor request">
+                <core:ListItem key="{catalog>ID}" text="{catalog>referenceNumber}" additionalText="{catalog>title}"/>
+              </ComboBox>
+              <Label text="{i18n>description}"/>
+              <TextArea value="{form>/description}" rows="3" width="100%" placeholder="Business context and expected outcome"/>
+            </form:SimpleForm>
+          </content>
+        </Panel>
+
+        <Panel
+          headerText="{form>/detailSectionTitle}"
+          expandable="false"
+          visible="{= !!${form>/requestVariantCode} }"
+          class="caFormSection">
+          <content>
+            <VBox id="dynamicFormHost"/>
+          </content>
+        </Panel>
+
+        <Panel headerText="Supporting Documents" expandable="false" class="caFormSection">
+          <content>
+            <VBox>
+              <unified:FileUploader
+                id="attachmentUploader"
+                multiple="true"
+                uploadOnChange="false"
+                change=".onFilesSelected"
+                buttonText="Select Files"
+                icon="sap-icon://attachment"/>
+              <List items="{files>/items}" noDataText="No supporting documents selected" class="sapUiSmallMarginTop">
+                <StandardListItem
+                  title="{files>name}"
+                  description="{files>sizeText}"
+                  icon="sap-icon://document"
+                  type="Inactive"/>
+              </List>
+              <MessageStrip
+                text="Files upload in the background after the request is created. The maximum size per file is 400 MB."
+                type="Information"
+                showIcon="true"
+                class="sapUiSmallMarginTop"/>
+            </VBox>
+          </content>
+        </Panel>
+      </VBox>
+    </content>
+    <footer>
+      <OverflowToolbar>
+        <ToolbarSpacer/>
+        <Button text="{i18n>cancel}" press=".onCancel"/>
+        <Button text="{i18n>submit}" icon="sap-icon://paper-plane" type="Emphasized" press=".onSubmit"/>
+      </OverflowToolbar>
+    </footer>
+  </Page>
+</mvc:View>

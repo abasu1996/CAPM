@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+NET30,Net 30,Payment due in 30 days,true,10
+NET60,Net 60,Payment due in 60 days,true,20
+ADVANCE,Advance Payment,Advance payment terms,true,30

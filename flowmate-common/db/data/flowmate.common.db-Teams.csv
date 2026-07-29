@@ -1,0 +1,7 @@
+ID,teamCode,name,description,isActive
+20000000-0000-4000-8000-000000000001,REQUESTOR,Dialog User Division,Request initiation and correction,true
+20000000-0000-4000-8000-000000000002,FINANCE,Finance Team,G/L account and budget validation,true
+20000000-0000-4000-8000-000000000003,SAP_MASTER,SAP Master Data Team,Valuation and SAP master enrichment,true
+20000000-0000-4000-8000-000000000004,INFOMATE,Infomate S4 Team,S/4HANA validation and creation,true
+20000000-0000-4000-8000-000000000005,SCM,SCM Team,Contract approval and revocation,true
+20000000-0000-4000-8000-000000000006,WAREHOUSE,Warehouse Team,GRN reservation and issuance,true

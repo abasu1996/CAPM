@@ -1,0 +1,7 @@
+code,name,description,isActive,sortOrder
+DRAFT,Draft,Request is being prepared,true,10
+SUBMITTED,Submitted,Request has entered the workflow,true,20
+IN_PROGRESS,In Progress,Request is actively being processed,true,30
+SENT_BACK,Sent Back,Request requires correction,true,40
+COMPLETED,Completed,Request processing is complete,true,50
+REJECTED,Rejected,Request has been rejected,true,60

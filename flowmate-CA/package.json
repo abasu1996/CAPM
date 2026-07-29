@@ -1,0 +1,120 @@
+{
+  "name": "flowmate-ca",
+  "version": "0.1.0",
+  "description": "Flowmate CA - Commerce Automation workflow application",
+  "private": true,
+  "workspaces": [
+    "app/*"
+  ],
+  "dependencies": {
+    "@cap-js-community/odata-v2-adapter": "^1.15.12",
+    "@cap-js/attachments": "^3.13.3",
+    "@cap-js/hana": "^2",
+    "@sap-cloud-sdk/connectivity": "^4.8.0",
+    "@sap-cloud-sdk/http-client": "^4.8.0",
+    "@sap-cloud-sdk/resilience": "^4.8.0",
+    "@sap/cds": "9.9.1",
+    "@sap/xssec": "^4",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2",
+    "@sap/cds-dk": "9.9.1"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch --port 4010 --open flowmateca/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch:flp": "cds watch --port 4010 --open \"flowmateca/webapp/test/flpSandbox.html#FlowmateCA-manage\"",
+    "build": "cds build --production",
+    "build:mta": "mbt build",
+    "deploy": "cf deploy mta_archives/flowmate-ca_0.1.0.mtar"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite"
+      },
+      "attachments": {
+        "kind": "db",
+        "scan": false
+      },
+      "[development]": {
+        "CommonMasterDataService": {
+          "kind": "odata-v4",
+          "model": "srv/external/common-master",
+          "credentials": {
+            "url": "http://localhost:4020/odata/v4/flowmate-common",
+            "username": "ca.admin@flowmate.demo",
+            "password": "FlowmateCAAdmin1!"
+          }
+        },
+        "auth": {
+          "kind": "dummy",
+          "users": {
+            "*": false,
+            "ca.admin@flowmate.demo": {
+              "password": "FlowmateCAAdmin1!",
+              "roles": [
+                "CAAdmin",
+                "CARequester",
+                "CAProcessor",
+                "CASupervisor"
+              ]
+            },
+            "ca.requester@flowmate.demo": {
+              "password": "FlowmateCAUser1!",
+              "roles": [
+                "CARequester"
+              ]
+            },
+            "ca.processor@flowmate.demo": {
+              "password": "FlowmateCAUser1!",
+              "roles": [
+                "CAProcessor"
+              ]
+            },
+            "ca.finance@flowmate.demo": {
+              "password": "FlowmateCAUser1!",
+              "roles": [
+                "CAProcessor"
+              ]
+            }
+          }
+        }
+      },
+      "[production]": {
+        "CommonMasterDataService": {
+          "kind": "odata-v4",
+          "model": "srv/external/common-master",
+          "credentials": {
+            "destination": "flowmate-common-api"
+          }
+        },
+        "auth": "xsuaa",
+        "db": {
+          "kind": "hana"
+        },
+        "attachments": {
+          "kind": "db",
+          "scan": false
+        }
+      },
+      "[hybrid]": {
+        "CommonMasterDataService": {
+          "kind": "odata-v4",
+          "model": "srv/external/common-master",
+          "credentials": {
+            "destination": "flowmate-common-api"
+          }
+        },
+        "db": {
+          "kind": "hana"
+        },
+        "attachments": {
+          "kind": "db",
+          "scan": false
+        }
+      }
+    }
+  }
+}

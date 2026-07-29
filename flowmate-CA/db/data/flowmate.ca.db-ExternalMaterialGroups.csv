@@ -1,0 +1,3 @@
+code,name,description,isActive,sortOrder
+LOCAL,Local,Locally sourced material,true,10
+IMPORT,Import,Imported material,true,20
