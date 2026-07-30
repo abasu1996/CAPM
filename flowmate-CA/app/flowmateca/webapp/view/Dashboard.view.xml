@@ -25,14 +25,18 @@
     <content>
       <VBox class="caDashboard sapUiResponsiveContentPadding">
         <HBox alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap" class="caDashboardIntro">
-          <VBox>
-            <Title text="{i18n>dashboardTitle}" level="H1"/>
-            <Text text="Create, process and monitor supply-chain requests across Dialog and SAP teams."/>
-          </VBox>
+          <HBox alignItems="Center" class="caDashboardHeroTitle">
+            <core:Icon src="sap-icon://business-objects-experience" class="caDashboardHeroIcon"/>
+            <VBox>
+              <Title text="{i18n>dashboardTitle}" level="H1"/>
+              <Text text="Create, process and monitor supply-chain requests across Dialog and SAP teams."/>
+            </VBox>
+          </HBox>
           <Button
             text="{i18n>createRequest}"
-            icon="sap-icon://add"
+            icon="sap-icon://add-document"
             type="Emphasized"
+            class="caHeroAction"
             press=".onCreateRequest"/>
         </HBox>
 
