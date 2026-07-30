@@ -32,6 +32,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   async init() {
     this._configCache = new Map();
     this._configCacheTtlMs = this._getConfigCacheTtlMs();
+    this.master = await cds.connect.to("CommonMasterDataService");
+    this.masterEntities = this.master.entities;
 
     const {
       ProcessRequests,
@@ -54,20 +56,34 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       Priorities,
       ProcessStatus,
       TaskStatus,
+      Teams: ServiceTeams,
+      Vendors: ServiceVendors,
+      TeamMembers: ServiceTeamMembers,
+      RequestDropDown,
+      RequestFilterQueries,
+      Users: ServiceUsers,
+      Delegations: ServiceDelegations
+    } = this.entities;
+    const {
+      Users,
       Teams,
       Vendors,
       TeamMembers,
-      RequestDropDown,
-      RequestFilterQueries,
-      Users,
       Delegations
-    } = this.entities;
+    } = this.masterEntities;
+
+    this.on("READ", [ServiceUsers, ServiceTeams, ServiceVendors, ServiceTeamMembers], (req) => {
+      return this.master.run(req.query);
+    });
+    this.on(["CREATE", "UPDATE", "DELETE"], [ServiceUsers, ServiceTeams, ServiceVendors, ServiceTeamMembers], (req) => {
+      return this.master.run(req.query);
+    });
 
     if (this.handle_attachments) {
       await this.handle_attachments();
     }
 
-    this.before("READ", Users, (req) => {
+    this.before("READ", ServiceUsers, (req) => {
       if (!this._isAdministrator(req)) {
         req.query.where({ isActive: true });
       }
@@ -135,132 +151,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await this._filterByVisibleRequests(req, Users, "request_ID");
     });
 
-    this.before(["CREATE", "UPDATE"], Users, async (req) => {
-      if (!this._isAdministrator(req)) {
-        return req.reject(403, "Only a user administrator can maintain users");
+    this.before(["CREATE", "UPDATE", "DELETE"], ServiceUsers, (req) => {
+      if (!this._canProvisionUsers(req)) {
+        return req.reject(403, "User administration or user provisioning authority is required");
       }
-
-      if (req.event === "CREATE") {
-        req.data.referenceNumber = await this._nextReferenceNumber(req, Users, "USR");//check with I2P team for number preference
-      }
-
-      const oExisting = req.event === "UPDATE"
-        ? await cds.tx(req).run(SELECT.one.from(Users).where({ ID: req.data.ID }))
-        : {};
-      const oUser = { ...oExisting, ...req.data };
-      await this._validateMaintainedUser(req, oUser, Users);
-    });
-
-    this.before("DELETE", Users, (req) => {
-      if (!this._isAdministrator(req)) {
-        return req.reject(403, "Only a user administrator can maintain users");
-      }
-
-      return req.reject(405, "Deactivate users instead of deleting them to preserve workflow history");
     });
 
     this.on("createUserWithTeams", async (req) => {
       if (!this._canProvisionUsers(req)) {
         return req.reject(403, "User administration or user provisioning authority is required");
       }
-
-      const sUserId = req.data.userId || null;
-      const tx = cds.tx(req);
-      const oExistingUser = sUserId
-        ? await tx.run(SELECT.one.from(Users).where({ ID: sUserId }))
-        : null;
-
-      if (sUserId && !oExistingUser) {
-        return req.reject(404, "User was not found");
-      }
-
-      const aExistingMemberships = oExistingUser
-        ? await tx.run(SELECT.from(TeamMembers).where({ user_ID: sUserId }))
-        : [];
-      const bTeamIdsProvided = Object.prototype.hasOwnProperty.call(req.data, "teamIds");
-      const aRequestedTeamIds = bTeamIdsProvided
-        ? req.data.teamIds || []
-        : aExistingMemberships.map((oMembership) => oMembership.team_ID);
-      const aTeamIds = [...new Set(aRequestedTeamIds
-        .map((vTeamId) => typeof vTeamId === "string" ? vTeamId : vTeamId?.ID || vTeamId?.teamId)
-        .filter(Boolean))];
-      const oUser = {
-        ID: oExistingUser?.ID || cds.utils.uuid(),
-        referenceNumber: oExistingUser?.referenceNumber || await this._nextReferenceNumber(req, Users, "USR"),
-        azureObjectId: Object.prototype.hasOwnProperty.call(req.data, "azureObjectId")
-          ? req.data.azureObjectId || null
-          : oExistingUser?.azureObjectId || null,
-        userPrincipalName: req.data.userPrincipalName?.trim() || oExistingUser?.userPrincipalName,
-        displayName: req.data.displayName?.trim() || oExistingUser?.displayName,
-        email: req.data.email?.trim() || oExistingUser?.email,
-        manager_ID: Object.prototype.hasOwnProperty.call(req.data, "managerId")
-          ? req.data.managerId || null
-          : oExistingUser?.manager_ID || null,
-        isActive: typeof req.data.isActive === "boolean"
-          ? req.data.isActive
-          : oExistingUser?.isActive !== false
-      };
-
-      await this._validateMaintainedUser(req, oUser, Users);
-
-      const aTeams = [];
-      for (const sTeamId of aTeamIds) {
-        const oTeam = await this._getTeam(req, sTeamId, Teams);
-
-        if (!oTeam) {
-          return req.reject(400, `Active team ${sTeamId} was not found`);
-        }
-
-        aTeams.push(oTeam);
-      }
-
-      if (oExistingUser) {
-        await tx.run(UPDATE(Users, oUser.ID).set({
-          azureObjectId: oUser.azureObjectId,
-          userPrincipalName: oUser.userPrincipalName,
-          displayName: oUser.displayName,
-          email: oUser.email,
-          manager_ID: oUser.manager_ID,
-          isActive: oUser.isActive
-        }));
-      } else {
-        await tx.run(INSERT.into(Users).entries(oUser));
-      }
-
-      const mExistingMemberships = new Map(
-        aExistingMemberships.map((oMembership) => [oMembership.team_ID, oMembership])
-      );
-      const oRequestedTeamIds = new Set(aTeamIds);
-
-      for (const oMembership of aExistingMemberships) {
-        if (!oRequestedTeamIds.has(oMembership.team_ID)) {
-          await tx.run(DELETE.from(TeamMembers).where({ ID: oMembership.ID }));
-        }
-      }
-
-      for (const oTeam of aTeams) {
-        const oMembership = mExistingMemberships.get(oTeam.ID);
-
-        if (oMembership) {
-          await tx.run(UPDATE(TeamMembers, oMembership.ID).set({
-            displayName: oUser.displayName,
-            email: oUser.email,
-            isActive: oUser.isActive
-          }));
-        } else {
-          await tx.run(INSERT.into(TeamMembers).entries({
-            ID: cds.utils.uuid(),
-            referenceNumber: await this._nextReferenceNumber(req, TeamMembers, "TMM"),
-            team_ID: oTeam.ID,
-            user_ID: oUser.ID,
-            displayName: oUser.displayName,
-            email: oUser.email,
-            isActive: oUser.isActive
-          }));
-        }
-      }
-
-      return tx.run(SELECT.one.from(Users).where({ ID: oUser.ID }));
+      return this.master.send({
+        event: "createUserWithTeams",
+        data: req.data
+      });
     });
 
     this.before(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, (req) => {
@@ -283,117 +187,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       this.after(["CREATE", "UPDATE", "DELETE"], oCodeList, () => this._clearConfigCache());
     });
 
-    this.before(["CREATE", "UPDATE", "DELETE"], Vendors, async (req) => {
+    this.before(["CREATE", "UPDATE", "DELETE"], ServiceVendors, (req) => {
       if (!this._canProvisionVendors(req)) {
         return req.reject(403, "Vendor administration or vendor provisioning authority is required");
       }
-
-      if (req.event === "DELETE") {
-        return;
-      }
-
-      const sVendorId = req.data.ID || req.params?.[0]?.ID;
-      const oExisting = req.event === "UPDATE" && sVendorId
-        ? await cds.tx(req).run(SELECT.one.from(Vendors).where({ ID: sVendorId }))
-        : {};
-      const oVendor = { ...oExisting, ...req.data };
-
-      oVendor.vendorCode = oVendor.vendorCode?.trim();
-      oVendor.vendorName = oVendor.vendorName?.trim();
-      oVendor.vendorEmail = oVendor.vendorEmail?.trim() || null;
-
-      if (!oVendor.vendorCode || !oVendor.vendorName) {
-        return req.reject(400, "Vendor code and vendor name are required");
-      }
-
-      if (oVendor.vendorEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(oVendor.vendorEmail)) {
-        return req.reject(400, "Enter a valid vendor email address");
-      }
-
-      req.data.vendorCode = oVendor.vendorCode;
-      req.data.vendorName = oVendor.vendorName;
-      req.data.vendorEmail = oVendor.vendorEmail;
     });
 
-    this.before(["CREATE", "UPDATE", "DELETE"], Teams, async (req) => {
+    this.before(["CREATE", "UPDATE", "DELETE"], [ServiceTeams, ServiceTeamMembers], (req) => {
       if (!this._isAdministrator(req)) {
-        return req.reject(403, "Only an administrator can maintain teams");
-      }
-
-      if (req.event === "DELETE") {
-        return;
-      }
-
-      const sTeamId = req.data.ID || req.params?.[0]?.ID;
-      const oExisting = req.event === "UPDATE" && sTeamId
-        ? await cds.tx(req).run(SELECT.one.from(Teams).where({ ID: sTeamId }))
-        : {};
-      const oTeam = { ...oExisting, ...req.data };
-
-      if (!oTeam.teamCode || !oTeam.name) {
-        return req.reject(400, "Team code and team name are required");
-      }
-
-      const oDuplicate = await cds.tx(req).run(
-        SELECT.one.from(Teams).where({ teamCode: oTeam.teamCode })
-      );
-
-      if (oDuplicate && oDuplicate.ID !== sTeamId) {
-        return req.reject(409, "A team already exists with the same team code");
-      }
-
-    });
-
-    this.before("CREATE", Teams, async (req) => {
-      req.data.referenceNumber = await this._nextReferenceNumber(req, Teams, "TEM");
-    });
-
-    this.before(["CREATE", "UPDATE", "DELETE"], TeamMembers, async (req) => {
-      if (!this._isAdministrator(req)) {
-        return req.reject(403, "Only an administrator can maintain team members");
-      }
-    });
-
-    this.before("CREATE", TeamMembers, async (req) => {
-      if (!req.data.team_ID || !req.data.user_ID) {
-        return req.reject(400, "Select a team and a user");
-      }
-
-      const oTeam = await this._getTeam(req, req.data.team_ID, Teams);
-      const oUser = await this._getUser(req, req.data.user_ID, Users);
-
-      if (!oTeam) {
-        return req.reject(400, "Selected team was not found");
-      }
-
-      if (!oUser) {
-        return req.reject(400, "Selected user was not found");
-      }
-
-      const oExisting = await cds.tx(req).run(
-        SELECT.one.from(TeamMembers).where({
-          team_ID: req.data.team_ID,
-          user_ID: req.data.user_ID
-        })
-      );
-
-      if (oExisting) {
-        return req.reject(409, "This user is already maintained under the team");
-      }
-
-      req.data.referenceNumber = await this._nextReferenceNumber(req, TeamMembers, "TMM");
-      this._setTeamMemberSnapshot(req.data, oUser);
-    });
-
-    this.before("UPDATE", TeamMembers, async (req) => {
-      if (req.data.user_ID) {
-        const oUser = await this._getUser(req, req.data.user_ID, Users);
-
-        if (!oUser) {
-          return req.reject(400, "Selected user was not found");
-        }
-
-        this._setTeamMemberSnapshot(req.data, oUser);
+        return req.reject(403, "Only an administrator can maintain teams and team members");
       }
     });
 
@@ -617,7 +419,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       if (req.data.vendor_ID) {
-        const oVendor = await cds.tx(req).run(
+        const oVendor = await this.master.run(
           SELECT.one.from(Vendors)
             .columns("ID", "vendorCode", "vendorName")
             .where({ ID: req.data.vendor_ID })
@@ -689,7 +491,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           req.data.vendorCode = null;
           req.data.vendorName = null;
         } else {
-          const oVendor = await cds.tx(req).run(
+          const oVendor = await this.master.run(
             SELECT.one.from(Vendors)
               .columns("ID", "vendorCode", "vendorName")
               .where({ ID: req.data.vendor_ID })
@@ -927,14 +729,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return req.reject(405, "Email attachment interface records are maintained by the request email action");
     });
 
-    this.before("CREATE", Delegations, async (req) => {
+    this.before("CREATE", ServiceDelegations, async (req) => {
       const oDelegation = req.data;
       const sCurrentUser = req.user?.id || "anonymous";
       const bCreatedOnBehalf = Boolean(
         oDelegation.delegatorUser_ID || oDelegation.delegator && oDelegation.delegator !== sCurrentUser
       );
-
-      oDelegation.referenceNumber = await this._nextReferenceNumber(req, Delegations, "DLG");
 
       if (!oDelegation.delegateUser_ID) {
         return req.reject(400, "Select a delegate from the user list");
@@ -945,8 +745,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!oDelegate) {
         return req.reject(400, "Selected delegate was not found");
       }
-
-      oDelegation.delegate = this._userAddress(oDelegate);
 
       if (bCreatedOnBehalf && !oDelegation.delegatorUser_ID) {
         return req.reject(400, "Select the user on leave from the user list");
@@ -959,11 +757,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           return req.reject(400, "Selected user on leave was not found");
         }
 
-        oDelegation.delegator = this._userAddress(oDelegator);
       } else {
         const oCurrentUser = await this._findUserByPrincipal(req, sCurrentUser, Users);
         oDelegation.delegatorUser_ID ||= oCurrentUser?.ID;
-        oDelegation.delegator = oCurrentUser ? this._userAddress(oCurrentUser) : sCurrentUser;
       }
 
       oDelegation.forwardNotifications ??= true;
@@ -974,11 +770,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(403, "Only an administrator can create a delegation for another user");
       }
 
-      if (!oDelegation.delegator || !oDelegation.delegate || !oDelegation.startDate || !oDelegation.endDate) {
+      if (!oDelegation.delegatorUser_ID || !oDelegation.delegateUser_ID || !oDelegation.startDate || !oDelegation.endDate) {
         return req.reject(400, "User, delegate, start date, and end date are required");
       }
 
-      if (oDelegation.delegator === oDelegation.delegate) {
+      if (oDelegation.delegatorUser_ID === oDelegation.delegateUser_ID) {
         return req.reject(400, "A user cannot be assigned as their own delegate");
       }
 
@@ -986,46 +782,38 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "End date must be on or after start date");
       }
 
-      if (oDelegation.enabled && oDelegation.forwardNotifications) {
-        const aDelegations = await cds.tx(req).run(
-          SELECT.from(Delegations).where({
-            delegator: oDelegation.delegator,
-            enabled: true,
-            forwardNotifications: true
-          })
-        );
-        const bOverlaps = aDelegations.some((oExisting) =>
-          oExisting.startDate <= oDelegation.endDate && oExisting.endDate >= oDelegation.startDate
-        );
-
-        if (bOverlaps) {
-          return req.reject(409, "An active notification delegation already exists during this period");
-        }
-      }
+      delete oDelegation.delegator;
+      delete oDelegation.delegate;
     });
 
-    this.before("READ", Delegations, async (req) => {
+    this.before("READ", ServiceDelegations, async (req) => {
       if (!this._isAdministrator(req)) {
-        req.query.where({ delegator: await this._currentUserAddress(req, Users) });
+        const oCurrentUser = await this._currentReservationUser(req, Users);
+        req.query.where({ delegatorUser_ID: oCurrentUser?.ID || null });
       }
     });
 
-    this.before("UPDATE", Delegations, (req) => {
+    this.before("UPDATE", ServiceDelegations, (req) => {
       return req.reject(405, "Delete and recreate a delegation to change its details");
     });
 
-    this.before("DELETE", Delegations, async (req) => {
+    this.before("DELETE", ServiceDelegations, async (req) => {
       if (this._isAdministrator(req)) {
         return;
       }
 
-      const oDelegation = await cds.tx(req).run(
-        SELECT.one.from(Delegations).where({ ID: req.data.ID })
+      const oDelegation = await this.master.run(
+        SELECT.one.from(Delegations).where({ ID: req.data.ID || req.params?.[0]?.ID })
       );
+      const oCurrentUser = await this._currentReservationUser(req, Users);
 
-      if (!oDelegation || oDelegation.delegator !== await this._currentUserAddress(req, Users)) {
+      if (!oDelegation || oDelegation.delegator_ID !== oCurrentUser?.ID) {
         return req.reject(403, "Only the delegation owner or an administrator can delete this assignment");
       }
+    });
+
+    this.on(["READ", "CREATE", "UPDATE", "DELETE"], ServiceDelegations, (req) => {
+      return this.master.run(req.query);
     });
 
     this.before("CREATE", ProcessHistory, async (req) => {
@@ -1672,7 +1460,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "Please maintain an email first for the processor.");
       }
 
-      const oProcessor = await cds.tx(req).run(
+      const oProcessor = await this.master.run(
         SELECT.one.from(Users).where({ ID: task.processorUser_ID, isActive: true })
       );
 
@@ -1736,7 +1524,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Involved party ${req.data.partyId} was not found`);
       }
 
-      const oUser = await cds.tx(req).run(
+      const oUser = await this.master.run(
         SELECT.one.from(Users).where({ ID: oParty.user_ID, isActive: true })
       );
 
@@ -1923,7 +1711,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return req.reject(403, "Completed or rejected requests are locked and cannot be modified");
   }
 
-  async _rejectIfRequestReservedByAnotherUser(req, request, Users = this.entities.Users) {
+  async _rejectIfRequestReservedByAnotherUser(req, request, Users = this.masterEntities.Users) {
     if (!request?.reservedBy) {
       return;
     }
@@ -2128,7 +1916,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
   }
 
-  async _rejectIfTaskAssignedToAnotherUser(req, task, Users = this.entities.Users) {
+  async _rejectIfTaskAssignedToAnotherUser(req, task, Users = this.masterEntities.Users) {
     if (!task || this._isTaskAssignedToCurrentUser(task, await this._currentReservationUser(req, Users))) {
       return;
     }
@@ -2136,7 +1924,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return req.reject(403, "Task is assigned to another user and cannot be accessed or modified");
   }
 
-  async _currentReservationUser(req, Users = this.entities.Users) {
+  async _currentReservationUser(req, Users = this.masterEntities.Users) {
     const sPrincipal = req.user?.id || "anonymous";
     const sEmail = this._emailFromAuthenticatedUser(req.user);
     const oUser = await this._findUserByPrincipal(req, sEmail || sPrincipal, Users);
@@ -2260,10 +2048,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _getUser(req, userId, Users) {
-    return cds.tx(req).run(SELECT.one.from(Users).where({ ID: userId, isActive: true }));
+    return this.master.run(SELECT.one.from(Users).where({ ID: userId, isActive: true }));
   }
 
-  async _validateMaintainedUser(req, user, Users = this.entities.Users) {
+  async _validateMaintainedUser(req, user, Users = this.masterEntities.Users) {
     if (!user.displayName || !user.email || !user.userPrincipalName) {
       return req.reject(400, "Name, email, and user principal name are required");
     }
@@ -2273,7 +2061,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
 
     if (user.manager_ID) {
-      const oManager = await cds.tx(req).run(
+      const oManager = await this.master.run(
         SELECT.one.from(Users).columns("ID").where({ ID: user.manager_ID, isActive: true })
       );
 
@@ -2282,7 +2070,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     }
 
-    const aUsers = await cds.tx(req).run(SELECT.from(Users));
+    const aUsers = await this.master.run(SELECT.from(Users));
     const sEmail = user.email.toLowerCase();
     const sPrincipal = user.userPrincipalName.toLowerCase();
     const bDuplicate = aUsers.some((oOther) =>
@@ -2297,12 +2085,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
   }
 
-  async _getTeam(req, teamId, Teams = this.entities.Teams) {
-    return cds.tx(req).run(SELECT.one.from(Teams).where({ ID: teamId, isActive: true }));
+  async _getTeam(req, teamId, Teams = this.masterEntities.Teams) {
+    return this.master.run(SELECT.one.from(Teams).where({ ID: teamId, isActive: true }));
   }
 
-  async _syncTaskTeamMembersFromTeam(req, taskId, teamId, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers, TeamMembers = this.entities.TeamMembers) {
-    const aTeamMembers = await cds.tx(req).run(
+  async _syncTaskTeamMembersFromTeam(req, taskId, teamId, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers, TeamMembers = this.masterEntities.TeamMembers) {
+    const aTeamMembers = await this.master.run(
       SELECT.from(TeamMembers).where({ team_ID: teamId, isActive: true })
     );
 
@@ -2365,17 +2153,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return null;
     }
 
-    for (const sProperty of ["email", "userPrincipalName", "azureObjectId"]) {
-      const oUser = await cds.tx(req).run(
-        SELECT.one.from(Users).where({ [sProperty]: principal, isActive: true })
-      );
-
-      if (oUser) {
-        return oUser;
-      }
-    }
-
-    return null;
+    const sPrincipal = String(principal).trim().toLowerCase();
+    const aUsers = await this.master.run(
+      SELECT.from(Users).where({ isActive: true })
+    );
+    return aUsers.find((oUser) =>
+      ["email", "userPrincipalName", "azureObjectId"].some((sProperty) =>
+        String(oUser[sProperty] || "").trim().toLowerCase() === sPrincipal
+      )
+    ) || null;
   }
 
   _queryOwner(req) {
@@ -2593,19 +2379,35 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _resolveDelegatedRecipient(req, originalRecipient, Delegations) {
     const sToday = new Date().toISOString().slice(0, 10);
-    const oDelegation = await cds.tx(req).run(
+    const oDelegator = await this._findUserByPrincipal(
+      req,
+      originalRecipient,
+      this.masterEntities.Users
+    );
+    if (!oDelegator) {
+      return {
+        originalRecipient,
+        recipient: originalRecipient,
+        delegated: false,
+        delegationId: null
+      };
+    }
+    const oDelegation = await this.master.run(
       SELECT.one.from(Delegations).where({
-        delegator: originalRecipient,
+        delegator_ID: oDelegator.ID,
         enabled: true,
         forwardNotifications: true,
         startDate: { "<=": sToday },
         endDate: { ">=": sToday }
       })
     );
+    const oDelegate = oDelegation?.delegate_ID
+      ? await this._getUser(req, oDelegation.delegate_ID, this.masterEntities.Users)
+      : null;
 
     return {
       originalRecipient,
-      recipient: oDelegation?.delegate || originalRecipient,
+      recipient: oDelegate?.email || originalRecipient,
       delegated: Boolean(oDelegation),
       delegationId: oDelegation?.ID || null
     };
@@ -2627,7 +2429,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return Boolean(this._isAdministrator(req) || req.user?.is("PaymentCategoryProvisioning"));
   }
 
-  async _getTaskCompletionContext(req, taskId, Users = this.entities.Users) {
+  async _getTaskCompletionContext(req, taskId, Users = this.masterEntities.Users) {
     const task = await this._getTask(req, taskId);
 
     if (!task) {
@@ -2653,7 +2455,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     };
   }
 
-  async _approveTaskOnly(req, taskId, remarks, Users = this.entities.Users) {
+  async _approveTaskOnly(req, taskId, remarks, Users = this.masterEntities.Users) {
     const { task, request } = await this._getTaskCompletionContext(req, taskId, Users);
     const oBlockingError = this._getTaskProgressionError(task);
 
@@ -2685,7 +2487,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return true;
   }
 
-  async _getStepCompletionContext(req, requestId, stepNo, Users = this.entities.Users) {
+  async _getStepCompletionContext(req, requestId, stepNo, Users = this.masterEntities.Users) {
     const request = await this._getRequest(req, requestId);
 
     if (!request) {
@@ -2720,14 +2522,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     };
   }
 
-  async _analyzeGuidedStepCompletion(req, requestId, stepNo, Users = this.entities.Users) {
+  async _analyzeGuidedStepCompletion(req, requestId, stepNo, Users = this.masterEntities.Users) {
     const { steps, currentStep } = await this._getStepCompletionContext(req, requestId, stepNo, Users);
     await this._rejectUnlessGuidedStepCanComplete(req, requestId, steps, currentStep);
 
     return this._guidedCompletionChoice(req, requestId, steps, currentStep);
   }
 
-  async _completeGuidedStep(req, requestId, stepNo, remarks, progressionMode = "continue", Users = this.entities.Users) {
+  async _completeGuidedStep(req, requestId, stepNo, remarks, progressionMode = "continue", Users = this.masterEntities.Users) {
     const { request, steps, currentStep } = await this._getStepCompletionContext(req, requestId, stepNo, Users);
 
     await this._rejectUnlessGuidedStepCanComplete(req, requestId, steps, currentStep);

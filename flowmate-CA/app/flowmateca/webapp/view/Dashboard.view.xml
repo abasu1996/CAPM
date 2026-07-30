@@ -81,24 +81,6 @@
           </GenericTile>
         </FlexBox>
 
-        <Toolbar class="caSectionToolbar">
-          <Title text="Commerce Automation Processes" level="H2"/>
-          <ToolbarSpacer/>
-          <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
-        </Toolbar>
-        <List items="{path: '/RequestTypes', sorter: {path: 'sortOrder'}}" class="caProcessList" growing="true">
-          <CustomListItem type="Active" press=".onProcessPress">
-            <HBox alignItems="Center" class="caProcessRow">
-              <Avatar icon="{icon}" displayShape="Square" displaySize="S" class="caProcessIcon"/>
-              <VBox class="caProcessText">
-                <Title text="{name}" level="H4"/>
-                <Text text="{description}" maxLines="2"/>
-              </VBox>
-              <ToolbarSpacer/>
-              <Button icon="sap-icon://add" type="Transparent" tooltip="Create this request"/>
-            </HBox>
-          </CustomListItem>
-        </List>
       </VBox>
     </content>
   </Page>

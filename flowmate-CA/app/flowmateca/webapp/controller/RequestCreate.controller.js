@@ -303,7 +303,7 @@ sap.ui.define([
           }
         });
         const token = await this._csrfToken();
-        const response = await fetch(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`, {
+        const response = await fetch(this.resolveAppUri(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`), {
           method: "PUT",
           headers: {
             "X-CSRF-Token": token,

@@ -1,4 +1,5 @@
 using { flowmate.db as fldb } from '../db/schema';
+using { CommonMasterDataService as common } from './external/common-master';
 
 @requires: 'authenticated-user'
 service FlowmateService {
@@ -16,27 +17,37 @@ service FlowmateService {
     entity Priorities as projection on fldb.Priorities;
     entity ProcessStatus as projection on fldb.ProcessStatus;
     entity TaskStatus as projection on fldb.TaskStatus;
-    entity Users as projection on fldb.Users {
+    entity Users as projection on common.Users {
         *,
         manager : redirected to Users
     };
-    entity Teams as projection on fldb.Teams {
+    entity Teams as projection on common.Teams {
         *,
         members : redirected to TeamMembers
     };
-    entity Vendors as projection on fldb.Vendors;
-    entity TeamMembers as projection on fldb.TeamMembers {
+    entity Vendors as projection on common.Vendors;
+    entity TeamMembers as projection on common.TeamMembers {
         *,
         team : redirected to Teams,
         user : redirected to Users
     };
-    entity Delegations as projection on fldb.Delegations;
+    entity Delegations as projection on common.Delegations {
+        ID,
+        delegator as delegatorUser,
+        delegate as delegateUser,
+        delegator.email as delegator,
+        delegate.email as delegate,
+        startDate,
+        endDate,
+        forwardNotifications,
+        enabled,
+        createdOnBehalf
+    };
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
         paymentCategory : redirected to PaymentCategories,
         businessEntity  : redirected to FtkEntities,
         priorityConfig  : redirected to Priorities,
-        vendor      : redirected to Vendors,
         tasks       : redirected to ProcessTasks,
         attachments : redirected to ProcessAttachments,
         emailMessages : redirected to ProcessEmailMessages
@@ -83,8 +94,7 @@ service FlowmateService {
     };
     entity ProcessHistory as projection on fldb.ProcessHistory;
     entity ProcessStepConfig as projection on fldb.ProcessStepConfig {
-        *,
-        processorTeam : redirected to Teams
+        *
     };
     entity RequestFilterQueries as projection on fldb.RequestFilterQueries;
 

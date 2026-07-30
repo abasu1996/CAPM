@@ -8,7 +8,24 @@
     },
     {
       "name": "$XSAPPNAME.MasterDataAdmin",
-      "description": "Maintain shared Flowmate master data"
+      "description": "Maintain shared Flowmate master data",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.UserProvisioning",
+      "description": "Create and update shared users, managers, and team memberships",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.VendorProvisioning",
+      "description": "Create, update, and delete shared vendors through the integration API",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
     }
   ],
   "authorities": [
@@ -29,6 +46,22 @@
       "scope-references": [
         "$XSAPPNAME.MasterDataRead",
         "$XSAPPNAME.MasterDataAdmin"
+      ]
+    },
+    {
+      "name": "UserProvisioning",
+      "description": "Provision shared Flowmate users and team memberships",
+      "scope-references": [
+        "$XSAPPNAME.MasterDataRead",
+        "$XSAPPNAME.UserProvisioning"
+      ]
+    },
+    {
+      "name": "VendorProvisioning",
+      "description": "Provision shared Flowmate vendors",
+      "scope-references": [
+        "$XSAPPNAME.MasterDataRead",
+        "$XSAPPNAME.VendorProvisioning"
       ]
     }
   ],

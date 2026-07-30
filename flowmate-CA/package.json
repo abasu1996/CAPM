@@ -24,6 +24,7 @@
   "scripts": {
     "start": "cds-serve",
     "watch": "cds watch --port 4010 --open flowmateca/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch:hybrid": "cds bind --exec --profile hybrid -- cds watch --profile hybrid --port 4010 --open flowmateca/webapp/index.html?sap-ui-xx-viewCache=false",
     "watch:flp": "cds watch --port 4010 --open \"flowmateca/webapp/test/flpSandbox.html#FlowmateCA-manage\"",
     "build": "cds build --production",
     "build:mta": "mbt build",
@@ -49,7 +50,7 @@
           }
         },
         "auth": {
-          "kind": "dummy",
+          "kind": "mocked",
           "users": {
             "*": false,
             "ca.admin@flowmate.demo": {
@@ -104,7 +105,10 @@
           "kind": "odata-v4",
           "model": "srv/external/common-master",
           "credentials": {
-            "destination": "flowmate-common-api"
+            "destination": "flowmate-common-api",
+            "url": null,
+            "username": null,
+            "password": null
           }
         },
         "db": {

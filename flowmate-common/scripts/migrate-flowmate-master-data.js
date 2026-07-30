@@ -111,7 +111,9 @@ async function main() {
   );
 
   for (const user of source.Users) {
-    if (!user.ID || !user.displayName || !user.email) {
+    const principalName = user.userPrincipalName || user.email;
+    const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email || "");
+    if (!user.ID || !user.displayName || !principalName || !hasValidEmail) {
       stats.Users.skipped += 1;
       continue;
     }
@@ -120,10 +122,12 @@ async function main() {
       "Users",
       {
         ID: user.ID,
-        userPrincipalName: user.userPrincipalName || user.email,
+        referenceNumber: user.referenceNumber || undefined,
+        userPrincipalName: principalName,
         displayName: user.displayName,
         email: user.email,
         azureObjectId: user.azureObjectId || null,
+        department: user.department || null,
         isActive: user.isActive !== false
       },
       existing.Users,
@@ -152,6 +156,7 @@ async function main() {
       "Teams",
       {
         ID: team.ID,
+        referenceNumber: team.referenceNumber || undefined,
         teamCode: team.teamCode,
         name: team.name,
         description: team.description || null,
@@ -198,8 +203,11 @@ async function main() {
       "TeamMembers",
       {
         ID: member.ID,
+        referenceNumber: member.referenceNumber || undefined,
         team_ID: member.team_ID,
         user_ID: member.user_ID,
+        displayName: member.displayName || null,
+        email: member.email || null,
         isActive: member.isActive !== false
       },
       existing.TeamMembers,

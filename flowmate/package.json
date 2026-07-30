@@ -7,6 +7,9 @@
     "@cap-js/hana": "^2",
     "@cap-js/openapi": "^1.5.0",
     "@sap/cds": "^9",
+    "@sap-cloud-sdk/connectivity": "^4.8.0",
+    "@sap-cloud-sdk/http-client": "^4.8.0",
+    "@sap-cloud-sdk/resilience": "^4.8.0",
     "@sap/xssec": "^4",
     "swagger-ui-express": "^5.0.1"
   },
@@ -36,6 +39,15 @@
   "cds": {
     "requires": {
       "[development]": {
+        "CommonMasterDataService": {
+          "kind": "odata-v4",
+          "model": "srv/external/common-master",
+          "credentials": {
+            "url": "http://localhost:4020/odata/v4/flowmate-common",
+            "username": "ca.admin@flowmate.demo",
+            "password": "FlowmateCAAdmin1!"
+          }
+        },
         "auth": {
           "kind": "dummy",
           "users": {
@@ -76,6 +88,13 @@
         }
       },
       "[production]": {
+        "CommonMasterDataService": {
+          "kind": "odata-v4",
+          "model": "srv/external/common-master",
+          "credentials": {
+            "destination": "flowmate-common-api"
+          }
+        },
         "auth": "xsuaa",
         "db": {
           "kind": "hana"
@@ -86,6 +105,13 @@
         }
       },
       "[hybrid]": {
+        "CommonMasterDataService": {
+          "kind": "odata-v4",
+          "model": "srv/external/common-master",
+          "credentials": {
+            "destination": "flowmate-common-api"
+          }
+        },
         "db": {
           "kind": "hana"
         },

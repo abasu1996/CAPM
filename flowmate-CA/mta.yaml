@@ -74,14 +74,17 @@ modules:
       instances: 1
       buildpack: nodejs_buildpack
       memory: 256M
+      disk-quota: 512M
+    properties:
+      INCOMING_CONNECTION_TIMEOUT: 600000
     build-parameters:
       builder: custom
       commands:
         - cp ../../router/package.json package.json
         - cp ../../router/xs-app.json xs-app.json
         - mkdir -p webapp
-        - cp -R ../../app/flowmateca/dist/. webapp/
-        - npm install --omit=dev
+        - cp -R ../../app/flowmateca/webapp/. webapp/
+        - npm install
     requires:
       - name: flowmate-ca-auth
       - name: flowmate-ca-html5-runtime
@@ -92,6 +95,7 @@ modules:
           name: flowmate-ca-srv-api
           url: ~{srv-url}
           forwardAuthToken: true
+          timeout: 600000
 
   - name: flowmate-ca-destination-content
     type: com.sap.application.content

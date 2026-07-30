@@ -5,16 +5,22 @@ using { cuid, managed } from '@sap/cds/common';
 @assert.unique.userEmail: [email]
 @assert.unique.userPrincipalName: [userPrincipalName]
 entity Users : cuid, managed {
+  referenceNumber   : String(30);
   userPrincipalName : String(255);
   displayName       : String(160) not null;
   email             : String(255) not null;
   azureObjectId     : String(100);
-  manager           : Association to Users;
+  department        : String(100);
+  @title: 'Manager'
+  @Common.Text: (manager.displayName)
+  @Common.TextArrangement: #TextOnly
+  manager           : Association to one Users @assert.target;
   isActive          : Boolean default true;
 }
 
 @assert.unique.teamCode: [teamCode]
 entity Teams : cuid, managed {
+  referenceNumber : String(30);
   teamCode    : String(40) not null;
   name        : String(160) not null;
   description : String(500);
@@ -25,9 +31,12 @@ entity Teams : cuid, managed {
 
 @assert.unique.teamUser: [team, user]
 entity TeamMembers : cuid, managed {
-  team     : Association to Teams not null;
-  user     : Association to Users not null;
-  isActive : Boolean default true;
+  referenceNumber : String(30);
+  team            : Association to Teams not null;
+  user            : Association to Users not null;
+  displayName     : String(160);
+  email           : String(255);
+  isActive        : Boolean default true;
 }
 
 @assert.unique.vendorCode: [vendorCode]

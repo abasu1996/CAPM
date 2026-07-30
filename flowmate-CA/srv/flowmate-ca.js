@@ -57,16 +57,25 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   _filterMyRequests = async (req) => {
+    if (req.user.is("CAAdmin")) {
+      return;
+    }
     const user = await this._ensureCurrentUser(req);
     req.query.where({ requester_ID: user.ID });
   };
 
   _filterMyTasks = async (req) => {
+    if (req.user.is("CAAdmin")) {
+      return;
+    }
     const user = await this._ensureCurrentUser(req);
     req.query.where({ assignedUser_ID: user.ID });
   };
 
   _filterMyTeamTasks = async (req) => {
+    if (req.user.is("CAAdmin")) {
+      return;
+    }
     const user = await this._ensureCurrentUser(req);
     const memberships = await this.master.run(SELECT.from(this.masterEntities.TeamMembers)
       .columns("team_ID")
@@ -603,16 +612,24 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   async _ensureCurrentUser(req) {
     const loginId = String(req.user.id || "").trim();
-    const emailFromToken = req.user.attr?.email || req.user.attr?.mail || loginId;
-    let user = await this.master.run(
-      SELECT.one.from(this.masterEntities.Users).where({ email: emailFromToken })
+    const emailFromToken = String(
+      req.user.attr?.email || req.user.attr?.mail || loginId
+    ).trim();
+    const normalizedLoginId = loginId.toLowerCase();
+    const normalizedEmail = emailFromToken.toLowerCase();
+    const activeUsers = await this.master.run(
+      SELECT.from(this.masterEntities.Users).where({ isActive: true })
     );
+    const user = activeUsers.find((candidate) => {
+      const candidateEmail = String(candidate.email || "").trim().toLowerCase();
+      const candidatePrincipal = String(
+        candidate.userPrincipalName || ""
+      ).trim().toLowerCase();
 
-    if (!user && loginId !== emailFromToken) {
-      user = await this.master.run(
-        SELECT.one.from(this.masterEntities.Users).where({ userPrincipalName: loginId })
-      );
-    }
+      return candidateEmail === normalizedEmail
+        || candidatePrincipal === normalizedLoginId;
+    });
+
     if (user) {
       return user;
     }

@@ -259,7 +259,7 @@ sap.ui.define([
               category: "SUPPORTING_DOCUMENT"
             }
           });
-          const response = await fetch(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`, {
+          const response = await fetch(this.resolveAppUri(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`), {
             method: "PUT",
             headers: {
               "X-CSRF-Token": await this._csrfToken(),
@@ -282,7 +282,7 @@ sap.ui.define([
 
     onAttachmentPress: function (event) {
       const attachment = event.getSource().getBindingContext("detail").getObject();
-      window.open(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`, "_blank", "noopener");
+      window.open(this.resolveAppUri(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`), "_blank", "noopener");
     },
 
     onAddComment: async function () {

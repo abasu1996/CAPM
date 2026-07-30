@@ -1,12 +1,10 @@
 const cds = require("@sap/cds");
 const swaggerUi = require("swagger-ui-express");
-const { createOpenApiDocument } = require("./openapi");
+const oOpenApiDocument = require("./docs/flowmate-openapi.json");
 
 const DOCS_PATH = "/api-docs";
 
 cds.on("served", () => {
-  const oOpenApiDocument = createOpenApiDocument(cds.clone(cds.model));
-
   const fnContext = cds.middlewares.context();
   const fnAuthenticate = cds.middlewares.auth();
   const fnAuthorize = (req, res, next) => {
@@ -38,7 +36,7 @@ cds.on("served", () => {
     fnAuthorize,
     swaggerUi.serve,
     swaggerUi.setup(oOpenApiDocument, {
-      customSiteTitle: "Flowmate API",
+      customSiteTitle: "Flowmate Platform API",
       swaggerOptions: {
         displayRequestDuration: true,
         filter: true,

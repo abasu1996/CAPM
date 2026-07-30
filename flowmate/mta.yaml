@@ -10,7 +10,10 @@ build-parameters:
     - builder: custom
       commands:
         - npm ci
+        - npm run swagger:generate
         - npx cds build --production
+        - mkdir -p gen/srv/docs
+        - cp docs/flowmate-openapi.json gen/srv/docs/flowmate-openapi.json
         - mkdir -p gen/router
 modules:
   - name: flowmate-app-content
@@ -84,6 +87,7 @@ modules:
     requires:
       - name: flowmate-auth
       - name: flowmate-db
+      - name: flowmate-destination
 
   - name: flowmate-db-deployer
     type: hdb
@@ -105,6 +109,10 @@ modules:
           service-key:
             name: flowmate-html5-repo-host-key
       - name: srv-api
+      - name: flowmate-common-auth
+        parameters:
+          service-key:
+            name: flowmate-common-auth-key
       - name: flowmate-destination
         parameters:
           content-target: true
@@ -127,6 +135,11 @@ modules:
               Name: flowmate-auth
               ServiceInstanceName: flowmate-auth
               ServiceKeyName: flowmate-auth-key
+            - Name: flowmate-common-api
+              Authentication: OAuth2ClientCredentials
+              TokenServiceInstanceName: flowmate-common-auth
+              TokenServiceKeyName: flowmate-common-auth-key
+              URL: https://flowmate-common-srv-org-b-test.cfapps.ap11.hana.ondemand.com/odata/v4/flowmate-common
           existing_destinations_policy: update
     build-parameters:
       no-source: true
@@ -177,3 +190,7 @@ resources:
     parameters:
       service: hana
       service-plan: hdi-shared
+  - name: flowmate-common-auth
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: flowmate-common-auth

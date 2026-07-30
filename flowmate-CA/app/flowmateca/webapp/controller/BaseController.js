@@ -2,9 +2,13 @@ sap.ui.define([
   "sap/ui/core/mvc/Controller",
   "sap/ui/core/UIComponent",
   "sap/m/MessageBox",
-  "sap/m/MessageToast"
-], function (Controller, UIComponent, MessageBox, MessageToast) {
+  "sap/m/MessageToast",
+  "flowmateca/model/serviceUrl"
+], function (Controller, UIComponent, MessageBox, MessageToast, serviceUrl) {
   "use strict";
+
+  const MAIN_SERVICE_URL = "odata/v4/flowmate-ca/";
+  const MASTER_SERVICE_URL = "odata/v4/flowmate-ca-master/";
 
   return Controller.extend("flowmateca.controller.BaseController", {
     getRouter: function () {
@@ -25,6 +29,10 @@ sap.ui.define([
 
     onNavHome: function () {
       this.navTo("dashboard");
+    },
+
+    resolveAppUri: function (uri) {
+      return serviceUrl.resolve(uri);
     },
 
     loadCurrentUser: async function () {
@@ -58,7 +66,7 @@ sap.ui.define([
         settings.headers["X-CSRF-Token"] = await this._csrfToken();
       }
 
-      const response = await fetch(`odata/v4/flowmate-ca/${path}`, settings);
+      const response = await fetch(this.resolveAppUri(`${MAIN_SERVICE_URL}${path}`), settings);
       if (!response.ok) {
         const payload = await response.json().catch(function () {
           return {};
@@ -86,10 +94,10 @@ sap.ui.define([
         settings.body = JSON.stringify(settings.body);
       }
       if (!["GET", "HEAD"].includes(settings.method.toUpperCase())) {
-        settings.headers["X-CSRF-Token"] = await this._csrfToken("odata/v4/flowmate-ca-master/");
+        settings.headers["X-CSRF-Token"] = await this._csrfToken(MASTER_SERVICE_URL);
       }
 
-      const response = await fetch(`odata/v4/flowmate-ca-master/${path}`, settings);
+      const response = await fetch(this.resolveAppUri(`${MASTER_SERVICE_URL}${path}`), settings);
       if (!response.ok) {
         const payload = await response.json().catch(function () {
           return {};
@@ -103,12 +111,12 @@ sap.ui.define([
     },
 
     _csrfToken: async function (serviceRoot) {
-      const root = serviceRoot || "odata/v4/flowmate-ca/";
-      const cacheKey = root === "odata/v4/flowmate-ca/" ? "_csrfMain" : "_csrfMaster";
+      const root = serviceRoot || MAIN_SERVICE_URL;
+      const cacheKey = root === MAIN_SERVICE_URL ? "_csrfMain" : "_csrfMaster";
       if (this[cacheKey]) {
         return this[cacheKey];
       }
-      const response = await fetch(root, {
+      const response = await fetch(this.resolveAppUri(root), {
         headers: {
           "X-CSRF-Token": "Fetch"
         }
