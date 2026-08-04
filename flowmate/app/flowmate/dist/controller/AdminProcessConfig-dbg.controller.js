@@ -24,6 +24,7 @@ sap.ui.define([
             this.getView().setModel(new JSONModel(this._emptyProcessStep()), "stepEdit");
             this.getView().setModel(new JSONModel(this._emptySubType()), "subTypeEdit");
             this.getView().setModel(new JSONModel(this._emptyVendor()), "vendorEdit");
+            this.getView().setModel(new JSONModel(this._emptyLoaApproval()), "loaApprovalEdit");
             this.getRouter().getRoute("RouteAdminProcessConfig").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -98,6 +99,75 @@ sap.ui.define([
                 "vendorName",
                 "vendorEmail"
             ]);
+        },
+
+        onSearchLoa(oEvent) {
+            this._filterTable(oEvent, "loaApprovalTable", [
+                "operator_code",
+                "role"
+            ]);
+        },
+
+        onAddLoaApproval() {
+            const oEntry = this._emptyLoaApproval();
+
+            oEntry.dialogTitle = this.getText("addLoaApprovalButton");
+            this.getView().getModel("loaApprovalEdit").setData(oEntry);
+            this.byId("loaApprovalDialog").open();
+        },
+
+        onEditLoaApproval(oEvent) {
+            const oEntry = oEvent.getSource().getBindingContext().getObject();
+
+            this.getView().getModel("loaApprovalEdit").setData({
+                ...oEntry,
+                isEdit: true,
+                dialogTitle: this.getText("editLoaApprovalButton")
+            });
+            this.byId("loaApprovalDialog").open();
+        },
+
+        onCloseLoaApprovalDialog() {
+            this.byId("loaApprovalDialog").close();
+        },
+
+        async onSaveLoaApproval() {
+            const oEntry = this.getView().getModel("loaApprovalEdit").getData();
+            const fAmount = Number(oEntry.amount);
+            const sOperator = String(oEntry.operator_code || "").trim();
+            const sRole = String(oEntry.role || "").trim();
+
+            if (oEntry.amount === "" || !Number.isFinite(fAmount) || !sOperator || !sRole) {
+                MessageBox.warning(this.getText("loaApprovalRequiredMessage"));
+                return;
+            }
+
+            await this._saveConfigEntity({
+                isEdit: oEntry.isEdit,
+                createPath: "/LoaApproval",
+                updatePath: `/LoaApproval(guid'${oEntry.ID}')`,
+                payload: {
+                    amount: fAmount,
+                    operator_code: sOperator,
+                    role: sRole
+                },
+                successCreateKey: "loaApprovalCreatedMessage",
+                successUpdateKey: "loaApprovalUpdatedMessage",
+                errorKey: "loaApprovalSaveErrorMessage",
+                tableId: "loaApprovalTable",
+                close: () => this.onCloseLoaApprovalDialog()
+            });
+        },
+
+        async onDeleteSelectedLoaApprovals() {
+            await this._deleteSelectedByKey({
+                tableId: "loaApprovalTable",
+                path: (sId) => `/LoaApproval(guid'${sId}')`,
+                keyProperty: "ID",
+                confirmKey: "deleteSelectedLoaApprovalsConfirmMessage",
+                successKey: "selectedLoaApprovalsDeletedMessage",
+                errorKey: "loaApprovalDeleteErrorMessage"
+            });
         },
 
         onAddVendor() {
@@ -530,6 +600,17 @@ sap.ui.define([
                 vendorCode: "",
                 vendorName: "",
                 vendorEmail: ""
+            };
+        },
+
+        _emptyLoaApproval() {
+            return {
+                dialogTitle: "",
+                isEdit: false,
+                ID: "",
+                amount: "",
+                operator_code: "",
+                role: ""
             };
         },
 

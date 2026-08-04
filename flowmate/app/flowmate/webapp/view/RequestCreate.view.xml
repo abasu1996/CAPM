@@ -172,6 +172,15 @@
                             </ComboBox>
                             <Label text="{i18n>departmentLabel}" />
                             <Input value="{create>/department}" maxLength="100" />
+                            <Label text="{i18n>amountLabel}" visible="{create>/isPaymentRequest}" required="{create>/isPaymentRequest}" />
+                            <Input
+                                value="{create>/amount}"
+                                type="Number"
+                                visible="{create>/isPaymentRequest}"
+                                required="{create>/isPaymentRequest}"
+                                liveChange=".onAmountChange" />
+                            <Label text="{i18n>approverRoleLabel}" visible="{create>/isPaymentRequest}" />
+                            <Input value="{create>/role}" visible="{create>/isPaymentRequest}" editable="false" />
                             <Label text="{i18n>descriptionLabel}" />
                             <TextArea value="{create>/description}" rows="5" width="100%" />
                         </form:SimpleForm>

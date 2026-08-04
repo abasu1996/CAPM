@@ -16,6 +16,8 @@ entity RequestTypes : ConfigCode {
   icon : String(80);
 }
 
+
+
 entity RequestVariants : ConfigCode {
   requestType : Association to RequestTypes not null;
 }

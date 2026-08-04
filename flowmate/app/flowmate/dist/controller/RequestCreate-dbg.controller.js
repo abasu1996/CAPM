@@ -10,6 +10,7 @@ sap.ui.define([
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
     const MAX_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
+    const PAYMENT_PROCESS_TYPE_CODES = new Set(["PAYMENT_REQUEST", "FTK", "PO", "NON_PO"]);
 
     return BaseController.extend("flowmate.controller.RequestCreate", {
         onInit() {
@@ -34,6 +35,9 @@ sap.ui.define([
                 subProcessType_code: "",
                 subProcessTypeName: "",
                 hasSubProcessTypes: false,
+                isPaymentRequest: false,
+                amount: null,
+                role: "",
                 isFtkFactoring: false,
                 paymentCategory_code: "",
                 businessEntity_code: "",
@@ -78,6 +82,16 @@ sap.ui.define([
                 return;
             }
 
+            if (oPayload.isPaymentRequest && (
+                oPayload.amount === ""
+                || oPayload.amount === null
+                || oPayload.amount === undefined
+                || !Number.isFinite(Number(oPayload.amount))
+            )) {
+                MessageBox.warning(this.getText("amountRequiredMessage"));
+                return;
+            }
+
             const oCreateModel = this.getView().getModel("create");
             oCreateModel.setProperty("/creating", true);
 
@@ -93,6 +107,8 @@ sap.ui.define([
                     processorTeamName: oPayload.processorTeamName,
                     predecessor_ID: oPayload.predecessor_ID || undefined,
                     department: oPayload.department,
+                    amount: oPayload.isPaymentRequest ? Number(oPayload.amount) : undefined,
+                    role: oPayload.isPaymentRequest ? oPayload.role : undefined,
                     priorityConfig_code: oPayload.priorityConfig_code || "MEDIUM",
                     ...(oPayload.isFtkFactoring ? {
                         paymentCategory_code: oPayload.paymentCategory_code || undefined,
@@ -557,6 +573,65 @@ sap.ui.define([
             }
         },
 
+        async onAmountChange(oEvent) {
+            const oCreateModel = this.getView().getModel("create");
+            const sValue = oEvent.getParameter("value");
+            const fAmount = Number(sValue);
+
+            if (sValue === "" || !Number.isFinite(fAmount)) {
+                oCreateModel.setProperty("/role", "");
+                return;
+            }
+
+            try {
+                oCreateModel.setProperty("/role", await this._resolveLoaRole(fAmount));
+            } catch (oError) {
+                oCreateModel.setProperty("/role", "");
+            }
+        },
+
+        async _resolveLoaRole(fAmount) {
+            const aRules = await this._readList("/LoaApproval", { sorters: [] });
+            let oWinner = null;
+
+            aRules.forEach((oRule) => {
+                const fThreshold = Number(oRule.amount);
+
+                if (!Number.isFinite(fThreshold) || !this._evaluateOperator(fAmount, oRule.operator_code, fThreshold)) {
+                    return;
+                }
+
+                if (!oWinner) {
+                    oWinner = oRule;
+                    return;
+                }
+
+                const bPrefersHigher = this._prefersHigherThreshold(oRule.operator_code);
+                const fWinnerThreshold = Number(oWinner.amount);
+
+                if ((bPrefersHigher && fThreshold > fWinnerThreshold) || (!bPrefersHigher && fThreshold < fWinnerThreshold)) {
+                    oWinner = oRule;
+                }
+            });
+
+            return oWinner?.role || "";
+        },
+
+        _prefersHigherThreshold(sOperator) {
+            return sOperator === ">" || sOperator === ">=";
+        },
+
+        _evaluateOperator(fAmount, sOperator, fThreshold) {
+            return {
+                "=": fAmount === fThreshold,
+                "!=": fAmount !== fThreshold,
+                "<": fAmount < fThreshold,
+                "<=": fAmount <= fThreshold,
+                ">": fAmount > fThreshold,
+                ">=": fAmount >= fThreshold
+            }[sOperator] || false;
+        },
+
         _setVendor(oContext) {
             const oCreateModel = this.getView().getModel("create");
 
@@ -571,6 +646,13 @@ sap.ui.define([
             oCreateModel.setProperty("/subProcessType_code", "");
             oCreateModel.setProperty("/subProcessTypeName", "");
             this._setFtkFactoringMode(false);
+            const bIsPaymentRequest = PAYMENT_PROCESS_TYPE_CODES.has(oCreateModel.getProperty("/processType_code"));
+            oCreateModel.setProperty("/isPaymentRequest", bIsPaymentRequest);
+
+            if (!bIsPaymentRequest) {
+                oCreateModel.setProperty("/amount", null);
+                oCreateModel.setProperty("/role", "");
+            }
 
             const aSubTypes = await this._readList("/ProcessSubTypes", {
                 filters: [new Filter("processType_code", FilterOperator.EQ, oCreateModel.getProperty("/processType_code"))],
@@ -600,6 +682,9 @@ sap.ui.define([
                     oPredecessor.title
                 ].filter(Boolean).join(" - "));
                 oCreateModel.setProperty("/processType_code", oPredecessor.processType_code || "");
+                oCreateModel.setProperty("/isPaymentRequest", PAYMENT_PROCESS_TYPE_CODES.has(oPredecessor.processType_code));
+                oCreateModel.setProperty("/amount", oPredecessor.amount ?? null);
+                oCreateModel.setProperty("/role", oPredecessor.role || "");
                 oCreateModel.setProperty("/processTypeName", oPredecessor.processType?.name || oPredecessor.processType_code || "");
                 oCreateModel.setProperty("/subProcessType_code", oPredecessor.subProcessType_code || "");
                 oCreateModel.setProperty("/subProcessTypeName", oPredecessor.subProcessType?.name || oPredecessor.subProcessType_code || "");

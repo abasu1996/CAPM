@@ -55,6 +55,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       PaymentCategories,
       FtkEntities,
       Priorities,
+      Operator,
+      LoaApproval,
       ProcessStatus,
       TaskStatus,
       Teams: ServiceTeams,
@@ -175,7 +177,22 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
     this.after(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, () => this._clearConfigCache());
 
-    [ProcessTypes, PaymentCategories, FtkEntities, Priorities, ProcessStatus, TaskStatus, RequestDropDown].forEach((oCodeList) => {
+    this.before(["CREATE", "UPDATE", "DELETE"], LoaApproval, (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain LoA approval rules");
+      }
+
+      if (req.event !== "DELETE" && (
+        req.data.amount === null
+        || req.data.amount === undefined
+        || !req.data.operator_code
+        || !String(req.data.role || "").trim()
+      )) {
+        return req.reject(400, "Amount, operator, and role are required");
+      }
+    });
+
+    [ProcessTypes, PaymentCategories, FtkEntities, Priorities, Operator, ProcessStatus, TaskStatus, RequestDropDown].forEach((oCodeList) => {
       this.before(["CREATE", "UPDATE", "DELETE"], oCodeList, (req) => {
         if (!this._isAdministrator(req)) {
           return req.reject(403, "Only an administrator can maintain configuration code lists");

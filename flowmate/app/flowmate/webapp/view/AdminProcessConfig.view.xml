@@ -313,6 +313,38 @@
                                 </cells></ColumnListItem></items>
                             </Table>
                         </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://approvals" text="{i18n>loaApprovalConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>loaApprovalConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchLoa" liveChange=".onSearchLoa" />
+                                <Button icon="sap-icon://add" text="{i18n>addLoaApprovalButton}" type="Emphasized" press=".onAddLoaApproval" />
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedLoaApprovals" />
+                            </OverflowToolbar>
+                            <Table
+                                id="loaApprovalTable"
+                                class="flowmateTable"
+                                mode="MultiSelect"
+                                noDataText="{i18n>noLoaApprovalsText}"
+                                items="{ path: '/LoaApproval', sorter: { path: 'amount' } }">
+                                <columns>
+                                    <Column><Text text="{i18n>amountLabel}" /></Column>
+                                    <Column><Text text="{i18n>operatorLabel}" /></Column>
+                                    <Column><Text text="{i18n>roleLabel}" /></Column>
+                                    <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <ObjectNumber number="{amount}" />
+                                            <Text text="{operator_code}" />
+                                            <Text text="{role}" />
+                                            <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editLoaApprovalButton}" press=".onEditLoaApproval" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
                         <IconTabFilter icon="sap-icon://supplier" text="{i18n>vendorMasterTitle}">
                             <OverflowToolbar class="flowmateToolbar">
                                 <Title text="{i18n>vendorMasterTitle}" />
@@ -376,6 +408,22 @@
         </f:content>
     </f:DynamicPage>
     <mvc:dependents>
+        <Dialog id="loaApprovalDialog" title="{loaApprovalEdit>/dialogTitle}" contentWidth="42rem" stretchOnPhone="true">
+            <content>
+                <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
+                    <Label text="{i18n>amountLabel}" required="true" />
+                    <Input value="{loaApprovalEdit>/amount}" type="Number" required="true" />
+                    <Label text="{i18n>operatorLabel}" required="true" />
+                    <Select selectedKey="{loaApprovalEdit>/operator_code}" items="{/Operator}" required="true" forceSelection="false">
+                        <core:Item key="{code}" text="{name}" />
+                    </Select>
+                    <Label text="{i18n>roleLabel}" required="true" />
+                    <Input value="{loaApprovalEdit>/role}" maxLength="100" required="true" />
+                </form:SimpleForm>
+            </content>
+            <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveLoaApproval" /></beginButton>
+            <endButton><Button text="{i18n>cancelButton}" press=".onCloseLoaApprovalDialog" /></endButton>
+        </Dialog>
         <Dialog id="codeListDialog" title="{configEdit>/dialogTitle}" contentWidth="42rem" stretchOnPhone="true">
             <content>
                 <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">

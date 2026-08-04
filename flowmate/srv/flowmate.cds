@@ -15,6 +15,8 @@ service FlowmateService {
     entity PaymentCategories as projection on fldb.PaymentCategories;
     entity FtkEntities as projection on fldb.FtkEntities;
     entity Priorities as projection on fldb.Priorities;
+    entity Operator as projection on fldb.Operator;
+    entity LoaApproval as projection on fldb.LoaApproval;
     entity ProcessStatus as projection on fldb.ProcessStatus;
     entity TaskStatus as projection on fldb.TaskStatus;
     entity Users as projection on common.Users {

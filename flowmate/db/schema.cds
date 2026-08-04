@@ -55,6 +55,16 @@ entity Priorities : CodeList {
     key code : String(20);
 }
 
+entity Operator : CodeList {
+    key code : String(10);
+}
+
+entity LoaApproval : cuid, managed {
+    amount   : Decimal(15, 2);
+    operator : Association to Operator;
+    role     : String(100);
+}
+
 entity Users : cuid, managed {
     referenceNumber   : String(30);
     azureObjectId     : String(100);//Azure ID from microsoft graph API
@@ -136,6 +146,8 @@ entity ProcessRequests : cuid, managed {
     reservedBy  : String(255);
     reservedAt  : DateTime;
     department  : String(100);
+    amount      : Decimal(15, 2);
+    role        : String(100);
     status      : Association to ProcessStatus;
     priority    : String(20);
     currentStep : Integer;

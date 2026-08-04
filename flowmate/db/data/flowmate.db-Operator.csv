@@ -1,0 +1,7 @@
+code,name,descr
+=,Equals,Equals
+!=,Not Equals,Not Equals
+<,Less Than,Less Than
+<=,Less Than or Equal,Less Than or Equal
+>,Greater Than,Greater Than
+>=,Greater Than or Equal,Greater Than or Equal
