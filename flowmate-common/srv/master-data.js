@@ -5,6 +5,7 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
   async init() {
     const {
       Users,
+      Roles,
       Teams,
       TeamMembers
     } = this.entities;
@@ -31,7 +32,7 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       const oUser = this._normalizeUser({ ...oExisting, ...req.data });
 
       oUser.referenceNumber ||= await this._nextReferenceNumber(req, Users, "USR");
-      await this._validateMaintainedUser(req, oUser, Users);
+      await this._validateMaintainedUser(req, oUser, Users, Roles);
       Object.assign(req.data, this._writableUserData(oUser));
     });
 
@@ -48,7 +49,24 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
         return req.reject(403, "Master-data administration or user provisioning authority is required");
       }
 
-      return this._createUserWithTeams(req, Users, Teams, TeamMembers);
+      return this._createUserWithTeams(req, Users, Roles, Teams, TeamMembers);
+    });
+
+    this.before(["CREATE", "UPDATE"], Roles, (req) => {
+      if (!req.data.code || !req.data.name || !req.data.descr) {
+        return req.reject(400, "Role code, name, and description are required");
+      }
+    });
+
+    this.before("DELETE", Roles, async (req) => {
+      const sRoleCode = req.data.code || req.params?.[0]?.code;
+      const oAssignedUser = sRoleCode && await cds.tx(req).run(
+        SELECT.one.from(Users).columns("ID").where({ role_code: sRoleCode })
+      );
+
+      if (oAssignedUser) {
+        return req.reject(409, "The role is assigned to one or more users and cannot be deleted");
+      }
     });
 
     this.before(["CREATE", "UPDATE"], Teams, async (req) => {
@@ -133,7 +151,7 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
     return super.init();
   }
 
-  async _createUserWithTeams(req, Users, Teams, TeamMembers) {
+  async _createUserWithTeams(req, Users, Roles, Teams, TeamMembers) {
     const sUserId = req.data.userId || null;
     const tx = cds.tx(req);
     const oExistingUser = sUserId
@@ -167,6 +185,9 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       department: Object.prototype.hasOwnProperty.call(req.data, "department")
         ? req.data.department || null
         : oExistingUser?.department || null,
+      role_code: Object.prototype.hasOwnProperty.call(req.data, "roleCode")
+        ? req.data.roleCode || null
+        : oExistingUser?.role_code || null,
       manager_ID: Object.prototype.hasOwnProperty.call(req.data, "managerId")
         ? req.data.managerId || null
         : oExistingUser?.manager_ID || null,
@@ -175,7 +196,7 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
         : oExistingUser?.isActive !== false
     });
 
-    await this._validateMaintainedUser(req, oUser, Users);
+    await this._validateMaintainedUser(req, oUser, Users, Roles);
 
     const aTeams = [];
     for (const sTeamId of aTeamIds) {
@@ -234,7 +255,8 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       userPrincipalName: oUser.userPrincipalName?.trim(),
       displayName: oUser.displayName?.trim(),
       email: oUser.email?.trim(),
-      department: oUser.department?.trim() || null
+      department: oUser.department?.trim() || null,
+      role_code: oUser.role_code?.trim() || null
     };
   }
 
@@ -246,18 +268,29 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       displayName: oUser.displayName,
       email: oUser.email,
       department: oUser.department,
+      role_code: oUser.role_code || null,
       manager_ID: oUser.manager_ID || null,
       isActive: oUser.isActive !== false
     };
   }
 
-  async _validateMaintainedUser(req, oUser, Users) {
+  async _validateMaintainedUser(req, oUser, Users, Roles) {
     if (!oUser.displayName || !oUser.email || !oUser.userPrincipalName) {
       return req.reject(400, "Name, email, and user principal name are required");
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(oUser.email)) {
       return req.reject(400, "Enter a valid email address");
+    }
+
+    if (oUser.role_code) {
+      const oRole = await cds.tx(req).run(
+        SELECT.one.from(Roles).columns("code").where({ code: oUser.role_code })
+      );
+
+      if (!oRole) {
+        return req.reject(400, "Selected role was not found");
+      }
     }
 
     if (oUser.manager_ID && oUser.manager_ID === oUser.ID) {

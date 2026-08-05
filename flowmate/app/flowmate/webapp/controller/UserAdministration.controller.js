@@ -83,7 +83,8 @@ sap.ui.define([
             const oEditUser = {
                 ...this._emptyUser(),
                 ...oUser,
-                managerName: oUser.manager?.displayName || ""
+                managerName: oUser.manager?.displayName || "",
+                role_code: oUser.role_code || ""
             };
 
             this.showBusy();
@@ -133,6 +134,8 @@ sap.ui.define([
                     userPrincipalName: oUser.userPrincipalName,
                     displayName: oUser.displayName,
                     email: oUser.email,
+                    department: oUser.department,
+                    role_code: oUser.role_code || null,
                     manager_ID: oUser.manager_ID || null,
                     isActive: oUser.isActive
                 };
@@ -147,6 +150,8 @@ sap.ui.define([
                     userPrincipalName: oPayload.userPrincipalName,
                     displayName: oPayload.displayName,
                     email: oPayload.email,
+                    department: oPayload.department || null,
+                    roleCode: oPayload.role_code,
                     managerId: oPayload.manager_ID,
                     teamIds: aTeamIds,
                     isActive: oPayload.isActive
@@ -471,6 +476,8 @@ sap.ui.define([
                 userPrincipalName: "",
                 displayName: "",
                 email: "",
+                department: "",
+                role_code: "",
                 manager_ID: "",
                 managerName: "",
                 team_ID: "",

@@ -614,7 +614,7 @@ sap.ui.define([
                 }
             });
 
-            return oWinner?.role || "";
+            return oWinner?.roleCode || "";
         },
 
         _prefersHigherThreshold(sOperator) {

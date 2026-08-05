@@ -62,7 +62,7 @@ entity Operator : CodeList {
 entity LoaApproval : cuid, managed {
     amount   : Decimal(15, 2);
     operator : Association to Operator;
-    role     : String(100);
+    roleCode : String(40);
 }
 
 entity Users : cuid, managed {

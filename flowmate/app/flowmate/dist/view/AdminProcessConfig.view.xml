@@ -313,6 +313,37 @@
                                 </cells></ColumnListItem></items>
                             </Table>
                         </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://key-user-settings" text="{i18n>rolesConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>rolesConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                    <customData><core:CustomData key="entitySet" value="Roles" /></customData>
+                                </SearchField>
+                                <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                    <customData><core:CustomData key="entitySet" value="Roles" /></customData>
+                                </Button>
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                    <customData><core:CustomData key="entitySet" value="Roles" /></customData>
+                                </Button>
+                            </OverflowToolbar>
+                            <Table id="rolesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noRolesText}" items="{/Roles}">
+                                <columns>
+                                    <Column width="12rem"><Text text="{i18n>configCodeLabel}" /></Column>
+                                    <Column width="16rem"><Text text="{i18n>configNameLabel}" /></Column>
+                                    <Column><Text text="{i18n>configDescriptionLabel}" /></Column>
+                                    <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem><cells>
+                                        <Text text="{code}" /><Text text="{name}" /><Text text="{descr}" />
+                                        <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                            <customData><core:CustomData key="entitySet" value="Roles" /></customData>
+                                        </Button>
+                                    </cells></ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
                         <IconTabFilter icon="sap-icon://approvals" text="{i18n>loaApprovalConfigTitle}">
                             <OverflowToolbar class="flowmateToolbar">
                                 <Title text="{i18n>loaApprovalConfigTitle}" />
@@ -326,7 +357,7 @@
                                 class="flowmateTable"
                                 mode="MultiSelect"
                                 noDataText="{i18n>noLoaApprovalsText}"
-                                items="{ path: '/LoaApproval', sorter: { path: 'amount' } }">
+                                items="{ path: '/LoaApproval', sorter: { path: 'amount' }, parameters: { expand: 'role' } }">
                                 <columns>
                                     <Column><Text text="{i18n>amountLabel}" /></Column>
                                     <Column><Text text="{i18n>operatorLabel}" /></Column>
@@ -338,7 +369,7 @@
                                         <cells>
                                             <ObjectNumber number="{amount}" />
                                             <Text text="{operator_code}" />
-                                            <Text text="{role}" />
+                                            <Text text="{role/name}" />
                                             <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editLoaApprovalButton}" press=".onEditLoaApproval" />
                                         </cells>
                                     </ColumnListItem>
@@ -414,11 +445,13 @@
                     <Label text="{i18n>amountLabel}" required="true" />
                     <Input value="{loaApprovalEdit>/amount}" type="Number" required="true" />
                     <Label text="{i18n>operatorLabel}" required="true" />
-                    <Select selectedKey="{loaApprovalEdit>/operator_code}" items="{/Operator}" required="true">
+                    <Select selectedKey="{loaApprovalEdit>/operator_code}" items="{/Operator}" required="true" forceSelection="false">
                         <core:Item key="{code}" text="{name}" />
                     </Select>
                     <Label text="{i18n>roleLabel}" required="true" />
-                    <Input value="{loaApprovalEdit>/role}" maxLength="100" required="true" />
+                    <Select selectedKey="{loaApprovalEdit>/roleCode}" items="{/Roles}" required="true" forceSelection="false">
+                        <core:Item key="{code}" text="{name}" />
+                    </Select>
                 </form:SimpleForm>
             </content>
             <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveLoaApproval" /></beginButton>

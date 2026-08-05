@@ -15,7 +15,8 @@ sap.ui.define([
         Priorities: { tableId: "prioritiesTable", titleKey: "prioritiesConfigTitle" },
         ProcessStatus: { tableId: "processStatusTable", titleKey: "processStatusesConfigTitle" },
         TaskStatus: { tableId: "taskStatusTable", titleKey: "taskStatusesConfigTitle" },
-        RequestDropDown: { tableId: "requestDropDownTable", titleKey: "requestDropdownConfigTitle" }
+        RequestDropDown: { tableId: "requestDropDownTable", titleKey: "requestDropdownConfigTitle" },
+        Roles: { tableId: "rolesTable", titleKey: "rolesConfigTitle" }
     };
 
     return BaseController.extend("flowmate.controller.AdminProcessConfig", {
@@ -104,7 +105,7 @@ sap.ui.define([
         onSearchLoa(oEvent) {
             this._filterTable(oEvent, "loaApprovalTable", [
                 "operator_code",
-                "role"
+                "roleCode"
             ]);
         },
 
@@ -135,9 +136,9 @@ sap.ui.define([
             const oEntry = this.getView().getModel("loaApprovalEdit").getData();
             const fAmount = Number(oEntry.amount);
             const sOperator = String(oEntry.operator_code || "").trim();
-            const sRole = String(oEntry.role || "").trim();
+            const sRoleCode = String(oEntry.roleCode || "").trim();
 
-            if (oEntry.amount === "" || !Number.isFinite(fAmount) || !sOperator || !sRole) {
+            if (oEntry.amount === "" || !Number.isFinite(fAmount) || !sOperator || !sRoleCode) {
                 MessageBox.warning(this.getText("loaApprovalRequiredMessage"));
                 return;
             }
@@ -149,7 +150,7 @@ sap.ui.define([
                 payload: {
                     amount: fAmount,
                     operator_code: sOperator,
-                    role: sRole
+                    roleCode: sRoleCode
                 },
                 successCreateKey: "loaApprovalCreatedMessage",
                 successUpdateKey: "loaApprovalUpdatedMessage",
@@ -610,7 +611,7 @@ sap.ui.define([
                 ID: "",
                 amount: "",
                 operator_code: "",
-                role: ""
+                roleCode: ""
             };
         },
 

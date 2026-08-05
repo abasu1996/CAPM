@@ -1,6 +1,13 @@
 @cds.persistence.skip
 service CommonMasterDataService {
   @cds.persistence.skip
+  entity Roles {
+    key code : String(40);
+        name : String(255);
+        descr: String(1000);
+  }
+
+  @cds.persistence.skip
   entity Users {
     key ID               : UUID;
         referenceNumber  : String(30);
@@ -9,6 +16,7 @@ service CommonMasterDataService {
         email            : String(255);
         azureObjectId    : String(100);
         department       : String(100);
+        role             : Association to Roles;
         manager          : Association to Users;
         isActive         : Boolean;
   }
@@ -66,6 +74,7 @@ service CommonMasterDataService {
     displayName: String(160),
     email: String(255),
     department: String(100),
+    roleCode: String(40),
     managerId: UUID,
     teamIds: many UUID,
     isActive: Boolean

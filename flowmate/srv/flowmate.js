@@ -60,6 +60,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessStatus,
       TaskStatus,
       Teams: ServiceTeams,
+      Roles: ServiceRoles,
       Vendors: ServiceVendors,
       TeamMembers: ServiceTeamMembers,
       RequestDropDown,
@@ -69,17 +70,35 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     } = this.entities;
     const {
       Users,
+      Roles,
       Teams,
       Vendors,
       TeamMembers,
       Delegations
     } = this.masterEntities;
 
-    this.on("READ", [ServiceUsers, ServiceTeams, ServiceVendors, ServiceTeamMembers], (req) => {
+    this.on("READ", [ServiceUsers, ServiceRoles, ServiceTeams, ServiceVendors, ServiceTeamMembers], (req) => {
       return this.master.run(req.query);
     });
-    this.on(["CREATE", "UPDATE", "DELETE"], [ServiceUsers, ServiceTeams, ServiceVendors, ServiceTeamMembers], (req) => {
+    this.on(["CREATE", "UPDATE", "DELETE"], [ServiceUsers, ServiceRoles, ServiceTeams, ServiceVendors, ServiceTeamMembers], (req) => {
       return this.master.run(req.query);
+    });
+
+    this.before(["CREATE", "UPDATE", "DELETE"], ServiceRoles, async (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain roles");
+      }
+
+      if (req.event === "DELETE") {
+        const sRoleCode = req.data.code || req.params?.[0]?.code;
+        const oLoaRule = sRoleCode && await cds.tx(req).run(
+          SELECT.one.from(LoaApproval).columns("ID").where({ roleCode: sRoleCode })
+        );
+
+        if (oLoaRule) {
+          return req.reject(409, "The role is used by one or more LoA approval rules and cannot be deleted");
+        }
+      }
     });
 
     if (this.handle_attachments) {
@@ -177,7 +196,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
     this.after(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, () => this._clearConfigCache());
 
-    this.before(["CREATE", "UPDATE", "DELETE"], LoaApproval, (req) => {
+    this.before(["CREATE", "UPDATE", "DELETE"], LoaApproval, async (req) => {
       if (!this._isAdministrator(req)) {
         return req.reject(403, "Only an administrator can maintain LoA approval rules");
       }
@@ -186,9 +205,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         req.data.amount === null
         || req.data.amount === undefined
         || !req.data.operator_code
-        || !String(req.data.role || "").trim()
+        || !String(req.data.roleCode || "").trim()
       )) {
         return req.reject(400, "Amount, operator, and role are required");
+      }
+
+      if (req.event !== "DELETE") {
+        const oRole = await this.master.run(
+          SELECT.one.from(Roles).columns("code").where({ code: req.data.roleCode })
+        );
+
+        if (!oRole) {
+          return req.reject(400, "Selected role was not found");
+        }
       }
     });
 

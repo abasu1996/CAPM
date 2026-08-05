@@ -48,7 +48,7 @@
                                 items="{
                                     path: '/Users',
                                     sorter: { path: 'displayName' },
-                                    parameters: { expand: 'manager' },
+                                    parameters: { expand: 'manager,role' },
                                     events: {
                                         dataRequested: '.onDataRequested',
                                         dataReceived: '.onDataReceived'
@@ -59,6 +59,7 @@
                                     <Column><Text text="{i18n>userNameLabel}" /></Column>
                                     <Column><Text text="{i18n>emailLabel}" /></Column>
                                     <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>managerLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
                                     <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>userPrincipalNameLabel}" /></Column>
                                     <Column><Text text="{i18n>statusLabel}" /></Column>
                                     <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
@@ -70,6 +71,7 @@
                                             <ObjectIdentifier title="{displayName}" text="{azureObjectId}" />
                                             <Text text="{email}" />
                                             <Text text="{manager/displayName}" />
+                                            <Text text="{role/name}" />
                                             <Text text="{userPrincipalName}" />
                                             <ObjectStatus
                                                 class="flowmateSemanticStatus"
@@ -164,6 +166,12 @@
                     <Input value="{userEdit>/userPrincipalName}" required="true" maxLength="255" />
                     <Label text="{i18n>azureObjectIdLabel}" />
                     <Input value="{userEdit>/azureObjectId}" maxLength="100" />
+                    <Label text="{i18n>departmentLabel}" />
+                    <Input value="{userEdit>/department}" maxLength="100" />
+                    <Label text="{i18n>roleLabel}" />
+                    <Select selectedKey="{userEdit>/role_code}" items="{/Roles}" forceSelection="false">
+                        <core:Item key="{code}" text="{name}" />
+                    </Select>
                     <Label text="{i18n>managerLabel}" />
                     <HBox renderType="Bare">
                         <Input

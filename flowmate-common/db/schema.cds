@@ -1,6 +1,10 @@
 namespace flowmate.common.db;
 
-using { cuid, managed } from '@sap/cds/common';
+using { cuid, managed, sap.common.CodeList } from '@sap/cds/common';
+
+entity Roles : CodeList {
+  key code : String(40);
+}
 
 @assert.unique.userEmail: [email]
 @assert.unique.userPrincipalName: [userPrincipalName]
@@ -11,6 +15,10 @@ entity Users : cuid, managed {
   email             : String(255) not null;
   azureObjectId     : String(100);
   department        : String(100);
+  @title: 'Role'
+  @Common.Text: (role.name)
+  @Common.TextArrangement: #TextOnly
+  role              : Association to one Roles @assert.target;
   @title: 'Manager'
   @Common.Text: (manager.displayName)
   @Common.TextArrangement: #TextOnly

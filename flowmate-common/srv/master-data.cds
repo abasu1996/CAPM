@@ -6,11 +6,18 @@ using { flowmate.common.db as db } from '../db/schema';
 service CommonMasterDataService {
   @restrict: [
     { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity Roles as projection on db.Roles;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
     { grant: '*', to: 'MasterDataAdmin' },
     { grant: ['CREATE', 'UPDATE', 'DELETE'], to: 'UserProvisioning' }
   ]
   entity Users as projection on db.Users {
     *,
+    role : redirected to Roles,
     manager : redirected to Users
   };
 
@@ -60,6 +67,7 @@ service CommonMasterDataService {
     displayName: String(160),
     email: String(255),
     department: String(100),
+    roleCode: String(40),
     managerId: UUID,
     teamIds: many UUID,
     isActive: Boolean

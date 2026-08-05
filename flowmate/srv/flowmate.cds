@@ -16,11 +16,16 @@ service FlowmateService {
     entity FtkEntities as projection on fldb.FtkEntities;
     entity Priorities as projection on fldb.Priorities;
     entity Operator as projection on fldb.Operator;
-    entity LoaApproval as projection on fldb.LoaApproval;
+    entity Roles as projection on common.Roles;
+    entity LoaApproval as projection on fldb.LoaApproval {
+        *,
+        role : Association to one Roles on role.code = roleCode
+    };
     entity ProcessStatus as projection on fldb.ProcessStatus;
     entity TaskStatus as projection on fldb.TaskStatus;
     entity Users as projection on common.Users {
         *,
+        role : redirected to Roles,
         manager : redirected to Users
     };
     entity Teams as projection on common.Teams {
@@ -106,6 +111,8 @@ service FlowmateService {
         userPrincipalName: String(255),
         displayName: String(150),
         email: String(255),
+        department: String(100),
+        roleCode: String(40),
         managerId: UUID,
         teamIds: many UUID,
         isActive: Boolean
