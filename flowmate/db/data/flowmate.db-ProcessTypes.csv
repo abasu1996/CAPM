@@ -2,3 +2,5 @@ code,name,descr
 FTK,FTK,FTK payment flows
 PO,PO,Purchase order payment flows
 NON_PO,Non-PO,Non-purchase-order payment flows
+DIRECT,Direct,Direct payment flows
+BANK_GUARANTEE,Bank Guarantee,Bank guarantee flows

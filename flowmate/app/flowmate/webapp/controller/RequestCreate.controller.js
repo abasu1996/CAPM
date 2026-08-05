@@ -10,7 +10,7 @@ sap.ui.define([
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
     const MAX_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
-    const PAYMENT_PROCESS_TYPE_CODES = new Set(["PAYMENT_REQUEST", "FTK", "PO", "NON_PO"]);
+    const PAYMENT_PROCESS_TYPE_CODES = new Set(["PAYMENT_REQUEST", "FTK", "PO", "NON_PO", "DIRECT", "BANK_GUARANTEE"]);
 
     return BaseController.extend("flowmate.controller.RequestCreate", {
         onInit() {
@@ -549,9 +549,9 @@ sap.ui.define([
 
         _isFtkFactoringSubtype(sCode) {
             return [
-                "FTK_FACTORING",
-                "FTK_FACTORING_WITH_UAC",
-                "FTK_FACTORING_WITHOUT_UAC"
+                "FTK_FACTORING_PO_VALIDATION",
+                "FTK_FACTORING_BASED_ON_UAC",
+                "FTK_FACTORING_PENDING_UAC"
             ].includes(sCode);
         },
 
