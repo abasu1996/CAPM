@@ -112,26 +112,41 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("READ", ProcessRequests, async (req) => {
+      if (this._isAdministrator(req)) {
+        return;
+      }
       const oReservationUser = await this._currentReservationUser(req, Users);
       this._applyVisibleRequestsWhere(req.query, oReservationUser);
     });
 
     this.after("READ", ProcessRequests, async (data, req) => {
+      if (this._isAdministrator(req)) {
+        return;
+      }
       const oReservationUser = await this._currentReservationUser(req, Users);
       this._filterExpandedTasksByAssignment(data, oReservationUser);
     });
 
     this.before("READ", ProcessTasks, async (req) => {
+      if (this._isAdministrator(req)) {
+        return;
+      }
       await this._filterByVisibleRequests(req, Users, "request_ID");
       await this._filterByAssignedTasks(req, Users);
     });
 
     this.before("READ", MyAssignedTasks, async (req) => {
+      if (this._isAdministrator(req)) {
+        return;
+      }
       await this._filterByAssignedTasks(req, Users);
     });
 
     this.before("READ", MyTeamTasks, async (req) => {
-      await this._filterByTeamTasks(req, Users, ProcessTaskTeamMembers);
+      if (this._isAdministrator(req)) {
+        return;
+      }
+      await this._filterByTeamTasks(req, Users, TeamMembers);
     });
 
     this.before("READ", RequestDetailTasks, async (req) => {
@@ -1444,7 +1459,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(409, "This team task is already assigned to another user");
       }
 
-      const bVisibleTeamTask = await this._isTeamTaskVisibleForUser(req, taskId, oReservationUser, ProcessTaskTeamMembers);
+      const bVisibleTeamTask = await this._isTeamTaskVisibleForUser(req, taskId, oReservationUser, TeamMembers);
 
       if (!bVisibleTeamTask) {
         return req.reject(403, "This team task is not available for your team membership");
@@ -1663,7 +1678,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.on("getRequestReservationCounts", async (req) => {
       const oReservationUser = await this._currentReservationUser(req, Users);
+      const qUnreserved = SELECT.one.from(ProcessRequests).columns("count(1) as count");
       const qReservedByMe = SELECT.one.from(ProcessRequests).columns("count(1) as count");
+
+      if (!this._isAdministrator(req)) {
+        qUnreserved.where({ requesterUser_ID: oReservationUser.user.ID });
+        qReservedByMe.where({ requesterUser_ID: oReservationUser.user.ID });
+      }
 
       if (oReservationUser.user?.ID) {
         qReservedByMe.where({ reservedByUser_ID: oReservationUser.user.ID });
@@ -1673,7 +1694,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const [oUnreserved, oReserved] = await Promise.all([
         cds.tx(req).run(
-          SELECT.one.from(ProcessRequests).columns("count(1) as count").where({ reservedBy: null })
+          qUnreserved.where({ reservedBy: null })
         ),
         cds.tx(req).run(qReservedByMe)
       ]);
@@ -1703,9 +1724,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.on("getMyTeamTaskCount", async (req) => {
       const oReservationUser = await this._currentReservationUser(req, Users);
-      const qTeamTasks = this._teamTaskMembershipQuery(oReservationUser, ProcessTaskTeamMembers);
+      const aMemberships = await this.master.run(
+        SELECT.from(TeamMembers)
+          .columns("team_ID")
+          .where({ user_ID: oReservationUser.user.ID, isActive: true })
+      );
+      const aTeamIds = [...new Set(aMemberships.map((oMembership) => oMembership.team_ID).filter(Boolean))];
 
-      if (!qTeamTasks) {
+      if (!aTeamIds.length) {
         return 0;
       }
 
@@ -1716,7 +1742,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           .where([
             { ref: ["processorUser_ID"] }, "is", "null",
             "and", { ref: ["processorEmail"] }, "is", "null",
-            "and", { ref: ["ID"] }, "in", qTeamTasks
+            "and", { ref: ["processorTeam_ID"] }, "in", { list: aTeamIds.map((sTeamId) => ({ val: sTeamId })) }
           ])
       );
 
@@ -1771,6 +1797,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _filterByVisibleRequests(req, Users, requestFieldName) {
+    if (this._isAdministrator(req)) {
+      return;
+    }
     const oReservationUser = await this._currentReservationUser(req, Users);
     const qVisibleRequests = SELECT.from(this.entities.ProcessRequests).columns("ID");
 
@@ -1801,6 +1830,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _filterByAssignedTasks(req, Users) {
+    if (this._isAdministrator(req)) {
+      return;
+    }
     const oReservationUser = await this._currentReservationUser(req, Users);
     const aPredicates = this._taskAssignmentPredicates(oReservationUser);
 
@@ -1812,11 +1844,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     req.query.where({ xpr: aPredicates });
   }
 
-  async _filterByTeamTasks(req, Users, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers) {
+  async _filterByTeamTasks(req, Users, TeamMembers = this.masterEntities.TeamMembers) {
+    if (this._isAdministrator(req)) {
+      return;
+    }
     const oReservationUser = await this._currentReservationUser(req, Users);
-    const qTeamTasks = this._teamTaskMembershipQuery(oReservationUser, ProcessTaskTeamMembers);
+    const aMemberships = await this.master.run(
+      SELECT.from(TeamMembers)
+        .columns("team_ID")
+        .where({ user_ID: oReservationUser.user.ID, isActive: true })
+    );
+    const aTeamIds = [...new Set(aMemberships.map((oMembership) => oMembership.team_ID).filter(Boolean))];
 
-    if (!qTeamTasks) {
+    if (!aTeamIds.length) {
       req.query.where(this._alwaysFalsePredicate());
       return;
     }
@@ -1826,7 +1866,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       .where([
         { ref: ["processorUser_ID"] }, "is", "null",
         "and", { ref: ["processorEmail"] }, "is", "null",
-        "and", { ref: ["ID"] }, "in", qTeamTasks
+        "and", { ref: ["processorTeam_ID"] }, "in", { list: aTeamIds.map((sTeamId) => ({ val: sTeamId })) }
       ]);
   }
 
@@ -1845,59 +1885,37 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     // The My Team Tasks queue is filtered separately by explicit user membership.
   }
 
-  _teamTaskMembershipQuery(reservationUser, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers) {
-    const qTeamTasks = SELECT.from(ProcessTaskTeamMembers).columns("task_ID");
-    const aPredicates = this._teamTaskMembershipPredicates(reservationUser);
-
-    if (!aPredicates.length) {
-      return null;
-    }
-
-    qTeamTasks.where({ xpr: aPredicates });
-    return qTeamTasks;
-  }
-
-  async _isTeamTaskVisibleForUser(req, taskId, reservationUser, ProcessTaskTeamMembers = this.entities.ProcessTaskTeamMembers) {
-    const aPredicates = this._teamTaskMembershipPredicates(reservationUser);
-
-    if (!aPredicates.length) {
+  async _isTeamTaskVisibleForUser(req, taskId, reservationUser, TeamMembers = this.masterEntities.TeamMembers) {
+    if (!reservationUser.user?.ID) {
       return false;
     }
 
-    const oMember = await cds.tx(req).run(
-      SELECT.one.from(ProcessTaskTeamMembers)
-        .columns("ID")
-        .where({ task_ID: taskId })
-        .where({ xpr: aPredicates })
+    const oTask = await cds.tx(req).run(
+      SELECT.one.from(this.entities.ProcessTasks)
+        .columns("processorTeam_ID")
+        .where({ ID: taskId })
     );
-
-    return Boolean(oMember);
-  }
-
-  _teamTaskMembershipPredicates(reservationUser) {
-    const aPredicates = [];
-
-    if (reservationUser.user?.ID) {
-      this._addStringEqualsPredicate(aPredicates, "user_ID", reservationUser.user.ID);
+    if (!oTask?.processorTeam_ID) {
+      return false;
     }
 
-    return aPredicates;
+    const oMembership = await this.master.run(
+      SELECT.one.from(TeamMembers).columns("ID").where({
+        team_ID: oTask.processorTeam_ID,
+        user_ID: reservationUser.user.ID,
+        isActive: true
+      })
+    );
+
+    return Boolean(oMembership);
   }
 
   _taskAssignmentPredicates(reservationUser) {
     const aPredicates = [];
 
-      if (reservationUser.email) {
-      this._addStringEqualsPredicate(aPredicates, "processorEmail", reservationUser.email);
-
-      if (reservationUser.user?.ID) {
-        this._addStringEqualsPredicate(aPredicates, "processorUser_ID", reservationUser.user.ID);
-      }
-
-      return aPredicates;
+    if (reservationUser.user?.ID) {
+      this._addStringEqualsPredicate(aPredicates, "processorUser_ID", reservationUser.user.ID);
     }
-
-    this._addStringEqualsPredicate(aPredicates, "processor", reservationUser.principal);
 
     return aPredicates;
   }
@@ -1974,7 +1992,21 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   async _currentReservationUser(req, Users = this.masterEntities.Users) {
     const sPrincipal = req.user?.id || "anonymous";
     const sEmail = this._emailFromAuthenticatedUser(req.user);
-    const oUser = await this._findUserByPrincipal(req, sEmail || sPrincipal, Users);
+    const sNormalizedPrincipal = String(sPrincipal).trim().toLowerCase();
+    const sNormalizedEmail = String(sEmail || sPrincipal).trim().toLowerCase();
+    const aActiveUsers = await this.master.run(SELECT.from(Users).where({ isActive: true }));
+    const oUser = aActiveUsers.find((oCandidate) => {
+      const sCandidateEmail = String(oCandidate.email || "").trim().toLowerCase();
+      const sCandidatePrincipal = String(oCandidate.userPrincipalName || "").trim().toLowerCase();
+      const sCandidateObjectId = String(oCandidate.azureObjectId || "").trim().toLowerCase();
+
+      return sCandidateEmail === sNormalizedEmail
+        || sCandidatePrincipal === sNormalizedPrincipal
+        || sCandidateObjectId === sNormalizedPrincipal;
+    });
+    if (!oUser) {
+      return req.reject(403, "Your user is not provisioned in the shared Flowmate master data service");
+    }
     const sResolvedEmail = sEmail || oUser?.email || oUser?.userPrincipalName || (this._looksLikeEmail(sPrincipal) ? sPrincipal : "");
 
     return {
@@ -1986,12 +2018,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   _applyVisibleRequestsWhere(query, reservationUser) {
-    if (reservationUser.user?.ID) {
-      query.where("(reservedBy is null or reservedByUser_ID =", reservationUser.user.ID, ")");
-      return;
-    }
-
-    query.where("(reservedBy is null or reservedBy =", reservationUser.displayName, ")");
+    query.where({ requesterUser_ID: reservationUser.user.ID });
   }
 
   _isReservedByCurrentUser(request, reservationUser) {
