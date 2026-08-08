@@ -259,15 +259,6 @@ Content-Type: application/json
   "processorTeamName": "Procurement"
 }
 
-### Submit request
-POST {{service}}/submitRequest
-Authorization: Basic {{user}} {{userPassword}}
-Content-Type: application/json
-
-{
-  "requestId": "{{requestId}}"
-}
-
 ### Reserve request
 POST {{service}}/reserveRequest
 Authorization: Basic {{user}} {{userPassword}}

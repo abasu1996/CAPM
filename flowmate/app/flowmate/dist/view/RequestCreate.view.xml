@@ -378,27 +378,6 @@
                     </content>
                 </Panel>
 
-                <Panel
-                    class="flowmateCreateSection flowmateCreateSubmitSection"
-                    backgroundDesign="Transparent"
-                    expandable="false"
-                    visible="false">
-                    <content>
-                        <HBox
-                            alignItems="Center"
-                            justifyContent="SpaceBetween"
-                            wrap="Wrap">
-                            <VBox>
-                                <Title text="{i18n>requestSubmitSectionTitle}" level="H3" />
-                                <Text text="{i18n>requestSubmitHelpText}" wrapping="true" />
-                            </VBox>
-                            <Switch
-                                state="{create>/autoSubmit}"
-                                customTextOn="{i18n>yesText}"
-                                customTextOff="{i18n>noText}" />
-                        </HBox>
-                    </content>
-                </Panel>
             </VBox>
         </f:content>
     </f:DynamicPage>
@@ -415,10 +394,6 @@
                 path: '/ProcessRequests',
                 parameters: {
                     expand: 'processType,subProcessType'
-                },
-                events: {
-                    dataRequested: '.onDataRequested',
-                    dataReceived: '.onDataReceived'
                 }
             }">
             <columns>
@@ -449,11 +424,7 @@
             confirm=".onProcessTypeValueHelpConfirm"
             cancel=".onProcessTypeValueHelpClose"
             items="{
-                path: '/ProcessTypes',
-                events: {
-                    dataRequested: '.onDataRequested',
-                    dataReceived: '.onDataReceived'
-                }
+                path: '/ProcessTypes'
             }">
             <columns>
                 <Column>
@@ -485,11 +456,7 @@
             confirm=".onSubProcessTypeValueHelpConfirm"
             cancel=".onSubProcessTypeValueHelpClose"
             items="{
-                path: '/ProcessSubTypes',
-                events: {
-                    dataRequested: '.onDataRequested',
-                    dataReceived: '.onDataReceived'
-                }
+                path: '/ProcessSubTypes'
             }">
             <columns>
                 <Column><Text text="{i18n>processTypeCodeLabel}" /></Column>
@@ -516,11 +483,7 @@
             cancel=".onCreateTeamValueHelpClose"
             items="{
                 path: '/Teams',
-                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
-                events: {
-                    dataRequested: '.onDataRequested',
-                    dataReceived: '.onDataReceived'
-                }
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }]
             }">
             <columns>
                 <Column><Text text="{i18n>teamCodeLabel}" /></Column>
@@ -542,11 +505,7 @@
             confirm=".onVendorValueHelpConfirm"
             cancel=".onVendorValueHelpClose"
             items="{
-                path: '/Vendors',
-                events: {
-                    dataRequested: '.onDataRequested',
-                    dataReceived: '.onDataReceived'
-                }
+                path: '/Vendors'
             }">
             <columns>
                 <Column><Text text="{i18n>vendorCodeLabel}" /></Column>

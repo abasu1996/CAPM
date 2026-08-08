@@ -159,7 +159,6 @@ service FlowmateService {
         teamIds: many UUID,
         isActive: Boolean
     ) returns Users;
-    action submitRequest(requestId: UUID) returns Boolean;
     action approveTask(taskId: UUID, remarks: String) returns Boolean;
     action analyzeGuidedTaskCompletion(taskId: UUID) returns {
         requiresDecision   : Boolean;
@@ -240,6 +239,11 @@ service FlowmateService {
     function getMyTaskCount() returns Integer;
     function getMyTeamTaskCount() returns Integer;
     action getReportDashboard(filter: ReportFilter) returns ReportDashboard;
+    action exportReportDashboardPdf(filter: ReportFilter, dashboardKey: String(30)) returns {
+        fileName : String(150);
+        mimeType : String(100);
+        content  : LargeString;
+    };
     function getApplicationCapabilities() returns {
         isAdmin             : Boolean;
         canMaintainUsers    : Boolean;

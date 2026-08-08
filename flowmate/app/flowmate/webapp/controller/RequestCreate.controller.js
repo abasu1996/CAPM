@@ -55,7 +55,6 @@ sap.ui.define([
                 processorTeamName: "",
                 department: "",
                 priorityConfig_code: "MEDIUM",
-                autoSubmit: true,
                 creating: false,
                 uploading: false,
                 attachments: []
@@ -120,12 +119,6 @@ sap.ui.define([
                     status_code: "DRAFT"
                 });
 
-                if (oPayload.autoSubmit) {
-                    await this.callAction("submitRequest", {
-                        requestId: oCreated.ID
-                    });
-                }
-
                 if (this._aAttachmentFiles.length) {
                     this._startAttachmentUploadInBackground(oCreated.ID, [...this._aAttachmentFiles]);
                     MessageToast.show(this.getText("requestCreatedAttachmentUploadStartedMessage"));
@@ -137,7 +130,7 @@ sap.ui.define([
                     requestId: oCreated.ID
                 }));
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("requestCreateFailedMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestCreateFailedMessage")));
             } finally {
                 oCreateModel.setProperty("/creating", false);
             }
@@ -715,7 +708,7 @@ sap.ui.define([
                     oCreateModel.setProperty("/hasSubProcessTypes", aSubTypes.length > 0);
                 }
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("predecessorLoadFailedMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("predecessorLoadFailedMessage")));
             } finally {
                 oCreateModel.setProperty("/creating", false);
             }
@@ -838,7 +831,7 @@ sap.ui.define([
                     MessageToast.show(this.getText("attachmentsUploadedMessage"));
                 })
                 .catch((oError) => {
-                    MessageBox.error(oError.message || this.getText("attachmentBackgroundUploadErrorMessage"));
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("attachmentBackgroundUploadErrorMessage")));
                 })
                 .finally(() => {
                     oCreateModel.setProperty("/uploading", false);

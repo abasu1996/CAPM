@@ -74,7 +74,7 @@ sap.ui.define([
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
         },
 
-        onRouteMatched(oEvent) {
+        async onRouteMatched(oEvent) {
             const oQuery = oEvent.getParameter("arguments")["?query"];
             const sRequestId = oQuery && oQuery.requestId;
 
@@ -82,6 +82,15 @@ sap.ui.define([
             this._updateBusyState();
             this._bShowUnreservedOnly = oQuery?.unreserved === "true";
             this._bShowReservedOnly = oQuery?.reserved === "true";
+            this._sCurrentReservationUserId = null;
+            if (this._bShowReservedOnly) {
+                try {
+                    const oResponse = await this.callAction("getCurrentUserDetails");
+                    this._sCurrentReservationUserId = (oResponse.value || oResponse).ID || null;
+                } catch (oError) {
+                    this._sCurrentReservationUserId = null;
+                }
+            }
             this.getView().getModel("viewState").setProperty("/showUnreservedOnly", this._bShowUnreservedOnly);
             if (this._bShowUnreservedOnly) {
                 this._loadRequestFilterQueries();
@@ -132,7 +141,11 @@ sap.ui.define([
                 this._addUnreservedQueueFilters(oBindingParams.filters);
             }
             if (this._bShowReservedOnly) {
-                oBindingParams.filters.push(new Filter("reservedBy", FilterOperator.NE, null));
+                oBindingParams.filters.push(new Filter(
+                    "reservedByUser_ID",
+                    FilterOperator.EQ,
+                    this._sCurrentReservationUserId || "00000000-0000-0000-0000-000000000000"
+                ));
             }
             this._addRequestSearchFilter(oBindingParams.filters);
             oEvents.dataRequested = (...aArgs) => {
@@ -274,7 +287,7 @@ sap.ui.define([
                 this._refreshRequestHeader();
                 this.byId("requestsTable").getBinding("items")?.refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("requestReserveErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestReserveErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -348,7 +361,7 @@ sap.ui.define([
                 this.byId("saveRequestQueryDialog").close();
                 MessageToast.show(this.getText("querySavedMessage"));
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("querySaveErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("querySaveErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -380,7 +393,7 @@ sap.ui.define([
                 await this._loadRequestFilterQueries();
                 MessageToast.show(this.getText("queryDeletedMessage"));
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("queryDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("queryDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -459,7 +472,7 @@ sap.ui.define([
                 this._refreshHistorySection();
                 this.byId("requestsTable").getBinding("items").refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("statusUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -483,7 +496,7 @@ sap.ui.define([
                 this._refreshAfterTaskChange();
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("statusUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -647,7 +660,7 @@ sap.ui.define([
                 this._refreshTaskSection();
                 this._refreshHistorySection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("processorUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -672,7 +685,7 @@ sap.ui.define([
                 this._refreshRequestHeader();
                 this._refreshHistorySection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("teamUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("teamUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -698,7 +711,7 @@ sap.ui.define([
                 this._refreshHistorySection();
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("processorUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -724,7 +737,7 @@ sap.ui.define([
                 this._refreshHistorySection();
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("teamUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("teamUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -778,7 +791,7 @@ sap.ui.define([
                 });
                 this.byId("requestEmailDialog").open();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("requestEmailAttachmentLoadErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestEmailAttachmentLoadErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -874,7 +887,7 @@ sap.ui.define([
                 this._refreshEmailSection();
                 this._refreshHistorySection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("requestEmailQueueErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestEmailQueueErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -924,7 +937,7 @@ sap.ui.define([
                 MessageToast.show(this.getText("taskCreatedMessage"));
                 this._refreshAfterTaskChange(iStepNo);
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("taskCreateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("taskCreateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -995,7 +1008,7 @@ sap.ui.define([
                 MessageToast.show(this.getText("partyCreatedMessage"));
                 this._refreshPartySection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("partyCreateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("partyCreateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1031,7 +1044,7 @@ sap.ui.define([
 
                 window.location.href = `mailto:${encodeURIComponent(oRecipient.recipient)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("partyEmailMissingMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("partyEmailMissingMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1059,7 +1072,7 @@ sap.ui.define([
 
                 this._refreshPartySection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("partyDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("partyDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1092,7 +1105,7 @@ sap.ui.define([
                 oTable.removeSelections(true);
                 this._refreshPartySection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("partyDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("partyDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1123,7 +1136,7 @@ sap.ui.define([
                 MessageToast.show(this.getText("attachmentsUploadedMessage"));
                 this._refreshAttachmentSection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("attachmentContentErrorMessage", [""]));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("attachmentContentErrorMessage", [""])));
             } finally {
                 this.getView().getModel("uploads").setProperty("/active", false);
             }
@@ -1151,7 +1164,7 @@ sap.ui.define([
                 window.open(sUrl, "_blank", "noopener,noreferrer");
                 setTimeout(() => URL.revokeObjectURL(sUrl), 60000);
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("attachmentOpenErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("attachmentOpenErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1181,7 +1194,7 @@ sap.ui.define([
                 document.body.removeChild(oLink);
                 URL.revokeObjectURL(sUrl);
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("attachmentDownloadErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("attachmentDownloadErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1219,7 +1232,7 @@ sap.ui.define([
                 this._refreshAfterTaskChange();
                 this.byId("requestsTable").getBinding("items").refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("taskDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1255,7 +1268,7 @@ sap.ui.define([
                 this._refreshAfterTaskChange();
                 this.byId("requestsTable").getBinding("items").refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("taskDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1292,7 +1305,7 @@ sap.ui.define([
 
                 this.byId("requestsTable").getBinding("items").refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("requestDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1328,7 +1341,7 @@ sap.ui.define([
                 oTable.removeSelections(true);
                 oTable.getBinding("items").refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("requestDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1357,7 +1370,7 @@ sap.ui.define([
                 MessageToast.show(this.getText("attachmentDeletedMessage"));
                 this._refreshAttachmentSection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("attachmentDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("attachmentDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1386,7 +1399,7 @@ sap.ui.define([
                 oTable.removeSelections(true);
                 this._refreshAttachmentSection();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("attachmentDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("attachmentDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1776,7 +1789,7 @@ sap.ui.define([
                 this._refreshAfterTaskChange();
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("actionFailedMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("actionFailedMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -1845,7 +1858,7 @@ sap.ui.define([
                 MessageToast.show(this.getText("guidedStepCompletedMessage"));
                 this._refreshAfterTaskChange();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("guidedStepCompleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("guidedStepCompleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }

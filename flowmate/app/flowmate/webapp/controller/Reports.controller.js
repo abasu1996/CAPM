@@ -99,6 +99,49 @@ sap.ui.define([
             this._loadDashboard();
         },
 
+        async onExportPdf() {
+            const oModel = this.getView().getModel("reports");
+            const oFilters = oModel.getProperty("/filters");
+            if (!oFilters.fromDate || !oFilters.toDate || oFilters.fromDate > oFilters.toDate) {
+                MessageBox.warning(this.getText("reportsInvalidDateRange"));
+                return;
+            }
+
+            try {
+                // Always refresh first so the exported dashboard reflects the current filter controls.
+                if (!await this._loadDashboard()) {
+                    return;
+                }
+                const oResult = await this.callAction("exportReportDashboardPdf", {
+                    dashboardKey: oModel.getProperty("/selectedDashboard"),
+                    filter: {
+                        fromDate: this._formatDate(oFilters.fromDate),
+                        toDate: this._formatDate(oFilters.toDate),
+                        processTypeCode: oFilters.processTypeCode || null,
+                        statusCode: oFilters.statusCode || null
+                    }
+                });
+                this._downloadPdf(oResult.value || oResult);
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("dashboardPdfExportFailed")));
+            }
+        },
+
+        _downloadPdf(oExport) {
+            const sBinary = String(oExport.content || "").replace(/^data:application\/pdf;base64,/, "");
+            const sDecoded = window.atob(sBinary);
+            const aBytes = new Uint8Array(sDecoded.length);
+            for (let iIndex = 0; iIndex < sDecoded.length; iIndex += 1) {
+                aBytes[iIndex] = sDecoded.charCodeAt(iIndex);
+            }
+            const sUrl = URL.createObjectURL(new Blob([aBytes], { type: oExport.mimeType || "application/pdf" }));
+            const oLink = document.createElement("a");
+            oLink.href = sUrl;
+            oLink.download = oExport.fileName || "flowmate-dashboard.pdf";
+            oLink.click();
+            URL.revokeObjectURL(sUrl);
+        },
+
         onOverdueTaskPress(oEvent) {
             const sTaskId = oEvent.getSource().getBindingContext("reports")?.getProperty("ID");
             if (sTaskId) {
@@ -111,7 +154,7 @@ sap.ui.define([
             const oFilters = oModel.getProperty("/filters");
             if (!oFilters.fromDate || !oFilters.toDate || oFilters.fromDate > oFilters.toDate) {
                 MessageBox.warning(this.getText("reportsInvalidDateRange"));
-                return;
+                return false;
             }
 
             this.showBusy();
@@ -130,8 +173,10 @@ sap.ui.define([
                     ...(oResult.value || oResult),
                     loaded: true
                 });
+                return true;
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("reportsLoadFailed"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("reportsLoadFailed")));
+                return false;
             } finally {
                 this.hideBusy();
             }

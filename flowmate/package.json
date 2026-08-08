@@ -6,11 +6,13 @@
     "@cap-js/attachments": "^3.12.2",
     "@cap-js/hana": "^2",
     "@cap-js/openapi": "^1.5.0",
-    "@sap/cds": "^9",
     "@sap-cloud-sdk/connectivity": "^4.8.0",
     "@sap-cloud-sdk/http-client": "^4.8.0",
     "@sap-cloud-sdk/resilience": "^4.8.0",
+    "@sap/cds": "^9",
     "@sap/xssec": "^4",
+    "pdfkit": "^0.17.2",
+    "svg-to-pdfkit": "^0.1.8",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {

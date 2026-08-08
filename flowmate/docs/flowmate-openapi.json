@@ -21729,6 +21729,72 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/exportReportDashboardPdf": {
+      "post": {
+        "summary": "Invokes action exportReportDashboardPdf",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.return_FlowmateService_exportReportDashboardPdf"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FlowmateService.ReportFilter"
+                      }
+                    ],
+                    "nullable": true
+                  },
+                  "dashboardKey": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "nullable": true
+                  },
+                  "charts": {
+                    "type": "array",
+                    "items": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/FlowmateService.ReportChartSnapshot"
+                        }
+                      ],
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/getApplicationCapabilities": {
       "get": {
         "summary": "Invokes function getApplicationCapabilities",
@@ -24421,55 +24487,6 @@
           },
           "4XX": {
             "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      }
-    },
-    "/odata/v4/flowmate/submitRequest": {
-      "post": {
-        "summary": "Invokes action submitRequest",
-        "tags": [
-          "Flowmate — Service Operations"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "value": {
-                      "type": "boolean",
-                      "nullable": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "requestBody": {
-          "description": "Action parameters",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "requestId": {
-                    "type": "string",
-                    "format": "uuid",
-                    "example": "01234567-89ab-cdef-0123-456789abcdef",
-                    "nullable": true
-                  }
-                }
-              }
-            }
           }
         },
         "x-flowmate-project": "flowmate",
@@ -66051,6 +66068,26 @@
           }
         }
       },
+      "FlowmateService.ReportChartSnapshot": {
+        "title": "ReportChartSnapshot",
+        "type": "object",
+        "properties": {
+          "chartKey": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 150,
+            "nullable": true
+          },
+          "svg": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "FlowmateService.ReportDashboard": {
         "title": "ReportDashboard",
         "type": "object",
@@ -68622,6 +68659,26 @@
           "incompleteStepName": {
             "type": "string",
             "maxLength": 100,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.return_FlowmateService_exportReportDashboardPdf": {
+        "title": "return_FlowmateService_exportReportDashboardPdf",
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "maxLength": 150,
+            "nullable": true
+          },
+          "mimeType": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
             "nullable": true
           }
         }

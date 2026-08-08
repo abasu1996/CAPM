@@ -1,7 +1,7 @@
 sap.ui.define([], () => {
     "use strict";
 
-    const LOCAL_CAP_APP_PATH = /\/flowmate\/webapp\/?$/;
+    const LOCAL_CAP_APP_PATH = /\/flowmate(?:\/webapp)?\/?$/;
 
     function resolve(sUri) {
         const sRelativeUri = String(sUri || "").replace(/^\/+/, "");

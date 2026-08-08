@@ -9,6 +9,36 @@ sap.ui.define([
 
   const MAIN_SERVICE_URL = "odata/v4/flowmate-ca/";
   const MASTER_SERVICE_URL = "odata/v4/flowmate-ca-master/";
+  const STATUS_MESSAGES = {
+    400: "Some of the information provided is invalid. Please review it and try again.",
+    401: "Your session has expired or you are not signed in. Please sign in again.",
+    403: "You do not have permission to perform this action.",
+    404: "The requested record could not be found. It may have been removed.",
+    409: "This change conflicts with a more recent update. Refresh the page and try again.",
+    412: "This record has changed since it was opened. Refresh the page and try again.",
+    429: "Too many requests were sent. Please wait a moment and try again.",
+    500: "The server could not complete the request. Please try again or contact support.",
+    502: "The service is temporarily unavailable. Please try again shortly.",
+    503: "The service is temporarily unavailable. Please try again shortly.",
+    504: "The request timed out. Please try again."
+  };
+
+  function errorMessage(error, fallback, status) {
+    let payload = error;
+    if (typeof payload === "string") {
+      try { payload = JSON.parse(payload); } catch (parseError) { payload = { message: payload }; }
+    }
+    const detail = payload?.error?.details?.[0]?.message ||
+      payload?.error?.innererror?.errordetails?.[0]?.message;
+    const candidate = detail?.value || detail || payload?.error?.message?.value ||
+      payload?.error?.message || payload?.message;
+    const cleaned = typeof candidate === "string" ? candidate.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : "";
+    const generic = /^(?:http request failed|request failed|failed to fetch)$/i.test(cleaned);
+    const technical = /(?:sql(?:state| error| syntax)?|stack trace|internal server error|\bquery:\s|\bselect\s.+\bfrom\s)/i.test(cleaned);
+    const code = Number(status || error?.status || error?.statusCode || error?.response?.status || 0);
+    return (!generic && !technical && cleaned) || STATUS_MESSAGES[code] || fallback ||
+      "The request could not be completed. Please try again.";
+  }
 
   return Controller.extend("flowmateca.controller.BaseController", {
     getRouter: function () {
@@ -41,7 +71,7 @@ sap.ui.define([
         this.getAppModel().setProperty("/currentUser", user);
         return user;
       } catch (error) {
-        MessageBox.error(error.message);
+        MessageBox.error(this.getErrorMessage(error));
         return null;
       }
     },
@@ -68,10 +98,8 @@ sap.ui.define([
 
       const response = await fetch(this.resolveAppUri(`${MAIN_SERVICE_URL}${path}`), settings);
       if (!response.ok) {
-        const payload = await response.json().catch(function () {
-          return {};
-        });
-        throw new Error(payload.error?.message || `Request failed with status ${response.status}`);
+        const payload = await response.text();
+        throw new Error(errorMessage(payload, null, response.status));
       }
       if (response.status === 204) {
         return null;
@@ -99,10 +127,8 @@ sap.ui.define([
 
       const response = await fetch(this.resolveAppUri(`${MASTER_SERVICE_URL}${path}`), settings);
       if (!response.ok) {
-        const payload = await response.json().catch(function () {
-          return {};
-        });
-        throw new Error(payload.error?.message || `Request failed with status ${response.status}`);
+        const payload = await response.text();
+        throw new Error(errorMessage(payload, null, response.status));
       }
       if (response.status === 204) {
         return null;
@@ -121,12 +147,20 @@ sap.ui.define([
           "X-CSRF-Token": "Fetch"
         }
       });
+      if (!response.ok) {
+        const payload = await response.text();
+        throw new Error(errorMessage(payload, null, response.status));
+      }
       this[cacheKey] = response.headers.get("X-CSRF-Token") || "";
       return this[cacheKey];
     },
 
     showError: function (error) {
-      MessageBox.error(error?.message || String(error));
+      MessageBox.error(this.getErrorMessage(error));
+    },
+
+    getErrorMessage: function (error, fallback) {
+      return errorMessage(error, fallback);
     },
 
     showSuccess: function (message) {

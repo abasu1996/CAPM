@@ -4,8 +4,9 @@ sap.ui.define([
     "sap/ui/core/routing/History",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "flowmate/model/serviceUrl"
-], (MessageToast, Controller, History, Filter, FilterOperator, serviceUrl) => {
+    "flowmate/model/serviceUrl",
+    "flowmate/model/errorMessage"
+], (MessageToast, Controller, History, Filter, FilterOperator, serviceUrl, errorMessage) => {
     "use strict";
 
     const SERVICE_V4_URL = "odata/v4/flowmate/";
@@ -21,6 +22,14 @@ sap.ui.define([
 
         getText(sKey, aArgs) {
             return this.getModel("i18n").getResourceBundle().getText(sKey, aArgs);
+        },
+
+        getErrorMessage(oError, sFallback) {
+            return errorMessage.getMessage(oError, sFallback);
+        },
+
+        normalizeError(oError, sFallback) {
+            return errorMessage.normalize(oError, sFallback);
         },
 
         resolveAppUri(sUri) {
@@ -275,7 +284,7 @@ sap.ui.define([
                     MessageToast.show(this.getText("notificationDelegatedMessage", [sRecipient]));
                 }
             } catch (oError) {
-                MessageToast.show(oError.message || this.getText("processorEmailMissingMessage"));
+                MessageToast.show(this.getErrorMessage(oError, this.getText("processorEmailMissingMessage")));
                 return;
             } finally {
                 this.hideBusy();
@@ -333,7 +342,7 @@ sap.ui.define([
 
                 window.location.href = `mailto:${encodeURIComponent(sRecipients)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
             } catch (oError) {
-                MessageToast.show(oError.message || this.getText("teamMembersEmailMissingMessage"));
+                MessageToast.show(this.getErrorMessage(oError, this.getText("teamMembersEmailMissingMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -343,7 +352,7 @@ sap.ui.define([
             return new Promise((resolve, reject) => {
                 this.getModel().create(sPath, oPayload, {
                     success: (oData) => resolve(oData || oPayload),
-                    error: reject
+                    error: (oError) => reject(this.normalizeError(oError))
                 });
             });
         },
@@ -352,7 +361,7 @@ sap.ui.define([
             return new Promise((resolve, reject) => {
                 this.getModel().remove(sPath, {
                     success: resolve,
-                    error: reject
+                    error: (oError) => reject(this.normalizeError(oError))
                 });
             });
         },
@@ -361,7 +370,7 @@ sap.ui.define([
             return new Promise((resolve, reject) => {
                 this.getModel().update(sPath, oPayload, {
                     success: resolve,
-                    error: reject
+                    error: (oError) => reject(this.normalizeError(oError))
                 });
             });
         },
@@ -380,16 +389,8 @@ sap.ui.define([
             });
 
             if (!oResponse.ok) {
-                let sMessage = this.getText("actionFailedMessage");
-
-                try {
-                    const oBody = await oResponse.json();
-                    sMessage = oBody?.error?.message || sMessage;
-                } catch (oError) {
-                    // Keep fallback message.
-                }
-
-                throw new Error(sMessage);
+                const sBody = await oResponse.text();
+                throw errorMessage.normalize(sBody, this.getText("actionFailedMessage"), oResponse.status);
             }
 
             return oResponse.json();
@@ -403,6 +404,11 @@ sap.ui.define([
                     "X-CSRF-Token": "Fetch"
                 }
             });
+
+            if (!oResponse.ok) {
+                const sBody = await oResponse.text();
+                throw errorMessage.normalize(sBody, this.getText("actionFailedMessage"), oResponse.status);
+            }
 
             return oResponse.headers.get("X-CSRF-Token") || "";
         }

@@ -277,11 +277,7 @@ sap.ui.define([
         },
 
         _getErrorMessage(oError, sFallbackKey) {
-            try {
-                return JSON.parse(oError.responseText).error.message.value || this.getText(sFallbackKey);
-            } catch (oParseError) {
-                return this.getText(sFallbackKey);
-            }
+            return this.getErrorMessage(oError, this.getText(sFallbackKey));
         }
     });
 });

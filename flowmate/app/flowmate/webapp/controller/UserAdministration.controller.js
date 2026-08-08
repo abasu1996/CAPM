@@ -730,11 +730,7 @@ sap.ui.define([
         },
 
         _getErrorMessage(oError) {
-            try {
-                return JSON.parse(oError.responseText).error.message.value || this.getText("userSaveErrorMessage");
-            } catch (oParseError) {
-                return oError.message || this.getText("userSaveErrorMessage");
-            }
+            return this.getErrorMessage(oError, this.getText("userSaveErrorMessage"));
         }
     });
 });

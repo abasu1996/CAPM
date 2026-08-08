@@ -99,6 +99,84 @@ sap.ui.define([
             this._loadDashboard();
         },
 
+        async onExportPdf() {
+            const oModel = this.getView().getModel("reports");
+            const oFilters = oModel.getProperty("/filters");
+            if (!oFilters.fromDate || !oFilters.toDate || oFilters.fromDate > oFilters.toDate) {
+                MessageBox.warning(this.getText("reportsInvalidDateRange"));
+                return;
+            }
+
+            try {
+                // Always refresh first so the exported dashboard reflects the current filter controls.
+                if (!await this._loadDashboard()) {
+                    return;
+                }
+                await this._waitForDashboardRendering();
+                const oResult = await this.callAction("exportReportDashboardPdf", {
+                    dashboardKey: oModel.getProperty("/selectedDashboard"),
+                    filter: {
+                        fromDate: this._formatDate(oFilters.fromDate),
+                        toDate: this._formatDate(oFilters.toDate),
+                        processTypeCode: oFilters.processTypeCode || null,
+                        statusCode: oFilters.statusCode || null
+                    },
+                    charts: this._collectVisibleChartSnapshots()
+                });
+                this._downloadPdf(oResult.value || oResult);
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("dashboardPdfExportFailed")));
+            }
+        },
+
+        _collectVisibleChartSnapshots() {
+            const mChartMetadata = {
+                statusBreakdownChart: ["statusBreakdown", this.getText("requestsByStatusTitle")],
+                operationalProcessChart: ["processBreakdown", this.getText("requestsByProcessTitle")],
+                teamWorkloadChart: ["teamWorkload", this.getText("teamWorkloadTitle")],
+                monthlyTrendChart: ["monthlyTrend", this.getText("requestTrendTitle")],
+                trendProcessChart: ["processBreakdown", this.getText("requestsByProcessTitle")],
+                userActivityChart: ["userActivity", this.getText("activityByUserTitle")],
+                auditActivityChart: ["auditActivity", this.getText("activityByActionTitle")]
+            };
+            return Object.entries(mChartMetadata).flatMap(([sControlId, [sKey, sTitle]]) => {
+                const oChart = this.byId(sControlId);
+                if (!oChart || !oChart.getVisible() || !oChart.getDomRef()) {
+                    return [];
+                }
+                const oSize = oChart.getDomRef().getBoundingClientRect();
+                return [{
+                    chartKey: sKey,
+                    title: sTitle,
+                    svg: oChart.exportToSVGString({
+                        width: Math.max(800, Math.round(oSize.width)),
+                        height: Math.max(400, Math.round(oSize.height))
+                    })
+                }];
+            });
+        },
+
+        _downloadPdf(oExport) {
+            const sBinary = String(oExport.content || "").replace(/^data:application\/pdf;base64,/, "");
+            const sDecoded = window.atob(sBinary);
+            const aBytes = new Uint8Array(sDecoded.length);
+            for (let iIndex = 0; iIndex < sDecoded.length; iIndex += 1) {
+                aBytes[iIndex] = sDecoded.charCodeAt(iIndex);
+            }
+            const sUrl = URL.createObjectURL(new Blob([aBytes], { type: oExport.mimeType || "application/pdf" }));
+            const oLink = document.createElement("a");
+            oLink.href = sUrl;
+            oLink.download = oExport.fileName || "flowmate-dashboard.pdf";
+            oLink.click();
+            URL.revokeObjectURL(sUrl);
+        },
+
+        _waitForDashboardRendering() {
+            return new Promise((resolve) => {
+                window.requestAnimationFrame(() => window.requestAnimationFrame(() => window.setTimeout(resolve, 300)));
+            });
+        },
+
         onOverdueTaskPress(oEvent) {
             const sTaskId = oEvent.getSource().getBindingContext("reports")?.getProperty("ID");
             if (sTaskId) {
@@ -111,7 +189,7 @@ sap.ui.define([
             const oFilters = oModel.getProperty("/filters");
             if (!oFilters.fromDate || !oFilters.toDate || oFilters.fromDate > oFilters.toDate) {
                 MessageBox.warning(this.getText("reportsInvalidDateRange"));
-                return;
+                return false;
             }
 
             this.showBusy();
@@ -130,8 +208,10 @@ sap.ui.define([
                     ...(oResult.value || oResult),
                     loaded: true
                 });
+                return true;
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("reportsLoadFailed"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("reportsLoadFailed")));
+                return false;
             } finally {
                 this.hideBusy();
             }

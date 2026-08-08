@@ -167,7 +167,7 @@ sap.ui.define([
                     this._setTasksLayout(fLibrary.LayoutType.OneColumn);
                 }
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("teamTaskAssignErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("teamTaskAssignErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -191,7 +191,7 @@ sap.ui.define([
                 this.byId("tasksTable").getBinding("items").refresh();
                 this.byId("taskObjectPage").getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("statusUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -257,7 +257,7 @@ sap.ui.define([
                 this.byId("tasksTable").getBinding("items").refresh();
                 this.byId("taskObjectPage").getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("processorUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -305,7 +305,7 @@ sap.ui.define([
 
                 this.byId("tasksTable").getBinding("items").refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("taskDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -340,7 +340,7 @@ sap.ui.define([
                 oTable.removeSelections(true);
                 oTable.getBinding("items").refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("taskDeleteErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("taskDeleteErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -480,7 +480,7 @@ sap.ui.define([
                 this.byId("tasksTable").getBinding("items").refresh();
                 this.byId("taskObjectPage").getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("actionFailedMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("actionFailedMessage")));
             } finally {
                 this.hideBusy();
             }

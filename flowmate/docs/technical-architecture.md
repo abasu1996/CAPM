@@ -245,7 +245,6 @@ The service projects domain entities from `flowmate.db`, redirects associations 
 
 | Operation | Purpose |
 | --- | --- |
-| `submitRequest` | Submits a request and creates/activates the initial guided task. |
 | `approveTask` | Approves a task without automatically moving the request step. |
 | `rejectTask` | Rejects a task and rejects the parent request. |
 | `sendBack` | Sends a task/request back to a previous configured step. |
@@ -269,7 +268,6 @@ The service projects domain entities from `flowmate.db`, redirects associations 
 Seeded statuses:
 
 - `DRAFT`
-- `SUBMITTED`
 - `IN_PROGRESS`
 - `SENT_BACK`
 - `REJECTED`
@@ -294,9 +292,7 @@ The implemented task progression mainly uses `OPEN`, `APPROVED`, `REJECTED`, and
 ```mermaid
 stateDiagram-v2
   [*] --> DRAFT: Create ProcessRequest
-  DRAFT --> IN_PROGRESS: submitRequest creates initial task
-  DRAFT --> SUBMITTED: submitRequest without configured steps
-  SUBMITTED --> IN_PROGRESS: task created / work starts
+  DRAFT --> IN_PROGRESS: creation activates the initial configured task
   IN_PROGRESS --> SENT_BACK: sendBack
   SENT_BACK --> IN_PROGRESS: previous step task recreated
   IN_PROGRESS --> REJECTED: rejectTask
@@ -318,11 +314,8 @@ sequenceDiagram
 
   User->>UI: Create request
   UI->>CAP: CREATE ProcessRequests
-  CAP->>DB: Insert request as DRAFT
-  CAP->>DB: Create initial task from ProcessStepConfig
-  User->>UI: Submit
-  UI->>CAP: submitRequest(requestId)
-  CAP->>DB: Set IN_PROGRESS, currentStep, dueDate
+  CAP->>DB: Insert request and create initial task from ProcessStepConfig
+  CAP->>DB: Set IN_PROGRESS, currentStep, and dueDate when a step exists
   User->>UI: Approve task
   UI->>CAP: approveTask(taskId, remarks)
   CAP->>DB: Mark task APPROVED and write history

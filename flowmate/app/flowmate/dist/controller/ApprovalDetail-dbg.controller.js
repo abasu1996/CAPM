@@ -68,7 +68,7 @@ sap.ui.define([
                 MessageToast.show(this.getText("taskStatusUpdatedMessage"));
                 this.getView().getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("statusUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("statusUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -133,7 +133,7 @@ sap.ui.define([
                 MessageToast.show(this.getText("taskProcessorUpdatedMessage"));
                 this.getView().getElementBinding().refresh();
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("processorUpdateErrorMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("processorUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -190,7 +190,7 @@ sap.ui.define([
                 MessageToast.show(this.getText(sSuccessTextKey));
                 this.navTo("RouteMyTasks");
             } catch (oError) {
-                MessageBox.error(oError.message || this.getText("actionFailedMessage"));
+                MessageBox.error(this.getErrorMessage(oError, this.getText("actionFailedMessage")));
             } finally {
                 this.hideBusy();
             }

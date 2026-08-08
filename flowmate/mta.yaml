@@ -58,7 +58,7 @@ modules:
         - mkdir -p webapp
         - cp ../../router/package.json package.json
         - cp ../../router/xs-app.json xs-app.json
-        - cp -R ../../app/flowmate/webapp/. webapp
+        - cp -R ../../app/flowmate/dist/. webapp
         - npm install
     requires:
       - name: flowmate-auth

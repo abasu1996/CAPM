@@ -1183,10 +1183,6 @@
         #ffffff;
 }
 
-.flowmateCreateSubmitSection {
-    border-left: 0.25rem solid var(--flowmateTeal);
-}
-
 .flowmateAttachmentList {
     overflow: hidden;
     border: 0.0625rem solid #d9e2ec;

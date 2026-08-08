@@ -1,9 +1,9 @@
 const cds = require("@sap/cds");
+const PDFDocument = require("pdfkit");
 
 
 const PROCESS_STATUS = {
   DRAFT: "DRAFT",
-  SUBMITTED: "SUBMITTED",
   IN_PROGRESS: "IN_PROGRESS",
   SENT_BACK: "SENT_BACK",
   REJECTED: "REJECTED",
@@ -882,44 +882,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessHistory, "HIS");
     });
 
-    this.on("submitRequest", async (req) => {
-      const { requestId } = req.data;
-      const request = await this._getRequest(req, requestId);
-
-      if (!request) {
-        return req.reject(404, `Process request ${requestId} was not found`);
-      }
-
-      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
-
-      if (this._isLockedRequest(request)) {
-        return this._rejectLockedRequest(req);
-      }
-
-      const { firstTaskStep } = await this._ensureInitialGuidedTask(req, requestId, request);
-      const oldStatus = request.status_code || PROCESS_STATUS.DRAFT;
-
-      await this._writeHistory(req, {
-        requestId,
-        stepNo: firstTaskStep?.stepNo || request.currentStep || 0,
-        action: "SUBMITTED",
-        actor: req.user?.id,
-        oldStatus,
-        newStatus: firstTaskStep ? PROCESS_STATUS.IN_PROGRESS : PROCESS_STATUS.SUBMITTED,
-        remarks: "Request submitted"
-      });
-
-      await cds.tx(req).run(
-        UPDATE(ProcessRequests, requestId).set({
-          status_code: firstTaskStep ? PROCESS_STATUS.IN_PROGRESS : PROCESS_STATUS.SUBMITTED,
-          currentStep: firstTaskStep?.stepNo || request.currentStep || 0,
-          dueDate: firstTaskStep ? this._calculateDueDate(firstTaskStep.slaDays) : request.dueDate
-        })
-      );
-
-      return true;
-    });
-
     this.on("approveTask", async (req) => {
       return this._approveTaskOnly(req, req.data.taskId, req.data.remarks, Users);
     });
@@ -1753,6 +1715,29 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return this._getReportDashboard(req, req.data.filter || {}, ProcessRequests, ProcessTasks, ProcessTypes, Users);
     });
 
+    this.on("exportReportDashboardPdf", async (req) => {
+      const sDashboardKey = String(req.data.dashboardKey || "operational").toLowerCase();
+      const aSupportedDashboards = ["operational", "sla", "teams", "trends", "users", "audit"];
+      if (!aSupportedDashboards.includes(sDashboardKey)) {
+        return req.reject(400, "Select a valid dashboard for PDF export");
+      }
+      const oDashboard = await this._getReportDashboard(
+        req,
+        req.data.filter || {},
+        ProcessRequests,
+        ProcessTasks,
+        ProcessTypes,
+        Users
+      );
+      const oRange = this._reportDateRange(req, req.data.filter?.fromDate, req.data.filter?.toDate);
+      const oPdf = await this._renderReportDashboardPdf(sDashboardKey, oDashboard, oRange);
+      return {
+        fileName: oPdf.fileName,
+        mimeType: "application/pdf",
+        content: oPdf.content.toString("base64")
+      };
+    });
+
     this.on("getApplicationCapabilities", (req) => ({
       isAdmin: this._isAdministrator(req),
       canMaintainUsers: this._isAdministrator(req),
@@ -1928,6 +1913,237 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         };
       }).sort((a, b) => b.overdueDays - a.overdueDays)
     };
+  }
+
+  _validatedReportChartSnapshots(req, sDashboardKey, charts) {
+    const mAllowedChartKeys = {
+      operational: new Set(["statusBreakdown", "processBreakdown"]),
+      sla: new Set(),
+      teams: new Set(["teamWorkload"]),
+      trends: new Set(["monthlyTrend", "processBreakdown"]),
+      users: new Set(["userActivity"]),
+      audit: new Set(["auditActivity"])
+    };
+    const aCharts = Array.isArray(charts) ? charts : [];
+    if (aCharts.length > 4) {
+      return req.reject(400, "A maximum of four dashboard charts can be exported at once");
+    }
+    const oAllowedKeys = mAllowedChartKeys[sDashboardKey];
+    return aCharts.map((oChart) => {
+      const sKey = String(oChart?.chartKey || "");
+      const sTitle = String(oChart?.title || "").trim().slice(0, 150);
+      const sSvg = String(oChart?.svg || "");
+      if (!oAllowedKeys.has(sKey)) {
+        return req.reject(400, `Chart ${sKey || "without a key"} is not valid for this dashboard`);
+      }
+      if (!sSvg.trim().startsWith("<svg") || sSvg.length > 1500000) {
+        return req.reject(400, `Chart ${sKey} contains invalid or excessive SVG content`);
+      }
+      return { chartKey: sKey, title: sTitle || this._reportLabel(sKey), svg: this._sanitizeReportChartSvg(sSvg) };
+    });
+  }
+
+  _sanitizeReportChartSvg(svg) {
+    return svg
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "")
+      .replace(/<foreignObject\b[^>]*>[\s\S]*?<\/foreignObject\s*>/gi, "")
+      .replace(/\s+on[a-z]+\s*=\s*("[^"]*"|'[^']*')/gi, "")
+      .replace(/\s+(?:href|xlink:href)\s*=\s*("|')(?!(?:#|data:image\/))[^"']*\1/gi, "");
+  }
+
+  _renderReportDashboardPdf(sDashboardKey, oData, oRange, aCharts = []) {
+    const mTitles = {
+      operational: "Operational Overview",
+      sla: "SLA & Aging",
+      teams: "Team Workload",
+      trends: "Process Trends",
+      users: "User Activity",
+      audit: "Audit Activity"
+    };
+    const sTitle = mTitles[sDashboardKey];
+    const sPeriod = `${oRange.fromDateTime.slice(0, 10)} to ${oRange.toDateTime.slice(0, 10)}`;
+
+    return new Promise((resolve, reject) => {
+      const oDocument = new PDFDocument({ size: "A4", layout: "landscape", margin: 42, bufferPages: true });
+      const aChunks = [];
+      oDocument.on("data", (oChunk) => aChunks.push(oChunk));
+      oDocument.on("error", reject);
+      oDocument.on("end", () => resolve({
+        fileName: `flowmate-${sDashboardKey}-${oRange.toDateTime.slice(0, 10)}.pdf`,
+        content: Buffer.concat(aChunks)
+      }));
+
+      this._drawPdfHeader(oDocument, sTitle, sPeriod);
+      const fnDrawChartOrFallback = (sKey, sFallbackTitle, fnFallback) => {
+        const oChart = aCharts.find((oItem) => oItem.chartKey === sKey);
+        if (oChart) {
+          this._drawPdfSvgChart(oDocument, oChart.title || sFallbackTitle, oChart.svg);
+        } else {
+          fnFallback();
+        }
+      };
+      switch (sDashboardKey) {
+        case "sla":
+          this._drawPdfKpis(oDocument, [
+            ["SLA Compliance", `${oData.slaCompliancePercent}%`],
+            ["Overdue Requests", oData.overdueRequests],
+            ["Open Requests", oData.openRequests]
+          ]);
+          this._drawPdfTable(oDocument, "Overdue Open Tasks", oData.overdueTasks, [
+            ["Request", "requestNumber", 80], ["Task", "taskName", 160], ["Team", "teamName", 130],
+            ["Due Date", "dueDate", 80], ["Days", "overdueDays", 50]
+          ]);
+          break;
+        case "teams":
+          fnDrawChartOrFallback("teamWorkload", "Open Task Workload by Team", () =>
+            this._drawPdfBars(oDocument, "Open Task Workload by Team", oData.teamWorkload));
+          break;
+        case "trends":
+          fnDrawChartOrFallback("monthlyTrend", "Monthly Request Trend", () =>
+            this._drawPdfTrend(oDocument, "Monthly Request Trend", oData.monthlyTrend));
+          fnDrawChartOrFallback("processBreakdown", "Requests by Process Type", () =>
+            this._drawPdfBars(oDocument, "Requests by Process Type", oData.processBreakdown));
+          break;
+        case "users":
+          fnDrawChartOrFallback("userActivity", "Recorded Activities by User", () =>
+            this._drawPdfBars(oDocument, "Recorded Activities by User", oData.userActivity));
+          break;
+        case "audit":
+          fnDrawChartOrFallback("auditActivity", "Audit Events by Action", () =>
+            this._drawPdfBars(oDocument, "Audit Events by Action", oData.auditActivity));
+          break;
+        default:
+          this._drawPdfKpis(oDocument, [
+            ["Total Requests", oData.totalRequests], ["Open Requests", oData.openRequests],
+            ["Completed Requests", oData.completedRequests], ["Overdue Requests", oData.overdueRequests]
+          ]);
+          fnDrawChartOrFallback("statusBreakdown", "Requests by Status", () =>
+            this._drawPdfBars(oDocument, "Requests by Status", oData.statusBreakdown));
+          fnDrawChartOrFallback("processBreakdown", "Requests by Process Type", () =>
+            this._drawPdfBars(oDocument, "Requests by Process Type", oData.processBreakdown));
+      }
+
+      const iPageCount = oDocument.bufferedPageRange().count;
+      for (let iPage = 0; iPage < iPageCount; iPage += 1) {
+        oDocument.switchToPage(iPage);
+        oDocument.fontSize(8).fillColor("#64748b")
+          .text(`Generated by Flowmate | Page ${iPage + 1} of ${iPageCount}`, 42, 535, { align: "right", width: 710, lineBreak: false });
+      }
+      oDocument.end();
+    });
+  }
+
+  _drawPdfSvgChart(oDocument, sTitle, sSvg) {
+    if (oDocument.y > 325) {
+      oDocument.addPage();
+      oDocument.y = 42;
+    }
+    oDocument.fillColor("#1e293b").font("Helvetica-Bold").fontSize(14).text(sTitle, 42, oDocument.y);
+    const iTop = oDocument.y + 10;
+    oDocument.roundedRect(42, iTop, 710, 300, 6).fillAndStroke("#ffffff", "#dbe3ea");
+    SVGtoPDF(oDocument, sSvg, 52, iTop + 10, {
+      width: 690,
+      height: 280,
+      preserveAspectRatio: "xMidYMid meet",
+      assumePt: true
+    });
+    oDocument.y = iTop + 318;
+  }
+
+  _drawPdfHeader(oDocument, sTitle, sPeriod) {
+    oDocument.fillColor("#0f7490").rect(0, 0, 842, 76).fill();
+    oDocument.fillColor("#ffffff").font("Helvetica-Bold").fontSize(22).text(sTitle, 42, 22);
+    oDocument.font("Helvetica").fontSize(10).text(`Reporting period: ${sPeriod}`, 42, 51);
+    oDocument.y = 98;
+  }
+
+  _drawPdfKpis(oDocument, aKpis) {
+    const iWidth = 165;
+    const iGap = 14;
+    const iTop = oDocument.y;
+    aKpis.forEach(([sLabel, vValue], iIndex) => {
+      const iLeft = 42 + iIndex * (iWidth + iGap);
+      oDocument.roundedRect(iLeft, iTop, iWidth, 62, 6).fillAndStroke("#f0f9fb", "#b9dce4");
+      oDocument.fillColor("#475569").font("Helvetica").fontSize(9).text(String(sLabel), iLeft + 12, iTop + 11, { width: iWidth - 24 });
+      oDocument.fillColor("#0f7490").font("Helvetica-Bold").fontSize(20).text(String(vValue ?? 0), iLeft + 12, iTop + 29, { width: iWidth - 24 });
+    });
+    oDocument.y = iTop + 80;
+  }
+
+  _drawPdfBars(oDocument, sTitle, aRows = []) {
+    if (oDocument.y > 390) {
+      oDocument.addPage();
+      oDocument.y = 42;
+    }
+    oDocument.fillColor("#1e293b").font("Helvetica-Bold").fontSize(14).text(sTitle, 42, oDocument.y);
+    const aVisibleRows = aRows.slice(0, 10);
+    if (!aVisibleRows.length) {
+      oDocument.moveDown(0.6).fillColor("#64748b").font("Helvetica").fontSize(10).text("No data for the selected filters.");
+      oDocument.moveDown(1);
+      return;
+    }
+    const iMaximum = Math.max(...aVisibleRows.map((oRow) => Number(oRow.count || 0)), 1);
+    let iTop = oDocument.y + 12;
+    aVisibleRows.forEach((oRow) => {
+      const iCount = Number(oRow.count || 0);
+      oDocument.fillColor("#334155").font("Helvetica").fontSize(9).text(String(oRow.label || oRow.code), 42, iTop + 3, { width: 170, ellipsis: true });
+      oDocument.fillColor("#e2e8f0").rect(220, iTop, 450, 14).fill();
+      oDocument.fillColor("#0f7490").rect(220, iTop, Math.max(2, (iCount / iMaximum) * 450), 14).fill();
+      oDocument.fillColor("#334155").font("Helvetica-Bold").text(String(iCount), 680, iTop + 3, { width: 50, align: "right" });
+      iTop += 22;
+    });
+    oDocument.y = iTop + 12;
+  }
+
+  _drawPdfTrend(oDocument, sTitle, aRows = []) {
+    oDocument.fillColor("#1e293b").font("Helvetica-Bold").fontSize(14).text(sTitle, 42, oDocument.y);
+    const aVisibleRows = aRows.slice(-12);
+    if (!aVisibleRows.length) {
+      oDocument.moveDown(0.6).fillColor("#64748b").font("Helvetica").fontSize(10).text("No data for the selected filters.");
+      oDocument.moveDown(1);
+      return;
+    }
+    const iLeft = 70;
+    const iTop = oDocument.y + 18;
+    const iWidth = 650;
+    const iHeight = 130;
+    const iMaximum = Math.max(...aVisibleRows.map((oRow) => Number(oRow.count || 0)), 1);
+    oDocument.strokeColor("#cbd5e1").moveTo(iLeft, iTop).lineTo(iLeft, iTop + iHeight).lineTo(iLeft + iWidth, iTop + iHeight).stroke();
+    const aPoints = aVisibleRows.map((oRow, iIndex) => ({
+      x: iLeft + (aVisibleRows.length === 1 ? iWidth / 2 : (iIndex / (aVisibleRows.length - 1)) * iWidth),
+      y: iTop + iHeight - (Number(oRow.count || 0) / iMaximum) * iHeight,
+      row: oRow
+    }));
+    oDocument.strokeColor("#0f7490").lineWidth(2);
+    aPoints.forEach((oPoint, iIndex) => iIndex ? oDocument.lineTo(oPoint.x, oPoint.y) : oDocument.moveTo(oPoint.x, oPoint.y));
+    oDocument.stroke();
+    aPoints.forEach((oPoint) => {
+      oDocument.fillColor("#0f7490").circle(oPoint.x, oPoint.y, 3).fill();
+      oDocument.fillColor("#475569").font("Helvetica").fontSize(7).text(String(oPoint.row.label), oPoint.x - 25, iTop + iHeight + 6, { width: 50, align: "center" });
+    });
+    oDocument.y = iTop + iHeight + 35;
+  }
+
+  _drawPdfTable(oDocument, sTitle, aRows = [], aColumns = []) {
+    oDocument.fillColor("#1e293b").font("Helvetica-Bold").fontSize(14).text(sTitle, 42, oDocument.y);
+    let iTop = oDocument.y + 12;
+    const fnDrawRow = (oRow, bHeader = false) => {
+      let iLeft = 42;
+      aColumns.forEach(([sLabel, sProperty, iWidth]) => {
+        oDocument.fillColor(bHeader ? "#0f7490" : "#334155").font(bHeader ? "Helvetica-Bold" : "Helvetica").fontSize(8)
+          .text(String(bHeader ? sLabel : (oRow[sProperty] ?? "")), iLeft + 4, iTop + 5, { width: iWidth - 8, ellipsis: true });
+        iLeft += iWidth;
+      });
+      oDocument.strokeColor("#dbe3ea").moveTo(42, iTop + 20).lineTo(iLeft, iTop + 20).stroke();
+      iTop += 21;
+    };
+    fnDrawRow({}, true);
+    aRows.slice(0, 16).forEach((oRow) => fnDrawRow(oRow));
+    if (!aRows.length) {
+      oDocument.fillColor("#64748b").font("Helvetica").fontSize(10).text("No overdue tasks for the selected filters.", 46, iTop + 6);
+      iTop += 28;
+    }
+    oDocument.y = iTop + 10;
   }
 
   _reportDateRange(req, fromDate, toDate) {
@@ -3188,9 +3404,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (firstTaskStep) {
       await this._createTask(req, requestId, firstTaskStep, { skipIfExistingStep: true, request: oRequest });
 
-      if (options.updateRequest && Number(oRequest?.currentStep || 0) !== Number(firstTaskStep.stepNo || 0)) {
+      if (options.updateRequest && (
+        Number(oRequest?.currentStep || 0) !== Number(firstTaskStep.stepNo || 0)
+        || oRequest?.status_code !== PROCESS_STATUS.IN_PROGRESS
+      )) {
         await cds.tx(req).run(
           UPDATE(this.entities.ProcessRequests, requestId).set({
+            status_code: PROCESS_STATUS.IN_PROGRESS,
             currentStep: firstTaskStep.stepNo,
             dueDate: this._calculateDueDate(firstTaskStep.slaDays)
           })
