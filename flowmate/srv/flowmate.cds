@@ -3,6 +3,48 @@ using { CommonMasterDataService as common } from './external/common-master';
 
 @requires: 'authenticated-user'
 service FlowmateService {
+    type ReportFilter {
+        fromDate        : Date;
+        toDate          : Date;
+        processTypeCode : String(30);
+        statusCode      : String(20);
+    }
+    type ReportBreakdown {
+        code  : String(100);
+        label : String(150);
+        count : Integer;
+    }
+    type ReportTrendPoint {
+        period : String(7);
+        label  : String(20);
+        count  : Integer;
+    }
+    type ReportOverdueTask {
+        ID              : UUID;
+        referenceNumber : String(30);
+        taskName         : String(100);
+        requestId        : UUID;
+        requestNumber    : String(30);
+        requestTitle     : String(255);
+        teamName         : String(150);
+        dueDate          : Date;
+        overdueDays      : Integer;
+        statusCode       : String(20);
+    }
+    type ReportDashboard {
+        totalRequests        : Integer;
+        openRequests         : Integer;
+        completedRequests    : Integer;
+        overdueRequests      : Integer;
+        slaCompliancePercent : Decimal(5, 2);
+        statusBreakdown      : many ReportBreakdown;
+        processBreakdown     : many ReportBreakdown;
+        monthlyTrend         : many ReportTrendPoint;
+        teamWorkload         : many ReportBreakdown;
+        userActivity         : many ReportBreakdown;
+        auditActivity        : many ReportBreakdown;
+        overdueTasks         : many ReportOverdueTask;
+    }
     type GuidedProcessTask {
         ID          : UUID;
         stepNo      : Integer;
@@ -197,6 +239,7 @@ service FlowmateService {
     };
     function getMyTaskCount() returns Integer;
     function getMyTeamTaskCount() returns Integer;
+    action getReportDashboard(filter: ReportFilter) returns ReportDashboard;
     function getApplicationCapabilities() returns {
         isAdmin             : Boolean;
         canMaintainUsers    : Boolean;

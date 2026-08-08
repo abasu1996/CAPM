@@ -1,0 +1,80 @@
+<mvc:View
+    controllerName="flowmate.controller.Reports"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+    <f:DynamicPage id="reportsPage" class="flowmatePage flowmateReportsPage" toggleHeaderOnTitleClick="false">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading><Title text="{= ${reports>/catalogueVisible} ? ${i18n>reportsTitle} : ${reports>/selectedDashboardTitle} }" /></f:heading>
+                <f:actions>
+                    <Button icon="sap-icon://grid" text="{i18n>allDashboardsButton}" visible="{= !${reports>/catalogueVisible} }" press=".onShowDashboardCatalogue" />
+                    <Button icon="sap-icon://home" text="{i18n>dashboardNavButton}" press=".onNavToDashboard" />
+                    <Button icon="sap-icon://refresh" text="{i18n>refreshButton}" visible="{= !${reports>/catalogueVisible} }" press=".onApplyFilters" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <VBox class="flowmateContent flowmateReportsContent">
+                <VBox class="flowmateDashboardCatalogue" visible="{reports>/catalogueVisible}">
+                    <Title text="{i18n>dashboardCatalogueTitle}" level="H2" />
+                    <Text text="{i18n>dashboardCatalogueDescription}" class="flowmateDashboardCatalogueIntro" />
+                    <FlexBox class="flowmateDashboardCards" wrap="Wrap" items="{reports>/dashboards}">
+                        <GenericTile class="flowmateDashboardCard" header="{reports>title}" subheader="{reports>description}" press=".onDashboardTilePress">
+                            <customData><core:CustomData key="dashboardKey" value="{reports>key}" /></customData>
+                            <TileContent><ImageContent src="{reports>icon}" /></TileContent>
+                        </GenericTile>
+                    </FlexBox>
+                </VBox>
+
+                <VBox visible="{= !${reports>/catalogueVisible} }" class="flowmateDashboardWorkspace">
+                    <VBox class="flowmateSurface flowmateReportFilterPanel">
+                        <OverflowToolbar class="flowmateToolbar">
+                            <Label text="{i18n>selectDashboardLabel}" />
+                            <Select width="18rem" selectedKey="{reports>/selectedDashboard}" change=".onDashboardSelectionChange" items="{reports>/dashboards}">
+                                <core:Item key="{reports>key}" text="{reports>title}" />
+                            </Select>
+                            <ToolbarSpacer />
+                            <Button icon="sap-icon://clear-filter" text="{i18n>resetButton}" press=".onResetFilters" />
+                            <Button icon="sap-icon://filter" text="{i18n>applyFiltersButton}" type="Emphasized" press=".onApplyFilters" />
+                        </OverflowToolbar>
+                        <HBox class="flowmateReportFilters" wrap="Wrap" alignItems="End">
+                            <VBox class="flowmateReportFilterField"><Label text="{i18n>dateRangeLabel}" /><DateRangeSelection dateValue="{reports>/filters/fromDate}" secondDateValue="{reports>/filters/toDate}" displayFormat="medium" /></VBox>
+                            <VBox class="flowmateReportFilterField"><Label text="{i18n>processTypeLabel}" /><Select width="15rem" selectedKey="{reports>/filters/processTypeCode}" items="{/ProcessTypes}"><core:Item key="{code}" text="{name}" /></Select></VBox>
+                            <VBox class="flowmateReportFilterField"><Label text="{i18n>statusLabel}" /><Select width="13rem" selectedKey="{reports>/filters/statusCode}" items="{/ProcessStatus}"><core:Item key="{code}" text="{name}" /></Select></VBox>
+                        </HBox>
+                    </VBox>
+
+                    <VBox visible="{= ${reports>/selectedDashboard} === 'operational' }">
+                        <HBox class="flowmateReportKpis" wrap="Wrap" renderType="Bare">
+                            <GenericTile class="flowmateReportKpi" header="{i18n>totalRequestsKpi}" subheader="{i18n>selectedPeriodLabel}"><TileContent><NumericContent icon="sap-icon://request" value="{reports>/totalRequests}" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>openRequestsKpi}" subheader="{i18n>requiresAttentionLabel}"><TileContent><NumericContent icon="sap-icon://pending" value="{reports>/openRequests}" valueColor="Critical" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>completedRequestsKpi}" subheader="{i18n>selectedPeriodLabel}"><TileContent><NumericContent icon="sap-icon://complete" value="{reports>/completedRequests}" valueColor="Good" /></TileContent></GenericTile>
+                        </HBox>
+                        <HBox class="flowmateReportChartRow" wrap="Wrap" renderType="Bare">
+                            <VBox class="flowmateSurface flowmateReportChartCard"><Title class="flowmateReportCardTitle" text="{i18n>requestsByStatusTitle}" /><viz:VizFrame height="20rem" width="100%" vizType="donut"><viz:dataset><viz.data:FlattenedDataset data="{reports>/statusBreakdown}"><viz.data:dimensions><viz.data:DimensionDefinition name="Status" value="{reports>label}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Requests" value="{reports>count}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset><viz:feeds><viz.feeds:FeedItem uid="size" type="Measure" values="Requests" /><viz.feeds:FeedItem uid="color" type="Dimension" values="Status" /></viz:feeds></viz:VizFrame></VBox>
+                            <VBox class="flowmateSurface flowmateReportChartCard"><Title class="flowmateReportCardTitle" text="{i18n>requestsByProcessTitle}" /><viz:VizFrame height="20rem" width="100%" vizType="column"><viz:dataset><viz.data:FlattenedDataset data="{reports>/processBreakdown}"><viz.data:dimensions><viz.data:DimensionDefinition name="Process" value="{reports>label}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Requests" value="{reports>count}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset><viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Requests" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Process" /></viz:feeds></viz:VizFrame></VBox>
+                        </HBox>
+                    </VBox>
+
+                    <VBox visible="{= ${reports>/selectedDashboard} === 'sla' }">
+                        <HBox class="flowmateReportKpis" wrap="Wrap" renderType="Bare"><GenericTile class="flowmateReportKpi" header="{i18n>slaComplianceKpi}"><TileContent><NumericContent icon="sap-icon://quality-issue" value="{reports>/slaCompliancePercent}" scale="%" valueColor="Good" /></TileContent></GenericTile><GenericTile class="flowmateReportKpi" header="{i18n>overdueRequestsKpi}"><TileContent><NumericContent icon="sap-icon://lateness" value="{reports>/overdueRequests}" valueColor="Error" /></TileContent></GenericTile></HBox>
+                        <VBox class="flowmateSurface flowmateReportTableCard"><OverflowToolbar class="flowmateToolbar"><Title text="{i18n>overdueTasksTitle}" /></OverflowToolbar><Table class="flowmateTable" noDataText="{i18n>noOverdueTasksText}" items="{reports>/overdueTasks}"><columns><Column><Text text="{i18n>taskIdLabel}" /></Column><Column><Text text="{i18n>taskNameLabel}" /></Column><Column><Text text="{i18n>requestIdLabel}" /></Column><Column><Text text="{i18n>teamLabel}" /></Column><Column><Text text="{i18n>dueDateLabel}" /></Column><Column hAlign="End"><Text text="{i18n>overdueDaysLabel}" /></Column></columns><items><ColumnListItem type="Navigation" press=".onOverdueTaskPress"><cells><ObjectIdentifier title="{reports>referenceNumber}" /><Text text="{reports>taskName}" /><ObjectIdentifier title="{reports>requestNumber}" text="{reports>requestTitle}" /><Text text="{reports>teamName}" /><Text text="{reports>dueDate}" /><ObjectStatus text="{reports>overdueDays}" state="Error" /></cells></ColumnListItem></items></Table></VBox>
+                    </VBox>
+
+                    <VBox visible="{= ${reports>/selectedDashboard} === 'teams' }" class="flowmateSurface flowmateReportChartCard"><Title class="flowmateReportCardTitle" text="{i18n>teamWorkloadTitle}" /><viz:VizFrame height="24rem" width="100%" vizType="bar"><viz:dataset><viz.data:FlattenedDataset data="{reports>/teamWorkload}"><viz.data:dimensions><viz.data:DimensionDefinition name="Team" value="{reports>label}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Open Tasks" value="{reports>count}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset><viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Open Tasks" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Team" /></viz:feeds></viz:VizFrame></VBox>
+
+                    <VBox visible="{= ${reports>/selectedDashboard} === 'trends' }"><HBox class="flowmateReportChartRow" wrap="Wrap"><VBox class="flowmateSurface flowmateReportChartCard"><Title class="flowmateReportCardTitle" text="{i18n>requestTrendTitle}" /><viz:VizFrame height="22rem" width="100%" vizType="line"><viz:dataset><viz.data:FlattenedDataset data="{reports>/monthlyTrend}"><viz.data:dimensions><viz.data:DimensionDefinition name="Month" value="{reports>label}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Requests" value="{reports>count}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset><viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Requests" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Month" /></viz:feeds></viz:VizFrame></VBox><VBox class="flowmateSurface flowmateReportChartCard"><Title class="flowmateReportCardTitle" text="{i18n>requestsByProcessTitle}" /><viz:VizFrame height="22rem" width="100%" vizType="column"><viz:dataset><viz.data:FlattenedDataset data="{reports>/processBreakdown}"><viz.data:dimensions><viz.data:DimensionDefinition name="Process" value="{reports>label}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Requests" value="{reports>count}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset><viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Requests" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Process" /></viz:feeds></viz:VizFrame></VBox></HBox></VBox>
+
+                    <VBox visible="{= ${reports>/selectedDashboard} === 'users' }" class="flowmateSurface flowmateReportChartCard"><Title class="flowmateReportCardTitle" text="{i18n>activityByUserTitle}" /><viz:VizFrame height="24rem" width="100%" vizType="bar"><viz:dataset><viz.data:FlattenedDataset data="{reports>/userActivity}"><viz.data:dimensions><viz.data:DimensionDefinition name="User" value="{reports>label}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Activities" value="{reports>count}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset><viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Activities" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="User" /></viz:feeds></viz:VizFrame></VBox>
+
+                    <VBox visible="{= ${reports>/selectedDashboard} === 'audit' }" class="flowmateSurface flowmateReportChartCard"><Title class="flowmateReportCardTitle" text="{i18n>activityByActionTitle}" /><viz:VizFrame height="24rem" width="100%" vizType="column"><viz:dataset><viz.data:FlattenedDataset data="{reports>/auditActivity}"><viz.data:dimensions><viz.data:DimensionDefinition name="Action" value="{reports>label}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Events" value="{reports>count}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset><viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Events" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Action" /></viz:feeds></viz:VizFrame></VBox>
+                </VBox>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

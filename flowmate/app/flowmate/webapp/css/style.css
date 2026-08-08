@@ -892,6 +892,99 @@
     --flowmateTileWash: linear-gradient(135deg, rgba(194, 65, 12, 0.14), rgba(194, 65, 12, 0));
 }
 
+.flowmateTileReports {
+    --flowmateTileAccent: #0f7490;
+    --flowmateTileAccentDark: #155e75;
+    --flowmateTileWash: linear-gradient(135deg, rgba(15, 116, 144, 0.16), rgba(15, 118, 110, 0.02));
+}
+
+.flowmateReportsContent {
+    gap: 1rem;
+}
+
+.flowmateDashboardCatalogue {
+    gap: 0.5rem;
+    padding: 0.5rem 0 1rem;
+}
+
+.flowmateDashboardCatalogueIntro {
+    max-width: 52rem;
+    color: var(--flowmateMuted);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.flowmateDashboardCards {
+    gap: 1rem;
+    padding-top: 1rem;
+}
+
+.flowmateDashboardCard.sapMGT {
+    min-width: 18rem;
+    border: 0.0625rem solid var(--flowmateLine);
+    border-radius: 0.75rem;
+    box-shadow: 0 0.35rem 1rem rgba(34, 54, 73, 0.09);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.flowmateDashboardCard.sapMGT:hover {
+    box-shadow: 0 0.55rem 1.35rem rgba(34, 54, 73, 0.14);
+    transform: translateY(-0.125rem);
+}
+
+.flowmateDashboardWorkspace {
+    gap: 1rem;
+}
+
+.flowmateReportFilterPanel {
+    overflow: visible;
+}
+
+.flowmateReportFilters {
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.flowmateReportFilterField {
+    min-width: 13rem;
+}
+
+.flowmateReportFilterField .sapMLabel {
+    margin-bottom: 0.25rem;
+    color: var(--flowmateMuted);
+    font-weight: 700;
+}
+
+.flowmateReportKpis,
+.flowmateReportChartRow {
+    gap: 1rem;
+}
+
+.flowmateReportKpi.sapMGT {
+    min-width: 12rem;
+    border: 0.0625rem solid var(--flowmateLine);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.875rem rgba(34, 54, 73, 0.08);
+}
+
+.flowmateReportChartCard {
+    box-sizing: border-box;
+    flex: 1 1 32rem;
+    min-width: 24rem;
+    padding: 1rem;
+}
+
+.flowmateReportCardTitle {
+    margin: 0.25rem 0 0.75rem;
+    color: var(--flowmateText);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.flowmateReportTableCard {
+    margin-bottom: 1rem;
+}
+
 @keyframes flowmateFadeIn {
     from {
         opacity: 0;
@@ -1226,6 +1319,12 @@
     .flowmateTile.sapMGT {
         width: 100%;
         min-width: 100%;
+    }
+
+    .flowmateReportChartCard,
+    .flowmateReportFilterField {
+        min-width: 100%;
+        width: 100%;
     }
 
     .flowmateHeaderCell,

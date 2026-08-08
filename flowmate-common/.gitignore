@@ -4,3 +4,6 @@ db.sqlite
 mta_archives/
 *.mtar
 .DS_Store
+
+# added by cds
+.cdsrc-private.json

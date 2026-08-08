@@ -21926,6 +21926,56 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/getReportDashboard": {
+      "post": {
+        "summary": "Invokes action getReportDashboard",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.ReportDashboard"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FlowmateService.ReportFilter"
+                      }
+                    ],
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/getRequestReservationCounts": {
       "get": {
         "summary": "Invokes function getRequestReservationCounts",
@@ -65976,6 +66026,256 @@
           "descr": {
             "type": "string",
             "maxLength": 1000,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.ReportBreakdown": {
+        "title": "ReportBreakdown",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 150,
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.ReportDashboard": {
+        "title": "ReportDashboard",
+        "type": "object",
+        "properties": {
+          "totalRequests": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "openRequests": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "completedRequests": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "overdueRequests": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "slaCompliancePercent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 999.99,
+                "minimum": -999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 5,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "statusBreakdown": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.ReportBreakdown"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "processBreakdown": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.ReportBreakdown"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "monthlyTrend": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.ReportTrendPoint"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "teamWorkload": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.ReportBreakdown"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "userActivity": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.ReportBreakdown"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "auditActivity": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.ReportBreakdown"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "overdueTasks": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.ReportOverdueTask"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        }
+      },
+      "FlowmateService.ReportFilter": {
+        "title": "ReportFilter",
+        "type": "object",
+        "properties": {
+          "fromDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "toDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "processTypeCode": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.ReportOverdueTask": {
+        "title": "ReportOverdueTask",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
+            "nullable": true
+          },
+          "referenceNumber": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "taskName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
+            "nullable": true
+          },
+          "requestNumber": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "requestTitle": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "teamName": {
+            "type": "string",
+            "maxLength": 150,
+            "nullable": true
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "overdueDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.ReportTrendPoint": {
+        "title": "ReportTrendPoint",
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "maxLength": 7,
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         }

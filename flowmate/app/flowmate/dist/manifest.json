@@ -77,7 +77,8 @@
 				"sap.ui.comp": {},
 				"sap.ui.unified": {},
 				"sap.uxap": {},
-				"sap.f": {}
+				"sap.f": {},
+				"sap.viz": {}
 			}
 		},
 		"contentDensities": {
@@ -137,6 +138,13 @@
 					]
 				},
 				{
+					"name": "RouteReports",
+					"pattern": "reports:?query:",
+					"target": [
+						"TargetReports"
+					]
+				},
+				{
 					"name": "RouteAdminProcessConfig",
 					"pattern": "admin/process-config:?query:",
 					"target": [
@@ -193,6 +201,11 @@
 				"TargetMyTasks": {
 					"id": "MyTasks",
 					"name": "MyTasks",
+					"controlAggregation": "pages"
+				},
+				"TargetReports": {
+					"id": "Reports",
+					"name": "Reports",
 					"controlAggregation": "pages"
 				},
 				"TargetRequestCreate": {

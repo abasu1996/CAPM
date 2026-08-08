@@ -209,6 +209,10 @@ sap.ui.define([
             this.navTo("RouteMyTasks");
         },
 
+        onNavToReports() {
+            this.navTo("RouteReports");
+        },
+
         onNavToCreateRequest() {
             this.navTo("RouteRequestCreate");
         },

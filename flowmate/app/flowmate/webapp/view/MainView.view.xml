@@ -123,6 +123,15 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
+                        class="flowmateTile flowmateTileReports"
+                        header="{i18n>reportsTitle}"
+                        subheader="{i18n>reportsSubtitle}"
+                        press=".onOpenReports">
+                        <TileContent>
+                            <NumericContent icon="sap-icon://business-objects-experience" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
                         class="flowmateTile flowmateTileAdmin"
                         header="{i18n>adminConfigTitle}"
                         subheader="{i18n>adminConfigSubtitle}"

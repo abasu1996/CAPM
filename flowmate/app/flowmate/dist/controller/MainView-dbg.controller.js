@@ -52,6 +52,10 @@ sap.ui.define([
             });
         },
 
+        onOpenReports() {
+            this.navTo("RouteReports");
+        },
+
         onCreateRequest() {
             this.navTo("RouteRequestCreate");
         },
