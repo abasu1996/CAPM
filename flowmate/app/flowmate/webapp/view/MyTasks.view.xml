@@ -88,7 +88,12 @@
                             </columns>
                             <items>
                                 <ColumnListItem
+                                    highlight="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaHighlight'}"
                                     type="Active">
+                                    <customData>
+                                        <core:CustomData key="sla-breached" value="{parts: ['request/dueDate', 'status_code'], formatter: '.formatSlaBreachedFlag'}" writeToDom="true" />
+                                        <core:CustomData key="sla-within" value="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaWithinFlag'}" writeToDom="true" />
+                                    </customData>
                                     <cells>
                                         <Link
                                             text="{referenceNumber}"
@@ -105,11 +110,25 @@
                                             state="{= ${isMandatory} ? 'Warning' : 'None' }" />
                                         <Text text="{processor}" />
                                         <Text text="{role}" />
-                                        <ObjectStatus
-                                            class="flowmateSemanticStatus"
-                                            text="{path: 'status_code', formatter: '.formatStatusText'}"
-                                            state="{path: 'status_code', formatter: '.formatStatusState'}"
-                                            inverted="true" />
+                                        <VBox>
+                                            <ObjectStatus
+                                                class="flowmateSemanticStatus"
+                                                text="{path: 'status_code', formatter: '.formatStatusText'}"
+                                                state="{path: 'status_code', formatter: '.formatStatusState'}"
+                                                inverted="true" />
+                                            <ObjectStatus
+                                                text="{i18n>slaBreachedLabel}"
+                                                icon="sap-icon://lateness"
+                                                state="Error"
+                                                inverted="true"
+                                                visible="{parts: ['request/dueDate', 'status_code'], formatter: '.isSlaBreached'}" />
+                                            <ObjectStatus
+                                                text="{i18n>withinSlaLabel}"
+                                                icon="sap-icon://accept"
+                                                state="Success"
+                                                inverted="true"
+                                                visible="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.isWithinSla'}" />
+                                        </VBox>
                                         <Text text="{decision}" />
                                         <HBox justifyContent="End">
                                             <Button

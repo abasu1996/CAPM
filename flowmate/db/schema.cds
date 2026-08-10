@@ -271,6 +271,8 @@ entity ProcessHistory : cuid, managed {
 
 entity ProcessStepConfig : cuid, managed {
     referenceNumber : String(30);
+    subProcessType : Association to ProcessSubTypes;
+    // Retained for deployed data compatibility. New configuration uses subProcessType.
     processType   : Association to ProcessTypes;
     processorTeam : Association to Teams;
     processorTeamName : String(150);

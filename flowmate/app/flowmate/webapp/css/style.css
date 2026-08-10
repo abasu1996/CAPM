@@ -1292,6 +1292,53 @@
     min-width: 16rem;
 }
 
+/* SLA breaches remain conspicuous in every request/task queue without reducing text contrast. */
+.flowmateTable [data-sla-breached="true"] {
+    background-color: #fff0f0 !important;
+    box-shadow: inset 0.25rem 0 0 #bb0000, inset 0 0 0 0.0625rem rgba(187, 0, 0, 0.18);
+}
+
+.flowmateTable [data-sla-breached="true"] > .sapMListTblCell,
+.flowmateTable [data-sla-breached="true"] > td {
+    background-color: #fff0f0 !important;
+}
+
+.flowmateTable [data-sla-breached="true"]:hover,
+.flowmateTable [data-sla-breached="true"].sapMLIBHoverable:hover,
+.flowmateTable [data-sla-breached="true"]:hover > .sapMListTblCell,
+.flowmateTable [data-sla-breached="true"]:hover > td {
+    background-color: #ffe1e1 !important;
+}
+
+.flowmateTable [data-sla-breached="true"] .sapMText,
+.flowmateTable [data-sla-breached="true"] .sapMLnk,
+.flowmateTable [data-sla-breached="true"] .sapMObjStatusText {
+    font-weight: 600;
+}
+
+.flowmateTable [data-sla-within="true"] {
+    background-color: #f1fbf3 !important;
+    box-shadow: inset 0.25rem 0 0 #188918, inset 0 0 0 0.0625rem rgba(24, 137, 24, 0.16);
+}
+
+.flowmateTable [data-sla-within="true"] > .sapMListTblCell,
+.flowmateTable [data-sla-within="true"] > td {
+    background-color: #f1fbf3 !important;
+}
+
+.flowmateTable [data-sla-within="true"]:hover,
+.flowmateTable [data-sla-within="true"].sapMLIBHoverable:hover,
+.flowmateTable [data-sla-within="true"]:hover > .sapMListTblCell,
+.flowmateTable [data-sla-within="true"]:hover > td {
+    background-color: #e3f7e7 !important;
+}
+
+.flowmateTable [data-sla-within="true"] .sapMText,
+.flowmateTable [data-sla-within="true"] .sapMLnk,
+.flowmateTable [data-sla-within="true"] .sapMObjStatusText {
+    font-weight: 600;
+}
+
 .flowmateQueueFilterField .sapMLabel {
     margin-bottom: 0.25rem;
     color: var(--flowmateMuted);

@@ -139,14 +139,14 @@ sap.ui.define([
                 userActivityChart: ["userActivity", this.getText("activityByUserTitle")],
                 auditActivityChart: ["auditActivity", this.getText("activityByActionTitle")]
             };
-            return Object.entries(mChartMetadata).flatMap(([sControlId, [sKey, sTitle]]) => {
+            return Object.entries(mChartMetadata).flatMap(([sControlId, [sChartKey, sTitle]]) => {
                 const oChart = this.byId(sControlId);
                 if (!oChart || !oChart.getVisible() || !oChart.getDomRef()) {
                     return [];
                 }
                 const oSize = oChart.getDomRef().getBoundingClientRect();
                 return [{
-                    chartKey: sKey,
+                    chartKey: sChartKey,
                     title: sTitle,
                     svg: oChart.exportToSVGString({
                         width: Math.max(800, Math.round(oSize.width)),

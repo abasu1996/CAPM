@@ -215,28 +215,26 @@
                             columnsL="2"
                             columnsM="1"
                             adjustLabelSpan="false">
-                            <Label text="{i18n>paymentCategoryLabel}" />
+                            <Label text="{i18n>paymentCategoryLabel}" required="{create>/isFtkPoValidation}" />
                             <ComboBox
                                 selectedKey="{create>/paymentCategory_code}"
+                                required="{create>/isFtkPoValidation}"
                                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
                                 items="{/PaymentCategories}">
                                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                             </ComboBox>
-                            <Label text="{i18n>entityLabel}" />
+                            <Label text="{i18n>entityLabel}" required="{create>/isFtkPoValidation}" />
                             <ComboBox
                                 selectedKey="{create>/businessEntity_code}"
+                                required="{create>/isFtkPoValidation}"
                                 placeholder="{i18n>selectEntityPlaceholder}"
                                 items="{/FtkEntities}">
                                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                             </ComboBox>
-                            <Label text="{i18n>taskLevelFlowLabel}" />
-                            <Input
-                                value="{create>/taskLevelFlow}"
-                                maxLength="255"
-                                placeholder="{i18n>taskLevelFlowPlaceholder}" />
-                            <Label text="{i18n>vendorCodeLabel}" />
+                            <Label text="{i18n>vendorCodeLabel}" required="{create>/isFtkPoValidation}" />
                             <Input
                                 value="{create>/vendorCode}"
+                                required="{create>/isFtkPoValidation}"
                                 placeholder="{i18n>selectVendorPlaceholder}"
                                 showValueHelp="true"
                                 showSuggestion="true"
@@ -251,8 +249,8 @@
                                     <core:ListItem key="{ID}" text="{vendorCode}" additionalText="{vendorName}" />
                                 </suggestionItems>
                             </Input>
-                            <Label text="{i18n>vendorNameLabel}" />
-                            <Input value="{create>/vendorName}" editable="false" />
+                            <Label text="{i18n>vendorNameLabel}" required="{create>/isFtkPoValidation}" />
+                            <Input value="{create>/vendorName}" editable="false" required="{create>/isFtkPoValidation}" />
                             <Label text="{i18n>remarksLabel}" />
                             <TextArea
                                 value="{create>/remarks}"
@@ -317,9 +315,9 @@
                     <headerToolbar>
                         <OverflowToolbar>
                             <core:Icon src="sap-icon://attachment" />
-                            <Title
+                            <Label
                                 text="{= ${create>/isFtkFactoring} ? ${i18n>supportingDocumentsLabel} : ${i18n>attachmentsTitle} }"
-                                level="H3" />
+                                required="{create>/isFtkPoValidation}" />
                         </OverflowToolbar>
                     </headerToolbar>
                     <content>

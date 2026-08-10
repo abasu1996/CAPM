@@ -1,1 +1,1 @@
-ID,referenceNumber,processType_code,processorTeam_ID,processorTeamName,stepNo,stepName,activityDescription,role,slaDays
+ID,referenceNumber,subProcessType_code,processType_code,processorTeam_ID,processorTeamName,stepNo,stepName,activityDescription,role,slaDays

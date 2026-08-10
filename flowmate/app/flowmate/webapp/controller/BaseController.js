@@ -70,6 +70,78 @@ sap.ui.define([
                 .replace(/\b\w/g, (sCharacter) => sCharacter.toUpperCase());
         },
 
+        isSlaBreached(vDueDate, sStatus) {
+            const sNormalizedStatus = String(sStatus || "").toUpperCase();
+            const aTerminalStatuses = ["APPROVED", "COMPLETED", "REJECTED", "CANCELLED", "CANCELED"];
+
+            if (!vDueDate || aTerminalStatuses.includes(sNormalizedStatus)) {
+                return false;
+            }
+
+            const oDueDate = vDueDate instanceof Date
+                ? new Date(vDueDate.getFullYear(), vDueDate.getMonth(), vDueDate.getDate())
+                : new Date(`${String(vDueDate).slice(0, 10)}T00:00:00`);
+            const oToday = new Date();
+
+            oToday.setHours(0, 0, 0, 0);
+            return !Number.isNaN(oDueDate.getTime()) && oDueDate < oToday;
+        },
+
+        formatSlaBreachedFlag(vDueDate, sStatus) {
+            return String(this.isSlaBreached(vDueDate, sStatus));
+        },
+
+        isWithinSla(vDueDate, sStatus, vCompletedAt) {
+            const sNormalizedStatus = String(sStatus || "").toUpperCase();
+
+            if (!vDueDate || ["REJECTED", "CANCELLED", "CANCELED"].includes(sNormalizedStatus)) {
+                return false;
+            }
+
+            const oDueDate = new Date(`${String(vDueDate).slice(0, 10)}T23:59:59.999`);
+
+            if (Number.isNaN(oDueDate.getTime())) {
+                return false;
+            }
+
+            if (["APPROVED", "COMPLETED"].includes(sNormalizedStatus)) {
+                const oCompletedAt = vCompletedAt ? new Date(vCompletedAt) : null;
+                return Boolean(oCompletedAt && !Number.isNaN(oCompletedAt.getTime()) && oCompletedAt <= oDueDate);
+            }
+
+            return !this.isSlaBreached(vDueDate, sStatus);
+        },
+
+        formatSlaWithinFlag(vDueDate, sStatus, vCompletedAt) {
+            return String(this.isWithinSla(vDueDate, sStatus, vCompletedAt));
+        },
+
+        formatSlaHighlight(vDueDate, sStatus, vCompletedAt) {
+            if (this.isSlaBreached(vDueDate, sStatus)) {
+                return "Error";
+            }
+
+            return this.isWithinSla(vDueDate, sStatus, vCompletedAt) ? "Success" : "None";
+        },
+
+        formatRequestHighlight(vDueDate, sStatus, sPriority, vCompletedAt) {
+            if (this.isSlaBreached(vDueDate, sStatus)) {
+                return "Error";
+            }
+
+            if (this.isWithinSla(vDueDate, sStatus, vCompletedAt)) {
+                return "Success";
+            }
+
+            switch ((sPriority || "").toLowerCase()) {
+                case "critical": return "Error";
+                case "high": return "Warning";
+                case "medium": return "Information";
+                case "low": return "Success";
+                default: return "None";
+            }
+        },
+
         formatPriorityState(sPriority) {
             switch ((sPriority || "").toLowerCase()) {
                 case "critical":

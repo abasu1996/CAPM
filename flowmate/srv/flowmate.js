@@ -1,5 +1,6 @@
 const cds = require("@sap/cds");
 const PDFDocument = require("pdfkit");
+const SVGtoPDF = require("svg-to-pdfkit");
 
 
 const PROCESS_STATUS = {
@@ -276,19 +277,29 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         : {};
       const oStep = { ...oExisting, ...req.data };
 
-      if (!oStep.processType_code || !oStep.stepNo || !oStep.stepName) {
-        return req.reject(400, "Process type, step number, and step name are required");
+      if (!oStep.subProcessType_code || !oStep.stepNo || !oStep.stepName) {
+        return req.reject(400, "Process subtype, step number, and step name are required");
+      }
+
+      const oSubProcessType = await cds.tx(req).run(
+        SELECT.one.from(ProcessSubTypes)
+          .columns("code")
+          .where({ code: oStep.subProcessType_code })
+      );
+
+      if (!oSubProcessType) {
+        return req.reject(400, "Selected process subtype was not found");
       }
 
       const oDuplicate = await cds.tx(req).run(
         SELECT.one.from(ProcessStepConfig).where({
-          processType_code: oStep.processType_code,
+          subProcessType_code: oStep.subProcessType_code,
           stepNo: oStep.stepNo
         })
       );
 
       if (oDuplicate && oDuplicate.ID !== sStepId) {
-        return req.reject(409, "A process step already exists for this process type and step number");
+        return req.reject(409, "A process step already exists for this process subtype and step number");
       }
 
       if (oStep.processorTeam_ID) {
@@ -425,6 +436,23 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("CREATE", ProcessRequests, async (req) => {
+      if (req.data.subProcessType_code === "FTK_FACTORING_PO_VALIDATION") {
+        const aMissingFields = [
+          ["Payment category", req.data.paymentCategory_code],
+          ["Entity", req.data.businessEntity_code],
+          ["Vendor code and vendor name", req.data.vendor_ID]
+        ]
+          .filter(([, vValue]) => !String(vValue || "").trim())
+          .map(([sLabel]) => sLabel);
+
+        if (aMissingFields.length) {
+          return req.reject(
+            400,
+            `${aMissingFields.join(", ")} ${aMissingFields.length === 1 ? "is" : "are"} mandatory for FTK Factoring PO Validation`
+          );
+        }
+      }
+
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessRequests, "REQ");
       const oReservationUser = await this._currentReservationUser(req, Users);
 
@@ -711,7 +739,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return;
       }
 
-      const steps = await this._getSteps(req, request.processType_code);
+      const steps = await this._getSteps(req, request.subProcessType_code);
       const step = steps.find((oStep) => Number(oStep.stepNo || 0) === Number(task.stepNo || 0));
 
       await cds.tx(req).run(
@@ -1009,7 +1037,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return this._rejectLockedRequest(req);
       }
 
-      const steps = await this._getSteps(req, request.processType_code);
+      const steps = await this._getSteps(req, request.subProcessType_code);
       const taskStepNo = Number(task.stepNo || 0);
       const sendBackStepNo = Number(targetStepNo || 0);
 
@@ -1137,7 +1165,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       if (statusCode === PROCESS_STATUS.COMPLETED) {
-        const steps = await this._getSteps(req, request.processType_code);
+        const steps = await this._getSteps(req, request.subProcessType_code);
         const incompleteStep = await this._findIncompleteGuidedStep(req, requestId, steps, {
           includeClosingSteps: true
         });
@@ -1730,7 +1758,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         Users
       );
       const oRange = this._reportDateRange(req, req.data.filter?.fromDate, req.data.filter?.toDate);
-      const oPdf = await this._renderReportDashboardPdf(sDashboardKey, oDashboard, oRange);
+      const aCharts = this._validatedReportChartSnapshots(req, sDashboardKey, req.data.charts);
+      const oPdf = await this._renderReportDashboardPdf(sDashboardKey, oDashboard, oRange, aCharts);
       return {
         fileName: oPdf.fileName,
         mimeType: "application/pdf",
@@ -2935,7 +2964,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return this._rejectLockedRequest(req);
     }
 
-    const steps = await this._getSteps(req, request.processType_code);
+    const steps = await this._getSteps(req, request.subProcessType_code);
     const currentStep = this._findStepByNo(steps, task.stepNo);
 
     return {
@@ -2995,7 +3024,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return this._rejectLockedRequest(req);
     }
 
-    const steps = await this._getSteps(req, request.processType_code);
+    const steps = await this._getSteps(req, request.subProcessType_code);
     const currentStep = this._findStepByNo(steps, stepNo);
 
     if (!currentStep) {
@@ -3088,12 +3117,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return cds.tx(req).run(SELECT.one.from(this.entities.ProcessTasks).where({ ID: taskId }));
   }
 
-  async _getSteps(req, processTypeCode) {
-    if (!processTypeCode) {
+  async _getSteps(req, subProcessTypeCode) {
+    if (!subProcessTypeCode) {
       return [];
     }
 
-    const sCacheKey = this._configCacheKey("steps", processTypeCode);
+    const sCacheKey = this._configCacheKey("steps", subProcessTypeCode);
     const aCachedSteps = this._getConfigCache(sCacheKey);
 
     if (aCachedSteps) {
@@ -3102,7 +3131,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     const aSteps = await cds.tx(req).run(
       SELECT.from(this.entities.ProcessStepConfig)
-        .where({ processType_code: processTypeCode })
+        .where({ subProcessType_code: subProcessTypeCode })
         .orderBy("stepNo")
     );
 
@@ -3398,7 +3427,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _ensureInitialGuidedTask(req, requestId, request, options = {}) {
     const oRequest = request?.processType_code ? request : await this._getRequest(req, requestId);
-    const steps = await this._getSteps(req, oRequest?.processType_code);
+    const steps = await this._getSteps(req, oRequest?.subProcessType_code);
     const firstTaskStep = this._getInitialGuidedStep(steps);
 
     if (firstTaskStep) {

@@ -12560,6 +12560,8 @@
                   "modifiedBy desc",
                   "referenceNumber",
                   "referenceNumber desc",
+                  "subProcessType_code",
+                  "subProcessType_code desc",
                   "processType_code",
                   "processType_code desc",
                   "processorTeam_ID",
@@ -12597,6 +12599,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "subProcessType_code",
                   "processType_code",
                   "processorTeam_ID",
                   "processorTeamName",
@@ -12621,6 +12624,7 @@
                 "type": "string",
                 "enum": [
                   "*",
+                  "subProcessType",
                   "processType"
                 ]
               }
@@ -12729,6 +12733,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "subProcessType_code",
                   "processType_code",
                   "processorTeam_ID",
                   "processorTeamName",
@@ -12753,6 +12758,7 @@
                 "type": "string",
                 "enum": [
                   "*",
+                  "subProcessType",
                   "processType"
                 ]
               }
@@ -12886,6 +12892,88 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FlowmateService.ProcessTypes"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/ProcessStepConfig({ID})/subProcessType": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves sub process type of a process step config.",
+        "tags": [
+          "Flowmate — Process Step Config",
+          "Flowmate — Process Sub Types"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "descr",
+                  "code",
+                  "processType_code",
+                  "processOwner",
+                  "activityDescription",
+                  "sapTCode"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "processType",
+                  "texts",
+                  "localized"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved sub process type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.ProcessSubTypes"
                 }
               }
             }
@@ -64977,6 +65065,19 @@
             "maxLength": 30,
             "nullable": true
           },
+          "subProcessType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FlowmateService.ProcessSubTypes"
+              }
+            ],
+            "nullable": true
+          },
+          "subProcessType_code": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
           "processType": {
             "allOf": [
               {
@@ -65042,6 +65143,11 @@
             "maxLength": 30,
             "nullable": true
           },
+          "subProcessType_code": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
           "processType_code": {
             "type": "string",
             "maxLength": 30,
@@ -65090,6 +65196,11 @@
         "type": "object",
         "properties": {
           "referenceNumber": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "subProcessType_code": {
             "type": "string",
             "maxLength": 30,
             "nullable": true

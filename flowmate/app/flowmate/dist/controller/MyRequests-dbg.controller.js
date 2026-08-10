@@ -2124,7 +2124,7 @@ sap.ui.define([
             oProcessFlowModel.setProperty("/loading", true);
 
             try {
-                const oRequest = oBoundRequest?.processType_code
+                const oRequest = oBoundRequest?.subProcessType_code
                     ? { ...oBoundRequest }
                     : await this._readEntry(`/ProcessRequests(guid'${sRequestId}')`);
                 const oTaskResponse = await this.callAction("getGuidedProcessTasks", {
@@ -2133,7 +2133,7 @@ sap.ui.define([
 
                 oRequest.tasks = oTaskResponse.value || oTaskResponse || [];
                 const aSteps = await this._readList("/ProcessStepConfig", {
-                    filters: [new Filter("processType_code", FilterOperator.EQ, oRequest.processType_code)]
+                    filters: [new Filter("subProcessType_code", FilterOperator.EQ, oRequest.subProcessType_code)]
                 });
 
                 aSteps.sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0));
@@ -2317,7 +2317,7 @@ sap.ui.define([
         async _loadTaskStepOptions(sObjectPageId) {
             const oTaskActionModel = this.getView().getModel("taskAction");
             const oContext = this.byId(sObjectPageId)?.getBindingContext();
-            const sProcessTypeCode = oContext?.getProperty("request/processType_code");
+            const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
             const iCurrentStepNo = Number(oContext?.getProperty("stepNo") || 0);
 
             oTaskActionModel.setData({
@@ -2325,13 +2325,13 @@ sap.ui.define([
                 steps: []
             });
 
-            if (!sProcessTypeCode) {
+            if (!sSubProcessTypeCode) {
                 return;
             }
 
             try {
                 const aSteps = await this._readList("/ProcessStepConfig", {
-                    filters: [new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)]
+                    filters: [new Filter("subProcessType_code", FilterOperator.EQ, sSubProcessTypeCode)]
                 });
                 const aStepItems = aSteps
                     .sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0))

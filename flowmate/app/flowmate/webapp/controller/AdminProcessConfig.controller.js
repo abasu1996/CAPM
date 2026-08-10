@@ -50,7 +50,7 @@ sap.ui.define([
                 new Filter({
                     filters: [
                         new Filter("referenceNumber", FilterOperator.Contains, sQuery),
-                        new Filter("processType_code", FilterOperator.Contains, sQuery),
+                        new Filter("subProcessType_code", FilterOperator.Contains, sQuery),
                         new Filter("stepName", FilterOperator.Contains, sQuery),
                         new Filter("processorTeamName", FilterOperator.Contains, sQuery),
                         new Filter("role", FilterOperator.Contains, sQuery)
@@ -359,13 +359,13 @@ sap.ui.define([
         async onSaveProcessStep() {
             const oEntry = this.getView().getModel("stepEdit").getData();
 
-            if (!oEntry.processType_code || !oEntry.stepNo || !oEntry.stepName) {
+            if (!oEntry.subProcessType_code || !oEntry.stepNo || !oEntry.stepName) {
                 MessageBox.warning(this.getText("processStepRequiredMessage"));
                 return;
             }
 
             const oPayload = {
-                processType_code: oEntry.processType_code,
+                subProcessType_code: oEntry.subProcessType_code,
                 stepNo: Number(oEntry.stepNo),
                 stepName: oEntry.stepName,
                 activityDescription: oEntry.activityDescription,
@@ -568,7 +568,7 @@ sap.ui.define([
             return {
                 dialogTitle: "",
                 isEdit: false,
-                processType_code: "",
+                subProcessType_code: "",
                 stepNo: "",
                 stepName: "",
                 activityDescription: "",

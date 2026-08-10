@@ -9,6 +9,11 @@ service FlowmateService {
         processTypeCode : String(30);
         statusCode      : String(20);
     }
+    type ReportChartSnapshot {
+        chartKey : String(100);
+        title    : String(150);
+        svg      : LargeString;
+    }
     type ReportBreakdown {
         code  : String(100);
         label : String(150);
@@ -239,7 +244,7 @@ service FlowmateService {
     function getMyTaskCount() returns Integer;
     function getMyTeamTaskCount() returns Integer;
     action getReportDashboard(filter: ReportFilter) returns ReportDashboard;
-    action exportReportDashboardPdf(filter: ReportFilter, dashboardKey: String(30)) returns {
+    action exportReportDashboardPdf(filter: ReportFilter, dashboardKey: String(30), charts: many ReportChartSnapshot) returns {
         fileName : String(150);
         mimeType : String(100);
         content  : LargeString;

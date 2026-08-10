@@ -48,7 +48,7 @@
                                 items="{path: '/ProcessStepConfig', events: {dataRequested: '.onDataRequested', dataReceived: '.onDataReceived'}}">
                                 <columns>
                                     <Column width="8rem"><Text text="{i18n>referenceNumberLabel}" wrapping="true" /></Column>
-                                    <Column width="9rem"><Text text="{i18n>processTypeLabel}" wrapping="true" /></Column>
+                                    <Column width="12rem"><Text text="{i18n>subProcessTypeLabel}" wrapping="true" /></Column>
                                     <Column width="5rem"><Text text="{i18n>stepLabel}" wrapping="true" /></Column>
                                     <Column width="10rem"><Text text="{i18n>stepNameLabel}" wrapping="true" /></Column>
                                     <Column width="16rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
@@ -61,7 +61,7 @@
                                     <ColumnListItem>
                                         <cells>
                                             <Text text="{referenceNumber}" />
-                                            <Text text="{processType_code}" />
+                                            <Text text="{subProcessType_code}" />
                                             <Text text="{stepNo}" />
                                             <ObjectIdentifier title="{stepName}" />
                                             <Text text="{activityDescription}" wrapping="true" />
@@ -530,8 +530,8 @@
         <Dialog id="processStepDialog" title="{stepEdit>/dialogTitle}" contentWidth="50rem" stretchOnPhone="true">
             <content>
                 <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
-                    <Label text="{i18n>processTypeLabel}" required="true" />
-                    <Select selectedKey="{stepEdit>/processType_code}" items="{/ProcessTypes}" required="true">
+                    <Label text="{i18n>subProcessTypeLabel}" required="true" />
+                    <Select selectedKey="{stepEdit>/subProcessType_code}" items="{/ProcessSubTypes}" required="true">
                         <core:Item key="{code}" text="{name}" />
                     </Select>
                     <Label text="{i18n>stepLabel}" required="true" />

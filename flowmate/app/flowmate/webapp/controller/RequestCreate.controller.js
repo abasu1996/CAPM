@@ -39,9 +39,9 @@ sap.ui.define([
                 amount: null,
                 role: "",
                 isFtkFactoring: false,
+                isFtkPoValidation: false,
                 paymentCategory_code: "",
                 businessEntity_code: "",
-                taskLevelFlow: "",
                 vendor_ID: "",
                 vendorCode: "",
                 vendorName: "",
@@ -91,6 +91,18 @@ sap.ui.define([
                 return;
             }
 
+            if (oPayload.isFtkPoValidation && (
+                !String(oPayload.paymentCategory_code || "").trim()
+                || !String(oPayload.businessEntity_code || "").trim()
+                || !String(oPayload.vendor_ID || "").trim()
+                || !String(oPayload.vendorCode || "").trim()
+                || !String(oPayload.vendorName || "").trim()
+                || !this._aAttachmentFiles.length
+            )) {
+                MessageBox.warning(this.getText("ftkPoValidationRequiredMessage"));
+                return;
+            }
+
             const oCreateModel = this.getView().getModel("create");
             oCreateModel.setProperty("/creating", true);
 
@@ -112,7 +124,6 @@ sap.ui.define([
                     ...(oPayload.isFtkFactoring ? {
                         paymentCategory_code: oPayload.paymentCategory_code || undefined,
                         businessEntity_code: oPayload.businessEntity_code || undefined,
-                        taskLevelFlow: oPayload.taskLevelFlow,
                         vendor_ID: oPayload.vendor_ID || undefined,
                         remarks: oPayload.remarks
                     } : {}),
@@ -538,6 +549,7 @@ sap.ui.define([
             oCreateModel.setProperty("/subProcessType_code", sCode);
             oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
             this._setFtkFactoringMode(this._isFtkFactoringSubtype(sCode));
+            oCreateModel.setProperty("/isFtkPoValidation", sCode === "FTK_FACTORING_PO_VALIDATION");
         },
 
         _isFtkFactoringSubtype(sCode) {
@@ -554,10 +566,10 @@ sap.ui.define([
             oCreateModel.setProperty("/isFtkFactoring", bEnabled);
 
             if (!bEnabled) {
+                oCreateModel.setProperty("/isFtkPoValidation", false);
                 [
                     "paymentCategory_code",
                     "businessEntity_code",
-                    "taskLevelFlow",
                     "vendor_ID",
                     "vendorCode",
                     "vendorName",
@@ -682,9 +694,12 @@ sap.ui.define([
                 oCreateModel.setProperty("/subProcessType_code", oPredecessor.subProcessType_code || "");
                 oCreateModel.setProperty("/subProcessTypeName", oPredecessor.subProcessType?.name || oPredecessor.subProcessType_code || "");
                 this._setFtkFactoringMode(this._isFtkFactoringSubtype(oPredecessor.subProcessType_code));
+                oCreateModel.setProperty(
+                    "/isFtkPoValidation",
+                    oPredecessor.subProcessType_code === "FTK_FACTORING_PO_VALIDATION"
+                );
                 oCreateModel.setProperty("/paymentCategory_code", oPredecessor.paymentCategory_code || "");
                 oCreateModel.setProperty("/businessEntity_code", oPredecessor.businessEntity_code || "");
-                oCreateModel.setProperty("/taskLevelFlow", oPredecessor.taskLevelFlow || "");
                 oCreateModel.setProperty("/vendor_ID", oPredecessor.vendor_ID || "");
                 oCreateModel.setProperty("/vendorCode", oPredecessor.vendorCode || "");
                 oCreateModel.setProperty("/vendorName", oPredecessor.vendorName || "");

@@ -112,6 +112,7 @@ sap.ui.define([
                 if (!await this._loadDashboard()) {
                     return;
                 }
+                await this._waitForDashboardRendering();
                 const oResult = await this.callAction("exportReportDashboardPdf", {
                     dashboardKey: oModel.getProperty("/selectedDashboard"),
                     filter: {
@@ -119,12 +120,40 @@ sap.ui.define([
                         toDate: this._formatDate(oFilters.toDate),
                         processTypeCode: oFilters.processTypeCode || null,
                         statusCode: oFilters.statusCode || null
-                    }
+                    },
+                    charts: this._collectVisibleChartSnapshots()
                 });
                 this._downloadPdf(oResult.value || oResult);
             } catch (oError) {
                 MessageBox.error(this.getErrorMessage(oError, this.getText("dashboardPdfExportFailed")));
             }
+        },
+
+        _collectVisibleChartSnapshots() {
+            const mChartMetadata = {
+                statusBreakdownChart: ["statusBreakdown", this.getText("requestsByStatusTitle")],
+                operationalProcessChart: ["processBreakdown", this.getText("requestsByProcessTitle")],
+                teamWorkloadChart: ["teamWorkload", this.getText("teamWorkloadTitle")],
+                monthlyTrendChart: ["monthlyTrend", this.getText("requestTrendTitle")],
+                trendProcessChart: ["processBreakdown", this.getText("requestsByProcessTitle")],
+                userActivityChart: ["userActivity", this.getText("activityByUserTitle")],
+                auditActivityChart: ["auditActivity", this.getText("activityByActionTitle")]
+            };
+            return Object.entries(mChartMetadata).flatMap(([sControlId, [sChartKey, sTitle]]) => {
+                const oChart = this.byId(sControlId);
+                if (!oChart || !oChart.getVisible() || !oChart.getDomRef()) {
+                    return [];
+                }
+                const oSize = oChart.getDomRef().getBoundingClientRect();
+                return [{
+                    chartKey: sChartKey,
+                    title: sTitle,
+                    svg: oChart.exportToSVGString({
+                        width: Math.max(800, Math.round(oSize.width)),
+                        height: Math.max(400, Math.round(oSize.height))
+                    })
+                }];
+            });
         },
 
         _downloadPdf(oExport) {
@@ -140,6 +169,12 @@ sap.ui.define([
             oLink.download = oExport.fileName || "flowmate-dashboard.pdf";
             oLink.click();
             URL.revokeObjectURL(sUrl);
+        },
+
+        _waitForDashboardRendering() {
+            return new Promise((resolve) => {
+                window.requestAnimationFrame(() => window.requestAnimationFrame(() => window.setTimeout(resolve, 300)));
+            });
         },
 
         onOverdueTaskPress(oEvent) {
