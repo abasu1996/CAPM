@@ -68,6 +68,12 @@
                 "Admin"
               ]
             },
+            "venkata.manisha@ext.dialog.lk": {
+              "password": "FlowmateAdmin1!",
+              "roles": [
+                "Admin"
+              ]
+            },
             "liam.patel@flowmate.demo": {
               "password": "FlowmateAdmin1!",
               "roles": [

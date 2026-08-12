@@ -137,17 +137,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("READ", MyAssignedTasks, async (req) => {
-      if (this._isAdministrator(req)) {
-        return;
-      }
-      await this._filterByAssignedTasks(req, Users);
+      await this._filterByAssignedTasks(req, Users, true);
     });
 
     this.before("READ", MyTeamTasks, async (req) => {
-      if (this._isAdministrator(req)) {
-        return;
-      }
-      await this._filterByTeamTasks(req, Users, TeamMembers);
+      await this._filterByTeamTasks(req, Users, TeamMembers, true);
     });
 
     this.before("READ", RequestDetailTasks, async (req) => {
@@ -2261,8 +2255,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     ]);
   }
 
-  async _filterByAssignedTasks(req, Users) {
-    if (this._isAdministrator(req)) {
+  async _filterByAssignedTasks(req, Users, forceUserScope = false) {
+    if (this._isAdministrator(req) && !forceUserScope) {
       return;
     }
     const oReservationUser = await this._currentReservationUser(req, Users);
@@ -2276,8 +2270,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     req.query.where({ xpr: aPredicates });
   }
 
-  async _filterByTeamTasks(req, Users, TeamMembers = this.masterEntities.TeamMembers) {
-    if (this._isAdministrator(req)) {
+  async _filterByTeamTasks(req, Users, TeamMembers = this.masterEntities.TeamMembers, forceUserScope = false) {
+    if (this._isAdministrator(req) && !forceUserScope) {
       return;
     }
     const oReservationUser = await this._currentReservationUser(req, Users);
