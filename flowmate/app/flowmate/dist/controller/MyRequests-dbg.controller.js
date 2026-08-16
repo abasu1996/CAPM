@@ -57,6 +57,17 @@ sap.ui.define([
                 steps: []
             }), "processFlow");
             this.getView().setModel(new JSONModel({
+                loading: false,
+                requestId: "",
+                referenceNumber: "",
+                title: "",
+                progress: 0,
+                progressText: "",
+                currentStepText: "",
+                steps: [],
+                hasSteps: false
+            }), "requestProgress");
+            this.getView().setModel(new JSONModel({
                 showUnreservedOnly: false
             }), "viewState");
             this.getView().setModel(new JSONModel({
@@ -197,14 +208,113 @@ sap.ui.define([
             this._openRequest(oItem.getBindingContext());
         },
 
-        onRequestReferencePress(oEvent) {
+        async onRequestReferencePress(oEvent) {
             oEvent.cancelBubble?.();
 
             const oContext = oEvent.getSource().getBindingContext();
 
             if (oContext) {
-                this._openRequest(oContext);
+                await this._openRequestProgress(oEvent.getSource(), oContext);
             }
+        },
+
+        async _openRequestProgress(oSource, oContext) {
+            const sRequestId = oContext.getProperty("ID");
+            const oProgressModel = this.getView().getModel("requestProgress");
+            const oPopover = this.byId("requestProgressPopover");
+
+            if (!sRequestId || !oPopover) {
+                return;
+            }
+
+            oProgressModel.setData({
+                loading: true,
+                requestId: sRequestId,
+                referenceNumber: oContext.getProperty("referenceNumber") || "",
+                title: oContext.getProperty("title") || "",
+                progress: 0,
+                progressText: this.getText("loadingProgressText"),
+                currentStepText: "",
+                steps: [],
+                hasSteps: false
+            });
+            oPopover.openBy(oSource);
+
+            try {
+                const oRequest = await this._readEntry(`/ProcessRequests(guid'${sRequestId}')`);
+                const oTaskResponse = await this.callAction("getGuidedProcessTasks", {
+                    requestId: sRequestId
+                });
+                const aTasks = oTaskResponse.value || oTaskResponse || [];
+                const aConfiguredSteps = await this._readList("/ProcessStepConfig", {
+                    filters: [new Filter("subProcessType_code", FilterOperator.EQ, oRequest.subProcessType_code)]
+                });
+
+                aConfiguredSteps.sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0));
+                oRequest.tasks = aTasks;
+                const aSteps = this._buildProcessFlowSteps(aConfiguredSteps, oRequest)
+                    .map((oStep) => this._buildRequestProgressStep(oStep, aTasks, oRequest));
+                const iCompleted = aSteps.filter((oStep) => oStep.completed).length;
+                const iProgress = aSteps.length ? Math.round((iCompleted / aSteps.length) * 100) : 0;
+                const oCurrentStep = aSteps.find((oStep) => oStep.isCurrent)
+                    || aSteps.find((oStep) => !oStep.completed)
+                    || aSteps[aSteps.length - 1];
+
+                oProgressModel.setData({
+                    loading: false,
+                    requestId: sRequestId,
+                    referenceNumber: oRequest.referenceNumber || oContext.getProperty("referenceNumber") || "",
+                    title: oRequest.title || oContext.getProperty("title") || "",
+                    progress: iProgress,
+                    progressText: this.getText("requestProgressCompletedText", [iCompleted, aSteps.length]),
+                    currentStepText: oCurrentStep
+                        ? this.getText("requestCurrentStepText", [oCurrentStep.sequenceText, oCurrentStep.stepName])
+                        : this.getText("noProcessStepsText"),
+                    steps: aSteps,
+                    hasSteps: Boolean(aSteps.length)
+                });
+            } catch (oError) {
+                oProgressModel.setProperty("/loading", false);
+                oPopover.close();
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestProgressLoadErrorMessage")));
+            }
+        },
+
+        _buildRequestProgressStep(oStep, aTasks, oRequest) {
+            const aStepTasks = aTasks.filter((oTask) => Number(oTask.stepNo || 0) === Number(oStep.stepNo || 0));
+            const oActiveTask = aStepTasks.find((oTask) => this._isOpenLikeTask(oTask));
+            const bCompleted = oStep.state === "Success";
+            const bBreached = !bCompleted && (oStep.isCurrent || Boolean(oActiveTask))
+                && this.isSlaBreachedAt(oRequest.slaDueAt, oRequest.dueDate, oRequest.status_code);
+            const sOwner = oActiveTask?.processorTeamName
+                || oActiveTask?.processor
+                || oActiveTask?.assignedTo
+                || "";
+
+            return {
+                ...oStep,
+                completed: bCompleted,
+                state: bBreached ? "Error" : oStep.state,
+                icon: bBreached ? "sap-icon://lateness" : oStep.icon,
+                statusText: bBreached ? this.getText("slaBreachedLabel") : oStep.statusText,
+                owner: sOwner,
+                ownerVisible: Boolean(sOwner),
+                dueDate: (oStep.isCurrent || Boolean(oActiveTask)) ? (oRequest.slaDueAt || oRequest.dueDate || "") : "",
+                dueDateVisible: Boolean((oStep.isCurrent || oActiveTask) && (oRequest.slaDueAt || oRequest.dueDate))
+            };
+        },
+
+        onOpenRequestFromProgress() {
+            const sRequestId = this.getView().getModel("requestProgress").getProperty("/requestId");
+
+            this.byId("requestProgressPopover")?.close();
+            if (sRequestId) {
+                this._showRequestDetailById(sRequestId);
+            }
+        },
+
+        onCloseRequestProgress() {
+            this.byId("requestProgressPopover")?.close();
         },
 
         onRequestTaskPress(oEvent) {
@@ -1622,7 +1732,11 @@ sap.ui.define([
         },
 
         _bindRequestSectionTables(sRequestId) {
-            this._bindRequestSectionTable("requestTasksTable", "/RequestDetailTasks", sRequestId);
+            this._bindRequestSectionTable("requestTasksTable", "/RequestDetailTasks", sRequestId, {
+                parameters: {
+                    expand: "request"
+                }
+            });
             this._bindRequestSectionTable("requestPartiesTable", "/ProcessInvolvedParties", sRequestId);
             this._bindRequestSectionTable("requestAttachmentsTable", "/ProcessAttachments", sRequestId);
             this._bindRequestSectionTable("requestHistoryTable", "/ProcessHistory", sRequestId);

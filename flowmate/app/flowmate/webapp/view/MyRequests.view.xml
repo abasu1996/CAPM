@@ -217,12 +217,12 @@
                                 </columns>
                                 <items>
                                     <ColumnListItem
-                                        highlight="{parts: ['dueDate', 'status_code', 'priority', 'completedAt'], formatter: '.formatRequestHighlight'}"
+                                        highlight="{parts: ['slaDueAt', 'dueDate', 'status_code', 'priority', 'completedAt'], formatter: '.formatRequestHighlightAt'}"
                                         type="Active"
                                         >
                                         <customData>
-                                            <core:CustomData key="sla-breached" value="{parts: ['dueDate', 'status_code'], formatter: '.formatSlaBreachedFlag'}" writeToDom="true" />
-                                            <core:CustomData key="sla-within" value="{parts: ['dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaWithinFlag'}" writeToDom="true" />
+                                            <core:CustomData key="sla-breached" value="{parts: ['slaDueAt', 'dueDate', 'status_code'], formatter: '.formatSlaBreachedAtFlag'}" writeToDom="true" />
+                                            <core:CustomData key="sla-within" value="{parts: ['slaDueAt', 'dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaWithinAtFlag'}" writeToDom="true" />
                                         </customData>
                                         <cells>
                                             <Link
@@ -256,13 +256,13 @@
                                                     icon="sap-icon://lateness"
                                                     state="Error"
                                                     inverted="true"
-                                                    visible="{parts: ['dueDate', 'status_code'], formatter: '.isSlaBreached'}" />
+                                                    visible="{parts: ['slaDueAt', 'dueDate', 'status_code'], formatter: '.isSlaBreachedAt'}" />
                                                 <ObjectStatus
                                                     text="{i18n>withinSlaLabel}"
                                                     icon="sap-icon://accept"
                                                     state="Success"
                                                     inverted="true"
-                                                    visible="{parts: ['dueDate', 'status_code', 'completedAt'], formatter: '.isWithinSla'}" />
+                                                    visible="{parts: ['slaDueAt', 'dueDate', 'status_code', 'completedAt'], formatter: '.isWithinSlaAt'}" />
                                             </VBox>
                                             <HBox justifyContent="End">
                                                 <Button
@@ -676,7 +676,7 @@
                                                                 icon="sap-icon://lateness"
                                                                 state="Error"
                                                                 inverted="true"
-                                                                visible="{parts: ['request/dueDate', 'status_code'], formatter: '.isSlaBreached'}" />
+                                                                visible="{parts: ['slaDueAt', 'dueDate', 'status_code'], formatter: '.isSlaBreachedAt'}" />
                                                         </VBox>
                                                         <ObjectStatus
                                                             text="{priority}"
@@ -728,11 +728,11 @@
                                             <items>
                                                 <ColumnListItem
                                                     type="Active"
-                                                    highlight="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaHighlight'}"
+                                                    highlight="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaHighlightAt'}"
                                                     press=".onRequestTaskPress">
                                                     <customData>
-                                                        <core:CustomData key="sla-breached" value="{parts: ['request/dueDate', 'status_code'], formatter: '.formatSlaBreachedFlag'}" writeToDom="true" />
-                                                        <core:CustomData key="sla-within" value="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaWithinFlag'}" writeToDom="true" />
+                                                        <core:CustomData key="sla-breached" value="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code'], formatter: '.formatSlaBreachedAtFlag'}" writeToDom="true" />
+                                                        <core:CustomData key="sla-within" value="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaWithinAtFlag'}" writeToDom="true" />
                                                     </customData>
                                                     <cells>
                                                         <Link
@@ -755,13 +755,13 @@
                                                                 icon="sap-icon://lateness"
                                                                 state="Error"
                                                                 inverted="true"
-                                                                visible="{parts: ['request/dueDate', 'status_code'], formatter: '.isSlaBreached'}" />
+                                                                visible="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code'], formatter: '.isSlaBreachedAt'}" />
                                                             <ObjectStatus
                                                                 text="{i18n>withinSlaLabel}"
                                                                 icon="sap-icon://accept"
                                                                 state="Success"
                                                                 inverted="true"
-                                                                visible="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.isWithinSla'}" />
+                                                                visible="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code', 'completedAt'], formatter: '.isWithinSlaAt'}" />
                                                         </VBox>
                                                         <HBox justifyContent="End">
                                                             <Button
@@ -1359,6 +1359,82 @@
         </f:endColumnPages>
     </f:FlexibleColumnLayout>
     <mvc:dependents>
+        <ResponsivePopover
+            id="requestProgressPopover"
+            class="flowmateProgressPopover"
+            title="{requestProgress>/referenceNumber}"
+            contentWidth="30rem"
+            contentHeight="34rem"
+            placement="Auto">
+            <content>
+                <VBox
+                    class="flowmateProgressPopoverContent"
+                    busy="{requestProgress>/loading}"
+                    busyIndicatorDelay="0">
+                    <Title text="{requestProgress>/title}" wrapping="true" />
+                    <ObjectStatus
+                        class="sapUiTinyMarginTop"
+                        icon="sap-icon://process"
+                        text="{requestProgress>/currentStepText}"
+                        state="Information" />
+                    <ProgressIndicator
+                        class="sapUiSmallMarginTop"
+                        percentValue="{requestProgress>/progress}"
+                        displayValue="{requestProgress>/progressText}"
+                        state="Success"
+                        width="100%" />
+                    <List
+                        class="flowmateProgressStepList sapUiSmallMarginTop"
+                        showSeparators="None"
+                        noDataText="{i18n>noProcessStepsText}"
+                        items="{requestProgress>/steps}">
+                        <CustomListItem>
+                            <HBox class="flowmateProgressStep" alignItems="Start" width="100%">
+                                <core:Icon
+                                    class="flowmateProgressStepIcon"
+                                    src="{requestProgress>icon}"
+                                    color="{= ${requestProgress>state} === 'Error' ? '#b00' : ${requestProgress>state} === 'Success' ? '#107e3e' : ${requestProgress>state} === 'Warning' ? '#e9730c' : '#0a6ed1' }" />
+                                <VBox class="flowmateProgressStepBody" width="100%">
+                                    <HBox justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                                        <VBox>
+                                            <Text class="flowmateProgressStepSequence" text="{requestProgress>sequenceText}" />
+                                            <Title class="flowmateProgressStepTitle" text="{requestProgress>stepName}" level="H6" wrapping="true" />
+                                        </VBox>
+                                        <ObjectStatus
+                                            text="{requestProgress>statusText}"
+                                            state="{requestProgress>state}"
+                                            inverted="true" />
+                                    </HBox>
+                                    <Text text="{requestProgress>activityDescription}" wrapping="true" />
+                                    <HBox class="sapUiTinyMarginTop" wrap="Wrap">
+                                        <ObjectStatus
+                                            icon="sap-icon://group"
+                                            text="{requestProgress>owner}"
+                                            visible="{requestProgress>ownerVisible}" />
+                                        <ObjectStatus
+                                            class="sapUiTinyMarginBegin"
+                                            icon="sap-icon://appointment-2"
+                                            text="{requestProgress>dueDate}"
+                                            state="{requestProgress>state}"
+                                            visible="{requestProgress>dueDateVisible}" />
+                                    </HBox>
+                                </VBox>
+                            </HBox>
+                        </CustomListItem>
+                    </List>
+                </VBox>
+            </content>
+            <beginButton>
+                <Button
+                    text="{i18n>openRequestButton}"
+                    type="Emphasized"
+                    icon="sap-icon://inspect"
+                    press=".onOpenRequestFromProgress" />
+            </beginButton>
+            <endButton>
+                <Button text="{i18n>closeButton}" press=".onCloseRequestProgress" />
+            </endButton>
+        </ResponsivePopover>
         <Dialog
             id="addTaskDialog"
             contentWidth="42rem"

@@ -56,6 +56,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessEmailAttachments,
       ProcessHistory,
       ProcessStepConfig,
+      WorkingCalendars,
+      WorkingCalendarDays,
+      WorkingCalendarHolidays,
       ProcessTypes,
       ProcessSubTypes,
       PaymentCategories,
@@ -210,6 +213,48 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
     this.after(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, () => this._clearConfigCache());
+
+    this.before(["CREATE", "UPDATE", "DELETE"], [WorkingCalendars, WorkingCalendarDays, WorkingCalendarHolidays], async (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain working calendars");
+      }
+
+      if (req.target === WorkingCalendarDays && req.event !== "DELETE") {
+        const iDay = Number(req.data.dayOfWeek);
+        if (!Number.isInteger(iDay) || iDay < 1 || iDay > 7) {
+          return req.reject(400, "Day of week must be between 1 (Monday) and 7 (Sunday)");
+        }
+        this._validateWorkingHours(req);
+      }
+
+      if (req.target === WorkingCalendarHolidays && req.event !== "DELETE") {
+        if (!req.data.holidayDate || !String(req.data.name || "").trim()) {
+          return req.reject(400, "Holiday date and name are required");
+        }
+        this._validateWorkingHours(req, true);
+      }
+
+      if (req.target === WorkingCalendars && req.event !== "DELETE") {
+        if (!String(req.data.code || "").trim() || !String(req.data.name || "").trim()) {
+          return req.reject(400, "Calendar code and name are required");
+        }
+        try {
+          new Intl.DateTimeFormat("en", { timeZone: req.data.timeZone || "Asia/Colombo" }).format();
+        } catch (_error) {
+          return req.reject(400, "Enter a valid IANA time zone, for example Asia/Colombo");
+        }
+      }
+    });
+
+    this.after(["CREATE", "UPDATE"], WorkingCalendars, async (calendar, req) => {
+      if (!calendar?.isDefault) return;
+      await cds.tx(req).run(
+        UPDATE(WorkingCalendars).set({ isDefault: false }).where([
+          { ref: ["ID"] }, "!=", { val: calendar.ID }
+        ])
+      );
+    });
+    this.after(["CREATE", "UPDATE", "DELETE"], [WorkingCalendars, WorkingCalendarDays, WorkingCalendarHolidays], () => this._clearConfigCache());
 
     this.before(["CREATE", "UPDATE", "DELETE"], LoaApproval, async (req) => {
       if (!this._isAdministrator(req)) {
@@ -814,12 +859,17 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const steps = await this._getSteps(req, request.subProcessType_code);
       const step = steps.find((oStep) => Number(oStep.stepNo || 0) === Number(task.stepNo || 0));
+      const oDeadline = step
+        ? await this._calculateSlaDeadline(req, request.subProcessType_code, step.slaDays)
+        : {};
 
       await cds.tx(req).run(
         UPDATE(ProcessRequests, task.request_ID).set({
           status_code: PROCESS_STATUS.IN_PROGRESS,
           currentStep: task.stepNo,
-          dueDate: step ? this._calculateDueDate(step.slaDays) : request.dueDate,
+          dueDate: oDeadline.dueDate || request.dueDate,
+          slaDueAt: oDeadline.slaDueAt || request.slaDueAt,
+          slaCalendarCode: oDeadline.slaCalendarCode || request.slaCalendarCode,
           completedAt: null
         })
       );
@@ -1134,12 +1184,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       );
 
       await this._createTask(req, task.request_ID, sendBackStep, { request });
+      const oDeadline = await this._calculateSlaDeadline(req, request.subProcessType_code, sendBackStep.slaDays);
 
       await cds.tx(req).run(
         UPDATE(ProcessRequests, task.request_ID).set({
           status_code: PROCESS_STATUS.SENT_BACK,
           currentStep: sendBackStep.stepNo,
-          dueDate: this._calculateDueDate(sendBackStep.slaDays),
+          ...oDeadline,
           completedAt: null
         })
       );
@@ -1753,6 +1804,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       };
     });
 
+    this.on("runSlaBreachScan", async (req) => {
+      return this._runSlaBreachScan(req);
+    });
+    this.on("recalculateOpenSlaDeadlines", async (req) => {
+      if (!this._isAdministrator(req)) return req.reject(403, "Only an administrator can recalculate SLA deadlines");
+      return this._recalculateOpenSlaDeadlines(req, req.data.calendarId);
+    });
+
     this.on("getUserAdministrationCapabilities", (req) => ({
       canMaintainUsers: this._isAdministrator(req)
     }));
@@ -1871,10 +1930,210 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return new Date().toISOString();
   }
 
-  _calculateDueDate(slaDays = 0) {
-    const dueDate = new Date();
-    dueDate.setUTCDate(dueDate.getUTCDate() + Number(slaDays || 0));
-    return dueDate.toISOString().slice(0, 10);
+  _isSlaDeadlineBreached(request, today = new Date().toISOString().slice(0, 10)) {
+    if (request?.slaDueAt) {
+      const deadline = Date.parse(request.slaDueAt);
+      return Number.isFinite(deadline) && deadline < Date.now();
+    }
+    return Boolean(request?.dueDate && String(request.dueDate).slice(0, 10) < today);
+  }
+
+  _validateWorkingHours(req, bHoliday = false) {
+    const bWorking = req.data.isWorkingDay === true;
+    const sStart = req.data.startTime;
+    const sEnd = req.data.endTime;
+
+    if (!bWorking && bHoliday) return;
+    if (!bWorking) return;
+    if (!sStart || !sEnd || this._timeToMinutes(sEnd) <= this._timeToMinutes(sStart)) {
+      req.reject(400, "A working day must have an end time later than its start time");
+    }
+  }
+
+  _timeToMinutes(value) {
+    if (value && typeof value === "object" && Number.isFinite(value.ms)) {
+      return Math.floor(value.ms / 60000);
+    }
+    const duration = /^PT(?:(\d+)H)?(?:(\d+)M)?/i.exec(String(value || ""));
+    if (duration) {
+      return (Number(duration[1] || 0) * 60) + Number(duration[2] || 0);
+    }
+    const [hours, minutes] = String(value || "00:00").split(":").map(Number);
+    return (hours * 60) + minutes;
+  }
+
+  _zonedParts(date, timeZone) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23"
+    }).formatToParts(date).reduce((result, part) => {
+      if (part.type !== "literal") result[part.type] = part.value;
+      return result;
+    }, {});
+    return {
+      date: `${parts.year}-${parts.month}-${parts.day}`,
+      minutes: (Number(parts.hour) * 60) + Number(parts.minute),
+      year: Number(parts.year), month: Number(parts.month), day: Number(parts.day)
+    };
+  }
+
+  _zonedDateTimeToUtc(dateValue, timeValue, timeZone) {
+    const [year, month, day] = String(dateValue).split("-").map(Number);
+    const [hour, minute, second = 0] = String(timeValue || "00:00:00").split(":").map(Number);
+    const desired = Date.UTC(year, month - 1, day, hour, minute, second);
+    let guess = desired;
+
+    for (let index = 0; index < 3; index += 1) {
+      const actual = this._zonedParts(new Date(guess), timeZone);
+      const actualAsUtc = Date.UTC(actual.year, actual.month - 1, actual.day, Math.floor(actual.minutes / 60), actual.minutes % 60, second);
+      guess += desired - actualAsUtc;
+    }
+    return new Date(guess);
+  }
+
+  _addLocalDays(dateValue, days) {
+    const date = new Date(`${dateValue}T00:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  _isoDayOfWeek(dateValue) {
+    const day = new Date(`${dateValue}T00:00:00Z`).getUTCDay();
+    return day === 0 ? 7 : day;
+  }
+
+  async _workingCalendar(req, subProcessTypeCode) {
+    const { WorkingCalendars, WorkingCalendarDays, WorkingCalendarHolidays, ProcessSubTypes } = this.entities;
+    const tx = cds.tx(req);
+    let calendarId;
+
+    if (subProcessTypeCode) {
+      const subType = await tx.run(
+        SELECT.one.from(ProcessSubTypes).columns("workingCalendar_ID").where({ code: subProcessTypeCode })
+      );
+      calendarId = subType?.workingCalendar_ID;
+    }
+
+    const calendar = calendarId
+      ? await tx.run(SELECT.one.from(WorkingCalendars).where({ ID: calendarId, isActive: true }))
+      : await tx.run(SELECT.one.from(WorkingCalendars).where({ isDefault: true, isActive: true }));
+    if (!calendar) return null;
+
+    const [days, holidays] = await Promise.all([
+      tx.run(SELECT.from(WorkingCalendarDays).where({ calendar_ID: calendar.ID })),
+      tx.run(SELECT.from(WorkingCalendarHolidays).where({ calendar_ID: calendar.ID, isActive: true }))
+    ]);
+    return { ...calendar, days, holidays };
+  }
+
+  async _calculateSlaDeadline(req, subProcessTypeCode, slaDays = 0, startAt = new Date()) {
+    const startedAt = new Date(startAt);
+    const calendar = await this._workingCalendar(req, subProcessTypeCode);
+
+    if (!calendar?.days?.some((day) => day.isWorkingDay)) {
+      const fallback = new Date(startAt);
+      fallback.setUTCDate(fallback.getUTCDate() + Number(slaDays || 0));
+      return {
+        dueDate: fallback.toISOString().slice(0, 10),
+        slaStartedAt: startedAt.toISOString(),
+        slaDueAt: fallback.toISOString(),
+        slaCalendarCode: calendar?.code || null
+      };
+    }
+
+    const timeZone = calendar.timeZone || "Asia/Colombo";
+    const schedules = new Map(calendar.days.map((day) => [Number(day.dayOfWeek), day]));
+    const holidays = new Map(calendar.holidays.map((holiday) => [String(holiday.holidayDate).slice(0, 10), holiday]));
+    const normalWorkingMinutes = Math.max(...calendar.days
+      .filter((day) => day.isWorkingDay)
+      .map((day) => this._timeToMinutes(day.endTime) - this._timeToMinutes(day.startTime)));
+    let remaining = Math.max(0, Number(slaDays || 0) * normalWorkingMinutes);
+    let cursor = new Date(startAt);
+
+    for (let guard = 0; guard < 3700; guard += 1) {
+      const local = this._zonedParts(cursor, timeZone);
+      const holiday = holidays.get(local.date);
+      const weekly = schedules.get(this._isoDayOfWeek(local.date));
+      const schedule = holiday
+        ? (holiday.isWorkingDay ? holiday : null)
+        : (weekly?.isWorkingDay ? weekly : null);
+
+      if (schedule) {
+        const startMinutes = this._timeToMinutes(schedule.startTime);
+        const endMinutes = this._timeToMinutes(schedule.endTime);
+        const effectiveMinutes = Math.max(local.minutes, startMinutes);
+
+        if (effectiveMinutes < endMinutes) {
+          const effectiveStart = this._zonedDateTimeToUtc(
+            local.date,
+            `${String(Math.floor(effectiveMinutes / 60)).padStart(2, "0")}:${String(effectiveMinutes % 60).padStart(2, "0")}:00`,
+            timeZone
+          );
+          const available = endMinutes - effectiveMinutes;
+          if (remaining <= available) {
+            const dueAt = new Date(effectiveStart.getTime() + (remaining * 60000));
+            return {
+              dueDate: this._zonedParts(dueAt, timeZone).date,
+              slaStartedAt: startedAt.toISOString(),
+              slaDueAt: dueAt.toISOString(),
+              slaCalendarCode: calendar.code
+            };
+          }
+          remaining -= available;
+        }
+      }
+
+      const nextDate = this._addLocalDays(local.date, 1);
+      cursor = this._zonedDateTimeToUtc(nextDate, "00:00:00", timeZone);
+    }
+    throw new Error(`Unable to calculate SLA deadline for working calendar ${calendar.code}`);
+  }
+
+  async _recalculateOpenSlaDeadlines(req, calendarId) {
+    const { ProcessRequests, ProcessStepConfig, ProcessSubTypes, WorkingCalendars } = this.entities;
+    const tx = cds.tx(req);
+    const calendar = calendarId
+      ? await tx.run(SELECT.one.from(WorkingCalendars).columns("ID", "code", "isDefault").where({ ID: calendarId }))
+      : null;
+    if (calendarId && !calendar) return req.reject(404, "Working calendar was not found");
+
+    const requests = await tx.run(
+      SELECT.from(ProcessRequests).columns(
+        "ID", "subProcessType_code", "currentStep", "slaStartedAt", "createdAt", "modifiedAt", "status_code"
+      ).where([
+        { ref: ["status_code"] }, "not in", {
+          list: [PROCESS_STATUS.COMPLETED, PROCESS_STATUS.REJECTED].map((status) => ({ val: status }))
+        }
+      ])
+    );
+    let updated = 0;
+    for (const request of requests) {
+      if (calendar) {
+        const subType = await tx.run(
+          SELECT.one.from(ProcessSubTypes).columns("workingCalendar_ID").where({ code: request.subProcessType_code })
+        );
+        const effectiveCalendarId = subType?.workingCalendar_ID || (calendar.isDefault ? calendar.ID : null);
+        if (effectiveCalendarId !== calendar.ID) continue;
+      }
+      const step = await tx.run(
+        SELECT.one.from(ProcessStepConfig).columns("slaDays").where({
+          subProcessType_code: request.subProcessType_code,
+          stepNo: request.currentStep
+        })
+      );
+      if (!step) continue;
+      const startedAt = request.slaStartedAt || request.modifiedAt || request.createdAt || this._now();
+      const deadline = await this._calculateSlaDeadline(req, request.subProcessType_code, step.slaDays, new Date(startedAt));
+      await tx.run(UPDATE(ProcessRequests, request.ID).set(deadline));
+      updated += 1;
+    }
+    return updated;
   }
 
   async _getReportDashboard(req, filter, ProcessRequests, ProcessTasks, ProcessTypes, Users) {
@@ -1902,7 +2161,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     fnApplyRequestFilters(qScopedRequests);
     const aRequests = await cds.tx(req).run(fnApplyRequestFilters(
       SELECT.from(ProcessRequests).columns(
-        "ID", "createdAt", "completedAt", "dueDate", "status_code", "processType_code", "referenceNumber", "title"
+        "ID", "createdAt", "completedAt", "dueDate", "slaDueAt", "status_code", "processType_code", "referenceNumber", "title"
       )
     ));
     const aProcessTypes = await cds.tx(req).run(SELECT.from(ProcessTypes).columns("code", "name"));
@@ -1923,7 +2182,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       const sPeriod = String(oRequest.createdAt || "").slice(0, 7);
       const bCompleted = sStatus === PROCESS_STATUS.COMPLETED;
       const bClosed = bCompleted || sStatus === PROCESS_STATUS.REJECTED;
-      const bOverdue = Boolean(oRequest.dueDate && !bClosed && oRequest.dueDate < sToday);
+      const bOverdue = !bClosed && this._isSlaDeadlineBreached(oRequest, sToday);
 
       mStatus.set(sStatus, (mStatus.get(sStatus) || 0) + 1);
       mProcess.set(sProcess, (mProcess.get(sProcess) || 0) + 1);
@@ -1933,10 +2192,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       iCompleted += bCompleted ? 1 : 0;
       iOpen += bClosed ? 0 : 1;
       iOverdue += bOverdue ? 1 : 0;
-      if (oRequest.dueDate && (bClosed || bOverdue)) {
+      if ((oRequest.slaDueAt || oRequest.dueDate) && (bClosed || bOverdue)) {
         iSlaEligible += 1;
-        const sCompletionDate = String(oRequest.completedAt || sToday).slice(0, 10);
-        iSlaMet += sCompletionDate <= oRequest.dueDate ? 1 : 0;
+        const sCompletedAt = oRequest.completedAt || new Date().toISOString();
+        const bMet = oRequest.slaDueAt
+          ? Date.parse(sCompletedAt) <= Date.parse(oRequest.slaDueAt)
+          : String(sCompletedAt).slice(0, 10) <= oRequest.dueDate;
+        iSlaMet += bMet ? 1 : 0;
       }
     });
 
@@ -1952,7 +2214,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         .groupBy("processorTeam_ID", "processorTeamName")
     );
     const aOverdueRequestIds = aRequests
-      .filter((oRequest) => oRequest.dueDate && ![PROCESS_STATUS.COMPLETED, PROCESS_STATUS.REJECTED].includes(oRequest.status_code) && oRequest.dueDate < sToday)
+      .filter((oRequest) => ![PROCESS_STATUS.COMPLETED, PROCESS_STATUS.REJECTED].includes(oRequest.status_code) && this._isSlaDeadlineBreached(oRequest, sToday))
       .map((oRequest) => oRequest.ID);
     const aOverdueTaskRows = aOverdueRequestIds.length
       ? await cds.tx(req).run(
@@ -2016,8 +2278,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       })).sort((a, b) => b.count - a.count),
       overdueTasks: aOverdueTaskRows.map((oTask) => {
         const oRequest = mRequests.get(oTask.request_ID) || {};
-        const iOverdueDays = oRequest.dueDate
-          ? Math.max(0, Math.floor((Date.parse(`${sToday}T00:00:00Z`) - Date.parse(`${oRequest.dueDate}T00:00:00Z`)) / 86400000))
+        const sDeadline = oRequest.slaDueAt || (oRequest.dueDate ? `${oRequest.dueDate}T00:00:00Z` : null);
+        const iOverdueDays = sDeadline
+          ? Math.max(0, Math.floor((Date.now() - Date.parse(sDeadline)) / 86400000))
           : 0;
         return {
           ID: oTask.ID,
@@ -3165,11 +3428,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (guidedNextStep) {
       await this._createTask(req, requestId, guidedNextStep);
       sNewRequestStatus = PROCESS_STATUS.IN_PROGRESS;
+      const oDeadline = await this._calculateSlaDeadline(req, request.subProcessType_code, guidedNextStep.slaDays);
       await cds.tx(req).run(
         UPDATE(this.entities.ProcessRequests, requestId).set({
           status_code: sNewRequestStatus,
           currentStep: guidedNextStep.stepNo,
-          dueDate: this._calculateDueDate(guidedNextStep.slaDays),
+          ...oDeadline,
           completedAt: null
         })
       );
@@ -3568,11 +3832,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         Number(oRequest?.currentStep || 0) !== Number(firstTaskStep.stepNo || 0)
         || oRequest?.status_code !== PROCESS_STATUS.IN_PROGRESS
       )) {
+        const oDeadline = await this._calculateSlaDeadline(req, oRequest.subProcessType_code, firstTaskStep.slaDays);
         await cds.tx(req).run(
           UPDATE(this.entities.ProcessRequests, requestId).set({
             status_code: PROCESS_STATUS.IN_PROGRESS,
             currentStep: firstTaskStep.stepNo,
-            dueDate: this._calculateDueDate(firstTaskStep.slaDays)
+            ...oDeadline
           })
         );
       }
@@ -3726,6 +3991,235 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         processor: ownership.processor,
         processorEmail: ownership.processorEmail,
         isTeamTask: Boolean(ownership.processorTeam_ID)
+      })
+    );
+  }
+
+  async _runSlaBreachScan(req) {
+    const sToday = new Date().toISOString().slice(0, 10);
+    const ProcessRequests = this.entities.ProcessRequests;
+    const ProcessTasks = this.entities.ProcessTasks;
+    const aOpenRequests = await cds.tx(req).run(
+      SELECT.from(ProcessRequests)
+        .columns(
+          "ID", "referenceNumber", "requester", "department", "amount", "dueDate", "slaDueAt",
+          "processorUser_ID", "processorTeam_ID", "processorTeamName", "status_code"
+        )
+        .where([
+          { ref: ["status_code"] }, "not in", {
+            list: [PROCESS_STATUS.COMPLETED, PROCESS_STATUS.REJECTED].map((status) => ({ val: status }))
+          }
+        ])
+    );
+    const aRequests = aOpenRequests.filter((request) => this._isSlaDeadlineBreached(request, sToday));
+    const aRequestIds = aRequests.map((oRequest) => oRequest.ID);
+    const aTasks = aRequestIds.length
+      ? await cds.tx(req).run(
+        SELECT.from(ProcessTasks)
+          .columns(
+            "ID", "referenceNumber", "request_ID", "taskName", "status_code",
+            "assignedUser_ID", "processorUser_ID", "processorTeam_ID", "processorTeamName",
+            "processor", "processorEmail"
+          )
+          .where({
+            request_ID: { in: aRequestIds },
+            status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
+          })
+      )
+      : [];
+    const mRequests = new Map(aRequests.map((oRequest) => [oRequest.ID, oRequest]));
+    const oResult = {
+      overdueRequests: aRequests.length,
+      overdueTasks: aTasks.length,
+      notificationsSent: 0,
+      notificationsFailed: 0,
+      notificationsSkipped: 0
+    };
+
+    for (const oRequest of aRequests) {
+      await this._processSlaTarget(req, {
+        targetType: "PROCESS",
+        target: oRequest,
+        request: oRequest,
+        dueDate: oRequest.slaDueAt || oRequest.dueDate
+      }, oResult);
+    }
+
+    for (const oTask of aTasks) {
+      await this._processSlaTarget(req, {
+        targetType: "TASK",
+        target: oTask,
+        request: mRequests.get(oTask.request_ID),
+        dueDate: mRequests.get(oTask.request_ID)?.slaDueAt || mRequests.get(oTask.request_ID)?.dueDate
+      }, oResult);
+    }
+
+    cds.log("sla-scheduler").info("SLA breach scan completed", oResult);
+    return oResult;
+  }
+
+  async _processSlaTarget(req, slaTarget, result) {
+    const aRecipients = await this._slaRecipients(req, slaTarget.target);
+
+    if (!aRecipients.length) {
+      result.notificationsSkipped += 1;
+      cds.log("sla-scheduler").warn(
+        `No active recipient is configured for ${slaTarget.targetType} ${slaTarget.target.ID}`
+      );
+      return;
+    }
+
+    for (const oRecipient of aRecipients) {
+      const sNotificationKey = [
+        "SLA_BREACH",
+        slaTarget.targetType,
+        slaTarget.target.ID,
+        slaTarget.dueDate,
+        oRecipient.email
+      ].join(":").toLowerCase();
+      const bClaimed = await this._claimSlaNotification(req, {
+        notificationKey: sNotificationKey,
+        requestId: slaTarget.request.ID,
+        taskId: slaTarget.targetType === "TASK" ? slaTarget.target.ID : null,
+        targetType: slaTarget.targetType,
+        recipient: oRecipient.email,
+        dueDate: slaTarget.dueDate
+      });
+
+      if (!bClaimed) {
+        result.notificationsSkipped += 1;
+        continue;
+      }
+
+      try {
+        await this._startBpaEmailWorkflow(req, {
+          assignment: {
+            assignmentType: slaTarget.targetType,
+            task: slaTarget.targetType === "TASK" ? slaTarget.target : null,
+            teamName: slaTarget.target.processorTeamName || null
+          },
+          request: slaTarget.request,
+          recipient: oRecipient
+        });
+        await this._completeSlaNotification(req, sNotificationKey, "SENT");
+        result.notificationsSent += 1;
+      } catch (error) {
+        await this._completeSlaNotification(req, sNotificationKey, "FAILED", error.message);
+        result.notificationsFailed += 1;
+      }
+    }
+  }
+
+  async _slaRecipients(req, target) {
+    let aCandidates = [];
+    const sUserId = target.processorUser_ID || target.assignedUser_ID;
+
+    if (sUserId) {
+      const oUser = await this._getUser(req, sUserId, this.masterEntities.Users);
+      if (oUser) {
+        aCandidates.push({
+          email: this._userEmail(oUser),
+          displayName: this._userDisplayName(oUser)
+        });
+      }
+    } else if (target.processorTeam_ID) {
+      const aMembers = await this.master.run(
+        SELECT.from(this.masterEntities.TeamMembers).where({
+          team_ID: target.processorTeam_ID,
+          isActive: true
+        })
+      );
+      aCandidates = aMembers.map((oMember) => ({
+        email: oMember.email,
+        displayName: oMember.displayName
+      }));
+    } else if (target.processorEmail) {
+      aCandidates.push({
+        email: target.processorEmail,
+        displayName: target.processor || target.processorEmail
+      });
+    }
+
+    const aRecipients = [];
+    for (const oCandidate of aCandidates) {
+      const sEmail = String(oCandidate.email || "").trim().toLowerCase();
+      if (!sEmail) {
+        continue;
+      }
+      const oResolved = await this._resolveDelegatedRecipient(
+        req,
+        sEmail,
+        this.masterEntities.Delegations
+      );
+      const sRecipient = String(oResolved.recipient || "").trim().toLowerCase();
+      if (sRecipient && !aRecipients.some((oEntry) => oEntry.email === sRecipient)) {
+        aRecipients.push({
+          email: sRecipient,
+          displayName: oCandidate.displayName || sRecipient
+        });
+      }
+    }
+
+    return aRecipients;
+  }
+
+  async _claimSlaNotification(req, notification) {
+    const SlaNotificationStates = cds.entities("flowmate.db").SlaNotificationStates;
+    const oExisting = await cds.tx(req).run(
+      SELECT.one.from(SlaNotificationStates).where({ notificationKey: notification.notificationKey })
+    );
+    const iMaxAttempts = Math.max(1, Number(process.env.FLOWMATE_SLA_MAX_RETRIES || 5));
+    const iAttempts = Number(oExisting?.attempts || 0);
+    const iStaleBefore = Date.now() - 15 * 60 * 1000;
+    const bProcessing = oExisting?.status === "PROCESSING"
+      && Date.parse(oExisting.lastAttemptAt || 0) > iStaleBefore;
+
+    if (oExisting?.status === "SENT" || iAttempts >= iMaxAttempts || bProcessing) {
+      return false;
+    }
+
+    if (oExisting) {
+      await cds.tx(req).run(
+        UPDATE(SlaNotificationStates, notification.notificationKey).set({
+          status: "PROCESSING",
+          attempts: iAttempts + 1,
+          lastAttemptAt: this._now(),
+          lastError: null
+        })
+      );
+      return true;
+    }
+
+    try {
+      await cds.tx(req).run(
+        INSERT.into(SlaNotificationStates).entries({
+          notificationKey: notification.notificationKey,
+          request_ID: notification.requestId,
+          task_ID: notification.taskId,
+          targetType: notification.targetType,
+          recipient: notification.recipient,
+          dueDate: notification.dueDate ? String(notification.dueDate).slice(0, 10) : null,
+          status: "PROCESSING",
+          attempts: 1,
+          lastAttemptAt: this._now()
+        })
+      );
+      return true;
+    } catch (error) {
+      if (/unique|duplicate/i.test(error.message || "")) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  async _completeSlaNotification(req, notificationKey, status, errorMessage = null) {
+    const SlaNotificationStates = cds.entities("flowmate.db").SlaNotificationStates;
+    await cds.tx(req).run(
+      UPDATE(SlaNotificationStates, notificationKey).set({
+        status,
+        notifiedAt: status === "SENT" ? this._now() : null,
+        lastError: errorMessage
       })
     );
   }

@@ -27,7 +27,7 @@ sap.ui.define([
             this.getView().bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,tasks,comments,attachments,history"
+                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,tasks/request,comments,attachments,history"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),

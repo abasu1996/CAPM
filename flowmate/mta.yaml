@@ -78,6 +78,8 @@ modules:
     parameters:
       instances: 1
       buildpack: nodejs_buildpack
+    properties:
+      FLOWMATE_APP_URL: https://dialog-axiata-plc-arize-qas-9339ozek-org-a-qas-org-b-te3bf718a2.cfapps.ap11.hana.ondemand.com
     build-parameters:
       builder: npm-ci
     provides:
@@ -88,6 +90,7 @@ modules:
       - name: flowmate-auth
       - name: flowmate-db
       - name: flowmate-destination
+      - name: dialog-job
 
   - name: flowmate-db-deployer
     type: hdb
@@ -194,3 +197,7 @@ resources:
     type: org.cloudfoundry.existing-service
     parameters:
       service-name: flowmate-common-auth
+  - name: dialog-job
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: dialog-job

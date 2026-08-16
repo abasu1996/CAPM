@@ -88,11 +88,11 @@
                             </columns>
                             <items>
                                 <ColumnListItem
-                                    highlight="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaHighlight'}"
+                                    highlight="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaHighlightAt'}"
                                     type="Active">
                                     <customData>
-                                        <core:CustomData key="sla-breached" value="{parts: ['request/dueDate', 'status_code'], formatter: '.formatSlaBreachedFlag'}" writeToDom="true" />
-                                        <core:CustomData key="sla-within" value="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaWithinFlag'}" writeToDom="true" />
+                                        <core:CustomData key="sla-breached" value="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code'], formatter: '.formatSlaBreachedAtFlag'}" writeToDom="true" />
+                                        <core:CustomData key="sla-within" value="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code', 'completedAt'], formatter: '.formatSlaWithinAtFlag'}" writeToDom="true" />
                                     </customData>
                                     <cells>
                                         <Link
@@ -121,13 +121,13 @@
                                                 icon="sap-icon://lateness"
                                                 state="Error"
                                                 inverted="true"
-                                                visible="{parts: ['request/dueDate', 'status_code'], formatter: '.isSlaBreached'}" />
+                                                visible="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code'], formatter: '.isSlaBreachedAt'}" />
                                             <ObjectStatus
                                                 text="{i18n>withinSlaLabel}"
                                                 icon="sap-icon://accept"
                                                 state="Success"
                                                 inverted="true"
-                                                visible="{parts: ['request/dueDate', 'status_code', 'completedAt'], formatter: '.isWithinSla'}" />
+                                                visible="{parts: ['request/slaDueAt', 'request/dueDate', 'status_code', 'completedAt'], formatter: '.isWithinSlaAt'}" />
                                         </VBox>
                                         <Text text="{decision}" />
                                         <HBox justifyContent="End">

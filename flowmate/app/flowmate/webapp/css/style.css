@@ -1339,6 +1339,65 @@
     font-weight: 600;
 }
 
+.flowmateProgressPopoverContent {
+    padding: 1rem;
+}
+
+.flowmateProgressStepList .sapMLIB {
+    background: transparent;
+}
+
+.flowmateProgressStep {
+    position: relative;
+    padding: 0.65rem 0;
+}
+
+.flowmateProgressStep::after {
+    position: absolute;
+    top: 2rem;
+    bottom: -0.75rem;
+    left: 0.72rem;
+    width: 0.125rem;
+    background: #d9d9d9;
+    content: "";
+}
+
+.flowmateProgressStepList .sapMLIB:last-child .flowmateProgressStep::after {
+    display: none;
+}
+
+.flowmateProgressStepIcon {
+    z-index: 1;
+    flex: 0 0 auto;
+    margin-top: 0.15rem;
+    padding: 0.35rem;
+    border-radius: 50%;
+    background: #fff;
+    font-size: 1rem;
+    box-shadow: 0 0 0 0.125rem #fff;
+}
+
+.flowmateProgressStepBody {
+    min-width: 0;
+    margin-left: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border: 0.0625rem solid #e5e5e5;
+    border-radius: 0.65rem;
+    background: #fff;
+    box-shadow: 0 0.125rem 0.5rem rgba(34, 53, 72, 0.08);
+}
+
+.flowmateProgressStepSequence {
+    color: var(--flowmateMuted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.flowmateProgressStepTitle {
+    margin-top: 0.1rem;
+}
+
 .flowmateQueueFilterField .sapMLabel {
     margin-bottom: 0.25rem;
     color: var(--flowmateMuted);

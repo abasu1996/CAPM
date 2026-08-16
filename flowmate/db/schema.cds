@@ -38,6 +38,7 @@ entity TaskStatus : CodeList {
 entity ProcessSubTypes : CodeList {
     key code : String(30);
     processType : Association to ProcessTypes;
+    workingCalendar : Association to WorkingCalendars;
     loaApprovalApplicable : Boolean default false;
     processOwner : String(100);
     activityDescription : String(500);
@@ -58,6 +59,40 @@ entity Priorities : CodeList {
 
 entity Operator : CodeList {
     key code : String(10);
+}
+
+@assert.unique.workingCalendarCode: [code]
+entity WorkingCalendars : cuid, managed {
+    code       : String(30) not null;
+    name       : String(100) not null;
+    timeZone   : String(100) default 'Asia/Colombo';
+    isDefault  : Boolean default false;
+    isActive   : Boolean default true;
+    days       : Composition of many WorkingCalendarDays
+                   on days.calendar = $self;
+    holidays   : Composition of many WorkingCalendarHolidays
+                   on holidays.calendar = $self;
+}
+
+@assert.unique.workingCalendarDay: [calendar, dayOfWeek]
+entity WorkingCalendarDays : cuid, managed {
+    calendar    : Association to WorkingCalendars not null;
+    dayOfWeek   : Integer not null; // 1 = Monday, 7 = Sunday
+    isWorkingDay: Boolean default false;
+    startTime   : Time;
+    endTime     : Time;
+}
+
+@assert.unique.workingCalendarHoliday: [calendar, holidayDate]
+entity WorkingCalendarHolidays : cuid, managed {
+    calendar     : Association to WorkingCalendars not null;
+    holidayDate  : Date not null;
+    name         : String(150) not null;
+    isWorkingDay : Boolean default false;
+    startTime    : Time;
+    endTime      : Time;
+    isActive     : Boolean default true;
+    notes        : String(500);
 }
 
 entity LoaApproval : cuid, managed {
@@ -153,6 +188,9 @@ entity ProcessRequests : cuid, managed {
     priority    : String(20);
     currentStep : Integer;
     dueDate     : Date;
+    slaStartedAt : DateTime;
+    slaDueAt    : DateTime;
+    slaCalendarCode : String(30);
     completedAt : DateTime;
     tasks       : Composition of many ProcessTasks
                     on tasks.request = $self;
@@ -244,6 +282,21 @@ entity ProcessEmailAttachments : cuid, managed {
     attachment      : Association to ProcessAttachments;
     filename        : String(255);
     mimeType        : String(255);
+}
+
+@assert.unique.slaNotification: [notificationKey]
+entity SlaNotificationStates : managed {
+    key notificationKey : String(512);
+    request             : Association to ProcessRequests;
+    task                : Association to ProcessTasks;
+    targetType          : String(20);
+    recipient           : String(255);
+    dueDate             : Date;
+    status              : String(30) default 'PROCESSING';
+    attempts            : Integer default 0;
+    lastAttemptAt       : DateTime;
+    notifiedAt          : DateTime;
+    lastError           : LargeString;
 }
 
 annotate ProcessAttachments with {

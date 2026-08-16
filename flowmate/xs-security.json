@@ -20,6 +20,13 @@
       "grant-as-authority-to-apps": [
         "$XSAPPNAME(application,flowmate-api-client)"
       ]
+    },
+    {
+      "name": "$XSAPPNAME.SlaScheduler",
+      "description": "Execute the scheduled Flowmate SLA breach scan",
+      "grant-as-authority-to-apps": [
+        "84245ff9-2e43-4213-9a3f-dd72ea770caf!b47994|sap-jobscheduler!b1"
+      ]
     }
   ],
   "attributes": [],

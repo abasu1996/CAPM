@@ -87,6 +87,22 @@ sap.ui.define([
             return !Number.isNaN(oDueDate.getTime()) && oDueDate < oToday;
         },
 
+        isSlaBreachedAt(vSlaDueAt, vDueDate, sStatus) {
+            const sNormalizedStatus = String(sStatus || "").toUpperCase();
+            if (["APPROVED", "COMPLETED", "REJECTED", "CANCELLED", "CANCELED"].includes(sNormalizedStatus)) {
+                return false;
+            }
+            if (!vSlaDueAt) {
+                return this.isSlaBreached(vDueDate, sStatus);
+            }
+            const oDeadline = new Date(vSlaDueAt);
+            return !Number.isNaN(oDeadline.getTime()) && oDeadline < new Date();
+        },
+
+        formatSlaBreachedAtFlag(vSlaDueAt, vDueDate, sStatus) {
+            return String(this.isSlaBreachedAt(vSlaDueAt, vDueDate, sStatus));
+        },
+
         formatSlaBreachedFlag(vDueDate, sStatus) {
             return String(this.isSlaBreached(vDueDate, sStatus));
         },
@@ -110,6 +126,36 @@ sap.ui.define([
             }
 
             return !this.isSlaBreached(vDueDate, sStatus);
+        },
+
+        isWithinSlaAt(vSlaDueAt, vDueDate, sStatus, vCompletedAt) {
+            if (!vSlaDueAt) {
+                return this.isWithinSla(vDueDate, sStatus, vCompletedAt);
+            }
+            const sNormalizedStatus = String(sStatus || "").toUpperCase();
+            if (["REJECTED", "CANCELLED", "CANCELED"].includes(sNormalizedStatus)) return false;
+            const oDeadline = new Date(vSlaDueAt);
+            if (Number.isNaN(oDeadline.getTime())) return false;
+            if (["APPROVED", "COMPLETED"].includes(sNormalizedStatus)) {
+                const oCompletedAt = vCompletedAt ? new Date(vCompletedAt) : null;
+                return Boolean(oCompletedAt && !Number.isNaN(oCompletedAt.getTime()) && oCompletedAt <= oDeadline);
+            }
+            return !this.isSlaBreachedAt(vSlaDueAt, vDueDate, sStatus);
+        },
+
+        formatSlaWithinAtFlag(vSlaDueAt, vDueDate, sStatus, vCompletedAt) {
+            return String(this.isWithinSlaAt(vSlaDueAt, vDueDate, sStatus, vCompletedAt));
+        },
+
+        formatSlaHighlightAt(vSlaDueAt, vDueDate, sStatus, vCompletedAt) {
+            if (this.isSlaBreachedAt(vSlaDueAt, vDueDate, sStatus)) return "Error";
+            return this.isWithinSlaAt(vSlaDueAt, vDueDate, sStatus, vCompletedAt) ? "Success" : "None";
+        },
+
+        formatRequestHighlightAt(vSlaDueAt, vDueDate, sStatus, sPriority, vCompletedAt) {
+            if (this.isSlaBreachedAt(vSlaDueAt, vDueDate, sStatus)) return "Error";
+            if (this.isWithinSlaAt(vSlaDueAt, vDueDate, sStatus, vCompletedAt)) return "Success";
+            return this.formatRequestHighlight(null, sStatus, sPriority, vCompletedAt);
         },
 
         formatSlaWithinFlag(vDueDate, sStatus, vCompletedAt) {

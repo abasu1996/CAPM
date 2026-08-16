@@ -26,6 +26,8 @@ sap.ui.define([
             this.getView().setModel(new JSONModel(this._emptySubType()), "subTypeEdit");
             this.getView().setModel(new JSONModel(this._emptyVendor()), "vendorEdit");
             this.getView().setModel(new JSONModel(this._emptyLoaApproval()), "loaApprovalEdit");
+            this.getView().setModel(new JSONModel(this._emptyWorkingCalendar()), "calendarEdit");
+            this.getView().setModel(new JSONModel(this._emptyHoliday()), "holidayEdit");
             this.getRouter().getRoute("RouteAdminProcessConfig").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -122,6 +124,185 @@ sap.ui.define([
 
         onRefreshEmailNotifications() {
             this._refreshTable("emailNotificationLogTable");
+        },
+
+        onAddWorkingCalendar() {
+            const oEntry = this._emptyWorkingCalendar();
+            oEntry.dialogTitle = this.getText("addWorkingCalendarButton");
+            this.getView().getModel("calendarEdit").setData(oEntry);
+            this.byId("workingCalendarDialog").open();
+        },
+
+        async onEditWorkingCalendar(oEvent) {
+            const oEntry = oEvent.getSource().getBindingContext().getObject();
+            this.showBusy();
+            try {
+                const aSavedDays = await this._readList("/WorkingCalendarDays", {
+                    filters: [new Filter("calendar_ID", FilterOperator.EQ, oEntry.ID)]
+                });
+                const aDefaults = this._defaultCalendarDays();
+                const aDays = aDefaults.map((oDefault) => {
+                    const oSaved = aSavedDays.find((oDay) => Number(oDay.dayOfWeek) === oDefault.dayOfWeek);
+                    return oSaved ? {
+                        ...oDefault,
+                        ...oSaved,
+                        startTime: this._normalizeTime(oSaved.startTime),
+                        endTime: this._normalizeTime(oSaved.endTime)
+                    } : oDefault;
+                });
+                this.getView().getModel("calendarEdit").setData({
+                    ...oEntry,
+                    isEdit: true,
+                    dialogTitle: this.getText("editWorkingCalendarButton"),
+                    days: aDays
+                });
+                this.byId("workingCalendarDialog").open();
+            } catch (oError) {
+                MessageBox.error(this._getErrorMessage(oError, "workingCalendarLoadErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        onCloseWorkingCalendarDialog() {
+            this.byId("workingCalendarDialog").close();
+        },
+
+        async onSaveWorkingCalendar() {
+            const oEntry = this.getView().getModel("calendarEdit").getData();
+            if (!String(oEntry.code || "").trim() || !String(oEntry.name || "").trim() || !String(oEntry.timeZone || "").trim()) {
+                MessageBox.warning(this.getText("workingCalendarRequiredMessage"));
+                return;
+            }
+            const oInvalidDay = oEntry.days.find((oDay) => oDay.isWorkingDay
+                && (!oDay.startTime || !oDay.endTime || oDay.startTime >= oDay.endTime));
+            if (oInvalidDay) {
+                MessageBox.warning(this.getText("workingCalendarHoursInvalidMessage", [oInvalidDay.dayName]));
+                return;
+            }
+
+            this.showBusy();
+            try {
+                const oPayload = {
+                    code: String(oEntry.code).trim().toUpperCase(),
+                    name: String(oEntry.name).trim(),
+                    timeZone: String(oEntry.timeZone).trim(),
+                    isDefault: Boolean(oEntry.isDefault),
+                    isActive: Boolean(oEntry.isActive)
+                };
+                let sCalendarId = oEntry.ID;
+                if (oEntry.isEdit) {
+                    await this.updateEntry(`/WorkingCalendars(guid'${sCalendarId}')`, oPayload);
+                } else {
+                    const oCreated = await this.createEntry("/WorkingCalendars", oPayload);
+                    sCalendarId = oCreated.ID;
+                }
+                await Promise.all(oEntry.days.map((oDay) => {
+                    const oDayPayload = {
+                        calendar_ID: sCalendarId,
+                        dayOfWeek: Number(oDay.dayOfWeek),
+                        isWorkingDay: Boolean(oDay.isWorkingDay),
+                        startTime: oDay.isWorkingDay ? this._toODataTime(oDay.startTime) : null,
+                        endTime: oDay.isWorkingDay ? this._toODataTime(oDay.endTime) : null
+                    };
+                    return oDay.ID
+                        ? this.updateEntry(`/WorkingCalendarDays(guid'${oDay.ID}')`, oDayPayload)
+                        : this.createEntry("/WorkingCalendarDays", oDayPayload);
+                }));
+                await this._recalculateCalendarSla(sCalendarId);
+                MessageToast.show(this.getText(oEntry.isEdit ? "workingCalendarUpdatedMessage" : "workingCalendarCreatedMessage"));
+                this._refreshTable("workingCalendarsTable");
+                this.onCloseWorkingCalendarDialog();
+            } catch (oError) {
+                MessageBox.error(this._getErrorMessage(oError, "workingCalendarSaveErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onDeleteSelectedWorkingCalendars() {
+            await this._deleteSelectedByKey({
+                tableId: "workingCalendarsTable",
+                path: (sId) => `/WorkingCalendars(guid'${sId}')`,
+                keyProperty: "ID",
+                confirmKey: "deleteWorkingCalendarsConfirmMessage",
+                successKey: "workingCalendarsDeletedMessage",
+                errorKey: "workingCalendarDeleteErrorMessage"
+            });
+        },
+
+        onAddHoliday() {
+            const oEntry = this._emptyHoliday();
+            oEntry.dialogTitle = this.getText("addHolidayButton");
+            this.getView().getModel("holidayEdit").setData(oEntry);
+            this.byId("holidayDialog").open();
+        },
+
+        onEditHoliday(oEvent) {
+            const oEntry = oEvent.getSource().getBindingContext().getObject();
+            this.getView().getModel("holidayEdit").setData({
+                ...oEntry,
+                startTime: this._normalizeTime(oEntry.startTime),
+                endTime: this._normalizeTime(oEntry.endTime),
+                isEdit: true,
+                dialogTitle: this.getText("editHolidayButton")
+            });
+            this.byId("holidayDialog").open();
+        },
+
+        onCloseHolidayDialog() {
+            this.byId("holidayDialog").close();
+        },
+
+        async onSaveHoliday() {
+            const oEntry = this.getView().getModel("holidayEdit").getData();
+            if (!oEntry.calendar_ID || !oEntry.holidayDate || !String(oEntry.name || "").trim()) {
+                MessageBox.warning(this.getText("holidayRequiredMessage"));
+                return;
+            }
+            if (oEntry.isWorkingDay && (!oEntry.startTime || !oEntry.endTime || oEntry.startTime >= oEntry.endTime)) {
+                MessageBox.warning(this.getText("holidayHoursInvalidMessage"));
+                return;
+            }
+            await this._saveConfigEntity({
+                isEdit: oEntry.isEdit,
+                createPath: "/WorkingCalendarHolidays",
+                updatePath: `/WorkingCalendarHolidays(guid'${oEntry.ID}')`,
+                payload: {
+                    calendar_ID: oEntry.calendar_ID,
+                    holidayDate: oEntry.holidayDate,
+                    name: String(oEntry.name).trim(),
+                    isWorkingDay: Boolean(oEntry.isWorkingDay),
+                    startTime: oEntry.isWorkingDay ? this._toODataTime(oEntry.startTime) : null,
+                    endTime: oEntry.isWorkingDay ? this._toODataTime(oEntry.endTime) : null,
+                    isActive: Boolean(oEntry.isActive),
+                    notes: oEntry.notes
+                },
+                successCreateKey: "holidayCreatedMessage",
+                successUpdateKey: "holidayUpdatedMessage",
+                errorKey: "holidaySaveErrorMessage",
+                tableId: "workingCalendarHolidaysTable",
+                afterSave: () => this._recalculateCalendarSla(oEntry.calendar_ID),
+                close: () => this.onCloseHolidayDialog()
+            });
+        },
+
+        async onDeleteSelectedHolidays() {
+            await this._deleteSelectedByKey({
+                tableId: "workingCalendarHolidaysTable",
+                path: (sId) => `/WorkingCalendarHolidays(guid'${sId}')`,
+                keyProperty: "ID",
+                confirmKey: "deleteHolidaysConfirmMessage",
+                successKey: "holidaysDeletedMessage",
+                errorKey: "holidayDeleteErrorMessage",
+                afterDelete: (aContexts) => Promise.all([...new Set(aContexts.map((oContext) => oContext.getProperty("calendar_ID")).filter(Boolean))]
+                    .map((sCalendarId) => this._recalculateCalendarSla(sCalendarId)))
+            });
+        },
+
+        async _recalculateCalendarSla(sCalendarId) {
+            if (!sCalendarId) return;
+            await this.callAction("recalculateOpenSlaDeadlines", { calendarId: sCalendarId });
         },
 
         onAddLoaApproval() {
@@ -539,6 +720,7 @@ sap.ui.define([
                 name: oEntry.name,
                 descr: oEntry.descr,
                 processType_code: oEntry.processType_code,
+                workingCalendar_ID: oEntry.workingCalendar_ID || null,
                 loaApprovalApplicable: Boolean(oEntry.loaApprovalApplicable),
                 processOwner: oEntry.processOwner,
                 activityDescription: oEntry.activityDescription,
@@ -603,10 +785,75 @@ sap.ui.define([
                 name: "",
                 descr: "",
                 processType_code: "",
+                workingCalendar_ID: "",
                 loaApprovalApplicable: false,
                 processOwner: "",
                 activityDescription: "",
                 sapTCode: ""
+            };
+        },
+
+        _emptyWorkingCalendar() {
+            return {
+                dialogTitle: "",
+                isEdit: false,
+                ID: "",
+                code: "",
+                name: "",
+                timeZone: "Asia/Colombo",
+                isDefault: false,
+                isActive: true,
+                days: this._defaultCalendarDays()
+            };
+        },
+
+        _defaultCalendarDays() {
+            return [
+                "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+            ].map((sDayName, iIndex) => ({
+                ID: "",
+                dayOfWeek: iIndex + 1,
+                dayName: sDayName,
+                isWorkingDay: iIndex < 5,
+                startTime: "09:00:00",
+                endTime: "18:00:00"
+            }));
+        },
+
+        _emptyHoliday() {
+            return {
+                dialogTitle: "",
+                isEdit: false,
+                ID: "",
+                calendar_ID: "",
+                holidayDate: "",
+                name: "",
+                isWorkingDay: false,
+                startTime: "09:00:00",
+                endTime: "18:00:00",
+                isActive: true,
+                notes: ""
+            };
+        },
+
+        _normalizeTime(vTime) {
+            if (vTime && typeof vTime === "object" && Number.isFinite(vTime.ms)) {
+                const iTotalSeconds = Math.floor(vTime.ms / 1000);
+                return `${String(Math.floor(iTotalSeconds / 3600)).padStart(2, "0")}:${String(Math.floor((iTotalSeconds % 3600) / 60)).padStart(2, "0")}:${String(iTotalSeconds % 60).padStart(2, "0")}`;
+            }
+            const sTime = String(vTime || "");
+            const oDurationMatch = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i.exec(sTime);
+            if (oDurationMatch) {
+                return `${String(oDurationMatch[1] || 0).padStart(2, "0")}:${String(oDurationMatch[2] || 0).padStart(2, "0")}:${String(oDurationMatch[3] || 0).padStart(2, "0")}`;
+            }
+            return sTime.slice(0, 8);
+        },
+
+        _toODataTime(vTime) {
+            const [iHours, iMinutes, iSeconds = 0] = String(vTime || "00:00:00").split(":").map(Number);
+            return {
+                __edmType: "Edm.Time",
+                ms: (((iHours * 60) + iMinutes) * 60 + iSeconds) * 1000
             };
         },
 
@@ -688,6 +935,10 @@ sap.ui.define([
                     MessageToast.show(this.getText(oOptions.successCreateKey));
                 }
 
+                if (oOptions.afterSave) {
+                    await oOptions.afterSave();
+                }
+
                 this._refreshTable(oOptions.tableId);
                 oOptions.close();
             } catch (oError) {
@@ -699,7 +950,8 @@ sap.ui.define([
 
         async _deleteSelectedByKey(oOptions) {
             const oTable = this.byId(oOptions.tableId);
-            const aKeys = oTable.getSelectedContexts().map((oContext) => oContext.getProperty(oOptions.keyProperty));
+            const aContexts = oTable.getSelectedContexts();
+            const aKeys = aContexts.map((oContext) => oContext.getProperty(oOptions.keyProperty));
 
             if (!aKeys.length) {
                 MessageToast.show(this.getText("selectItemsToDeleteMessage"));
@@ -716,6 +968,9 @@ sap.ui.define([
 
             try {
                 await Promise.all(aKeys.map((sKey) => this.removeEntry(oOptions.path(sKey))));
+                if (oOptions.afterDelete) {
+                    await oOptions.afterDelete(aContexts);
+                }
                 MessageToast.show(this.getText(oOptions.successKey, [aKeys.length]));
                 oTable.removeSelections(true);
                 this._refreshTable(oOptions.tableId);

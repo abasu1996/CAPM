@@ -159,6 +159,15 @@
       "name": "Flowmate — Vendors"
     },
     {
+      "name": "Flowmate — Working Calendar Days"
+    },
+    {
+      "name": "Flowmate — Working Calendar Holidays"
+    },
+    {
+      "name": "Flowmate — Working Calendars"
+    },
+    {
       "name": "Flowmate CA — Attachments"
     },
     {
@@ -3609,6 +3618,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -4348,6 +4360,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -6912,6 +6927,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -7404,6 +7422,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -8510,6 +8531,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -8940,6 +8964,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -9366,6 +9393,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -9531,6 +9561,12 @@
                   "currentStep desc",
                   "dueDate",
                   "dueDate desc",
+                  "slaStartedAt",
+                  "slaStartedAt desc",
+                  "slaDueAt",
+                  "slaDueAt desc",
+                  "slaCalendarCode",
+                  "slaCalendarCode desc",
                   "completedAt",
                   "completedAt desc"
                 ]
@@ -9584,6 +9620,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -9752,6 +9791,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -11041,6 +11083,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -11363,6 +11408,7 @@
                   "descr",
                   "code",
                   "processType_code",
+                  "workingCalendar_ID",
                   "loaApprovalApplicable",
                   "processOwner",
                   "activityDescription",
@@ -11384,6 +11430,7 @@
                 "enum": [
                   "*",
                   "processType",
+                  "workingCalendar",
                   "texts",
                   "localized"
                 ]
@@ -11533,6 +11580,12 @@
                   "currentStep desc",
                   "dueDate",
                   "dueDate desc",
+                  "slaStartedAt",
+                  "slaStartedAt desc",
+                  "slaDueAt",
+                  "slaDueAt desc",
+                  "slaCalendarCode",
+                  "slaCalendarCode desc",
                   "completedAt",
                   "completedAt desc"
                 ]
@@ -11586,6 +11639,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -12941,6 +12997,7 @@
                   "descr",
                   "code",
                   "processType_code",
+                  "workingCalendar_ID",
                   "loaApprovalApplicable",
                   "processOwner",
                   "activityDescription",
@@ -12962,6 +13019,7 @@
                 "enum": [
                   "*",
                   "processType",
+                  "workingCalendar",
                   "texts",
                   "localized"
                 ]
@@ -13034,6 +13092,8 @@
                   "code desc",
                   "processType_code",
                   "processType_code desc",
+                  "workingCalendar_ID",
+                  "workingCalendar_ID desc",
                   "loaApprovalApplicable",
                   "loaApprovalApplicable desc",
                   "processOwner",
@@ -13061,6 +13121,7 @@
                   "descr",
                   "code",
                   "processType_code",
+                  "workingCalendar_ID",
                   "loaApprovalApplicable",
                   "processOwner",
                   "activityDescription",
@@ -13082,6 +13143,7 @@
                 "enum": [
                   "*",
                   "processType",
+                  "workingCalendar",
                   "texts",
                   "localized"
                 ]
@@ -13188,6 +13250,7 @@
                   "descr",
                   "code",
                   "processType_code",
+                  "workingCalendar_ID",
                   "loaApprovalApplicable",
                   "processOwner",
                   "activityDescription",
@@ -13209,6 +13272,7 @@
                 "enum": [
                   "*",
                   "processType",
+                  "workingCalendar",
                   "texts",
                   "localized"
                 ]
@@ -13675,6 +13739,89 @@
         "responses": {
           "204": {
             "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/ProcessSubTypes('{code}')/workingCalendar": {
+      "parameters": [
+        {
+          "description": "key: code",
+          "in": "path",
+          "name": "code",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "maxLength": 30
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves working calendar of a process sub type.",
+        "tags": [
+          "Flowmate — Process Sub Types",
+          "Flowmate — Working Calendars"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "code",
+                  "name",
+                  "timeZone",
+                  "isDefault",
+                  "isActive"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "days",
+                  "holidays"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved working calendar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+                }
+              }
+            }
           },
           "4XX": {
             "$ref": "#/components/responses/error"
@@ -14500,6 +14647,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -15837,6 +15987,9 @@
                   "priority",
                   "currentStep",
                   "dueDate",
+                  "slaStartedAt",
+                  "slaDueAt",
+                  "slaCalendarCode",
                   "completedAt"
                 ]
               }
@@ -20447,6 +20600,1452 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/WorkingCalendarDays": {
+      "get": {
+        "summary": "Retrieves a list of working calendar days.",
+        "tags": [
+          "Flowmate — Working Calendar Days"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "calendar_ID",
+                  "calendar_ID desc",
+                  "dayOfWeek",
+                  "dayOfWeek desc",
+                  "isWorkingDay",
+                  "isWorkingDay desc",
+                  "startTime",
+                  "startTime desc",
+                  "endTime",
+                  "endTime desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "calendar_ID",
+                  "dayOfWeek",
+                  "isWorkingDay",
+                  "startTime",
+                  "endTime"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "calendar"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved working calendar days",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of WorkingCalendarDays",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "post": {
+        "summary": "Creates a single working calendar day.",
+        "tags": [
+          "Flowmate — Working Calendar Days"
+        ],
+        "requestBody": {
+          "description": "New working calendar day",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created working calendar day",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendarDays({ID})": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a single working calendar day.",
+        "tags": [
+          "Flowmate — Working Calendar Days"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "calendar_ID",
+                  "dayOfWeek",
+                  "isWorkingDay",
+                  "startTime",
+                  "endTime"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "calendar"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved working calendar day",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "patch": {
+        "summary": "Changes a single working calendar day.",
+        "tags": [
+          "Flowmate — Working Calendar Days"
+        ],
+        "requestBody": {
+          "description": "New property values",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays-update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "delete": {
+        "summary": "Deletes a single working calendar day.",
+        "tags": [
+          "Flowmate — Working Calendar Days"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendarDays({ID})/calendar": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves calendar of a working calendar day.",
+        "tags": [
+          "Flowmate — Working Calendar Days",
+          "Flowmate — Working Calendars"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "code",
+                  "name",
+                  "timeZone",
+                  "isDefault",
+                  "isActive"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "days",
+                  "holidays"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved calendar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendarHolidays": {
+      "get": {
+        "summary": "Retrieves a list of working calendar holidays.",
+        "tags": [
+          "Flowmate — Working Calendar Holidays"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "calendar_ID",
+                  "calendar_ID desc",
+                  "holidayDate",
+                  "holidayDate desc",
+                  "name",
+                  "name desc",
+                  "isWorkingDay",
+                  "isWorkingDay desc",
+                  "startTime",
+                  "startTime desc",
+                  "endTime",
+                  "endTime desc",
+                  "isActive",
+                  "isActive desc",
+                  "notes",
+                  "notes desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "calendar_ID",
+                  "holidayDate",
+                  "name",
+                  "isWorkingDay",
+                  "startTime",
+                  "endTime",
+                  "isActive",
+                  "notes"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "calendar"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved working calendar holidays",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of WorkingCalendarHolidays",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "post": {
+        "summary": "Creates a single working calendar holiday.",
+        "tags": [
+          "Flowmate — Working Calendar Holidays"
+        ],
+        "requestBody": {
+          "description": "New working calendar holiday",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created working calendar holiday",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendarHolidays({ID})": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a single working calendar holiday.",
+        "tags": [
+          "Flowmate — Working Calendar Holidays"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "calendar_ID",
+                  "holidayDate",
+                  "name",
+                  "isWorkingDay",
+                  "startTime",
+                  "endTime",
+                  "isActive",
+                  "notes"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "calendar"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved working calendar holiday",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "patch": {
+        "summary": "Changes a single working calendar holiday.",
+        "tags": [
+          "Flowmate — Working Calendar Holidays"
+        ],
+        "requestBody": {
+          "description": "New property values",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays-update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "delete": {
+        "summary": "Deletes a single working calendar holiday.",
+        "tags": [
+          "Flowmate — Working Calendar Holidays"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendarHolidays({ID})/calendar": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves calendar of a working calendar holiday.",
+        "tags": [
+          "Flowmate — Working Calendar Holidays",
+          "Flowmate — Working Calendars"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "code",
+                  "name",
+                  "timeZone",
+                  "isDefault",
+                  "isActive"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "days",
+                  "holidays"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved calendar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendars": {
+      "get": {
+        "summary": "Retrieves a list of working calendars.",
+        "tags": [
+          "Flowmate — Working Calendars"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "code",
+                  "code desc",
+                  "name",
+                  "name desc",
+                  "timeZone",
+                  "timeZone desc",
+                  "isDefault",
+                  "isDefault desc",
+                  "isActive",
+                  "isActive desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "code",
+                  "name",
+                  "timeZone",
+                  "isDefault",
+                  "isActive"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "days",
+                  "holidays"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved working calendars",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of WorkingCalendars",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "post": {
+        "summary": "Creates a single working calendar.",
+        "tags": [
+          "Flowmate — Working Calendars"
+        ],
+        "requestBody": {
+          "description": "New working calendar",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendars-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created working calendar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendars({ID})": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a single working calendar.",
+        "tags": [
+          "Flowmate — Working Calendars"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "code",
+                  "name",
+                  "timeZone",
+                  "isDefault",
+                  "isActive"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "days",
+                  "holidays"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved working calendar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "patch": {
+        "summary": "Changes a single working calendar.",
+        "tags": [
+          "Flowmate — Working Calendars"
+        ],
+        "requestBody": {
+          "description": "New property values",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendars-update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "delete": {
+        "summary": "Deletes a single working calendar.",
+        "tags": [
+          "Flowmate — Working Calendars"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendars({ID})/days": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a list of days of a working calendar.",
+        "tags": [
+          "Flowmate — Working Calendars",
+          "Flowmate — Working Calendar Days"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "calendar_ID",
+                  "calendar_ID desc",
+                  "dayOfWeek",
+                  "dayOfWeek desc",
+                  "isWorkingDay",
+                  "isWorkingDay desc",
+                  "startTime",
+                  "startTime desc",
+                  "endTime",
+                  "endTime desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "calendar_ID",
+                  "dayOfWeek",
+                  "isWorkingDay",
+                  "startTime",
+                  "endTime"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "calendar"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved days",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of WorkingCalendarDays",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "post": {
+        "summary": "Creates a single day of a working calendar.",
+        "tags": [
+          "Flowmate — Working Calendars",
+          "Flowmate — Working Calendar Days"
+        ],
+        "requestBody": {
+          "description": "New day",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created day",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/WorkingCalendars({ID})/holidays": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a list of holidays of a working calendar.",
+        "tags": [
+          "Flowmate — Working Calendars",
+          "Flowmate — Working Calendar Holidays"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "calendar_ID",
+                  "calendar_ID desc",
+                  "holidayDate",
+                  "holidayDate desc",
+                  "name",
+                  "name desc",
+                  "isWorkingDay",
+                  "isWorkingDay desc",
+                  "startTime",
+                  "startTime desc",
+                  "endTime",
+                  "endTime desc",
+                  "isActive",
+                  "isActive desc",
+                  "notes",
+                  "notes desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "calendar_ID",
+                  "holidayDate",
+                  "name",
+                  "isWorkingDay",
+                  "startTime",
+                  "endTime",
+                  "isActive",
+                  "notes"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "calendar"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved holidays",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of WorkingCalendarHolidays",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      },
+      "post": {
+        "summary": "Creates a single holiday of a working calendar.",
+        "tags": [
+          "Flowmate — Working Calendars",
+          "Flowmate — Working Calendar Holidays"
+        ],
+        "requestBody": {
+          "description": "New holiday",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created holiday",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/analyzeGuidedStepCompletion": {
       "post": {
         "summary": "Invokes action analyzeGuidedStepCompletion",
@@ -23677,6 +25276,56 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/recalculateOpenSlaDeadlines": {
+      "post": {
+        "summary": "Invokes action recalculateOpenSlaDeadlines",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "integer",
+                      "format": "int32",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "calendarId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/rejectTask": {
       "post": {
         "summary": "Invokes action rejectTask",
@@ -23962,6 +25611,46 @@
                     "nullable": true
                   }
                 }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/runSlaBreachScan": {
+      "post": {
+        "summary": "Invokes action runSlaBreachScan",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.return_FlowmateService_runSlaBreachScan"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
               }
             }
           }
@@ -64366,6 +66055,23 @@
             "example": "2017-04-13",
             "nullable": true
           },
+          "slaStartedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "slaCalendarCode": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
           "completedAt": {
             "type": "string",
             "format": "date-time",
@@ -64611,6 +66317,23 @@
             "example": "2017-04-13",
             "nullable": true
           },
+          "slaStartedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "slaCalendarCode": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
           "completedAt": {
             "type": "string",
             "format": "date-time",
@@ -64831,6 +66554,23 @@
             "type": "string",
             "format": "date",
             "example": "2017-04-13",
+            "nullable": true
+          },
+          "slaStartedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "slaCalendarCode": {
+            "type": "string",
+            "maxLength": 30,
             "nullable": true
           },
           "completedAt": {
@@ -65285,6 +67025,20 @@
             "maxLength": 30,
             "nullable": true
           },
+          "workingCalendar": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+              }
+            ],
+            "nullable": true
+          },
+          "workingCalendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
+            "nullable": true
+          },
           "loaApprovalApplicable": {
             "type": "boolean",
             "nullable": true,
@@ -65347,6 +67101,12 @@
             "maxLength": 30,
             "nullable": true
           },
+          "workingCalendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
+            "nullable": true
+          },
           "loaApprovalApplicable": {
             "type": "boolean",
             "nullable": true,
@@ -65395,6 +67155,12 @@
           "processType_code": {
             "type": "string",
             "maxLength": 30,
+            "nullable": true
+          },
+          "workingCalendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
             "nullable": true
           },
           "loaApprovalApplicable": {
@@ -68132,6 +69898,483 @@
           }
         }
       },
+      "FlowmateService.WorkingCalendarDays": {
+        "title": "WorkingCalendarDays",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "modifiedBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "calendar": {
+            "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+          },
+          "calendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isWorkingDay": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.WorkingCalendarDays-create": {
+        "title": "WorkingCalendarDays (for create)",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "calendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isWorkingDay": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.WorkingCalendarDays-update": {
+        "title": "WorkingCalendarDays (for update)",
+        "type": "object",
+        "properties": {
+          "calendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isWorkingDay": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.WorkingCalendarHolidays": {
+        "title": "WorkingCalendarHolidays",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "modifiedBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "calendar": {
+            "$ref": "#/components/schemas/FlowmateService.WorkingCalendars"
+          },
+          "calendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "holidayDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "isWorkingDay": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true,
+            "default": true
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.WorkingCalendarHolidays-create": {
+        "title": "WorkingCalendarHolidays (for create)",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "calendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "holidayDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "isWorkingDay": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true,
+            "default": true
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.WorkingCalendarHolidays-update": {
+        "title": "WorkingCalendarHolidays (for update)",
+        "type": "object",
+        "properties": {
+          "calendar_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "holidayDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "isWorkingDay": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "example": "15:51:04",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true,
+            "default": true
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.WorkingCalendars": {
+        "title": "WorkingCalendars",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "modifiedBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "timeZone": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true,
+            "default": "Asia/Colombo"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true,
+            "default": true
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays"
+            }
+          },
+          "days@count": {
+            "$ref": "#/components/schemas/count"
+          },
+          "holidays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays"
+            }
+          },
+          "holidays@count": {
+            "$ref": "#/components/schemas/count"
+          }
+        }
+      },
+      "FlowmateService.WorkingCalendars-create": {
+        "title": "WorkingCalendars (for create)",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "timeZone": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true,
+            "default": "Asia/Colombo"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true,
+            "default": true
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays-create"
+            }
+          },
+          "holidays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays-create"
+            }
+          }
+        }
+      },
+      "FlowmateService.WorkingCalendars-update": {
+        "title": "WorkingCalendars (for update)",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "timeZone": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true,
+            "default": "Asia/Colombo"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "isActive": {
+            "type": "boolean",
+            "nullable": true,
+            "default": true
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateService.WorkingCalendarDays-create"
+            }
+          },
+          "holidays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateService.WorkingCalendarHolidays-create"
+            }
+          }
+        }
+      },
       "FlowmateService.centralizedPO": {
         "title": "centralizedPO",
         "type": "object",
@@ -68983,6 +71226,37 @@
             "nullable": true
           },
           "delegatedCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.return_FlowmateService_runSlaBreachScan": {
+        "title": "return_FlowmateService_runSlaBreachScan",
+        "type": "object",
+        "properties": {
+          "overdueRequests": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "overdueTasks": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "notificationsSent": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "notificationsFailed": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "notificationsSkipped": {
             "type": "integer",
             "format": "int32",
             "nullable": true

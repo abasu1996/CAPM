@@ -150,6 +150,19 @@ service FlowmateService {
     entity ProcessStepConfig as projection on fldb.ProcessStepConfig {
         *
     };
+    entity WorkingCalendars as projection on fldb.WorkingCalendars {
+        *,
+        days : redirected to WorkingCalendarDays,
+        holidays : redirected to WorkingCalendarHolidays
+    };
+    entity WorkingCalendarDays as projection on fldb.WorkingCalendarDays {
+        *,
+        calendar : redirected to WorkingCalendars
+    };
+    entity WorkingCalendarHolidays as projection on fldb.WorkingCalendarHolidays {
+        *,
+        calendar : redirected to WorkingCalendars
+    };
     entity RequestFilterQueries as projection on fldb.RequestFilterQueries;
 
     action createUserWithTeams(
@@ -196,6 +209,16 @@ service FlowmateService {
         status          : String(30);
         attachmentCount : Integer;
     };
+    @requires: 'SlaScheduler'
+    action runSlaBreachScan() returns {
+        overdueRequests : Integer;
+        overdueTasks    : Integer;
+        notificationsSent : Integer;
+        notificationsFailed : Integer;
+        notificationsSkipped : Integer;
+    };
+    @requires: 'Administrator'
+    action recalculateOpenSlaDeadlines(calendarId: UUID) returns Integer;
     action reserveRequest(requestId: UUID) returns Boolean;
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;

@@ -120,11 +120,12 @@
                                 noDataText="{i18n>noConfigValuesText}"
                                 growing="true"
                                 growingScrollToLoad="true"
-                                items="{/ProcessSubTypes}">
+                                items="{path: '/ProcessSubTypes', parameters: {expand: 'workingCalendar'}}">
                                 <columns>
                                     <Column width="7rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
                                     <Column width="12rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
                                     <Column width="7rem"><Text text="{i18n>processTypeLabel}" wrapping="true" /></Column>
+                                    <Column width="10rem"><Text text="{i18n>workingCalendarLabel}" wrapping="true" /></Column>
                                     <Column width="8rem" hAlign="Center"><Text text="{i18n>loaApprovalApplicableLabel}" wrapping="true" /></Column>
                                     <Column width="8rem"><Text text="{i18n>processOwnerLabel}" wrapping="true" /></Column>
                                     <Column><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
@@ -137,6 +138,7 @@
                                             <ObjectIdentifier title="{descr}" text="{code}" />
                                             <Text text="{name}" wrapping="true" />
                                             <Text text="{processType_code}" />
+                                            <Text text="{workingCalendar/name}" />
                                             <ObjectStatus text="{= ${loaApprovalApplicable} ? ${i18n>yesText} : ${i18n>noText} }" state="{= ${loaApprovalApplicable} ? 'Success' : 'None' }" />
                                             <Text text="{processOwner}" wrapping="true" />
                                             <Text text="{activityDescription}" wrapping="true" />
@@ -435,6 +437,68 @@
                                 </items>
                             </Table>
                         </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://calendar" text="{i18n>workingCalendarAdminTitle}">
+                            <VBox class="flowmateAdminCalendarSection">
+                                <OverflowToolbar class="flowmateToolbar">
+                                    <Title text="{i18n>workingCalendarsTitle}" />
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://add" text="{i18n>addWorkingCalendarButton}" type="Emphasized" press=".onAddWorkingCalendar" />
+                                    <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedWorkingCalendars" />
+                                </OverflowToolbar>
+                                <Table id="workingCalendarsTable" class="flowmateTable" mode="MultiSelect" growing="true" items="{/WorkingCalendars}">
+                                    <columns>
+                                        <Column><Text text="{i18n>calendarCodeLabel}" /></Column>
+                                        <Column><Text text="{i18n>calendarNameLabel}" /></Column>
+                                        <Column><Text text="{i18n>timeZoneLabel}" /></Column>
+                                        <Column hAlign="Center"><Text text="{i18n>defaultLabel}" /></Column>
+                                        <Column hAlign="Center"><Text text="{i18n>activeLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{code}" />
+                                                <Text text="{name}" />
+                                                <Text text="{timeZone}" />
+                                                <ObjectStatus text="{= ${isDefault} ? ${i18n>yesText} : ${i18n>noText} }" state="{= ${isDefault} ? 'Success' : 'None' }" />
+                                                <ObjectStatus text="{= ${isActive} ? ${i18n>activeLabel} : ${i18n>inactiveLabel} }" state="{= ${isActive} ? 'Success' : 'None' }" />
+                                                <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editWorkingCalendarButton}" press=".onEditWorkingCalendar" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                                <OverflowToolbar class="flowmateToolbar sapUiMediumMarginTop">
+                                    <Title text="{i18n>holidayExceptionsTitle}" />
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://add" text="{i18n>addHolidayButton}" type="Emphasized" press=".onAddHoliday" />
+                                    <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedHolidays" />
+                                </OverflowToolbar>
+                                <Table id="workingCalendarHolidaysTable" class="flowmateTable" mode="MultiSelect" growing="true" items="{path: '/WorkingCalendarHolidays', parameters: {expand: 'calendar'}}">
+                                    <columns>
+                                        <Column><Text text="{i18n>holidayDateLabel}" /></Column>
+                                        <Column><Text text="{i18n>holidayNameLabel}" /></Column>
+                                        <Column><Text text="{i18n>workingCalendarLabel}" /></Column>
+                                        <Column><Text text="{i18n>holidayTypeLabel}" /></Column>
+                                        <Column><Text text="{i18n>workingHoursLabel}" /></Column>
+                                        <Column hAlign="Center"><Text text="{i18n>activeLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{holidayDate}" />
+                                                <ObjectIdentifier title="{name}" text="{notes}" />
+                                                <Text text="{calendar/name}" />
+                                                <ObjectStatus text="{= ${isWorkingDay} ? ${i18n>partialWorkingDayLabel} : ${i18n>fullDayHolidayLabel} }" state="{= ${isWorkingDay} ? 'Warning' : 'Error' }" />
+                                                <Text text="{= ${isWorkingDay} ? ${startTime} + ' - ' + ${endTime} : '-' }" />
+                                                <ObjectStatus text="{= ${isActive} ? ${i18n>activeLabel} : ${i18n>inactiveLabel} }" state="{= ${isActive} ? 'Success' : 'None' }" />
+                                                <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editHolidayButton}" press=".onEditHoliday" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </VBox>
+                        </IconTabFilter>
                         <IconTabFilter icon="sap-icon://email" text="{i18n>emailNotificationLogTitle}">
                             <OverflowToolbar class="flowmateToolbar">
                                 <Title text="{i18n>emailNotificationLogTitle}" />
@@ -581,6 +645,10 @@
                     <Select selectedKey="{subTypeEdit>/processType_code}" items="{/ProcessTypes}" required="true">
                         <core:Item key="{code}" text="{name}" />
                     </Select>
+                    <Label text="{i18n>workingCalendarLabel}" />
+                    <Select selectedKey="{subTypeEdit>/workingCalendar_ID}" items="{/WorkingCalendars}" forceSelection="false">
+                        <core:Item key="{ID}" text="{name}" additionalText="{code}" />
+                    </Select>
                     <Label text="{i18n>loaApprovalApplicableLabel}" />
                     <Switch state="{subTypeEdit>/loaApprovalApplicable}" customTextOn="{i18n>yesText}" customTextOff="{i18n>noText}" />
                     <Label text="{i18n>processOwnerLabel}" />
@@ -593,6 +661,71 @@
             </content>
             <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveSubType" /></beginButton>
             <endButton><Button text="{i18n>cancelButton}" press=".onCloseSubTypeDialog" /></endButton>
+        </Dialog>
+        <Dialog id="workingCalendarDialog" title="{calendarEdit>/dialogTitle}" contentWidth="58rem" stretchOnPhone="true">
+            <content>
+                <VBox class="flowmateDialogContent">
+                    <form:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
+                        <Label text="{i18n>calendarCodeLabel}" required="true" />
+                        <Input value="{calendarEdit>/code}" enabled="{= !${calendarEdit>/isEdit} }" maxLength="30" required="true" />
+                        <Label text="{i18n>calendarNameLabel}" required="true" />
+                        <Input value="{calendarEdit>/name}" maxLength="100" required="true" />
+                        <Label text="{i18n>timeZoneLabel}" required="true" />
+                        <Input value="{calendarEdit>/timeZone}" placeholder="Asia/Colombo" required="true" />
+                        <Label text="{i18n>defaultCalendarLabel}" />
+                        <Switch state="{calendarEdit>/isDefault}" />
+                        <Label text="{i18n>activeLabel}" />
+                        <Switch state="{calendarEdit>/isActive}" />
+                    </form:SimpleForm>
+                    <Title class="sapUiSmallMarginTop" text="{i18n>weeklyWorkingScheduleTitle}" />
+                    <Table class="flowmateTable" items="{calendarEdit>/days}">
+                        <columns>
+                            <Column><Text text="{i18n>dayLabel}" /></Column>
+                            <Column hAlign="Center"><Text text="{i18n>workingDayLabel}" /></Column>
+                            <Column><Text text="{i18n>startTimeLabel}" /></Column>
+                            <Column><Text text="{i18n>endTimeLabel}" /></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{calendarEdit>dayName}" />
+                                    <Switch state="{calendarEdit>isWorkingDay}" />
+                                    <TimePicker value="{calendarEdit>startTime}" valueFormat="HH:mm:ss" displayFormat="HH:mm" enabled="{calendarEdit>isWorkingDay}" />
+                                    <TimePicker value="{calendarEdit>endTime}" valueFormat="HH:mm:ss" displayFormat="HH:mm" enabled="{calendarEdit>isWorkingDay}" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
+            </content>
+            <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveWorkingCalendar" /></beginButton>
+            <endButton><Button text="{i18n>cancelButton}" press=".onCloseWorkingCalendarDialog" /></endButton>
+        </Dialog>
+        <Dialog id="holidayDialog" title="{holidayEdit>/dialogTitle}" contentWidth="46rem" stretchOnPhone="true">
+            <content>
+                <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
+                    <Label text="{i18n>workingCalendarLabel}" required="true" />
+                    <Select selectedKey="{holidayEdit>/calendar_ID}" items="{/WorkingCalendars}" required="true">
+                        <core:Item key="{ID}" text="{name}" additionalText="{code}" />
+                    </Select>
+                    <Label text="{i18n>holidayDateLabel}" required="true" />
+                    <DatePicker value="{holidayEdit>/holidayDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" required="true" />
+                    <Label text="{i18n>holidayNameLabel}" required="true" />
+                    <Input value="{holidayEdit>/name}" maxLength="150" required="true" />
+                    <Label text="{i18n>partialWorkingDayLabel}" />
+                    <Switch state="{holidayEdit>/isWorkingDay}" />
+                    <Label text="{i18n>startTimeLabel}" visible="{holidayEdit>/isWorkingDay}" />
+                    <TimePicker value="{holidayEdit>/startTime}" valueFormat="HH:mm:ss" displayFormat="HH:mm" visible="{holidayEdit>/isWorkingDay}" />
+                    <Label text="{i18n>endTimeLabel}" visible="{holidayEdit>/isWorkingDay}" />
+                    <TimePicker value="{holidayEdit>/endTime}" valueFormat="HH:mm:ss" displayFormat="HH:mm" visible="{holidayEdit>/isWorkingDay}" />
+                    <Label text="{i18n>activeLabel}" />
+                    <Switch state="{holidayEdit>/isActive}" />
+                    <Label text="{i18n>notesLabel}" />
+                    <TextArea value="{holidayEdit>/notes}" rows="3" maxLength="500" />
+                </form:SimpleForm>
+            </content>
+            <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveHoliday" /></beginButton>
+            <endButton><Button text="{i18n>cancelButton}" press=".onCloseHolidayDialog" /></endButton>
         </Dialog>
         <Dialog id="processStepDialog" title="{stepEdit>/dialogTitle}" contentWidth="50rem" stretchOnPhone="true">
             <content>
