@@ -125,6 +125,7 @@
                                     <Column width="7rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
                                     <Column width="12rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
                                     <Column width="7rem"><Text text="{i18n>processTypeLabel}" wrapping="true" /></Column>
+                                    <Column width="8rem" hAlign="Center"><Text text="{i18n>loaApprovalApplicableLabel}" wrapping="true" /></Column>
                                     <Column width="8rem"><Text text="{i18n>processOwnerLabel}" wrapping="true" /></Column>
                                     <Column><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
                                     <Column width="8rem"><Text text="{i18n>sapTCodeLabel}" wrapping="true" /></Column>
@@ -136,6 +137,7 @@
                                             <ObjectIdentifier title="{descr}" text="{code}" />
                                             <Text text="{name}" wrapping="true" />
                                             <Text text="{processType_code}" />
+                                            <ObjectStatus text="{= ${loaApprovalApplicable} ? ${i18n>yesText} : ${i18n>noText} }" state="{= ${loaApprovalApplicable} ? 'Success' : 'None' }" />
                                             <Text text="{processOwner}" wrapping="true" />
                                             <Text text="{activityDescription}" wrapping="true" />
                                             <Text text="{sapTCode}" wrapping="true" />
@@ -433,6 +435,69 @@
                                 </items>
                             </Table>
                         </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://email" text="{i18n>emailNotificationLogTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>emailNotificationLogTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField
+                                    width="18rem"
+                                    placeholder="{i18n>searchEmailNotificationsPlaceholder}"
+                                    search=".onSearchEmailNotifications"
+                                    liveChange=".onSearchEmailNotifications" />
+                                <Button
+                                    icon="sap-icon://refresh"
+                                    text="{i18n>refreshButton}"
+                                    press=".onRefreshEmailNotifications" />
+                            </OverflowToolbar>
+                            <Table
+                                id="emailNotificationLogTable"
+                                class="flowmateTable"
+                                noDataText="{i18n>noEmailNotificationsText}"
+                                growing="true"
+                                growingThreshold="25"
+                                growingScrollToLoad="true"
+                                items="{
+                                    path: '/ProcessEmailMessages',
+                                    sorter: { path: 'queuedAt', descending: true },
+                                    parameters: { expand: 'request' },
+                                    events: {
+                                        dataRequested: '.onDataRequested',
+                                        dataReceived: '.onDataReceived'
+                                    }
+                                }">
+                                <columns>
+                                    <Column width="9rem"><Text text="{i18n>referenceNumberLabel}" wrapping="true" /></Column>
+                                    <Column width="12rem"><Text text="{i18n>requestLabel}" wrapping="true" /></Column>
+                                    <Column width="18rem"><Text text="{i18n>emailToLabel}" wrapping="true" /></Column>
+                                    <Column width="17rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>emailSubjectLabel}" wrapping="true" /></Column>
+                                    <Column width="8rem"><Text text="{i18n>statusLabel}" wrapping="true" /></Column>
+                                    <Column width="11rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>emailInterfaceLabel}" wrapping="true" /></Column>
+                                    <Column width="12rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>queuedAtLabel}" wrapping="true" /></Column>
+                                    <Column width="12rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>sentAtLabel}" wrapping="true" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>emailErrorDetailsLabel}" wrapping="true" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem vAlign="Middle">
+                                        <cells>
+                                            <Text text="{referenceNumber}" />
+                                            <ObjectIdentifier title="{request/referenceNumber}" text="{request_ID}" />
+                                            <Link text="{toRecipients}" href="{= ${toRecipients} ? 'mailto:' + ${toRecipients} : '' }" wrapping="true" />
+                                            <Text text="{subject}" wrapping="true" />
+                                            <ObjectStatus
+                                                text="{status}"
+                                                state="{= ${status} === 'SENT' ? 'Success' : ${status} === 'FAILED' ? 'Error' : 'Information' }" />
+                                            <Text text="{interfaceSystem}" wrapping="true" />
+                                            <Text text="{path: 'queuedAt', type: 'sap.ui.model.type.DateTime', formatOptions: {style: 'medium'}}" />
+                                            <Text text="{path: 'sentAt', type: 'sap.ui.model.type.DateTime', formatOptions: {style: 'medium'}}" />
+                                            <ObjectStatus
+                                                text="{errorMessage}"
+                                                state="{= ${errorMessage} ? 'Error' : 'None' }"
+                                                tooltip="{errorMessage}" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
                     </items>
                 </IconTabBar>
             </VBox>
@@ -516,6 +581,8 @@
                     <Select selectedKey="{subTypeEdit>/processType_code}" items="{/ProcessTypes}" required="true">
                         <core:Item key="{code}" text="{name}" />
                     </Select>
+                    <Label text="{i18n>loaApprovalApplicableLabel}" />
+                    <Switch state="{subTypeEdit>/loaApprovalApplicable}" customTextOn="{i18n>yesText}" customTextOff="{i18n>noText}" />
                     <Label text="{i18n>processOwnerLabel}" />
                     <Input value="{subTypeEdit>/processOwner}" maxLength="100" />
                     <Label text="{i18n>activityDescriptionLabel}" />

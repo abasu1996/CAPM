@@ -11363,6 +11363,7 @@
                   "descr",
                   "code",
                   "processType_code",
+                  "loaApprovalApplicable",
                   "processOwner",
                   "activityDescription",
                   "sapTCode"
@@ -12940,6 +12941,7 @@
                   "descr",
                   "code",
                   "processType_code",
+                  "loaApprovalApplicable",
                   "processOwner",
                   "activityDescription",
                   "sapTCode"
@@ -13032,6 +13034,8 @@
                   "code desc",
                   "processType_code",
                   "processType_code desc",
+                  "loaApprovalApplicable",
+                  "loaApprovalApplicable desc",
                   "processOwner",
                   "processOwner desc",
                   "activityDescription",
@@ -13057,6 +13061,7 @@
                   "descr",
                   "code",
                   "processType_code",
+                  "loaApprovalApplicable",
                   "processOwner",
                   "activityDescription",
                   "sapTCode"
@@ -13183,6 +13188,7 @@
                   "descr",
                   "code",
                   "processType_code",
+                  "loaApprovalApplicable",
                   "processOwner",
                   "activityDescription",
                   "sapTCode"
@@ -65279,6 +65285,11 @@
             "maxLength": 30,
             "nullable": true
           },
+          "loaApprovalApplicable": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
           "processOwner": {
             "type": "string",
             "maxLength": 100,
@@ -65336,6 +65347,11 @@
             "maxLength": 30,
             "nullable": true
           },
+          "loaApprovalApplicable": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
           "processOwner": {
             "type": "string",
             "maxLength": 100,
@@ -65380,6 +65396,11 @@
             "type": "string",
             "maxLength": 30,
             "nullable": true
+          },
+          "loaApprovalApplicable": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
           },
           "processOwner": {
             "type": "string",

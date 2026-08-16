@@ -10,8 +10,6 @@ sap.ui.define([
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
     const MAX_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
-    const PAYMENT_PROCESS_TYPE_CODES = new Set(["PAYMENT_REQUEST", "FTK", "PO", "NON_PO", "DIRECT", "BANK_GUARANTEE"]);
-
     return BaseController.extend("flowmate.controller.RequestCreate", {
         onInit() {
             this.getRouter().getRoute("RouteRequestCreate").attachPatternMatched(this.onRouteMatched, this);
@@ -35,6 +33,7 @@ sap.ui.define([
                 subProcessType_code: "",
                 subProcessTypeName: "",
                 hasSubProcessTypes: false,
+                loaApprovalApplicable: false,
                 isPaymentRequest: false,
                 amount: null,
                 role: "",
@@ -81,7 +80,7 @@ sap.ui.define([
                 return;
             }
 
-            if (oPayload.isPaymentRequest && (
+            if (oPayload.loaApprovalApplicable && (
                 oPayload.amount === ""
                 || oPayload.amount === null
                 || oPayload.amount === undefined
@@ -118,8 +117,8 @@ sap.ui.define([
                     processorTeamName: oPayload.processorTeamName,
                     predecessor_ID: oPayload.predecessor_ID || undefined,
                     department: oPayload.department,
-                    amount: oPayload.isPaymentRequest ? Number(oPayload.amount) : undefined,
-                    role: oPayload.isPaymentRequest ? oPayload.role : undefined,
+                    amount: oPayload.loaApprovalApplicable ? Number(oPayload.amount) : undefined,
+                    role: oPayload.loaApprovalApplicable ? oPayload.role : undefined,
                     priorityConfig_code: oPayload.priorityConfig_code || "MEDIUM",
                     ...(oPayload.isFtkFactoring ? {
                         paymentCategory_code: oPayload.paymentCategory_code || undefined,
@@ -370,6 +369,10 @@ sap.ui.define([
             const oCreateModel = this.getView().getModel("create");
 
             oCreateModel.setProperty("/subProcessType_code", "");
+            oCreateModel.setProperty("/loaApprovalApplicable", false);
+            oCreateModel.setProperty("/isPaymentRequest", false);
+            oCreateModel.setProperty("/amount", null);
+            oCreateModel.setProperty("/role", "");
             this._setFtkFactoringMode(false);
         },
 
@@ -548,6 +551,14 @@ sap.ui.define([
 
             oCreateModel.setProperty("/subProcessType_code", sCode);
             oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
+            const bLoaApplicable = Boolean(oContext.getProperty("loaApprovalApplicable"));
+            oCreateModel.setProperty("/loaApprovalApplicable", bLoaApplicable);
+            oCreateModel.setProperty("/isPaymentRequest", bLoaApplicable);
+
+            if (!bLoaApplicable) {
+                oCreateModel.setProperty("/amount", null);
+                oCreateModel.setProperty("/role", "");
+            }
             this._setFtkFactoringMode(this._isFtkFactoringSubtype(sCode));
             oCreateModel.setProperty("/isFtkPoValidation", sCode === "FTK_FACTORING_PO_VALIDATION");
         },
@@ -580,6 +591,12 @@ sap.ui.define([
 
         async onAmountChange(oEvent) {
             const oCreateModel = this.getView().getModel("create");
+
+            if (!oCreateModel.getProperty("/loaApprovalApplicable")) {
+                oCreateModel.setProperty("/role", "");
+                return;
+            }
+
             const sValue = oEvent.getParameter("value");
             const fAmount = Number(sValue);
 
@@ -651,13 +668,10 @@ sap.ui.define([
             oCreateModel.setProperty("/subProcessType_code", "");
             oCreateModel.setProperty("/subProcessTypeName", "");
             this._setFtkFactoringMode(false);
-            const bIsPaymentRequest = PAYMENT_PROCESS_TYPE_CODES.has(oCreateModel.getProperty("/processType_code"));
-            oCreateModel.setProperty("/isPaymentRequest", bIsPaymentRequest);
-
-            if (!bIsPaymentRequest) {
-                oCreateModel.setProperty("/amount", null);
-                oCreateModel.setProperty("/role", "");
-            }
+            oCreateModel.setProperty("/loaApprovalApplicable", false);
+            oCreateModel.setProperty("/isPaymentRequest", false);
+            oCreateModel.setProperty("/amount", null);
+            oCreateModel.setProperty("/role", "");
 
             const aSubTypes = await this._readList("/ProcessSubTypes", {
                 filters: [new Filter("processType_code", FilterOperator.EQ, oCreateModel.getProperty("/processType_code"))],
@@ -687,7 +701,9 @@ sap.ui.define([
                     oPredecessor.title
                 ].filter(Boolean).join(" - "));
                 oCreateModel.setProperty("/processType_code", oPredecessor.processType_code || "");
-                oCreateModel.setProperty("/isPaymentRequest", PAYMENT_PROCESS_TYPE_CODES.has(oPredecessor.processType_code));
+                const bLoaApplicable = Boolean(oPredecessor.subProcessType?.loaApprovalApplicable);
+                oCreateModel.setProperty("/loaApprovalApplicable", bLoaApplicable);
+                oCreateModel.setProperty("/isPaymentRequest", bLoaApplicable);
                 oCreateModel.setProperty("/amount", oPredecessor.amount ?? null);
                 oCreateModel.setProperty("/role", oPredecessor.role || "");
                 oCreateModel.setProperty("/processTypeName", oPredecessor.processType?.name || oPredecessor.processType_code || "");

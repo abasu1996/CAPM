@@ -38,6 +38,7 @@ entity TaskStatus : CodeList {
 entity ProcessSubTypes : CodeList {
     key code : String(30);
     processType : Association to ProcessTypes;
+    loaApprovalApplicable : Boolean default false;
     processOwner : String(100);
     activityDescription : String(500);
     sapTCode : String(100);

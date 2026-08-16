@@ -109,6 +109,21 @@ sap.ui.define([
             ]);
         },
 
+        onSearchEmailNotifications(oEvent) {
+            this._filterTable(oEvent, "emailNotificationLogTable", [
+                "referenceNumber",
+                "toRecipients",
+                "subject",
+                "status",
+                "interfaceSystem",
+                "errorMessage"
+            ]);
+        },
+
+        onRefreshEmailNotifications() {
+            this._refreshTable("emailNotificationLogTable");
+        },
+
         onAddLoaApproval() {
             const oEntry = this._emptyLoaApproval();
 
@@ -524,6 +539,7 @@ sap.ui.define([
                 name: oEntry.name,
                 descr: oEntry.descr,
                 processType_code: oEntry.processType_code,
+                loaApprovalApplicable: Boolean(oEntry.loaApprovalApplicable),
                 processOwner: oEntry.processOwner,
                 activityDescription: oEntry.activityDescription,
                 sapTCode: oEntry.sapTCode
@@ -587,6 +603,7 @@ sap.ui.define([
                 name: "",
                 descr: "",
                 processType_code: "",
+                loaApprovalApplicable: false,
                 processOwner: "",
                 activityDescription: "",
                 sapTCode: ""

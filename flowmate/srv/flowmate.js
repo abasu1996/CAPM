@@ -1,4 +1,5 @@
 const cds = require("@sap/cds");
+const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 const PDFDocument = require("pdfkit");
 const SVGtoPDF = require("svg-to-pdfkit");
 
@@ -29,6 +30,10 @@ const FTK_FACTORING_SUBTYPES = new Set([
   "FTK_FACTORING_PENDING_UAC"
 ]);
 const DEFAULT_CONFIG_CACHE_TTL_MS = 60 * 1000;
+const BPA_USER_DESTINATION = "bpa_workflow";
+const BPA_TECHNICAL_DESTINATION = "bpa_workflow_technical";
+const BPA_WORKFLOW_PATH = "/workflow/rest/v1/workflow-instances";
+const BPA_EMAIL_DEFINITION_ID = "ap11.arize-qas-9339ozek.emailprocess.emailProcess";
 
 module.exports = class FlowmateService extends cds.ApplicationService {
   async init() {
@@ -244,6 +249,21 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       this.after(["CREATE", "UPDATE", "DELETE"], oCodeList, () => this._clearConfigCache());
     });
 
+    this.before(["CREATE", "UPDATE", "DELETE"], ProcessSubTypes, (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain process subtypes");
+      }
+
+      if (req.event === "CREATE" && (!req.data.code || !req.data.name || !req.data.processType_code)) {
+        return req.reject(400, "Subtype code, name, and process type are required");
+      }
+
+      if (Object.prototype.hasOwnProperty.call(req.data, "loaApprovalApplicable")) {
+        req.data.loaApprovalApplicable = Boolean(req.data.loaApprovalApplicable);
+      }
+    });
+    this.after(["CREATE", "UPDATE", "DELETE"], ProcessSubTypes, () => this._clearConfigCache());
+
     this.before(["CREATE", "UPDATE", "DELETE"], ServiceVendors, (req) => {
       if (!this._canProvisionVendors(req)) {
         return req.reject(403, "Vendor administration or vendor provisioning authority is required");
@@ -429,6 +449,51 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     });
 
+    this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
+      const sRequestId = this._requestIdFromReq(req);
+      const oExisting = req.event === "UPDATE" && sRequestId
+        ? await cds.tx(req).run(
+          SELECT.one.from(ProcessRequests)
+            .columns("subProcessType_code", "amount")
+            .where({ ID: sRequestId })
+        )
+        : null;
+      const sSubProcessTypeCode = Object.prototype.hasOwnProperty.call(req.data, "subProcessType_code")
+        ? req.data.subProcessType_code
+        : oExisting?.subProcessType_code;
+      const oSubProcessType = sSubProcessTypeCode
+        ? await cds.tx(req).run(
+          SELECT.one.from(ProcessSubTypes)
+            .columns("loaApprovalApplicable")
+            .where({ code: sSubProcessTypeCode })
+        )
+        : null;
+
+      if (!oSubProcessType?.loaApprovalApplicable) {
+        req.data.amount = null;
+        req.data.role = null;
+        return;
+      }
+
+      const vAmount = Object.prototype.hasOwnProperty.call(req.data, "amount")
+        ? req.data.amount
+        : oExisting?.amount;
+      const fAmount = Number(vAmount);
+
+      if (vAmount === null || vAmount === undefined || vAmount === "" || !Number.isFinite(fAmount)) {
+        return req.reject(400, "Amount is required when LoA approval is applicable");
+      }
+
+      const sRoleCode = await this._resolveLoaRole(req, LoaApproval, fAmount);
+
+      if (!sRoleCode) {
+        return req.reject(400, `No LoA approval rule is configured for amount ${fAmount}`);
+      }
+
+      req.data.amount = fAmount;
+      req.data.role = sRoleCode;
+    });
+
     this.before("CREATE", ProcessRequests, async (req) => {
       if (req.data.subProcessType_code === "FTK_FACTORING_PO_VALIDATION") {
         const aMissingFields = [
@@ -522,6 +587,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.after("CREATE", ProcessRequests, async (request, req) => {
+      if (request.processorTeam_ID) {
+        await this._notifyTeamAssignment(req, {
+          assignmentType: "PROCESS",
+          request,
+          teamId: request.processorTeam_ID,
+          teamName: request.processorTeamName
+        });
+      }
       await this._ensureInitialGuidedTask(req, request.ID, request, { updateRequest: true });
     });
 
@@ -643,6 +716,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     this.after("CREATE", ProcessTasks, async (task, req) => {
       if (task.processorTeam_ID) {
         await this._syncTaskTeamMembersFromTeam(req, task.ID, task.processorTeam_ID, ProcessTaskTeamMembers, TeamMembers);
+        await this._notifyTeamAssignment(req, {
+          assignmentType: "TASK",
+          task,
+          teamId: task.processorTeam_ID,
+          teamName: task.processorTeamName
+        });
       }
     });
 
@@ -1313,6 +1392,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         remarks: `Request team assigned: ${oTeam.name}`
       });
 
+      if (request.processorTeam_ID !== teamId) {
+        await this._notifyTeamAssignment(req, {
+          assignmentType: "PROCESS",
+          request: { ...request, ...oPayload },
+          teamId,
+          teamName: oTeam.name
+        });
+      }
+
       return true;
     });
 
@@ -1410,6 +1498,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         newStatus: task.status_code,
         remarks: `Task team assigned: ${oTeam.name}`
       });
+
+      if (task.processorTeam_ID !== teamId) {
+        await this._notifyTeamAssignment(req, {
+          assignmentType: "TASK",
+          task: { ...task, ...oPayload },
+          teamId,
+          teamName: oTeam.name
+        });
+      }
 
       return true;
     });
@@ -3134,6 +3231,46 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return aSteps;
   }
 
+  async _resolveLoaRole(req, LoaApproval, amount) {
+    const aRules = await cds.tx(req).run(
+      SELECT.from(LoaApproval).columns("amount", "operator_code", "roleCode")
+    );
+    let oWinner = null;
+
+    for (const oRule of aRules) {
+      const fThreshold = Number(oRule.amount);
+
+      if (!Number.isFinite(fThreshold) || !this._evaluateLoaOperator(amount, oRule.operator_code, fThreshold)) {
+        continue;
+      }
+
+      if (!oWinner) {
+        oWinner = oRule;
+        continue;
+      }
+
+      const bPrefersHigher = oRule.operator_code === ">" || oRule.operator_code === ">=";
+      const fWinnerThreshold = Number(oWinner.amount);
+
+      if ((bPrefersHigher && fThreshold > fWinnerThreshold) || (!bPrefersHigher && fThreshold < fWinnerThreshold)) {
+        oWinner = oRule;
+      }
+    }
+
+    return oWinner?.roleCode || "";
+  }
+
+  _evaluateLoaOperator(amount, operator, threshold) {
+    return {
+      "=": amount === threshold,
+      "!=": amount !== threshold,
+      "<": amount < threshold,
+      "<=": amount <= threshold,
+      ">": amount > threshold,
+      ">=": amount >= threshold
+    }[operator] || false;
+  }
+
   _getInitialGuidedStep(steps) {
     if (!steps.length) {
       return null;
@@ -3492,6 +3629,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     if (oTaskOwnership.processorTeam_ID) {
       await this._syncTaskTeamMembersFromTeam(req, sTaskId, oTaskOwnership.processorTeam_ID);
+      await this._notifyTeamAssignment(req, {
+        assignmentType: "TASK",
+        request,
+        task: {
+          ID: sTaskId,
+          referenceNumber: sReferenceNumber,
+          request_ID: requestId,
+          taskName: step.stepName,
+          processorTeam_ID: oTaskOwnership.processorTeam_ID,
+          processorTeamName: oTaskOwnership.processorTeamName
+        },
+        teamId: oTaskOwnership.processorTeam_ID,
+        teamName: oTaskOwnership.processorTeamName
+      });
     }
   }
 
@@ -3577,6 +3728,172 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         isTeamTask: Boolean(ownership.processorTeam_ID)
       })
     );
+  }
+
+  async _notifyTeamAssignment(req, assignment) {
+    const oLog = cds.log("team-notifications");
+
+    try {
+      const oRequest = assignment.request || await this._getRequest(
+        req,
+        assignment.task?.request_ID
+      );
+      const aMembers = await this.master.run(
+        SELECT.from(this.masterEntities.TeamMembers).where({
+          team_ID: assignment.teamId,
+          isActive: true
+        })
+      );
+      const aRecipients = [];
+
+      for (const oMember of aMembers) {
+        const sMemberEmail = String(oMember.email || "").trim().toLowerCase();
+
+        if (!sMemberEmail) {
+          continue;
+        }
+
+        const oResolved = await this._resolveDelegatedRecipient(
+          req,
+          sMemberEmail,
+          this.masterEntities.Delegations
+        );
+        const sRecipient = String(oResolved.recipient || "").trim().toLowerCase();
+
+        if (sRecipient && !aRecipients.some((oRecipient) => oRecipient.email === sRecipient)) {
+          aRecipients.push({
+            email: sRecipient,
+            displayName: oMember.displayName || sRecipient
+          });
+        }
+      }
+
+      if (!aRecipients.length) {
+        oLog.warn(`No active team-member email is maintained for team ${assignment.teamId}`);
+        return;
+      }
+
+      for (const oRecipient of aRecipients) {
+        try {
+          await this._startBpaEmailWorkflow(req, {
+            assignment,
+            request: oRequest,
+            recipient: oRecipient
+          });
+        } catch (error) {
+          oLog.error(`Team-assignment notification failed for ${oRecipient.email}`, error);
+        }
+      }
+    } catch (error) {
+      // Assignment remains successful if the external notification endpoint is unavailable.
+      oLog.error("Team-assignment notification failed", error);
+    }
+  }
+
+  async _startBpaEmailWorkflow(req, notification) {
+    const { assignment, request, recipient } = notification;
+    const sRequestId = request?.ID || assignment.task?.request_ID || null;
+    const sSubject = assignment.assignmentType === "TASK"
+      ? `Flowmate task assigned to ${assignment.teamName || "your team"}`
+      : `Flowmate process assigned to ${assignment.teamName || "your team"}`;
+    const sJwt = this._requestJwt(req);
+    const bUseUserDestination = this._hasBusinessUserJwt(req, sJwt);
+    const sDestinationName = bUseUserDestination
+      ? BPA_USER_DESTINATION
+      : BPA_TECHNICAL_DESTINATION;
+    const oPayload = {
+      definitionId: BPA_EMAIL_DEFINITION_ID,
+      context: {
+        requesterName: request?.requester || "",
+        requestID: request?.referenceNumber || sRequestId || "",
+        department: request?.department || "",
+        displayName: recipient.displayName,
+        uRL: this._assignmentUrl(req, sRequestId, assignment.task?.ID),
+        amount: Number(request?.amount || 0),
+        email: recipient.email
+      }
+    };
+
+    try {
+      await executeHttpRequest(
+        {
+          destinationName: sDestinationName,
+          ...(bUseUserDestination ? { jwt: sJwt } : {})
+        },
+        {
+          method: "POST",
+          url: BPA_WORKFLOW_PATH,
+          data: oPayload,
+          headers: { "content-type": "application/json" }
+        }
+      );
+      await this._recordTeamNotification(req, {
+        requestId: sRequestId,
+        recipient: recipient.email,
+        subject: sSubject,
+        status: "SENT"
+      });
+    } catch (error) {
+      await this._recordTeamNotification(req, {
+        requestId: sRequestId,
+        recipient: recipient.email,
+        subject: sSubject,
+        status: "FAILED",
+        errorMessage: error.message
+      });
+      throw error;
+    }
+  }
+
+  async _recordTeamNotification(req, notification) {
+    if (!notification.requestId) {
+      return;
+    }
+
+    await cds.tx(req).run(
+      INSERT.into(this.entities.ProcessEmailMessages).entries({
+        ID: cds.utils.uuid(),
+        referenceNumber: await this._nextReferenceNumber(req, this.entities.ProcessEmailMessages, "EML"),
+        request_ID: notification.requestId,
+        toRecipients: notification.recipient,
+        subject: notification.subject,
+        body: notification.subject,
+        status: notification.status,
+        interfaceSystem: "BPA_EMAIL_WORKFLOW",
+        queuedAt: this._now(),
+        sentAt: notification.status === "SENT" ? this._now() : null,
+        errorMessage: notification.errorMessage || null
+      })
+    );
+  }
+
+  _requestJwt(req) {
+    const sAuthorization = req?.headers?.authorization || "";
+    const sBearerToken = /^Bearer\s+(.+)$/i.exec(sAuthorization)?.[1];
+
+    return req?.user?.authInfo?.token?.jwt || sBearerToken || undefined;
+  }
+
+  _hasBusinessUserJwt(req, jwt) {
+    if (!jwt) {
+      return false;
+    }
+
+    const sGrantType = req?.user?.authInfo?.getGrantType?.()
+      || req?.user?.authInfo?.token?.grantType
+      || "";
+
+    return String(sGrantType).toLowerCase() !== "client_credentials";
+  }
+
+  _assignmentUrl(req, requestId, taskId) {
+    const sConfiguredUrl = String(process.env.FLOWMATE_APP_URL || "").replace(/\/$/, "");
+    const sForwardedHost = req?.headers?.["x-forwarded-host"];
+    const sProtocol = req?.headers?.["x-forwarded-proto"] || "https";
+    const sOrigin = sConfiguredUrl || req?.headers?.origin || (sForwardedHost ? `${sProtocol}://${sForwardedHost}` : "");
+    const sRoute = taskId ? `tasks/${taskId}` : `requests/${requestId}`;
+
+    return sOrigin ? `${sOrigin}/index.html#/${sRoute}` : `#/${sRoute}`;
   }
 
   async _writeHistory(req, entry) {
