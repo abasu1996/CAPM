@@ -104,7 +104,8 @@
                             width="12rem"
                             enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                             selectedKey="{statusEdit>/taskStatus}"
-                            items="{/TaskStatus}">
+                            items="{/TaskStatus}"
+                            forceSelection="false">
                             <core:Item key="{code}" text="{name}" />
                         </Select>
                     </VBox>

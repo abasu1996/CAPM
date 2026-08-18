@@ -149,7 +149,7 @@
             id="userDialog"
             title="{= ${userAdmin>/isEdit} ? ${i18n>editUserButton} : ${i18n>addUserButton} }"
             contentWidth="42rem"
-            stretchOnPhone="true">
+            >
             <content>
                 <form:SimpleForm
                     class="flowmateDialogContent"

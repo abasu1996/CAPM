@@ -642,7 +642,7 @@
                     <Label text="{i18n>configDescriptionLabel}" />
                     <Input value="{subTypeEdit>/descr}" maxLength="1000" />
                     <Label text="{i18n>processTypeLabel}" required="true" />
-                    <Select selectedKey="{subTypeEdit>/processType_code}" items="{/ProcessTypes}" required="true">
+                    <Select selectedKey="{subTypeEdit>/processType_code}" items="{/ProcessTypes}" required="true" forceSelection="false" >
                         <core:Item key="{code}" text="{name}" />
                     </Select>
                     <Label text="{i18n>workingCalendarLabel}" />
@@ -705,7 +705,7 @@
             <content>
                 <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
                     <Label text="{i18n>workingCalendarLabel}" required="true" />
-                    <Select selectedKey="{holidayEdit>/calendar_ID}" items="{/WorkingCalendars}" required="true">
+                    <Select selectedKey="{holidayEdit>/calendar_ID}" items="{/WorkingCalendars}" required="true" forceSelection="false">
                         <core:Item key="{ID}" text="{name}" additionalText="{code}" />
                     </Select>
                     <Label text="{i18n>holidayDateLabel}" required="true" />
@@ -731,7 +731,7 @@
             <content>
                 <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
                     <Label text="{i18n>subProcessTypeLabel}" required="true" />
-                    <Select selectedKey="{stepEdit>/subProcessType_code}" items="{/ProcessSubTypes}" required="true">
+                    <Select selectedKey="{stepEdit>/subProcessType_code}" items="{/ProcessSubTypes}" required="true" forceSelection="false">
                         <core:Item key="{code}" text="{name}" />
                     </Select>
                     <Label text="{i18n>stepLabel}" required="true" />

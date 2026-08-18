@@ -229,6 +229,54 @@ entity ProcessTasks : cuid, managed {
                     on teamMembers.task = $self;
 }
 
+/**
+ * Reporting source for request-level SLA analytics. Keeping the normalization
+ * in a CDS view lets HANA apply reporting-period filters and aggregations
+ * without loading the transactional request table into the application tier.
+ */
+@readonly
+view OverallSlaReport as select from ProcessRequests as request {
+    key request.ID                              as ID,
+        request.createdAt                       as reportingDate,
+        request.requesterUser.ID                as requesterUserId,
+        request.processType.code                as mainFlowCode,
+        request.processType.name                as mainFlowName,
+        request.subProcessType.code             as subFlowCode,
+        request.subProcessType.name             as subFlowName,
+        request.referenceNumber                 as requestReference,
+        request.amount                          as amount,
+        request.status.code                     as statusCode,
+        request.slaStartedAt                    as slaStartedAt,
+        request.slaDueAt                        as slaDueAt,
+        request.completedAt                     as completedAt,
+        case
+            when request.slaDueAt is null then 'NOT_APPLICABLE'
+            when request.completedAt is not null and request.completedAt <= request.slaDueAt then 'WITHIN_SLA'
+            when request.completedAt is not null and request.completedAt > request.slaDueAt then 'SLA_EXCEEDED'
+            when request.completedAt is null and $now <= request.slaDueAt then 'WITHIN_SLA'
+            else 'SLA_EXCEEDED'
+        end                                      as slaResult : String(20)
+};
+
+/** Completed-request source for average calendar-day processing analytics. */
+@readonly
+view AverageProcessingDaysReport as select from ProcessRequests as request {
+    key request.ID                              as ID,
+        request.completedAt                     as reportingDate,
+        request.requesterUser.ID                as requesterUserId,
+        request.processType.code                as mainFlowCode,
+        request.processType.name                as mainFlowName,
+        request.subProcessType.code             as subFlowCode,
+        request.subProcessType.name             as subFlowName,
+        request.referenceNumber                 as requestReference,
+        request.status.code                     as statusCode,
+        request.completedAt                     as completedAt,
+        cast(seconds_between(request.createdAt, request.completedAt) as Decimal(18, 4)) / 86400
+                                                   as processingDays : Decimal(18, 4)
+}
+where request.completedAt is not null
+  and request.status.code = 'COMPLETED';
+
 entity ProcessTaskTeamMembers : cuid, managed {
     referenceNumber : String(30);
     task            : Association to ProcessTasks;

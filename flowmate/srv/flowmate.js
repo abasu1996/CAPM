@@ -1902,7 +1902,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.on("exportReportDashboardPdf", async (req) => {
       const sDashboardKey = String(req.data.dashboardKey || "operational").toLowerCase();
-      const aSupportedDashboards = ["operational", "sla", "teams", "trends", "users", "audit"];
+      const aSupportedDashboards = ["overallsla", "averageprocessing", "operational", "sla", "teams", "trends", "users", "audit"];
       if (!aSupportedDashboards.includes(sDashboardKey)) {
         return req.reject(400, "Select a valid dashboard for PDF export");
       }
@@ -2170,7 +2170,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _getReportDashboard(req, filter, ProcessRequests, ProcessTasks, ProcessTypes, Users) {
-    const oCurrentUser = await this._currentReservationUser(req, Users);
+    const oCurrentUser = this._isAdministrator(req)
+      ? null
+      : await this._currentReservationUser(req, Users);
     const oRange = this._reportDateRange(req, filter.fromDate, filter.toDate);
     const qScopedRequests = SELECT.from(ProcessRequests).columns("ID");
     const fnApplyRequestFilters = (query) => {
@@ -2184,6 +2186,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
       if (filter.processTypeCode) {
         query.where({ processType_code: filter.processTypeCode });
+      }
+      if (filter.subProcessTypeCode) {
+        query.where({ subProcessType_code: filter.subProcessTypeCode });
       }
       if (filter.statusCode) {
         query.where({ status_code: filter.statusCode });
@@ -2281,6 +2286,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       .map(([sKey, iCount]) => ({ code: sKey, label: fnLabel(sKey), count: iCount }))
       .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 
+    const oOverallSla = await this._getOverallSlaMetrics(req, filter, oRange, oCurrentUser);
+    const oAverageProcessing = await this._getAverageProcessingMetrics(req, filter, oRange, oCurrentUser);
+
     return {
       totalRequests: aRequests.length,
       openRequests: iOpen,
@@ -2327,12 +2335,197 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           overdueDays: iOverdueDays,
           statusCode: oTask.status_code
         };
-      }).sort((a, b) => b.overdueDays - a.overdueDays)
+      }).sort((a, b) => b.overdueDays - a.overdueDays),
+      ...oOverallSla,
+      ...oAverageProcessing
+    };
+  }
+
+  async _getOverallSlaMetrics(req, filter, oRange, oCurrentUser) {
+    const OverallSlaReport = cds.entities("flowmate.db").OverallSlaReport;
+    const qMetrics = SELECT.from(OverallSlaReport)
+      .columns(
+        "mainFlowCode", "mainFlowName", "subFlowCode", "subFlowName", "slaResult",
+        "count(ID) as volume", "sum(amount) as value"
+      )
+      .where([
+        { ref: ["reportingDate"] }, ">=", { val: oRange.fromDateTime },
+        "and",
+        { ref: ["reportingDate"] }, "<=", { val: oRange.toDateTime }
+      ])
+      .groupBy("mainFlowCode", "mainFlowName", "subFlowCode", "subFlowName", "slaResult");
+
+    if (!this._isAdministrator(req)) {
+      qMetrics.where({ requesterUserId: oCurrentUser.user.ID });
+    }
+    if (filter.processTypeCode) {
+      qMetrics.where({ mainFlowCode: filter.processTypeCode });
+    }
+    if (filter.subProcessTypeCode) {
+      qMetrics.where({ subFlowCode: filter.subProcessTypeCode });
+    }
+    if (filter.statusCode) {
+      qMetrics.where({ statusCode: filter.statusCode });
+    }
+
+    const aRows = await cds.tx(req).run(qMetrics);
+    const fnAccumulator = (mainFlowCode = null, mainFlowName = null, subFlowCode = null, subFlowName = null) => ({
+      mainFlowCode,
+      mainFlowName: mainFlowName || this._reportLabel(mainFlowCode),
+      subFlowCode,
+      subFlowName: subFlowCode ? (subFlowName || this._reportLabel(subFlowCode)) : null,
+      volume: 0,
+      value: 0,
+      withinSlaVolume: 0,
+      withinSlaValue: 0,
+      exceededSlaVolume: 0,
+      exceededSlaValue: 0
+    });
+    const oOverall = fnAccumulator();
+    const mMainFlows = new Map();
+    const mSubFlows = new Map();
+    const fnAdd = (oTarget, sResult, iVolume, fValue) => {
+      oTarget.volume += iVolume;
+      oTarget.value += fValue;
+      if (sResult === "WITHIN_SLA") {
+        oTarget.withinSlaVolume += iVolume;
+        oTarget.withinSlaValue += fValue;
+      } else if (sResult === "SLA_EXCEEDED") {
+        oTarget.exceededSlaVolume += iVolume;
+        oTarget.exceededSlaValue += fValue;
+      }
+    };
+
+    aRows.forEach((oRow) => {
+      const sMainCode = oRow.mainFlowCode || "UNSPECIFIED";
+      const sSubCode = oRow.subFlowCode || "UNSPECIFIED";
+      const sMainKey = sMainCode;
+      const sSubKey = `${sMainCode}\u0000${sSubCode}`;
+      const iVolume = Number(oRow.volume || oRow.VOLUME || 0);
+      const fValue = Number(oRow.value || oRow.VALUE || 0);
+      const sResult = oRow.slaResult;
+      if (!mMainFlows.has(sMainKey)) {
+        mMainFlows.set(sMainKey, fnAccumulator(sMainCode, oRow.mainFlowName));
+      }
+      if (!mSubFlows.has(sSubKey)) {
+        mSubFlows.set(sSubKey, fnAccumulator(sMainCode, oRow.mainFlowName, sSubCode, oRow.subFlowName));
+      }
+      fnAdd(oOverall, sResult, iVolume, fValue);
+      fnAdd(mMainFlows.get(sMainKey), sResult, iVolume, fValue);
+      fnAdd(mSubFlows.get(sSubKey), sResult, iVolume, fValue);
+    });
+
+    const fnFinalize = (oMetric) => ({
+      ...oMetric,
+      value: Number(oMetric.value.toFixed(2)),
+      withinSlaValue: Number(oMetric.withinSlaValue.toFixed(2)),
+      exceededSlaValue: Number(oMetric.exceededSlaValue.toFixed(2)),
+      withinSlaPercent: oMetric.volume ? Number(((oMetric.withinSlaVolume / oMetric.volume) * 100).toFixed(2)) : 0,
+      exceededSlaPercent: oMetric.volume ? Number(((oMetric.exceededSlaVolume / oMetric.volume) * 100).toFixed(2)) : 0
+    });
+    const oTotals = fnFinalize(oOverall);
+    const fnSort = (a, b) => b.volume - a.volume || a.mainFlowName.localeCompare(b.mainFlowName)
+      || String(a.subFlowName || "").localeCompare(String(b.subFlowName || ""));
+
+    return {
+      overallSlaVolume: oTotals.volume,
+      overallSlaValue: oTotals.value,
+      overallWithinVolume: oTotals.withinSlaVolume,
+      overallWithinValue: oTotals.withinSlaValue,
+      overallWithinPercent: oTotals.withinSlaPercent,
+      overallExceededVolume: oTotals.exceededSlaVolume,
+      overallExceededValue: oTotals.exceededSlaValue,
+      overallExceededPercent: oTotals.exceededSlaPercent,
+      mainFlowSlaMetrics: [...mMainFlows.values()].map(fnFinalize).sort(fnSort),
+      subFlowSlaMetrics: [...mSubFlows.values()].map(fnFinalize).sort(fnSort)
+    };
+  }
+
+  async _getAverageProcessingMetrics(req, filter, oRange, oCurrentUser) {
+    const AverageProcessingDaysReport = cds.entities("flowmate.db").AverageProcessingDaysReport;
+    const qMetrics = SELECT.from(AverageProcessingDaysReport)
+      .columns(
+        "mainFlowCode", "mainFlowName", "subFlowCode", "subFlowName",
+        "count(ID) as completedVolume", "sum(processingDays) as totalProcessingDays"
+      )
+      .where([
+        { ref: ["reportingDate"] }, ">=", { val: oRange.fromDateTime },
+        "and",
+        { ref: ["reportingDate"] }, "<=", { val: oRange.toDateTime }
+      ])
+      .groupBy("mainFlowCode", "mainFlowName", "subFlowCode", "subFlowName");
+
+    if (!this._isAdministrator(req)) {
+      qMetrics.where({ requesterUserId: oCurrentUser.user.ID });
+    }
+    if (filter.processTypeCode) {
+      qMetrics.where({ mainFlowCode: filter.processTypeCode });
+    }
+    if (filter.subProcessTypeCode) {
+      qMetrics.where({ subFlowCode: filter.subProcessTypeCode });
+    }
+    const aRows = await cds.tx(req).run(qMetrics);
+    const fnAccumulator = (mainFlowCode = null, mainFlowName = null, subFlowCode = null, subFlowName = null) => ({
+      mainFlowCode,
+      mainFlowName: mainFlowName || this._reportLabel(mainFlowCode),
+      subFlowCode,
+      subFlowName: subFlowCode ? (subFlowName || this._reportLabel(subFlowCode)) : null,
+      completedVolume: 0,
+      totalProcessingDays: 0
+    });
+    const oOverall = fnAccumulator();
+    const mMainFlows = new Map();
+    const mSubFlows = new Map();
+    const fnAdd = (oTarget, iVolume, fDays) => {
+      oTarget.completedVolume += iVolume;
+      oTarget.totalProcessingDays += fDays;
+    };
+
+    aRows.forEach((oRow) => {
+      const sMainCode = oRow.mainFlowCode || "UNSPECIFIED";
+      const sSubCode = oRow.subFlowCode || "UNSPECIFIED";
+      const sSubKey = `${sMainCode}\u0000${sSubCode}`;
+      const iVolume = Number(oRow.completedVolume || oRow.COMPLETEDVOLUME || 0);
+      const fDays = Number(oRow.totalProcessingDays || oRow.TOTALPROCESSINGDAYS || 0);
+      if (!mMainFlows.has(sMainCode)) {
+        mMainFlows.set(sMainCode, fnAccumulator(sMainCode, oRow.mainFlowName));
+      }
+      if (!mSubFlows.has(sSubKey)) {
+        mSubFlows.set(sSubKey, fnAccumulator(sMainCode, oRow.mainFlowName, sSubCode, oRow.subFlowName));
+      }
+      fnAdd(oOverall, iVolume, fDays);
+      fnAdd(mMainFlows.get(sMainCode), iVolume, fDays);
+      fnAdd(mSubFlows.get(sSubKey), iVolume, fDays);
+    });
+
+    const fnFinalize = (oMetric) => ({
+      mainFlowCode: oMetric.mainFlowCode,
+      mainFlowName: oMetric.mainFlowName,
+      subFlowCode: oMetric.subFlowCode,
+      subFlowName: oMetric.subFlowName,
+      completedVolume: oMetric.completedVolume,
+      averageProcessingDays: oMetric.completedVolume
+        ? Number((oMetric.totalProcessingDays / oMetric.completedVolume).toFixed(2))
+        : 0
+    });
+    const fnSort = (a, b) => b.averageProcessingDays - a.averageProcessingDays
+      || a.mainFlowName.localeCompare(b.mainFlowName)
+      || String(a.subFlowName || "").localeCompare(String(b.subFlowName || ""));
+
+    return {
+      completedProcessingVolume: oOverall.completedVolume,
+      overallAverageProcessingDays: oOverall.completedVolume
+        ? Number((oOverall.totalProcessingDays / oOverall.completedVolume).toFixed(2))
+        : 0,
+      mainFlowProcessingMetrics: [...mMainFlows.values()].map(fnFinalize).sort(fnSort),
+      subFlowProcessingMetrics: [...mSubFlows.values()].map(fnFinalize).sort(fnSort)
     };
   }
 
   _validatedReportChartSnapshots(req, sDashboardKey, charts) {
     const mAllowedChartKeys = {
+      overallsla: new Set(["overallSlaVolume", "overallSlaValue"]),
+      averageprocessing: new Set(["averageProcessing"]),
       operational: new Set(["statusBreakdown", "processBreakdown"]),
       sla: new Set(),
       teams: new Set(["teamWorkload"]),
@@ -2369,6 +2562,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _renderReportDashboardPdf(sDashboardKey, oData, oRange, aCharts = []) {
     const mTitles = {
+      overallsla: "Overall SLA Dashboard",
+      averageprocessing: "Average Processing Days",
       operational: "Operational Overview",
       sla: "SLA & Aging",
       teams: "Team Workload",
@@ -2399,6 +2594,39 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         }
       };
       switch (sDashboardKey) {
+        case "overallsla":
+          this._drawPdfKpis(oDocument, [
+            ["Transaction Volume", oData.overallSlaVolume],
+            ["Transaction Value", Number(oData.overallSlaValue || 0).toFixed(2)],
+            ["Within SLA", `${oData.overallWithinPercent}%`],
+            ["SLA Exceeded", `${oData.overallExceededPercent}%`]
+          ]);
+          fnDrawChartOrFallback("overallSlaVolume", "SLA Volume by Main Flow", () =>
+            this._drawPdfSlaBars(oDocument, "SLA Volume by Main Flow", oData.mainFlowSlaMetrics, "withinSlaVolume", "exceededSlaVolume"));
+          fnDrawChartOrFallback("overallSlaValue", "SLA Value by Main Flow", () =>
+            this._drawPdfSlaBars(oDocument, "SLA Value by Main Flow", oData.mainFlowSlaMetrics, "withinSlaValue", "exceededSlaValue"));
+          this._drawPdfTable(oDocument, "SLA Performance by Sub Flow", oData.subFlowSlaMetrics, [
+            ["Main Flow", "mainFlowName", 105], ["Sub Flow", "subFlowName", 130],
+            ["Volume", "volume", 55], ["Value", "value", 75], ["Within %", "withinSlaPercent", 60],
+            ["Exceeded %", "exceededSlaPercent", 65]
+          ]);
+          break;
+        case "averageprocessing":
+          this._drawPdfKpis(oDocument, [
+            ["Average Processing Days", oData.overallAverageProcessingDays],
+            ["Completed Requests", oData.completedProcessingVolume]
+          ]);
+          fnDrawChartOrFallback("averageProcessing", "Average Processing Days by Main Flow", () =>
+            this._drawPdfBars(oDocument, "Average Processing Days by Main Flow", oData.mainFlowProcessingMetrics.map((oRow) => ({
+              code: oRow.mainFlowCode,
+              label: oRow.mainFlowName,
+              count: oRow.averageProcessingDays
+            }))));
+          this._drawPdfTable(oDocument, "Average Processing Days by Sub Flow", oData.subFlowProcessingMetrics, [
+            ["Main Flow", "mainFlowName", 180], ["Sub Flow", "subFlowName", 220],
+            ["Completed", "completedVolume", 90], ["Average Days", "averageProcessingDays", 100]
+          ]);
+          break;
         case "sla":
           this._drawPdfKpis(oDocument, [
             ["SLA Compliance", `${oData.slaCompliancePercent}%`],
@@ -2511,6 +2739,40 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     oDocument.y = iTop + 12;
   }
 
+  _drawPdfSlaBars(oDocument, sTitle, aRows = [], sWithinProperty, sExceededProperty) {
+    if (oDocument.y > 390) {
+      oDocument.addPage();
+      oDocument.y = 42;
+    }
+    oDocument.fillColor("#1e293b").font("Helvetica-Bold").fontSize(14).text(sTitle, 42, oDocument.y);
+    const aVisibleRows = aRows.slice(0, 10);
+    if (!aVisibleRows.length) {
+      oDocument.moveDown(0.6).fillColor("#64748b").font("Helvetica").fontSize(10).text("No data for the selected filters.");
+      oDocument.moveDown(1);
+      return;
+    }
+    const iMaximum = Math.max(...aVisibleRows.map((oRow) =>
+      Number(oRow[sWithinProperty] || 0) + Number(oRow[sExceededProperty] || 0)), 1);
+    let iTop = oDocument.y + 12;
+    aVisibleRows.forEach((oRow) => {
+      const fWithin = Number(oRow[sWithinProperty] || 0);
+      const fExceeded = Number(oRow[sExceededProperty] || 0);
+      const iWithinWidth = (fWithin / iMaximum) * 430;
+      const iExceededWidth = (fExceeded / iMaximum) * 430;
+      oDocument.fillColor("#334155").font("Helvetica").fontSize(9)
+        .text(String(oRow.mainFlowName || oRow.mainFlowCode), 42, iTop + 3, { width: 170, ellipsis: true });
+      oDocument.fillColor("#e2e8f0").rect(220, iTop, 430, 14).fill();
+      if (iWithinWidth > 0) oDocument.fillColor("#30914c").rect(220, iTop, iWithinWidth, 14).fill();
+      if (iExceededWidth > 0) oDocument.fillColor("#c0392b").rect(220 + iWithinWidth, iTop, iExceededWidth, 14).fill();
+      oDocument.fillColor("#334155").font("Helvetica-Bold").fontSize(8)
+        .text(`${fWithin} / ${fExceeded}`, 660, iTop + 3, { width: 70, align: "right" });
+      iTop += 22;
+    });
+    oDocument.fillColor("#30914c").font("Helvetica-Bold").fontSize(8).text("Within SLA", 220, iTop + 2);
+    oDocument.fillColor("#c0392b").text("SLA Exceeded", 290, iTop + 2);
+    oDocument.y = iTop + 22;
+  }
+
   _drawPdfTrend(oDocument, sTitle, aRows = []) {
     oDocument.fillColor("#1e293b").font("Helvetica-Bold").fontSize(14).text(sTitle, 42, oDocument.y);
     const aVisibleRows = aRows.slice(-12);
@@ -2541,6 +2803,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   _drawPdfTable(oDocument, sTitle, aRows = [], aColumns = []) {
+    if (oDocument.y > 390) {
+      oDocument.addPage();
+      oDocument.y = 42;
+    }
     oDocument.fillColor("#1e293b").font("Helvetica-Bold").fontSize(14).text(sTitle, 42, oDocument.y);
     let iTop = oDocument.y + 12;
     const fnDrawRow = (oRow, bHeader = false) => {
@@ -2564,8 +2830,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _reportDateRange(req, fromDate, toDate) {
     const oToday = new Date();
-    const oDefaultFrom = new Date(oToday);
-    oDefaultFrom.setUTCDate(oDefaultFrom.getUTCDate() - 89);
+    const oDefaultFrom = new Date(Date.UTC(oToday.getUTCFullYear(), oToday.getUTCMonth(), 1));
     const sFrom = fromDate || oDefaultFrom.toISOString().slice(0, 10);
     const sTo = toDate || oToday.toISOString().slice(0, 10);
     const oFrom = new Date(`${sFrom}T00:00:00Z`);

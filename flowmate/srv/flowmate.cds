@@ -7,6 +7,7 @@ service FlowmateService {
         fromDate        : Date;
         toDate          : Date;
         processTypeCode : String(30);
+        subProcessTypeCode : String(30);
         statusCode      : String(20);
     }
     type ReportChartSnapshot {
@@ -36,6 +37,28 @@ service FlowmateService {
         overdueDays      : Integer;
         statusCode       : String(20);
     }
+    type OverallSlaMetric {
+        mainFlowCode       : String(30);
+        mainFlowName       : String(100);
+        subFlowCode        : String(30);
+        subFlowName        : String(100);
+        volume             : Integer;
+        value              : Decimal(18, 2);
+        withinSlaVolume    : Integer;
+        withinSlaValue     : Decimal(18, 2);
+        withinSlaPercent   : Decimal(5, 2);
+        exceededSlaVolume  : Integer;
+        exceededSlaValue   : Decimal(18, 2);
+        exceededSlaPercent : Decimal(5, 2);
+    }
+    type AverageProcessingMetric {
+        mainFlowCode         : String(30);
+        mainFlowName         : String(100);
+        subFlowCode          : String(30);
+        subFlowName          : String(100);
+        completedVolume      : Integer;
+        averageProcessingDays: Decimal(12, 2);
+    }
     type ReportDashboard {
         totalRequests        : Integer;
         openRequests         : Integer;
@@ -49,6 +72,20 @@ service FlowmateService {
         userActivity         : many ReportBreakdown;
         auditActivity        : many ReportBreakdown;
         overdueTasks         : many ReportOverdueTask;
+        overallSlaVolume     : Integer;
+        overallSlaValue      : Decimal(18, 2);
+        overallWithinVolume  : Integer;
+        overallWithinValue   : Decimal(18, 2);
+        overallWithinPercent : Decimal(5, 2);
+        overallExceededVolume  : Integer;
+        overallExceededValue   : Decimal(18, 2);
+        overallExceededPercent : Decimal(5, 2);
+        mainFlowSlaMetrics    : many OverallSlaMetric;
+        subFlowSlaMetrics     : many OverallSlaMetric;
+        completedProcessingVolume : Integer;
+        overallAverageProcessingDays : Decimal(12, 2);
+        mainFlowProcessingMetrics : many AverageProcessingMetric;
+        subFlowProcessingMetrics  : many AverageProcessingMetric;
     }
     type GuidedProcessTask {
         ID          : UUID;

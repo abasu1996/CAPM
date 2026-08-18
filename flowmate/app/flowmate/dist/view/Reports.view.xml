@@ -45,9 +45,63 @@
                         </OverflowToolbar>
                         <HBox class="flowmateReportFilters" wrap="Wrap" alignItems="End">
                             <VBox class="flowmateReportFilterField"><Label text="{i18n>dateRangeLabel}" /><DateRangeSelection dateValue="{reports>/filters/fromDate}" secondDateValue="{reports>/filters/toDate}" displayFormat="medium" /></VBox>
-                            <VBox class="flowmateReportFilterField"><Label text="{i18n>processTypeLabel}" /><Select width="15rem" selectedKey="{reports>/filters/processTypeCode}" items="{/ProcessTypes}"><core:Item key="{code}" text="{name}" /></Select></VBox>
-                            <VBox class="flowmateReportFilterField"><Label text="{i18n>statusLabel}" /><Select width="13rem" selectedKey="{reports>/filters/statusCode}" items="{/ProcessStatus}"><core:Item key="{code}" text="{name}" /></Select></VBox>
+                            <VBox class="flowmateReportFilterField"><Label text="{i18n>processTypeLabel}" /><Select width="15rem" selectedKey="{reports>/filters/processTypeCode}" items="{/ProcessTypes}" forceSelection="false"><core:Item key="{code}" text="{name}" /></Select></VBox>
+                            <VBox class="flowmateReportFilterField"><Label text="{i18n>subProcessTypeLabel}" /><Select width="15rem" selectedKey="{reports>/filters/subProcessTypeCode}" items="{/ProcessSubTypes}" forceSelection="false"><core:Item key="{code}" text="{name}" /></Select></VBox>
+                            <VBox class="flowmateReportFilterField" visible="{= ${reports>/selectedDashboard} !== 'averageProcessing' }"><Label text="{i18n>statusLabel}" /><Select width="13rem" selectedKey="{reports>/filters/statusCode}" items="{/ProcessStatus}" forceSelection="false"><core:Item key="{code}" text="{name}" /></Select></VBox>
                         </HBox>
+                    </VBox>
+
+                    <VBox visible="{= ${reports>/selectedDashboard} === 'overallSla' }">
+                        <HBox class="flowmateReportKpis" wrap="Wrap" renderType="Bare">
+                            <GenericTile class="flowmateReportKpi" header="{i18n>transactionVolumeKpi}" subheader="{i18n>selectedPeriodLabel}"><TileContent><NumericContent icon="sap-icon://request" value="{reports>/overallSlaVolume}" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>transactionValueKpi}" subheader="{i18n>selectedPeriodLabel}"><TileContent><NumericContent icon="sap-icon://money-bills" value="{reports>/overallSlaValue}" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>withinSlaKpi}" subheader="{= ${reports>/overallWithinVolume} + ' requests' }"><TileContent><NumericContent icon="sap-icon://accept" value="{reports>/overallWithinPercent}" scale="%" valueColor="Good" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>slaExceededKpi}" subheader="{= ${reports>/overallExceededVolume} + ' requests' }"><TileContent><NumericContent icon="sap-icon://lateness" value="{reports>/overallExceededPercent}" scale="%" valueColor="Error" /></TileContent></GenericTile>
+                        </HBox>
+                        <HBox class="flowmateReportChartRow" wrap="Wrap" renderType="Bare">
+                            <VBox class="flowmateSurface flowmateReportChartCard">
+                                <Title class="flowmateReportCardTitle" text="{i18n>overallSlaVolumeChartTitle}" />
+                                <viz:VizFrame id="overallSlaVolumeChart" height="22rem" width="100%" vizType="stacked_column">
+                                    <viz:dataset><viz.data:FlattenedDataset data="{reports>/mainFlowSlaMetrics}"><viz.data:dimensions><viz.data:DimensionDefinition name="Main Flow" value="{reports>mainFlowName}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Within SLA" value="{reports>withinSlaVolume}" /><viz.data:MeasureDefinition name="SLA Exceeded" value="{reports>exceededSlaVolume}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset>
+                                    <viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Within SLA,SLA Exceeded" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Main Flow" /></viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            <VBox class="flowmateSurface flowmateReportChartCard">
+                                <Title class="flowmateReportCardTitle" text="{i18n>overallSlaValueChartTitle}" />
+                                <viz:VizFrame id="overallSlaValueChart" height="22rem" width="100%" vizType="stacked_column">
+                                    <viz:dataset><viz.data:FlattenedDataset data="{reports>/mainFlowSlaMetrics}"><viz.data:dimensions><viz.data:DimensionDefinition name="Main Flow" value="{reports>mainFlowName}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Within SLA Value" value="{reports>withinSlaValue}" /><viz.data:MeasureDefinition name="SLA Exceeded Value" value="{reports>exceededSlaValue}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset>
+                                    <viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Within SLA Value,SLA Exceeded Value" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Main Flow" /></viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                        </HBox>
+                        <VBox class="flowmateSurface flowmateReportTableCard">
+                            <OverflowToolbar class="flowmateToolbar"><Title text="{i18n>subFlowSlaTableTitle}" /></OverflowToolbar>
+                            <Table class="flowmateTable" noDataText="{i18n>noSlaReportDataText}" items="{reports>/subFlowSlaMetrics}">
+                                <columns><Column><Text text="{i18n>mainFlowLabel}" /></Column><Column><Text text="{i18n>subFlowLabel}" /></Column><Column hAlign="End"><Text text="{i18n>volumeLabel}" /></Column><Column hAlign="End"><Text text="{i18n>valueLabel}" /></Column><Column hAlign="End"><Text text="{i18n>withinSlaVolumeLabel}" /></Column><Column hAlign="End"><Text text="{i18n>withinSlaValueLabel}" /></Column><Column hAlign="End"><Text text="{i18n>withinSlaPercentLabel}" /></Column><Column hAlign="End"><Text text="{i18n>slaExceededVolumeLabel}" /></Column><Column hAlign="End"><Text text="{i18n>slaExceededValueLabel}" /></Column><Column hAlign="End"><Text text="{i18n>slaExceededPercentLabel}" /></Column></columns>
+                                <items><ColumnListItem><cells><Text text="{reports>mainFlowName}" /><Text text="{reports>subFlowName}" /><ObjectNumber number="{reports>volume}" /><ObjectNumber number="{reports>value}" /><ObjectNumber number="{reports>withinSlaVolume}" state="Success" /><ObjectNumber number="{reports>withinSlaValue}" state="Success" /><ObjectStatus text="{= ${reports>withinSlaPercent} + '%' }" state="Success" /><ObjectNumber number="{reports>exceededSlaVolume}" state="Error" /><ObjectNumber number="{reports>exceededSlaValue}" state="Error" /><ObjectStatus text="{= ${reports>exceededSlaPercent} + '%' }" state="Error" /></cells></ColumnListItem></items>
+                            </Table>
+                        </VBox>
+                    </VBox>
+
+                    <VBox visible="{= ${reports>/selectedDashboard} === 'averageProcessing' }">
+                        <HBox class="flowmateReportKpis" wrap="Wrap" renderType="Bare">
+                            <GenericTile class="flowmateReportKpi" header="{i18n>averageProcessingDaysKpi}" subheader="{i18n>calendarDaysLabel}"><TileContent><NumericContent icon="sap-icon://history" value="{reports>/overallAverageProcessingDays}" scale="{i18n>daysScale}" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>completedRequestsInPeriodKpi}" subheader="{i18n>selectedPeriodLabel}"><TileContent><NumericContent icon="sap-icon://complete" value="{reports>/completedProcessingVolume}" valueColor="Good" /></TileContent></GenericTile>
+                        </HBox>
+                        <VBox class="flowmateSurface flowmateReportChartCard">
+                            <Title class="flowmateReportCardTitle" text="{i18n>averageProcessingChartTitle}" />
+                            <viz:VizFrame id="averageProcessingChart" height="24rem" width="100%" vizType="column">
+                                <viz:dataset><viz.data:FlattenedDataset data="{reports>/mainFlowProcessingMetrics}"><viz.data:dimensions><viz.data:DimensionDefinition name="Main Flow" value="{reports>mainFlowName}" /></viz.data:dimensions><viz.data:measures><viz.data:MeasureDefinition name="Average Processing Days" value="{reports>averageProcessingDays}" /></viz.data:measures></viz.data:FlattenedDataset></viz:dataset>
+                                <viz:feeds><viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Average Processing Days" /><viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Main Flow" /></viz:feeds>
+                            </viz:VizFrame>
+                        </VBox>
+                        <VBox class="flowmateSurface flowmateReportTableCard">
+                            <OverflowToolbar class="flowmateToolbar"><Title text="{i18n>averageProcessingTableTitle}" /></OverflowToolbar>
+                            <Table class="flowmateTable" noDataText="{i18n>noAverageProcessingDataText}" items="{reports>/subFlowProcessingMetrics}">
+                                <columns><Column><Text text="{i18n>mainFlowLabel}" /></Column><Column><Text text="{i18n>subFlowLabel}" /></Column><Column hAlign="End"><Text text="{i18n>completedVolumeLabel}" /></Column><Column hAlign="End"><Text text="{i18n>averageProcessingDaysLabel}" /></Column></columns>
+                                <items><ColumnListItem><cells><Text text="{reports>mainFlowName}" /><Text text="{reports>subFlowName}" /><ObjectNumber number="{reports>completedVolume}" /><ObjectNumber number="{reports>averageProcessingDays}" unit="{i18n>daysScale}" /></cells></ColumnListItem></items>
+                            </Table>
+                        </VBox>
                     </VBox>
 
                     <VBox visible="{= ${reports>/selectedDashboard} === 'operational' }">

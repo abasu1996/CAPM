@@ -8,13 +8,14 @@ sap.ui.define([
     return BaseController.extend("flowmate.controller.Reports", {
         onInit() {
             const oTo = new Date();
-            const oFrom = new Date(oTo);
-            oFrom.setDate(oFrom.getDate() - 89);
+            const oFrom = new Date(oTo.getFullYear(), oTo.getMonth(), 1);
             this.getView().setModel(new JSONModel({
                 catalogueVisible: true,
                 selectedDashboard: "operational",
                 selectedDashboardTitle: this.getText("operationalDashboardTitle"),
                 dashboards: [
+                    { key: "overallSla", title: this.getText("overallSlaDashboardTitle"), description: this.getText("overallSlaDashboardDescription"), icon: "sap-icon://business-objects-experience" },
+                    { key: "averageProcessing", title: this.getText("averageProcessingDashboardTitle"), description: this.getText("averageProcessingDashboardDescription"), icon: "sap-icon://history" },
                     { key: "operational", title: this.getText("operationalDashboardTitle"), description: this.getText("operationalDashboardDescription"), icon: "sap-icon://business-objects-experience" },
                     { key: "sla", title: this.getText("slaDashboardTitle"), description: this.getText("slaDashboardDescription"), icon: "sap-icon://quality-issue" },
                     { key: "teams", title: this.getText("teamDashboardTitle"), description: this.getText("teamDashboardDescription"), icon: "sap-icon://collaborate" },
@@ -26,6 +27,7 @@ sap.ui.define([
                     fromDate: oFrom,
                     toDate: oTo,
                     processTypeCode: "",
+                    subProcessTypeCode: "",
                     statusCode: ""
                 },
                 totalRequests: 0,
@@ -40,6 +42,20 @@ sap.ui.define([
                 userActivity: [],
                 auditActivity: [],
                 overdueTasks: [],
+                overallSlaVolume: 0,
+                overallSlaValue: 0,
+                overallWithinVolume: 0,
+                overallWithinValue: 0,
+                overallWithinPercent: 0,
+                overallExceededVolume: 0,
+                overallExceededValue: 0,
+                overallExceededPercent: 0,
+                mainFlowSlaMetrics: [],
+                subFlowSlaMetrics: [],
+                completedProcessingVolume: 0,
+                overallAverageProcessingDays: 0,
+                mainFlowProcessingMetrics: [],
+                subFlowProcessingMetrics: [],
                 loaded: false
             }), "reports");
             this.getRouter().getRoute("RouteReports").attachPatternMatched(this.onRouteMatched, this);
@@ -88,17 +104,16 @@ sap.ui.define([
 
         onResetFilters() {
             const oTo = new Date();
-            const oFrom = new Date(oTo);
-            oFrom.setDate(oFrom.getDate() - 89);
+            const oFrom = new Date(oTo.getFullYear(), oTo.getMonth(), 1);
             this.getView().getModel("reports").setProperty("/filters", {
                 fromDate: oFrom,
                 toDate: oTo,
                 processTypeCode: "",
+                subProcessTypeCode: "",
                 statusCode: ""
             });
             this._loadDashboard();
         },
-
         async onExportPdf() {
             const oModel = this.getView().getModel("reports");
             const oFilters = oModel.getProperty("/filters");
@@ -119,6 +134,7 @@ sap.ui.define([
                         fromDate: this._formatDate(oFilters.fromDate),
                         toDate: this._formatDate(oFilters.toDate),
                         processTypeCode: oFilters.processTypeCode || null,
+                        subProcessTypeCode: oFilters.subProcessTypeCode || null,
                         statusCode: oFilters.statusCode || null
                     },
                     charts: this._collectVisibleChartSnapshots()
@@ -137,7 +153,10 @@ sap.ui.define([
                 monthlyTrendChart: ["monthlyTrend", this.getText("requestTrendTitle")],
                 trendProcessChart: ["processBreakdown", this.getText("requestsByProcessTitle")],
                 userActivityChart: ["userActivity", this.getText("activityByUserTitle")],
-                auditActivityChart: ["auditActivity", this.getText("activityByActionTitle")]
+                auditActivityChart: ["auditActivity", this.getText("activityByActionTitle")],
+                overallSlaVolumeChart: ["overallSlaVolume", this.getText("overallSlaVolumeChartTitle")],
+                overallSlaValueChart: ["overallSlaValue", this.getText("overallSlaValueChartTitle")],
+                averageProcessingChart: ["averageProcessing", this.getText("averageProcessingChartTitle")]
             };
             return Object.entries(mChartMetadata).flatMap(([sControlId, [sChartKey, sTitle]]) => {
                 const oChart = this.byId(sControlId);
@@ -199,6 +218,7 @@ sap.ui.define([
                         fromDate: this._formatDate(oFilters.fromDate),
                         toDate: this._formatDate(oFilters.toDate),
                         processTypeCode: oFilters.processTypeCode || null,
+                        subProcessTypeCode: oFilters.subProcessTypeCode || null,
                         statusCode: oFilters.statusCode || null
                     }
                 });

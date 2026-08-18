@@ -399,7 +399,8 @@
                                         width="11rem"
                                         enabled="{requestEdit>/editable}"
                                         selectedKey="{statusEdit>/requestStatus}"
-                                        items="{/ProcessStatus}">
+                                        items="{/ProcessStatus}"
+                                        forceSelection="false">
                                         <core:Item key="{code}" text="{name}" />
                                     </Select>
                                     <Button
@@ -1168,7 +1169,8 @@
                                         width="11rem"
                                         enabled="{requestEdit>/editable}"
                                         selectedKey="{statusEdit>/taskStatus}"
-                                        items="{/TaskStatus}">
+                                        items="{/TaskStatus}"
+                                        forceSelection="false">
                                         <core:Item key="{code}" text="{name}" />
                                     </Select>
                                     <Button

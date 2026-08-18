@@ -62708,6 +62708,55 @@
   },
   "components": {
     "schemas": {
+      "FlowmateService.AverageProcessingMetric": {
+        "title": "AverageProcessingMetric",
+        "type": "object",
+        "properties": {
+          "mainFlowCode": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "mainFlowName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "subFlowCode": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "subFlowName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "completedVolume": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "averageProcessingDays": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 9999999999.99,
+                "minimum": -9999999999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 12,
+            "x-sap-scale": 2,
+            "nullable": true
+          }
+        }
+      },
       "FlowmateService.DNSProcess": {
         "title": "DNSProcess",
         "type": "object",
@@ -64478,6 +64527,131 @@
           "descr": {
             "type": "string",
             "maxLength": 1000,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.OverallSlaMetric": {
+        "title": "OverallSlaMetric",
+        "type": "object",
+        "properties": {
+          "mainFlowCode": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "mainFlowName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "subFlowCode": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "subFlowName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "volume": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 18,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "withinSlaVolume": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "withinSlaValue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 18,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "withinSlaPercent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 999.99,
+                "minimum": -999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 5,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "exceededSlaVolume": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "exceededSlaValue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 18,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "exceededSlaPercent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 999.99,
+                "minimum": -999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 5,
+            "x-sap-scale": 2,
             "nullable": true
           }
         }
@@ -68166,6 +68340,172 @@
               ],
               "nullable": true
             }
+          },
+          "overallSlaVolume": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "overallSlaValue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 18,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "overallWithinVolume": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "overallWithinValue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 18,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "overallWithinPercent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 999.99,
+                "minimum": -999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 5,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "overallExceededVolume": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "overallExceededValue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 18,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "overallExceededPercent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 999.99,
+                "minimum": -999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 5,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "mainFlowSlaMetrics": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.OverallSlaMetric"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "subFlowSlaMetrics": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.OverallSlaMetric"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "completedProcessingVolume": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "overallAverageProcessingDays": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 9999999999.99,
+                "minimum": -9999999999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 12,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "mainFlowProcessingMetrics": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.AverageProcessingMetric"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "subFlowProcessingMetrics": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.AverageProcessingMetric"
+                }
+              ],
+              "nullable": true
+            }
           }
         }
       },
@@ -68186,6 +68526,11 @@
             "nullable": true
           },
           "processTypeCode": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "subProcessTypeCode": {
             "type": "string",
             "maxLength": 30,
             "nullable": true
