@@ -116,6 +116,10 @@ modules:
         parameters:
           service-key:
             name: flowmate-common-auth-key
+      - name: flowmate-api-auth
+        parameters:
+          service-key:
+            name: flowmate-api-auth-key
       - name: flowmate-destination
         parameters:
           content-target: true
@@ -143,6 +147,11 @@ modules:
               TokenServiceInstanceName: flowmate-common-auth
               TokenServiceKeyName: flowmate-common-auth-key
               URL: https://flowmate-common-srv-org-b-test.cfapps.ap11.hana.ondemand.com/odata/v4/flowmate-common
+            - Name: flowmate-ca-api
+              Authentication: OAuth2ClientCredentials
+              TokenServiceInstanceName: flowmate-api-auth
+              TokenServiceKeyName: flowmate-api-auth-key
+              URL: https://dialog-axiata-plc-arize-qas-9339ozek-org-a-qas-org-b-te6cc03f10.cfapps.ap11.hana.ondemand.com/odata/v4/flowmate-ca
           existing_destinations_policy: update
     build-parameters:
       no-source: true

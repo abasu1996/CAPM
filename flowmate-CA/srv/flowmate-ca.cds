@@ -89,6 +89,15 @@ service FlowmateCAService {
 
   function getDashboardCounts() returns DashboardCounts;
   function getCurrentUser() returns CurrentUser;
+  @requires: 'CAAdmin'
+  function getFlowmateConnectionStatus() returns {
+    reachable     : Boolean;
+    application   : String(40);
+    endpoint      : String(255);
+    sampleRecords : Integer;
+    checkedAt     : DateTime;
+    message       : String(500);
+  };
 
   action createRequest(input: NewRequestInput) returns Requests;
   action submitRequest(requestId: UUID) returns Boolean;

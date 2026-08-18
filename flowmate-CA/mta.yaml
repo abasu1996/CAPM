@@ -113,6 +113,10 @@ modules:
         parameters:
           service-key:
             name: flowmate-common-auth-key
+      - name: flowmate-api-auth
+        parameters:
+          service-key:
+            name: flowmate-api-auth-key
       - name: flowmate-ca-destination
         parameters:
           content-target: true
@@ -131,6 +135,11 @@ modules:
               TokenServiceInstanceName: flowmate-common-auth
               TokenServiceKeyName: flowmate-common-auth-key
               URL: https://flowmate-common-srv-org-b-test.cfapps.ap11.hana.ondemand.com/odata/v4/flowmate-common
+            - Name: flowmate-api
+              Authentication: OAuth2ClientCredentials
+              TokenServiceInstanceName: flowmate-api-auth
+              TokenServiceKeyName: flowmate-api-auth-key
+              URL: https://dialog-axiata-plc-arize-qas-9339ozek-org-a-qas-org-b-te48c9fbef.cfapps.ap11.hana.ondemand.com/odata/v4/flowmate
             - Name: flowmate-ca-html5-host
               ServiceInstanceName: flowmate-ca-html5-host
               ServiceKeyName: flowmate-ca-html5-host-key
@@ -189,3 +198,7 @@ resources:
     type: org.cloudfoundry.existing-service
     parameters:
       service-name: flowmate-common-auth
+  - name: flowmate-api-auth
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: flowmate-api-auth

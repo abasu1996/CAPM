@@ -31,6 +31,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.db = cds.entities("flowmate.ca.db");
     this.master = await cds.connect.to("CommonMasterDataService");
     this.masterEntities = this.master.entities;
+    this.flowmate = await cds.connect.to("FlowmateService");
 
     this.on("READ", ["Users", "Teams", "TeamMembers", "Vendors"], (req) => {
       return this.master.run(req.query);
@@ -42,6 +43,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     this.on("getCurrentUser", this._getCurrentUser);
     this.on("getDashboardCounts", this._getDashboardCounts);
+    this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
     this.on("submitRequest", this._submitRequest);
     this.on("addTask", this._addTask);
@@ -55,6 +57,33 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     return super.init();
   }
+
+  _getFlowmateConnectionStatus = async () => {
+    const checkedAt = new Date().toISOString();
+    try {
+      const rows = await this.flowmate.run(
+        SELECT.from(this.flowmate.entities.ProcessRequests).columns("ID").limit(1)
+      );
+      return {
+        reachable: true,
+        application: "Flowmate",
+        endpoint: "flowmate-api",
+        sampleRecords: Array.isArray(rows) ? rows.length : (rows ? 1 : 0),
+        checkedAt,
+        message: "Authenticated connection to Flowmate is ready"
+      };
+    } catch (error) {
+      cds.log("peer-integration").warn("Flowmate connection check failed", error.message);
+      return {
+        reachable: false,
+        application: "Flowmate",
+        endpoint: "flowmate-api",
+        sampleRecords: 0,
+        checkedAt,
+        message: `Connection failed: ${error.message}`.slice(0, 500)
+      };
+    }
+  };
 
   _filterMyRequests = async (req) => {
     if (req.user.is("CAAdmin")) {

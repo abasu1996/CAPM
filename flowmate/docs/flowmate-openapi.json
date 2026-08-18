@@ -23559,6 +23559,37 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/getFlowmateCAConnectionStatus": {
+      "get": {
+        "summary": "Invokes function getFlowmateCAConnectionStatus",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.return_FlowmateService_getFlowmateCAConnectionStatus"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/getGuidedProcessTasks": {
       "post": {
         "summary": "Invokes action getGuidedProcessTasks",
@@ -56660,6 +56691,37 @@
         "x-cap-service": "FlowmateCAService"
       }
     },
+    "/odata/v4/flowmate-ca/getFlowmateConnectionStatus": {
+      "get": {
+        "summary": "Invokes function getFlowmateConnectionStatus",
+        "tags": [
+          "Flowmate CA — Service Operations"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateCAService.return_FlowmateCAService_getFlowmateConnectionStatus"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
     "/odata/v4/flowmate-ca/sendBackTask": {
       "post": {
         "summary": "Invokes action sendBackTask",
@@ -71108,6 +71170,42 @@
           }
         }
       },
+      "FlowmateService.return_FlowmateService_getFlowmateCAConnectionStatus": {
+        "title": "return_FlowmateService_getFlowmateCAConnectionStatus",
+        "type": "object",
+        "properties": {
+          "reachable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "application": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "endpoint": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sampleRecords": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          }
+        }
+      },
       "FlowmateService.return_FlowmateService_getRequestReservationCounts": {
         "title": "return_FlowmateService_getRequestReservationCounts",
         "type": "object",
@@ -82157,6 +82255,42 @@
             "type": "boolean",
             "nullable": true,
             "default": true
+          }
+        }
+      },
+      "FlowmateCAService.return_FlowmateCAService_getFlowmateConnectionStatus": {
+        "title": "return_FlowmateCAService_getFlowmateConnectionStatus",
+        "type": "object",
+        "properties": {
+          "reachable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "application": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "endpoint": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "sampleRecords": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
           }
         }
       },

@@ -41,6 +41,13 @@
   "cds": {
     "requires": {
       "[development]": {
+        "FlowmateCAService": {
+          "kind": "odata-v4",
+          "model": "srv/external/flowmate-ca",
+          "credentials": {
+            "url": "http://localhost:4010/odata/v4/flowmate-ca"
+          }
+        },
         "CommonMasterDataService": {
           "kind": "odata-v4",
           "model": "srv/external/common-master",
@@ -102,6 +109,13 @@
         }
       },
       "[production]": {
+        "FlowmateCAService": {
+          "kind": "odata-v4",
+          "model": "srv/external/flowmate-ca",
+          "credentials": {
+            "destination": "flowmate-ca-api"
+          }
+        },
         "CommonMasterDataService": {
           "kind": "odata-v4",
           "model": "srv/external/common-master",
@@ -119,6 +133,13 @@
         }
       },
       "[hybrid]": {
+        "FlowmateCAService": {
+          "kind": "odata-v4",
+          "model": "srv/external/flowmate-ca",
+          "credentials": {
+            "destination": "flowmate-ca-api"
+          }
+        },
         "CommonMasterDataService": {
           "kind": "odata-v4",
           "model": "srv/external/common-master",

@@ -41,6 +41,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     this._configCacheTtlMs = this._getConfigCacheTtlMs();
     this.master = await cds.connect.to("CommonMasterDataService");
     this.masterEntities = this.master.entities;
+    this.flowmateCA = await cds.connect.to("FlowmateCAService");
 
     const {
       ProcessRequests,
@@ -1811,6 +1812,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!this._isAdministrator(req)) return req.reject(403, "Only an administrator can recalculate SLA deadlines");
       return this._recalculateOpenSlaDeadlines(req, req.data.calendarId);
     });
+    this.on("getFlowmateCAConnectionStatus", async () => this._peerConnectionStatus({
+      service: this.flowmateCA,
+      entityName: "Requests",
+      application: "Flowmate CA",
+      endpoint: "flowmate-ca-api"
+    }));
 
     this.on("getUserAdministrationCapabilities", (req) => ({
       canMaintainUsers: this._isAdministrator(req)
@@ -1928,6 +1935,32 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _now() {
     return new Date().toISOString();
+  }
+
+  async _peerConnectionStatus({ service, entityName, application, endpoint }) {
+    const checkedAt = this._now();
+    try {
+      const entity = service.entities[entityName];
+      const rows = await service.run(SELECT.from(entity).columns("ID").limit(1));
+      return {
+        reachable: true,
+        application,
+        endpoint,
+        sampleRecords: Array.isArray(rows) ? rows.length : (rows ? 1 : 0),
+        checkedAt,
+        message: `Authenticated connection to ${application} is ready`
+      };
+    } catch (error) {
+      cds.log("peer-integration").warn(`${application} connection check failed`, error.message);
+      return {
+        reachable: false,
+        application,
+        endpoint,
+        sampleRecords: 0,
+        checkedAt,
+        message: `Connection failed: ${error.message}`.slice(0, 500)
+      };
+    }
   }
 
   _isSlaDeadlineBreached(request, today = new Date().toISOString().slice(0, 10)) {

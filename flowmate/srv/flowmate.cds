@@ -217,8 +217,17 @@ service FlowmateService {
         notificationsFailed : Integer;
         notificationsSkipped : Integer;
     };
-    @requires: 'Administrator'
+    @requires: 'Admin'
     action recalculateOpenSlaDeadlines(calendarId: UUID) returns Integer;
+    @requires: 'Admin'
+    function getFlowmateCAConnectionStatus() returns {
+        reachable     : Boolean;
+        application   : String(40);
+        endpoint      : String(255);
+        sampleRecords : Integer;
+        checkedAt     : DateTime;
+        message       : String(500);
+    };
     action reserveRequest(requestId: UUID) returns Boolean;
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;

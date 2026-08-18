@@ -45,8 +45,8 @@
                         </OverflowToolbar>
                         <HBox class="flowmateReportFilters" wrap="Wrap" alignItems="End">
                             <VBox class="flowmateReportFilterField"><Label text="{i18n>dateRangeLabel}" /><DateRangeSelection dateValue="{reports>/filters/fromDate}" secondDateValue="{reports>/filters/toDate}" displayFormat="medium" /></VBox>
-                            <VBox class="flowmateReportFilterField"><Label text="{i18n>processTypeLabel}" /><Select width="15rem" selectedKey="{reports>/filters/processTypeCode}" items="{/ProcessTypes}"><core:Item key="{code}" text="{name}" /></Select></VBox>
-                            <VBox class="flowmateReportFilterField"><Label text="{i18n>statusLabel}" /><Select width="13rem" selectedKey="{reports>/filters/statusCode}" items="{/ProcessStatus}"><core:Item key="{code}" text="{name}" /></Select></VBox>
+                            <VBox class="flowmateReportFilterField"><Label text="{i18n>processTypeLabel}" /><Select width="15rem" selectedKey="{reports>/filters/processTypeCode}" items="{/ProcessTypes}" forceSelection="false"><core:Item key="{code}" text="{name}" /></Select></VBox>
+                            <VBox class="flowmateReportFilterField"><Label text="{i18n>statusLabel}" /><Select width="13rem" selectedKey="{reports>/filters/statusCode}" items="{/ProcessStatus}" forceSelection="false"><core:Item key="{code}" text="{name}" /></Select></VBox>
                         </HBox>
                     </VBox>
 

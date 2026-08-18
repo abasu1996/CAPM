@@ -98,7 +98,6 @@ sap.ui.define([
             });
             this._loadDashboard();
         },
-
         async onExportPdf() {
             const oModel = this.getView().getModel("reports");
             const oFilters = oModel.getProperty("/filters");

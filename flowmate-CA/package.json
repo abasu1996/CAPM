@@ -40,6 +40,13 @@
         "scan": false
       },
       "[development]": {
+        "FlowmateService": {
+          "kind": "odata-v4",
+          "model": "srv/external/flowmate",
+          "credentials": {
+            "url": "http://localhost:4004/odata/v4/flowmate"
+          }
+        },
         "CommonMasterDataService": {
           "kind": "odata-v4",
           "model": "srv/external/common-master",
@@ -84,6 +91,13 @@
         }
       },
       "[production]": {
+        "FlowmateService": {
+          "kind": "odata-v4",
+          "model": "srv/external/flowmate",
+          "credentials": {
+            "destination": "flowmate-api"
+          }
+        },
         "CommonMasterDataService": {
           "kind": "odata-v4",
           "model": "srv/external/common-master",
@@ -101,6 +115,13 @@
         }
       },
       "[hybrid]": {
+        "FlowmateService": {
+          "kind": "odata-v4",
+          "model": "srv/external/flowmate",
+          "credentials": {
+            "destination": "flowmate-api"
+          }
+        },
         "CommonMasterDataService": {
           "kind": "odata-v4",
           "model": "srv/external/common-master",
