@@ -23766,6 +23766,76 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/getReportDrilldown": {
+      "post": {
+        "summary": "Invokes action getReportDrilldown",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.ReportDrilldownResult"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FlowmateService.ReportFilter"
+                      }
+                    ],
+                    "nullable": true
+                  },
+                  "dashboardKey": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "nullable": true
+                  },
+                  "metricKey": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "nullable": true
+                  },
+                  "page": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true
+                  },
+                  "pageSize": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/getRequestReservationCounts": {
       "get": {
         "summary": "Invokes function getRequestReservationCounts",
@@ -68506,6 +68576,132 @@
               ],
               "nullable": true
             }
+          }
+        }
+      },
+      "FlowmateService.ReportDrilldownResult": {
+        "title": "ReportDrilldownResult",
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.ReportDrilldownRow"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        }
+      },
+      "FlowmateService.ReportDrilldownRow": {
+        "title": "ReportDrilldownRow",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
+            "nullable": true
+          },
+          "requestReference": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "requestTitle": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "mainFlowName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "subFlowName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 18,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "slaDueAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04Z",
+            "nullable": true
+          },
+          "slaResult": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "processingDays": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 9999999999.99,
+                "minimum": -9999999999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 12,
+            "x-sap-scale": 2,
+            "nullable": true
           }
         }
       },

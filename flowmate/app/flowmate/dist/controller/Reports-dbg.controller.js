@@ -58,6 +58,20 @@ sap.ui.define([
                 subFlowProcessingMetrics: [],
                 loaded: false
             }), "reports");
+            this.getView().setModel(new JSONModel({
+                title: "",
+                dashboardKey: "",
+                metricKey: "",
+                total: 0,
+                page: 1,
+                pageSize: 25,
+                rows: [],
+                busy: false,
+                hasPrevious: false,
+                hasNext: false,
+                isSla: false,
+                isProcessing: false
+            }), "drilldown");
             this.getRouter().getRoute("RouteReports").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -200,6 +214,88 @@ sap.ui.define([
             const sTaskId = oEvent.getSource().getBindingContext("reports")?.getProperty("ID");
             if (sTaskId) {
                 this.navTo("RouteApprovalDetail", { taskId: sTaskId });
+            }
+        },
+
+        async onReportKpiPress(oEvent) {
+            const oSource = oEvent.getSource();
+            const oReportsModel = this.getView().getModel("reports");
+            const oDrilldownModel = this.getView().getModel("drilldown");
+            const sDashboardKey = oReportsModel.getProperty("/selectedDashboard");
+            oDrilldownModel.setData({
+                ...oDrilldownModel.getData(),
+                title: `${oSource.getHeader()} - ${this.getText("requestDetailsLabel")}`,
+                dashboardKey: sDashboardKey,
+                metricKey: oSource.data("metricKey"),
+                page: 1,
+                rows: [],
+                total: 0,
+                isSla: sDashboardKey === "overallSla",
+                isProcessing: sDashboardKey === "averageProcessing"
+            });
+            await this._loadReportDrilldown(true);
+        },
+
+        async onDrilldownPrevious() {
+            const oModel = this.getView().getModel("drilldown");
+            oModel.setProperty("/page", Math.max(1, oModel.getProperty("/page") - 1));
+            await this._loadReportDrilldown(false);
+        },
+
+        async onDrilldownNext() {
+            const oModel = this.getView().getModel("drilldown");
+            oModel.setProperty("/page", oModel.getProperty("/page") + 1);
+            await this._loadReportDrilldown(false);
+        },
+
+        onDrilldownRequestPress(oEvent) {
+            const sRequestId = oEvent.getSource().getBindingContext("drilldown")?.getProperty("ID");
+            if (!sRequestId) {
+                return;
+            }
+            this.onCloseReportDrilldown();
+            this.navTo("RouteRequestDetail", { requestId: sRequestId });
+        },
+
+        onCloseReportDrilldown() {
+            this.byId("reportDrilldownDialog")?.close();
+        },
+
+        async _loadReportDrilldown(bOpenDialog) {
+            const oReportsModel = this.getView().getModel("reports");
+            const oDrilldownModel = this.getView().getModel("drilldown");
+            const oFilters = oReportsModel.getProperty("/filters");
+            oDrilldownModel.setProperty("/busy", true);
+            try {
+                const oResult = await this.callAction("getReportDrilldown", {
+                    dashboardKey: oDrilldownModel.getProperty("/dashboardKey"),
+                    metricKey: oDrilldownModel.getProperty("/metricKey"),
+                    page: oDrilldownModel.getProperty("/page"),
+                    pageSize: oDrilldownModel.getProperty("/pageSize"),
+                    filter: {
+                        fromDate: this._formatDate(oFilters.fromDate),
+                        toDate: this._formatDate(oFilters.toDate),
+                        processTypeCode: oFilters.processTypeCode || null,
+                        subProcessTypeCode: oFilters.subProcessTypeCode || null,
+                        statusCode: oFilters.statusCode || null
+                    }
+                });
+                const oData = oResult.value || oResult;
+                oDrilldownModel.setProperty("/rows", oData.rows || []);
+                oDrilldownModel.setProperty("/total", Number(oData.total || 0));
+                oDrilldownModel.setProperty("/page", Number(oData.page || 1));
+                oDrilldownModel.setProperty("/pageSize", Number(oData.pageSize || 25));
+                oDrilldownModel.setProperty("/hasPrevious", Number(oData.page || 1) > 1);
+                oDrilldownModel.setProperty("/hasNext", Number(oData.page || 1) * Number(oData.pageSize || 25) < Number(oData.total || 0));
+                if (bOpenDialog) {
+                    this._pReportDrilldown ||= this.loadFragment({ name: "flowmate.fragment.ReportDrilldown" });
+                    const oDialog = await this._pReportDrilldown;
+                    oDialog.open();
+                }
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("reportDrilldownLoadFailed")));
+            } finally {
+                oDrilldownModel.setProperty("/busy", false);
             }
         },
 

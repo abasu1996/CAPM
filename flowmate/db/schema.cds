@@ -244,6 +244,7 @@ view OverallSlaReport as select from ProcessRequests as request {
         request.subProcessType.code             as subFlowCode,
         request.subProcessType.name             as subFlowName,
         request.referenceNumber                 as requestReference,
+        request.title                           as requestTitle,
         request.amount                          as amount,
         request.status.code                     as statusCode,
         request.slaStartedAt                    as slaStartedAt,
@@ -269,6 +270,8 @@ view AverageProcessingDaysReport as select from ProcessRequests as request {
         request.subProcessType.code             as subFlowCode,
         request.subProcessType.name             as subFlowName,
         request.referenceNumber                 as requestReference,
+        request.title                           as requestTitle,
+        request.createdAt                       as createdAt,
         request.status.code                     as statusCode,
         request.completedAt                     as completedAt,
         cast(seconds_between(request.createdAt, request.completedAt) as Decimal(18, 4)) / 86400

@@ -53,10 +53,10 @@
 
                     <VBox visible="{= ${reports>/selectedDashboard} === 'overallSla' }">
                         <HBox class="flowmateReportKpis" wrap="Wrap" renderType="Bare">
-                            <GenericTile class="flowmateReportKpi" header="{i18n>transactionVolumeKpi}" subheader="{i18n>selectedPeriodLabel}"><TileContent><NumericContent icon="sap-icon://request" value="{reports>/overallSlaVolume}" /></TileContent></GenericTile>
-                            <GenericTile class="flowmateReportKpi" header="{i18n>transactionValueKpi}" subheader="{i18n>selectedPeriodLabel}"><TileContent><NumericContent icon="sap-icon://money-bills" value="{reports>/overallSlaValue}" /></TileContent></GenericTile>
-                            <GenericTile class="flowmateReportKpi" header="{i18n>withinSlaKpi}" subheader="{= ${reports>/overallWithinVolume} + ' requests' }"><TileContent><NumericContent icon="sap-icon://accept" value="{reports>/overallWithinPercent}" scale="%" valueColor="Good" /></TileContent></GenericTile>
-                            <GenericTile class="flowmateReportKpi" header="{i18n>slaExceededKpi}" subheader="{= ${reports>/overallExceededVolume} + ' requests' }"><TileContent><NumericContent icon="sap-icon://lateness" value="{reports>/overallExceededPercent}" scale="%" valueColor="Error" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>transactionVolumeKpi}" subheader="{i18n>selectedPeriodLabel}" press=".onReportKpiPress"><customData><core:CustomData key="metricKey" value="totalVolume" /></customData><TileContent><NumericContent icon="sap-icon://request" value="{reports>/overallSlaVolume}" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>transactionValueKpi}" subheader="{i18n>selectedPeriodLabel}" press=".onReportKpiPress"><customData><core:CustomData key="metricKey" value="totalValue" /></customData><TileContent><NumericContent icon="sap-icon://money-bills" value="{reports>/overallSlaValue}" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>withinSlaKpi}" subheader="{= ${reports>/overallWithinVolume} + ' requests' }" press=".onReportKpiPress"><customData><core:CustomData key="metricKey" value="withinSla" /></customData><TileContent><NumericContent icon="sap-icon://accept" value="{reports>/overallWithinPercent}" scale="%" valueColor="Good" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>slaExceededKpi}" subheader="{= ${reports>/overallExceededVolume} + ' requests' }" press=".onReportKpiPress"><customData><core:CustomData key="metricKey" value="exceededSla" /></customData><TileContent><NumericContent icon="sap-icon://lateness" value="{reports>/overallExceededPercent}" scale="%" valueColor="Error" /></TileContent></GenericTile>
                         </HBox>
                         <HBox class="flowmateReportChartRow" wrap="Wrap" renderType="Bare">
                             <VBox class="flowmateSurface flowmateReportChartCard">
@@ -85,8 +85,8 @@
 
                     <VBox visible="{= ${reports>/selectedDashboard} === 'averageProcessing' }">
                         <HBox class="flowmateReportKpis" wrap="Wrap" renderType="Bare">
-                            <GenericTile class="flowmateReportKpi" header="{i18n>averageProcessingDaysKpi}" subheader="{i18n>calendarDaysLabel}"><TileContent><NumericContent icon="sap-icon://history" value="{reports>/overallAverageProcessingDays}" scale="{i18n>daysScale}" /></TileContent></GenericTile>
-                            <GenericTile class="flowmateReportKpi" header="{i18n>completedRequestsInPeriodKpi}" subheader="{i18n>selectedPeriodLabel}"><TileContent><NumericContent icon="sap-icon://complete" value="{reports>/completedProcessingVolume}" valueColor="Good" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>averageProcessingDaysKpi}" subheader="{i18n>calendarDaysLabel}" press=".onReportKpiPress"><customData><core:CustomData key="metricKey" value="averageProcessing" /></customData><TileContent><NumericContent icon="sap-icon://history" value="{reports>/overallAverageProcessingDays}" scale="{i18n>daysScale}" /></TileContent></GenericTile>
+                            <GenericTile class="flowmateReportKpi" header="{i18n>completedRequestsInPeriodKpi}" subheader="{i18n>selectedPeriodLabel}" press=".onReportKpiPress"><customData><core:CustomData key="metricKey" value="completedVolume" /></customData><TileContent><NumericContent icon="sap-icon://complete" value="{reports>/completedProcessingVolume}" valueColor="Good" /></TileContent></GenericTile>
                         </HBox>
                         <VBox class="flowmateSurface flowmateReportChartCard">
                             <Title class="flowmateReportCardTitle" text="{i18n>averageProcessingChartTitle}" />

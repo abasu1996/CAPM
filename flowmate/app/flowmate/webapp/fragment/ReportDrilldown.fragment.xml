@@ -1,0 +1,49 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="reportDrilldownDialog" contentWidth="92rem" contentHeight="38rem" resizable="true" draggable="true">
+        <customHeader>
+            <OverflowToolbar>
+                <Title text="{drilldown>/title}" />
+                <ToolbarSpacer />
+                <ObjectStatus text="{= ${drilldown>/total} + ' ' + ${i18n>matchingRequestsLabel} }" state="Information" />
+            </OverflowToolbar>
+        </customHeader>
+        <content>
+            <Table busy="{drilldown>/busy}" noDataText="{i18n>noDrilldownRequestsText}" items="{drilldown>/rows}" sticky="ColumnHeaders">
+                <columns>
+                    <Column width="10rem"><Text text="{i18n>requestIdLabel}" /></Column>
+                    <Column width="14rem"><Text text="{i18n>requestTitleLabel}" /></Column>
+                    <Column width="11rem"><Text text="{i18n>mainFlowLabel}" /></Column>
+                    <Column width="12rem"><Text text="{i18n>subFlowLabel}" /></Column>
+                    <Column width="9rem" hAlign="End" visible="{drilldown>/isSla}"><Text text="{i18n>valueLabel}" /></Column>
+                    <Column width="10rem"><Text text="{i18n>statusLabel}" /></Column>
+                    <Column width="12rem"><Text text="{i18n>createdAtLabel}" /></Column>
+                    <Column width="12rem"><Text text="{i18n>completedAtLabel}" /></Column>
+                    <Column width="10rem" visible="{drilldown>/isSla}"><Text text="{i18n>slaResultLabel}" /></Column>
+                    <Column width="10rem" hAlign="End" visible="{drilldown>/isProcessing}"><Text text="{i18n>processingDaysLabel}" /></Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Link text="{drilldown>requestReference}" press=".onDrilldownRequestPress" />
+                            <Text text="{drilldown>requestTitle}" maxLines="2" />
+                            <Text text="{drilldown>mainFlowName}" />
+                            <Text text="{drilldown>subFlowName}" />
+                            <ObjectNumber number="{drilldown>amount}" visible="{drilldown>/isSla}" />
+                            <ObjectStatus text="{drilldown>statusCode}" />
+                            <Text text="{drilldown>createdAt}" />
+                            <Text text="{drilldown>completedAt}" />
+                            <ObjectStatus text="{drilldown>slaResult}" state="{= ${drilldown>slaResult} === 'SLA_EXCEEDED' ? 'Error' : (${drilldown>slaResult} === 'WITHIN_SLA' ? 'Success' : 'None') }" visible="{drilldown>/isSla}" />
+                            <ObjectNumber number="{drilldown>processingDays}" unit="{i18n>daysScale}" visible="{drilldown>/isProcessing}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+        <buttons>
+            <Button text="{i18n>previousPageButton}" icon="sap-icon://navigation-left-arrow" enabled="{drilldown>/hasPrevious}" press=".onDrilldownPrevious" />
+            <Button text="{= ${i18n>pageLabel} + ' ' + ${drilldown>/page} }" enabled="false" />
+            <Button text="{i18n>nextPageButton}" icon="sap-icon://navigation-right-arrow" iconFirst="false" enabled="{drilldown>/hasNext}" press=".onDrilldownNext" />
+            <Button text="{i18n>closeButton}" press=".onCloseReportDrilldown" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

@@ -1900,6 +1900,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return this._getReportDashboard(req, req.data.filter || {}, ProcessRequests, ProcessTasks, ProcessTypes, Users);
     });
 
+    this.on("getReportDrilldown", async (req) => {
+      return this._getReportDrilldown(req, req.data, Users);
+    });
+
     this.on("exportReportDashboardPdf", async (req) => {
       const sDashboardKey = String(req.data.dashboardKey || "operational").toLowerCase();
       const aSupportedDashboards = ["overallsla", "averageprocessing", "operational", "sla", "teams", "trends", "users", "audit"];
@@ -2519,6 +2523,75 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         : 0,
       mainFlowProcessingMetrics: [...mMainFlows.values()].map(fnFinalize).sort(fnSort),
       subFlowProcessingMetrics: [...mSubFlows.values()].map(fnFinalize).sort(fnSort)
+    };
+  }
+
+  async _getReportDrilldown(req, data, Users) {
+    const sDashboardKey = String(data.dashboardKey || "").toLowerCase();
+    const sMetricKey = String(data.metricKey || "");
+    const mAllowedMetrics = {
+      overallsla: new Set(["totalVolume", "totalValue", "withinSla", "exceededSla"]),
+      averageprocessing: new Set(["averageProcessing", "completedVolume"])
+    };
+    if (!mAllowedMetrics[sDashboardKey]?.has(sMetricKey)) {
+      return req.reject(400, "Select a valid dashboard tile for drill-down");
+    }
+
+    const iPage = Math.max(1, Number.parseInt(data.page, 10) || 1);
+    const iPageSize = Math.min(100, Math.max(10, Number.parseInt(data.pageSize, 10) || 25));
+    const iOffset = (iPage - 1) * iPageSize;
+    const oRange = this._reportDateRange(req, data.filter?.fromDate, data.filter?.toDate);
+    const oCurrentUser = this._isAdministrator(req) ? null : await this._currentReservationUser(req, Users);
+    const bAverageProcessing = sDashboardKey === "averageprocessing";
+    const ReportEntity = bAverageProcessing
+      ? cds.entities("flowmate.db").AverageProcessingDaysReport
+      : cds.entities("flowmate.db").OverallSlaReport;
+
+    const fnApplyFilters = (query) => {
+      query.where([
+        { ref: ["reportingDate"] }, ">=", { val: oRange.fromDateTime },
+        "and",
+        { ref: ["reportingDate"] }, "<=", { val: oRange.toDateTime }
+      ]);
+      if (!this._isAdministrator(req)) query.where({ requesterUserId: oCurrentUser.user.ID });
+      if (data.filter?.processTypeCode) query.where({ mainFlowCode: data.filter.processTypeCode });
+      if (data.filter?.subProcessTypeCode) query.where({ subFlowCode: data.filter.subProcessTypeCode });
+      if (!bAverageProcessing && data.filter?.statusCode) query.where({ statusCode: data.filter.statusCode });
+      if (sMetricKey === "withinSla") query.where({ slaResult: "WITHIN_SLA" });
+      if (sMetricKey === "exceededSla") query.where({ slaResult: "SLA_EXCEEDED" });
+      return query;
+    };
+
+    const qCount = fnApplyFilters(SELECT.one.from(ReportEntity).columns("count(ID) as count"));
+    const aColumns = bAverageProcessing
+      ? ["ID", "requestReference", "requestTitle", "mainFlowName", "subFlowName", "statusCode", "createdAt", "completedAt", "processingDays"]
+      : ["ID", "requestReference", "requestTitle", "mainFlowName", "subFlowName", "amount", "statusCode", "reportingDate", "completedAt", "slaDueAt", "slaResult"];
+    const qRows = fnApplyFilters(SELECT.from(ReportEntity).columns(...aColumns))
+      .orderBy({ ref: ["reportingDate"], sort: "desc" })
+      .limit(iPageSize, iOffset);
+    const [oCount, aRows] = await Promise.all([
+      cds.tx(req).run(qCount),
+      cds.tx(req).run(qRows)
+    ]);
+
+    return {
+      total: Number(oCount?.count || oCount?.COUNT || 0),
+      page: iPage,
+      pageSize: iPageSize,
+      rows: aRows.map((oRow) => ({
+        ID: oRow.ID,
+        requestReference: oRow.requestReference,
+        requestTitle: oRow.requestTitle,
+        mainFlowName: oRow.mainFlowName || this._reportLabel(oRow.mainFlowCode),
+        subFlowName: oRow.subFlowName || this._reportLabel(oRow.subFlowCode),
+        amount: oRow.amount == null ? null : Number(oRow.amount),
+        statusCode: oRow.statusCode,
+        createdAt: bAverageProcessing ? oRow.createdAt : oRow.reportingDate,
+        completedAt: oRow.completedAt,
+        slaDueAt: oRow.slaDueAt,
+        slaResult: oRow.slaResult,
+        processingDays: oRow.processingDays == null ? null : Number(Number(oRow.processingDays).toFixed(2))
+      }))
     };
   }
 

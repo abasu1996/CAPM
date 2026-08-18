@@ -59,6 +59,26 @@ service FlowmateService {
         completedVolume      : Integer;
         averageProcessingDays: Decimal(12, 2);
     }
+    type ReportDrilldownRow {
+        ID             : UUID;
+        requestReference : String(30);
+        requestTitle   : String(255);
+        mainFlowName   : String(100);
+        subFlowName    : String(100);
+        amount         : Decimal(18, 2);
+        statusCode     : String(20);
+        createdAt      : DateTime;
+        completedAt    : DateTime;
+        slaDueAt       : DateTime;
+        slaResult      : String(20);
+        processingDays : Decimal(12, 2);
+    }
+    type ReportDrilldownResult {
+        total    : Integer;
+        page     : Integer;
+        pageSize : Integer;
+        rows     : many ReportDrilldownRow;
+    }
     type ReportDashboard {
         totalRequests        : Integer;
         openRequests         : Integer;
@@ -313,6 +333,7 @@ service FlowmateService {
     function getMyTaskCount() returns Integer;
     function getMyTeamTaskCount() returns Integer;
     action getReportDashboard(filter: ReportFilter) returns ReportDashboard;
+    action getReportDrilldown(filter: ReportFilter, dashboardKey: String(30), metricKey: String(30), page: Integer, pageSize: Integer) returns ReportDrilldownResult;
     action exportReportDashboardPdf(filter: ReportFilter, dashboardKey: String(30), charts: many ReportChartSnapshot) returns {
         fileName : String(150);
         mimeType : String(100);
