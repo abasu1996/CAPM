@@ -237,6 +237,10 @@
                                 <Label text="{i18n>stepLabel}" />
                                 <Text text="{stepNo}" />
                             </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>processorTeamLabel}" />
+                                <Text text="{processorTeamName}" />
+                            </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
                                 <Label text="{i18n>mandatoryLabel}" />
                                 <ObjectStatus
@@ -258,26 +262,6 @@
                             wrap="Wrap"
                             alignItems="Start">
                             <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
-                                <Label text="{i18n>statusLabel}" />
-                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
-                                    <Select
-                                        width="11rem"
-                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
-                                        selectedKey="{statusEdit>/taskStatus}"
-                                        items="{/TaskStatus}"
-                                        forceSelection="false">
-                                        <core:Item key="{code}" text="{name}" />
-                                    </Select>
-                                    <Button
-                                        class="sapUiTinyMarginBegin"
-                                        icon="sap-icon://save"
-                                        type="Emphasized"
-                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
-                                        tooltip="{i18n>saveStatusButton}"
-                                        press=".onSaveTaskStatus" />
-                                </HBox>
-                            </VBox>
-                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
                                 <Label text="{i18n>processorLabel}" />
                                 <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
                                     <Input
@@ -291,7 +275,7 @@
                                         suggest=".onUserSuggest"
                                         suggestionItemSelected=".onProcessorSuggestionSelected"
                                         liveChange=".onProcessorLiveChange"
-                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                        enabled="{= !${processorTeam_ID} &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                         valueHelpRequest=".onProcessorValueHelpRequest"
                                         suggestionItems="{/Users}">
                                         <suggestionItems>
@@ -301,7 +285,7 @@
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
-                                        enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                        enabled="{= !${processorTeam_ID} &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                         tooltip="{i18n>saveProcessorButton}"
                                         press=".onSaveTaskProcessor" />
                                 </HBox>

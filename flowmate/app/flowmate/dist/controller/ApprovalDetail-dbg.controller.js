@@ -25,6 +25,12 @@ sap.ui.define([
 
             this._sTaskId = sTaskId;
             this.setTwoColumnLayout();
+            this.getView().unbindElement();
+            this.getView().getModel("statusEdit").setProperty("/taskStatus", "");
+            this.getView().getModel("processorEdit").setData({
+                processorUser_ID: "",
+                processorName: ""
+            });
             this.getView().bindElement({
                 path: `/ProcessTasks(guid'${sTaskId}')`,
                 parameters: {
@@ -49,6 +55,7 @@ sap.ui.define([
                     }
                 }
             });
+            this.getView().getElementBinding()?.refresh(true);
         },
 
         async onSaveTaskStatus() {

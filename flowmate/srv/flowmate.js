@@ -34,6 +34,7 @@ const BPA_USER_DESTINATION = "bpa_workflow";
 const BPA_TECHNICAL_DESTINATION = "bpa_workflow_technical";
 const BPA_WORKFLOW_PATH = "/workflow/rest/v1/workflow-instances";
 const BPA_EMAIL_DEFINITION_ID = "ap11.arize-qas-9339ozek.emailprocess.emailProcess";
+const BPA_TASK_ASSIGNMENT_DEFINITION_ID = "ap11.arize-qas-9339ozek.taskassignmentnotificationprocess.taskAssignmentNotificationProcess";
 
 module.exports = class FlowmateService extends cds.ApplicationService {
   async init() {
@@ -130,6 +131,22 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.after("READ", ProcessRequests, async (data, req) => {
+      const aRequests = Array.isArray(data) ? data : [data];
+      aRequests.filter(Boolean).forEach((request) => {
+        // Older team assignments stored the team name in the individual
+        // processor snapshot. A team is not a processor until a user reserves
+        // the request or an administrator assigns it to a user.
+        if (
+          request.processorTeam_ID
+          && !request.processorUser_ID
+          && !request.reservedByUser_ID
+          && !request.reservedBy
+        ) {
+          request.processor = null;
+          request.processorEmail = null;
+        }
+      });
+
       if (this._isAdministrator(req)) {
         return;
       }
@@ -768,6 +785,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           teamId: task.processorTeam_ID,
           teamName: task.processorTeamName
         });
+      } else if (task.processorEmail || task.processorUser_ID || task.assignedUser_ID) {
+        await this._notifyTaskAssignment(req, { task });
       }
     });
 
@@ -832,6 +851,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!req.data.processorUser_ID) {
         return;
+      }
+
+      const sTaskId = this._requestIdFromReq(req);
+      const oExistingTask = sTaskId ? await this._getTask(req, sTaskId) : null;
+
+      if (oExistingTask?.processorTeam_ID && !oExistingTask.processorUser_ID) {
+        return req.reject(409, "A configured team task cannot be assigned through the Processor field; claim it from the team queue");
       }
 
       const oProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
@@ -1267,6 +1293,69 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return true;
     });
 
+    this.on("assignRequestToUser", async (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can assign a request to another user");
+      }
+
+      const { requestId, userId } = req.data;
+      const request = await this._getRequest(req, requestId);
+
+      if (!request) {
+        return req.reject(404, `Process request ${requestId} was not found`);
+      }
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+
+      const oUser = await this._getUser(req, userId, Users);
+      if (!oUser) {
+        return req.reject(400, "Select an active user");
+      }
+
+      const sDisplayName = this._userDisplayName(oUser);
+      const sEmail = this._userEmail(oUser);
+
+      await cds.tx(req).run(
+        UPDATE(ProcessRequests, requestId).set({
+          reservedByUser_ID: oUser.ID,
+          reservedBy: sDisplayName,
+          reservedAt: this._now(),
+          processorUser_ID: oUser.ID,
+          processorTeam_ID: null,
+          processorTeamName: null,
+          processor: sDisplayName,
+          processorEmail: sEmail
+        })
+      );
+
+      await cds.tx(req).run(
+        UPDATE(ProcessTasks)
+          .set({
+            processorUser_ID: oUser.ID,
+            processor: sDisplayName,
+            processorEmail: sEmail
+          })
+          .where({
+            request_ID: requestId,
+            processorUser_ID: null,
+            processorTeam_ID: null
+          })
+      );
+
+      await this._writeHistory(req, {
+        requestId,
+        stepNo: request.currentStep || 0,
+        action: "ASSIGNED_BY_ADMIN",
+        actor: req.user?.id,
+        oldStatus: request.status_code,
+        newStatus: request.status_code,
+        remarks: `Request assigned and reserved to ${sDisplayName}`
+      });
+
+      return true;
+    });
+
     this.on("updateRequestStatus", async (req) => {
       const { requestId, statusCode } = req.data;
       const request = await this._getRequest(req, requestId);
@@ -1464,6 +1553,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Task ${taskId} was not found`);
       }
 
+      if (task.processorTeam_ID && !task.processorUser_ID) {
+        return req.reject(409, "A configured team task cannot be assigned through the Processor field; claim it from the team queue");
+      }
+
       await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
 
       await this._rejectIfRequestLocked(req, task.request_ID);
@@ -1504,6 +1597,17 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         oldStatus: task.status_code,
         newStatus: task.status_code,
         remarks: `Task processor assigned: ${sProcessor}`
+      });
+
+      await this._notifyTaskAssignment(req, {
+        task: {
+          ...task,
+          processorUser_ID: processorUserId,
+          processorTeam_ID: null,
+          processorTeamName: null,
+          processor: sProcessor,
+          processorEmail: sProcessorEmail
+        }
       });
 
       return true;
@@ -1618,7 +1722,33 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         remarks: `Team task assigned to ${this._userDisplayName(oCurrentUser)}`
       });
 
+      await this._notifyTaskAssignment(req, {
+        task: {
+          ...task,
+          assignedUser_ID: oCurrentUser.ID,
+          processorUser_ID: oCurrentUser.ID,
+          assignedTo: this._userDisplayName(oCurrentUser),
+          processor: this._userDisplayName(oCurrentUser),
+          processorEmail: this._userEmail(oCurrentUser)
+        }
+      });
+
       return true;
+    });
+
+    this.on("notifyTaskProcessor", async (req) => {
+      const oTask = await this._getTask(req, req.data.taskId);
+
+      if (!oTask) {
+        return req.reject(404, `Task ${req.data.taskId} was not found`);
+      }
+
+      const iRecipientCount = await this._notifyTaskAssignment(req, {
+        task: oTask,
+        failWhenUnassigned: true
+      });
+
+      return { recipientCount: iRecipientCount };
     });
 
     this.on("getCurrentUserDetails", async (req) => {
@@ -1830,7 +1960,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!this._isAdministrator(req)) {
         qUnreserved.where({ requesterUser_ID: oReservationUser.user.ID });
-        qReservedByMe.where({ requesterUser_ID: oReservationUser.user.ID });
       }
 
       if (oReservationUser.user?.ID) {
@@ -3132,8 +3261,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const aTasks = Array.isArray(data) ? data : [data];
 
     aTasks.filter(Boolean).forEach((task) => {
-      if (task.isTeamTask && !task.processorUser_ID && !task.processorEmail) {
+      if (task.processorTeam_ID && !task.processorUser_ID) {
         task.processor = null;
+        task.processorEmail = null;
       }
     });
   }
@@ -3189,7 +3319,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   _applyVisibleRequestsWhere(query, reservationUser) {
-    query.where({ requesterUser_ID: reservationUser.user.ID });
+    const sUserId = reservationUser.user.ID;
+    query.where([
+      { ref: ["requesterUser_ID"] }, "=", { val: sUserId },
+      "or", { ref: ["reservedByUser_ID"] }, "=", { val: sUserId },
+      "or", { ref: ["processorUser_ID"] }, "=", { val: sUserId }
+    ]);
   }
 
   _isReservedByCurrentUser(request, reservationUser) {
@@ -3205,22 +3340,34 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   _isTaskAssignedToCurrentUser(task, reservationUser) {
-    if (task.processorEmail) {
-      return Boolean(reservationUser.email && task.processorEmail === reservationUser.email);
-    }
+    const sCurrentUserId = reservationUser.user?.ID;
 
+    // Persisted user IDs are the authoritative assignment identity. Email and
+    // display-name snapshots can become stale or differ in case from JWT claims.
     if (task.processorUser_ID || task.assignedUser_ID) {
       return Boolean(
-        reservationUser.user?.ID &&
-        (task.processorUser_ID === reservationUser.user.ID || task.assignedUser_ID === reservationUser.user.ID)
+        sCurrentUserId
+        && (task.processorUser_ID === sCurrentUserId || task.assignedUser_ID === sCurrentUserId)
       );
     }
 
-    return [task.processor, task.assignedTo].some((sOwner) =>
-      sOwner === reservationUser.email ||
-      sOwner === reservationUser.displayName ||
-      sOwner === reservationUser.principal
-    );
+    const fnNormalizeIdentity = (value) => String(value || "").trim().toLowerCase();
+    const sTaskEmail = fnNormalizeIdentity(task.processorEmail);
+    const sCurrentEmail = fnNormalizeIdentity(reservationUser.email);
+
+    if (sTaskEmail) {
+      return Boolean(sCurrentEmail && sTaskEmail === sCurrentEmail);
+    }
+
+    const oCurrentIdentities = new Set([
+      reservationUser.email,
+      reservationUser.displayName,
+      reservationUser.principal
+    ].map(fnNormalizeIdentity).filter(Boolean));
+
+    return [task.processor, task.assignedTo]
+      .map(fnNormalizeIdentity)
+      .some((sOwner) => sOwner && oCurrentIdentities.has(sOwner));
   }
 
   _isTaskVisibleForRequest(task, request, reservationUser) {
@@ -3529,7 +3676,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _setProcessorTeamSnapshot(target, team) {
     target.processorTeamName = team.name || team.teamCode;
-    target.processor = team.name || team.teamCode;
+    target.processorUser_ID = null;
+    target.processor = null;
     target.processorEmail = null;
   }
 
@@ -4279,6 +4427,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         teamId: oTaskOwnership.processorTeam_ID,
         teamName: oTaskOwnership.processorTeamName
       });
+    } else if (oTaskOwnership.processorEmail || oTaskOwnership.processorUser_ID || oTaskOwnership.assignedUser_ID) {
+      await this._notifyTaskAssignment(req, {
+        task: {
+          ID: sTaskId,
+          referenceNumber: sReferenceNumber,
+          request_ID: requestId,
+          taskName: step.stepName,
+          ...oTaskOwnership
+        }
+      });
     }
   }
 
@@ -4348,6 +4506,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _ensureExistingTaskOwnership(req, task, ownership) {
+    if (task.processorTeam_ID && !task.processorUser_ID) {
+      await cds.tx(req).run(
+        UPDATE(this.entities.ProcessTasks, task.ID).set({
+          processor: null,
+          processorEmail: null,
+          assignedUser_ID: null,
+          isTeamTask: true
+        })
+      );
+      return;
+    }
+
     if (task.assignedUser_ID || task.processorUser_ID || task.processorTeam_ID || task.processorEmail || task.processor) {
       return;
     }
@@ -4596,6 +4766,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _notifyTeamAssignment(req, assignment) {
+    if (assignment.assignmentType === "TASK") {
+      return this._notifyTaskAssignment(req, { task: assignment.task });
+    }
+
     const oLog = cds.log("team-notifications");
 
     try {
@@ -4652,6 +4826,160 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     } catch (error) {
       // Assignment remains successful if the external notification endpoint is unavailable.
       oLog.error("Team-assignment notification failed", error);
+    }
+  }
+
+  async _notifyTaskAssignment(req, { task, failWhenUnassigned = false }) {
+    const oLog = cds.log("task-assignment-notifications");
+
+    try {
+      const oRequest = await this._getRequest(req, task.request_ID);
+      const aRecipients = [];
+
+      if (task.processorTeam_ID) {
+        const aMembers = await this.master.run(
+          SELECT.from(this.masterEntities.TeamMembers).where({
+            team_ID: task.processorTeam_ID,
+            isActive: true
+          })
+        );
+
+        for (const oMember of aMembers) {
+          const sEmail = String(oMember.email || "").trim().toLowerCase();
+          if (sEmail) {
+            aRecipients.push({ email: sEmail, displayName: oMember.displayName || sEmail });
+          }
+        }
+      } else if (task.processorEmail) {
+        aRecipients.push({
+          email: String(task.processorEmail).trim().toLowerCase(),
+          displayName: task.processor || task.assignedTo || task.processorEmail
+        });
+      } else if (task.processorUser_ID || task.assignedUser_ID) {
+        const oUser = await this.master.run(
+          SELECT.one.from(this.masterEntities.Users).where({
+            ID: task.processorUser_ID || task.assignedUser_ID,
+            isActive: true
+          })
+        );
+        if (oUser && this._userEmail(oUser)) {
+          aRecipients.push({
+            email: this._userEmail(oUser).trim().toLowerCase(),
+            displayName: this._userDisplayName(oUser)
+          });
+        }
+      }
+
+      const aResolvedRecipients = [];
+      for (const oRecipient of aRecipients) {
+        const oResolved = await this._resolveDelegatedRecipient(
+          req,
+          oRecipient.email,
+          this.masterEntities.Delegations
+        );
+        const sEmail = String(oResolved.recipient || "").trim().toLowerCase();
+        if (sEmail && !aResolvedRecipients.some((oItem) => oItem.email === sEmail)) {
+          aResolvedRecipients.push({
+            email: sEmail,
+            displayName: oResolved.delegated ? sEmail : oRecipient.displayName
+          });
+        }
+      }
+
+      if (!aResolvedRecipients.length) {
+        if (failWhenUnassigned) {
+          return req.reject(400, "Please assign a processor with a maintained email address first.");
+        }
+        oLog.warn(`No notification recipient is maintained for task ${task.ID}`);
+        return 0;
+      }
+
+      await this._startBpaTaskAssignmentWorkflow(req, {
+        task,
+        request: oRequest,
+        recipients: aResolvedRecipients
+      });
+
+      if (task.processorTeam_ID) {
+        await cds.tx(req).run(
+          UPDATE(this.entities.ProcessTaskTeamMembers)
+            .set({ notifiedAt: this._now() })
+            .where({ task_ID: task.ID })
+        );
+      }
+
+      return aResolvedRecipients.length;
+    } catch (error) {
+      if (failWhenUnassigned) {
+        throw error;
+      }
+      // Task assignment remains successful if BPA is unavailable.
+      oLog.error(`Task-assignment notification failed for task ${task.ID}`, error);
+      return 0;
+    }
+  }
+
+  async _startBpaTaskAssignmentWorkflow(req, { task, request, recipients }) {
+    const sJwt = this._requestJwt(req);
+    const bUseUserDestination = this._hasBusinessUserJwt(req, sJwt);
+    const sDestinationName = bUseUserDestination ? BPA_USER_DESTINATION : BPA_TECHNICAL_DESTINATION;
+    const aEmails = recipients.map((oRecipient) => oRecipient.email);
+    const sAssigneeName = recipients.length === 1
+      ? recipients[0].displayName
+      : task.processorTeamName || recipients.map((oRecipient) => oRecipient.displayName).join(", ");
+    const oPayload = {
+      definitionId: BPA_TASK_ASSIGNMENT_DEFINITION_ID,
+      context: {
+        taskId: task.ID || "",
+        taskTitle: task.taskName || "",
+        assigneeEmail: aEmails,
+        assigneeName: sAssigneeName || "",
+        taskUrl: this._assignmentUrl(req, request?.ID || task.request_ID, task.ID),
+        assignedDate: this._now(),
+        requesterName: request?.requester || "",
+        requestId: request?.ID || task.request_ID || "",
+        processorTeam: task.processorTeamName || "",
+        processType: request?.processType_code || "",
+        subProcessType: request?.subProcessType_code || ""
+      }
+    };
+    const sSubject = `Flowmate task assigned: ${task.taskName || task.referenceNumber || task.ID}`;
+
+    try {
+      await executeHttpRequest(
+        {
+          destinationName: sDestinationName,
+          ...(bUseUserDestination ? { jwt: sJwt } : {})
+        },
+        {
+          method: "POST",
+          url: BPA_WORKFLOW_PATH,
+          data: oPayload,
+          headers: { "content-type": "application/json" }
+        }
+      );
+
+      for (const sEmail of aEmails) {
+        await this._recordTeamNotification(req, {
+          requestId: request?.ID || task.request_ID,
+          recipient: sEmail,
+          subject: sSubject,
+          status: "SENT",
+          interfaceSystem: "BPA_TASK_ASSIGNMENT_WORKFLOW"
+        });
+      }
+    } catch (error) {
+      for (const sEmail of aEmails) {
+        await this._recordTeamNotification(req, {
+          requestId: request?.ID || task.request_ID,
+          recipient: sEmail,
+          subject: sSubject,
+          status: "FAILED",
+          errorMessage: error.message,
+          interfaceSystem: "BPA_TASK_ASSIGNMENT_WORKFLOW"
+        });
+      }
+      throw error;
     }
   }
 
@@ -4724,7 +5052,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         subject: notification.subject,
         body: notification.subject,
         status: notification.status,
-        interfaceSystem: "BPA_EMAIL_WORKFLOW",
+        interfaceSystem: notification.interfaceSystem || "BPA_EMAIL_WORKFLOW",
         queuedAt: this._now(),
         sentAt: notification.status === "SENT" ? this._now() : null,
         errorMessage: notification.errorMessage || null

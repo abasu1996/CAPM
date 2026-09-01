@@ -2,6 +2,7 @@ using { flowmate.db as fldb } from '../db/schema';
 using { CommonMasterDataService as common } from './external/common-master';
 
 @requires: 'authenticated-user'
+//@odata.draft.enabled: true
 service FlowmateService {
     type ReportFilter {
         fromDate        : Date;
@@ -286,6 +287,8 @@ service FlowmateService {
         message       : String(500);
     };
     action reserveRequest(requestId: UUID) returns Boolean;
+    @requires: 'Admin'
+    action assignRequestToUser(requestId: UUID, userId: UUID) returns Boolean;
     action updateRequestStatus(requestId: UUID, statusCode: String(20)) returns Boolean;
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;
     action assignRequestProcessor(requestId: UUID, processorUserId: UUID) returns Boolean;
@@ -293,6 +296,9 @@ service FlowmateService {
     action assignTaskProcessor(taskId: UUID, processorUserId: UUID) returns Boolean;
     action assignTaskTeam(taskId: UUID, teamId: UUID) returns Boolean;
     action assignTeamTaskToMe(taskId: UUID) returns Boolean;
+    action notifyTaskProcessor(taskId: UUID) returns {
+        recipientCount : Integer;
+    };
     action getCurrentUserDetails() returns {
         ID                : UUID;
         displayName       : String(150);

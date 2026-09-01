@@ -387,37 +387,18 @@ sap.ui.define([
                 return;
             }
 
-            let sRecipient;
-
             this.showBusy();
 
             try {
-                const oResolvedRecipient = await this.callAction("resolveTaskNotificationRecipient", {
+                const oResult = await this.callAction("notifyTaskProcessor", {
                     taskId: sTaskId
                 });
-
-                sRecipient = oResolvedRecipient.recipient;
-
-                if (oResolvedRecipient.delegated) {
-                    MessageToast.show(this.getText("notificationDelegatedMessage", [sRecipient]));
-                }
+                MessageToast.show(this.getText("processorNotificationSentMessage", [oResult.recipientCount]));
             } catch (oError) {
                 MessageToast.show(this.getErrorMessage(oError, this.getText("processorEmailMissingMessage")));
-                return;
             } finally {
                 this.hideBusy();
             }
-
-            const sTaskName = oContext.getProperty("taskName") || this.getText("taskFallbackName");
-            const sRequestTitle = oContext.getProperty("request/title") || oContext.getProperty("request/referenceNumber") || "";
-            const sSubject = this.getText("taskNotificationSubject", [sTaskName]);
-            const sBody = this.getText("taskNotificationBody", [
-                sTaskName,
-                sRequestTitle,
-                window.location.href
-            ]);
-
-            window.location.href = `mailto:${encodeURIComponent(sRecipient)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
         },
 
         async onNotifyTaskTeamMembers(oEvent) {

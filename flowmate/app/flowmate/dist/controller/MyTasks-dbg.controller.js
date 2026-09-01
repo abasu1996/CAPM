@@ -352,7 +352,15 @@ sap.ui.define([
 
         _showTaskDetailById(sTaskId) {
             this._sSelectedTaskId = sTaskId;
-            this.byId("taskObjectPage").bindElement({
+            const oTaskPage = this.byId("taskObjectPage");
+
+            oTaskPage.unbindElement();
+            this.getView().getModel("statusEdit").setProperty("/taskStatus", "");
+            this.getView().getModel("processorEdit").setData({
+                processorUser_ID: "",
+                processorName: ""
+            });
+            oTaskPage.bindElement({
                 path: `${this._taskCollectionPath()}(guid'${sTaskId}')`,
                 parameters: {
                     expand: "request"
@@ -377,6 +385,7 @@ sap.ui.define([
                     }
                 }
             });
+            oTaskPage.getElementBinding()?.refresh(true);
             this._setTasksLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
         },
 

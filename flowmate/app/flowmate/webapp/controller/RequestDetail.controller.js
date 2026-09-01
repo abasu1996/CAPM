@@ -59,6 +59,18 @@ sap.ui.define([
             const sRequestId = this.getView().getBindingContext()?.getProperty("ID");
             const sStatusCode = this.getView().getModel("statusEdit").getProperty("/requestStatus");
 
+            return this._updateRequestStatus(sRequestId, sStatusCode);
+        },
+
+        async onRequestStatusAction(oEvent) {
+            return this._updateRequestStatus(
+                this.getView().getBindingContext()?.getProperty("ID"),
+                oEvent.getSource().getKey()
+            );
+        },
+
+        async _updateRequestStatus(sRequestId, sStatusCode) {
+
             if (!sRequestId || !sStatusCode) {
                 return;
             }
@@ -77,6 +89,56 @@ sap.ui.define([
             } finally {
                 this.hideBusy();
             }
+        },
+
+        async onReserveRequest() {
+            const sRequestId = this.getView().getBindingContext()?.getProperty("ID");
+            if (!sRequestId) {
+                return;
+            }
+
+            this.showBusy();
+            try {
+                await this.callAction("reserveRequest", { requestId: sRequestId });
+                MessageToast.show(this.getText("requestReservedMessage"));
+                this._refreshRequest();
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestReserveErrorMessage")));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        onOpenAssignRequestUserDialog() {
+            this.byId("requestDetailAssignUserDialog").open();
+        },
+
+        onAssignRequestUserSearch(oEvent) {
+            this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
+        },
+
+        async onAssignRequestUserConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+            const sRequestId = this.getView().getBindingContext()?.getProperty("ID");
+            const sUserId = oContext?.getProperty("ID");
+            if (!sRequestId || !sUserId) {
+                return;
+            }
+
+            this.showBusy();
+            try {
+                await this.callAction("assignRequestToUser", { requestId: sRequestId, userId: sUserId });
+                MessageToast.show(this.getText("requestAssignedToUserMessage", [oContext.getProperty("displayName")]));
+                this._refreshRequest();
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestAssignToUserErrorMessage")));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        onAssignRequestUserClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
         },
 
         onProcessorValueHelpRequest() {

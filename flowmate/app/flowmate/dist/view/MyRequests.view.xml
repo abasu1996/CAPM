@@ -310,12 +310,37 @@
                                 icon="{= ${fclState>/midFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen' }"
                                 tooltip="{= ${fclState>/midFullScreen} ? ${i18n>restoreColumnsButton} : ${i18n>expandColumnButton} }"
                                 press=".onToggleRequestFullScreen" />
-                            <Button
-                                icon="sap-icon://locked"
-                                text="{i18n>reserveRequestButton}"
-                                type="Emphasized"
-                                visible="{= !${reservedBy} }"
-                                press=".onReserveRequest" />
+                            <MenuButton
+                                icon="sap-icon://action"
+                                text="{i18n>requestActionsMenuButton}"
+                                type="Emphasized">
+                                <menu>
+                                    <Menu>
+                                        <MenuItem
+                                            text="{i18n>changeRequestStatusAction}"
+                                            icon="sap-icon://status-in-process"
+                                            visible="{requestEdit>/editable}"
+                                            items="{/ProcessStatus}">
+                                            <items>
+                                                <MenuItem
+                                                    key="{code}"
+                                                    text="{name}"
+                                                    press=".onRequestStatusAction" />
+                                            </items>
+                                        </MenuItem>
+                                        <MenuItem
+                                            text="{i18n>reserveRequestButton}"
+                                            icon="sap-icon://locked"
+                                            visible="{= !${reservedBy} }"
+                                            press=".onReserveRequest" />
+                                        <MenuItem
+                                            text="{i18n>assignRequestToUserButton}"
+                                            icon="sap-icon://employee-approvals"
+                                            visible="{permissions>/isAdmin}"
+                                            press=".onOpenAssignRequestUserDialog" />
+                                    </Menu>
+                                </menu>
+                            </MenuButton>
                             <Button
                                 icon="sap-icon://chain-link"
                                 text="{i18n>createSuccessorRequestButton}"
@@ -392,54 +417,9 @@
                                 <Label text="{i18n>dueDateLabel}" />
                                 <Text text="{dueDate}" />
                             </VBox>
-                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
-                                <Label text="{i18n>statusLabel}" />
-                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
-                                    <Select
-                                        width="11rem"
-                                        enabled="{requestEdit>/editable}"
-                                        selectedKey="{statusEdit>/requestStatus}"
-                                        items="{/ProcessStatus}"
-                                        forceSelection="false">
-                                        <core:Item key="{code}" text="{name}" />
-                                    </Select>
-                                    <Button
-                                        class="sapUiTinyMarginBegin"
-                                        icon="sap-icon://save"
-                                        type="Emphasized"
-                                        enabled="{requestEdit>/editable}"
-                                        tooltip="{i18n>saveStatusButton}"
-                                        press=".onSaveRequestStatus" />
-                                </HBox>
-                            </VBox>
-                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>processorLabel}" />
-                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
-                                    <Input
-                                        width="100%"
-                                        value="{processorEdit>/requestProcessorName}"
-                                        placeholder="{i18n>selectProcessorPlaceholder}"
-                                        showValueHelp="true"
-                                        showSuggestion="true"
-                                        startSuggestion="1"
-                                        filterSuggests="false"
-                                        suggest=".onUserSuggest"
-                                        suggestionItemSelected=".onRequestProcessorSuggestionSelected"
-                                        liveChange=".onRequestProcessorLiveChange"
-                                        enabled="{requestEdit>/editable}"
-                                        valueHelpRequest=".onRequestProcessorValueHelpRequest"
-                                        suggestionItems="{/Users}">
-                                        <suggestionItems>
-                                            <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
-                                        </suggestionItems>
-                                    </Input>
-                                    <Button
-                                        class="sapUiTinyMarginBegin"
-                                        icon="sap-icon://save"
-                                        enabled="{requestEdit>/editable}"
-                                        tooltip="{i18n>saveProcessorButton}"
-                                        press=".onSaveRequestProcessor" />
-                                </HBox>
+                                <Text text="{= ${processor} || ${i18n>unassignedProcessorText} }" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
                                 <Label text="{i18n>processorTeamLabel}" />
@@ -1163,26 +1143,6 @@
                             wrap="Wrap"
                             alignItems="Start">
                             <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
-                                <Label text="{i18n>statusLabel}" />
-                                <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
-                                    <Select
-                                        width="11rem"
-                                        enabled="{requestEdit>/editable}"
-                                        selectedKey="{statusEdit>/taskStatus}"
-                                        items="{/TaskStatus}"
-                                        forceSelection="false">
-                                        <core:Item key="{code}" text="{name}" />
-                                    </Select>
-                                    <Button
-                                        class="sapUiTinyMarginBegin"
-                                        icon="sap-icon://save"
-                                        type="Emphasized"
-                                        enabled="{requestEdit>/editable}"
-                                        tooltip="{i18n>saveStatusButton}"
-                                        press=".onSaveRequestTaskStatus" />
-                                </HBox>
-                            </VBox>
-                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
                                 <Label text="{i18n>processorLabel}" />
                                 <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
                                     <Input
@@ -1196,7 +1156,7 @@
                                         suggest=".onUserSuggest"
                                         suggestionItemSelected=".onRequestTaskProcessorSuggestionSelected"
                                         liveChange=".onRequestTaskProcessorLiveChange"
-                                        enabled="{requestEdit>/editable}"
+                                        enabled="{= ${requestEdit>/editable} &amp;&amp; !${processorTeam_ID} }"
                                         valueHelpRequest=".onRequestTaskProcessorValueHelpRequest"
                                         suggestionItems="{/Users}">
                                         <suggestionItems>
@@ -1206,7 +1166,7 @@
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
-                                        enabled="{requestEdit>/editable}"
+                                        enabled="{= ${requestEdit>/editable} &amp;&amp; !${processorTeam_ID} }"
                                         tooltip="{i18n>saveProcessorButton}"
                                         press=".onSaveRequestTaskProcessor" />
                                 </HBox>
@@ -1225,7 +1185,7 @@
                                         suggest=".onTeamSuggest"
                                         suggestionItemSelected=".onRequestTaskTeamSuggestionSelected"
                                         liveChange=".onRequestTaskTeamLiveChange"
-                                        enabled="{requestEdit>/editable}"
+                                        enabled="{= ${requestEdit>/editable} &amp;&amp; !${processorTeam_ID} }"
                                         valueHelpRequest=".onRequestTaskTeamValueHelpRequest"
                                         suggestionItems="{/Teams}">
                                         <suggestionItems>
@@ -1235,7 +1195,7 @@
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
-                                        enabled="{requestEdit>/editable}"
+                                        enabled="{= ${requestEdit>/editable} &amp;&amp; !${processorTeam_ID} }"
                                         tooltip="{i18n>saveTeamButton}"
                                         press=".onSaveRequestTaskTeam" />
                                 </HBox>
@@ -1730,6 +1690,35 @@
                     press=".onCloseRequestEmailDialog" />
             </endButton>
         </Dialog>
+        <TableSelectDialog
+            id="assignRequestUserDialog"
+            title="{i18n>assignRequestToUserTitle}"
+            noDataText="{i18n>noUsersFoundText}"
+            rememberSelections="false"
+            search=".onAssignRequestUserSearch"
+            confirm=".onAssignRequestUserConfirm"
+            cancel=".onAssignRequestUserClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>departmentLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                    <Text text="{department}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
         <TableSelectDialog
             id="requestEmailToUserDialog"
             title="{i18n>selectEmailRecipientsTitle}"

@@ -44,6 +44,34 @@
                         icon="sap-icon://refresh"
                         tooltip="{i18n>refreshButton}"
                         press=".onRefresh" />
+                    <MenuButton
+                        icon="sap-icon://action"
+                        text="{i18n>requestActionsMenuButton}"
+                        type="Emphasized">
+                        <menu>
+                            <Menu>
+                                <MenuItem
+                                    text="{i18n>changeRequestStatusAction}"
+                                    icon="sap-icon://status-in-process"
+                                    visible="{= !!${reservedBy} &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
+                                    items="{/ProcessStatus}">
+                                    <items>
+                                        <MenuItem key="{code}" text="{name}" press=".onRequestStatusAction" />
+                                    </items>
+                                </MenuItem>
+                                <MenuItem
+                                    text="{i18n>reserveRequestButton}"
+                                    icon="sap-icon://locked"
+                                    visible="{= !${reservedBy} }"
+                                    press=".onReserveRequest" />
+                                <MenuItem
+                                    text="{i18n>assignRequestToUserButton}"
+                                    icon="sap-icon://employee-approvals"
+                                    visible="{permissions>/isAdmin}"
+                                    press=".onOpenAssignRequestUserDialog" />
+                            </Menu>
+                        </menu>
+                    </MenuButton>
                     <Button
                         icon="sap-icon://chain-link"
                         text="{i18n>createSuccessorRequestButton}"
@@ -95,55 +123,6 @@
                             inverted="true" />
                     </statuses>
                 </ObjectHeader>
-                <HBox
-                    class="sapUiSmallMarginTop flowmateDetailBlock flowmateStatusRow"
-                    alignItems="End">
-                    <VBox class="flowmateStatusEditor">
-                        <Label text="{i18n>statusLabel}" />
-                        <Select
-                            width="12rem"
-                            selectedKey="{statusEdit>/requestStatus}"
-                            items="{/ProcessStatus}">
-                            <core:Item key="{code}" text="{name}" />
-                        </Select>
-                    </VBox>
-                    <Button
-                        class="sapUiTinyMarginBegin"
-                        icon="sap-icon://save"
-                        text="{i18n>saveStatusButton}"
-                        type="Emphasized"
-                        press=".onSaveRequestStatus" />
-                </HBox>
-                <HBox
-                    class="sapUiSmallMarginTop flowmateDetailBlock flowmateStatusRow"
-                    alignItems="End">
-                    <VBox class="flowmateStatusEditor">
-                        <Label text="{i18n>processorLabel}" />
-                        <Input
-                            width="12rem"
-                            value="{processorEdit>/processorName}"
-                            placeholder="{i18n>selectProcessorPlaceholder}"
-                            showValueHelp="true"
-                            showSuggestion="true"
-                            startSuggestion="1"
-                            filterSuggests="false"
-                            suggest=".onUserSuggest"
-                            suggestionItemSelected=".onProcessorSuggestionSelected"
-                            liveChange=".onProcessorLiveChange"
-                            valueHelpRequest=".onProcessorValueHelpRequest"
-                            suggestionItems="{/Users}">
-                            <suggestionItems>
-                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
-                            </suggestionItems>
-                        </Input>
-                    </VBox>
-                    <Button
-                        class="sapUiTinyMarginBegin"
-                        icon="sap-icon://save"
-                        text="{i18n>saveProcessorButton}"
-                        type="Emphasized"
-                        press=".onSaveRequestProcessor" />
-                </HBox>
                 <IconTabBar
                     class="sapUiSmallMarginTop flowmateSurface"
                     expandable="false">
@@ -437,13 +416,13 @@
     </f:DynamicPage>
     <mvc:dependents>
         <TableSelectDialog
-            id="requestDetailProcessorValueHelpDialog"
-            title="{i18n>selectProcessorTitle}"
+            id="requestDetailAssignUserDialog"
+            title="{i18n>assignRequestToUserTitle}"
             noDataText="{i18n>noUsersFoundText}"
             rememberSelections="false"
-            search=".onProcessorValueHelpSearch"
-            confirm=".onProcessorValueHelpConfirm"
-            cancel=".onProcessorValueHelpClose"
+            search=".onAssignRequestUserSearch"
+            confirm=".onAssignRequestUserConfirm"
+            cancel=".onAssignRequestUserClose"
             items="{
                 path: '/Users',
                 filters: [{ path: 'isActive', operator: 'EQ', value1: true }],

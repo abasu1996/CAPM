@@ -22310,6 +22310,61 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/assignRequestToUser": {
+      "post": {
+        "summary": "Invokes action assignRequestToUser",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "boolean",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef",
+                    "nullable": true
+                  },
+                  "userId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/assignTaskProcessor": {
       "post": {
         "summary": "Invokes action assignTaskProcessor",
@@ -24636,6 +24691,54 @@
           },
           "4XX": {
             "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/notifyTaskProcessor": {
+      "post": {
+        "summary": "Invokes action notifyTaskProcessor",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.return_FlowmateService_notifyTaskProcessor"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef",
+                    "nullable": true
+                  }
+                }
+              }
+            }
           }
         },
         "x-flowmate-project": "flowmate",
@@ -71769,6 +71872,17 @@
         "properties": {
           "canMaintainUsers": {
             "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateService.return_FlowmateService_notifyTaskProcessor": {
+        "title": "return_FlowmateService_notifyTaskProcessor",
+        "type": "object",
+        "properties": {
+          "recipientCount": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         }

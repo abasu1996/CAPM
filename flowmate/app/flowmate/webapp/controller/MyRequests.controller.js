@@ -403,6 +403,49 @@ sap.ui.define([
             }
         },
 
+        onOpenAssignRequestUserDialog() {
+            if (!this._sSelectedRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this.byId("assignRequestUserDialog").open();
+        },
+
+        onAssignRequestUserSearch(oEvent) {
+            this._filterUsers(oEvent.getSource(), oEvent.getParameter("value") || "");
+        },
+
+        async onAssignRequestUserConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+            const sUserId = oContext?.getProperty("ID");
+
+            if (!this._sSelectedRequestId || !sUserId) {
+                return;
+            }
+
+            this.showBusy();
+            try {
+                await this.callAction("assignRequestToUser", {
+                    requestId: this._sSelectedRequestId,
+                    userId: sUserId
+                });
+                MessageToast.show(this.getText("requestAssignedToUserMessage", [oContext.getProperty("displayName")]));
+                this._refreshRequestHeader();
+                this._refreshTaskSection();
+                this._refreshHistorySection();
+                this.byId("requestsTable").getBinding("items")?.refresh();
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestAssignToUserErrorMessage")));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        onAssignRequestUserClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([]);
+        },
+
         onSearch(oEvent) {
             const sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue") || "";
 
@@ -516,6 +559,7 @@ sap.ui.define([
 
         onCloseRequestTaskDetail() {
             this._sSelectedTaskId = null;
+            this._sTaskDetailLoadToken = null;
             this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
         },
 
@@ -565,6 +609,15 @@ sap.ui.define([
 
         async onSaveRequestStatus() {
             const sStatusCode = this.getView().getModel("statusEdit").getProperty("/requestStatus");
+
+            return this._updateRequestStatus(sStatusCode);
+        },
+
+        async onRequestStatusAction(oEvent) {
+            return this._updateRequestStatus(oEvent.getSource().getKey());
+        },
+
+        async _updateRequestStatus(sStatusCode) {
 
             if (!this._sSelectedRequestId || !sStatusCode) {
                 return;
@@ -1792,6 +1845,7 @@ sap.ui.define([
         _resetRequestSelection() {
             this._sSelectedRequestId = null;
             this._sSelectedTaskId = null;
+            this._sTaskDetailLoadToken = null;
             this._sSelectedPartyId = null;
             this._setRequestsLayout(fLibrary.LayoutType.OneColumn);
             this.getView().getModel("requestEdit").setProperty("/editable", true);
@@ -1802,43 +1856,54 @@ sap.ui.define([
             });
         },
 
-        _showRequestTaskDetail(sTaskId) {
+        async _showRequestTaskDetail(sTaskId) {
             this._sSelectedTaskId = sTaskId;
-            this.byId("requestsFlexibleColumnLayout").toEndColumnPage(this.byId("requestTaskObjectPage").getId());
-            this.byId("requestTaskObjectPage").bindElement({
-                path: `/RequestDetailTasks(guid'${sTaskId}')`,
-                parameters: {
-                    expand: "request"
-                },
-                events: {
-                    dataRequested: this.onDataRequested.bind(this),
-                    dataReceived: () => {
-                        this.onDataReceived();
-                        this.getView().getModel("statusEdit").setProperty(
-                            "/taskStatus",
-                            this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("status_code") || ""
-                        );
-                        this.getView().getModel("processorEdit").setProperty(
-                            "/taskProcessorUser_ID",
-                            this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("processorUser_ID") || ""
-                        );
-                        this.getView().getModel("processorEdit").setProperty(
-                            "/taskProcessorName",
-                            this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("processor") || ""
-                        );
-                        this.getView().getModel("processorEdit").setProperty(
-                            "/taskTeam_ID",
-                            this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("processorTeam_ID") || ""
-                        );
-                        this.getView().getModel("processorEdit").setProperty(
-                            "/taskTeamName",
-                            this.byId("requestTaskObjectPage").getBindingContext()?.getProperty("processorTeamName") || ""
-                        );
-                        this._loadTaskStepOptions("requestTaskObjectPage");
-                    }
-                }
-            });
+            const sLoadToken = `${sTaskId}-${Date.now()}`;
+            const oTaskPage = this.byId("requestTaskObjectPage");
+            const sTaskPath = `/RequestDetailTasks(guid'${sTaskId}')`;
+
+            this._sTaskDetailLoadToken = sLoadToken;
+            this.byId("requestsFlexibleColumnLayout").toEndColumnPage(oTaskPage.getId());
+            oTaskPage.unbindElement();
+            oTaskPage.setBindingContext(null);
+            this.getView().getModel("statusEdit").setProperty("/taskStatus", "");
+            this.getView().getModel("processorEdit").setProperty("/taskProcessorUser_ID", "");
+            this.getView().getModel("processorEdit").setProperty("/taskProcessorName", "");
+            this.getView().getModel("processorEdit").setProperty("/taskTeam_ID", "");
+            this.getView().getModel("processorEdit").setProperty("/taskTeamName", "");
             this._setRequestsLayout(fLibrary.LayoutType.ThreeColumnsEndExpanded);
+
+            this.showBusy();
+            try {
+                const oTask = await this._readEntry(sTaskPath, {
+                    urlParameters: {
+                        "$expand": "request"
+                    }
+                });
+
+                if (this._sTaskDetailLoadToken !== sLoadToken) {
+                    return;
+                }
+
+                oTaskPage.bindElement({
+                    path: sTaskPath,
+                    parameters: {
+                        expand: "request"
+                    }
+                });
+                this.getView().getModel("statusEdit").setProperty("/taskStatus", oTask.status_code || "");
+                this.getView().getModel("processorEdit").setProperty("/taskProcessorUser_ID", oTask.processorUser_ID || "");
+                this.getView().getModel("processorEdit").setProperty("/taskProcessorName", oTask.processor || "");
+                this.getView().getModel("processorEdit").setProperty("/taskTeam_ID", oTask.processorTeam_ID || "");
+                this.getView().getModel("processorEdit").setProperty("/taskTeamName", oTask.processorTeamName || "");
+                this._loadTaskStepOptions("requestTaskObjectPage");
+            } catch (oError) {
+                if (this._sTaskDetailLoadToken === sLoadToken) {
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("actionFailedMessage")));
+                }
+            } finally {
+                this.hideBusy();
+            }
         },
 
         _showInvolvedPartyDetail(sPartyId) {
