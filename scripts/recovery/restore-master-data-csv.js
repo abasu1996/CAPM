@@ -87,13 +87,11 @@ const definitions = {
     namespace: "flowmate.common.db",
     tablePrefix: "FLOWMATE_COMMON_DB_",
     entities: {
-      Roles: ["code", "name", "descr"],
       Users: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "referenceNumber", "userPrincipalName", "displayName", "email", "azureObjectId", "department", "role_code", "manager_ID", "isActive"],
       Teams: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "referenceNumber", "teamCode", "name", "description", "isActive"],
       TeamMembers: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "referenceNumber", "team_ID", "user_ID", "displayName", "email", "isActive"],
       Vendors: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "vendorCode", "vendorName", "vendorEmail", "isActive"],
-      Customers: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "customerCode", "customerName", "customerEmail", "isActive"],
-      Delegations: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "delegator_ID", "delegate_ID", "startDate", "endDate", "forwardNotifications", "enabled", "createdOnBehalf"]
+      Customers: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "customerCode", "customerName", "customerEmail", "isActive"]
     }
   }
 };

@@ -129,13 +129,40 @@ jobs:
             flowmate-CA/mta_archives/flowmate-ca.mtar
 
       - name: Deploy Flowmate Common
-        run: cf deploy flowmate-common/mta_archives/flowmate-common.mtar -f
+        shell: bash
+        run: |
+          cf deploy flowmate-common/mta_archives/flowmate-common.mtar -f || {
+            mkdir -p "${RUNNER_TEMP}/mta-failure-logs"
+            cf dmol --mta flowmate-common --last 1 -d "${RUNNER_TEMP}/mta-failure-logs" || true
+            exit 1
+          }
 
       - name: Deploy Flowmate
-        run: cf deploy flowmate/mta_archives/flowmate.mtar -f
+        shell: bash
+        run: |
+          cf deploy flowmate/mta_archives/flowmate.mtar -f || {
+            mkdir -p "${RUNNER_TEMP}/mta-failure-logs"
+            cf dmol --mta flowmate --last 1 -d "${RUNNER_TEMP}/mta-failure-logs" || true
+            exit 1
+          }
 
       - name: Deploy Flowmate CA
-        run: cf deploy flowmate-CA/mta_archives/flowmate-ca.mtar -f
+        shell: bash
+        run: |
+          cf deploy flowmate-CA/mta_archives/flowmate-ca.mtar -f || {
+            mkdir -p "${RUNNER_TEMP}/mta-failure-logs"
+            cf dmol --mta flowmate-ca --last 1 -d "${RUNNER_TEMP}/mta-failure-logs" || true
+            exit 1
+          }
+
+      - name: Upload MTA failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-failure-logs-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/mta-failure-logs
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Verify application state
         shell: bash
