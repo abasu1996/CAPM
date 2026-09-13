@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "22"
   CF_API: ${{ secrets.CF_API }}
   CF_ORG: ${{ secrets.CF_ORG }}
   CF_SPACE: ${{ secrets.CF_SPACE }}
@@ -80,7 +80,9 @@ jobs:
         run: |
           set -euo pipefail
           npm ci --prefix flowmate-common
-          npm ci --prefix flowmate
+          # Flowmate is an npm workspace. npm 10 currently rejects its generated
+          # lockfile while resolving optional peer dependencies (keyv/cacheable).
+          npm install --prefix flowmate --no-audit --no-fund
           npm ci --prefix flowmate-CA
 
       - name: Export HANA before deployment

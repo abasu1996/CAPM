@@ -23,9 +23,9 @@ for index in "${!projects[@]}"; do
   echo "Exporting ${instance} into ${export_dir}"
   (
     cd "${project_dir}"
-    npx cds bind db --to "${instance}:github-actions-backup" --for ci --kind hana
+    ./node_modules/.bin/cds bind db --to "${instance}:github-actions-backup" --for ci --kind hana
     RECOVERY_EXPORT_DIR="${export_dir}" \
-      npx cds bind --exec --profile ci -- \
+      ./node_modules/.bin/cds bind --exec --profile ci -- \
       node "${repository_root}/scripts/recovery/export-hana-catalog.js"
   )
 done
@@ -39,4 +39,3 @@ node "${repository_root}/scripts/ci/validate-hana-export.js" "${output_root}"
     | xargs -0 sha256sum > SHA256SUMS
   sha256sum --check SHA256SUMS
 )
-

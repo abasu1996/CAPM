@@ -9,9 +9,10 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
-        - npm ci
+        # npm 10 rejects this workspace lock during optional peer resolution.
+        - npm install --no-audit --no-fund
         - npm run swagger:generate
-        - npx cds build --production
+        - ./node_modules/.bin/cds build --production
         - mkdir -p gen/srv/docs
         - cp docs/flowmate-openapi.json gen/srv/docs/flowmate-openapi.json
         - mkdir -p gen/router
