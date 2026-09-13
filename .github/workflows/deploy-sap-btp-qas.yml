@@ -115,9 +115,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mbt build --mtar flowmate-common.mtar --target flowmate-common/mta_archives --source flowmate-common
-          mbt build --mtar flowmate.mtar --target flowmate/mta_archives --source flowmate
-          mbt build --mtar flowmate-ca.mtar --target flowmate-CA/mta_archives --source flowmate-CA
+          (cd flowmate-common && mbt build --mtar flowmate-common.mtar)
+          (cd flowmate && mbt build --mtar flowmate.mtar)
+          (cd flowmate-CA && mbt build --mtar flowmate-ca.mtar)
+
+          test -s flowmate-common/mta_archives/flowmate-common.mtar
+          test -s flowmate/mta_archives/flowmate.mtar
+          test -s flowmate-CA/mta_archives/flowmate-ca.mtar
+
+          ls -lh \
+            flowmate-common/mta_archives/flowmate-common.mtar \
+            flowmate/mta_archives/flowmate.mtar \
+            flowmate-CA/mta_archives/flowmate-ca.mtar
 
       - name: Deploy Flowmate Common
         run: cf deploy flowmate-common/mta_archives/flowmate-common.mtar -f
