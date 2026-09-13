@@ -23,6 +23,18 @@ for index in "${!projects[@]}"; do
   echo "Exporting ${instance} into ${export_dir}"
   (
     cd "${project_dir}"
+    if [[ ! -x ./node_modules/.bin/cds ]]; then
+      echo "Project-local CDS CLI is missing for ${project}; reinstalling dependencies"
+      if [[ "${project}" == "flowmate" ]]; then
+        npm install --no-audit --no-fund
+      else
+        npm ci --no-audit --no-fund
+      fi
+    fi
+    if [[ ! -x ./node_modules/.bin/cds ]]; then
+      echo "CDS CLI is still unavailable after installing ${project} dependencies" >&2
+      exit 1
+    fi
     ./node_modules/.bin/cds bind db --to "${instance}:github-actions-backup" --for ci --kind hana
     RECOVERY_EXPORT_DIR="${export_dir}" \
       ./node_modules/.bin/cds bind --exec --profile ci -- \
