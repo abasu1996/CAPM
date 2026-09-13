@@ -436,9 +436,96 @@ sap.ui.define([], function () {
   definitions.SES_NEW = sesFields;
   definitions.SES_MOD = sesFields;
 
+  const column = (name, label, type) => ({ name, label, type: type || "input" });
+
+  const itemColumns = {
+    PURCHASE_ORDER: [
+      column("materialOrService", "Service Code / Material Code"),
+      column("wbsElement", "WBS Element / Cost Center / Budget Code"),
+      column("quantity", "Quantity", "number"),
+      column("unitPrice", "Unit Price", "number"),
+      column("currency", "Currency"),
+      column("taxCode", "Applicable Taxes"),
+      column("contractNo", "Contract No"),
+      column("campaignLocationCode", "Campaign / Location Code"),
+      column("siteId", "Site ID"),
+      column("plant", "Plant"),
+      column("itemCategory", "Item Category"),
+      column("accountAssignment", "Account Assignment"),
+      column("materialGroup", "Material Group")
+    ],
+    SERVICE_ENTRY_SHEET: [
+      column("poNumber", "PO Number"),
+      column("poLineItemNo", "PO Line Item No"),
+      column("quantity", "Quantity", "number"),
+      column("value", "SES Amount", "number")
+    ],
+    OUTLINE_CONTRACT: [
+      column("contractType", "Contract Type"),
+      column("lineItem", "Line Item"),
+      column("itemCategory", "Item Category"),
+      column("purchaseOrg", "Purchase Org"),
+      column("purchaseGroup", "Purchase Group"),
+      column("vendorId", "Vendor ID"),
+      column("companyCode", "Company Code"),
+      column("plant", "Plant"),
+      column("validityStartDate", "Validity Start Date", "date"),
+      column("validityEndDate", "Validity End Date", "date"),
+      column("incoterms", "Incoterms"),
+      column("incotermsLocation", "Incoterms Location"),
+      column("targetQuantity", "Target Quantity", "number"),
+      column("coupaSourcingEventNo", "Coupa Sourcing Event No."),
+      column("serviceLine", "Service Line"),
+      column("shortTextForServices", "Short Text for Services"),
+      column("materialServiceCode", "Material / Service Code"),
+      column("quantity", "Quantity", "number"),
+      column("grossPrice", "Gross Price", "number"),
+      column("priceUnit", "Price Unit"),
+      column("currency", "Currency"),
+      column("materialSavingPct", "Material Saving %", "number"),
+      column("serviceSavingPct", "Service Saving %", "number"),
+      column("taxCode", "Tax Code"),
+      column("paymentTerm", "Payment Term"),
+      column("accountAssignment", "Account Assignment"),
+      column("costCenter", "Cost Center"),
+      column("orderNumber", "Order Number"),
+      column("wbsElement", "WBS Element")
+    ]
+  };
+
+  const variantsByRequestType = {
+    MATERIAL_CODE: ["MAT_ENG_IT", "MAT_ADMIN_CONS", "MAT_ZTRD_NEW", "MAT_ZTRD_EXISTING"],
+    SERVICE_CODE: ["SVC_NEW", "SVC_EXISTING"],
+    EQUIPMENT_CODE: ["EQP_NEW", "EQP_EXISTING"],
+    PROJECT_CODE: ["PROJECT_NEW_MOD", "PROJECT_FL_ACTIVITY"],
+    MATERIAL_RESERVATION: ["RES_DIRECT", "RES_WAREHOUSE"],
+    OUTLINE_CONTRACT: ["CONTRACT_NEW", "CONTRACT_MOD"],
+    PURCHASE_ORDER: ["PO_CAPEX_IM", "PO_CAPEX_FM", "PO_OPEX"],
+    SERVICE_ENTRY_SHEET: ["SES_NEW", "SES_MOD"]
+  };
+
   return {
     getFields: function (variantCode) {
       return definitions[variantCode] || [];
+    },
+    getFieldsByRequestType: function (requestTypeCode) {
+      const variantCodes = variantsByRequestType[requestTypeCode] || [];
+      const seen = new Set();
+      const merged = [];
+
+      variantCodes.forEach(function (variantCode) {
+        (definitions[variantCode] || []).forEach(function (fieldDefinition) {
+          if (!seen.has(fieldDefinition.name)) {
+            seen.add(fieldDefinition.name);
+            merged.push(fieldDefinition);
+          }
+        });
+      });
+
+      return merged;
+    },
+    getItemColumns: function (requestTypeCode) {
+      return itemColumns[requestTypeCode] || [];
     }
   };
 });

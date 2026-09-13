@@ -16,7 +16,14 @@ sap.ui.define([
         ProcessStatus: { tableId: "processStatusTable", titleKey: "processStatusesConfigTitle" },
         TaskStatus: { tableId: "taskStatusTable", titleKey: "taskStatusesConfigTitle" },
         RequestDropDown: { tableId: "requestDropDownTable", titleKey: "requestDropdownConfigTitle" },
-        Roles: { tableId: "rolesTable", titleKey: "rolesConfigTitle" }
+        Roles: { tableId: "rolesTable", titleKey: "rolesConfigTitle" },
+        Currencies: { tableId: "currencyTable", titleKey: "currencyConfigTitle" },
+        Categories: { tableId: "categoryTable", titleKey: "categoryConfigTitle" },
+        PaymentSubCategories: { tableId: "paymentSubCategoryTable", titleKey: "paymentSubCategoryConfigTitle" },
+        PaymentMethod: { tableId: "paymentMethodTable", titleKey: "paymentMethodConfigTitle" },
+        TypeOfPayment: { tableId: "typeOfPaymentTable", titleKey: "typeOfPaymentConfigTitle" },
+        RequestDivision: { tableId: "requestDivisionTable", titleKey: "requestDivisionConfigTitle" },
+        GuaranteeTypes: { tableId: "guaranteeTypesTable", titleKey: "guaranteeTypesConfigTitle" }
     };
 
     return BaseController.extend("flowmate.controller.AdminProcessConfig", {
@@ -25,6 +32,7 @@ sap.ui.define([
             this.getView().setModel(new JSONModel(this._emptyProcessStep()), "stepEdit");
             this.getView().setModel(new JSONModel(this._emptySubType()), "subTypeEdit");
             this.getView().setModel(new JSONModel(this._emptyVendor()), "vendorEdit");
+            this.getView().setModel(new JSONModel(this._emptyVendor()), "customerEdit");
             this.getView().setModel(new JSONModel(this._emptyLoaApproval()), "loaApprovalEdit");
             this.getView().setModel(new JSONModel(this._emptyWorkingCalendar()), "calendarEdit");
             this.getView().setModel(new JSONModel(this._emptyHoliday()), "holidayEdit");
@@ -434,6 +442,94 @@ sap.ui.define([
             });
         },
 
+        onAddCustomer() {
+            const oEntry = this._emptyCustomer();
+
+            oEntry.dialogTitle = this.getText("addCustomerButton");
+            this.getView().getModel("customerEdit").setData(oEntry);
+            this.byId("customerDialog").open();
+        },
+
+        onEditCustomer(oEvent) {
+            const oEntry = oEvent.getSource().getBindingContext().getObject();
+
+            this.getView().getModel("customerEdit").setData({
+                ...oEntry,
+                isEdit: true,
+                dialogTitle: this.getText("editCustomerButton")
+            });
+            this.byId("customerDialog").open();
+        },
+
+        onCloseCustomerDialog() {
+            this.byId("customerDialog").close();
+        },
+
+        async onSaveCustomer() {
+            const oEntry = this.getView().getModel("customerEdit").getData();
+            const sCustomerCode = String(oEntry.customerCode || "").trim();
+            const sCustomerName = String(oEntry.customerName || "").trim();
+            const sCustomerEmail = String(oEntry.customerEmail || "").trim();
+
+            if (!sCustomerCode || !sCustomerName) {
+                MessageBox.warning(this.getText("customerRequiredMessage"));
+                return;
+            }
+
+            if (sCustomerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sCustomerEmail)) {
+                MessageBox.warning(this.getText("customerEmailInvalidMessage"));
+                return;
+            }
+
+            await this._saveConfigEntity({
+                isEdit: oEntry.isEdit,
+                createPath: "/Customers",
+                updatePath: `/Customers(guid'${oEntry.ID}')`,
+                payload: {
+                    customerCode: sCustomerCode,
+                    customerName: sCustomerName,
+                    customerEmail: sCustomerEmail || null
+                },
+                successCreateKey: "customerCreatedMessage",
+                successUpdateKey: "customerUpdatedMessage",
+                errorKey: "customerSaveErrorMessage",
+                tableId: "customersTable",
+                close: () => this.onCloseCustomerDialog()
+            });
+        },
+
+        async onDeleteSelectedCustomers() {
+            await this._deleteSelectedByKey({
+                tableId: "customersTable",
+                path: (sId) => `/Customers(guid'${sId}')`,
+                keyProperty: "ID",
+                confirmKey: "deleteSelectedCustomersConfirmMessage",
+                successKey: "selectedCustomersDeletedMessage",
+                errorKey: "customerDeleteErrorMessage"
+            });
+        },
+
+        onSearchCustomers(oEvent) {
+            const sQuery = (oEvent.getParameter("query") ?? oEvent.getParameter("newValue") ?? "").trim();
+            const oBinding = this.byId("customersTable").getBinding("items");
+
+            if (!sQuery) {
+                oBinding.filter([]);
+                return;
+            }
+
+            oBinding.filter([
+                new Filter({
+                    filters: ["customerCode", "customerName", "customerEmail"].map((sProperty) => new Filter({
+                        path: sProperty,
+                        operator: FilterOperator.Contains,
+                        value1: sQuery,
+                        caseSensitive: false
+                    })),
+                    and: false
+                })
+            ]);
+        },
         onAddCodeList(oEvent) {
             const sEntitySet = oEvent.getSource().data("entitySet");
             const oEntry = this._emptyCodeList();
@@ -867,7 +963,17 @@ sap.ui.define([
                 vendorEmail: ""
             };
         },
-
+        
+        _emptyCustomer() {
+            return {
+                ID: "",
+                customerCode: "",
+                customerName: "",
+                customerEmail: "",
+                isEdit: false,
+                dialogTitle: ""
+            };
+        },
         _emptyLoaApproval() {
             return {
                 dialogTitle: "",

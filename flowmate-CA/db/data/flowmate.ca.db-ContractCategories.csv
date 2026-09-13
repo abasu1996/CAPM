@@ -1,4 +1,4 @@
 code,name,description,isActive,sortOrder
-SERVICE,Service Contract,Outline contract for services,true,10
-MATERIAL,Material Contract,Outline contract for materials,true,20
-MIXED,Mixed Contract,Material and service contract,true,30
+SERVICE,Service Contract,Outline contract for services,1,10
+MATERIAL,Material Contract,Outline contract for materials,1,20
+MIXED,Mixed Contract,Material and service contract,1,30

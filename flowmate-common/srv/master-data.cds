@@ -46,6 +46,12 @@ service CommonMasterDataService {
     { grant: ['CREATE', 'UPDATE', 'DELETE'], to: 'VendorProvisioning' }
   ]
   entity Vendors as projection on db.Vendors;
+  @restrict: [
+  { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'CustomerProvisioning'] },
+  { grant: '*', to: 'MasterDataAdmin' },
+  { grant: ['CREATE', 'UPDATE', 'DELETE'], to: 'CustomerProvisioning' }
+]
+entity Customers as projection on db.Customers;
 
   @restrict: [
     { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },

@@ -1,0 +1,5 @@
+code,name,descr
+LABEL_FEE,Label Fee,Payment for label fee
+TYPE_APPROVAL_FEE,Type Approval Fee,Payment for type approval fee
+EQUIPMENT_CHARGES,Equipment Charges,Payment for equipment charges
+STICKER_FEE,Sticker Fee,Payment for sticker fee

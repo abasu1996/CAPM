@@ -1,7 +1,7 @@
 code,name,description,isActive,sortOrder
-EA,Each,Each,true,10
-PC,Piece,Piece,true,20
-H,H hour,Hour,true,30
-DAY,Day,Day,true,40
-KG,Kilogram,Kilogram,true,50
-M,Meter,Meter,true,60
+EA,Each,Each,1,10
+PC,Piece,Piece,1,20
+H,H hour,Hour,1,30
+DAY,Day,Day,1,40
+KG,Kilogram,Kilogram,1,50
+M,Meter,Meter,1,60

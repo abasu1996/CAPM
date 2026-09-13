@@ -1,0 +1,51 @@
+ID,createdAt,createdBy,modifiedAt,modifiedBy,vendorCode,vendorName,vendorEmail,isActive
+bb07c9dc-1bd1-4f8a-a274-941b342e1237,2026-07-29T18:32:43.599,system,2026-07-29T18:32:43.599,system,100001,Ivycross AG,info@ivycross.com,1
+025ca284-a3ee-4709-9e92-3ff4ce0803cc,2026-07-29T18:32:43.611,system,2026-07-29T18:32:43.611,system,100021,Everstone S.A.,accounts@everstone.com.br,1
+cdb3e7cf-9b15-4efd-bfb2-36f2dd918529,2026-07-29T18:32:43.641,system,2026-07-29T18:32:43.641,system,100041,Blackfriar AG,info@blackfriar.nl,1
+1715ed21-6e6a-4c5b-b1a4-12211b6ea6c3,2026-07-29T18:32:43.646,system,2026-07-29T18:32:43.646,system,100022,Brightstar Corp.,info@brightstar.co.jp,1
+c263498b-0060-488c-b86a-f2e37a69da70,2026-07-29T18:32:43.667,system,2026-07-29T18:32:43.667,system,100002,Northgate Ltd.,procurement@northgate.co.uk,1
+e76f5a3a-b7ab-4a15-b758-80e6f41bcac7,2026-07-29T18:32:43.676,system,2026-07-29T18:32:43.676,system,100042,Hallcrest GmbH,ap@hallcrest.co.uk,1
+69395605-d3db-4004-b483-145b124f4c50,2026-07-29T18:32:43.687,system,2026-07-29T18:32:43.687,system,100023,Trentworth Co.,ap@trentworth.com,1
+de6d70b3-eeb3-49c7-9b0b-7b414b078946,2026-07-29T18:32:43.691,system,2026-07-29T18:32:43.691,system,100003,Kirkland Bay LLC,billing@kirkland.in,1
+7c652511-b0bc-4ced-8d73-84afd8a05da6,2026-07-29T18:32:43.702,system,2026-07-29T18:32:43.702,system,100043,Ashgrove AG,procurement@ashgrove.cn,1
+94fea5bb-913f-4954-a9ff-57cc3e5c663e,2026-07-29T18:32:43.712,system,2026-07-29T18:32:43.712,system,100024,Hartswood Pty Ltd,info@hartswood.com.br,1
+c601586a-bec9-40ea-9896-c4e0bebfbc85,2026-07-29T18:32:43.719,system,2026-07-29T18:32:43.719,system,100004,Windermere GmbH,finance@windermere.cn,1
+147da32b-6d46-4c13-95eb-ac4480ffb960,2026-07-29T18:32:43.729,system,2026-07-29T18:32:43.729,system,100044,Oakridge AG,contact@oakridge.cn,1
+425deb1b-cda8-45e3-9517-7bfe52a1a1cc,2026-07-29T18:32:43.738,system,2026-07-29T18:32:43.738,system,100025,Grayling Ltd.,finance@grayling.ca,1
+4b522fc6-6567-4162-bd33-26d1fcb03372,2026-07-29T18:32:43.745,system,2026-07-29T18:32:43.745,system,100005,Quarrymont GmbH,procurement@quarrymont.de,1
+c5968fea-b78f-4a7f-b3b6-1af956cd7afa,2026-07-29T18:32:43.758,system,2026-07-29T18:32:43.758,system,100045,Sabertech AG,procurement@sabertech.sg,1
+f1b93126-2dca-49d1-9808-ad121d742203,2026-07-29T18:32:43.764,system,2026-07-29T18:32:43.764,system,100026,Hallcrest LLC,procurement@hallcrest.de,1
+c37bfdc8-bb7f-4410-9c92-b4afde66ec21,2026-07-29T18:32:43.772,system,2026-07-29T18:32:43.772,system,100006,Quarrymont Inc.,accounts@quarrymont.ca,1
+d3949a6a-23a3-41ca-a806-e7b5a0406a42,2026-07-29T18:32:43.785,system,2026-07-29T18:32:43.785,system,100046,Palisade Pty Ltd,ap@palisade.fr,1
+12e397df-26bb-4ae8-add1-e0ffe3306a16,2026-07-29T18:32:43.792,system,2026-07-29T18:32:43.792,system,100027,Marrowfen Inc.,accounts@marrowfen.nl,1
+d33679b2-9da6-4240-8e5c-8bd3222defc5,2026-07-29T18:32:43.8,system,2026-07-29T18:32:43.8,system,100007,Cliffside LLC,billing@cliffside.mx,1
+afe895bd-da0f-4fc7-9389-3e8d30177bfe,2026-07-29T18:32:43.818,system,2026-07-29T18:32:43.818,system,100047,Sabertech S.A.,info@sabertech.de,1
+7c294dae-cbf9-4267-af04-2802002c902a,2026-07-29T18:32:43.829,system,2026-07-29T18:32:43.829,system,100028,Duskfield S.A.,accounts@duskfield.sg,1
+2b8c2acf-da1f-437b-ac09-24f72409aba5,2026-07-29T18:32:43.834,system,2026-07-29T18:32:43.834,system,100008,Millbrook LLC,contact@millbrook.in,1
+5c722fad-cf8a-40b3-b09f-c955c89cebe0,2026-07-29T18:32:43.849,system,2026-07-29T18:32:43.849,system,100048,Ashgrove S.A.,contact@ashgrove.mx,1
+803db2b0-1b8f-4bb4-a399-b2810e362ae0,2026-07-29T18:32:43.855,system,2026-07-29T18:32:43.855,system,100029,Nettlebury Ltd.,sales@nettlebury.mx,1
+549620b6-2667-44e5-b2d1-772d26b4f4fe,2026-07-29T18:32:43.858,system,2026-07-29T18:32:43.858,system,100009,Trentworth LLC,finance@trentworth.fr,1
+9a26c58c-4641-44b1-892c-5f85e770c31a,2026-07-29T18:32:43.873,system,2026-07-29T18:32:43.873,system,100049,Foxglen S.A.,ap@foxglen.ca,1
+841f2acd-369b-499b-9477-bc319240787b,2026-07-29T18:32:43.881,system,2026-07-29T18:32:43.881,system,100030,Waverton AG,procurement@waverton.sg,1
+cbd206d8-905f-4f50-a23e-fb3e91f7ff31,2026-07-29T18:32:43.888,system,2026-07-29T18:32:43.888,system,100010,Marrowfen Pty Ltd,billing@marrowfen.nl,1
+47e64b71-8edc-40e0-9f8e-58a7ad0aa0e5,2026-07-29T18:32:43.897,system,2026-07-29T18:32:43.897,system,100050,Ferrowave B.V.,finance@ferrowave.de,1
+93bfa808-f482-4473-9de2-cad5c4fdb9b4,2026-07-29T18:32:43.907,system,2026-07-29T18:32:43.907,system,100031,Marrowfen B.V.,contact@marrowfen.in,1
+0d67cf75-5559-4ee5-87e2-af61a73ecb23,2026-07-29T18:32:43.917,system,2026-07-29T18:32:43.917,system,100011,Emberton LLC,billing@emberton.sg,1
+460746e9-0f73-46c9-b011-7099b2fbf461,2026-07-29T18:32:43.931,system,2026-07-29T18:32:43.931,system,100032,Nettlebury Inc.,procurement@nettlebury.in,1
+ea39768d-d48e-41c2-8d29-d11e93f89393,2026-07-29T18:32:43.94,system,2026-07-29T18:32:43.94,system,100012,Millbrook Ltd.,accounts@millbrook.co.uk,1
+dcf8f920-0547-4670-85ad-2aa890b56bae,2026-07-29T18:32:43.953,system,2026-07-29T18:32:43.953,system,100033,Foxglen Co.,billing@foxglen.nl,1
+7c74b4d9-2b4e-4676-a9d8-00d013e205e2,2026-07-29T18:32:43.963,system,2026-07-29T18:32:43.963,system,100013,Palisade S.A.,accounts@palisade.in,1
+59b7ec10-55b0-49ae-942f-354db3880db2,2026-07-29T18:32:43.975,system,2026-07-29T18:32:43.975,system,100034,Kestrel Inc.,sales@kestrel.ca,1
+134d76c9-1d30-4e4c-8ae0-dacf011a2759,2026-07-29T18:32:43.987,system,2026-07-29T18:32:43.987,system,100014,Cobalt LLC,sales@cobalt.nl,1
+c4a3331f-2ca7-4335-ad91-ef3688af9282,2026-07-29T18:32:44,system,2026-07-29T18:32:44,system,100035,Cliffside GmbH,sales@cliffside.sg,1
+b934f877-1d06-43dc-a233-134d11de8325,2026-07-29T18:32:44.013,system,2026-07-29T18:32:44.013,system,100015,Blackfriar Corp.,procurement@blackfriar.in,1
+2e36e388-f67f-4b11-9b6c-1bd4f1297eae,2026-07-29T18:32:44.023,system,2026-07-29T18:32:44.023,system,100036,Foxglen Inc.,finance@foxglen.fr,1
+66d5f2ec-5ac4-444b-879c-9dbbc36f8b8d,2026-07-29T18:32:44.041,system,2026-07-29T18:32:44.041,system,100016,Sabertech Corp.,info@sabertech.co.jp,1
+70f7090e-def0-43d8-ba80-7fb20954cbda,2026-07-29T18:32:44.049,system,2026-07-29T18:32:44.049,system,100037,Vantis S.A.,billing@vantis.in,1
+39055661-cd40-449d-914e-d338f5e5a6bd,2026-07-29T18:32:44.065,system,2026-07-29T18:32:44.065,system,100017,Marrowfen Ltd.,accounts@marrowfen.ca,1
+7b428198-9b37-41ea-9d5b-fdcdf8d956b7,2026-07-29T18:32:44.072,system,2026-07-29T18:32:44.072,system,100038,Marlowe Corp.,sales@marlowe.mx,1
+d8d22c7b-3e45-437d-b79d-b68375e96bb7,2026-07-29T18:32:44.088,system,2026-07-29T18:32:44.088,system,100018,Millbrook Co.,ap@millbrook.cn,1
+e2de9973-7aba-467f-a998-fa9b1d9d1fff,2026-07-29T18:32:44.093,system,2026-07-29T18:32:44.093,system,100039,Hallcrest Pty Ltd,accounts@hallcrest.de,1
+cd150262-6b8f-44f9-aef5-7f4ac4bff415,2026-07-29T18:32:44.11,system,2026-07-29T18:32:44.11,system,100019,Meridian Pty Ltd,contact@meridian.fr,1
+e0d36b2b-71b9-44bc-ab8e-0370f7bdcef4,2026-07-29T18:32:44.116,system,2026-07-29T18:32:44.116,system,100040,Kirkland Bay Pty Ltd,billing@kirkland.co.jp,1
+efd2e768-d8fe-43b4-8cf3-93fc61d71906,2026-07-29T18:32:44.133,system,2026-07-29T18:32:44.133,system,100020,Solace Inc.,accounts@solace.fr,1

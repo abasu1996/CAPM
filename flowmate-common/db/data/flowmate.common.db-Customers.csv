@@ -1,0 +1,4 @@
+ID,customerCode,customerName,customerEmail,isActive
+b1a1c3d4-1111-4a2b-8c3d-000000000001,CUST-001,Ceylon Telecom Solutions,accounts@ceylontelecom.lk,true
+b1a1c3d4-1111-4a2b-8c3d-000000000002,CUST-002,Colombo Digital Networks,finance@colombodigital.lk,true
+b1a1c3d4-1111-4a2b-8c3d-000000000003,CUST-003,Lanka Interconnect Services,billing@lankaic.lk,true

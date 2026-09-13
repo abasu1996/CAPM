@@ -254,8 +254,6 @@ sap.ui.define([
             body: {
               request_ID: this._requestId,
               filename: file.name,
-              mediaType: file.type || "application/octet-stream",
-              size: file.size,
               category: "SUPPORTING_DOCUMENT"
             }
           });

@@ -54,6 +54,14 @@ entity Vendors : cuid, managed {
   vendorEmail : String(255);
   isActive    : Boolean default true;
 }
+@assert.unique.customerCode: [customerCode]
+entity Customers : cuid, managed {
+    customerCode  : String(30) not null;
+    customerName  : String(150) not null;
+    customerEmail : String(255);
+    isActive    : Boolean default true;
+}
+
 
 entity Delegations : cuid, managed {
   delegator            : Association to Users not null;

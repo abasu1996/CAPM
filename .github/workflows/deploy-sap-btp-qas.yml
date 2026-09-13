@@ -1,0 +1,164 @@
+name: Backup and deploy Flowmate to SAP BTP QAS
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flowmate-btp-qas
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "20"
+  CF_API: ${{ vars.CF_API }}
+  CF_ORG: ${{ vars.CF_ORG }}
+  CF_SPACE: ${{ vars.CF_SPACE }}
+
+jobs:
+  backup-build-deploy:
+    name: Backup HANA and deploy all applications
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment: qas
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            flowmate-common/package-lock.json
+            flowmate/package-lock.json
+            flowmate-CA/package-lock.json
+
+      - name: Install Cloud Foundry CLI, MTA plugin, and MBT
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key \
+            | sudo gpg --dearmor --yes -o /usr/share/keyrings/cloudfoundry-cli.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloudfoundry-cli.gpg] https://packages.cloudfoundry.org/debian stable main" \
+            | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes cf8-cli
+          cf add-plugin-repo CF-Community https://plugins.cloudfoundry.org
+          cf install-plugin multiapps -f -r CF-Community
+          npm install --global mbt
+          cf version
+          mbt --version
+
+      - name: Authenticate and verify BTP target
+        shell: bash
+        env:
+          CF_USERNAME: ${{ secrets.CF_USERNAME }}
+          CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+        run: |
+          set -euo pipefail
+          : "${CF_API:?Set the qas environment variable CF_API}"
+          : "${CF_ORG:?Set the qas environment variable CF_ORG}"
+          : "${CF_SPACE:?Set the qas environment variable CF_SPACE}"
+          : "${CF_USERNAME:?Set the qas secret CF_USERNAME}"
+          : "${CF_PASSWORD:?Set the qas secret CF_PASSWORD}"
+          cf api "${CF_API}"
+          cf auth "${CF_USERNAME}" "${CF_PASSWORD}"
+          cf target -o "${CF_ORG}" -s "${CF_SPACE}"
+          cf target
+          cf service flowmate-common-db
+          cf service flowmate-db
+          cf service flowmate-ca-db
+
+      - name: Install project dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix flowmate-common
+          npm ci --prefix flowmate
+          npm ci --prefix flowmate-CA
+
+      - name: Export HANA before deployment
+        id: backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          backup_directory="${RUNNER_TEMP}/hana-backup-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "directory=${backup_directory}" >> "${GITHUB_OUTPUT}"
+          bash scripts/ci/export-hana.sh "${backup_directory}"
+
+      - name: Upload verified pre-deployment backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: hana-predeploy-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ steps.backup.outputs.directory }}
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 9
+
+      - name: Refresh master and configuration CSVs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/recovery/restore-master-data-csv.js \
+            "${{ steps.backup.outputs.directory }}" "${GITHUB_WORKSPACE}"
+          node scripts/ci/validate-seed-safety.js
+
+      - name: Build MTAs in dependency order
+        shell: bash
+        run: |
+          set -euo pipefail
+          mbt build --mtar flowmate-common.mtar --target flowmate-common/mta_archives --source flowmate-common
+          mbt build --mtar flowmate.mtar --target flowmate/mta_archives --source flowmate
+          mbt build --mtar flowmate-ca.mtar --target flowmate-CA/mta_archives --source flowmate-CA
+
+      - name: Deploy Flowmate Common
+        run: cf deploy flowmate-common/mta_archives/flowmate-common.mtar -f
+
+      - name: Deploy Flowmate
+        run: cf deploy flowmate/mta_archives/flowmate.mtar -f
+
+      - name: Deploy Flowmate CA
+        run: cf deploy flowmate-CA/mta_archives/flowmate-ca.mtar -f
+
+      - name: Verify application state
+        shell: bash
+        run: |
+          set -euo pipefail
+          for app in flowmate-common-srv flowmate-srv flowmate-approuter flowmate-ca-srv flowmate-ca-approuter; do
+            state="$(cf app "${app}" | awk -F: '/requested state/ {gsub(/^[[:space:]]+/, "", $2); print $2}')"
+            if [[ "${state}" != "started" ]]; then
+              echo "${app} requested state is '${state}', expected 'started'" >&2
+              cf app "${app}"
+              exit 1
+            fi
+          done
+
+      - name: Export and verify HANA after deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          post_directory="${RUNNER_TEMP}/hana-postdeploy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          bash scripts/ci/export-hana.sh "${post_directory}"
+          node scripts/ci/compare-deployed-seed-counts.js "${post_directory}"
+
+      - name: Write deployment summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## SAP BTP QAS deployment"
+            echo ""
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Backup artifact: \`hana-predeploy-${GITHUB_SHA}-${GITHUB_RUN_ATTEMPT}\`"
+            echo "- Deployment order: flowmate-common → flowmate → flowmate-CA"
+            echo "- Result: ${JOB_STATUS}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+        env:
+          JOB_STATUS: ${{ job.status }}
+

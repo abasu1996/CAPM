@@ -24,11 +24,449 @@ const TASK_STATUS = {
   SENT_BACK: "SENT_BACK"
 };
 
-const FTK_FACTORING_SUBTYPES = new Set([
-  "FTK_FACTORING_PO_VALIDATION",
-  "FTK_FACTORING_BASED_ON_UAC",
-  "FTK_FACTORING_PENDING_UAC"
-]);
+// const FTK_FACTORING_SUBTYPES = new Set([
+//   "FTK_FACTORING_PO_VALIDATION",
+//   "FTK_FACTORING_BASED_ON_UAC",
+//   "FTK_FACTORING_PENDING_UAC"
+// ]);
+//for each sub-process type, define the required and optional fields that must be present in the request payload. This will be used to validate the form before submission.
+const PO_NON_ADV_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "vendor_ID",
+    "vendorCode",
+    "vendorName",
+    "paymentSubCategory_code",
+    "userDivisionRepresentativeName",
+    "poNumber",
+    "invoices"
+  ],
+  optional: ["remarks", "whtCertificateReference"]
+};
+const PO_ADVANCE_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "vendor_ID",
+    "vendorCode",
+    "vendorName",
+    "paymentSubCategory_code",
+    "userDivisionRepresentativeName",
+    "poNumber",
+    "invoices"
+  ],
+  optional: ["remarks"]
+};
+const PO_ADV_SETTLEMENT_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "vendor_ID",
+    "vendorCode",
+    "vendorName",
+    "paymentSubCategory_code",
+    "userDivisionRepresentativeName",
+    "poNumber",
+    "remainingBalanceAfterAdvanceSettlement",
+    "invoices"
+  ],
+  optional: ["remarks"]
+};
+const NON_PO_OFN_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "vendor_ID",
+    "vendorCode",
+    "vendorName",
+    "invoiceDate",
+    "invoiceNumber",
+    "costCentre",
+    "profitCentre",
+    "paymentMethod_code",
+    "totalValue",
+    "ofnReference",
+    "siteId",
+    "wbsElement",
+    "totalRentValue",
+    "totalSupervisionValue",
+    "securityDepositValue",
+    "siteName"
+  ],
+  optional: ["remarks"]
+};
+const NON_PO_IDEAMART_APPMAKER_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "customer_ID",
+    "customerCode",
+    "customerName",
+    "invoiceDebitNoteDate",
+    "invoiceDebitNoteNumber",
+    "totalPaymentValueForMonth",
+    "userDivisionRepresentativeName",
+    "whtNicHighestTransactionValue",
+    "lessThan100kNicBlankHighestTransactionValue",
+    "retentionRepaymentValue"
+  ],
+  optional: [
+    "brcHighestTransactionValue", "remarks"
+  ]
+};
+const NON_PO_SITE_SHARING_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "vendorCode",
+    "vendorName"
+  ],
+  optional: [
+    "remarks"
+  ]
+};
+const DIRECT_NON_PO_REIMBURSEMENT_FIELDS = {
+  required: [
+    "paymentCategory_code", "businessEntity_code", "currency_code",
+    "authorityVendorCode", "authorityVendorName",
+    "employeeVendorCode", "employeeVendorName",
+    "invoiceDate", "invoiceNumber", "costCentre", "wbsElement",
+    "totalValue", "ofnReference", "siteId", "siteName"
+  ],
+  optional: ["remarks"]
+};
+const NON_PO_TAX_LIABILITY_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "requestingDivision_code",
+    "vendor_ID",
+    "vendorCode",
+    "vendorName",
+    "taxType",
+    "reference",
+    "totalTaxPayable",
+    "tin",
+    "taxDueDate",
+    "glBreakups"
+  ],
+  optional: ["remarks", "din"]
+};
+const NON_PO_IMPORT_DGC_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "vendor_ID",
+    "vendorCode",
+    "vendorName",
+    "cusdecDate",
+    "cusdecNumber",
+    "poNumber",
+    "totalDeclarationValueInCusdec"
+  ],
+  optional: ["remarks"]
+};
+const DIN_MANDATORY_ENTITIES = ["DAP", "DBN", "DTV", "H_ONE"];
+const SUBTYPE_FIELDS = {
+  FTK_FACTORING_PO_VALIDATION: {
+    required: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "vendorCode",
+      "vendorName"],
+    optional: ["remarks"]
+  },
+  FTK_FACTORING_BASED_ON_UAC: {
+    required: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "currency_code", "category_code", "vendorCode",
+      "vendorName"],
+    optional: ["remarks"]
+  },
+  // FTK_FACTORING_PENDING_UAC: {
+  //   required: [],
+  //   optional: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "remarks"]
+  // },
+  FTK_NON_FACTORING_BASED_UAC: {
+    required: ["paymentCategory_code", "businessEntity_code", "currency_code", "category_code", "vendor_ID", "vendorCode",
+      "vendorName"],
+    optional: ["remarks"]
+  },
+  FTK_SERVICE_PAYMENT: {
+    required: ["paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode",
+      "vendorName"],
+    optional: ["remarks"]
+  },
+  FTK_DUTY_REIMBURSEMENT: {
+    required: [
+      "paymentCategory_code", "businessEntity_code", "currency_code", "amount", "vendor_ID", "vendorCode",
+      "vendorName", "invoiceDebitNoteDate", "invoiceDebitNoteNumber", "totalDebitNoteValue", "userDivisionRepresentativeName", "poNumber"
+    ],
+    optional: ["remarks"]
+  },
+  PO_BEFORE_INVOICE_NON_ADV: PO_NON_ADV_FIELDS,
+  PO_BEFORE_INVOICE_NON_ADV_LIAB: PO_NON_ADV_FIELDS,
+  PO_AFTER_INVOICE_NON_ADV: PO_NON_ADV_FIELDS,
+  PO_AFTER_INVOICE_NON_ADV_LIAB: PO_NON_ADV_FIELDS,
+  PO_BEFORE_INVOICE_ADVANCE: PO_ADVANCE_FIELDS,
+  PO_AFTER_INVOICE_ADVANCE: PO_ADVANCE_FIELDS,
+  PO_BEFORE_INVOICE_ADV_STLMT: PO_ADV_SETTLEMENT_FIELDS,
+  "PO_BEFORE_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_FIELDS,
+  PO_AFTER_INVOICE_ADV_STLMT: PO_ADV_SETTLEMENT_FIELDS,
+  "PO_AFTER_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_FIELDS,
+  NON_PO_DIRECT_OFN_AUTHORITY: NON_PO_OFN_FIELDS,
+  NON_PO_ADV_SETTLE_OFN_OTHER: NON_PO_OFN_FIELDS,
+  NON_PO_DIRECT_FOREIGN_TRAVEL: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "directForeignTravelEntries"
+    ],
+    optional: []
+  },
+  NON_PO_FUEL_STAFF: {
+    required: ["paymentCategory_code", "businessEntity_code", "currency_code", "fuelInclVat", "highestValueInFile"],
+    optional: ["taxi", "remarks"]
+  },
+  NON_PO_FUEL_GENERATOR: {
+    required: ["paymentCategory_code", "businessEntity_code", "currency_code", "fuelInclVat", "highestValueInFile"],
+    optional: ["remarks"]
+  },
+  NON_PO_IDEAMART: NON_PO_IDEAMART_APPMAKER_FIELDS,
+  NON_PO_APPMAKER: NON_PO_IDEAMART_APPMAKER_FIELDS,
+  NON_PO_CUSTOMER_REFUNDS: {
+    required: ["paymentCategory_code", "businessEntity_code", "currency_code", "highestRefundValueOfFile"],
+    optional: ["remarks"]
+  },
+  NON_PO_STELACOM_CONSIGNMENT: {
+    required: [
+      "paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName", "totalInvoiceValue", "invoiceNumber",
+      "invoiceDate", "liabilityBookingDocumentNumber"
+    ],
+    optional: ["remarks"]
+  },
+  NON_PO_SITE_SHARE_LIABILITY: {
+    required: [
+      "paymentCategory_code", "businessEntity_code", "category_code", "currency_code", "vendor_ID", "vendorCode",
+      "vendorName", "invoiceDate", "invoiceNumber", "totalInvoiceValue", "invoiceDescription"
+    ],
+    optional: ["remarks"]
+  },
+  NON_PO_SITE_SHARING_SETOFF: NON_PO_SITE_SHARING_FIELDS,
+  "NON_PO_SITE_SHARING_SETOFF&PAY": NON_PO_SITE_SHARING_FIELDS,
+  NON_PO_SITE_RENT_TAX_INVOICE: {
+    required: [
+      "paymentCategory_code", "businessEntity_code", "currency_code",
+      "vendor_ID", "vendorCode", "vendorName",
+      "totalInvoiceValue", "invoiceNumber", "invoiceDate"
+    ],
+    optional: ["remarks"]
+  },
+  NON_PO_SITE_RENT_MONTHLY_FILE: {
+    required: [
+      "paymentCategory_code", "businessEntity_code", "currency_code", "highestMonthlyRentalValueInFile",
+      "totalFileValue", "invoiceDescription"
+    ],
+    optional: ["remarks"]
+  },
+  NON_PO_SITE_RENT_STAMP_ADHOC: {
+    required: [
+      "paymentCategory_code", "businessEntity_code",
+      "vendor_ID", "vendorCode", "vendorName",
+      "currency_code", "totalPayableValue", "paymentDescription"
+    ],
+    optional: [
+      "invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
+    ]
+  },
+  DIRECT_NON_PO_REIMB_LIAB: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
+  DIRECT_NON_PO_REIMB_PAYMENT: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
+  DIRECT_FOREIGN_TRAVEL_REIMB: {
+    required: [
+      "paymentCategory_code", "businessEntity_code", "currency_code",
+      "employeeVendorCode", "employeeVendorName",
+      "balanceToBeReturned", "totalAmountLKR",
+      "travelExpenses"
+    ],
+    optional: [
+      "transactionDate", "totalAmountForeignCurrency", "remarks"
+    ]
+  },
+  NON_PO_TAX_LIAB_PAY_OTTP: NON_PO_TAX_LIABILITY_FIELDS,
+  NON_PO_TAX_LIAB_PAY_PAYORDER: NON_PO_TAX_LIABILITY_FIELDS,
+  NON_PO_INTERCONNECT_LIAB: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "customer_ID",
+      "customerCode",
+      "customerName",
+      "invoiceDebitNoteDate",
+      "invoiceDebitNoteNumber",
+      "totalInvoiceValueRelevantCurrency",
+      "totalInvoiceValueLKR"
+    ],
+    optional: ["vatAmount", "remarks"]
+  },
+  NON_PO_INTERCONNECT_ROAM_PAY: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "customer_ID",
+      "customerCode",
+      "customerName"
+    ],
+    optional: ["remarks", "whtCertificateReference"]
+  },
+  NON_PO_ROAMING_LIABILITY: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "customer_ID",
+      "customerCode",
+      "customerName",
+      "totalInvoiceValueRelevantCurrency",
+      "totalInvoiceValueLKR"
+    ],
+    optional: []
+  },
+  NON_PO_STAR_POINT_PAYMENTS: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "highestPayableValueInList",
+      "ivDocumentPostingDate"
+    ],
+    optional: ["remarks"]
+  },
+  NON_PO_IMPORT_TRC: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "vendor_ID",
+      "vendorCode",
+      "vendorName",
+      "trcslProformaInvoiceDate",
+      "typeOfPayment_code",
+      "trcslProformaInvoiceTotalValue"
+    ],
+    optional: ["poNumber", "budgetCode", "remarks"]
+  },
+  NON_PO_IMPORT_ICL: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "vendor_ID",
+      "vendorCode",
+      "vendorName",
+      "pivDate",
+      "pivApplicationNumber",
+      "totalPivValue"
+    ],
+    optional: ["remarks"]
+  },
+  NON_PO_IMPORT_DGC_ADV: NON_PO_IMPORT_DGC_FIELDS,
+  NON_PO_IMPORT_DGC_DIRECT: NON_PO_IMPORT_DGC_FIELDS,
+  NON_PO_CC_PAYMENT: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "ccCustodianName",
+      "vendor_ID",
+      "vendorCode",
+      "vendorName",
+      "whtEligibilityConfirmation",
+      "poNumber",
+      "sesReference",
+      "totalAmountPayable",
+      "descriptionOfPayment",
+      "justificationForCreditCardUse"
+    ],
+    optional: ["invoiceDate", "invoiceNumber", "budgetCode", "remarks"]
+  },
+  NON_PO_CC_SETTLEMENT: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "bankName",
+      "ccCustodianName",
+      "ccPeriodFromDate",
+      "ccPeriodToDate",
+      "settlementEntries",
+      "stampDuty",
+      "latePaymentFee",
+      "interestCharges",
+      "totalAmountPayableCcSettlement"
+    ],
+    optional: ["annualFee", "remarks"]
+  },
+  NON_PO_MERCHANT_SETTLEMENTS: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "merchantEntityValues",
+      "highestValueInExcel",
+      "aggregateTotalValueAcrossAllFiles",
+      "processingBankAccountDetails"
+    ],
+    optional: []
+  },
+  NON_PO_MISC_RECEIPTS: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "depositedAmount",
+      "debitGL"
+    ],
+    optional: ["vendor_ID", "vendorCode", "vendorName", "costCentre", "remarks"]
+  },
+  PO_ZERO_IV: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "zeroIvUserConfirmationAttached"
+    ],
+    optional: ["remarks"]
+  },
+  BANK_GUARANTEE: {
+    required: [
+      "paymentCategory_code",
+      "businessEntity_code",
+      "currency_code",
+      "amount",
+      "guaranteeType_code",
+      "beneficiaryName",
+      "beneficiaryAddress",
+      "commencingDate",
+      "expiryDate",
+      "claimDate",
+      "tenderDate",
+      "expectedDate",
+      "purposeOfBankGuarantee",
+      "bidTenderReference",
+      "collectorName",
+      "collectorNic",
+      "collectorContactNumber",
+      "specificBgFormatAvailable"
+    ],
+    optional: ["remarks"]
+  }
+};
 const DEFAULT_CONFIG_CACHE_TTL_MS = 60 * 1000;
 const BPA_USER_DESTINATION = "bpa_workflow";
 const BPA_TECHNICAL_DESTINATION = "bpa_workflow_technical";
@@ -66,6 +504,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       PaymentCategories,
       FtkEntities,
       Priorities,
+      Currencies,
+      Categories,
+      PaymentSubCategories,
+      PaymentMethod,
+      TypeOfPayment,
+      RequestDivision,
+      GuaranteeTypes,
       Operator,
       LoaApproval,
       ProcessStatus,
@@ -73,6 +518,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       Teams: ServiceTeams,
       Roles: ServiceRoles,
       Vendors: ServiceVendors,
+      Customers: ServiceCustomers,
       TeamMembers: ServiceTeamMembers,
       RequestDropDown,
       RequestFilterQueries,
@@ -84,14 +530,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       Roles,
       Teams,
       Vendors,
+      Customers,
       TeamMembers,
       Delegations
     } = this.masterEntities;
 
-    this.on("READ", [ServiceUsers, ServiceRoles, ServiceTeams, ServiceVendors, ServiceTeamMembers], (req) => {
+    this.on("READ", [ServiceUsers, ServiceRoles, ServiceTeams, ServiceVendors, ServiceCustomers, ServiceTeamMembers], (req) => {
       return this.master.run(req.query);
     });
-    this.on(["CREATE", "UPDATE", "DELETE"], [ServiceUsers, ServiceRoles, ServiceTeams, ServiceVendors, ServiceTeamMembers], (req) => {
+    this.on(["CREATE", "UPDATE", "DELETE"], [ServiceUsers, ServiceRoles, ServiceTeams, ServiceVendors, ServiceCustomers, ServiceTeamMembers], (req) => {
       return this.master.run(req.query);
     });
 
@@ -299,7 +746,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
 
-    [ProcessTypes, PaymentCategories, FtkEntities, Priorities, Operator, ProcessStatus, TaskStatus, RequestDropDown].forEach((oCodeList) => {
+    [ProcessTypes, PaymentCategories, FtkEntities, Priorities, Operator, ProcessStatus, TaskStatus, RequestDropDown, Currencies, Categories, PaymentSubCategories, PaymentMethod, TypeOfPayment, RequestDivision, GuaranteeTypes].forEach((oCodeList) => {
       this.before(["CREATE", "UPDATE", "DELETE"], oCodeList, (req) => {
         if (!this._isAdministrator(req)) {
           return req.reject(403, "Only an administrator can maintain configuration code lists");
@@ -332,7 +779,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(403, "Vendor administration or vendor provisioning authority is required");
       }
     });
-
+    this.before(["CREATE", "UPDATE", "DELETE"], ServiceCustomers, (req) => {
+      if (!this._canProvisionCustomers(req)) {
+        return req.reject(403, "Customer administration or customer provisioning authority is required");
+      }
+    });
     this.before(["CREATE", "UPDATE", "DELETE"], [ServiceTeams, ServiceTeamMembers], (req) => {
       if (!this._isAdministrator(req)) {
         return req.reject(403, "Only an administrator can maintain teams and team members");
@@ -480,38 +931,137 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     });
 
-    this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
-      const aFactoringFields = [
-        "paymentCategory_code",
-        "businessEntity_code",
-        "taskLevelFlow",
-        "vendor_ID",
-        "remarks"
-      ];
+    // this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
+    //   const aFactoringFields = [
+    //     "paymentCategory_code",
+    //     "businessEntity_code",
+    //     "taskLevelFlow",
+    //     "vendor_ID",
+    //     "remarks"
+    //   ];
 
-      if (!aFactoringFields.some((sField) => Object.prototype.hasOwnProperty.call(req.data, sField))) {
+    //   if (!aFactoringFields.some((sField) => Object.prototype.hasOwnProperty.call(req.data, sField))) {
+    //     return;
+    //   }
+
+    //   let sSubProcessTypeCode = req.data.subProcessType_code;
+
+    //   if (!sSubProcessTypeCode && req.event === "UPDATE") {
+    //     const sRequestId = this._requestIdFromReq(req);
+    //     const oExisting = sRequestId && await cds.tx(req).run(
+    //       SELECT.one.from(ProcessRequests)
+    //         .columns("subProcessType_code")
+    //         .where({ ID: sRequestId })
+    //     );
+
+    //     sSubProcessTypeCode = oExisting?.subProcessType_code;
+    //   }
+
+    //   if (!FTK_FACTORING_SUBTYPES.has(sSubProcessTypeCode)) {
+    //     return req.reject(400, "FTK Factoring fields are only available for the Factoring subprocess");
+    //   }
+
+    // });
+    //check that the required fields for the selected process subtype are present in the request payload. If any required field is missing, reject the request with a 400 error and a message indicating which fields are missing.
+    this.before("CREATE", ProcessRequests, async (req) => {
+      const sSubProcessTypeCode = req.data.subProcessType_code;
+      const oFieldSet = SUBTYPE_FIELDS[sSubProcessTypeCode];
+
+      if (!oFieldSet) {
         return;
       }
 
-      let sSubProcessTypeCode = req.data.subProcessType_code;
+      const aMissing = oFieldSet.required.filter((sField) => {
+        if (
+          sField === "invoices" ||
+          sField === "travelExpenses" ||
+          sField === "glBreakups" ||
+          sField === "merchantEntityValues" || sField === "settlementEntries" || sField === "directForeignTravelEntries"
+        ) {
+          return !Array.isArray(req.data[sField]) || req.data[sField].length === 0;
+        }
+        return !this._hasValue(req.data[sField]);
+      });
 
-      if (!sSubProcessTypeCode && req.event === "UPDATE") {
-        const sRequestId = this._requestIdFromReq(req);
-        const oExisting = sRequestId && await cds.tx(req).run(
-          SELECT.one.from(ProcessRequests)
-            .columns("subProcessType_code")
-            .where({ ID: sRequestId })
-        );
-
-        sSubProcessTypeCode = oExisting?.subProcessType_code;
+      if (
+        this._isPoBasedNonAdvanceSubtype(sSubProcessTypeCode) &&
+        req.data.paymentCategory_code === "FOREIGN" &&
+        !this._hasValue(req.data.whtCertificateReference)
+      ) {
+        aMissing.push("whtCertificateReference");
+      }
+      if (
+        this._isNonPoInterconnectRoamPaySubtype(sSubProcessTypeCode) &&
+        req.data.paymentCategory_code === "FOREIGN" &&
+        !this._hasValue(req.data.whtCertificateReference)
+      ) {
+        aMissing.push("whtCertificateReference");
       }
 
-      if (!FTK_FACTORING_SUBTYPES.has(sSubProcessTypeCode)) {
-        return req.reject(400, "FTK Factoring fields are only available for the Factoring subprocess");
+      if (
+        sSubProcessTypeCode === "NON_PO_IDEAMART" &&
+        !this._hasValue(req.data.brcHighestTransactionValue)
+      ) {
+        aMissing.push("brcHighestTransactionValue");
+      }
+
+      if (
+        this._isNonPoTaxLiabilitySubtype(sSubProcessTypeCode) &&
+        DIN_MANDATORY_ENTITIES.includes(req.data.businessEntity_code) &&
+        !this._hasValue(req.data.din)
+      ) {
+        aMissing.push("din");
+      }
+
+      if (aMissing.length) {
+        return req.reject(
+          400,
+          `${aMissing.join(", ")} ${aMissing.length === 1 ? "is" : "are"} mandatory for this process subtype`
+        );
+      }
+        if (sSubProcessTypeCode === "NON_PO_CC_SETTLEMENT") {
+        const aEntries = Array.isArray(req.data.settlementEntries)
+          ? req.data.settlementEntries
+          : [];
+
+        const aRequestIds = [
+          ...new Set(
+            aEntries
+              .map((oEntry) => oEntry.paymentRequestRef_ID)
+              .filter(Boolean)
+          )
+        ];
+
+        if (!aRequestIds.length) {
+          return;
+        }
+
+        const aValidRequests = await cds.tx(req).run(
+          SELECT.from(ProcessRequests)
+            .columns("ID")
+            .where({
+              ID: { in: aRequestIds },
+              subProcessType_code: "NON_PO_CC_PAYMENT"
+            })
+        );
+
+        const oValidIds = new Set(
+          aValidRequests.map((oRequest) => oRequest.ID)
+        );
+
+        const bAllValid = aRequestIds.every((sId) =>
+          oValidIds.has(sId)
+        );
+
+        if (!bAllValid) {
+          return req.reject(
+            400,
+            "Each settlement entry must reference a valid Credit Card Payment request"
+          );
+        }
       }
 
     });
-
     this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
       const sRequestId = this._requestIdFromReq(req);
       const oExisting = req.event === "UPDATE" && sRequestId
@@ -557,23 +1107,119 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       req.data.role = sRoleCode;
     });
 
-    this.before("CREATE", ProcessRequests, async (req) => {
-      if (req.data.subProcessType_code === "FTK_FACTORING_PO_VALIDATION") {
-        const aMissingFields = [
-          ["Payment category", req.data.paymentCategory_code],
-          ["Entity", req.data.businessEntity_code],
-          ["Vendor code and vendor name", req.data.vendor_ID]
-        ]
-          .filter(([, vValue]) => !String(vValue || "").trim())
-          .map(([sLabel]) => sLabel);
+    this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
+      const sRequestId = this._requestIdFromReq(req);
+      const oExisting = req.event === "UPDATE" && sRequestId
+        ? await cds.tx(req).run(
+          SELECT.one.from(ProcessRequests)
+            .columns(
+              "title",
+              "subProcessType_code",
+              "paymentCategory_code",
+              "businessEntity_code",
+              "vendor_ID"
+            )
+            .where({ ID: sRequestId })
+        )
+        : null;
+      const valueOf = (sProperty) => Object.prototype.hasOwnProperty.call(req.data, sProperty)
+        ? req.data[sProperty]
+        : oExisting?.[sProperty];
+      const sTitle = String(valueOf("title") || "").trim();
 
-        if (aMissingFields.length) {
-          return req.reject(
-            400,
-            `${aMissingFields.join(", ")} ${aMissingFields.length === 1 ? "is" : "are"} mandatory for FTK Factoring PO Validation`
-          );
+      if (!sTitle) {
+        return req.reject(400, "Request title is required");
+      }
+
+      if (Object.prototype.hasOwnProperty.call(req.data, "title")) {
+        req.data.title = sTitle;
+      }
+
+      const sSubProcessTypeCode = valueOf("subProcessType_code");
+
+      if (sSubProcessTypeCode !== "FTK_FACTORING_PO_VALIDATION") {
+        return;
+      }
+
+      const aMissingFields = [
+        ["Payment category", valueOf("paymentCategory_code")],
+        ["Entity", valueOf("businessEntity_code")],
+        ["Vendor code and vendor name", valueOf("vendor_ID")]
+      ]
+        .filter(([, vValue]) => !String(vValue || "").trim())
+        .map(([sLabel]) => sLabel);
+      const sVendorId = valueOf("vendor_ID");
+
+      if (sVendorId) {
+        const oVendor = await this.master.run(
+          SELECT.one.from(Vendors)
+            .columns("vendorCode", "vendorName")
+            .where({ ID: sVendorId })
+        );
+
+        if (!oVendor?.vendorCode || !oVendor?.vendorName) {
+          if (!aMissingFields.includes("Vendor code and vendor name")) {
+            aMissingFields.push("Vendor code and vendor name");
+          }
+        } else {
+          req.data.vendorCode = oVendor.vendorCode;
+          req.data.vendorName = oVendor.vendorName;
         }
       }
+
+      let bHasAttachment;
+
+      if (req.event === "CREATE") {
+        const vAttachments = req.data.attachments;
+        const aAttachments = Array.isArray(vAttachments)
+          ? vAttachments
+          : vAttachments?.results || [];
+
+        bHasAttachment = aAttachments.some((oAttachment) =>
+          String(oAttachment?.filename || "").trim()
+        );
+
+        if (bHasAttachment) {
+          if (aAttachments.some((oAttachment) => !String(oAttachment?.filename || "").trim())) {
+            return req.reject(400, "Every attachment must have a filename");
+          }
+
+          const sFirstReferenceNumber = await this._nextReferenceNumber(
+            req,
+            ProcessAttachments,
+            "ATT"
+          );
+          const iFirstReferenceNumber = Number(sFirstReferenceNumber.slice(4));
+
+          aAttachments.forEach((oAttachment, iIndex) => {
+            oAttachment.filename = String(oAttachment.filename || "").trim();
+            oAttachment.mimeType ||= "application/octet-stream";
+            oAttachment.referenceNumber ||= `ATT-${String(iFirstReferenceNumber + iIndex).padStart(6, "0")}`;
+          });
+        }
+      } else {
+        const oAttachment = await cds.tx(req).run(
+          SELECT.one.from(ProcessAttachments)
+            .columns("ID")
+            .where({ request_ID: sRequestId })
+        );
+
+        bHasAttachment = Boolean(oAttachment);
+      }
+
+      if (!bHasAttachment) {
+        aMissingFields.push("At least one attachment");
+      }
+
+      if (aMissingFields.length) {
+        return req.reject(
+          400,
+          `${aMissingFields.join(", ")} ${aMissingFields.length === 1 ? "is" : "are"} mandatory for FTK Factoring PO Validation`
+        );
+      }
+    });
+
+    this.before("CREATE", ProcessRequests, async (req) => {
 
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessRequests, "REQ");
       const oReservationUser = await this._currentReservationUser(req, Users);
@@ -642,6 +1288,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         }
 
         this._setVendorSnapshot(req.data, oVendor);
+      }
+      if (req.data.customer_ID) {
+        const oCustomer = await this.master.run(
+          SELECT.one.from(Customers).columns("ID", "customerCode", "customerName").where({ ID: req.data.customer_ID })
+        );
+        if (!oCustomer) return req.reject(400, "Selected customer was not found");
+        this._setCustomerSnapshot(req.data, oCustomer);
       }
 
       req.data.status_code ??= PROCESS_STATUS.DRAFT;
@@ -722,6 +1375,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           }
 
           this._setVendorSnapshot(req.data, oVendor);
+        }
+      }
+      if (Object.prototype.hasOwnProperty.call(req.data, "customer_ID")) {
+        if (!req.data.customer_ID) {
+          req.data.customer_ID = null;
+          req.data.customerCode = null;
+          req.data.customerName = null;
+        } else {
+          const oCustomer = await this.master.run(
+            SELECT.one.from(Customers).columns("ID", "customerCode", "customerName").where({ ID: req.data.customer_ID })
+          );
+          if (!oCustomer) return req.reject(400, "Selected customer was not found");
+          this._setCustomerSnapshot(req.data, oCustomer);
         }
       }
     });
@@ -953,12 +1619,66 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("CREATE", ProcessAttachments, async (req) => {
+      if (!req.data.request_ID || !String(req.data.filename || "").trim()) {
+        return req.reject(400, "Select a request and provide an attachment filename");
+      }
+
+      const oRequest = await this._getRequest(req, req.data.request_ID);
+
+      if (!oRequest) {
+        return req.reject(400, "Selected request was not found");
+      }
+
       await this._rejectIfRequestLocked(req, req.data.request_ID);
       req.data.referenceNumber ??= await this._nextReferenceNumber(req, ProcessAttachments, "ATT");
     });
 
     this.before(["UPDATE", "DELETE"], ProcessAttachments, async (req) => {
       await this._rejectIfAttachmentRequestLocked(req);
+    });
+
+    this.before("UPDATE", ProcessAttachments, (req) => {
+      if (
+        Object.prototype.hasOwnProperty.call(req.data, "filename")
+        && !String(req.data.filename || "").trim()
+      ) {
+        return req.reject(400, "Attachment filename is required");
+      }
+    });
+
+    this.before("DELETE", ProcessAttachments, async (req) => {
+      const sAttachmentId = this._requestIdFromReq(req);
+      const oAttachment = sAttachmentId
+        ? await cds.tx(req).run(
+          SELECT.one.from(ProcessAttachments)
+            .columns("request_ID")
+            .where({ ID: sAttachmentId })
+        )
+        : null;
+
+      if (!oAttachment?.request_ID) {
+        return;
+      }
+
+      const oRequest = await cds.tx(req).run(
+        SELECT.one.from(ProcessRequests)
+          .columns("subProcessType_code")
+          .where({ ID: oAttachment.request_ID })
+      );
+
+      if (oRequest?.subProcessType_code !== "FTK_FACTORING_PO_VALIDATION") {
+        return;
+      }
+
+      const { count: iAttachmentCount = 0 } = await cds.tx(req).run(
+        SELECT.one.from(ProcessAttachments)
+          .columns("count(1) as count")
+          .where({ request_ID: oAttachment.request_ID })
+      ) || {};
+
+      if (Number(iAttachmentCount) <= 1) {
+        return req.reject(400, "At least one attachment is mandatory for FTK Factoring PO Validation");
+      }
     });
 
     this.before(["CREATE", "UPDATE", "DELETE"], ProcessEmailMessages, (req) => {
@@ -2095,7 +2815,26 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       };
     }
   }
-
+  _hasValue(value) {
+    return value !== null && value !== undefined && String(value).trim() !== "";
+  }
+  _isPoBasedNonAdvanceSubtype(sCode) {
+    return [
+      "PO_BEFORE_INVOICE_NON_ADV",
+      "PO_BEFORE_INVOICE_NON_ADV_LIAB",
+      "PO_AFTER_INVOICE_NON_ADV",
+      "PO_AFTER_INVOICE_NON_ADV_LIAB"
+    ].includes(sCode);
+  }
+  _isNonPoTaxLiabilitySubtype(sCode) {
+    return [
+      "NON_PO_TAX_LIAB_PAY_OTTP",
+      "NON_PO_TAX_LIAB_PAY_PAYORDER"
+    ].includes(sCode);
+  }
+  _isNonPoInterconnectRoamPaySubtype(sCode) {
+    return sCode === "NON_PO_INTERCONNECT_ROAM_PAY";
+  }
   _isSlaDeadlineBreached(request, today = new Date().toISOString().slice(0, 10)) {
     if (request?.slaDueAt) {
       const deadline = Date.parse(request.slaDueAt);
@@ -2389,16 +3128,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       .map((oRequest) => oRequest.ID);
     const aOverdueTaskRows = aOverdueRequestIds.length
       ? await cds.tx(req).run(
-          SELECT.from(ProcessTasks)
-            .columns("ID", "referenceNumber", "taskName", "request_ID", "processorTeamName", "status_code")
-            .where({ request_ID: { in: aOverdueRequestIds } })
-            .where([
-              { ref: ["status_code"] }, "not in", {
-                list: [TASK_STATUS.APPROVED, TASK_STATUS.REJECTED].map((sStatus) => ({ val: sStatus }))
-              }
-            ])
-            .limit(50)
-        )
+        SELECT.from(ProcessTasks)
+          .columns("ID", "referenceNumber", "taskName", "request_ID", "processorTeamName", "status_code")
+          .where({ request_ID: { in: aOverdueRequestIds } })
+          .where([
+            { ref: ["status_code"] }, "not in", {
+              list: [TASK_STATUS.APPROVED, TASK_STATUS.REJECTED].map((sStatus) => ({ val: sStatus }))
+            }
+          ])
+          .limit(50)
+      )
       : [];
     const [aUserActivityRows, aAuditActivityRows] = await Promise.all([
       cds.tx(req).run(
@@ -3686,6 +4425,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     target.vendorName = vendor.vendorName;
   }
 
+  _setCustomerSnapshot(target, customer) {
+    target.customerCode = customer.customerCode;
+    target.customerName = customer.customerName;
+  }
+
   _setTaskProcessorTeamSnapshot(target, team) {
     target.processorTeamName = team.name || team.teamCode;
     target.processor = null;
@@ -3816,6 +4560,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _canProvisionVendors(req) {
     return Boolean(this._isAdministrator(req) || req.user?.is("VendorProvisioning"));
+  }
+
+  _canProvisionCustomers(req) {
+    return Boolean(this._isAdministrator(req) || req.user?.is("CustomerProvisioning"));
   }
 
   _canProvisionPaymentCategories(req){
@@ -4234,9 +4982,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     return task
       ? {
-          stepNo: task.stepNo || 0,
-          stepName: task.taskName || `Task ${task.referenceNumber || task.ID || ""}`
-        }
+        stepNo: task.stepNo || 0,
+        stepName: task.taskName || `Task ${task.referenceNumber || task.ID || ""}`
+      }
       : null;
   }
 

@@ -178,7 +178,7 @@
                 <List items="{detail>/attachments}" noDataText="No supporting documents">
                   <StandardListItem
                     title="{detail>filename}"
-                    description="{detail>mediaType}"
+                    description="{detail>mimeType}"
                     icon="sap-icon://document"
                     type="Active"
                     press=".onAttachmentPress"/>

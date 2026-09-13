@@ -1,5 +1,5 @@
 code,name,description,isActive,sortOrder
-LOW,Low,Low priority,true,10
-MEDIUM,Medium,Normal priority,true,20
-HIGH,High,High priority,true,30
-CRITICAL,Critical,Critical priority,true,40
+LOW,Low,Low priority,1,10
+MEDIUM,Medium,Normal priority,1,20
+HIGH,High,High priority,1,30
+CRITICAL,Critical,Critical priority,1,40

@@ -36,7 +36,7 @@ entity TaskStatus : CodeList {
 }
 
 entity ProcessSubTypes : CodeList {
-    key code : String(30);
+    key code : String(50);
     processType : Association to ProcessTypes;
     workingCalendar : Association to WorkingCalendars;
     loaApprovalApplicable : Boolean default false;
@@ -53,6 +53,30 @@ entity FtkEntities : CodeList {
     key code : String(30);
 }
 
+entity Currencies : CodeList {
+    key code : String(10);
+}
+entity Categories : CodeList {
+    key code : String(20);
+}
+
+entity PaymentSubCategories : CodeList {
+    key code : String(20);
+}
+entity PaymentMethod : CodeList {
+    key code : String(20);
+}
+entity TypeOfPayment : CodeList {
+    key code : String(30);
+}
+
+entity RequestDivision : CodeList {
+    key code : String(30);
+}
+
+entity GuaranteeTypes : CodeList {
+    key code : String(40);
+}
 entity Priorities : CodeList {
     key code : String(20);
 }
@@ -131,6 +155,12 @@ entity Vendors : cuid, managed {
     vendorName  : String(150) not null;
     vendorEmail : String(255);
 }
+@assert.unique.customerCode: [customerCode]
+entity Customers : cuid, managed {
+    customerCode  : String(30) not null;
+    customerName  : String(150) not null;
+    customerEmail : String(255);
+}
 
 entity TeamMembers : cuid, managed {
     referenceNumber : String(30);
@@ -161,6 +191,112 @@ entity ProcessRequests : cuid, managed {
     paymentCategory : Association to PaymentCategories @assert.target;
     businessEntity : Association to FtkEntities @assert.target;
     priorityConfig : Association to Priorities @assert.target;
+    currency : Association to Currencies @assert.target;
+    category : Association to Categories @assert.target;
+    invoiceDebitNoteDate : Date;
+    invoiceDebitNoteNumber : String(50);
+    totalDebitNoteValue : Decimal(15, 2);
+    poNumber : String(50);
+    userDivisionRepresentativeName : String(150);
+    vatAmount : Decimal(15, 2);
+    sesReference : String(50);
+    paymentSubCategory : Association to PaymentSubCategories @assert.target;
+    whtCertificateReference : String(50);
+    remainingBalanceAfterAdvanceSettlement : Decimal(15, 2); 
+    invoiceDate: Date;
+    invoiceNumber: String(50);
+    costCentre : String(50);
+    profitCentre : String(50);
+    wbsElement : String(50);
+    paymentMethod : Association to PaymentMethod @assert.target;
+    totalRentValue : Decimal(15, 2);
+    totalSupervisionValue : Decimal(15, 2);
+    securityDepositValue : Decimal(15, 2);
+    totalValue : Decimal(15, 2);
+    ofnReference : String(50);
+    siteId : String(50);
+    siteName : String(150);
+    fuelInclVat     : Decimal(15, 2);
+    taxi            : Decimal(15, 2);
+    highestValueInFile : Decimal(15, 2);
+    brcHighestTransactionValue                : Decimal(15, 2);
+    whtNicHighestTransactionValue             : Decimal(15, 2);
+    lessThan100kNicBlankHighestTransactionValue : Decimal(15, 2);
+    totalPaymentValueForMonth                 : Decimal(15, 2);
+    retentionRepaymentValue                   : Decimal(15, 2);
+    highestRefundValueOfFile : Decimal(15, 2);
+    totalInvoiceValue : Decimal(15, 2);
+    liabilityBookingDocumentNumber : String(50);
+    invoiceDescription : String(500);
+    highestMonthlyRentalValueInFile : Decimal(15, 2);
+    totalFileValue                 : Decimal(15, 2);
+    totalPayableValue : Decimal(15, 2);
+    paymentDescription : LargeString;
+    authorityVendorCode : String(30);
+    authorityVendorName : String(150);
+    employeeVendorCode : String(30);
+    employeeVendorName : String(150);
+    transactionDate : Date;
+    totalAmountForeignCurrency : Decimal(15, 2);
+    totalAmountLKR : Decimal(15, 2);
+    balanceToBeReturned : Decimal(15, 2);
+    taxType : String(100);
+    reference : String(100);
+    totalTaxPayable : Decimal(15, 2);
+    tin : String(50);
+    din : String(50);
+    requestingDivision : Association to RequestDivision @assert.target;
+    taxDueDate : Date;
+    customer                          : Association to Customers;
+    customerCode                      : String(30);
+    customerName                      : String(150);
+    totalInvoiceValueRelevantCurrency : Decimal(15, 2);
+    totalInvoiceValueLKR              : Decimal(15, 2);
+    highestPayableValueInList : Decimal(15, 2);
+    ivDocumentPostingDate     : Date;
+    budgetCode                        : String(50);
+    trcslProformaInvoiceDate          : Date;
+    typeOfPayment                     : Association to TypeOfPayment;
+    trcslProformaInvoiceTotalValue    : Decimal(15, 2);
+    pivApplicationNumber : String(50);
+    totalPivValue        : Decimal(15, 2);
+    pivDate : Date;
+    cusdecDate                      : Date;
+    cusdecNumber                    : String(50);
+    totalDeclarationValueInCusdec   : Decimal(15, 2);
+    ccCustodianName               : String(150);
+    whtEligibilityConfirmation    : Boolean default false;
+    totalAmountPayable            : Decimal(15, 2);
+    descriptionOfPayment          : LargeString;
+    justificationForCreditCardUse : LargeString;
+    bankName                        : String(150);
+    ccPeriodFromDate                : Date;
+    ccPeriodToDate                  : Date;
+    annualFee                       : Decimal(15, 2);
+    stampDuty                       : Decimal(15, 2);
+    latePaymentFee                  : Decimal(15, 2);
+    interestCharges                 : Decimal(15, 2);
+    totalAmountPayableCcSettlement  : Decimal(15, 2);
+    highestValueInExcel                : Decimal(15, 2);
+    aggregateTotalValueAcrossAllFiles  : Decimal(15, 2);
+    processingBankAccountDetails       : String(255);
+    depositedAmount : Decimal(15, 2);
+    debitGL         : String(50);
+    zeroIvUserConfirmationAttached : Boolean default false;
+    guaranteeType              : Association to GuaranteeTypes;
+    beneficiaryName            : String(150);
+    beneficiaryAddress         : String(500);
+    commencingDate             : Date;
+    expiryDate                 : Date;
+    claimDate                  : Date;
+    tenderDate                 : Date;
+    expectedDate                : Date;
+    purposeOfBankGuarantee     : LargeString;
+    bidTenderReference          : String(100);
+    collectorName               : String(150);
+    collectorNic                 : String(30);
+    collectorContactNumber       : String(30);
+    specificBgFormatAvailable    : Boolean default false;
     vendor : Association to Vendors;
     requesterUser : Association to Users;
     processorUser : Association to Users;
@@ -192,6 +328,18 @@ entity ProcessRequests : cuid, managed {
     slaDueAt    : DateTime;
     slaCalendarCode : String(30);
     completedAt : DateTime;
+    invoices    : Composition of many Invoices
+                    on invoices.request = $self;
+    directForeignTravelEntries : Composition of many DirectForeignTravelEntries
+                    on directForeignTravelEntries.request = $self;
+    travelExpenses : Composition of many TravelExpenses
+                    on travelExpenses.request = $self;
+    glBreakups : Composition of many GLBreakups
+                    on glBreakups.request = $self;
+    settlementEntries : Composition of many SettlementEntries
+                    on settlementEntries.request = $self;
+    merchantEntityValues : Composition of many MerchantEntityValues
+                    on merchantEntityValues.request = $self;
     tasks       : Composition of many ProcessTasks
                     on tasks.request = $self;
     involvedParties : Composition of many ProcessInvolvedParties
@@ -204,6 +352,83 @@ entity ProcessRequests : cuid, managed {
                     on emailMessages.request = $self;
     history     : Composition of many ProcessHistory
                     on history.request = $self;
+}
+entity Invoices : cuid, managed {
+    request         : Association to ProcessRequests;
+    subProcessType : Association to ProcessSubTypes;
+    invoiceDate     : Date;
+    invoiceNumber   : String(50);
+    amount      : Decimal(15, 2);
+    vatAmount       : Decimal(15, 2);
+    sesReference    : String(50);
+    remarks         : LargeString;
+}
+entity TravelExpenses : cuid {
+    request       : Association to ProcessRequests;
+    date          : Date;
+    particulars   : String(255);
+    transport     : Decimal(15, 2);
+    hotel         : Decimal(15, 2);
+    meals         : Decimal(15, 2);
+    entertainment : Decimal(15, 2);
+    laundry       : Decimal(15, 2);
+    phone         : Decimal(15, 2);
+    sundry        : Decimal(15, 2);
+    miscellaneous : Decimal(15, 2);
+    total         : Decimal(15, 2);
+}
+entity GLBreakups : cuid, managed {
+    request : Association to ProcessRequests;
+    glAccount : String(50);
+    relevantDescription : String(255);
+    relevantAmount : Decimal(15, 2);
+    profitCentre : String(50);
+    costCentre : String(50);
+}
+entity SettlementEntries : cuid, managed {
+    request                : Association to ProcessRequests;
+    paymentRequestRef      : Association to ProcessRequests; 
+    paymentRequest         : String(50);
+    poNumber                : String(50);
+    sesReference            : String(50);
+    invoiceNumber            : String(50);
+    invoiceDate               : Date;
+    description                : String(500);
+    transactionAmountUSD     : Decimal(15, 2);
+    paymentAmountLKR          : Decimal(15, 2);
+    availabilityOfInvoice     : Boolean default false;
+}
+entity MerchantEntityValues : cuid, managed {
+    request            : Association to ProcessRequests;
+    businessEntity     : Association to FtkEntities;
+    totalPayableValue  : Decimal(15, 2);
+}
+entity DirectForeignTravelEntries : cuid, managed {
+    request                    : Association to ProcessRequests;
+    travelerName               : String(150);
+    category                   : String(100);
+    vendorCode                 : String(30);
+    ctmProposalNo              : String(50);
+    purposeOfTravel            : String(255);
+    venue                      : String(150);
+    departureDateTime          : DateTime;
+    arrivalDateTime            : DateTime;
+    budgetCode                 : String(50);
+    currency                   : Association to Currencies;
+    airfare                    : Decimal(15, 2);
+    visaFee                    : Decimal(15, 2);
+    perDayAllowanceUSD         : Decimal(15, 2);
+    noOfDays                   : Integer;
+    totalInUSD                 : Decimal(15, 2);
+    exchangeRate               : Decimal(15, 6);
+    totalInLKR                 : Decimal(15, 2);
+    totalCostForeignCurrency   : Decimal(15, 2);
+    totalCostLKR               : Decimal(15, 2);
+    confirmedTravelItinerary   : LargeString;
+    selectedScheme             : String(100);
+    personalTravelInvolved     : Boolean default false;
+    periodOfPersonalTravel     : String(150);
+    specialRemarks             : LargeString;
 }
 
 entity ProcessTasks : cuid, managed {

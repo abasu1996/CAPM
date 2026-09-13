@@ -1,4 +1,4 @@
 code,name,description,isActive,sortOrder
-CAPEX,Capex Project,Capital project,true,10
-OPEX,Opex Project,Operating project,true,20
-NETWORK,Network Project,Network deployment project,true,30
+CAPEX,Capex Project,Capital project,1,10
+OPEX,Opex Project,Operating project,1,20
+NETWORK,Network Project,Network deployment project,1,30

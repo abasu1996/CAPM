@@ -1,0 +1,2 @@
+ID,createdAt,createdBy,modifiedAt,modifiedBy,delegator_ID,delegate_ID,startDate,endDate,forwardNotifications,enabled,createdOnBehalf
+7b2c07e8-febf-4148-9072-370c7f0ef194,2026-08-31T21:41:37.51,system,2026-08-31T21:41:37.51,system,7420b7b2-27c3-42b7-826f-10375b267138,39f7470a-106b-4efc-a03e-5ed8a681d2f7,2026-09-01,2026-09-03,1,1,1

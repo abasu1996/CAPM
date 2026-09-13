@@ -1,9 +1,16 @@
-ID,referenceNumber,azureObjectId,userPrincipalName,displayName,email,department,isActive
-10000000-0000-4000-8000-000000000001,USR-000001,aad-alex-johnson,alex.johnson@flowmate.demo,Alex Johnson,alex.johnson@flowmate.demo,Operations,true
-10000000-0000-4000-8000-000000000002,USR-000002,aad-priya-sharma,priya.sharma@flowmate.demo,Priya Sharma,priya.sharma@flowmate.demo,Finance,true
-10000000-0000-4000-8000-000000000003,USR-000003,aad-daniel-kim,daniel.kim@flowmate.demo,Daniel Kim,daniel.kim@flowmate.demo,Procurement,true
-10000000-0000-4000-8000-000000000004,USR-000004,aad-maya-perera,maya.perera@flowmate.demo,Maya Perera,maya.perera@flowmate.demo,Human Resources,true
-10000000-0000-4000-8000-000000000005,USR-000005,aad-sophia-fernando,sophia.fernando@flowmate.demo,Sophia Fernando,sophia.fernando@flowmate.demo,IT Security,true
-10000000-0000-4000-8000-000000000006,USR-000006,aad-liam-patel,liam.patel@flowmate.demo,Liam Patel,liam.patel@flowmate.demo,Management,true
-10000000-0000-4000-8000-000000000007,USR-000007,aad-emma-silva,emma.silva@flowmate.demo,Emma Silva,emma.silva@flowmate.demo,Document Control,true
-10000000-0000-4000-8000-000000000008,USR-000008,aad-noah-wijesinghe,noah.wijesinghe@flowmate.demo,Noah Wijesinghe,noah.wijesinghe@flowmate.demo,Operations,false
+ID,createdAt,createdBy,modifiedAt,modifiedBy,referenceNumber,azureObjectId,userPrincipalName,displayName,email,department,manager_ID,isActive
+10000000-0000-4000-8000-000000000001,,,,,USR-000001,aad-alex-johnson,alex.johnson@flowmate.demo,Alex Johnson,alex.johnson@flowmate.demo,Operations,,1
+10000000-0000-4000-8000-000000000002,,,,,USR-000002,aad-priya-sharma,priya.sharma@flowmate.demo,Priya Sharma,priya.sharma@flowmate.demo,Finance,,1
+10000000-0000-4000-8000-000000000003,,,,,USR-000003,aad-daniel-kim,daniel.kim@flowmate.demo,Daniel Kim,daniel.kim@flowmate.demo,Procurement,,1
+10000000-0000-4000-8000-000000000004,,,,,USR-000004,aad-maya-perera,maya.perera@flowmate.demo,Maya Perera,maya.perera@flowmate.demo,Human Resources,,1
+10000000-0000-4000-8000-000000000005,,,,,USR-000005,aad-sophia-fernando,sophia.fernando@flowmate.demo,Sophia Fernando,sophia.fernando@flowmate.demo,IT Security,,1
+10000000-0000-4000-8000-000000000006,,,,,USR-000006,aad-liam-patel,liam.patel@flowmate.demo,Liam Patel,liam.patel@flowmate.demo,Management,,1
+10000000-0000-4000-8000-000000000007,,,,,USR-000007,aad-emma-silva,emma.silva@flowmate.demo,Emma Silva,emma.silva@flowmate.demo,Document Control,,1
+10000000-0000-4000-8000-000000000008,,,,,USR-000008,aad-noah-wijesinghe,noah.wijesinghe@flowmate.demo,Noah Wijesinghe,noah.wijesinghe@flowmate.demo,Operations,,0
+01234567-89ab-cdef-0123-456789abcdef,2026-07-21T12:43:58.951,anim.basu@ext.dialog.lk,2026-07-21T13:59:07.643,system,USR-000009,aad-sayoojya-d,sj@brainbox.consulting,Sayoojya D,sj@brainbox.consulting,string,10000000-0000-4000-8000-000000000002,1
+3901a0fe-f87a-404e-baad-15e0aeefc721,2026-07-21T13:35:01.895,system,2026-07-21T14:00:49.207,system,USR-000010,aad-nitish-sm,nitish.sm@brainbox.consulting,Nitish SM,nitish.sm@brainbox.consulting,,10000000-0000-4000-8000-000000000003,1
+13e1528b-ac00-45d1-969f-991f5c3b4fd2,2026-07-21T14:10:34.856,system,2026-07-21T14:10:34.856,system,USR-000011,a3fb80d4-1a27-4339-8820-03c047ba75ea,sanjay.dn@brainbox.consulting,Sanjay DN,Sanjay DN,,,1
+5223d87d-06a1-43a9-b9d2-7ba67174dfdb,2026-07-23T12:57:01.153,system,2026-07-23T12:57:01.153,system,USR-000012,1df34ad5-c700-43ce-8039-af61a655f4cd,Manisha@brainbox.consulting,Manisha,Manisha@brainbox.consulting,,,1
+d04e9e4e-c508-406d-aa8c-d451b3fb107b,2026-07-23T13:32:59.233,system,2026-07-23T13:44:57.124,system,USR-000013,9e45fae6-fc6b-4d8b-a7cc-ba8815ce4e48,rohithnaik.s@brainbox.consulting,Rohithnaik S,rohithnaik.s@brainbox.consulting,,d8c31e55-35ba-43cd-a5fc-d539c91fd655,1
+d8c31e55-35ba-43cd-a5fc-d539c91fd655,2026-07-23T13:32:59.293,system,2026-07-28T08:38:47.444,anim.basu@ext.dialog.lk,USR-000014,62056f15-f2ab-4469-a3d0-fb3677ac8792,anim.basu@ext.dialog.lk,Anim Basu,anim.basu@ext.dialog.lk,,13e1528b-ac00-45d1-969f-991f5c3b4fd2,1
+681e46fe-f7af-4dd6-a90e-cfad79c9d11f,2026-07-29T07:10:35.423,anim.basu@ext.dialog.lk,2026-07-29T07:10:35.423,anim.basu@ext.dialog.lk,USR-000015,,shabreen.taj@brainbox.consulting,Shabreen Taj,shabreen.taj@brainbox.consulting,,d8c31e55-35ba-43cd-a5fc-d539c91fd655,1

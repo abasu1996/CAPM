@@ -1,0 +1,4 @@
+code,name,descr
+DRAFT,Draft,Payment made by bank draft
+CHEQUE,Cheque,Payment made by cheque
+SLIPS,Slips,Payment made by deposit slip

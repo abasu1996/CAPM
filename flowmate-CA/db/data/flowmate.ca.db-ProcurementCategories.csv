@@ -1,4 +1,4 @@
 code,name,description,isActive,sortOrder
-CAPEX_IM,Capex IM,Capital expenditure investment management,true,10
-CAPEX_FM,Capex FM,Capital expenditure funds management,true,20
-OPEX,Opex,Operating expenditure,true,30
+CAPEX_IM,Capex IM,Capital expenditure investment management,1,10
+CAPEX_FM,Capex FM,Capital expenditure funds management,1,20
+OPEX,Opex,Operating expenditure,1,30

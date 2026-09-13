@@ -1,7 +1,112 @@
-ID,teamCode,name,description,isActive
-20000000-0000-4000-8000-000000000001,REQUESTOR,Dialog User Division,Request initiation and correction,true
-20000000-0000-4000-8000-000000000002,FINANCE,Finance Team,G/L account and budget validation,true
-20000000-0000-4000-8000-000000000003,SAP_MASTER,SAP Master Data Team,Valuation and SAP master enrichment,true
-20000000-0000-4000-8000-000000000004,INFOMATE,Infomate S4 Team,S/4HANA validation and creation,true
-20000000-0000-4000-8000-000000000005,SCM,SCM Team,Contract approval and revocation,true
-20000000-0000-4000-8000-000000000006,WAREHOUSE,Warehouse Team,GRN reservation and issuance,true
+ID,createdAt,createdBy,modifiedAt,modifiedBy,referenceNumber,teamCode,name,description,isActive
+96999a76-1bd0-4bec-a032-251abe9c8d44,2026-08-07T04:34:40.366,system,2026-08-07T04:34:40.366,system,TEM-000006,Brainbox Ariba,Brainbox Ariba,Ariba Solutions by Brainbox,1
+8714c645-80da-4b06-9e4d-176ddcc5cfd4,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000007,All Company,All Company,This is the default group for everyone in the network,1
+6d8626e3-0bc7-437f-ab6c-823ca72272b7,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000007,Access Engineering PLC,Access Engineering PLC,Access Engineering PLC,1
+91d1898b-e68a-4669-bb50-0fa4355154f3,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000008,AdaptNext & Brainbox,AdaptNext & Brainbox,AdaptNext & Brainbox,1
+ee561c46-bb52-4050-aa68-867c62bc52d1,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000008,Admini&HR,Admini&HR,Admini&HR,1
+949d815e-3729-41a0-a110-6267634550ee,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000009,Agile CoE,Agile CoE,Agile,1
+5dfea136-8061-4a6b-9d6d-07663dca89f6,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000009,AppX - Extend Business Application,AppX - Extend Business Application,AppX - Extend Business Application,1
+e5c6630c-0a2b-4064-9013-54a1a325494d,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000010,AppXtend,AppXtend,AppXtend,1
+28dcb44b-e4e8-45e2-95b7-2cbc4310a6ea,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000010,Ariba COE,Ariba COE,Ariba COE,1
+9f5ecd37-0d68-40a7-ae72-a9dca7316593,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000011,Ariba Learning,Ariba Learning,Ariba Learning,1
+6b819977-de6b-4f9f-9e07-7287cfcd853d,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000011,Ariba Learning Path,Ariba Learning Path,"Welcome to the Ariba Learning Path Team channel! This channel is dedicated to enhancing our knowledge and expertise in Ariba Procure-to-Pay (P2P),P2O, CA and BN and fostering collaboration among team members. Whether you're a seasoned Ariba user or just getting started, this space is designed to support your professional growth and development.",1
+2b6aeaec-6d6d-4e4c-88b0-997d2b9992c2,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000012,BB Digital,BB Digital,BB Digital,1
+a575e5d9-8a1e-4af9-81b0-35473828bcc9,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000012,BB Digital Projects,BB Digital Projects,BB Digital Projects,1
+701b2f6b-d501-4ecc-8bf0-4504eb761f55,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000013,BB S2P Pre sales and Sales Team,BB S2P Pre sales and Sales Team,Dedicated teams channel for pre sales and sales team,1
+f074f785-fb5d-4282-8776-64df8a7c36cf,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000013,BBC consultants profiles,BBC consultants profiles,Folder will have one slider profiles of all the BBC consultants,1
+d293740a-ff6f-4f13-a534-0d7771e9067d,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000014,BCD - Finance,BCD - Finance,BCD - Finance,1
+f3569250-0028-42ff-9849-4fd2656c8ee6,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000014,Bish sales leads,Bish sales leads,Biswa sales leads,1
+fbc1a381-345d-41cd-8b42-dd3985ea7bbb,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000015,"Blogs, Webinars","Blogs, Webinars","Blogs, Webinars",1
+3c4022a5-cfeb-4409-981c-c918e6e0ebbb,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000015,Brainbox Active List,Brainbox Active List,Brainbox Active List,1
+8d45ad63-0ddf-4b4c-a80a-1f7cf366f3aa,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000016,Brainbox Engineering,Brainbox Engineering,Brainbox Engineering,1
+e98d9852-f5e3-4022-8128-3ac00cd932ff,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000016,Brainbox External,Brainbox External,Brainbox External,1
+4d9afafc-c56b-44c2-a2f1-a9080c55ea93,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000017,Brainbox Presales,Brainbox Presales,Presales documentation,1
+35f0ff79-ada6-4edf-871b-54a831d59dd1,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000017,Brainbox Procurement Sales & Marketing,Brainbox Procurement Sales & Marketing,All relevant Information on Procurement Sales & Marketing,1
+fcb98771-2281-4658-9e2d-63b630d3e554,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000018,Brainstorm Session Questions,Brainstorm Session Questions,Submit all questions here from the brainstorm session you have,1
+eb5d3e0c-b569-4b7e-870b-fca4676ac73d,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000018,C4C - AMOS,C4C - AMOS,C4C - AMOS,1
+641ca861-4b36-42c9-b4af-5b29c3b866b5,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000019,Capital Maharaja,Capital Maharaja,Capital Maharaja,1
+c8461c8d-cdec-4c74-afd0-d0018f647218,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000019,Category management,Category management,Category management,1
+d0abd40a-0c22-4c71-ad1c-84fc7523958d,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000020,CBL Implementation Project,CBL Implementation Project,CBL Implementation Project,1
+54a00d23-c256-4409-a4d1-07bbfb98f31a,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000020,Centrient Tender (Expertum),Centrient Tender (Expertum),Centrient Tender (Expertum),1
+b1c5355e-5e17-4427-b46d-c8159f8c24d6,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000021,Change Management,Change Management,Change Management,1
+fcad179e-2425-4709-a1aa-da9846278222,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000021,Cohance - Implementation Project,Cohance - Implementation Project,Cohance - Implementation Project,1
+b8ec4857-3ee2-47b9-8446-c538ced55d95,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000022,Concur Team,Concur Team,"Concur Implementation, Functional, and Sales",1
+c89b1114-a2fb-498b-8b7b-0bd5e8b42308,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000022,Conversational Chatbot / AI ML/RPA,Conversational Chatbot / AI ML/RPA,Conversational Chatbot / AI ML/RPA,1
+5a4da73b-dde3-436c-81c5-7868aeb1cc02,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000023,Crystal Ventures Ltd,Crystal Ventures Ltd,Crystal Ventures Ltd,1
+7921d613-5528-48f8-82e2-0ec4e9d2e083,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000023,CV,CV,CV,1
+9dbf4e4b-ccba-4e7e-80a9-6757faf9d3a2,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000024,Dairy Day,Dairy Day,Dairy Day,1
+9c6f5fc5-c05b-42c2-aeeb-1e17dc5319ab,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000024,Demo Videos,Demo Videos,Demo Videos,1
+b0f7e7a7-3d8b-45aa-8703-8a863cd97a25,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000025,Devesh,Devesh,Devesh,1
+310852b6-0954-4510-b681-8d7dabefc360,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000025,DevOpsCoE,DevOpsCoE,DevOps place holder,1
+22d416d1-5122-464c-a273-3c1a3f6835e9,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000026,Dialog Delivery,Dialog Delivery,Dialog Delivery,1
+7130a4d5-3716-4c78-9098-c46b4111d307,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000026,Digital Price Management,Digital Price Management,Digital Price Management,1
+a191a626-c7cd-4130-bf48-b789d015ff18,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000027,Digital - Ops,Digital - Ops,Digital team operations,1
+8518339f-de34-4207-80c5-f9de6259293b,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000027,Doka - RFP,Doka - RFP,"Manage tasks, share documents, conduct project meetings and document risks and decisions with this template for general project management.",1
+9bdf5896-a068-4ad4-9421-3c425c744f80,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000028,DPNow+Brainbox,DPNow+Brainbox,DPNow+Brainbox,1
+1f839da4-1f25-4539-824d-43a9d08be3e8,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000028,Ebay Adtech,Ebay Adtech,"Place for team collaboration, documents, process guidelines and instant communication.",1
+efae8a70-637b-4cdb-a5f4-71a259f0076f,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000029,Ebay Team,Ebay Team,Ebay Team,1
+54178e1f-b6fb-4386-a1cf-fbb2ba9de184,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000029,Edge Innovation and Intelligence,Edge Innovation and Intelligence,Edge Innovation and Intelligence,1
+7ae47779-91bb-4722-838f-218a08db91d3,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000030,Emaar Properties ( via SAP MENA),Emaar Properties ( via SAP MENA),Emaar Properties ( via SAP MENA),1
+38dd1933-20cb-40f0-8d23-52091c84cc00,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000030,Emmvee,Emmvee,Emmvee,1
+4ab66b7d-3700-45c0-a4fb-0aabbae0d29d,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000031,End Year Party,End Year Party,End Year Party,1
+eac3cdd4-1cee-4c69-b0bb-b155cbd972a9,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000031,ENPRO Team,ENPRO Team,ENPRO Team,1
+c68965c0-3879-43b6-b763-ea485c2b95b5,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000032,FOYER,FOYER,FOYER,1
+0e810b22-0d46-4be7-baf0-afa548a7ec7f,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000032,Foyer - Development,Foyer - Development,Foyer - Development,1
+f0eefd67-ac83-49c6-a9ad-33661ce9b01d,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000033,"GDPR - Data protection , IT Security","GDPR - Data protection , IT Security","GDPR - Data protection , IT Security",1
+ec94f2d7-d4ae-4d8c-a1e8-619a0618a916,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000033,Harman - RFP,Harman - RFP,Harman - RFP,1
+67d96649-c5f4-4622-9cb4-b94b6e9d0314,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000034,HR Admin,HR Admin,Teams folder to track the timesheet entries,1
+524aff04-4989-4e1e-8d50-39bad50a723f,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000034,India Business,India Business,Documents and plan for India Business,1
+a7e25e85-1b5c-454c-aac9-8b542133e70b,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000035,India Operations,India Operations,India Operations,1
+80b0616b-78c9-45a9-b662-708946273d5d,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000035,Kaisa- MWC,Kaisa- MWC,Kaisa- MWC,1
+e39a8413-16fe-45db-b8c2-26382d50e954,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000036,KHC - NAM ( Phase 1,KHC - NAM ( Phase 1,KHC - NAM ( Phase 1,1
+fcb58364-b9a4-4fe1-8fa4-ea86c83cc227,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000036,KHC - Sourcing,KHC - Sourcing,KHC - Sourcing,1
+e1b20831-3ee2-48e9-b688-e5f3cc6323a8,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000037,KHC communication,KHC communication,KHC communication,1
+efe29ca2-b49e-4468-9dad-b22300226af2,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000037,KHC LATAM,KHC LATAM,KHC LATAM,1
+17a8de6f-349f-4b64-aebd-bbb2aa5317dd,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000038,KLM,KLM,Guided Buying Project,1
+30f16442-5e7c-458c-831c-c5ba9cec02fe,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000038,KLM - SRM move,KLM - SRM move,KLM - SRM move,1
+8b28f5d4-a7d6-4bbb-aea1-97ea907d3cb5,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000039,Kout Food Group,Kout Food Group,Kout Food Group,1
+4fde24e9-0e6f-4a5e-8521-449b365a67ce,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000039,Kraft Heinz Project,Kraft Heinz Project,Kraft Heinz Project,1
+3218b019-d2d9-4175-b820-76536857ac29,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000040,Kraft RFP,Kraft RFP,Kraft RFP,1
+c8163bb1-4c36-4eb1-a46e-54931c3008e4,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000040,Leadership,Leadership,Leadership,1
+e2d771aa-d261-45e9-96d0-6cfc68923ac2,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000041,Marketing 2022-2023,Marketing 2022-2023,Marketing 2022-2023,1
+f16b0dc1-8641-449d-9d84-8dcbb8d0f614,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000041,Marketing,Marketing,Marketing,1
+0d6220df-60ab-48b5-a412-442bdb5ebf09,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000042,Marketing 2024 - External,Marketing 2024 - External,Marketing 2024 - External,1
+53e76838-9a9e-4d64-ad06-c77c78916051,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000042,MSPL Implementation,MSPL Implementation,"This team will be part of implementation of Sourcing and Commerce Auto, F. O.",1
+0830f726-eaed-41a9-bc0f-85d871c09858,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000043,Mukund Sumi - Phase 1,Mukund Sumi - Phase 1,Mukund Sumi - Phase 1,1
+e07b2a4a-ec4a-4fc2-b527-19b7de5a60e4,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000043,MWC,MWC,MWC proposal docs,1
+4ca902c9-dc5f-4970-9655-dd3b7d6f636f,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000044,New Releases,New Releases,New Releases,1
+9397bd4f-fcad-4ca8-b915-20ef6b4c0d00,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000044,NMG - RFP,NMG - RFP,NMG - RFP,1
+6f5d4260-6f40-42cb-a144-3c42b4fb9776,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000045,NOL Tender,NOL Tender,NOL Tender,1
+19387514-c2f3-400b-b77f-49e811393a0f,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000045,OKR FY 2022,OKR FY 2022,OKR FY 2022,1
+86918459-a056-44b3-9cf9-87f45641d0ff,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000046,Oracle EBS,Oracle EBS,Oracle EBS,1
+8bf4334d-5da9-49fc-8e56-b76b90e0cebf,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000046,Platform and Integrations Team,Platform and Integrations Team,Channel for the technical integrations and development team at Brainbox,1
+bc137464-b5ed-4a7b-9a23-aa6832e9669c,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000047,Previs_Project,Previs_Project,"Manage tasks, share documents, conduct project meetings and document risks and decisions with this template for general project management.",1
+56215047-7b6d-42a8-895f-d0af2354ef3a,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000047,Procurement Online Questionnaire,Procurement Online Questionnaire,All files and comms for the Procurement Online Questionnaire should be stored here,1
+33649aea-f25a-426f-bc32-33f82a5822b4,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000048,Profile Management,Profile Management,Profile Management,1
+2e74a004-d0a0-462b-8400-7494d2f4ae72,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000048,Profiles,Profiles,Masked and unmasked profiles,1
+5c4fd7d6-9a5a-4c81-b92b-ecb8374c18d7,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000049,project infinity,project infinity,project infinity,1
+83df5b50-9e9b-413e-9501-c991b768687e,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000049,Project Infinity,Project Infinity,Project Infinity,1
+6006e752-2b23-4088-ade3-a5823efec4f4,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000050,Project Proposals,Project Proposals,Project Proposals,1
+d1dbda68-febf-40f9-ad07-9870a9553642,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000050,Query Related Tickets,Query Related Tickets,We Can have Collab discussion On Features implementation,1
+33cae8ed-62d4-4ac5-99b2-db18ee5440ca,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000051,RAI Sugars - RFP,RAI Sugars - RFP,RAI Sugars - RFP,1
+a27cab46-39f4-4a32-9a78-90889283201b,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000051,Revathi,Revathi,Revathi,1
+c0c8d3d5-dea0-43cc-b28a-a86629b7bd4a,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000052,RFP - Nyrstar,RFP - Nyrstar,RFP - Nyrstar,1
+913f133a-cda4-4820-aaeb-56134e98d654,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000052,RFP - Proximus,RFP - Proximus,RFP - Proximus,1
+c8f33b94-6dbe-4d4d-a903-4cc8083ccba2,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000053,S2P_SC_Practice_Leadership,S2P_SC_Practice_Leadership,S2P_SC_Practice_Leadership,1
+97929f19-1606-4227-ac54-0ada4a78c1b0,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000053,Sales,Sales,Manage sales tasks,1
+1e7e5501-5c87-4741-8501-428dc3eb2137,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000054,Sales & Marketing,Sales & Marketing,Sales & Marketing,1
+956873c9-2ec6-47e9-803e-40fedcfdf5d4,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000054,Sales commission,Sales commission,commission calculation sheet for Jai and Adi,1
+103999b4-261c-45e4-b3d9-4fff51d23b16,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000055,SAP Ariba - PrSEE Service,SAP Ariba - PrSEE Service,SAP Ariba - PrSEE Service,1
+e23a1db9-32d5-454c-bcaf-750cf060afba,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000055,Sales Team,Sales Team,Sales Team,1
+1e5d71a4-5670-4354-b1ad-3b89381de7b6,2026-08-21T14:48:33.351,system,2026-08-21T14:48:33.351,system,TEM-000056,SAP Ariba Tasks,SAP Ariba Tasks,SAP Ariba daily tasks progress.,1
+cb32af17-d8c0-4236-b757-76c4acbcf48f,2026-08-21T14:48:39.511,system,2026-08-21T14:48:39.511,system,TEM-000057,Skylar Migration and Integration,Skylar Migration and Integration,Skylar Migration and Integration,1
+9f42e6da-55e4-48d2-aacc-cc6b43a94c7e,2026-08-21T14:48:39.511,system,2026-08-21T14:48:39.511,system,TEM-000057,Dialog,Dialog,,1
+a30af5a4-09a1-4be4-a839-4b51503500a0,2026-08-21T14:48:39.511,system,2026-08-21T14:48:39.511,system,TEM-000058,Event,Event,Event,1
+f2817ed1-9aa8-4c5e-b004-c7d105db91bc,2026-08-21T14:48:41.873,system,2026-08-21T14:48:41.873,system,TEM-000059,BB_CMG,BB_CMG,BB CMG Group,1
+79a1e1d8-335b-4f73-a633-8b3d6ab58f4f,2026-08-21T14:48:41.873,system,2026-08-21T14:48:41.873,system,TEM-000059,CMG_BB,CMG_BB,CMG_BB,1
+f17038d2-1381-499b-a0cc-61addf4c447d,2026-08-21T14:48:42.443,system,2026-08-21T14:48:42.443,system,TEM-000060,MYK Vishwas,MYK Vishwas,Collaboration with in Brainbox ,1
+53da594d-284a-4ca2-97a1-25e0a9132470,2026-08-21T14:48:42.443,system,2026-08-21T14:48:42.443,system,TEM-000060,dialog test,dialog test,for mail testing purpose,1
+a6a08d68-fef2-4d62-996f-1fbb7f058c40,2026-08-21T14:48:44.563,system,2026-08-21T14:48:44.563,system,TEM-000061,Shayadri Farms,Shayadri Farms,"Client name - Shayadri
+Project Name - Saksham",1
+cec5d29a-1330-4956-bcbe-c831d6ce75f4,2026-08-22T01:07:23.421,system,2026-08-22T01:07:23.421,system,TEM-000062,Group IT Leads,Group IT Leads,,1
+dbcb512b-a1c3-4f6a-82e3-393b40ab7874,2026-08-22T01:07:24.172,system,2026-08-22T01:07:24.172,system,TEM-000063,Group IT Support Team,Group IT Support Team,,1

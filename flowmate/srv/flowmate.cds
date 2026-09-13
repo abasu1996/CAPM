@@ -119,6 +119,13 @@ service FlowmateService {
     entity ProcessSubTypes as projection on fldb.ProcessSubTypes;
     entity PaymentCategories as projection on fldb.PaymentCategories;
     entity FtkEntities as projection on fldb.FtkEntities;
+    entity Currencies as projection on fldb.Currencies;
+    entity Categories as projection on fldb.Categories;
+    entity PaymentSubCategories as projection on fldb.PaymentSubCategories;
+    entity PaymentMethod as projection on fldb.PaymentMethod;
+    entity TypeOfPayment as projection on fldb.TypeOfPayment;
+    entity RequestDivision as projection on fldb.RequestDivision;
+    entity GuaranteeTypes as projection on fldb.GuaranteeTypes;
     entity Priorities as projection on fldb.Priorities;
     entity Operator as projection on fldb.Operator;
     entity Roles as projection on common.Roles;
@@ -138,6 +145,7 @@ service FlowmateService {
         members : redirected to TeamMembers
     };
     entity Vendors as projection on common.Vendors;
+    entity Customers as projection on common.Customers;
     entity TeamMembers as projection on common.TeamMembers {
         *,
         team : redirected to Teams,
@@ -155,12 +163,47 @@ service FlowmateService {
         enabled,
         createdOnBehalf
     };
+    entity Invoices as projection on fldb.Invoices {
+        *,
+        request : redirected to ProcessRequests,
+        subProcessType : redirected to ProcessSubTypes
+    };
+    entity DirectForeignTravelEntries as projection on fldb.DirectForeignTravelEntries {
+    *,
+    request : redirected to ProcessRequests,
+    currency : redirected to Currencies
+};
+    entity TravelExpenses as projection on fldb.TravelExpenses;
+    entity GLBreakups as projection on fldb.GLBreakups;
+    entity MerchantEntityValues as projection on fldb.MerchantEntityValues {
+    *,
+    request : redirected to ProcessRequests,
+    businessEntity : redirected to FtkEntities
+    };
+    entity SettlementEntries as projection on fldb.SettlementEntries {
+        *,
+        request : redirected to ProcessRequests,
+        paymentRequestRef : redirected to ProcessRequests
+    };
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
         paymentCategory : redirected to PaymentCategories,
         businessEntity  : redirected to FtkEntities,
         priorityConfig  : redirected to Priorities,
+        currency        : redirected to Currencies,
+        category        : redirected to Categories,
+        paymentSubCategory : redirected to PaymentSubCategories,
+        paymentMethod   : redirected to PaymentMethod,
+        requestingDivision : redirected to RequestDivision,
+        typeOfPayment   : redirected to TypeOfPayment,   
+        guaranteeType : redirected to GuaranteeTypes,
         tasks       : redirected to ProcessTasks,
+        invoices : redirected to Invoices,
+        travelExpenses : redirected to TravelExpenses,
+        directForeignTravelEntries : redirected to DirectForeignTravelEntries,
+        glBreakups: redirected to GLBreakups,
+        settlementEntries : redirected to SettlementEntries,
+        merchantEntityValues : redirected to MerchantEntityValues,
         attachments : redirected to ProcessAttachments,
         emailMessages : redirected to ProcessEmailMessages
     };

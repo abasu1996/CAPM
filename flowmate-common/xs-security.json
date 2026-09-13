@@ -26,6 +26,13 @@
       "grant-as-authority-to-apps": [
         "$XSAPPNAME(application,flowmate-api-client)"
       ]
+    },
+    {
+      "name": "$XSAPPNAME.CustomerProvisioning",
+      "description": "Create, update, and delete shared Flowmate customers through the integration API",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
     }
   ],
   "authorities": [
@@ -62,6 +69,14 @@
       "scope-references": [
         "$XSAPPNAME.MasterDataRead",
         "$XSAPPNAME.VendorProvisioning"
+      ]
+    },
+    {
+      "name": "CustomerProvisioning",
+      "description": "Provision shared Flowmate customers",
+      "scope-references": [
+        "$XSAPPNAME.MasterDataRead",
+        "$XSAPPNAME.CustomerProvisioning"
       ]
     }
   ],

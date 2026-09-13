@@ -1,0 +1,3 @@
+ID,createdAt,createdBy,modifiedAt,modifiedBy,amount,operator_code,roleCode
+19773c2b-310f-427c-a710-07b724aa069f,2026-08-05T07:22:44.811,anim.basu@ext.dialog.lk,2026-08-06T12:51:20.182,anim.basu@ext.dialog.lk,1000.00,>=,ZSUP
+8b16ac8a-e1f5-4a73-a0f1-cc43175bb9f5,2026-08-06T12:51:14.477,anim.basu@ext.dialog.lk,2026-08-21T18:06:50.532,venkata.manisha@ext.dialog.lk,100.00,>,ZQC

@@ -437,6 +437,63 @@
                                 </items>
                             </Table>
                         </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://customer" text="{i18n>customerMasterTitle}">
+                        <OverflowToolbar class="flowmateToolbar">
+                            <Title text="{i18n>customerMasterTitle}" />
+                            <ToolbarSpacer />
+                            <SearchField
+                                width="18rem"
+                                placeholder="{i18n>searchCustomersPlaceholder}"
+                                search=".onSearchCustomers"
+                                liveChange=".onSearchCustomers" />
+                            <Button
+                                icon="sap-icon://add"
+                                text="{i18n>addCustomerButton}"
+                                type="Emphasized"
+                                press=".onAddCustomer" />
+                            <Button
+                                icon="sap-icon://delete"
+                                text="{i18n>deleteSelectedButton}"
+                                type="Reject"
+                                press=".onDeleteSelectedCustomers" />
+                        </OverflowToolbar>
+                        <Table
+                            id="customersTable"
+                            class="flowmateTable"
+                            mode="MultiSelect"
+                            noDataText="{i18n>noCustomersText}"
+                            growing="true"
+                            growingScrollToLoad="true"
+                            items="{
+                                path: '/Customers',
+                                sorter: { path: 'customerName' },
+                                events: {
+                                    dataRequested: '.onDataRequested',
+                                    dataReceived: '.onDataReceived'
+                                }
+                            }">
+                            <columns>
+                                <Column width="12rem"><Text text="{i18n>customerCodeLabel}" wrapping="true" /></Column>
+                                <Column><Text text="{i18n>customerNameLabel}" wrapping="true" /></Column>
+                                <Column width="20rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>customerEmailLabel}" wrapping="true" /></Column>
+                                <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem vAlign="Middle">
+                                    <cells>
+                                        <ObjectIdentifier title="{customerCode}" />
+                                        <Text text="{customerName}" wrapping="true" />
+                                        <Link text="{customerEmail}" href="{= ${customerEmail} ? 'mailto:' + ${customerEmail} : '' }" />
+                                        <Button
+                                            icon="sap-icon://edit"
+                                            type="Transparent"
+                                            tooltip="{i18n>editCustomerButton}"
+                                            press=".onEditCustomer" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </IconTabFilter>
                         <IconTabFilter icon="sap-icon://calendar" text="{i18n>workingCalendarAdminTitle}">
                             <VBox class="flowmateAdminCalendarSection">
                                 <OverflowToolbar class="flowmateToolbar">
@@ -562,6 +619,211 @@
                                 </items>
                             </Table>
                         </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://money-bills" text="{i18n>currencyConfigTitle}">
+                        <OverflowToolbar class="flowmateToolbar">
+                            <Title text="{i18n>currencyConfigTitle}" />
+                            <ToolbarSpacer />
+                            <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                <customData><core:CustomData key="entitySet" value="Currencies" /></customData>
+                            </SearchField>
+                            <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                <customData><core:CustomData key="entitySet" value="Currencies" /></customData>
+                            </Button>
+                            <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                <customData><core:CustomData key="entitySet" value="Currencies" /></customData>
+                            </Button>
+                        </OverflowToolbar>
+                        <Table id="currencyTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/Currencies}">
+                            <columns>
+                                <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                                <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                                <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                            </columns>
+                            <items><ColumnListItem><cells>
+                                <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                                <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                    <customData><core:CustomData key="entitySet" value="Currencies" /></customData>
+                                </Button>
+                            </cells></ColumnListItem></items>
+                        </Table>
+                    </IconTabFilter>
+                    <IconTabFilter icon="sap-icon://commission-check" text="{i18n>categoryConfigTitle}">
+                        <OverflowToolbar class="flowmateToolbar">
+                            <Title text="{i18n>categoryConfigTitle}" />
+                            <ToolbarSpacer />
+                            <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                                <customData><core:CustomData key="entitySet" value="Categories" /></customData>
+                            </SearchField>
+                            <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                                <customData><core:CustomData key="entitySet" value="Categories" /></customData>
+                            </Button>
+                            <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                                <customData><core:CustomData key="entitySet" value="Categories" /></customData>
+                            </Button>
+                        </OverflowToolbar>
+                        <Table id="categoryTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/Categories}">
+                            <columns>
+                                <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                                <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                                <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                                <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                            </columns>
+                            <items><ColumnListItem><cells>
+                                <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                                <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                    <customData><core:CustomData key="entitySet" value="Categories" /></customData>
+                                </Button>
+                            </cells></ColumnListItem></items>
+                        </Table>
+                    </IconTabFilter>
+                    <IconTabFilter icon="sap-icon://money-bills" text="{i18n>paymentSubCategoryConfigTitle}">
+                    <OverflowToolbar class="flowmateToolbar">
+                        <Title text="{i18n>paymentSubCategoryConfigTitle}" />
+                        <ToolbarSpacer />
+                        <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                            <customData><core:CustomData key="entitySet" value="PaymentSubCategories" /></customData>
+                        </SearchField>
+                        <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                            <customData><core:CustomData key="entitySet" value="PaymentSubCategories" /></customData>
+                        </Button>
+                        <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                            <customData><core:CustomData key="entitySet" value="PaymentSubCategories" /></customData>
+                        </Button>
+                    </OverflowToolbar>
+                    <Table id="paymentSubCategoryTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/PaymentSubCategories}">
+                        <columns>
+                            <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                            <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                            <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                            <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                        </columns>
+                        <items><ColumnListItem><cells>
+                            <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                            <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                <customData><core:CustomData key="entitySet" value="PaymentSubCategories" /></customData>
+                            </Button>
+                        </cells></ColumnListItem></items>
+                    </Table>
+                </IconTabFilter>
+
+                <IconTabFilter icon="sap-icon://payment-approval" text="{i18n>paymentMethodConfigTitle}">
+                    <OverflowToolbar class="flowmateToolbar">
+                        <Title text="{i18n>paymentMethodConfigTitle}" />
+                        <ToolbarSpacer />
+                        <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                            <customData><core:CustomData key="entitySet" value="PaymentMethod" /></customData>
+                        </SearchField>
+                        <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                            <customData><core:CustomData key="entitySet" value="PaymentMethod" /></customData>
+                        </Button>
+                        <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                            <customData><core:CustomData key="entitySet" value="PaymentMethod" /></customData>
+                        </Button>
+                    </OverflowToolbar>
+                    <Table id="paymentMethodTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/PaymentMethod}">
+                        <columns>
+                            <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                            <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                            <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                            <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                        </columns>
+                        <items><ColumnListItem><cells>
+                            <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                            <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                <customData><core:CustomData key="entitySet" value="PaymentMethod" /></customData>
+                            </Button>
+                        </cells></ColumnListItem></items>
+                    </Table>
+                </IconTabFilter>
+
+                <IconTabFilter icon="sap-icon://money-bills" text="{i18n>typeOfPaymentConfigTitle}">
+                    <OverflowToolbar class="flowmateToolbar">
+                        <Title text="{i18n>typeOfPaymentConfigTitle}" />
+                        <ToolbarSpacer />
+                        <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                            <customData><core:CustomData key="entitySet" value="TypeOfPayment" /></customData>
+                        </SearchField>
+                        <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                            <customData><core:CustomData key="entitySet" value="TypeOfPayment" /></customData>
+                        </Button>
+                        <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                            <customData><core:CustomData key="entitySet" value="TypeOfPayment" /></customData>
+                        </Button>
+                    </OverflowToolbar>
+                    <Table id="typeOfPaymentTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/TypeOfPayment}">
+                        <columns>
+                            <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                            <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                            <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                            <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                        </columns>
+                        <items><ColumnListItem><cells>
+                            <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                            <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                <customData><core:CustomData key="entitySet" value="TypeOfPayment" /></customData>
+                            </Button>
+                        </cells></ColumnListItem></items>
+                    </Table>
+                </IconTabFilter>
+                <IconTabFilter icon="sap-icon://org-chart" text="{i18n>requestDivisionConfigTitle}">
+                <OverflowToolbar class="flowmateToolbar">
+                    <Title text="{i18n>requestDivisionConfigTitle}" />
+                    <ToolbarSpacer />
+                    <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                        <customData><core:CustomData key="entitySet" value="RequestDivision" /></customData>
+                    </SearchField>
+                    <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                        <customData><core:CustomData key="entitySet" value="RequestDivision" /></customData>
+                    </Button>
+                    <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                        <customData><core:CustomData key="entitySet" value="RequestDivision" /></customData>
+                    </Button>
+                </OverflowToolbar>
+                <Table id="requestDivisionTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/RequestDivision}">
+                    <columns>
+                        <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                        <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                        <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                        <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                    </columns>
+                    <items><ColumnListItem><cells>
+                        <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                        <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                            <customData><core:CustomData key="entitySet" value="RequestDivision" /></customData>
+                        </Button>
+                    </cells></ColumnListItem></items>
+                </Table>
+            </IconTabFilter>
+            <IconTabFilter icon="sap-icon://shield" text="{i18n>guaranteeTypesConfigTitle}">
+    <OverflowToolbar class="flowmateToolbar">
+        <Title text="{i18n>guaranteeTypesConfigTitle}" />
+        <ToolbarSpacer />
+        <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+            <customData><core:CustomData key="entitySet" value="GuaranteeTypes" /></customData>
+        </SearchField>
+        <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+            <customData><core:CustomData key="entitySet" value="GuaranteeTypes" /></customData>
+        </Button>
+        <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+            <customData><core:CustomData key="entitySet" value="GuaranteeTypes" /></customData>
+        </Button>
+    </OverflowToolbar>
+    <Table id="guaranteeTypesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/GuaranteeTypes}">
+        <columns>
+            <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+            <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+            <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+            <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+        </columns>
+        <items><ColumnListItem><cells>
+            <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+            <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                <customData><core:CustomData key="entitySet" value="GuaranteeTypes" /></customData>
+            </Button>
+        </cells></ColumnListItem></items>
+    </Table>
+</IconTabFilter>        
                     </items>
                 </IconTabBar>
             </VBox>
@@ -632,6 +894,38 @@
                 <Button text="{i18n>cancelButton}" press=".onCloseVendorDialog" />
             </endButton>
         </Dialog>
+        <Dialog id="customerDialog" title="{customerEdit>/dialogTitle}" contentWidth="42rem" stretchOnPhone="true">
+        <content>
+            <form:SimpleForm
+                class="flowmateDialogContent"
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="4"
+                labelSpanM="4"
+                labelSpanS="12"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1">
+                <Label text="{i18n>customerCodeLabel}" required="true" />
+                <Input value="{customerEdit>/customerCode}" maxLength="30" required="true" />
+                <Label text="{i18n>customerNameLabel}" required="true" />
+                <Input value="{customerEdit>/customerName}" maxLength="150" required="true" />
+                <Label text="{i18n>customerEmailLabel}" />
+                <Input
+                    value="{customerEdit>/customerEmail}"
+                    type="Email"
+                    maxLength="255"
+                    placeholder="{i18n>customerEmailPlaceholder}" />
+            </form:SimpleForm>
+        </content>
+        <beginButton>
+        <Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveCustomer" />
+    </beginButton>
+    <endButton>
+        <Button text="{i18n>cancelButton}" press=".onCloseCustomerDialog" />
+    </endButton>
+</Dialog>
         <Dialog id="processSubTypeDialog" title="{subTypeEdit>/dialogTitle}" contentWidth="52rem" stretchOnPhone="true">
             <content>
                 <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">

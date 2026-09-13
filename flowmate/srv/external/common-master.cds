@@ -53,6 +53,16 @@ service CommonMasterDataService {
         isActive   : Boolean;
   }
 
+
+   @cds.persistence.skip
+  entity Customers {
+    key ID            : UUID;
+        customerCode  : String(40);
+        customerName  : String(180);
+        customerEmail : String(255);
+        isActive      : Boolean;
+  }
+
   @cds.persistence.skip
   entity Delegations {
     key ID                  : UUID;
