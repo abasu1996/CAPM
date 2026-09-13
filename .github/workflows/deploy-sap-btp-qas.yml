@@ -13,9 +13,9 @@ concurrency:
 
 env:
   NODE_VERSION: "20"
-  CF_API: ${{ vars.CF_API }}
-  CF_ORG: ${{ vars.CF_ORG }}
-  CF_SPACE: ${{ vars.CF_SPACE }}
+  CF_API: ${{ secrets.CF_API }}
+  CF_ORG: ${{ secrets.CF_ORG }}
+  CF_SPACE: ${{ secrets.CF_SPACE }}
 
 jobs:
   backup-build-deploy:
@@ -161,4 +161,3 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
         env:
           JOB_STATUS: ${{ job.status }}
-
