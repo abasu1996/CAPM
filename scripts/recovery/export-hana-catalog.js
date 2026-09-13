@@ -8,9 +8,14 @@
  *
  * The script performs SELECT operations only. Binary columns are excluded.
  */
-const cds = require("@sap/cds");
 const fs = require("fs");
 const path = require("path");
+
+// This script is intentionally shared by several CAP projects and therefore
+// lives outside their package directories. Resolve @sap/cds from the project
+// that invokes the script instead of from this script's own directory.
+const projectDirectory = path.resolve(process.env.CDS_PROJECT_DIR || process.cwd());
+const cds = require(require.resolve("@sap/cds", { paths: [projectDirectory] }));
 
 const outputDirectory = process.env.RECOVERY_EXPORT_DIR;
 
