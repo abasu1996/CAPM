@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+ND,ND - No Planning,No MRP planning,true,10
+PD,PD - Deterministic MRP,Deterministic requirement planning,true,20
+VB,VB - Manual Reorder Point,Manual reorder point planning,true,30
+VM,VM - Automatic Reorder Point,Automatic reorder point planning,true,40

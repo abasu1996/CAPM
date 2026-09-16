@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+TRADING,Trading Materials,Trading materials - adds the Section 10.2 sales and distribution fields,true,10
+ENG_IT,Engineering / IT,Engineering and IT materials,true,20
+ADMIN_CONS,Admin & Consumables,Administrative and consumable materials,true,30
+SPARE,Spare Parts,Spare parts,true,40

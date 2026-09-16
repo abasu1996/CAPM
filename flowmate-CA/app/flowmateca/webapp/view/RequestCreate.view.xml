@@ -13,7 +13,7 @@
     <content>
       <VBox class="caCreatePage sapUiResponsiveContentPadding">
         <MessageStrip
-          text="The process variant controls the request fields and the guided workflow that will be created."
+          text="Fields are shown based on the selected Request Type. The Process Variant controls the guided workflow that will be created."
           type="Information"
           showIcon="true"
           class="sapUiSmallMarginBottom"/>
@@ -43,7 +43,6 @@
                 id="requestVariant"
                 selectedKey="{form>/requestVariantCode}"
                 items="{catalog>/filteredVariants}"
-                selectionChange=".onRequestVariantChange"
                 showSecondaryValues="true">
                 <core:ListItem key="{catalog>code}" text="{catalog>name}" additionalText="{catalog>code}"/>
               </ComboBox>
@@ -86,408 +85,41 @@
           </content>
         </Panel>
 
-        <!-- Excel sheet: "Centralized PO" - requestType PURCHASE_ORDER -->
-        <Panel
-          headerText="{i18n>poManualSectionTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' }"
-          class="caFormSection">
-          <content>
-            <form:SimpleForm
-              editable="true"
-              layout="ColumnLayout"
-              columnsXL="3"
-              columnsL="3"
-              columnsM="2"
-              labelSpanXL="12"
-              labelSpanL="12"
-              labelSpanM="12">
-              <Label text="{i18n>poPoType}"/>
-              <Select selectedKey="{form>/details/poPoType}">
-                <core:Item key="SINGLE" text="Single PO"/>
-                <core:Item key="MULTIPLE" text="Multiple PO"/>
-              </Select>
-              <Label text="{i18n>poHeaderTextManual}"/>
-              <Input value="{form>/details/poHeaderTextManual}"/>
-              <Label text="{i18n>poTermsOfDelivery}"/>
-              <Input value="{form>/details/poTermsOfDelivery}"/>
-              <Label text="{i18n>poWarranty}"/>
-              <Input value="{form>/details/poWarranty}"/>
-              <Label text="{i18n>poValueWithoutTaxes}"/>
-              <Input value="{form>/details/poValueWithoutTaxes}" type="Number"/>
-              <Label text="{i18n>poPaymentMilestone}"/>
-              <Input value="{form>/details/poPaymentMilestone}"/>
-              <Label text="{i18n>poArNumber}"/>
-              <Input value="{form>/details/poArNumber}"/>
-              <Label text="{i18n>poApprovedRecipientEmail}"/>
-              <Input value="{form>/details/poApprovedRecipientEmail}" type="Email"/>
-              <Label text="{i18n>poSpecialPersonArea}"/>
-              <Select selectedKey="{form>/details/poSpecialPersonArea}">
-                <core:Item key="FTK" text="FTK"/>
-                <core:Item key="ENGINEERING" text="Engineering"/>
-                <core:Item key="IT" text="IT"/>
-                <core:Item key="DBS" text="DBS"/>
-                <core:Item key="MARKETING" text="Marketing"/>
-                <core:Item key="FOC" text="FOC"/>
-                <core:Item key="DNS" text="DNS"/>
-              </Select>
-              <Label text="{i18n>poInvoiceAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-              <Label text="{i18n>poEmailApprovalAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-              <Label text="{i18n>poSummary}"/>
-              <TextArea value="{form>/details/poSummary}" rows="3" width="100%"/>
-              <Label text="{i18n>poSesNumberRequired}"/>
-              <Select selectedKey="{form>/details/poSesNumberRequired}">
-                <core:Item key="YES" text="Yes"/>
-                <core:Item key="NO" text="No"/>
-              </Select>
-              <Label text="{i18n>poPaymentRequired}"/>
-              <Select selectedKey="{form>/details/poPaymentRequired}">
-                <core:Item key="YES" text="Yes"/>
-                <core:Item key="NO" text="No"/>
-              </Select>
-              <Label text="{i18n>poItemQuantity}"/>
-              <Input value="{form>/details/poItemQuantity}" type="Number"/>
-              <Label text="{i18n>poItemUnitPrice}"/>
-              <Input value="{form>/details/poItemUnitPrice}" type="Number"/>
-            </form:SimpleForm>
-          </content>
-        </Panel>
-
-        <!-- Excel sheet: "SES creation" - requestType SERVICE_ENTRY_SHEET -->
-        <Panel
-          headerText="{i18n>sesManualSectionTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'SERVICE_ENTRY_SHEET' }"
-          class="caFormSection">
-          <content>
-            <form:SimpleForm
-              editable="true"
-              layout="ColumnLayout"
-              columnsXL="3"
-              columnsL="3"
-              columnsM="2"
-              labelSpanXL="12"
-              labelSpanL="12"
-              labelSpanM="12">
-              <Label text="{i18n>sesOptionType}"/>
-              <Select selectedKey="{form>/details/sesOptionType}">
-                <core:Item key="SES_REQUIRED" text="SES Required"/>
-                <core:Item key="PAYMENT_REQUIRED" text="Payment Required"/>
-                <core:Item key="PAYMENT_REQUIRED_GRN_PO" text="Payment Required for GRN PO"/>
-              </Select>
-              <Label text="{i18n>sesRecipientEmail}"/>
-              <Input value="{form>/details/sesRecipientEmail}" type="Email"/>
-              <Label text="{i18n>sesSpecialPersonArea}"/>
-              <Select selectedKey="{form>/details/sesSpecialPersonArea}">
-                <core:Item key="DBS" text="DBS"/>
-                <core:Item key="MARKETING" text="Marketing"/>
-              </Select>
-              <Label text="{i18n>sesAmount}"/>
-              <Input value="{form>/details/sesAmount}" type="Number"/>
-              <Label text="{i18n>sesInvoiceAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-              <Label text="{i18n>sesRemarks}"/>
-              <TextArea value="{form>/details/sesRemarks}" rows="3" width="100%"/>
-            </form:SimpleForm>
-          </content>
-        </Panel>
-
-        <!-- Excel sheet: "Service Code" - requestType SERVICE_CODE -->
-        <Panel
-          headerText="{i18n>svcManualSectionTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'SERVICE_CODE' }"
-          class="caFormSection">
-          <content>
-            <form:SimpleForm
-              editable="true"
-              layout="ColumnLayout"
-              columnsXL="3"
-              columnsL="3"
-              columnsM="2"
-              labelSpanXL="12"
-              labelSpanL="12"
-              labelSpanM="12">
-              <Label text="{i18n>svcDescription}"/>
-              <Input value="{form>/details/svcDescription}" maxLength="40"/>
-              <Label text="{i18n>svcAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-              <Label text="{i18n>svcRemarks}"/>
-              <TextArea value="{form>/details/svcRemarks}" rows="3" width="100%"/>
-            </form:SimpleForm>
-          </content>
-        </Panel>
-
-        <!-- Excel sheet: "Mat Reservation" - requestType MATERIAL_RESERVATION -->
-        <Panel
-          headerText="{i18n>mresManualSectionTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'MATERIAL_RESERVATION' }"
-          class="caFormSection">
-          <content>
-            <form:SimpleForm
-              editable="true"
-              layout="ColumnLayout"
-              columnsXL="3"
-              columnsL="3"
-              columnsM="2"
-              labelSpanXL="12"
-              labelSpanL="12"
-              labelSpanM="12">
-              <Label text="{i18n>mresProject}"/>
-              <Input value="{form>/details/mresProject}"/>
-              <Label text="{i18n>mresBatch}"/>
-              <Input value="{form>/details/mresBatch}"/>
-              <Label text="{i18n>mresRequestType}"/>
-              <Select selectedKey="{form>/details/mresRequestType}">
-                <core:Item key="ENGINEERING" text="Engineering"/>
-                <core:Item key="NON_ENGINEERING" text="Non-Engineering"/>
-              </Select>
-              <Label text="{i18n>mresMaterialType}"/>
-              <Select selectedKey="{form>/details/mresMaterialType}">
-                <core:Item key="WAREHOUSE" text="Warehouse"/>
-                <core:Item key="DIRECT_DELIVERY" text="Direct Delivery"/>
-              </Select>
-              <Label text="{i18n>mresWarehouseLocation}"/>
-              <Input value="{form>/details/mresWarehouseLocation}"/>
-              <Label text="{i18n>mresRemarks}"/>
-              <TextArea value="{form>/details/mresRemarks}" rows="3" width="100%"/>
-              <Label text="{i18n>mresAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-            </form:SimpleForm>
-          </content>
-        </Panel>
-
-        <!-- Excel sheet: "Project Code Creation" - requestType PROJECT_CODE -->
-        <Panel
-          headerText="{i18n>projManualSectionTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'PROJECT_CODE' }"
-          class="caFormSection">
-          <content>
-            <form:SimpleForm
-              editable="true"
-              layout="ColumnLayout"
-              columnsXL="3"
-              columnsL="3"
-              columnsM="2"
-              labelSpanXL="12"
-              labelSpanL="12"
-              labelSpanM="12">
-              <Label text="{i18n>projSelectionMode}"/>
-              <Select selectedKey="{form>/details/projSelectionMode}">
-                <core:Item key="SINGLE" text="Single"/>
-                <core:Item key="BULK" text="Bulk"/>
-              </Select>
-              <Label text="{i18n>projRequestedBy}"/>
-              <Select selectedKey="{form>/details/projRequestedBy}">
-                <core:Item key="ENGINEERING" text="Engineering"/>
-                <core:Item key="NON_ENGINEERING" text="Non-Engineering"/>
-              </Select>
-              <Label text="{i18n>projFlCreationRequired}"/>
-              <Select selectedKey="{form>/details/projFlCreationRequired}">
-                <core:Item key="YES" text="Yes"/>
-                <core:Item key="NO" text="No"/>
-              </Select>
-              <Label text="{i18n>projActivityCreationRequired}"/>
-              <Select selectedKey="{form>/details/projActivityCreationRequired}">
-                <core:Item key="YES" text="Yes"/>
-                <core:Item key="NO" text="No"/>
-              </Select>
-              <Label text="{i18n>projProjectName}"/>
-              <Input value="{form>/details/projProjectName}"/>
-              <Label text="{i18n>projVendor}"/>
-              <Input value="{form>/details/projVendor}"/>
-              <Label text="{i18n>projScope}"/>
-              <TextArea value="{form>/details/projScope}" rows="3" width="100%"/>
-              <Label text="{i18n>projProjectType}"/>
-              <Input value="{form>/details/projProjectType}"/>
-              <Label text="{i18n>projRemarks}"/>
-              <TextArea value="{form>/details/projRemarks}" rows="3" width="100%"/>
-              <Label text="{i18n>projAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-            </form:SimpleForm>
-          </content>
-        </Panel>
-
-        <!-- Excel sheet: "Equipment Creation" - requestType EQUIPMENT_CODE -->
-        <Panel
-          headerText="{i18n>eqpManualSectionTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'EQUIPMENT_CODE' }"
-          class="caFormSection">
-          <content>
-            <form:SimpleForm
-              editable="true"
-              layout="ColumnLayout"
-              columnsXL="3"
-              columnsL="3"
-              columnsM="2"
-              labelSpanXL="12"
-              labelSpanL="12"
-              labelSpanM="12">
-              <Label text="{i18n>eqpSerialNumber}"/>
-              <Input value="{form>/details/eqpSerialNumber}"/>
-              <Label text="{i18n>eqpCommissionedDate}"/>
-              <DatePicker value="{form>/details/eqpCommissionedDate}" valueFormat="yyyy-MM-dd" displayFormat="medium"/>
-              <Label text="{i18n>eqpRemarks}"/>
-              <TextArea value="{form>/details/eqpRemarks}" rows="3" width="100%"/>
-              <Label text="{i18n>eqpAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-            </form:SimpleForm>
-          </content>
-        </Panel>
-
-        <!-- Excel sheet: "Material Code Creation" - requestType MATERIAL_CODE -->
-        <Panel
-          headerText="{i18n>matcManualSectionTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'MATERIAL_CODE' }"
-          class="caFormSection">
-          <content>
-            <form:SimpleForm
-              editable="true"
-              layout="ColumnLayout"
-              columnsXL="3"
-              columnsL="3"
-              columnsM="2"
-              labelSpanXL="12"
-              labelSpanL="12"
-              labelSpanM="12">
-              <Label text="{i18n>matcDescription}"/>
-              <Input value="{form>/details/matcDescription}" maxLength="40"/>
-              <Label text="{i18n>matcGrProcessingTime}"/>
-              <Input value="{form>/details/matcGrProcessingTime}"/>
-              <Label text="{i18n>matcHsCode}"/>
-              <Input value="{form>/details/matcHsCode}"/>
-              <Label text="{i18n>matcPerUnitPrice}"/>
-              <Input value="{form>/details/matcPerUnitPrice}" type="Number"/>
-              <Label text="{i18n>matcApprovalAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-              <Label text="{i18n>matcInspectionStock}"/>
-              <Select selectedKey="{form>/details/matcInspectionStock}">
-                <core:Item key="YES" text="Yes"/>
-                <core:Item key="NO" text="No"/>
-              </Select>
-              <Label text="{i18n>matcSourceList}"/>
-              <Select selectedKey="{form>/details/matcSourceList}">
-                <core:Item key="YES" text="Yes"/>
-                <core:Item key="NO" text="No"/>
-              </Select>
-              <Label text="{i18n>matcSapMaterialCode}"/>
-              <Input value="{form>/details/matcSapMaterialCode}"/>
-              <Label text="{i18n>matcItemName}"/>
-              <Input value="{form>/details/matcItemName}"/>
-              <Label text="{i18n>matcItemCategory}"/>
-              <Input value="{form>/details/matcItemCategory}"/>
-              <Label text="{i18n>matcUnitsPerItem}"/>
-              <Input value="{form>/details/matcUnitsPerItem}" type="Number"/>
-              <Label text="{i18n>matcUnitPrice}"/>
-              <Input value="{form>/details/matcUnitPrice}" type="Number"/>
-              <Label text="{i18n>matcTaxPercentage}"/>
-              <Input value="{form>/details/matcTaxPercentage}" type="Number"/>
-              <Label text="{i18n>matcIsSaleable}"/>
-              <Select selectedKey="{form>/details/matcIsSaleable}">
-                <core:Item key="YES" text="Yes"/>
-                <core:Item key="NO" text="No"/>
-              </Select>
-              <Label text="{i18n>matcIsSerialized}"/>
-              <Select selectedKey="{form>/details/matcIsSerialized}">
-                <core:Item key="YES" text="Yes"/>
-                <core:Item key="NO" text="No"/>
-              </Select>
-              <Label text="{i18n>matcRequiredAgents}"/>
-              <Input value="{form>/details/matcRequiredAgents}"/>
-              <Label text="{i18n>matcVendorErp}"/>
-              <Input value="{form>/details/matcVendorErp}"/>
-              <Label text="{i18n>matcDefaultWarrantyPeriod}"/>
-              <Input value="{form>/details/matcDefaultWarrantyPeriod}" type="Number"/>
-              <Label text="{i18n>matcWarrantyType}"/>
-              <Input value="{form>/details/matcWarrantyType}"/>
-              <Label text="{i18n>matcValueType}"/>
-              <Input value="{form>/details/matcValueType}"/>
-              <Label text="{i18n>matcSbu}"/>
-              <Input value="{form>/details/matcSbu}"/>
-              <Label text="{i18n>matcConfigId}"/>
-              <Select selectedKey="{form>/details/matcConfigId}">
-                <core:Item key="1" text="1 - Serials breaking from 2500"/>
-                <core:Item key="2" text="2 - Serials breaking from 1000"/>
-                <core:Item key="3" text="3 - Random or sequential serials"/>
-                <core:Item key="4" text="4 - Alpha numeric"/>
-              </Select>
-            </form:SimpleForm>
-          </content>
-        </Panel>
-
-        <!-- Excel sheet: "Outline Contract Creation" - requestType OUTLINE_CONTRACT -->
-        <Panel
-          headerText="{i18n>ocManualSectionTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'OUTLINE_CONTRACT' }"
-          class="caFormSection">
-          <content>
-            <form:SimpleForm
-              editable="true"
-              layout="ColumnLayout"
-              columnsXL="3"
-              columnsL="3"
-              columnsM="2"
-              labelSpanXL="12"
-              labelSpanL="12"
-              labelSpanM="12">
-              <Label text="{i18n>ocContractNumber}"/>
-              <Input value="{form>/details/ocContractNumber}"/>
-              <Label text="{i18n>ocApprovalAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-              <Label text="{i18n>ocOtherSupportingAttachment}"/>
-              <unified:FileUploader buttonText="Select File" icon="sap-icon://attachment"/>
-              <Label text="{i18n>ocOtherComments}"/>
-              <TextArea value="{form>/details/ocOtherComments}" rows="3" width="100%"/>
-              <Label text="{i18n>ocRemarks}"/>
-              <TextArea value="{form>/details/ocRemarks}" rows="3" width="100%"/>
-              <Label text="{i18n>ocContractCount}"/>
-              <Input value="{form>/details/ocContractCount}" type="Number"/>
-              <Label text="{i18n>ocLineItem}"/>
-              <Input value="{form>/details/ocLineItem}"/>
-              <Label text="{i18n>ocValidityStartDate}"/>
-              <DatePicker value="{form>/details/ocValidityStartDate}" valueFormat="yyyy-MM-dd" displayFormat="medium"/>
-              <Label text="{i18n>ocValidityEndDate}"/>
-              <DatePicker value="{form>/details/ocValidityEndDate}" valueFormat="yyyy-MM-dd" displayFormat="medium"/>
-              <Label text="{i18n>ocIncotermsLocation}"/>
-              <Input value="{form>/details/ocIncotermsLocation}"/>
-              <Label text="{i18n>ocTotalTargetValue}"/>
-              <Input value="{form>/details/ocTotalTargetValue}" type="Number"/>
-              <Label text="{i18n>ocTargetQuantity}"/>
-              <Input value="{form>/details/ocTargetQuantity}" type="Number"/>
-              <Label text="{i18n>ocServiceLine}"/>
-              <Input value="{form>/details/ocServiceLine}"/>
-              <Label text="{i18n>ocShortTextServices}"/>
-              <Input value="{form>/details/ocShortTextServices}" maxLength="40"/>
-              <Label text="{i18n>ocQuantity}"/>
-              <Input value="{form>/details/ocQuantity}" type="Number"/>
-              <Label text="{i18n>ocGrossPrice}"/>
-              <Input value="{form>/details/ocGrossPrice}" type="Number"/>
-              <Label text="{i18n>ocPriceUnit}"/>
-              <Input value="{form>/details/ocPriceUnit}"/>
-              <Label text="{i18n>ocMaterialSavingPct}"/>
-              <Input value="{form>/details/ocMaterialSavingPct}" type="Number"/>
-              <Label text="{i18n>ocServiceSavingPct}"/>
-              <Input value="{form>/details/ocServiceSavingPct}" type="Number"/>
-              <Label text="{i18n>ocScmSpocUserId}"/>
-              <Input value="{form>/details/ocScmSpocUserId}"/>
-            </form:SimpleForm>
-          </content>
-        </Panel>
-
         <Panel
           headerText="{form>/detailSectionTitle}"
           expandable="false"
-          visible="{= !!${form>/requestVariantCode} }"
+          visible="{= !!${form>/requestTypeCode} }"
           class="caFormSection">
           <content>
             <VBox id="dynamicFormHost"/>
+          </content>
+        </Panel>
+        <Panel
+          headerText="{i18n>itemsTableTitle}"
+          expandable="false"
+          visible="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' || ${form>/requestTypeCode} === 'SERVICE_ENTRY_SHEET' || ${form>/requestTypeCode} === 'OUTLINE_CONTRACT' || ${form>/requestTypeCode} === 'MATERIAL_RESERVATION' }"
+          class="caFormSection">
+          <content>
+            <Toolbar>
+              <Title text="{= ${i18n>itemsTableTitle} + ' (' + (${form>/details/items} ? ${form>/details/items}.length : 0) + ')' }" level="H4"/>
+              <ToolbarSpacer/>
+              <unified:FileUploader
+                id="itemsCsvUploader"
+                buttonOnly="true"
+                buttonText="{i18n>importCsv}"
+                icon="sap-icon://upload"
+                change=".onImportItemsCsv"/>
+              <Button text="{i18n>exportCsvTemplate}" icon="sap-icon://download" press=".onExportItemsCsv"/>
+              <Button text="{i18n>addRow}" icon="sap-icon://add" type="Emphasized" press=".onAddItemRow"/>
+            </Toolbar>
+            <Text text="{i18n>itemsTableHint}" class="sapUiTinyMarginBottom sapUiTinyMarginBeginEnd"/>
+            <ScrollContainer height="24rem" horizontal="true" vertical="true" focusable="false" width="100%">
+              <Table
+                id="itemsTableHost"
+                noDataText="{i18n>noItemsYet}"
+                sticky="ColumnHeaders"
+                class="sapUiSizeCompact caItemsTable"/>
+            </ScrollContainer>
           </content>
         </Panel>
 

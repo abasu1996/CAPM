@@ -1,0 +1,7 @@
+code,name,description,isActive,sortOrder
+MAT-100001,Outdoor Antenna Unit 900MHz,Outdoor macro antenna 900MHz band,true,10
+MAT-100002,Baseband Processing Unit,Baseband unit for macro site,true,20
+MAT-100003,Fibre Optic Cable 24-Core,24 core single mode fibre cable,true,30
+MAT-100004,Rectifier Module 48V,48V DC rectifier power module,true,40
+MAT-100005,Battery Bank 48V 200Ah,Backup battery bank,true,50
+MAT-100006,Microwave Radio Link Unit,Point to point microwave radio,true,60

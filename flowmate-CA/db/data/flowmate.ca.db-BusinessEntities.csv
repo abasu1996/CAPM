@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+DAP,Dialog Axiata PLC,Parent entity,true,10
+DBN,Dialog Broadband Networks,Broadband entity,true,20
+DTV,Dialog Television,Television entity,true,30

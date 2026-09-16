@@ -2,8 +2,11 @@ sap.ui.define([
   "flowmateca/controller/BaseController",
   "flowmateca/model/FormDefinitions",
   "sap/ui/model/json/JSONModel",
-  "sap/m/MessageBox"
-], function (BaseController, FormDefinitions, JSONModel, MessageBox) {
+  "sap/m/MessageBox",
+  "sap/m/Column",
+  "sap/m/ColumnListItem",
+  "sap/m/Text"
+], function (BaseController, FormDefinitions, JSONModel, MessageBox, Column, ColumnListItem, Text) {
   "use strict";
 
   const DETAIL_NAVIGATION = {
@@ -52,14 +55,15 @@ sap.ui.define([
           "serviceCode",
           "equipmentCode",
           "projectCode",
-          "materialReservation",
-          "outlineContract",
-          "purchaseOrder",
-          "serviceEntrySheet"
+          "materialReservation($expand=items)",
+          "outlineContract($expand=items)",
+          "purchaseOrder($expand=items)",
+          "serviceEntrySheet($expand=items)"
         ].join(",");
         const request = await this.request(`Requests(${this._requestId})?$expand=${expand}`);
         this._prepareDetail(request);
         this.getView().getModel("detail").setData(request);
+        this._renderDetailItems(request.requestType?.code);
       } catch (error) {
         this.showError(error);
       } finally {
@@ -100,14 +104,18 @@ sap.ui.define([
         ? "Workflow completed"
         : `Step ${request.currentStep} of ${request.stepInstances.length}`;
       request.detailFields = this._detailFields(request);
+      request.detailItems = (request[DETAIL_NAVIGATION[request.requestType?.code]] || {}).items || [];
+      request.hasDetailItems = request.detailItems.length > 0;
     },
 
     _detailFields: function (request) {
       const navigation = DETAIL_NAVIGATION[request.requestType?.code];
       const details = request[navigation] || {};
-      const definitions = FormDefinitions.getFields(request.requestVariant?.code);
+      const definitions = FormDefinitions.getFieldsByRequestType(request.requestType?.code);
       return definitions.map(function (definition) {
-        let value = details[definition.name];
+        let value = definition.source === "request"
+          ? (definition.name === "requestDateTime" ? request.createdAt : request[definition.name])
+          : details[definition.name];
         if (typeof value === "boolean") {
           value = value ? "Yes" : "No";
         }
@@ -115,6 +123,40 @@ sap.ui.define([
           label: definition.label,
           value: value === null || value === undefined || value === "" ? "Not provided" : String(value)
         };
+      });
+    },
+
+    _renderDetailItems: function (typeCode) {
+      const table = this.byId("detailItemsTable");
+      if (!table) {
+        return;
+      }
+      const columns = FormDefinitions.getItemColumns(typeCode);
+      table.destroyColumns();
+      table.unbindItems();
+
+      if (!columns.length) {
+        return;
+      }
+
+      table.addColumn(new Column({
+        header: new Text({ text: "#" }),
+        width: "4rem"
+      }));
+      columns.forEach(function (col) {
+        table.addColumn(new Column({
+          header: new Text({ text: col.label }),
+          width: col.type === "date" ? "11rem" : "12rem"
+        }));
+      });
+
+      table.bindItems({
+        path: "detail>/detailItems",
+        template: new ColumnListItem({
+          cells: [new Text({ text: "{detail>itemNo}" })].concat(columns.map(function (col) {
+            return new Text({ text: `{detail>${col.name}}` });
+          }))
+        })
       });
     },
 

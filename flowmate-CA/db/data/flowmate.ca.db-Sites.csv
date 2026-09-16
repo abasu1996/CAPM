@@ -1,0 +1,7 @@
+code,name,description,isActive,sortOrder
+SITE-CMB-001,Colombo Central Tower,Colombo central macro site,true,10
+SITE-CMB-002,Colombo Fort Rooftop,Colombo Fort rooftop site,true,20
+SITE-KDY-001,Kandy Hill Tower,Kandy hill macro site,true,30
+SITE-GLE-001,Galle Coastal Tower,Galle coastal macro site,true,40
+SITE-JAF-001,Jaffna North Tower,Jaffna north macro site,true,50
+SITE-NEG-001,Negombo Beach Tower,Negombo coastal site,true,60

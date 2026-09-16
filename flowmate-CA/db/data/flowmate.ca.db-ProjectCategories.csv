@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+NETWORK,Network Infrastructure,Network infrastructure projects,true,10
+IT,Information Technology,IT and platform projects,true,20
+RETAIL,Retail Expansion,Retail and channel projects,true,30
+CORPORATE,Corporate Services,Corporate and support projects,true,40

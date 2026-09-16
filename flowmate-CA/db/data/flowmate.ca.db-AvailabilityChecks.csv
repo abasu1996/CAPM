@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+01,01 - Daily Requirements,Daily requirements check,true,10
+02,02 - Individual Requirements,Individual requirements check,true,20
+KP,KP - No Check,No availability check,true,30

@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+WBS-NW-001,WBS-NW-001 Network Rollout,Network rollout work breakdown element,true,10
+WBS-NW-002,WBS-NW-002 Capacity Upgrade,Capacity augmentation element,true,20
+WBS-IT-001,WBS-IT-001 IT Platform,IT platform work breakdown element,true,30
+WBS-MK-001,WBS-MK-001 Marketing Campaign,Marketing campaign element,true,40

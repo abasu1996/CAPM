@@ -17,7 +17,8 @@ sap.ui.define([
   "sap/m/Column",
   "sap/m/ColumnListItem",
   "sap/m/Text",
-  "sap/m/Button"
+  "sap/m/Button",
+  "sap/base/Log"
 ], function (
   BaseController,
   FormDefinitions,
@@ -37,7 +38,8 @@ sap.ui.define([
   Column,
   ColumnListItem,
   Text,
-  Button
+  Button,
+  Log
 ) {
   "use strict";
 
@@ -67,6 +69,8 @@ sap.ui.define([
         predecessorId: "",
         requesterId: "",
         requesterName: "",
+        requesterEmail: "",
+        requestDateTime: new Date().toLocaleString(),
 
         processorTeamCode: "",
         processorTeamName: "",
@@ -250,21 +254,50 @@ sap.ui.define([
         return definition.entity;
       })));
       const catalog = this.getView().getModel("catalog");
+      // A failed pick list must degrade only its own field, not abort the render.
       await Promise.all(entities.map(async function (entity) {
         if (catalog.getProperty(`/${entity}`)) {
           return;
         }
         const orderBy = entity === "Users" || entity === "Vendors" ? "" : "&$orderby=sortOrder";
-        const result = await this.request(`${entity}?$filter=isActive eq true${orderBy}`);
-        catalog.setProperty(`/${entity}`, result.value || []);
+        try {
+          const result = await this.request(`${entity}?$filter=isActive eq true${orderBy}`);
+          catalog.setProperty(`/${entity}`, result.value || []);
+        } catch (error) {
+          Log.error(`Could not load the ${entity} list`, error);
+          catalog.setProperty(`/${entity}`, []);
+        }
       }.bind(this)));
     },
 
+    _applyAutoFill: function (definition, selectedKey) {
+      if (!definition.autoFills || !definition.entity) {
+        return;
+      }
+      const rows = this.getView().getModel("catalog")
+        .getProperty(`/${definition.entity}`) || [];
+      const keyProperty = definition.key || "code";
+      const match = rows.find(function (row) {
+        return String(row[keyProperty]) === String(selectedKey);
+      });
+      this.getView().getModel("form").setProperty(
+        `/details/${definition.autoFills.field}`,
+        match ? (match[definition.autoFills.from] || "") : ""
+      );
+    },
+
     _createFieldControl: function (definition) {
-      const dataPath = `/details/${definition.name}`;
+      const dataPath = definition.source === "request"
+        ? `/${definition.name}`
+        : `/details/${definition.name}`;
       const path = `form>${dataPath}`;
       let control;
-      if (definition.type === "textarea") {
+      if (definition.type === "readonly") {
+        control = new Input({
+          editable: false,
+          placeholder: definition.placeholder || ""
+        }).bindValue(path);
+      } else if (definition.type === "textarea") {
         control = new TextArea({
           rows: 3,
           width: "100%",
@@ -312,7 +345,11 @@ sap.ui.define([
           width: "100%",
           showSecondaryValues: true,
           filterSecondaryValues: true,
-          placeholder: definition.placeholder || `Search ${definition.label}`
+          placeholder: definition.placeholder || `Search ${definition.label}`,
+          selectionChange: function (event) {
+            const item = event.getParameter("selectedItem");
+            this._applyAutoFill(definition, item ? item.getKey() : "");
+          }.bind(this)
         }).bindProperty("selectedKey", path);
         control.bindItems({
           path: `catalog>/${definition.entity}`,
@@ -545,7 +582,9 @@ sap.ui.define([
         if (!entry.definition.required) {
           return false;
         }
-        const value = form.details[entry.definition.name];
+        const value = entry.definition.source === "request"
+          ? form[entry.definition.name]
+          : form.details[entry.definition.name];
         return value === undefined || value === null || value === "";
       });
       if (missing) {

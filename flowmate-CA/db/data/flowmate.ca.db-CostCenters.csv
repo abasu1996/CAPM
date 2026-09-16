@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+CC1000,CC1000 - Network Operations,Network operations cost center,true,10
+CC2000,CC2000 - Information Technology,IT cost center,true,20
+CC3000,CC3000 - Marketing,Marketing cost center,true,30
+CC4000,CC4000 - Corporate Services,Corporate services cost center,true,40

@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+0001,0001 - Standard Serial Profile,Standard serial number handling,true,10
+0002,0002 - Equipment Serial Profile,Serial profile with equipment record,true,20
+0003,0003 - Trading Serial Profile,Serial profile for trading materials,true,30

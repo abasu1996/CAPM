@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+GREENFIELD,Greenfield Site,New site build,true,10
+BROWNFIELD,Brownfield Upgrade,Upgrade of an existing site,true,20
+CAPACITY,Capacity Augmentation,Capacity expansion works,true,30
+DECOM,Decommissioning,Site decommissioning,true,40

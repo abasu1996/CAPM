@@ -26,6 +26,13 @@ const DETAIL_ENTITY_BY_REQUEST_TYPE = {
   SERVICE_ENTRY_SHEET: "ServiceEntrySheetDetails"
 };
 
+const ITEMS_ENTITY_BY_REQUEST_TYPE = {
+  MATERIAL_RESERVATION: "MaterialReservationItems",
+  OUTLINE_CONTRACT: "OutlineContractItems",
+  PURCHASE_ORDER: "PurchaseOrderItems",
+  SERVICE_ENTRY_SHEET: "ServiceEntrySheetItems"
+};
+
 module.exports = class FlowmateCAService extends cds.ApplicationService {
   async init() {
     this.db = cds.entities("flowmate.ca.db");
@@ -207,6 +214,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
 
+    let processorTeam = null;
+    if (input.processorTeamCode) {
+      processorTeam = await this.master.run(SELECT.one.from(this.masterEntities.Teams).where({
+        teamCode: input.processorTeamCode,
+        isActive: true
+      }));
+      if (!processorTeam) {
+        return req.reject(400, "Select a valid processor team");
+      }
+    }
     const requestId = cds.utils.uuid();
     const referenceNumber = this._referenceNumber(requestType.code);
     const details = this._parseDetails(req, input.details);
@@ -222,6 +239,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       requesterName: user.displayName,
       requesterEmail: user.email,
       owner_ID: user.ID,
+      ownerTeam_ID: processorTeam?.ID || null,
+      ownerTeamName: processorTeam?.name || null,
       status_code: REQUEST_STATUS.DRAFT,
       priority_code: input.priorityCode || "MEDIUM",
       dueDate: input.dueDate || null,
@@ -632,11 +651,23 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!entityName) {
       return;
     }
+    const { items, ...headerFields } = details;
+    const detailsId = cds.utils.uuid();
     await tx.run(INSERT.into(this.db[entityName]).entries({
-      ID: cds.utils.uuid(),
+      ID: detailsId,
       request_ID: requestId,
-      ...details
+      ...headerFields
     }));
+
+    const itemsEntityName = ITEMS_ENTITY_BY_REQUEST_TYPE[requestTypeCode];
+    if (itemsEntityName && Array.isArray(items) && items.length) {
+      await tx.run(INSERT.into(this.db[itemsEntityName]).entries(items.map((item, index) => ({
+        ID: cds.utils.uuid(),
+        details_ID: detailsId,
+        itemNo: index + 1,
+        ...item
+      }))));
+    }
   }
 
   async _ensureCurrentUser(req) {

@@ -1,0 +1,9 @@
+code,name,description,isActive,sortOrder
+SCM,SCM,Supply chain management,true,10
+MKT,MKT,Marketing,true,20
+HR,HR,Human resources,true,30
+FTK,FTK,FTK division,true,40
+IT,IT,Information technology,true,50
+DBS,DBS,Digital business services,true,60
+DNS,DNS,DNS division,true,70
+FOC,FOC,FOC division,true,80

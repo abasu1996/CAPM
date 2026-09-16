@@ -1,0 +1,6 @@
+code,name,description,isActive,sortOrder
+CIF,CIF - Cost Insurance and Freight,Cost insurance and freight,true,10
+FOB,FOB - Free On Board,Free on board,true,20
+EXW,EXW - Ex Works,Ex works,true,30
+DDP,DDP - Delivered Duty Paid,Delivered duty paid,true,40
+CFR,CFR - Cost and Freight,Cost and freight,true,50

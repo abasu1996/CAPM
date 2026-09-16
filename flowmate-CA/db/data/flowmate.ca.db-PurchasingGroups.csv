@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+P01,P01 - Network Procurement,Network and engineering,true,10
+P02,P02 - IT Procurement,IT hardware and software,true,20
+P03,P03 - Corporate Services,Admin and corporate services,true,30
+P04,P04 - Marketing Procurement,Marketing and brand,true,40

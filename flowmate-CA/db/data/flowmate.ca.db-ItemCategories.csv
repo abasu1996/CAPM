@@ -1,0 +1,3 @@
+code,name,description,isActive,sortOrder
+BLANK,(Empty) - Material,Leave empty for a material line,true,10
+D,D - Service,Include D for a service line,true,20

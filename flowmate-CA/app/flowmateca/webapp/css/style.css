@@ -763,6 +763,24 @@
   background: #eef2f6;
 }
 
+.caItemsTable.sapMListTable {
+  border: 1px solid var(--ca-border);
+  border-radius: 0.35rem;
+}
+
+.caItemsTable .sapMListTblHeaderCell {
+  background: linear-gradient(180deg, #f8fbff, #edf5fc);
+  border-right: 1px solid var(--ca-border);
+  border-bottom: 1px solid var(--ca-border);
+}
+
+.caItemsTable .sapMListTblCell {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-right: 1px solid #eef2f6;
+  border-bottom: 1px solid #eef2f6;
+}
+
 .caTeamTree.sapMTree {
   max-height: 22rem;
   overflow-y: auto;

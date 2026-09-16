@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+B2026Q1,Batch 2026 Q1,First quarter 2026,true,10
+B2026Q2,Batch 2026 Q2,Second quarter 2026,true,20
+B2026Q3,Batch 2026 Q3,Third quarter 2026,true,30
+B2026Q4,Batch 2026 Q4,Fourth quarter 2026,true,40

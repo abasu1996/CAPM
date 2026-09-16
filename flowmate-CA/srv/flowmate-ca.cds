@@ -28,8 +28,10 @@ service FlowmateCAService {
     priorityCode       : String(40);
     dueDate            : Date;
     predecessorId      : UUID;
+    processorTeamCode  : String(40);
     details            : LargeString;
-  }
+
+    }
 
   entity RequestTypes as projection on db.RequestTypes;
   entity RequestVariants as projection on db.RequestVariants;
@@ -58,6 +60,34 @@ service FlowmateCAService {
   entity ProjectTypes as projection on db.ProjectTypes;
   entity ContractCategories as projection on db.ContractCategories;
 
+  entity DocumentTypes as projection on db.DocumentTypes;
+  entity CompanyCodes as projection on db.CompanyCodes;
+  entity PurchasingGroups as projection on db.PurchasingGroups;
+  entity Divisions as projection on db.Divisions;
+  entity TaxCodes as projection on db.TaxCodes;
+  entity ItemCategories as projection on db.ItemCategories;
+  entity AccountAssignments as projection on db.AccountAssignments;
+  entity CostCenters as projection on db.CostCenters;
+  entity ContractTypes as projection on db.ContractTypes;
+  entity Incoterms as projection on db.Incoterms;
+  entity ServiceCategories as projection on db.ServiceCategories;
+  entity ReservationProjects as projection on db.ReservationProjects;
+  entity ReservationBatches as projection on db.ReservationBatches;
+  entity BusinessEntities as projection on db.BusinessEntities;
+  entity ProjectScopes as projection on db.ProjectScopes;
+  entity MaterialTypes as projection on db.MaterialTypes;
+  entity MrpTypes as projection on db.MrpTypes;
+  entity AvailabilityChecks as projection on db.AvailabilityChecks;
+  entity SerialNumberProfiles as projection on db.SerialNumberProfiles;
+  entity StorageLocations as projection on db.StorageLocations;
+  entity SalesOrganizations as projection on db.SalesOrganizations;
+  entity DistributionChannels as projection on db.DistributionChannels;
+  entity Sites as projection on db.Sites;
+  entity MaterialCodes as projection on db.MaterialCodes;
+  entity WbsElements as projection on db.WbsElements;
+  entity ArReferences as projection on db.ArReferences;
+  entity ProjectCategories as projection on db.ProjectCategories;
+
   @cds.redirection.target
   entity Requests as projection on db.CARequests;
   entity MyRequests as projection on db.CARequests;
@@ -82,6 +112,7 @@ service FlowmateCAService {
   entity MaterialReservationDetails as projection on db.MaterialReservationDetails;
   entity MaterialReservationItems as projection on db.MaterialReservationItems;
   entity OutlineContractDetails as projection on db.OutlineContractDetails;
+  entity OutlineContractItems as projection on db.OutlineContractItems;
   entity PurchaseOrderDetails as projection on db.PurchaseOrderDetails;
   entity PurchaseOrderItems as projection on db.PurchaseOrderItems;
   entity ServiceEntrySheetDetails as projection on db.ServiceEntrySheetDetails;

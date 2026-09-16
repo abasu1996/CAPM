@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+K,K - Cost Center,Cost center assignment,true,10
+P,P - Project / WBS,Project or WBS assignment,true,20
+F,F - Order,Internal order assignment,true,30
+A,A - Asset,Asset assignment,true,40

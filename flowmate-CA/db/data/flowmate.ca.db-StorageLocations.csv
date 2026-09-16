@@ -1,0 +1,7 @@
+code,name,description,isActive,sortOrder
+3401,3401 - Main Store (Plant 3400),Storage location under plant 3400,true,10
+3402,3402 - Transit Store (Plant 3400),Storage location under plant 3400,true,20
+3403,3403 - Returns Store (Plant 3400),Storage location under plant 3400,true,30
+4401,4401 - Main Store (Plant 4400),Storage location under plant 4400,true,40
+4402,4402 - Transit Store (Plant 4400),Storage location under plant 4400,true,50
+4403,4403 - Returns Store (Plant 4400),Storage location under plant 4400,true,60

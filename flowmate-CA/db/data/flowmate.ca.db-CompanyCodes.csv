@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+LK00,LK00 - Dialog Axiata PLC,Primary company code,true,10
+LK10,LK10 - Dialog Broadband Networks,Broadband entity,true,20
+LK20,LK20 - Dialog Television,Television entity,true,30

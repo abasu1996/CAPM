@@ -41,6 +41,33 @@ entity PurchasingOrganizations : ConfigCode {};
 entity PaymentTerms : ConfigCode {};
 entity ProjectTypes : ConfigCode {};
 entity ContractCategories : ConfigCode {};
+entity DocumentTypes : ConfigCode {};
+entity CompanyCodes : ConfigCode {};
+entity PurchasingGroups : ConfigCode {};
+entity Divisions : ConfigCode {};
+entity TaxCodes : ConfigCode {};
+entity ItemCategories : ConfigCode {};
+entity AccountAssignments : ConfigCode {};
+entity CostCenters : ConfigCode {};
+entity ContractTypes : ConfigCode {};
+entity Incoterms : ConfigCode {};
+entity ServiceCategories : ConfigCode {};
+entity ReservationProjects : ConfigCode {};
+entity ReservationBatches : ConfigCode {};
+entity BusinessEntities : ConfigCode {};
+entity ProjectScopes : ConfigCode {};
+entity MaterialTypes : ConfigCode {};
+entity MrpTypes : ConfigCode {};
+entity AvailabilityChecks : ConfigCode {};
+entity SerialNumberProfiles : ConfigCode {};
+entity StorageLocations : ConfigCode {};
+entity SalesOrganizations : ConfigCode {};
+entity DistributionChannels : ConfigCode {};
+entity Sites : ConfigCode {};
+entity MaterialCodes : ConfigCode {};
+entity WbsElements : ConfigCode {};
+entity ArReferences : ConfigCode {};
+entity ProjectCategories : ConfigCode {};
 
 entity WorkflowStepConfigs : cuid, managed {
   requestType         : Association to RequestTypes not null;
@@ -232,6 +259,14 @@ entity MaterialCodeDetails : cuid, managed {
   valueType              : String(80);
   sbu                    : String(80);
   configurationId        : String(80);
+  grProcessingTime       : String(60);
+  perUnitPrice           : Decimal(15,2);
+  approvalDocumentsAttachment: String(255);
+  dmsSapMaterialCode     : String(40);
+  materialType           : String(60);
+  mrpType                : String(60);
+  availabilityCheck      : String(60);
+  industrySector         : String(60) default 'TELECOMMUNICATION';
 }
 
 entity ServiceCodeDetails : cuid, managed {
@@ -244,6 +279,8 @@ entity ServiceCodeDetails : cuid, managed {
   serviceGroup       : Association to ServiceGroups;
   valuationClass     : Association to ValuationClasses;
   coupaCommodityCode : Association to CoupaCommodityCodes;
+  supportingAttachment: String(255);
+  remarks            : LargeString;
 }
 
 entity EquipmentCodeDetails : cuid, managed {
@@ -255,6 +292,10 @@ entity EquipmentCodeDetails : cuid, managed {
   wbsElement       : String(80);
   commissionedDate : Date;
   approver          : Association to common.Users;
+  remarks          : LargeString;
+  supportingAttachment: String(255);
+  siteName         : String(180);
+  materialDescription: String(180);
 }
 
 entity ProjectCodeDetails : cuid, managed {
@@ -273,6 +314,12 @@ entity ProjectCodeDetails : cuid, managed {
   functionLocation        : String(80);
   activityNumber          : String(80);
   remarks                 : LargeString;
+  supportingAttachment    : String(255);
+  siteId                  : String(80);
+  siteName                : String(180);
+  projectId               : String(80);
+  projectCategory         : String(80);
+  projectDescription      : String(255);
 }
 
 entity MaterialReservationDetails : cuid, managed {
@@ -285,12 +332,14 @@ entity MaterialReservationDetails : cuid, managed {
   warehouse        : Association to Warehouses;
   allocationOwner  : Association to common.Users;
   remarks          : LargeString;
+  supportingAttachment: String(255);
   items            : Composition of many MaterialReservationItems
                        on items.details = $self;
 }
 
 entity MaterialReservationItems : cuid, managed {
   details      : Association to MaterialReservationDetails not null;
+  itemNo       : Integer;
   materialCode: String(40);
   description : String(180);
   quantity    : Decimal(15,3);
@@ -306,6 +355,57 @@ entity OutlineContractDetails : cuid, managed {
   category         : Association to ContractCategories;
   approvalReference: String(120);
   remarks          : LargeString;
+  approvalDocumentsAttachment: String(255);
+  otherSupportingDocumentsAttachment: String(255);
+  otherComments    : LargeString;
+  contractCount    : Integer;
+  scmSpocUserId    : String(80);
+  totalTargetValue : Decimal(17,2);
+  sapVendorCode    : String(40);
+  sapSourcingEventNo: String(80);
+  sapPoHeaderText  : LargeString;
+  sapPaymentTerms  : String(120);
+  sapWarranty      : LargeString;
+  sapPenalties     : LargeString;
+  sapTermsOfDelivery: LargeString;
+  sapGuarantees    : LargeString;
+  sapOtherCommercialTerms: LargeString;
+  items            : Composition of many OutlineContractItems
+                       on items.details = $self;
+}
+
+entity OutlineContractItems : cuid, managed {
+  details            : Association to OutlineContractDetails not null;
+  itemNo             : Integer;
+  contractType        : String(40);
+  lineItem            : String(40);
+  itemCategory         : String(40);
+  purchaseOrg          : String(40);
+  purchaseGroup        : String(40);
+  vendorId             : String(40);
+  companyCode          : String(40);
+  plant                : String(40);
+  validityStartDate    : Date;
+  validityEndDate      : Date;
+  incoterms            : String(40);
+  incotermsLocation    : String(120);
+  targetQuantity       : Decimal(15,3);
+  coupaSourcingEventNo : String(80);
+  serviceLine          : String(80);
+  shortTextForServices : String(40);
+  materialServiceCode  : String(80);
+  quantity             : Decimal(15,3);
+  grossPrice           : Decimal(17,2);
+  priceUnit            : String(40);
+  currency             : String(40);
+  materialSavingPct    : Decimal(5,2);
+  serviceSavingPct     : Decimal(5,2);
+  taxCode              : String(40);
+  paymentTerm          : String(80);
+  accountAssignment    : String(80);
+  costCenter           : String(80);
+  orderNumber          : String(80);
+  wbsElement           : String(80);
 }
 
 entity PurchaseOrderDetails : cuid, managed {
@@ -339,6 +439,21 @@ entity PurchaseOrderDetails : cuid, managed {
   totalValue              : Decimal(17,2);
   paymentTerms            : Association to PaymentTerms;
   remarks                 : LargeString;
+  termsOfDelivery         : LargeString;
+  warranty                : LargeString;
+  paymentMilestone        : String(120);
+  approvedPoRecipientEmail: String(255);
+  invoiceBoqAttachment    : String(255);
+  emailApprovalAttachment : String(255);
+  summary                 : LargeString;
+  psrRefNo                : String(80);
+  systemContractId        : String(80);
+  divisionalUser          : Association to common.Users;
+  procurementApprovalAttachment: String(255);
+  supportiveDocumentAttachment: String(255);
+  vendorCode              : String(40);
+  poValueWithTaxes        : Decimal(17,2);
+  procurementValue        : Decimal(17,2);
   items                   : Composition of many PurchaseOrderItems
                               on items.details = $self;
 }
@@ -354,6 +469,15 @@ entity PurchaseOrderItems : cuid, managed {
   unitPrice        : Decimal(17,2);
   taxCode          : String(40);
   deliveryDate     : Date;
+  wbsElement       : String(80);
+  currency         : String(40);
+  contractNo       : String(80);
+  campaignLocationCode: String(100);
+  siteId           : String(80);
+  plant            : String(40);
+  itemCategory     : String(40);
+  accountAssignment: String(80);
+  materialGroup    : String(40);
 }
 
 entity ServiceEntrySheetDetails : cuid, managed {
@@ -368,6 +492,16 @@ entity ServiceEntrySheetDetails : cuid, managed {
   totalValue       : Decimal(17,2);
   paymentRequestRequired: Boolean default false;
   remarks          : LargeString;
+  sesPaymentOption : String(40);
+  sesRecipientEmail: String(255);
+  specialPersonArea: String(80);
+  invoiceBoqAttachment: String(255);
+  division         : String(80);
+  divisionalUser   : Association to common.Users;
+  approvalDivisionalHead: Association to common.Users;
+  taxInvoiceAttachment: String(255);
+  additionalAttachment: String(255);
+  comment          : LargeString;
   items            : Composition of many ServiceEntrySheetItems
                        on items.details = $self;
 }
@@ -380,4 +514,6 @@ entity ServiceEntrySheetItems : cuid, managed {
   quantity   : Decimal(15,3);
   unitOfMeasure: Association to UnitsOfMeasure;
   value      : Decimal(17,2);
+  poNumber     : String(80);
+  poLineItemNo : String(40);
 }

@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+10,10 - Direct Sales,Direct sales channel,true,10
+20,20 - Dealer Network,Dealer and partner channel,true,20
+30,30 - Retail,Retail outlets,true,30

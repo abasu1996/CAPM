@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+V023,V023 - SSCL 2.564% & VAT 18%,Combined SSCL and VAT,true,10
+V000,V000 - Exempt,No tax applicable,true,20
+V018,V018 - VAT 18%,Standard VAT only,true,30

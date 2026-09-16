@@ -1,0 +1,5 @@
+code,name,description,isActive,sortOrder
+PRJ-4G-EXP,4G Coverage Expansion,4G coverage expansion,true,10
+PRJ-5G-PILOT,5G Pilot Rollout,5G pilot deployment,true,20
+PRJ-FTTH,FTTH Deployment,Fibre to the home deployment,true,30
+PRJ-BAU,Business as Usual,Routine operational reservations,true,40

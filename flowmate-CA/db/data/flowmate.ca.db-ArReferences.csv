@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+AR-2026-001,AR-2026-001 Network Expansion,Network expansion appropriation request,true,10
+AR-2026-002,AR-2026-002 IT Modernisation,IT modernisation appropriation request,true,20
+AR-2026-003,AR-2026-003 Retail Rollout,Retail rollout appropriation request,true,30

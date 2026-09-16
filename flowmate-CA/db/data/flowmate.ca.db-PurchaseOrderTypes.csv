@@ -3,3 +3,6 @@ CENTRALIZED,Centralized PO,Centralized purchase order,1,10
 CIVIL_RR,Civil R and R,Civil repair and replacement,1,20
 POWER_RR,Power R and R,Power repair and replacement,1,30
 IN_HOUSE,In-house PO,In-house purchase order,1,40
+GENERAL,General,General purchase order,1,50
+DNS,DNS,DNS purchase order,1,60
+FTK,FTK,FTK purchase order,1,70

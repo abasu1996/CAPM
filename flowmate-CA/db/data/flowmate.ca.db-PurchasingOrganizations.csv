@@ -1,2 +1,5 @@
 code,name,description,isActive,sortOrder
 DIALOG,Dialog Purchasing,Dialog purchasing organization,1,10
+LK00,LK00 - Dialog Central Purchasing,LK00,1,20
+LK10,LK10 - Broadband Purchasing,LK10,1,30
+LK20,LK20 - Television Purchasing,LK20,1,40

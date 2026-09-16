@@ -1,0 +1,6 @@
+code,name,description,isActive,sortOrder
+NB,NB - Standard PO,Standalone purchase order,true,10
+FO,FO - Framework Order,Framework order,true,20
+ZCTR,ZCTR - Contract Release,Release against a contract,true,30
+ZFOC,ZFOC - Free of Charge,Free of charge order,true,40
+ZCON,ZCON - Consumables,Consumables order,true,50
