@@ -290,6 +290,11 @@ const SUBTYPE_FIELDS = {
       "paymentCategory_code", "businessEntity_code", "currency_code",
       "employeeVendorCode", "employeeVendorName",
       "balanceToBeReturned", "totalAmountLKR",
+       "nameEmpNo",
+        "designation",
+        "purposeOfTrip",
+        "country",
+        "budgetCode",
       "travelExpenses"
     ],
     optional: [

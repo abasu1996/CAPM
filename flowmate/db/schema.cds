@@ -240,6 +240,11 @@ entity ProcessRequests : cuid, managed {
     totalAmountForeignCurrency : Decimal(15, 2);
     totalAmountLKR : Decimal(15, 2);
     balanceToBeReturned : Decimal(15, 2);
+    nameEmpNo    : String(150);
+    designation  : String(100);
+    purposeOfTrip : String(255);
+    month        : Date;
+    country      : String(100);
     taxType : String(100);
     reference : String(100);
     totalTaxPayable : Decimal(15, 2);

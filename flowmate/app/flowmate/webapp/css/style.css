@@ -1452,3 +1452,81 @@
         min-width: 100%;
     }
 }
+
+
+.caAdminTabs.sapMITB {
+    padding: 0 0.75rem 0.75rem;
+}
+
+.caAdminTabs .sapMITBHead {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.875rem 0.25rem 0.75rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: transparent;
+    border-bottom: 0.0625rem solid var(--flowmateLine);
+}
+
+/* Pill shape for each tab */
+.caAdminTabs .sapMITBFilter {
+    width: auto;
+    min-width: auto;
+    padding: 0.5rem 1rem;
+    background: #ffffff;
+    border: 0.0625rem solid var(--flowmateLine);
+    border-radius: 2rem;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(34, 54, 73, 0.06);
+    transition: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.caAdminTabs .sapMITBFilter:hover {
+    background: var(--flowmateSoftBlue);
+    border-color: #8cc5ff;
+    transform: translateY(-0.0625rem);
+}
+
+/* Remove default underline indicator */
+.caAdminTabs .sapMITBFilter.sapMITBSelected {
+    background: var(--flowmateSoftBlue);
+    border-color: var(--flowmateBlue);
+    box-shadow: 0 0.125rem 0.5rem rgba(10, 110, 209, 0.14);
+}
+
+.caAdminTabs .sapMITBFilter.sapMITBSelected::after,
+.caAdminTabs .sapMITBFilter .sapMITBContentArrow {
+    display: none !important;
+}
+
+.caAdminTabs .sapMITBFilter .sapMITBText {
+    max-width: none;
+    white-space: nowrap;
+    color: var(--flowmateText);
+    font-weight: 600;
+}
+
+.caAdminTabs .sapMITBFilter.sapMITBSelected .sapMITBText {
+    color: var(--flowmateBlue);
+}
+
+.caAdminTabs .sapMITBFilter .sapMITBFilterIcon {
+    color: var(--flowmateMuted);
+}
+
+.caAdminTabs .sapMITBFilter.sapMITBSelected .sapMITBFilterIcon {
+    color: var(--flowmateBlue);
+}
+
+/* "More" overflow button to match pill style */
+.caAdminTabs .sapMITBHead .sapMITBHeadOverflow {
+    padding: 0.5rem 1rem;
+    background: #ffffff;
+    border: 0.0625rem solid var(--flowmateLine);
+    border-radius: 2rem;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(34, 54, 73, 0.06);
+}
+
+.caAdminTabs .sapMITBHead .sapMITBHeadOverflow:hover {
+    background: var(--flowmateSoftBlue);
+    border-color: #8cc5ff;
+}

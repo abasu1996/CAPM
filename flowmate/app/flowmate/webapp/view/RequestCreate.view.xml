@@ -753,6 +753,104 @@
     class="flowmateCreateSection flowmateFtkFactoringSection"
     backgroundDesign="Transparent"
     expandable="false"
+    visible="{create>/isDirectForeignTravelReimb}"
+>
+    <headerToolbar>
+        <OverflowToolbar>
+            <core:Icon
+                src="sap-icon://travel-request"
+            />
+            <Title
+                text="{i18n>directForeignTravelReimbTripDetailsTitle}"
+                level="H3"
+            />
+        </OverflowToolbar>
+    </headerToolbar>
+    <content>
+        <form:SimpleForm
+            class="flowmateCreateForm"
+            editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanXL="3"
+            labelSpanL="3"
+            labelSpanM="4"
+            columnsXL="2"
+            columnsL="2"
+            columnsM="1"
+            adjustLabelSpan="false"
+        >
+            <Label
+                text="{i18n>nameEmpNoLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/nameEmpNo}"
+                required="{create>/isDirectForeignTravelReimb}"
+                placeholder="{i18n>nameEmpNoPlaceholder}"
+            />
+
+            <Label
+                text="{i18n>designationLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/designation}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+
+            <Label
+                text="{i18n>purposeOfTripLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/purposeOfTrip}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+
+            <Label
+                text="{i18n>monthLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <DatePicker
+                id="directForeignTravelReimbTripMonth"
+                value="{
+                    'path': 'create>/month',
+                    'type': 'sap.ui.model.type.Date',
+                    'formatOptions': {
+                        'pattern': 'yyyy-MM'
+                    }
+                }"
+                displayFormat="yyyy-MM"
+                valueFormat="yyyy-MM-dd"
+                required="{create>/isDirectForeignTravelReimb}"
+                placeholder="{i18n>selectMonthPlaceholder}"
+            />
+
+            <Label
+                text="{i18n>countryLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/country}"
+                required="{create>/isDirectForeignTravelReimb}"
+                placeholder="{i18n>selectCountryPlaceholder}"
+            />
+
+            <Label
+                text="{i18n>budgetCodeLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/budgetCode}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+        </form:SimpleForm>
+    </content>
+</Panel>
+<Panel
+    class="flowmateCreateSection flowmateFtkFactoringSection"
+    backgroundDesign="Transparent"
+    expandable="false"
     visible="{create>/isPoBasedNonAdvance}"
 >
     <headerToolbar>
@@ -5769,8 +5867,8 @@
             <columns>
                 <Column><Text text="{i18n>processTypeCodeLabel}" /></Column>
                 <Column><Text text="{i18n>processTypeNameLabel}" /></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>processOwnerLabel}" /></Column>
-                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>sapTCodeLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet" visible="false"><Text text="{i18n>processOwnerLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet" visible="false"><Text text="{i18n>sapTCodeLabel}" /></Column>
             </columns>
             <ColumnListItem type="Active">
                 <cells>

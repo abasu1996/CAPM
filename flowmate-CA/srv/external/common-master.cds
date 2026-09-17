@@ -54,4 +54,118 @@ service CommonMasterDataService {
         enabled             : Boolean;
         createdOnBehalf     : Boolean;
   }
+   @cds.persistence.skip
+  entity Sites {
+    key ID       : UUID;
+        siteId   : String(40);
+        siteName : String(180);
+        isActive : Boolean;
+  }
+
+   @cds.persistence.skip
+  entity Materials {
+    key ID       : UUID;
+        materialCode   : String(40);
+        materialDescription : String(180);
+        isActive : Boolean;
+  }
+
+   @cds.persistence.skip
+  entity Wbs {
+    key ID       : UUID;
+        wbsCode   : String(40);
+        wbsDescription : String(180);
+        isActive : Boolean;
+  }
+
+  @cds.persistence.skip
+  entity DocumentTypes {
+    key ID       : UUID;
+        documentTypeCode   : String(40);
+        documentTypeDescription : String(180);
+        isActive : Boolean;
+  }
+
+  @cds.persistence.skip
+  entity CompanyCodes {
+    key ID       : UUID;
+        companyCode   : String(40);
+        companyName : String(180);
+        isActive : Boolean;
+  }
+
+  @cds.persistence.skip
+  entity PurchasingGroups {
+    key ID       : UUID;
+        purchasingGroupCode   : String(40);
+        purchasingGroupName : String(180);
+        isActive : Boolean;
+  }
+
+  @cds.persistence.skip
+  entity Divisions {
+    key ID       : UUID;
+        divisionCode   : String(40);
+        divisionName : String(180);
+        isActive : Boolean;
+  }
+
+  @cds.persistence.skip
+  entity ApplicableTaxes {
+    key ID       : UUID;
+        taxCode   : String(40);
+        taxDescription : String(180);
+        isActive : Boolean;
+  }
+  @cds.persistence.skip
+  entity Plant {
+    key ID       : UUID;
+        plantCode   : String(40);
+        plantName : String(180);
+        isActive : Boolean;
+  }
+  @cds.persistence.skip
+  entity ServiceGroups {
+    key ID      : UUID;
+    servicegroupCode : String(40) not null;
+    servicegroupDescription : String(180) not null;
+    isActive  : Boolean default true;
+  }
+  @cds.persistence.skip
+  entity ValuationClass {
+    key ID    :UUID;
+    valuationclassCode : String(40) not null;
+    valuationclassDescription : String(180) not null;
+    isActive : Boolean default true;
+
+  }
+  @cds.persistence.skip
+  entity StorageLocation {
+    key ID  :UUID;
+  storageLocationCode : String(40) not null;
+  storageLocationName : String(180) not null;
+  isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity SalesOrg {
+  key ID: UUID;
+  salesOrgCode : String(40) not null;
+  salesOrgName : String(180) not null;
+  isActive : Boolean default true;
+}
+  @cds.persistence.skip
+  entity Incoterms {
+    key ID: UUID;
+     incotermsCode : String(40) not null;
+  incotermsDescription : String(180) not null;
+  isActive : Boolean default true;
+  }
+   @cds.persistence.skip
+  entity CostCenter {
+  key ID  :UUID;
+  costCenterCode : String(40) not null;
+  costCenterName : String(180) not null;
+  isActive : Boolean default true;
+  }
 }

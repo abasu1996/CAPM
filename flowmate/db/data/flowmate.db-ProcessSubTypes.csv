@@ -4,7 +4,7 @@ FTK_FACTORING_BASED_ON_UAC,FTK_Factoring_Payment Release Based on UAC,FTK factor
 FTK_FACTORING_PENDING_UAC,FTK_Factoring_Payment Release Pending UAC,FTK factoring payment release pending UAC,FTK,false,,,
 FTK_NON_FACTORING_BASED_UAC,FTK_Non-Factoring_Payment Release Based on UAC,FTK non-factoring payment release based on UAC,FTK,false,,,
 FTK_SERVICE_PAYMENT,FTK_Service Payment,FTK service payment,FTK,false,,,
-FTK_DUTY_REIMBURSEMENT,FTK_Duty Reimbursement,FTK duty reimbursement,FTK,false,,,
+FTK_DUTY_REIMBURSEMENT,FTK_Duty Reimbursement,FTK duty reimbursement,FTK,true,,,
 PO_BEFORE_INVOICE_NON_ADV,PO_PO Raised Before Invoice Submission by Vendor_Non-advance payment,PO raised before invoice submission by vendor - non-advance payment,PO,false,,,
 PO_BEFORE_INVOICE_NON_ADV_LIAB,PO_PO Raised Before Invoice Submission by Vendor_Non-advance liability,PO raised before invoice submission by vendor - non-advance liability,PO,false,,,
 PO_AFTER_INVOICE_NON_ADV,PO_PO Raised After Invoice Submission by Vendor_Non-advance payment,PO raised after invoice submission by vendor - non-advance payment,PO,false,,,

@@ -43,6 +43,7 @@ service FlowmateCAService {
   entity TeamMembers as projection on common.TeamMembers;
   entity Vendors as projection on common.Vendors;
 
+
   entity Plants as projection on db.Plants;
   entity UnitsOfMeasure as projection on db.UnitsOfMeasure;
   entity MaterialGroups as projection on db.MaterialGroups;
@@ -58,19 +59,31 @@ service FlowmateCAService {
   entity PurchasingOrganizations as projection on db.PurchasingOrganizations;
   entity PaymentTerms as projection on db.PaymentTerms;
   entity ProjectTypes as projection on db.ProjectTypes;
+  entity SystemContractBasePO as projection on db.SystemContractBasePO;
   entity ContractCategories as projection on db.ContractCategories;
+  entity ItemCategories as projection on db.ItemCategories;
+  entity AccountAssignment as projection on db.AccountAssignment;
+  entity ServiceCategories as projection on db.ServiceCategories;
+  entity Entity as projection on db.Entity;
+  entity Projects as projection on db.Projects;
+  entity MatGroup as projection on db.MatGroup;
+  entity ExtensionMaterialGroup as projection on db.ExtensionMaterialGroup;
+  entity ProfitCenter as projection on db.ProfitCenter;
+  entity MRPType as projection on db.MRPType;
+  entity AvailabilityCheck as projection on db.AvailabilityCheck;
+  entity SerialNumberProfile as projection on db.SerialNumberProfile;
+  entity DistributionChannel as projection on db.DistributionChannel;
+  entity ContractType as projection on db.ContractType;
 
   entity DocumentTypes as projection on db.DocumentTypes;
   entity CompanyCodes as projection on db.CompanyCodes;
   entity PurchasingGroups as projection on db.PurchasingGroups;
   entity Divisions as projection on db.Divisions;
   entity TaxCodes as projection on db.TaxCodes;
-  entity ItemCategories as projection on db.ItemCategories;
   entity AccountAssignments as projection on db.AccountAssignments;
   entity CostCenters as projection on db.CostCenters;
   entity ContractTypes as projection on db.ContractTypes;
   entity Incoterms as projection on db.Incoterms;
-  entity ServiceCategories as projection on db.ServiceCategories;
   entity ReservationProjects as projection on db.ReservationProjects;
   entity ReservationBatches as projection on db.ReservationBatches;
   entity BusinessEntities as projection on db.BusinessEntities;
@@ -208,4 +221,19 @@ service CAMasterDataService {
     { grant: '*', to: 'CAAdmin' }
   ]
   entity WorkflowStepConfigs as projection on db.WorkflowStepConfigs;
+   entity Sites as projection on common.Sites;
+   entity Materials as projection on common.Materials;
+   entity Wbs as projection on common.Wbs;
+   entity DocumentTypes as projection on common.DocumentTypes;
+   entity CompanyCodes as projection on common.CompanyCodes;
+   entity PurchasingGroups as projection on common.PurchasingGroups;
+   entity Divisions as projection on common.Divisions;
+   entity ApplicableTaxes as projection on common.ApplicableTaxes;
+   entity Plant as projection on common.Plant;
+   entity ServiceGroups as projection on common.ServiceGroups;
+   entity ValuationClass as projection on common.ValuationClass;
+   entity StorageLocation as projection on common.StorageLocation;
+   entity SalesOrg as projection on common.SalesOrg;
+   entity Incoterms as projection on common.Incoterms;
+   entity CostCenter as projection on common.CostCenter;
 }

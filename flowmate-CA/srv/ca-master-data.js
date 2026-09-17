@@ -5,7 +5,23 @@ const SHARED_ENTITIES = [
   "Teams",
   "TeamMembers",
   "Vendors",
-  "Delegations"
+  "Delegations",
+  "Sites",
+  "Materials",
+  "Wbs",
+  "DocumentTypes",
+  "CompanyCodes",
+  "PurchasingGroups",
+  "Divisions",
+  "ApplicableTaxes",
+  "Plant",
+  "ServiceGroups",
+  "ValuationClass",
+  "StorageLocation",
+  "SalesOrg",
+  "Incoterms",
+  "CostCenter"
+
 ];
 
 module.exports = class CAMasterDataService extends cds.ApplicationService {

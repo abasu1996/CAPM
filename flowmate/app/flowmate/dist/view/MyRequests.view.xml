@@ -574,7 +574,7 @@
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
-                    <uxap:ObjectPageSection
+                    <!-- <uxap:ObjectPageSection
                         title="{i18n>ftkFactoringDetailsTitle}"
                         visible="{= ${subProcessType_code} === 'FTK_FACTORING_PO_VALIDATION' || ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' || ${subProcessType_code} === 'FTK_FACTORING_PENDING_UAC' }">
                         <uxap:subSections>
@@ -605,7 +605,1246 @@
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
+                    </uxap:ObjectPageSection> -->
+                    <uxap:ObjectPageSection
+                        title="{i18n>ftkFactoringDetailsTitle}"
+                        visible="{= ${subProcessType_code} === 'FTK_FACTORING_PO_VALIDATION' || ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' }">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        class="flowmateDetailBlock flowmateFactoringDetailForm"
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanXL="3" labelSpanL="3" labelSpanM="4"
+                                        columnsXL="2" columnsL="2" columnsM="1"
+                                        adjustLabelSpan="false">
+                                        <Label text="{i18n>paymentCategoryLabel}" />
+                                        <Text text="{paymentCategory/name}" />
+                                        <Label text="{i18n>entityLabel}" />
+                                        <Text text="{businessEntity/name}" />
+                                        <Label text="{i18n>currencyLabel}" visible="{= ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' }" />
+                                        <Text text="{currency_code}" visible="{= ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' }" />
+                                        <Label text="{i18n>categoryLabel}" visible="{= ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' }" />
+                                        <Text text="{category_code}" visible="{= ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' }" />
+                                        <Label text="{i18n>vendorCodeLabel}" />
+                                        <Text text="{vendorCode}" />
+                                        <Label text="{i18n>vendorNameLabel}" />
+                                        <Text text="{vendorName}" wrapping="true" />
+                                        <Label text="{i18n>remarksLabel}" />
+                                        <Text text="{remarks}" wrapping="true" />
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
                     </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                    title="{i18n>ftkNonFactoringDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'FTK_NON_FACTORING_BASED_UAC' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>categoryLabel}" /><Text text="{category_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>ftkServicePaymentDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'FTK_SERVICE_PAYMENT' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>ftkDutyReimbursementDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'FTK_DUTY_REIMBURSEMENT' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>amountLabel}" /><Text text="{amount}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>invoiceDebitNoteDateLabel}" />
+                                    <Text text="{path: 'invoiceDebitNoteDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' }}" />
+                                    <Label text="{i18n>invoiceDebitNoteNumberLabel}" /><Text text="{invoiceDebitNoteNumber}" />
+                                    <Label text="{i18n>totalDebitNoteValueLabel}" /><Text text="{totalDebitNoteValue}" />
+                                    <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
+                                    <Label text="{i18n>userDivisionRepresentativeNameLabel}" /><Text text="{userDivisionRepresentativeName}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>poBasedNonAdvanceDetailsTitle}"
+                    visible="{= ['PO_BEFORE_INVOICE_NON_ADV','PO_BEFORE_INVOICE_NON_ADV_LIAB','PO_AFTER_INVOICE_NON_ADV','PO_AFTER_INVOICE_NON_ADV_LIAB'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>paymentSubCategoryLabel}" /><Text text="{paymentSubCategory/name}" />
+                                    <Label text="{i18n>userDivisionRepresentativeNameLabel}" /><Text text="{userDivisionRepresentativeName}" />
+                                    <Label text="{i18n>whtCertificateReferenceLabel}" visible="{= ${paymentCategory_code} === 'FOREIGN' }" />
+                                    <Text text="{whtCertificateReference}" visible="{= ${paymentCategory_code} === 'FOREIGN' }" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>poAdvanceDetailsTitle}"
+                    visible="{= ['PO_BEFORE_INVOICE_ADVANCE','PO_AFTER_INVOICE_ADVANCE'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>paymentSubCategoryLabel}" /><Text text="{paymentSubCategory/name}" />
+                                    <Label text="{i18n>userDivisionRepresentativeNameLabel}" /><Text text="{userDivisionRepresentativeName}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>poAdvSettlementDetailsTitle}"
+                    visible="{= ['PO_BEFORE_INVOICE_ADV_STLMT','PO_BEFORE_INVOICE_ADV_STLMT_100%','PO_AFTER_INVOICE_ADV_STLMT','PO_AFTER_INVOICE_ADV_STLMT_100%'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>paymentSubCategoryLabel}" /><Text text="{paymentSubCategory/name}" />
+                                    <Label text="{i18n>userDivisionRepresentativeNameLabel}" /><Text text="{userDivisionRepresentativeName}" />
+                                    <Label text="{i18n>remainingBalanceAfterAdvanceSettlementLabel}" /><Text text="{remainingBalanceAfterAdvanceSettlement}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+                <uxap:ObjectPageSection
+                    title="{i18n>invoiceDetailsTitle}"
+                    visible="{= [
+                        'PO_BEFORE_INVOICE_NON_ADV',
+                        'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                        'PO_AFTER_INVOICE_NON_ADV',
+                        'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                        'PO_BEFORE_INVOICE_ADVANCE',
+                        'PO_AFTER_INVOICE_ADVANCE',
+                        'PO_BEFORE_INVOICE_ADV_STLMT',
+                        'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                        'PO_AFTER_INVOICE_ADV_STLMT',
+                        'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                    ].indexOf(${subProcessType_code}) > -1 }">
+
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+
+                                <Table
+                                    class="flowmateTable"
+                                    width="100%"
+                                    fixedLayout="false"
+                                    noDataText="{i18n>noInvoicesText}"
+                                    items="{invoices}"
+                                >
+
+                                    <columns>
+                                        <Column
+                                            width="{= [
+                                                'PO_BEFORE_INVOICE_NON_ADV',
+                                                'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                                                'PO_AFTER_INVOICE_NON_ADV',
+                                                'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                                                'PO_AFTER_INVOICE_ADV_STLMT',
+                                                'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                                            ].indexOf(${subProcessType_code}) > -1 ? '10rem' : '15rem' }"
+                                        >
+                                            <Text
+                                                text="{i18n>invoiceNumberLabel}"
+                                                wrapping="true"
+                                            />
+                                        </Column>
+                                        <Column
+                                            width="{= [
+                                                'PO_BEFORE_INVOICE_NON_ADV',
+                                                'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                                                'PO_AFTER_INVOICE_NON_ADV',
+                                                'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                                                'PO_AFTER_INVOICE_ADV_STLMT',
+                                                'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                                            ].indexOf(${subProcessType_code}) > -1 ? '8rem' : '12rem' }"
+                                        >
+                                            <Text
+                                                text="{i18n>invoiceDateLabel}"
+                                                wrapping="true"
+                                            />
+                                        </Column>
+                                        <Column
+                                            width="{= [
+                                                'PO_BEFORE_INVOICE_NON_ADV',
+                                                'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                                                'PO_AFTER_INVOICE_NON_ADV',
+                                                'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                                                'PO_AFTER_INVOICE_ADV_STLMT',
+                                                'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                                            ].indexOf(${subProcessType_code}) > -1 ? '8rem' : '13rem' }"
+                                        >
+                                            <Text
+                                                text="{i18n>amountLabel}"
+                                                wrapping="true"
+                                            />
+                                        </Column>
+                                        <Column
+                                            width="9rem"
+                                            visible="{= [
+                                                'PO_BEFORE_INVOICE_NON_ADV',
+                                                'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                                                'PO_AFTER_INVOICE_NON_ADV',
+                                                'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                                                'PO_AFTER_INVOICE_ADV_STLMT',
+                                                'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                                            ].indexOf(${subProcessType_code}) > -1 }"
+                                        >
+                                            <Text
+                                                text="{i18n>vatAmountLabel}"
+                                                wrapping="true"
+                                            />
+                                        </Column>
+                                        <Column
+                                            width="10rem"
+                                            visible="{= [
+                                                'PO_BEFORE_INVOICE_NON_ADV',
+                                                'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                                                'PO_AFTER_INVOICE_NON_ADV',
+                                                'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                                                'PO_AFTER_INVOICE_ADV_STLMT',
+                                                'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                                            ].indexOf(${subProcessType_code}) > -1 }"
+                                        >
+                                            <Text
+                                                text="{i18n>sesReferenceLabel}"
+                                                wrapping="true"
+                                            />
+                                        </Column>
+                                        <Column
+                                            width="{= [
+                                                'PO_BEFORE_INVOICE_NON_ADV',
+                                                'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                                                'PO_AFTER_INVOICE_NON_ADV',
+                                                'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT',
+                                                'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                                                'PO_AFTER_INVOICE_ADV_STLMT',
+                                                'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                                            ].indexOf(${subProcessType_code}) > -1 ? '10rem' : '25rem' }"
+                                            demandPopin="true"
+                                            minScreenWidth="Desktop"
+                                        >
+                                            <Text
+                                                text="{i18n>remarksLabel}"
+                                                wrapping="true"
+                                            />
+                                        </Column>
+
+                                    </columns>
+
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text
+                                                    text="{invoiceNumber}"
+                                                    wrapping="true"
+                                                />
+                                                <Text
+                                                    text="{
+                                                        path: 'invoiceDate',
+                                                        type: 'sap.ui.model.type.Date',
+                                                        formatOptions: {
+                                                            pattern: 'yyyy-MM-dd'
+                                                        }
+                                                    }"
+                                                />
+                                                <Text
+                                                    text="{amount}"
+                                                />
+                                                <Text
+                                                    text="{vatAmount}"
+                                                    visible="{= [
+                                                        'PO_BEFORE_INVOICE_NON_ADV',
+                                                        'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                                                        'PO_AFTER_INVOICE_NON_ADV',
+                                                        'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                                                        'PO_BEFORE_INVOICE_ADV_STLMT',
+                                                        'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                                                        'PO_AFTER_INVOICE_ADV_STLMT',
+                                                        'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                                                    ].indexOf(${subProcessType_code}) > -1 }"
+                                                />
+
+                                                <!-- SES Reference -->
+                                                <Text
+                                                    text="{sesReference}"
+                                                    wrapping="true"
+                                                    visible="{= [
+                                                        'PO_BEFORE_INVOICE_NON_ADV',
+                                                        'PO_BEFORE_INVOICE_NON_ADV_LIAB',
+                                                        'PO_AFTER_INVOICE_NON_ADV',
+                                                        'PO_AFTER_INVOICE_NON_ADV_LIAB',
+                                                        'PO_BEFORE_INVOICE_ADV_STLMT',
+                                                        'PO_BEFORE_INVOICE_ADV_STLMT_100%',
+                                                        'PO_AFTER_INVOICE_ADV_STLMT',
+                                                        'PO_AFTER_INVOICE_ADV_STLMT_100%'
+                                                    ].indexOf(${subProcessType_code}) > -1 }"
+                                                />
+
+                                                <!-- Remarks -->
+                                                <Text
+                                                    text="{remarks}"
+                                                    wrapping="true"
+                                                />
+
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+
+                                </Table>
+
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+
+                </uxap:ObjectPageSection>
+                <uxap:ObjectPageSection
+                    title="{= ${subProcessType_code} === 'NON_PO_DIRECT_OFN_AUTHORITY' ? ${i18n>nonPoDirectOfnAuthorityDetailsTitle} : ${i18n>nonPoAdvanceSettlementDetailsTitle} }"
+                    visible="{= ['NON_PO_DIRECT_OFN_AUTHORITY','NON_PO_ADV_SETTLE_OFN_OTHER'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>invoiceDateLabel}" />
+                                    <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
+                                    <Label text="{i18n>costCentreLabel}" /><Text text="{costCentre}" />
+                                    <Label text="{i18n>profitCentreLabel}" /><Text text="{profitCentre}" />
+                                    <Label text="{i18n>wbsElementLabel}" /><Text text="{wbsElement}" />
+                                    <Label text="{i18n>paymentMethodLabel}" /><Text text="{paymentMethod/name}" />
+                                    <Label text="{i18n>totalRentValueLabel}" /><Text text="{totalRentValue}" />
+                                    <Label text="{i18n>totalSupervisionValueLabel}" /><Text text="{totalSupervisionValue}" />
+                                    <Label text="{i18n>securityDepositValueLabel}" /><Text text="{securityDepositValue}" />
+                                    <Label text="{i18n>totalValueLabel}" /><Text text="{totalValue}" />
+                                    <Label text="{i18n>ofnReferenceLabel}" /><Text text="{ofnReference}" />
+                                    <Label text="{i18n>siteIdLabel}" /><Text text="{siteId}" />
+                                    <Label text="{i18n>siteNameLabel}" /><Text text="{siteName}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoDirectForeignTravelDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_DIRECT_FOREIGN_TRAVEL' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>directForeignTravelEntriesDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_DIRECT_FOREIGN_TRAVEL' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <Table class="flowmateTable" noDataText="{i18n>noDirectForeignTravelEntriesText}" items="{directForeignTravelEntries}">
+                                    <columns>
+                                        <Column><Text text="{i18n>travelerNameLabel}" /></Column>
+                                        <Column><Text text="{i18n>vendorCodeLabel}" /></Column>
+                                        <Column><Text text="{i18n>ctmProposalNoLabel}" /></Column>
+                                        <Column><Text text="{i18n>purposeOfTravelLabel}" /></Column>
+                                        <Column><Text text="{i18n>currencyLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>perDiemCalculationLabel}" /></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{travelerName}" />
+                                                <Text text="{vendorCode}" />
+                                                <Text text="{ctmProposalNo}" />
+                                                <Text text="{purposeOfTravel}" />
+                                                <Text text="{currency_code}" />
+                                                <Text text="{= ${perDayAllowanceUSD} + ' x ' + ${noOfDays} + ' = ' + ${totalInUSD} + ' USD' }" textAlign="End" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{= ${subProcessType_code} === 'NON_PO_FUEL_STAFF' ? ${i18n>nonPoFuelStaffDetailsTitle} : ${i18n>nonPoFuelGeneratorDetailsTitle} }"
+                    visible="{= ['NON_PO_FUEL_STAFF','NON_PO_FUEL_GENERATOR'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>fuelInclVatLabel}" /><Text text="{fuelInclVat}" />
+                                    <Label text="{i18n>taxiLabel}" visible="{= ${subProcessType_code} === 'NON_PO_FUEL_STAFF' }" />
+                                    <Text text="{taxi}" visible="{= ${subProcessType_code} === 'NON_PO_FUEL_STAFF' }" />
+                                    <Label text="{i18n>highestValueInFileLabel}" /><Text text="{highestValueInFile}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoIdeaMartDetailsTitle}"
+                    visible="{= ['NON_PO_IDEAMART','NON_PO_APPMAKER'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>customerCodeLabel}" /><Text text="{customerCode}" />
+                                    <Label text="{i18n>customerNameLabel}" /><Text text="{customerName}" wrapping="true" />
+                                    <Label text="{i18n>invoiceDebitNoteDateLabel}" />
+                                    <Text text="{path: 'invoiceDebitNoteDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>invoiceDebitNoteNumberLabel}" /><Text text="{invoiceDebitNoteNumber}" />
+                                    <Label text="{i18n>brcHighestTransactionValueLabel}" /><Text text="{brcHighestTransactionValue}" />
+                                    <Label text="{i18n>whtNicHighestTransactionValueLabel}" /><Text text="{whtNicHighestTransactionValue}" />
+                                    <Label text="{i18n>lessThan100kNicBlankHighestTransactionValueLabel}" /><Text text="{lessThan100kNicBlankHighestTransactionValue}" />
+                                    <Label text="{i18n>totalPaymentValueForMonthLabel}" /><Text text="{totalPaymentValueForMonth}" />
+                                    <Label text="{i18n>retentionRepaymentValueLabel}" /><Text text="{retentionRepaymentValue}" />
+                                    <Label text="{i18n>userDivisionRepresentativeNameLabel}" /><Text text="{userDivisionRepresentativeName}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoCustomerRefundsDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_CUSTOMER_REFUNDS' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>highestRefundValueOfFileLabel}" /><Text text="{highestRefundValueOfFile}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoStelacomConsignmentDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_STELACOM_CONSIGNMENT' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>totalInvoiceValueLabel}" /><Text text="{totalInvoiceValue}" />
+                                    <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
+                                    <Label text="{i18n>invoiceDateLabel}" />
+                                    <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>liabilityBookingDocumentNumberLabel}" /><Text text="{liabilityBookingDocumentNumber}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoSiteShareLiabilityDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_SITE_SHARE_LIABILITY' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>categoryLabel}" /><Text text="{category_code}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>invoiceDateLabel}" />
+                                    <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
+                                    <Label text="{i18n>totalInvoiceValueLabelSiteShare}" /><Text text="{totalInvoiceValue}" />
+                                    <Label text="{i18n>invoiceDescriptionLabel}" /><Text text="{invoiceDescription}" wrapping="true" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoSiteSharingDetailsTitle}"
+                    visible="{= ['NON_PO_SITE_SHARING_SETOFF','NON_PO_SITE_SHARING_SETOFF&amp;PAY'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoSiteRentTaxInvoiceDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_SITE_RENT_TAX_INVOICE' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>totalInvoiceValueLabel}" /><Text text="{totalInvoiceValue}" />
+                                    <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
+                                    <Label text="{i18n>invoiceDateLabel}" />
+                                    <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoSiteRentMonthlyFileDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_SITE_RENT_MONTHLY_FILE' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>highestMonthlyRentalValueInFileLabel}" /><Text text="{highestMonthlyRentalValueInFile}" />
+                                    <Label text="{i18n>totalFileValueLabel}" /><Text text="{totalFileValue}" />
+                                    <Label text="{i18n>invoiceDescriptionLabel}" /><Text text="{invoiceDescription}" wrapping="true" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoSiteRentStampAdhocDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_SITE_RENT_STAMP_ADHOC' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>invoiceDateLabel}" />
+                                    <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
+                                    <Label text="{i18n>siteIdLabel}" /><Text text="{siteId}" />
+                                    <Label text="{i18n>siteNameLabel}" /><Text text="{siteName}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>totalPayableStampDutyValueLabel}" /><Text text="{totalPayableValue}" />
+                                    <Label text="{i18n>paymentDescriptionLabel}" /><Text text="{paymentDescription}" wrapping="true" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{subProcessType/name}"
+                    visible="{= ['DIRECT_NON_PO_REIMB_LIAB','DIRECT_NON_PO_REIMB_PAYMENT'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>authorityVendorCodeLabel}" /><Text text="{authorityVendorCode}" />
+                                    <Label text="{i18n>authorityVendorNameLabel}" /><Text text="{authorityVendorName}" wrapping="true" />
+                                    <Label text="{i18n>employeeVendorCodeLabel}" /><Text text="{employeeVendorCode}" />
+                                    <Label text="{i18n>employeeVendorNameLabel}" /><Text text="{employeeVendorName}" wrapping="true" />
+                                    <Label text="{i18n>invoiceDateLabel}" />
+                                    <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
+                                    <Label text="{i18n>costCentreLabel}" /><Text text="{costCentre}" />
+                                    <Label text="{i18n>wbsElementLabel}" /><Text text="{wbsElement}" />
+                                    <Label text="{i18n>totalValueLabel}" /><Text text="{totalValue}" />
+                                    <Label text="{i18n>ofnReferenceLabel}" /><Text text="{ofnReference}" />
+                                    <Label text="{i18n>siteIdLabel}" /><Text text="{siteId}" />
+                                    <Label text="{i18n>siteNameLabel}" /><Text text="{siteName}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>directForeignTravelReimbDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'DIRECT_FOREIGN_TRAVEL_REIMB' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>employeeVendorCodeLabel}" /><Text text="{employeeVendorCode}" />
+                                    <Label text="{i18n>employeeVendorNameLabel}" /><Text text="{employeeVendorName}" wrapping="true" />
+                                    <Label text="{i18n>transactionDateLabel}" />
+                                    <Text text="{path: 'transactionDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>totalAmountForeignCurrencyLabel}" /><Text text="{totalAmountForeignCurrency}" />
+                                    <Label text="{i18n>totalAmountLKRLabel}" /><Text text="{totalAmountLKR}" />
+                                    <Label text="{i18n>balanceToBeReturnedLabel}" /><Text text="{balanceToBeReturned}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>directForeignTravelReimbTripDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'DIRECT_FOREIGN_TRAVEL_REIMB' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>nameEmpNoLabel}" /><Text text="{nameEmpNo}" />
+                                    <Label text="{i18n>designationLabel}" /><Text text="{designation}" />
+                                    <Label text="{i18n>purposeOfTripLabel}" /><Text text="{purposeOfTrip}" />
+                                    <Label text="{i18n>monthLabel}" />
+                                    <Text text="{path: 'month', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM'}}" />
+                                    <Label text="{i18n>countryLabel}" /><Text text="{country}" />
+                                    <Label text="{i18n>budgetCodeLabel}" /><Text text="{budgetCode}" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>travelExpensesDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'DIRECT_FOREIGN_TRAVEL_REIMB' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <Table class="flowmateTable" noDataText="{i18n>noTravelExpensesText}" items="{travelExpenses}">
+                                    <columns>
+                                        <Column><Text text="{i18n>dateLabel}" /></Column>
+                                        <Column><Text text="{i18n>particularsLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>transportLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>hotelAccommodationLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>mealsLabel}" /></Column>
+                                        <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>entertainmentLabel}" /></Column>
+                                        <Column hAlign="End" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>laundryLabel}" /></Column>
+                                        <Column hAlign="End" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>phoneLabel}" /></Column>
+                                        <Column hAlign="End" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>sundryLabel}" /></Column>
+                                        <Column hAlign="End" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>miscellaneousExpensesLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>totalLabel}" /></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{path: 'date', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                                <Text text="{particulars}" wrapping="true" />
+                                                <Text text="{transport}" textAlign="End" />
+                                                <Text text="{hotel}" textAlign="End" />
+                                                <Text text="{meals}" textAlign="End" />
+                                                <Text text="{entertainment}" textAlign="End" />
+                                                <Text text="{laundry}" textAlign="End" />
+                                                <Text text="{phone}" textAlign="End" />
+                                                <Text text="{sundry}" textAlign="End" />
+                                                <Text text="{miscellaneous}" textAlign="End" />
+                                                <Text text="{total}" textAlign="End" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoTaxLiabilityDetailsTitle}"
+                    visible="{= ['NON_PO_TAX_LIAB_PAY_OTTP','NON_PO_TAX_LIAB_PAY_PAYORDER'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>requestingDivisionLabel}" /><Text text="{requestingDivision_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>taxTypeLabel}" /><Text text="{taxType}" />
+                                    <Label text="{i18n>referenceLabel}" /><Text text="{reference}" />
+                                    <Label text="{i18n>totalTaxPayableLabel}" /><Text text="{totalTaxPayable}" />
+                                    <Label text="{i18n>tinLabel}" /><Text text="{tin}" />
+                                    <Label text="{i18n>dinLabel}" /><Text text="{din}" />
+                                    <Label text="{i18n>taxDueDateLabel}" />
+                                    <Text text="{path: 'taxDueDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>glBreakupDetailsTitle}"
+                    visible="{= ['NON_PO_TAX_LIAB_PAY_OTTP','NON_PO_TAX_LIAB_PAY_PAYORDER'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <Table class="flowmateTable" noDataText="{i18n>noGLBreakupsText}" items="{glBreakups}">
+                                    <columns>
+                                        <Column><Text text="{i18n>glAccountLabel}" /></Column>
+                                        <Column><Text text="{i18n>relevantDescriptionLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>relevantAmountLabel}" /></Column>
+                                        <Column><Text text="{i18n>costCentreLabel}" /></Column>
+                                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>profitCentreLabel}" /></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{glAccount}" wrapping="true" />
+                                                <Text text="{relevantDescription}" wrapping="true" />
+                                                <Text text="{relevantAmount}" textAlign="End" />
+                                                <Text text="{costCentre}" />
+                                                <Text text="{profitCentre}" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoInterconnectLiabDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_INTERCONNECT_LIAB' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>customerCodeLabel}" /><Text text="{customerCode}" />
+                                    <Label text="{i18n>customerNameLabel}" /><Text text="{customerName}" wrapping="true" />
+                                    <Label text="{i18n>invoiceDebitNoteDateLabel}" />
+                                    <Text text="{path: 'invoiceDebitNoteDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>invoiceDebitNoteNumberLabel}" /><Text text="{invoiceDebitNoteNumber}" />
+                                    <Label text="{i18n>totalInvoiceValueRelevantCurrencyLabel}" /><Text text="{totalInvoiceValueRelevantCurrency}" />
+                                    <Label text="{i18n>totalInvoiceValueLKRLabel}" /><Text text="{totalInvoiceValueLKR}" />
+                                    <Label text="{i18n>vatAmountLabel}" /><Text text="{vatAmount}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoInterconnectRoamPayDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_INTERCONNECT_ROAM_PAY' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>customerCodeLabel}" /><Text text="{customerCode}" />
+                                    <Label text="{i18n>customerNameLabel}" /><Text text="{customerName}" wrapping="true" />
+                                    <Label text="{i18n>whtCertificateReferenceLabel}" visible="{= ${paymentCategory_code} === 'FOREIGN' }" />
+                                    <Text text="{whtCertificateReference}" visible="{= ${paymentCategory_code} === 'FOREIGN' }" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoRoamingLiabilityDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_ROAMING_LIABILITY' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>customerCodeLabel}" /><Text text="{customerCode}" />
+                                    <Label text="{i18n>customerNameLabel}" /><Text text="{customerName}" wrapping="true" />
+                                    <Label text="{i18n>totalInvoiceValueRelevantCurrencyLabel}" /><Text text="{totalInvoiceValueRelevantCurrency}" />
+                                    <Label text="{i18n>totalInvoiceValueLKRLabel}" /><Text text="{totalInvoiceValueLKR}" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoStarPointPaymentsDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_STAR_POINT_PAYMENTS' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>highestPayableValueInListLabel}" /><Text text="{highestPayableValueInList}" />
+                                    <Label text="{i18n>ivDocumentPostingDateLabel}" />
+                                    <Text text="{path: 'ivDocumentPostingDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoImportTrcDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_IMPORT_TRC' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
+                                    <Label text="{i18n>budgetCodeLabelTRC}" /><Text text="{budgetCode}" />
+                                    <Label text="{i18n>trcslProformaInvoiceDateLabel}" />
+                                    <Text text="{path: 'trcslProformaInvoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>typeOfPaymentLabel}" /><Text text="{typeOfPayment/name}" />
+                                    <Label text="{i18n>trcslProformaInvoiceTotalValueLabel}" /><Text text="{trcslProformaInvoiceTotalValue}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoImportIclDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_IMPORT_ICL' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>pivDateLabel}" />
+                                    <Text text="{path: 'pivDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>pivApplicationNumberLabel}" /><Text text="{pivApplicationNumber}" />
+                                    <Label text="{i18n>totalPivValueLabel}" /><Text text="{totalPivValue}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{= ${subProcessType_code} === 'NON_PO_IMPORT_DGC_ADV' ? ${i18n>nonPoImportDgcAdvDetailsTitle} : ${i18n>nonPoImportDgcDirectDetailsTitle} }"
+                    visible="{= ['NON_PO_IMPORT_DGC_ADV','NON_PO_IMPORT_DGC_DIRECT'].indexOf(${subProcessType_code}) > -1 }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>cusdecDateLabel}" />
+                                    <Text text="{path: 'cusdecDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>cusdecNumberLabel}" /><Text text="{cusdecNumber}" />
+                                    <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
+                                    <Label text="{i18n>totalDeclarationValueInCusdecLabel}" /><Text text="{totalDeclarationValueInCusdec}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoCcPaymentDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_CC_PAYMENT' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>ccCustodianNameLabel}" /><Text text="{ccCustodianName}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>whtEligibilityConfirmationLabel}" /><Text text="{= ${whtEligibilityConfirmation} ? ${i18n>yesText} : ${i18n>noText} }" />
+                                    <Label text="{i18n>invoiceDateLabel}" />
+                                    <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
+                                    <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
+                                    <Label text="{i18n>sesReferenceCreditCardLabel}" /><Text text="{sesReference}" />
+                                    <Label text="{i18n>totalAmountPayableLabel}" /><Text text="{totalAmountPayable}" />
+                                    <Label text="{i18n>descriptionOfPaymentLabel}" /><Text text="{descriptionOfPayment}" wrapping="true" />
+                                    <Label text="{i18n>budgetCodeLabel}" /><Text text="{budgetCode}" />
+                                    <Label text="{i18n>justificationForCreditCardUseLabel}" /><Text text="{justificationForCreditCardUse}" wrapping="true" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoCcSettlementDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_CC_SETTLEMENT' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>bankNameLabel}" /><Text text="{bankName}" />
+                                    <Label text="{i18n>ccCustodianNameLabel}" /><Text text="{ccCustodianName}" />
+                                    <Label text="{i18n>ccPeriodFromDateLabel}" />
+                                    <Text text="{path: 'ccPeriodFromDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>ccPeriodToDateLabel}" />
+                                    <Text text="{path: 'ccPeriodToDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>annualFeeLabel}" /><Text text="{annualFee}" />
+                                    <Label text="{i18n>stampDutyLabel}" /><Text text="{stampDuty}" />
+                                    <Label text="{i18n>latePaymentFeeLabel}" /><Text text="{latePaymentFee}" />
+                                    <Label text="{i18n>interestChargesLabel}" /><Text text="{interestCharges}" />
+                                    <Label text="{i18n>totalAmountPayableLabel}" /><Text text="{totalAmountPayableCcSettlement}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>settlementEntriesDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_CC_SETTLEMENT' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <Table class="flowmateTable" noDataText="{i18n>noSettlementEntriesText}" items="{settlementEntries}">
+                                    <columns>
+                                        <Column><Text text="{i18n>paymentRequestLabel}" /></Column>
+                                        <Column><Text text="{i18n>poNumberLabel}" /></Column>
+                                        <Column><Text text="{i18n>sesReferenceLabel}" /></Column>
+                                        <Column><Text text="{i18n>invoiceNumberLabel}" /></Column>
+                                        <Column><Text text="{i18n>invoiceDateLabel}" /></Column>
+                                        <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>descriptionLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>transactionAmountUSDLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>paymentAmountLKRLabel}" /></Column>
+                                        <Column hAlign="Center"><Text text="{i18n>availabilityOfInvoiceLabel}" /></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{paymentRequest}" wrapping="true" />
+                                                <Text text="{poNumber}" />
+                                                <Text text="{sesReference}" />
+                                                <Text text="{invoiceNumber}" />
+                                                <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                                <Text text="{description}" wrapping="true" />
+                                                <Text text="{transactionAmountUSD}" textAlign="End" />
+                                                <Text text="{paymentAmountLKR}" textAlign="End" />
+                                                <core:Icon
+                                                    src="{= ${availabilityOfInvoice} ? 'sap-icon://accept' : 'sap-icon://decline' }"
+                                                    color="{= ${availabilityOfInvoice} ? '#107e3e' : '#bb0000' }" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoMerchantSettlementsDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_MERCHANT_SETTLEMENTS' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>highestValueInExcelLabel}" /><Text text="{highestValueInExcel}" />
+                                    <Label text="{i18n>aggregateTotalValueAcrossAllFilesLabel}" /><Text text="{aggregateTotalValueAcrossAllFiles}" />
+                                    <Label text="{i18n>processingBankAccountDetailsLabel}" /><Text text="{processingBankAccountDetails}" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>merchantEntityValuesDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_MERCHANT_SETTLEMENTS' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <Table class="flowmateTable" noDataText="{i18n>noMerchantEntityValuesText}" items="{merchantEntityValues}">
+                                    <columns>
+                                        <Column><Text text="{i18n>entityLabel}" /></Column>
+                                        <Column><Text text="{i18n>totalPayableValueLabel}" /></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{businessEntity_code}" />
+                                                <Text text="{totalPayableValue}" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>nonPoMiscReceiptsDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'NON_PO_MISC_RECEIPTS' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
+                                    <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>depositedAmountLabel}" /><Text text="{depositedAmount}" />
+                                    <Label text="{i18n>costCentreLabel}" /><Text text="{costCentre}" />
+                                    <Label text="{i18n>debitGLLabel}" /><Text text="{debitGL}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>poZeroIvDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'PO_ZERO_IV' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>zeroIvUserConfirmationAttachedLabel}" /><Text text="{= ${zeroIvUserConfirmationAttached} ? ${i18n>yesText} : ${i18n>noText} }" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
+
+                <uxap:ObjectPageSection
+                    title="{i18n>bankGuaranteeDetailsTitle}"
+                    visible="{= ${subProcessType_code} === 'BANK_GUARANTEE' }">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm class="flowmateDetailBlock" editable="false" layout="ResponsiveGridLayout"
+                                    labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
+                                    <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
+                                    <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
+                                    <Label text="{i18n>amountLabel}" /><Text text="{amount}" />
+                                    <Label text="{i18n>guaranteeTypeLabel}" /><Text text="{guaranteeType/name}" />
+                                    <Label text="{i18n>beneficiaryNameLabel}" /><Text text="{beneficiaryName}" />
+                                    <Label text="{i18n>beneficiaryAddressLabel}" /><Text text="{beneficiaryAddress}" wrapping="true" />
+                                    <Label text="{i18n>commencingDateLabel}" />
+                                    <Text text="{path: 'commencingDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>expiryDateLabel}" />
+                                    <Text text="{path: 'expiryDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>claimDateLabel}" />
+                                    <Text text="{path: 'claimDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>tenderDateLabel}" />
+                                    <Text text="{path: 'tenderDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>expectedDateLabel}" />
+                                    <Text text="{path: 'expectedDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                    <Label text="{i18n>purposeOfBankGuaranteeLabel}" /><Text text="{purposeOfBankGuarantee}" wrapping="true" />
+                                    <Label text="{i18n>bidTenderReferenceLabel}" /><Text text="{bidTenderReference}" />
+                                    <Label text="{i18n>collectorNameLabel}" /><Text text="{collectorName}" />
+                                    <Label text="{i18n>collectorNicLabel}" /><Text text="{collectorNic}" />
+                                    <Label text="{i18n>collectorContactNumberLabel}" /><Text text="{collectorContactNumber}" />
+                                    <Label text="{i18n>specificBgFormatAvailableLabel}" /><Text text="{= ${specificBgFormatAvailable} ? ${i18n>yesText} : ${i18n>noText} }" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection title="{i18n>requestRelationsTitle}">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>

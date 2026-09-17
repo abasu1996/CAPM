@@ -222,7 +222,7 @@ sap.ui.define([
         },
         NON_PO_STELACOM_CONSIGNMENT: {
             required: [
-                "paymentCategory_code", "businessEntity_code", "currency_code", "vendorCode", "vendorName", "totalInvoiceValue", "invoiceNumber",
+                "paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID","vendorCode", "vendorName", "totalInvoiceValue", "invoiceNumber",
                 "invoiceDate", "liabilityBookingDocumentNumber"
             ],
             optional: ["remarks"]
@@ -267,6 +267,7 @@ sap.ui.define([
         DIRECT_FOREIGN_TRAVEL_REIMB: {
             required: [
                 "paymentCategory_code", "businessEntity_code", "currency_code",
+                "nameEmpNo", "designation", "purposeOfTrip", "month", "country", "budgetCode",
                 "employeeVendorCode", "employeeVendorName",
                 "balanceToBeReturned", "totalAmountLKR",
                 "travelExpenses"
@@ -570,6 +571,11 @@ sap.ui.define([
                 totalAmountForeignCurrency: null,
                 totalAmountLKR: null,
                 balanceToBeReturned: null,
+                nameEmpNo: "",
+                designation: "",
+                purposeOfTrip: "",
+                month: null,
+                country: "",
                 travelExpenses: [],
                 taxType: "",
                 reference: "",
@@ -3107,6 +3113,11 @@ sap.ui.define([
                     "paymentCategory_code",
                     "businessEntity_code",
                     "currency_code",
+                     "nameEmpNo",
+                    "designation",
+                    "purposeOfTrip",
+                    "country",
+                    "budgetCode",
                     "employeeVendorCode",
                     "employeeVendorName",
                     "remarks"
@@ -3121,7 +3132,7 @@ sap.ui.define([
                 ].forEach((sProperty) => {
                     oCreateModel.setProperty(`/${sProperty}`, null);
                 });
-
+                oCreateModel.setProperty("/month", null);
                 oCreateModel.setProperty("/transactionDate", null);
                 oCreateModel.setProperty("/travelExpenses", []);
             }

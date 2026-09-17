@@ -39,6 +39,7 @@ entity ProcurementCategories : ConfigCode {};
 entity Currencies : ConfigCode {};
 entity PurchasingOrganizations : ConfigCode {};
 entity PaymentTerms : ConfigCode {};
+entity SystemContractBasePO : ConfigCode {};
 entity ProjectTypes : ConfigCode {};
 entity ContractCategories : ConfigCode {};
 entity DocumentTypes : ConfigCode {};
@@ -46,12 +47,10 @@ entity CompanyCodes : ConfigCode {};
 entity PurchasingGroups : ConfigCode {};
 entity Divisions : ConfigCode {};
 entity TaxCodes : ConfigCode {};
-entity ItemCategories : ConfigCode {};
 entity AccountAssignments : ConfigCode {};
 entity CostCenters : ConfigCode {};
 entity ContractTypes : ConfigCode {};
 entity Incoterms : ConfigCode {};
-entity ServiceCategories : ConfigCode {};
 entity ReservationProjects : ConfigCode {};
 entity ReservationBatches : ConfigCode {};
 entity BusinessEntities : ConfigCode {};
@@ -68,6 +67,7 @@ entity MaterialCodes : ConfigCode {};
 entity WbsElements : ConfigCode {};
 entity ArReferences : ConfigCode {};
 entity ProjectCategories : ConfigCode {};
+
 
 entity WorkflowStepConfigs : cuid, managed {
   requestType         : Association to RequestTypes not null;
@@ -245,8 +245,8 @@ entity MaterialCodeDetails : cuid, managed {
   inspectionStock        : Boolean default false;
   sourceList             : Boolean default false;
   commodityImportCode    : String(60);
-  itemName               : String(160);
-  itemCategory           : String(80);
+  itemName               : Association to ItemCategories;
+  itemCategory           : Association to ItemCategories;
   unitsPerItem           : Decimal(15,3);
   unitPrice              : Decimal(15,2);
   taxPercentage          : Decimal(5,2);
@@ -516,4 +516,83 @@ entity ServiceEntrySheetItems : cuid, managed {
   value      : Decimal(17,2);
   poNumber     : String(80);
   poLineItemNo : String(40);
+}
+
+entity ItemCategories : cuid, managed {
+  itemcategory        : String(40);
+  name        : String(160) not null;
+  isActive    : Boolean default true;
+}
+
+entity AccountAssignment : cuid, managed {
+  code : String(40);
+  description : String(160) not null;
+  isActive    : Boolean default true;
+}
+
+entity ServiceCategories : cuid, managed {
+  code : String(40);
+  description : String(160) not null;
+  isActive    : Boolean default true;
+}
+
+entity Entity: cuid, managed{
+  code : String(40);
+  description : String(160) not null;
+  isActive    : Boolean default true;
+}
+
+entity Projects : cuid, managed{
+  projectID : String(40);
+  projectCategory : String(160) not null;
+  projectDescription : LargeString;
+  isActive    : Boolean default true;
+}
+
+entity MatGroup : cuid, managed {
+  matGroupCode : String(40) not null;
+  matGroupDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity ExtensionMaterialGroup : cuid, managed {
+  extensionMaterialGroupCode : String(40) not null;
+  extensionMaterialGroupDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity ProfitCenter : cuid, managed {
+  profitCenterCode : String(40) not null;
+  profitCenterDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity MRPType : cuid, managed {
+  mrpTypeCode : String(40) not null;
+  mrpTypeDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity AvailabilityCheck : cuid, managed {
+  availabilityCheckCode : String(40) not null;
+  availabilityCheckDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity SerialNumberProfile : cuid, managed {
+  serialNumberProfileCode : String(40) not null;
+  serialNumberProfileDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity DistributionChannel : cuid, managed {
+  distributionChannelCode : String(40) not null;
+  distributionChannelDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity ContractType : cuid, managed {
+  contractTypeCode : String(40) not null;
+  contractTypeDescription : String(180) not null;
+  isActive : Boolean default true;
 }

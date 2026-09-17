@@ -14,7 +14,10 @@
           type="Information"
           showIcon="true"
           class="sapUiSmallMarginBottom"/>
-        <IconTabBar expandable="false" class="caAdminTabs">
+
+
+        <IconTabBar id="adminTabBar" expandable="false" headerMode="Inline" showOverflowSelectList="true" class="caAdminTabs" width="100%">
+
           <items>
             <IconTabFilter key="steps" text="Process Steps" icon="sap-icon://process">
               <Toolbar class="caSectionToolbar">
@@ -185,10 +188,2679 @@
                 </items>
               </Table>
             </IconTabFilter>
+
+            <IconTabFilter key="sites" text="Sites" icon="sap-icon://building">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Site Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Site"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddSite"
+          />
+    </Toolbar>
+
+    <Table
+        items="{admin>/sites}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Site ID"/>
+            </Column>
+
+            <Column>
+                <Text text="Site Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>siteId}"/>
+
+                    <Input value="{admin>siteName}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveSite"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteSite"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="materials" text="Materials" icon="sap-icon://product">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Material Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Material"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddMaterial"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/materials}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Material Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Material Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>materialCode}"/>
+
+                    <Input value="{admin>materialDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveMaterial"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteMaterial"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="wbs" text="WBS" icon="sap-icon://tree">
+    <Toolbar class="caSectionToolbar">
+        <Title text="WBS Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add WBS"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddWBS"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/wbs}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="WBS Code"/>
+            </Column>
+
+            <Column>
+                <Text text="WBS Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>wbsCode}"/>
+
+                    <Input value="{admin>wbsDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveWBS"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteWBS"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+
+
+<IconTabFilter
+    key="documentTypes"
+    text="Document Types"
+    icon="sap-icon://document-text">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Document Type Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Document Type"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddDocumentType"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/documentTypes}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Document Type Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Document Type Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>documentTypeCode}"/>
+
+                    <Input
+                        value="{admin>documentTypeDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveDocumentType"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteDocumentType"/>
+
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+  <IconTabFilter
+    key="purchasingOrganizations"
+    text="Purchasing Organizations"
+    icon="sap-icon://factory">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Purchasing Organization Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Purchasing Organization"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddPurchasingOrganization"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/purchasingOrganizations}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Purchasing Org Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Purchasing Org Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>code}"/>
+
+                    <Input
+                        value="{admin>name}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSavePurchasingOrganization"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeletePurchasingOrganization"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+
+    <IconTabFilter
+    key="companyCodes"
+    text="Company Codes"
+    icon="sap-icon://company-view">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Company Code Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Company Code"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddCompanyCode"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/companyCodes}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Company Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Company Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>companyCode}"/>
+
+                    <Input
+                        value="{admin>companyName}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveCompanyCode"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteCompanyCode"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+
+
+  <IconTabFilter
+    key="purchasingGroups"
+    text="Purchasing Groups"
+    icon="sap-icon://group">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Purchasing Group Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Purchasing Group"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddPurchasingGroup"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/purchasingGroups}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Purchasing Group Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Purchasing Group Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text text="{admin>purchasingGroupCode}"/>
+
+                    <Input
+                        value="{admin>purchasingGroupName}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSavePurchasingGroup"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeletePurchasingGroup"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+ <IconTabFilter
+    key="currencies"
+    text="Currencies"
+    icon="sap-icon://currency">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Currency Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Currency"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddCurrency"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/currencies}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Currency Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Currency Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>code}"/>
+
+                    <Input
+                        value="{admin>name}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveCurrency"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteCurrency"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+
+ <IconTabFilter
+    key="paymentTerms"
+    text="Payment Terms"
+    icon="sap-icon://payment-approval">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Payment Terms"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Payment Term"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddPaymentTerm"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/paymentTerms}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Payment Term Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Payment Term Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>code}"/>
+
+                    <Input
+                        value="{admin>name}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSavePaymentTerm"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeletePaymentTerm"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+
+<IconTabFilter
+    key="systemContractBasePO"
+    text="System Contract Base PO"
+    icon="sap-icon://sales-document">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="System Contract Base PO"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add System Contract Base PO"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddSystemContractBasePO"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/systemContractBasePO}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="System Contract Base PO Code"/>
+            </Column>
+
+            <Column>
+                <Text text="System Contract Base PO Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>code}"/>
+
+                    <Input
+                        value="{admin>name}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveSystemContractBasePO"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteSystemContractBasePO"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+
+<IconTabFilter key="divisions" text="Divisions" icon="sap-icon://org-chart">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Divisions Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Division"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddDivision"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/divisions}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Division Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Division Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>divisionCode}"/>
+
+                    <Input value="{admin>divisionName}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveDivision"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteDivision"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter
+    key="procurementCategories"
+    text="Procurement Categories"
+    icon="sap-icon://folder">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Procurement Categories Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Procurement Category"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddProcurementCategory"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/procurementCategories}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Procurement Category Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Procurement Category Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>code}"/>
+
+                    <Input
+                        value="{admin>name}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveProcurementCategory"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteProcurementCategory"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="applicableTaxes" text="Applicable Taxes" icon="sap-icon://receipt">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Applicable Taxes Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Applicable Tax"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddApplicableTax"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/applicableTaxes}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Tax Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Tax Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>taxCode}"/>
+
+                    <Input value="{admin>taxDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveApplicableTax"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteApplicableTax"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+
+<IconTabFilter key="plant" text="Plants" icon="sap-icon://factory">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Plants Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Plant"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddPlant"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/plant}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Plant Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Plant Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>plantCode}"/>
+
+                    <Input value="{admin>plantName}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSavePlant"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeletePlant"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter
+    key="itemCategories"
+    text="Item Categories"
+    icon="sap-icon://product">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Item Categories Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Item Category"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddItemCategory"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/itemCategories}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Item Category Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Item Category Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>itemcategory}"/>
+
+                    <Input
+                        value="{admin>name}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveItemCategory"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteItemCategory"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+ <IconTabFilter
+    key="accountAssignment"
+    text="Account Assignments"
+    icon="sap-icon://account">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Account Assignment Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Account Assignment"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddAccountAssignment"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/accountAssignments}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Account Assignment Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Account Assignment Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>code}"/>
+
+                    <Input
+                        value="{admin>description}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveAccountAssignment"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteAccountAssignment"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter
+    key="serviceCategories"
+    text="Service Categories"
+    icon="sap-icon://customer-and-supplier">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Service Category Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Service Category"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddServiceCategories"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/serviceCategories}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="14rem">
+                <Text text="Service Category Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Service Category Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>code}"/>
+
+                    <Input
+                        value="{admin>description}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveServiceCategories"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteServiceCategories"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter
+    key="unitsOfMeasure"
+    text="Units of Measure"
+    icon="sap-icon://measure">
+
+    <Toolbar class="caSectionToolbar">
+
+        <Title
+            text="Unit of Measure Master"
+            level="H3"/>
+
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Unit of Measure"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddUnitOfMeasure"/>
+
+    </Toolbar>
+
+    <Table
+        items="{admin>/unitsOfMeasure}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="12rem">
+                <Text text="Code"/>
+            </Column>
+
+            <Column width="14rem">
+                <Text text="Name"/>
+            </Column>
+
+            <Column>
+                <Text text="Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>code}"/>
+
+                    <Input
+                        value="{admin>name}"/>
+
+                    <Input
+                        value="{admin>description}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveUnitOfMeasure"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteUnitOfMeasure"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="serviceGroups" text="Service Groups" icon="sap-icon://group">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Service Group Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Service Group"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddServiceGroup"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/serviceGroups}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Service Group Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Service Group Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>servicegroupCode}"/>
+
+                    <Input value="{admin>servicegroupDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveServiceGroup"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteServiceGroup"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="valuationClass" text="Valuation Class" icon="sap-icon://money-bills">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Valuation Class Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Valuation Class"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddValuationClass"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/valuationClasses}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Valuation Class Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Valuation Class Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>valuationclassCode}"/>
+
+                    <Input value="{admin>valuationclassDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveValuationClass"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteValuationClass"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="entities" text="Entities" icon="sap-icon://database">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Entity Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Entity"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddEntity"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/entities}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Entity Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Entity Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>code}"/>
+
+                    <Input value="{admin>description}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveEntity"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteEntity"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="projects" text="Projects" icon="sap-icon://group">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Projects Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Project"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddProject"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/projects}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="12rem">
+                <Text text="Project ID"/>
+            </Column>
+
+            <Column width="14rem">
+                <Text text="Project Category"/>
+            </Column>
+
+            <Column>
+                <Text text="Project Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text text="{admin>projectID}"/>
+
+                    <Input value="{admin>projectCategory}"/>
+
+                    <Input value="{admin>projectDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveProject"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteProject"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="matGroups" text="Material Groups" icon="sap-icon://product">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Material Group Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Material Group"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddMatGroup"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/matGroups}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="12rem">
+                <Text text="Material Group Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Material Group Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text text="{admin>matGroupCode}"/>
+
+                    <Input value="{admin>matGroupDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveMatGroup"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteMatGroup"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="extensionMaterialGroups" text="Extension Material Groups" icon="sap-icon://product">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Extension Material Group Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Extension Material Group"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddExtensionMaterialGroup"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/extensionMaterialGroups}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="12rem">
+                <Text text="Extension Material Group Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Extension Material Group Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text
+                        text="{admin>extensionMaterialGroupCode}"/>
+
+                    <Input
+                        value="{admin>extensionMaterialGroupDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveExtensionMaterialGroup"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteExtensionMaterialGroup"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="profitCenters" text="Profit Centers" icon="sap-icon://business-objects-experience">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Profit Center Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Profit Center"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddProfitCenter"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/profitCenters}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="12rem">
+                <Text text="Profit Center Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Profit Center Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>profitCenterCode}"/>
+
+                    <Input value="{admin>profitCenterDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveProfitCenter"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteProfitCenter"/>
+
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="mrpTypes" text="MRP Types" icon="sap-icon://factory">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="MRP Type Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add MRP Type"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddMRPType"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/mrpTypes}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="MRP Type Code"/>
+            </Column>
+
+            <Column>
+                <Text text="MRP Type Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>mrpTypeCode}"/>
+
+                    <Input value="{admin>mrpTypeDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveMRPType"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteMRPType"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="availabilityChecks" text="Availability Checks" icon="sap-icon://check-availability">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Availability Check Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Availability Check"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddAvailabilityCheck"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/availabilityChecks}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Availability Check Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Availability Check Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>availabilityCheckCode}"/>
+
+                    <Input value="{admin>availabilityCheckDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveAvailabilityCheck"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteAvailabilityCheck"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="serialNumberProfiles" text="Serial Number Profiles" icon="sap-icon://number-sign">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Serial Number Profile Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Serial Number Profile"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddSerialNumberProfile"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/serialNumberProfiles}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Serial Number Profile Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Serial Number Profile Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>serialNumberProfileCode}"/>
+
+                    <Input value="{admin>serialNumberProfileDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveSerialNumberProfile"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteSerialNumberProfile"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="distributionChannels" text="Distribution Channels" icon="sap-icon://shipping-status">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Distribution Channel Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Distribution Channel"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddDistributionChannel"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/distributionChannels}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Distribution Channel Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Distribution Channel Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>distributionChannelCode}"/>
+
+                    <Input value="{admin>distributionChannelDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveDistributionChannel"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteDistributionChannel"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+<IconTabFilter key="storageLocations" text="Storage Locations" icon="sap-icon://inventory">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Storage Location Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Storage Location"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddStorageLocation"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/storageLocations}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Storage Location Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Storage Location Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>storageLocationCode}"/>
+
+                    <Input value="{admin>storageLocationName}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveStorageLocation"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteStorageLocation"/>
+
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+<IconTabFilter key="salesOrgs" text="Sales Organizations" icon="sap-icon://sales-order">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Sales Organization Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Sales Org"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddSalesOrg"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/salesOrgs}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Sales Org Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Sales Org Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>salesOrgCode}"/>
+
+                    <Input value="{admin>salesOrgName}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveSalesOrg"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteSalesOrg"/>
+
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+<IconTabFilter key="incoterms" text="Incoterms" icon="sap-icon://shipping-status">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Incoterms Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Incoterm"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddIncoterm"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/incoterms}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Incoterms Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Incoterms Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>incotermsCode}"/>
+
+                    <Input value="{admin>incotermsDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveIncoterm"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteIncoterm"/>
+
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="contractTypes" text="Contract Types" icon="sap-icon://document-text">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Contract Type Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Contract Type"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddContractType"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/contractTypes}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Contract Type Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Contract Type Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>contractTypeCode}"/>
+
+                    <Input value="{admin>contractTypeDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveContractType"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteContractType"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+<IconTabFilter
+    key="costCenters"
+    text="Cost Centers"
+    icon="sap-icon://building">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Cost Center Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add Cost Center"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddCostCenter"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/costCenters}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+
+            <Column width="12rem">
+                <Text text="Cost Center Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Cost Center Name"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+
+        </columns>
+
+        <items>
+
+            <ColumnListItem>
+
+                <cells>
+
+                    <Text text="{admin>costCenterCode}"/>
+
+                    <Input
+                        value="{admin>costCenterName}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveCostCenter"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteCostCenter"/>
+
+                    </HBox>
+
+                </cells>
+
+            </ColumnListItem>
+
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+
+
+
+
           </items>
         </IconTabBar>
       </VBox>
     </content>
+
+
+
+
 
     <dependents>
       <Dialog id="addConfigDialog" title="{newItem>/title}" contentWidth="38rem">
@@ -258,7 +2930,435 @@
               <Label text="Vendor Email" class="sapUiSmallMarginTop"/>
               <Input value="{newItem>/email}" type="Email"/>
             </VBox>
+
+            <VBox visible="{newItem>/isSite}">
+            <Label text="Site ID" required="true"/>
+            <Input value="{newItem>/siteId}"  placeholder="Enter Site ID"/>
+            <Label text="Site Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/siteName}" placeholder="Enter Site Name"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isMaterial}">
+            <Label text="Material Code" required="true"/>
+            <Input value="{newItem>/materialCode}"  placeholder="Enter Material Code"/>
+            <Label text="Material Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/materialDescription}" placeholder="Enter Material Description"/>
+            </VBox>
+
+             <VBox visible="{newItem>/isWBS}">
+            <Label text="WBS Code" required="true"/>
+            <Input value="{newItem>/wbsCode}"  placeholder="Enter WBS Code"/>
+            <Label text="WBS Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/wbsDescription}" placeholder="Enter WBS Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isDocumentType}">
+            <Label text="Document Type Code" required="true"/>
+            <Input value="{newItem>/documentTypeCode}"  placeholder="Enter Document Type Code"/>
+            <Label text="Document Type Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/documentTypeDescription}" placeholder="Enter Document Type Description"/>
+            </VBox>
+
+             <VBox visible="{newItem>/isCompanyCode}">
+            <Label text="Company Code" required="true"/>
+            <Input value="{newItem>/companyCode}"  placeholder="Enter Company Code"/>
+            <Label text="Company Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/companyName}" placeholder="Enter Company Name"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isPurchasingOrganization}">
+            <Label text="Purchasing Organization Code" required="true"/>
+            <Input value="{newItem>/purchasingOrgCode}"  placeholder="Enter Purchasing Organization Code"/>
+            <Label text="Purchasing Organization Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/purchasingOrgName}" placeholder="Enter Purchasing Organization Name"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isPurchasingGroup}">
+            <Label text="Purchasing Group Code" required="true"/>
+            <Input value="{newItem>/purchasingGroupCode}"  placeholder="Enter Purchasing Group Code"/>
+            <Label text="Purchasing Group Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/purchasingGroupName}" placeholder="Enter Purchasing Group Name"/>
+            </VBox>
+
+             <VBox visible="{newItem>/isCurrency}">
+            <Label text="Currency Code" required="true"/>
+            <Input value="{newItem>/currencyCode}"  placeholder="Enter Currency Code"/>
+            <Label text="Currency Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/currencyName}" placeholder="Enter Currency Name"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isPaymentTerm}">
+            <Label text="Payment Term Code" required="true"/>
+            <Input value="{newItem>/paymentTermCode}"  placeholder="Enter Payment Term Code"/>
+            <Label text="Payment Term Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/paymentTermName}" placeholder="Enter Payment Term Name"/>
+            </VBox>
+
+           <VBox visible="{newItem>/isSystemContractBasePO}">
+            <Label text="System Contract Base PO Code" required="true"/>
+            <Input value="{newItem>/systemContractBasePOCode}"  placeholder="Enter System Contract Base PO Code"/>
+            <Label text="System Contract Base PO Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/systemContractBasePOName}" placeholder="Enter System Contract Base PO Name"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isDivision}">
+            <Label text="Division Code" required="true"/>
+            <Input value="{newItem>/divisionCode}"  placeholder="Enter Division Code"/>
+            <Label text="Division Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/divisionName}" placeholder="Enter Division Name"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isApplicableTax}">
+            <Label text="Tax Code" required="true"/>
+            <Input value="{newItem>/taxCode}"  placeholder="Enter Tax Code"/>
+            <Label text="Tax Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/taxDescription}" placeholder="Enter Tax Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isPlant}">
+            <Label text="Plant Code" required="true"/>
+            <Input value="{newItem>/plantCode}"  placeholder="Enter Plant Code"/>
+            <Label text="Plant Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/plantName}" placeholder="Enter Plant Name"/>
+            </VBox>
+
+             <VBox visible="{newItem>/isItemCategory}">
+            <Label text="Item Category Code" required="true"/>
+            <Input value="{newItem>/itemCategoryCode}"  placeholder="Enter Item Category Code"/>
+            <Label text="Item Category Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/itemCategoryName}" placeholder="Enter Item Category Name"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isAccountAssignment}">
+            <Label text="Account Assignment Code" required="true"/>
+            <Input value="{newItem>/accountAssignmentCode}"  placeholder="Enter Account Assignment Code"/>
+            <Label text="Account Assignment Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/accountAssignmentDescription}" placeholder="Enter Account Assignment Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isServiceCategory}">
+            <Label text="Service Category Code" required="true"/>
+            <Input value="{newItem>/serviceCategoryCode}"  placeholder="Enter Service Category Code"/>
+            <Label text="Service Category Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/serviceCategoryDescription}" placeholder="Enter Service Category Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isUnitOfMeasure}">
+            <Label text="Unit of Measure Code" required="true"/>
+            <Input value="{newItem>/unitOfMeasureCode}" placeholder="Enter Unit of Measure Code"/>
+            <Label text="Unit of Measure Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/unitOfMeasureName}" placeholder="Enter Unit of Measure Name"/>
+            <Label text="Unit of Measure Description" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/unitOfMeasureDescription}" placeholder="Enter Unit of Measure Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isServiceGroup}">
+            <Label text="Service Group Code" required="true"/>
+            <Input value="{newItem>/serviceGroupCode}" placeholder="Enter Service Group Code"/>
+            <Label text="Service Group Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/serviceGroupDescription}" placeholder="Enter Service Group Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isValuationClass}">
+            <Label text="Valuation Class Code" required="true"/>
+            <Input value="{newItem>/valuationClassCode}" placeholder="Enter Valuation Class Code"/>
+            <Label text="Valuation Class Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/valuationClassDescription}" placeholder="Enter Valuation Class Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isEntity}">
+            <Label text="Entity Code" required="true"/>
+            <Input value="{newItem>/entityCode}" placeholder="Enter Entity Code"/>
+            <Label text="Entity Description" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/entityDescription}" placeholder="Enter Entity Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isProject}">
+
+    <Label
+        text="Project ID"
+        required="true"/>
+
+    <Input
+        value="{newItem>/projectID}"
+        placeholder="Enter Project ID"/>
+
+    <Label
+        text="Project Category"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/projectCategory}"
+        placeholder="Enter Project Category"/>
+
+    <Label
+        text="Project Description"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/projectDescription}"
+        placeholder="Enter Project Description"/>
+
+</VBox>
+<VBox visible="{newItem>/isMatGroup}">
+
+    <Label
+        text="Material Group Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/matGroupCode}"
+        placeholder="Enter Material Group Code"/>
+
+    <Label
+        text="Material Group Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/matGroupDescription}"
+        placeholder="Enter Material Group Description"/>
+
+</VBox>
+
+<VBox visible="{newItem>/isExtensionMaterialGroup}">
+
+    <Label
+        text="Extension Material Group Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/extensionMaterialGroupCode}"
+        placeholder="Enter Extension Material Group Code"/>
+
+    <Label
+        text="Extension Material Group Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/extensionMaterialGroupDescription}"
+        placeholder="Enter Extension Material Group Description"/>
+
+</VBox>
+
+<VBox visible="{newItem>/isProfitCenter}">
+
+    <Label
+        text="Profit Center Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/profitCenterCode}"
+        placeholder="Enter Profit Center Code"/>
+
+    <Label
+        text="Profit Center Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/profitCenterDescription}"
+        placeholder="Enter Profit Center Description"/>
+
+</VBox>
+<VBox visible="{newItem>/isMRPType}">
+
+    <Label
+        text="MRP Type Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/mrpTypeCode}"
+        placeholder="Enter MRP Type Code"/>
+
+    <Label
+        text="MRP Type Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/mrpTypeDescription}"
+        placeholder="Enter MRP Type Description"/>
+
+</VBox>
+
+<VBox visible="{newItem>/isAvailabilityCheck}">
+
+    <Label
+        text="Availability Check Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/availabilityCheckCode}"
+        placeholder="Enter Availability Check Code"/>
+
+    <Label
+        text="Availability Check Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/availabilityCheckDescription}"
+        placeholder="Enter Availability Check Description"/>
+
+</VBox>
+
+<VBox visible="{newItem>/isSerialNumberProfile}">
+
+    <Label
+        text="Serial Number Profile Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/serialNumberProfileCode}"
+        placeholder="Enter Serial Number Profile Code"/>
+
+    <Label
+        text="Serial Number Profile Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/serialNumberProfileDescription}"
+        placeholder="Enter Serial Number Profile Description"/>
+
+</VBox>
+<VBox visible="{newItem>/isDistributionChannel}">
+
+    <Label
+        text="Distribution Channel Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/distributionChannelCode}"
+        placeholder="Enter Distribution Channel Code"/>
+
+    <Label
+        text="Distribution Channel Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/distributionChannelDescription}"
+        placeholder="Enter Distribution Channel Description"/>
+
+</VBox>
+<VBox visible="{newItem>/isStorageLocation}">
+
+    <Label
+        text="Storage Location Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/storageLocationCode}"
+        placeholder="Enter Storage Location Code"/>
+
+    <Label
+        text="Storage Location Name"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/storageLocationName}"
+        placeholder="Enter Storage Location Name"/>
+
+</VBox>
+<VBox visible="{newItem>/isSalesOrg}">
+
+    <Label
+        text="Sales Org Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/salesOrgCode}"
+        placeholder="Enter Sales Org Code"/>
+
+    <Label
+        text="Sales Org Name"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/salesOrgName}"
+        placeholder="Enter Sales Org Name"/>
+
+</VBox>
+
+<VBox visible="{newItem>/isIncoterm}">
+
+    <Label
+        text="Incoterms Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/incotermsCode}"
+        placeholder="Enter Incoterms Code"/>
+
+    <Label
+        text="Incoterms Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/incotermsDescription}"
+        placeholder="Enter Incoterms Description"/>
+
+</VBox>
+
+<VBox visible="{newItem>/isContractType}">
+
+    <Label
+        text="Contract Type Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/contractTypeCode}"
+        placeholder="Enter Contract Type Code"/>
+
+    <Label
+        text="Contract Type Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/contractTypeDescription}"
+        placeholder="Enter Contract Type Description"/>
+
+</VBox>
+
+<VBox visible="{newItem>/isCostCenter}">
+
+    <Label
+        text="Cost Center Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/costCenterCode}"
+        placeholder="Enter Cost Center Code"/>
+
+    <Label
+        text="Cost Center Name"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/costCenterName}"
+        placeholder="Enter Cost Center Name"/>
+
+</VBox>
+
+
+
+
+
+
+
+
+
           </VBox>
+
         </content>
         <beginButton>
           <Button text="{i18n>add}" type="Emphasized" press=".onCreateConfigItem"/>

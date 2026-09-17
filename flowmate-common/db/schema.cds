@@ -72,3 +72,93 @@ entity Delegations : cuid, managed {
   enabled              : Boolean default true;
   createdOnBehalf      : Boolean default false;
 }
+
+entity Sites : cuid, managed {
+  siteId   : String(40) not null;
+  siteName : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity Materials: cuid, managed {
+  materialCode : String(40) not null;
+  materialDescription : String(180) not null;
+  isActive     : Boolean default true;
+}
+
+entity Wbs: cuid, managed {
+  wbsCode : String(40) not null;
+  wbsDescription : String(180) not null;
+  isActive     : Boolean default true;
+}
+
+entity DocumentTypes : cuid, managed {
+  documentTypeCode : String(40) not null;
+  documentTypeDescription : String(180) not null;
+  isActive     : Boolean default true;
+}
+
+entity CompanyCodes : cuid, managed {
+  companyCode : String(40) not null;
+  companyName : String(180) not null;
+  isActive     : Boolean default true;
+}
+
+entity PurchasingGroups : cuid, managed {
+  purchasingGroupCode : String(40) not null;
+  purchasingGroupName : String(180) not null;
+  isActive     : Boolean default true;
+}
+
+entity Divisions : cuid, managed {
+  divisionCode : String(40) not null;
+  divisionName : String(180) not null;
+  isActive     : Boolean default true;
+}
+
+entity ApplicableTaxes : cuid, managed {
+  taxCode : String(40) not null;
+  taxDescription : String(180) not null;
+  isActive     : Boolean default true;
+}
+
+entity Plant : cuid, managed {
+  plantCode : String(40) not null;
+  plantName : String(180) not null;
+  isActive     : Boolean default true;
+}
+
+entity ServiceGroups : cuid, managed {
+  servicegroupCode : String(40) not null;
+  servicegroupDescription : String(180) not null;
+  isActive  : Boolean default true;
+}
+
+entity ValuationClass : cuid, managed{
+  valuationclassCode : String(40) not null;
+  valuationclassDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity StorageLocation : cuid, managed {
+  storageLocationCode : String(40) not null;
+  storageLocationName : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity SalesOrg : cuid, managed {
+  salesOrgCode : String(40) not null;
+  salesOrgName : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity Incoterms : cuid, managed {
+  incotermsCode : String(40) not null;
+  incotermsDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity CostCenter : cuid, managed {
+  costCenterCode : String(40) not null;
+  costCenterName : String(180) not null;
+  isActive : Boolean default true;
+}
