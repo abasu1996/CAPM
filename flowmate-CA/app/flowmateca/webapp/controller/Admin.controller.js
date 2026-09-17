@@ -120,9 +120,9 @@ sap.ui.define([
         model.setProperty("/systemContractBasePO", systemContractBasePO.value || []);
         const procurementCategories = await this.requestCA("ProcurementCategories?$orderby=code");
         model.setProperty("/procurementCategories", procurementCategories.value || []);
-        const itemCategories = await this.requestCA("ItemCategories?$orderby=itemcategory");
+        const itemCategories = await this.requestCA("ItemCategories?$orderby=code");
         model.setProperty("/itemCategories", itemCategories.value || []);
-        const accountAssignment = await this.requestCA("AccountAssignment?$orderby=code");
+        const accountAssignment = await this.requestCA("AccountAssignments?$orderby=code");
         model.setProperty("/accountAssignments", accountAssignment.value || []);
         const serviceCategories = await this.requestCA("ServiceCategories?$orderby=code");
         model.setProperty("/serviceCategories", serviceCategories.value || []);
@@ -812,10 +812,10 @@ else if (item.type === "purchasingOrganization") {
         }
         else if (item.type === "itemCategory") {
 
-    const itemcategory = item.itemCategoryCode?.trim();
+    const code = item.itemCategoryCode?.trim();
     const name = item.itemCategoryName?.trim();
 
-    if (!itemcategory || !name) {
+    if (!code || !name) {
         throw new Error(
             "Item Category Code and Item Category Name are required."
         );
@@ -826,7 +826,7 @@ else if (item.type === "purchasingOrganization") {
         {
             method: "POST",
             body: {
-                itemcategory: itemcategory,
+                code: code,
                 name: name,
                 isActive: true
             }
@@ -849,6 +849,7 @@ else if (item.type === "purchasingOrganization") {
             method: "POST",
             body: {
                 code: code,
+                name: description,
                 description: description,
                 isActive: true
             }
@@ -874,6 +875,7 @@ else if (item.type === "purchasingOrganization") {
             },
             body: {
                 code: code,
+                name: description,
                 description: description,
                 isActive: true
             }
@@ -1982,13 +1984,12 @@ onSaveItemCategory: async function (event) {
 
     try {
 
-        // ItemCategories uses cuid, so ID is the UUID key
-        if (!row.ID) {
-            throw new Error("Item Category ID is missing.");
+        if (!row.code) {
+            throw new Error("Item Category Code is missing.");
         }
 
         await this.requestCA(
-            `ItemCategories(${encodeURIComponent(row.ID)})`,
+            `ItemCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
                 headers: {
@@ -1996,7 +1997,6 @@ onSaveItemCategory: async function (event) {
                     "If-Match": "*"
                 },
                 body: {
-                    itemcategory: row.itemcategory,
                     name: row.name,
                     isActive: row.isActive
                 }
@@ -2022,8 +2022,8 @@ onDeleteItemCategory: async function (event) {
         .getBindingContext("admin")
         .getObject();
 
-    if (!row.ID) {
-        this.showError("Item Category ID is missing.");
+    if (!row.code) {
+        this.showError("Item Category Code is missing.");
         return;
     }
 
@@ -2049,7 +2049,7 @@ onDeleteItemCategory: async function (event) {
     try {
 
         await this.requestCA(
-            `ItemCategories(${encodeURIComponent(row.ID)})`,
+            `ItemCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
                 headers: {
@@ -2169,7 +2169,7 @@ onSaveServiceCategories: async function (event) {
     try {
 
         await this.requestCA(
-            `ServiceCategories('${encodeURIComponent(row.ID)}')`,
+            `ServiceCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
                 headers: {
@@ -2178,6 +2178,7 @@ onSaveServiceCategories: async function (event) {
                 },
                 body: {
                     code: row.code,
+                    name: row.name || row.description,
                     description: row.description,
                     isActive: row.isActive,
                 }
@@ -2224,7 +2225,7 @@ onSaveServiceCategories: async function (event) {
     try {
 
         await this.requestCA(
-            `ServiceCategories('${encodeURIComponent(row.ID)}')`,
+            `ServiceCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
                 headers: {

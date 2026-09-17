@@ -47,10 +47,12 @@ entity CompanyCodes : ConfigCode {};
 entity PurchasingGroups : ConfigCode {};
 entity Divisions : ConfigCode {};
 entity TaxCodes : ConfigCode {};
+entity ItemCategories : ConfigCode {};
 entity AccountAssignments : ConfigCode {};
 entity CostCenters : ConfigCode {};
 entity ContractTypes : ConfigCode {};
 entity Incoterms : ConfigCode {};
+entity ServiceCategories : ConfigCode {};
 entity ReservationProjects : ConfigCode {};
 entity ReservationBatches : ConfigCode {};
 entity BusinessEntities : ConfigCode {};
@@ -518,19 +520,7 @@ entity ServiceEntrySheetItems : cuid, managed {
   poLineItemNo : String(40);
 }
 
-entity ItemCategories : cuid, managed {
-  itemcategory        : String(40);
-  name        : String(160) not null;
-  isActive    : Boolean default true;
-}
-
 entity AccountAssignment : cuid, managed {
-  code : String(40);
-  description : String(160) not null;
-  isActive    : Boolean default true;
-}
-
-entity ServiceCategories : cuid, managed {
   code : String(40);
   description : String(160) not null;
   isActive    : Boolean default true;

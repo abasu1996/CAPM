@@ -1355,7 +1355,7 @@
                 <cells>
 
                     <Text
-                        text="{admin>itemcategory}"/>
+                        text="{admin>code}"/>
 
                     <Input
                         value="{admin>name}"/>
