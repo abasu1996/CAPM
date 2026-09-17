@@ -94,6 +94,54 @@ const definitions = {
   }
 };
 
+// These lookup tables are maintained both through source control and in HANA.
+// Preserve HANA-only rows, but allow intentional repository additions/changes
+// to become the desired deployed value for the same business key.
+const mergeRepositoryRowsBy = {
+  "flowmate:ProcessSubTypes": ["code"]
+};
+
+const parseCsv = (text) => {
+  const records = [];
+  let record = [];
+  let field = "";
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (character === '"') {
+      if (quoted && text[index + 1] === '"') {
+        field += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (character === "," && !quoted) {
+      record.push(field);
+      field = "";
+    } else if ((character === "\n" || character === "\r") && !quoted) {
+      if (character === "\r" && text[index + 1] === "\n") index += 1;
+      record.push(field);
+      if (record.some((value) => value !== "")) records.push(record);
+      record = [];
+      field = "";
+    } else {
+      field += character;
+    }
+  }
+
+  if (field || record.length) {
+    record.push(field);
+    records.push(record);
+  }
+  if (!records.length) return [];
+
+  const headers = records[0];
+  return records.slice(1).map((values) => Object.fromEntries(
+    headers.map((header, index) => [header, values[index] ?? ""])
+  ));
+};
+
 const csvCell = (value) => {
   if (value === null || value === undefined) return "";
   const text = String(value);
@@ -127,12 +175,38 @@ for (const [project, definition] of Object.entries(definitions)) {
       }
     }
     const output = path.join(dataDir, `${definition.namespace}-${entity}.csv`);
+    let outputRows = rows.map((row) => Object.fromEntries(
+      columns.map((column) => [column, row[physicalColumn(column)]])
+    ));
+    const mergeKeys = mergeRepositoryRowsBy[`${project}:${entity}`];
+    if (mergeKeys && fs.existsSync(output)) {
+      const repositoryRows = parseCsv(fs.readFileSync(output, "utf8"));
+      const keyOf = (row) => mergeKeys.map((column) => String(row[column] ?? "")).join("\u001f");
+      const merged = new Map(outputRows.map((row) => [keyOf(row), row]));
+      for (const repositoryRow of repositoryRows) {
+        const key = keyOf(repositoryRow);
+        if (!key || mergeKeys.some((column) => !repositoryRow[column])) {
+          throw new Error(`${project}/${entity}: repository row has an empty merge key`);
+        }
+        const recoveredRow = merged.get(key) || {};
+        merged.set(key, Object.fromEntries(
+          columns.map((column) => [
+            column,
+            Object.prototype.hasOwnProperty.call(repositoryRow, column)
+              ? repositoryRow[column]
+              : recoveredRow[column]
+          ])
+        ));
+      }
+      outputRows = [...merged.values()];
+      console.log(`${project}/${entity}: merged ${rows.length} HANA rows with ${repositoryRows.length} repository rows`);
+    }
     const lines = [columns.map(csvCell).join(",")];
-    for (const row of rows) {
-      lines.push(columns.map((column) => csvCell(row[physicalColumn(column)])).join(","));
+    for (const row of outputRows) {
+      lines.push(columns.map((column) => csvCell(row[column])).join(","));
     }
     fs.writeFileSync(output, `${lines.join("\n")}\n`);
-    totalRows += rows.length;
+    totalRows += outputRows.length;
     restoredFiles += 1;
   }
   console.log(`${project}: ${restoredFiles} CSVs, ${totalRows} rows restored`);
