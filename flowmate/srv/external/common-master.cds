@@ -5,6 +5,7 @@ service CommonMasterDataService {
     key code : String(40);
         name : String(255);
         descr: String(1000);
+        isActive : Boolean;
   }
 
   @cds.persistence.skip
