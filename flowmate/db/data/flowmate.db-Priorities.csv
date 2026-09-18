@@ -1,5 +1,5 @@
-code,name,descr
-LOW,Low,Low-priority request
-MEDIUM,Medium,Medium-priority request
-HIGH,High,High-priority request
-CRITICAL,Critical,Critical-priority request
+code,name,descr,isActive
+LOW,Low,Low-priority request,true
+MEDIUM,Medium,Medium-priority request,true
+HIGH,High,High-priority request,true
+CRITICAL,Critical,Critical-priority request,true

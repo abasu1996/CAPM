@@ -1,4 +1,4 @@
-code,name,descr
-DRAFT,Draft,Payment made by bank draft
-CHEQUE,Cheque,Payment made by cheque
-SLIPS,Slips,Payment made by deposit slip
+code,name,descr,isActive
+DRAFT,Draft,Payment made by bank draft,true
+CHEQUE,Cheque,Payment made by cheque,true
+SLIPS,Slips,Payment made by deposit slip,true

@@ -1,5 +1,5 @@
-code,name,descr
-LABEL_FEE,Label Fee,Payment for label fee
-TYPE_APPROVAL_FEE,Type Approval Fee,Payment for type approval fee
-EQUIPMENT_CHARGES,Equipment Charges,Payment for equipment charges
-STICKER_FEE,Sticker Fee,Payment for sticker fee
+code,name,descr,isActive
+LABEL_FEE,Label Fee,Payment for label fee,true
+TYPE_APPROVAL_FEE,Type Approval Fee,Payment for type approval fee,true
+EQUIPMENT_CHARGES,Equipment Charges,Payment for equipment charges,true
+STICKER_FEE,Sticker Fee,Payment for sticker fee,true

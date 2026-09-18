@@ -4,6 +4,7 @@ using { cuid, managed, sap.common.CodeList } from '@sap/cds/common';
 
 entity Roles : CodeList {
   key code : String(40);
+  isActive : Boolean default true;
 }
 
 @assert.unique.userEmail: [email]

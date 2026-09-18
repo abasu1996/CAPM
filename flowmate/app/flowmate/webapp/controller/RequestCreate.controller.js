@@ -1112,7 +1112,9 @@ sap.ui.define([
         },
 
         onProcessTypeSuggest(oEvent) {
-            this._filterSuggestionItems(oEvent, ["code", "name", "descr"]);
+            this._filterSuggestionItems(oEvent, ["code", "name", "descr"], [
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
         },
 
         async onProcessTypeSuggestionSelected(oEvent) {
@@ -1140,13 +1142,15 @@ sap.ui.define([
         onProcessTypeValueHelpSearch(oEvent) {
             const sQuery = oEvent.getParameter("value") || "";
             const oBinding = oEvent.getSource().getBinding("items");
+            const oActiveFilter = new Filter("isActive", FilterOperator.EQ, true);
 
             if (!sQuery) {
-                oBinding.filter([]);
+                oBinding.filter([oActiveFilter]);
                 return;
             }
 
             oBinding.filter([
+                oActiveFilter,
                 new Filter({
                     filters: [
                         new Filter("code", FilterOperator.Contains, sQuery),
@@ -1277,8 +1281,11 @@ sap.ui.define([
         onSubProcessTypeSuggest(oEvent) {
             const sProcessTypeCode = this.getView().getModel("create").getProperty("/processType_code");
             const aFixedFilters = sProcessTypeCode
-                ? [new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)]
-                : [];
+                ? [
+                    new Filter("isActive", FilterOperator.EQ, true),
+                    new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)
+                ]
+                : [new Filter("isActive", FilterOperator.EQ, true)];
 
             this._filterSuggestionItems(oEvent, ["code", "name", "descr", "processOwner"], aFixedFilters);
         },
@@ -1386,7 +1393,9 @@ sap.ui.define([
         },
 
         onVendorSuggest(oEvent) {
-            this._filterSuggestionItems(oEvent, ["vendorCode", "vendorName", "vendorEmail"]);
+            this._filterSuggestionItems(oEvent, ["vendorCode", "vendorName", "vendorEmail"], [
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
         },
 
         onVendorSuggestionSelected(oEvent) {
@@ -1407,13 +1416,15 @@ sap.ui.define([
         onVendorValueHelpSearch(oEvent) {
             const sQuery = (oEvent.getParameter("value") || "").trim();
             const oBinding = oEvent.getSource().getBinding("items");
+            const oActiveFilter = new Filter("isActive", FilterOperator.EQ, true);
 
             if (!sQuery) {
-                oBinding.filter([]);
+                oBinding.filter([oActiveFilter]);
                 return;
             }
 
             oBinding.filter([
+                oActiveFilter,
                 new Filter({
                     filters: ["vendorCode", "vendorName", "vendorEmail"].map((sProperty) => new Filter({
                         path: sProperty,
@@ -1452,10 +1463,14 @@ sap.ui.define([
             this.onVendorValueHelpClose(oEvent);
         },
         onVendorValueHelpClose(oEvent) {
-            oEvent.getSource().getBinding("items")?.filter([]);
+            oEvent.getSource().getBinding("items")?.filter([
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
         },
         onAuthorityVendorSuggest(oEvent) {
-            this._filterSuggestionItems(oEvent, ["vendorCode", "vendorName", "vendorEmail"]);
+            this._filterSuggestionItems(oEvent, ["vendorCode", "vendorName", "vendorEmail"], [
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
         },
         onAuthorityVendorSuggestionSelected(oEvent) {
             const oContext = this._getSuggestionContext(oEvent);
@@ -1474,7 +1489,9 @@ sap.ui.define([
         },
 
         onEmployeeVendorSuggest(oEvent) {
-            this._filterSuggestionItems(oEvent, ["vendorCode", "vendorName", "vendorEmail"]);
+            this._filterSuggestionItems(oEvent, ["vendorCode", "vendorName", "vendorEmail"], [
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
         },
         onEmployeeVendorSuggestionSelected(oEvent) {
             const oContext = this._getSuggestionContext(oEvent);
@@ -1504,7 +1521,9 @@ sap.ui.define([
         },
 
         onCustomerSuggest(oEvent) {
-            this._filterSuggestionItems(oEvent, ["customerCode", "customerName", "customerEmail"]);
+            this._filterSuggestionItems(oEvent, ["customerCode", "customerName", "customerEmail"], [
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
         },
 
         onCustomerSuggestionSelected(oEvent) {
@@ -1525,13 +1544,15 @@ sap.ui.define([
         onCustomerValueHelpSearch(oEvent) {
             const sQuery = (oEvent.getParameter("value") || "").trim();
             const oBinding = oEvent.getSource().getBinding("items");
+            const oActiveFilter = new Filter("isActive", FilterOperator.EQ, true);
 
             if (!sQuery) {
-                oBinding.filter([]);
+                oBinding.filter([oActiveFilter]);
                 return;
             }
 
             oBinding.filter([
+                oActiveFilter,
                 new Filter({
                     filters: ["customerCode", "customerName", "customerEmail"].map((sProperty) => new Filter({
                         path: sProperty,
@@ -1555,7 +1576,9 @@ sap.ui.define([
         },
 
         onCustomerValueHelpClose(oEvent) {
-            oEvent.getSource().getBinding("items")?.filter([]);
+            oEvent.getSource().getBinding("items")?.filter([
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
         },
 
         _setCustomer(oContext) {
@@ -2413,6 +2436,7 @@ sap.ui.define([
             const sProcessTypeCode = this.getView().getModel("create").getProperty("/processType_code");
             const oBinding = oDialog.getBinding("items");
             const aFilters = [
+                new Filter("isActive", FilterOperator.EQ, true),
                 new Filter("processType_code", FilterOperator.EQ, sProcessTypeCode)
             ];
 
@@ -3562,7 +3586,10 @@ sap.ui.define([
             oCreateModel.setProperty("/role", "");
 
             const aSubTypes = await this._readList("/ProcessSubTypes", {
-                filters: [new Filter("processType_code", FilterOperator.EQ, oCreateModel.getProperty("/processType_code"))],
+                filters: [
+                    new Filter("isActive", FilterOperator.EQ, true),
+                    new Filter("processType_code", FilterOperator.EQ, oCreateModel.getProperty("/processType_code"))
+                ],
                 sorters: []
             });
 
@@ -3620,7 +3647,10 @@ sap.ui.define([
 
                 if (oPredecessor.processType_code) {
                     const aSubTypes = await this._readList("/ProcessSubTypes", {
-                        filters: [new Filter("processType_code", FilterOperator.EQ, oPredecessor.processType_code)],
+                        filters: [
+                            new Filter("isActive", FilterOperator.EQ, true),
+                            new Filter("processType_code", FilterOperator.EQ, oPredecessor.processType_code)
+                        ],
                         sorters: []
                     });
 

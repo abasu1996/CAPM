@@ -57,9 +57,9 @@
           }
         },
         "auth": {
-          "kind": "mocked",
+          "kind": "xsuaa",
           "users": {
-            "*": false,
+            "*": true,
             "ca.admin@flowmate.demo": {
               "password": "FlowmateCAAdmin1!",
               "roles": [

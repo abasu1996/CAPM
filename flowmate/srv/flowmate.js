@@ -906,16 +906,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       const [oProcessType, oConfiguredSubType] = await Promise.all([
-        cds.tx(req).run(SELECT.one.from(ProcessTypes).columns("code").where({ code: sProcessTypeCode })),
+        cds.tx(req).run(SELECT.one.from(ProcessTypes).columns("code").where({ code: sProcessTypeCode, isActive: true })),
         cds.tx(req).run(
           SELECT.one.from(ProcessSubTypes)
             .columns("code")
-            .where({ processType_code: sProcessTypeCode })
+            .where({ processType_code: sProcessTypeCode, isActive: true })
         )
       ]);
 
       if (!oProcessType) {
-        return req.reject(400, "Selected process type was not found");
+          return req.reject(400, "Selected process type is inactive or was not found");
       }
 
       if (oConfiguredSubType && !sSubProcessTypeCode) {
@@ -926,11 +926,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         const oMatchingSubType = await cds.tx(req).run(
           SELECT.one.from(ProcessSubTypes)
             .columns("code")
-            .where({ code: sSubProcessTypeCode, processType_code: sProcessTypeCode })
+            .where({ code: sSubProcessTypeCode, processType_code: sProcessTypeCode, isActive: true })
         );
 
         if (!oMatchingSubType) {
-          return req.reject(400, "Selected process subtype does not belong to the selected process type");
+          return req.reject(400, "Selected process subtype is inactive or does not belong to the selected process type");
         }
       }
 

@@ -840,7 +840,7 @@
                         <core:Item key="{code}" text="{name}" />
                     </Select>
                     <Label text="{i18n>roleLabel}" required="true" />
-                    <Select selectedKey="{loaApprovalEdit>/roleCode}" items="{/Roles}" required="true" forceSelection="false">
+                    <Select selectedKey="{loaApprovalEdit>/roleCode}" items="{path: '/Roles', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}" required="true" forceSelection="false">
                         <core:Item key="{code}" text="{name}" />
                     </Select>
                 </form:SimpleForm>
@@ -857,6 +857,8 @@
                     <Input value="{configEdit>/name}" maxLength="255" required="true" />
                     <Label text="{i18n>configDescriptionLabel}" required="true" />
                     <TextArea value="{configEdit>/descr}" rows="4" required="true" />
+                    <Label text="{i18n>activeLabel}" />
+                    <CheckBox selected="{configEdit>/isActive}" />
                 </form:SimpleForm>
             </content>
             <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveCodeList" /></beginButton>
@@ -945,6 +947,8 @@
                     </Select>
                     <Label text="{i18n>loaApprovalApplicableLabel}" />
                     <Switch state="{subTypeEdit>/loaApprovalApplicable}" customTextOn="{i18n>yesText}" customTextOff="{i18n>noText}" />
+                    <Label text="{i18n>activeLabel}" />
+                    <CheckBox selected="{subTypeEdit>/isActive}" />
                     <Label text="{i18n>processOwnerLabel}" />
                     <Input value="{subTypeEdit>/processOwner}" maxLength="100" />
                     <Label text="{i18n>activityDescriptionLabel}" />

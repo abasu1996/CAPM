@@ -285,7 +285,7 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
 
     if (oUser.role_code) {
       const oRole = await cds.tx(req).run(
-        SELECT.one.from(Roles).columns("code").where({ code: oUser.role_code })
+        SELECT.one.from(Roles).columns("code").where({ code: oUser.role_code, isActive: true })
       );
 
       if (!oRole) {

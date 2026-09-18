@@ -25,18 +25,22 @@ entity Flows: cuid, managed {
 
 entity ProcessTypes : CodeList {
     key code : String(30);
+    isActive : Boolean default true;
 }
 
 entity ProcessStatus : CodeList {
     key code : String(20);
+    isActive : Boolean default true;
 }
 
 entity TaskStatus : CodeList {
     key code : String(20);
+    isActive : Boolean default true;
 }
 
 entity ProcessSubTypes : CodeList {
     key code : String(50);
+    isActive : Boolean default true;
     processType : Association to ProcessTypes;
     workingCalendar : Association to WorkingCalendars;
     loaApprovalApplicable : Boolean default false;
@@ -47,42 +51,53 @@ entity ProcessSubTypes : CodeList {
 
 entity PaymentCategories : CodeList {
     key code : String(20);
+    isActive : Boolean default true;
 }
 
 entity FtkEntities : CodeList {
     key code : String(30);
+    isActive : Boolean default true;
 }
 
 entity Currencies : CodeList {
     key code : String(10);
+    isActive : Boolean default true;
 }
 entity Categories : CodeList {
     key code : String(20);
+    isActive : Boolean default true;
 }
 
 entity PaymentSubCategories : CodeList {
     key code : String(20);
+    isActive : Boolean default true;
 }
 entity PaymentMethod : CodeList {
     key code : String(20);
+    isActive : Boolean default true;
 }
 entity TypeOfPayment : CodeList {
     key code : String(30);
+    isActive : Boolean default true;
 }
 
 entity RequestDivision : CodeList {
     key code : String(30);
+    isActive : Boolean default true;
 }
 
 entity GuaranteeTypes : CodeList {
     key code : String(40);
+    isActive : Boolean default true;
 }
 entity Priorities : CodeList {
     key code : String(20);
+    isActive : Boolean default true;
 }
 
 entity Operator : CodeList {
     key code : String(10);
+    isActive : Boolean default true;
 }
 
 @assert.unique.workingCalendarCode: [code]
@@ -683,4 +698,5 @@ entity DNSProcess: cuid, managed {
 entity RequestDropDown: CodeList {
     key code: String(10);
     description: String(255);
+    isActive : Boolean default true;
 }

@@ -568,7 +568,8 @@ sap.ui.define([
             const oPayload = {
                 code: oEntry.code,
                 name: oEntry.name,
-                descr: oEntry.descr
+                descr: oEntry.descr,
+                isActive: Boolean(oEntry.isActive)
             };
 
             if (oEntry.entitySet === "RequestDropDown") {
@@ -820,7 +821,8 @@ sap.ui.define([
                 loaApprovalApplicable: Boolean(oEntry.loaApprovalApplicable),
                 processOwner: oEntry.processOwner,
                 activityDescription: oEntry.activityDescription,
-                sapTCode: oEntry.sapTCode
+                sapTCode: oEntry.sapTCode,
+                isActive: Boolean(oEntry.isActive)
             };
 
             await this._saveConfigEntity({
@@ -854,7 +856,8 @@ sap.ui.define([
                 isEdit: false,
                 code: "",
                 name: "",
-                descr: ""
+                descr: "",
+                isActive: true
             };
         },
 
@@ -883,6 +886,7 @@ sap.ui.define([
                 processType_code: "",
                 workingCalendar_ID: "",
                 loaApprovalApplicable: false,
+                isActive: true,
                 processOwner: "",
                 activityDescription: "",
                 sapTCode: ""

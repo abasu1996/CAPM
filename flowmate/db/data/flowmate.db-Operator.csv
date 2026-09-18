@@ -1,7 +1,7 @@
-code,name,descr
-=,Equals,Equals
-!=,Not Equals,Not Equals
-<,Less Than,Less Than
-<=,Less Than or Equal,Less Than or Equal
->,Greater Than,Greater Than
->=,Greater Than or Equal,Greater Than or Equal
+code,name,descr,isActive
+=,Equals,Equals,true
+!=,Not Equals,Not Equals,true
+<,Less Than,Less Than,true
+<=,Less Than or Equal,Less Than or Equal,true
+>,Greater Than,Greater Than,true
+>=,Greater Than or Equal,Greater Than or Equal,true

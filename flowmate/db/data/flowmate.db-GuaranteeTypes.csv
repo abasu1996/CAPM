@@ -1,6 +1,6 @@
-code,name,descr
-FINANCIAL_GUARANTEE,Financial Guarantee,Financial guarantee
-BID_TENDER_GUARANTEE,Bid/Tender Guarantee,Bid or tender guarantee
-SECURITY_GUARANTEE,Security Guarantee,Security guarantee
-ADVANCE_PAYMENT_GUARANTEE,Advance Payment Guarantee,Advance payment guarantee
-PERFORMANCE_BOND,Performance Bond,Performance bond
+code,name,descr,isActive
+FINANCIAL_GUARANTEE,Financial Guarantee,Financial guarantee,true
+BID_TENDER_GUARANTEE,Bid/Tender Guarantee,Bid or tender guarantee,true
+SECURITY_GUARANTEE,Security Guarantee,Security guarantee,true
+ADVANCE_PAYMENT_GUARANTEE,Advance Payment Guarantee,Advance payment guarantee,true
+PERFORMANCE_BOND,Performance Bond,Performance bond,true

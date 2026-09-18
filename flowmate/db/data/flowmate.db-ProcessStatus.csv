@@ -1,6 +1,6 @@
-code,name,descr
-DRAFT,Draft,Request is being prepared
-IN_PROGRESS,In Progress,Request is being processed
-SENT_BACK,Sent Back,Request was sent back for clarification
-REJECTED,Rejected,Request was rejected
-COMPLETED,Completed,Request was completed
+code,name,descr,isActive
+DRAFT,Draft,Request is being prepared,true
+IN_PROGRESS,In Progress,Request is being processed,true
+SENT_BACK,Sent Back,Request was sent back for clarification,true
+REJECTED,Rejected,Request was rejected,true
+COMPLETED,Completed,Request was completed,true

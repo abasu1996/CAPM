@@ -169,7 +169,7 @@
                     <Label text="{i18n>departmentLabel}" />
                     <Input value="{userEdit>/department}" maxLength="100" />
                     <Label text="{i18n>roleLabel}" />
-                    <Select selectedKey="{userEdit>/role_code}" items="{/Roles}" forceSelection="false">
+                    <Select selectedKey="{userEdit>/role_code}" items="{path: '/Roles', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}" forceSelection="false">
                         <core:Item key="{code}" text="{name}" />
                     </Select>
                     <Label text="{i18n>managerLabel}" />

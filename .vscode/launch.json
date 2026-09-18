@@ -1,15 +1,28 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Attach to Python Functions",
-            "type": "debugpy",
-            "request": "attach",
-            "connect": {
-                "host": "localhost",
-                "port": 9091
-            },
-            "preLaunchTask": "func: host start"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Python Functions",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 9091
+      },
+      "preLaunchTask": "func: host start"
+    },
+    {
+      "name": "Debug HANA CSV Restore",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/CAPM/scripts/recovery/restore-master-data-csv.js",
+      "args": [
+        "/Users/megamind/localDev/CAPM/CAPM/recovery-exports/20260912T180414Z",
+        "${workspaceFolder}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
 }

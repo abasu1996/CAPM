@@ -167,7 +167,7 @@
                             <ComboBox
                                 selectedKey="{create>/priorityConfig_code}"
                                 placeholder="{i18n>selectPriorityPlaceholder}"
-                                items="{/Priorities}">
+                                items="{path: '/Priorities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
                                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                             </ComboBox>
                             <Label text="{i18n>departmentLabel}" />
@@ -220,7 +220,7 @@
                                 selectedKey="{create>/paymentCategory_code}"
                                 required="{= ${create>/isFtkPoValidation} || ${create>/isFtkBasedOnUac} }"
                                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                                items="{/PaymentCategories}">
+                                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
                                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                             </ComboBox>
                             <Label text="{i18n>entityLabel}" required="{= ${create>/isFtkPoValidation} || ${create>/isFtkBasedOnUac} }" />
@@ -228,7 +228,7 @@
                                 selectedKey="{create>/businessEntity_code}"
                                 required="{= ${create>/isFtkPoValidation} || ${create>/isFtkBasedOnUac} }"
                                 placeholder="{i18n>selectEntityPlaceholder}"
-                                items="{/FtkEntities}">
+                                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
                                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                             </ComboBox>
                             <Label
@@ -240,7 +240,7 @@
                                 visible="{= ${create>/isFtkBasedOnUac} }"
                                 required="{= ${create>/isFtkBasedOnUac} }"
                                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                                items="{/Currencies}">
+                                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
                                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                             </ComboBox>
 
@@ -253,7 +253,7 @@
                                 visible="{= ${create>/isFtkBasedOnUac} }"
                                 required="{= ${create>/isFtkBasedOnUac} }"
                                 placeholder="{i18n>selectCategoryPlaceholder}"
-                                items="{/Categories}">
+                                items="{path: '/Categories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
                                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                             </ComboBox>
                             <Label text="{i18n>vendorCodeLabel}" required="{= ${create>/isFtkPoValidation} || ${create>/isFtkBasedOnUac} }" />
@@ -330,7 +330,7 @@
                                 selectedKey="{create>/paymentCategory_code}"
                                 required="{create>/isFtkNonFactoring}"
                                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                                items="{/PaymentCategories}"
+                                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
                                 <core:ListItem
                                     key="{code}"
@@ -346,7 +346,7 @@
                                 selectedKey="{create>/businessEntity_code}"
                                 required="{create>/isFtkNonFactoring}"
                                 placeholder="{i18n>selectEntityPlaceholder}"
-                                items="{/FtkEntities}"
+                                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
                                 <core:ListItem
                                     key="{code}"
@@ -362,7 +362,7 @@
                                 selectedKey="{create>/currency_code}"
                                 required="{create>/isFtkNonFactoring}"
                                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                                items="{/Currencies}"
+                                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
                                 <core:ListItem
                                     key="{code}"
@@ -378,7 +378,7 @@
                                 selectedKey="{create>/category_code}"
                                 required="{create>/isFtkNonFactoring}"
                                 placeholder="{i18n>selectCategoryPlaceholder}"
-                                items="{/Categories}"
+                                items="{path: '/Categories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
                                 <core:ListItem
                                     key="{code}"
@@ -476,7 +476,7 @@
                             selectedKey="{create>/paymentCategory_code}"
                             required="{create>/isFtkServicePayment}"
                             placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                            items="{/PaymentCategories}"
+                            items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem
                                 key="{code}"
@@ -492,7 +492,7 @@
                             selectedKey="{create>/businessEntity_code}"
                             required="{create>/isFtkServicePayment}"
                             placeholder="{i18n>selectEntityPlaceholder}"
-                            items="{/FtkEntities}"
+                            items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem
                                 key="{code}"
@@ -508,7 +508,7 @@
                             selectedKey="{create>/currency_code}"
                             required="{create>/isFtkServicePayment}"
                             placeholder="{i18n>selectCurrencyPlaceholder}"
-                            items="{/Currencies}"
+                            items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem
                                 key="{code}"
@@ -606,7 +606,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isFtkDutyReimbursement}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -622,7 +622,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isFtkDutyReimbursement}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -638,7 +638,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isFtkDutyReimbursement}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -891,7 +891,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isPoBasedNonAdvance}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -904,7 +904,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isPoBasedNonAdvance}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -917,7 +917,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isPoBasedNonAdvance}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -973,7 +973,7 @@
                 selectedKey="{create>/paymentSubCategory_code}"
                 required="{create>/isPoBasedNonAdvance}"
                 placeholder="{i18n>selectPaymentSubCategoryPlaceholder}"
-                items="{/PaymentSubCategories}"
+                items="{path: '/PaymentSubCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1048,7 +1048,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isPoAdvance}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1061,7 +1061,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isPoAdvance}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1074,7 +1074,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isPoAdvance}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1129,7 +1129,7 @@
                 selectedKey="{create>/paymentSubCategory_code}"
                 required="{create>/isPoAdvance}"
                 placeholder="{i18n>selectPaymentSubCategoryPlaceholder}"
-                items="{/PaymentSubCategories}"
+                items="{path: '/PaymentSubCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1195,7 +1195,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isPoAdvSettlement}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1208,7 +1208,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isPoAdvSettlement}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1221,7 +1221,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isPoAdvSettlement}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1276,7 +1276,7 @@
                 selectedKey="{create>/paymentSubCategory_code}"
                 required="{create>/isPoAdvSettlement}"
                 placeholder="{i18n>selectPaymentSubCategoryPlaceholder}"
-                items="{/PaymentSubCategories}"
+                items="{path: '/PaymentSubCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1499,7 +1499,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isOfnAuthority}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -1515,7 +1515,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isOfnAuthority}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -1531,7 +1531,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isOfnAuthority}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -1629,7 +1629,7 @@
                 selectedKey="{create>/paymentMethod_code}"
                 required="{create>/isOfnAuthority}"
                 placeholder="{i18n>selectPaymentMethodPlaceholder}"
-                items="{/PaymentMethod}"
+                items="{path: '/PaymentMethod', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -1745,7 +1745,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoDirectForeignTravel}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1755,7 +1755,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoDirectForeignTravel}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -1885,7 +1885,7 @@
                             selectedKey="{create>/paymentCategory_code}"
                             required="{create>/isNonPoFuel}"
                             placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                            items="{/PaymentCategories}"
+                            items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -1898,7 +1898,7 @@
                             selectedKey="{create>/businessEntity_code}"
                             required="{create>/isNonPoFuel}"
                             placeholder="{i18n>selectEntityPlaceholder}"
-                            items="{/FtkEntities}"
+                            items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -1911,7 +1911,7 @@
                             selectedKey="{create>/currency_code}"
                             required="{create>/isNonPoFuel}"
                             placeholder="{i18n>selectCurrencyPlaceholder}"
-                            items="{/Currencies}"
+                            items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -2000,7 +2000,7 @@
                             selectedKey="{create>/paymentCategory_code}"
                             required="{create>/isNonPoIdeaMartAppMaker}"
                             placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                            items="{/PaymentCategories}"
+                            items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -2013,7 +2013,7 @@
                             selectedKey="{create>/businessEntity_code}"
                             required="{create>/isNonPoIdeaMartAppMaker}"
                             placeholder="{i18n>selectEntityPlaceholder}"
-                            items="{/FtkEntities}"
+                            items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -2026,7 +2026,7 @@
                             selectedKey="{create>/currency_code}"
                             required="{create>/isNonPoIdeaMartAppMaker}"
                             placeholder="{i18n>selectCurrencyPlaceholder}"
-                            items="{/Currencies}"
+                            items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -2202,7 +2202,7 @@
                             selectedKey="{create>/paymentCategory_code}"
                             required="{create>/isNonPoCustomerRefunds}"
                             placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                            items="{/PaymentCategories}"
+                            items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -2215,7 +2215,7 @@
                             selectedKey="{create>/businessEntity_code}"
                             required="{create>/isNonPoCustomerRefunds}"
                             placeholder="{i18n>selectEntityPlaceholder}"
-                            items="{/FtkEntities}"
+                            items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -2228,7 +2228,7 @@
                             selectedKey="{create>/currency_code}"
                             required="{create>/isNonPoCustomerRefunds}"
                             placeholder="{i18n>selectCurrencyPlaceholder}"
-                            items="{/Currencies}"
+                            items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -2295,7 +2295,7 @@
                     <ComboBox
                         selectedKey="{create>/paymentCategory_code}"
                         required="{create>/isNonPoStelacomConsignment}"
-                        items="{/PaymentCategories}"
+                        items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                     >
                         <core:ListItem
                             key="{code}"
@@ -2311,7 +2311,7 @@
                     <ComboBox
                         selectedKey="{create>/businessEntity_code}"
                         required="{create>/isNonPoStelacomConsignment}"
-                        items="{/FtkEntities}"
+                        items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                     >
                         <core:ListItem
                             key="{code}"
@@ -2327,7 +2327,7 @@
                     <ComboBox
                         selectedKey="{create>/currency_code}"
                         required="{create>/isNonPoStelacomConsignment}"
-                        items="{/Currencies}"
+                        items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                     >
                         <core:ListItem
                             key="{code}"
@@ -2471,7 +2471,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoSiteShareLiability}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2484,7 +2484,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoSiteShareLiability}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2497,7 +2497,7 @@
                 selectedKey="{create>/category_code}"
                 required="{create>/isNonPoSiteShareLiability}"
                 placeholder="{i18n>selectCategoryPlaceholder}"
-                items="{/Categories}"
+                items="{path: '/Categories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2510,7 +2510,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoSiteShareLiability}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2649,7 +2649,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoSiteSharing}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2662,7 +2662,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoSiteSharing}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2675,7 +2675,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoSiteSharing}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2767,7 +2767,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoSiteRentTaxInvoice}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2780,7 +2780,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoSiteRentTaxInvoice}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2793,7 +2793,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoSiteRentTaxInvoice}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -2919,7 +2919,7 @@
             <ComboBox
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoSiteRentMonthlyFile}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -2935,7 +2935,7 @@
             <ComboBox
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoSiteRentMonthlyFile}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -2951,7 +2951,7 @@
             <ComboBox
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoSiteRentMonthlyFile}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem
                     key="{code}"
@@ -3045,7 +3045,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoSiteRentStampAdhoc}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3058,7 +3058,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoSiteRentStampAdhoc}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3126,7 +3126,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoSiteRentStampAdhoc}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3206,7 +3206,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isDirectNonPoReimbursement}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3219,7 +3219,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isDirectNonPoReimbursement}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3232,7 +3232,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isDirectNonPoReimbursement}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3438,7 +3438,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isDirectForeignTravelReimb}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3451,7 +3451,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isDirectForeignTravelReimb}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3464,7 +3464,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isDirectForeignTravelReimb}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3685,7 +3685,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoTaxLiability}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3698,7 +3698,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoTaxLiability}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3711,7 +3711,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoTaxLiability}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3724,7 +3724,7 @@
                 selectedKey="{create>/requestingDivision_code}"
                 required="{create>/isNonPoTaxLiability}"
                 placeholder="{i18n>selectRequestingDivisionPlaceholder}"
-                items="{/RequestDivision}"
+                items="{path: '/RequestDivision', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3944,7 +3944,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoInterconnectLiab}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3954,7 +3954,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoInterconnectLiab}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -3964,7 +3964,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoInterconnectLiab}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4080,7 +4080,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoInterconnectRoamPay}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4090,7 +4090,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoInterconnectRoamPay}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4100,7 +4100,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoInterconnectRoamPay}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4187,7 +4187,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoRoamingLiability}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4197,7 +4197,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoRoamingLiability}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4207,7 +4207,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoRoamingLiability}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4292,7 +4292,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoStarPointPayments}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4302,7 +4302,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoStarPointPayments}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4312,7 +4312,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoStarPointPayments}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4382,7 +4382,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoImportTrc}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4392,7 +4392,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoImportTrc}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4402,7 +4402,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoImportTrc}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4457,7 +4457,7 @@
                 selectedKey="{create>/typeOfPayment_code}"
                 required="{create>/isNonPoImportTrc}"
                 placeholder="{i18n>selectTypeOfPaymentPlaceholder}"
-                items="{/TypeOfPayment}"
+                items="{path: '/TypeOfPayment', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4515,7 +4515,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoImportIcl}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4525,7 +4525,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoImportIcl}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4535,7 +4535,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoImportIcl}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4643,7 +4643,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoImportDgc}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4653,7 +4653,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoImportDgc}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4663,7 +4663,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoImportDgc}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4772,7 +4772,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoCcPayment}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4782,7 +4782,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoCcPayment}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4792,7 +4792,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoCcPayment}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4933,7 +4933,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoCcSettlement}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4943,7 +4943,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoCcSettlement}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -4953,7 +4953,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoCcSettlement}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5162,7 +5162,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoMerchantSettlements}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5172,7 +5172,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoMerchantSettlements}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5182,7 +5182,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoMerchantSettlements}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5309,7 +5309,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isNonPoMiscReceipts}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5319,7 +5319,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isNonPoMiscReceipts}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5329,7 +5329,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isNonPoMiscReceipts}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5421,7 +5421,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isPoZeroIv}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5431,7 +5431,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isPoZeroIv}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5441,7 +5441,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isPoZeroIv}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5498,7 +5498,7 @@
                 selectedKey="{create>/paymentCategory_code}"
                 required="{create>/isBankGuarantee}"
                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
-                items="{/PaymentCategories}"
+                items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5508,7 +5508,7 @@
                 selectedKey="{create>/businessEntity_code}"
                 required="{create>/isBankGuarantee}"
                 placeholder="{i18n>selectEntityPlaceholder}"
-                items="{/FtkEntities}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5518,7 +5518,7 @@
                 selectedKey="{create>/currency_code}"
                 required="{create>/isBankGuarantee}"
                 placeholder="{i18n>selectCurrencyPlaceholder}"
-                items="{/Currencies}"
+                items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5535,7 +5535,7 @@
                 selectedKey="{create>/guaranteeType_code}"
                 required="{create>/isBankGuarantee}"
                 placeholder="{i18n>selectGuaranteeTypePlaceholder}"
-                items="{/GuaranteeTypes}"
+                items="{path: '/GuaranteeTypes', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
@@ -5830,7 +5830,8 @@
             confirm=".onProcessTypeValueHelpConfirm"
             cancel=".onProcessTypeValueHelpClose"
             items="{
-                path: '/ProcessTypes'
+                path: '/ProcessTypes',
+            filters: [{path: 'isActive', operator: 'EQ', value1: true}]
             }">
             <columns>
                 <Column>
@@ -5862,7 +5863,8 @@
             confirm=".onSubProcessTypeValueHelpConfirm"
             cancel=".onSubProcessTypeValueHelpClose"
             items="{
-                path: '/ProcessSubTypes'
+                path: '/ProcessSubTypes',
+            filters: [{path: 'isActive', operator: 'EQ', value1: true}]
             }">
             <columns>
                 <Column><Text text="{i18n>processTypeCodeLabel}" /></Column>
@@ -5911,7 +5913,8 @@
             confirm=".onVendorValueHelpConfirm"
             cancel=".onVendorValueHelpClose"
             items="{
-                path: '/Vendors'
+                path: '/Vendors',
+                filters: [{path: 'isActive', operator: 'EQ', value1: true}]
             }">
             <columns>
                 <Column><Text text="{i18n>vendorCodeLabel}" /></Column>
@@ -5934,7 +5937,7 @@
                 search=".onCustomerValueHelpSearch"
                 confirm=".onCustomerValueHelpConfirm"
                 cancel=".onCustomerValueHelpClose"
-                items="{ path: '/Customers' }">
+                items="{path: '/Customers', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
                 <columns>
                     <Column><Text text="{i18n>customerCodeLabel}" /></Column>
                     <Column><Text text="{i18n>customerNameLabel}" /></Column>
@@ -6127,7 +6130,7 @@
                             selectedKey="{directForeignTravelEdit>/currency_code}"
                             required="true"
                             placeholder="{i18n>selectCurrencyPlaceholder}"
-                            items="{/Currencies}"
+                            items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>
@@ -6448,7 +6451,7 @@
                             selectedKey="{merchantEntityValueEdit>/businessEntity_code}"
                             required="true"
                             placeholder="{i18n>selectEntityPlaceholder}"
-                            items="{/FtkEntities}"
+                            items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                         >
                             <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
                         </ComboBox>

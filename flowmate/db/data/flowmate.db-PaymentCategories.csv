@@ -1,3 +1,3 @@
-code,name,descr
-LOCAL,Local,Payment processed locally
-FOREIGN,Foreign,Payment processed in a foreign currency or country
+code,name,descr,isActive
+LOCAL,Local,Payment processed locally,true
+FOREIGN,Foreign,Payment processed in a foreign currency or country,true
