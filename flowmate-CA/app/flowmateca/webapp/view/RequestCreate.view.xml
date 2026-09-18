@@ -123,34 +123,6 @@
           </content>
         </Panel>
 
-        <Panel
-          headerText="{i18n>itemsTableTitle}"
-          expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' || ${form>/requestTypeCode} === 'SERVICE_ENTRY_SHEET' || ${form>/requestTypeCode} === 'OUTLINE_CONTRACT' }"
-          class="caFormSection">
-          <content>
-            <Toolbar>
-              <Title text="{= ${i18n>itemsTableTitle} + ' (' + (${form>/details/items} ? ${form>/details/items}.length : 0) + ')' }" level="H4"/>
-              <ToolbarSpacer/>
-              <unified:FileUploader
-                id="itemsCsvUploader"
-                buttonOnly="true"
-                buttonText="{i18n>importCsv}"
-                icon="sap-icon://upload"
-                change=".onImportItemsCsv"/>
-              <Button text="{i18n>exportCsvTemplate}" icon="sap-icon://download" press=".onExportItemsCsv"/>
-              <Button text="{i18n>addRow}" icon="sap-icon://add" type="Emphasized" press=".onAddItemRow"/>
-            </Toolbar>
-            <Text text="{i18n>itemsTableHint}" class="sapUiTinyMarginBottom sapUiTinyMarginBeginEnd"/>
-            <ScrollContainer height="24rem" horizontal="true" vertical="true" focusable="false" width="100%">
-              <Table
-                id="itemsTableHost"
-                noDataText="{i18n>noItemsYet}"
-                sticky="ColumnHeaders"
-                class="sapUiSizeCompact caItemsTable"/>
-            </ScrollContainer>
-          </content>
-        </Panel>
 
         <Panel headerText="Supporting Documents" expandable="false" class="caFormSection">
           <content>
