@@ -163,3 +163,39 @@ entity CostCenter : cuid, managed {
   costCenterName : String(180) not null;
   isActive : Boolean default true;
 }
+
+entity MatGroup : cuid, managed {
+  matGroupCode : String(40) not null;
+  matGroupDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity ProfitCenter : cuid, managed {
+  profitCenterCode : String(40) not null;
+  profitCenterDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity MRPType : cuid, managed {
+  mrpTypeCode : String(40) not null;
+  mrpTypeDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity AvailabilityCheck : cuid, managed {
+  availabilityCheckCode : String(40) not null;
+  availabilityCheckDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity SerialNumberProfile : cuid, managed {
+  serialNumberProfileCode : String(40) not null;
+  serialNumberProfileDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity DistributionChannel : cuid, managed {
+  distributionChannelCode : String(40) not null;
+  distributionChannelDescription : String(180) not null;
+  isActive : Boolean default true;
+}

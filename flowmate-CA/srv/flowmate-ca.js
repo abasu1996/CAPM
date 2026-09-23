@@ -52,6 +52,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getDashboardCounts", this._getDashboardCounts);
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
+    this.on("createBulkRequests", this._createBulkRequests);
     this.on("submitRequest", this._submitRequest);
     this.on("addTask", this._addTask);
     this.on("claimTeamTask", this._claimTeamTask);
@@ -110,13 +111,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   _filterMyTeamTasks = async (req) => {
     if (req.user.is("CAAdmin")) {
+      req.query.where({ assignedUser_ID: null });
       return;
     }
     const user = await this._ensureCurrentUser(req);
-    const memberships = await this.master.run(SELECT.from(this.masterEntities.TeamMembers)
-      .columns("team_ID")
-      .where({ user_ID: user.ID, isActive: true }));
-    const teamIds = memberships.map((membership) => membership.team_ID);
+    const teamIds = await this._teamIdsOf(user);
 
     if (!teamIds.length) {
       req.query.where({ ID: null });
@@ -141,10 +140,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   _getDashboardCounts = async (req) => {
     const user = await this._ensureCurrentUser(req);
-    const memberships = await this.master.run(SELECT.from(this.masterEntities.TeamMembers)
-      .columns("team_ID")
-      .where({ user_ID: user.ID, isActive: true }));
-    const teamIds = memberships.map((membership) => membership.team_ID);
+    const isAdmin = req.user.is("CAAdmin");
+    const requestedBy = isAdmin ? {} : { requester_ID: user.ID };
+    const assignedToMe = isAdmin ? {} : { assignedUser_ID: user.ID };
+    const openStatus = { status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] } };
+    const teamIds = isAdmin ? [] : await this._teamIdsOf(user);
 
     const [
       myRequests,
@@ -153,33 +153,33 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       pendingApproval,
       completedRequests
     ] = await Promise.all([
-      this._count(this.db.CARequests, { requester_ID: user.ID }),
-      this._count(this.db.CATasks, {
-        assignedUser_ID: user.ID,
-        status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
-      }),
+      this._count(this.db.CARequests, requestedBy),
+      this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }),
       this._count(this.db.CARequests, {
-        requester_ID: user.ID,
+        ...requestedBy,
         status_code: REQUEST_STATUS.SENT_BACK
       }),
       this._count(this.db.CATasks, {
-        assignedUser_ID: user.ID,
-        isApproval: true,
-        status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
+        ...assignedToMe,
+        ...openStatus,
+        isApproval: true
       }),
       this._count(this.db.CARequests, {
-        requester_ID: user.ID,
+        ...requestedBy,
         status_code: REQUEST_STATUS.COMPLETED
       })
     ]);
 
-    const myTeamTasks = teamIds.length
-      ? await this._count(this.db.CATasks, {
-          assignedTeam_ID: { in: teamIds },
-          assignedUser_ID: null,
-          status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
-        })
-      : 0;
+    let myTeamTasks = 0;
+    if (isAdmin) {
+      myTeamTasks = await this._count(this.db.CATasks, { assignedUser_ID: null, ...openStatus });
+    } else if (teamIds.length) {
+      myTeamTasks = await this._count(this.db.CATasks, {
+        assignedTeam_ID: { in: teamIds },
+        assignedUser_ID: null,
+        ...openStatus
+      });
+    }
 
     return {
       myRequests,
@@ -224,6 +224,19 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         return req.reject(400, "Select a valid processor team");
       }
     }
+
+
+    const requestId = await this._insertOneRequest(req, tx, user, {
+      requestType,
+      requestVariant,
+      processorTeam,
+      input
+    });
+
+    return tx.run(SELECT.one.from(this.db.CARequests).where({ ID: requestId }));
+  };
+
+  async _insertOneRequest(req, tx, user, { requestType, requestVariant, processorTeam, input }) {
     const requestId = cds.utils.uuid();
     const referenceNumber = this._referenceNumber(requestType.code);
     const details = this._parseDetails(req, input.details);
@@ -251,8 +264,86 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     await this._insertDetails(tx, requestType.code, requestId, details);
     await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, user);
     await this._writeHistory(tx, requestId, 0, "REQUEST_CREATED", user, null, REQUEST_STATUS.SUBMITTED);
+    return requestId;
+  }
 
-    return tx.run(SELECT.one.from(this.db.CARequests).where({ ID: requestId }));
+  _createBulkRequests = async (req) => {
+    const input = req.data.input || {};
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req, tx);
+
+    let rows;
+    try {
+      rows = JSON.parse(input.rows || "[]");
+    } catch (_error) {
+      return req.reject(400, "The bulk rows contain invalid JSON");
+    }
+    if (!Array.isArray(rows) || !rows.length) {
+      return req.reject(400, "Upload at least one row before submitting");
+    }
+
+    const requestType = await SELECT.one.from(this.db.RequestTypes)
+      .where({ code: input.requestTypeCode, isActive: true });
+    if (!requestType) {
+      return req.reject(400, "Select a valid request type");
+    }
+
+    let requestVariant = null;
+    if (input.requestVariantCode) {
+      requestVariant = await SELECT.one.from(this.db.RequestVariants).where({
+        code: input.requestVariantCode,
+        requestType_code: requestType.code,
+        isActive: true
+      });
+      if (!requestVariant) {
+        return req.reject(400, "The selected request variant does not belong to this request type");
+      }
+    }
+
+    let processorTeam = null;
+    if (input.processorTeamCode) {
+      processorTeam = await this.master.run(SELECT.one.from(this.masterEntities.Teams).where({
+        teamCode: input.processorTeamCode,
+        isActive: true
+      }));
+      if (!processorTeam) {
+        return req.reject(400, "Select a valid processor team");
+      }
+    }
+
+    const referenceNumbers = [];
+    for (let index = 0; index < rows.length; index++) {
+      const row = rows[index] || {};
+      const { title, priorityCode, dueDate, description, ...details } = row;
+      if (!String(title || "").trim()) {
+        return req.reject(400, `Row ${index + 1}: Title is required`);
+      }
+      try {
+        const requestId = await this._insertOneRequest(req, tx, user, {
+          requestType,
+          requestVariant,
+          processorTeam,
+          input: {
+            title: String(title).trim(),
+            description: description || null,
+            priorityCode: priorityCode || "MEDIUM",
+            dueDate: dueDate || null,
+            details: JSON.stringify(details)
+          }
+        });
+        const created = await tx.run(
+          SELECT.one.from(this.db.CARequests).columns("referenceNumber").where({ ID: requestId })
+        );
+        referenceNumbers.push(created.referenceNumber);
+      } catch (error) {
+        return req.reject(400, `Row ${index + 1}: ${error.message}`);
+      }
+    }
+
+    return {
+      created: referenceNumbers.length,
+      referenceNumbers: JSON.stringify(referenceNumbers)
+    };
   };
 
   _submitRequest = async (req) => {
@@ -379,8 +470,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(404, "Task not found");
     }
     await this._assertTaskAccess(req, task, user);
-    if (![TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK].includes(task.status_code)) {
-      return req.reject(409, "Only open or sent-back tasks can be approved");
+    if (task.status_code !== TASK_STATUS.OPEN) {
+      return req.reject(409, "Only open tasks can be approved");
     }
 
     await tx.run(UPDATE(this.db.CATasks).set({
@@ -736,8 +827,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }));
   }
 
+  async _teamIdsOf(user) {
+    const memberships = await this.master.run(SELECT.from(this.masterEntities.TeamMembers)
+      .columns("team_ID")
+      .where({ user_ID: user.ID, isActive: true }));
+    return memberships.map((membership) => membership.team_ID);
+  }
+
   async _count(entity, where) {
-    const result = await SELECT.one.from(entity).columns("count(1) as count").where(where);
+    const query = SELECT.one.from(entity).columns("count(1) as count");
+    const result = await (Object.keys(where || {}).length ? query.where(where) : query);
     return Number(result?.count || 0);
   }
 

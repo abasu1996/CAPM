@@ -132,19 +132,19 @@ sap.ui.define([
         model.setProperty("/entities",entities.value || []);
         const projects = await this.requestCA("Projects?$orderby=projectID");
         model.setProperty("/projects",projects.value || []);
-        const matGroups = await this.requestCA("MatGroup?$orderby=matGroupCode");
+        const matGroups = await this.requestMaster("MatGroup?$orderby=matGroupCode");
         model.setProperty("/matGroups", matGroups.value || []);
         const extensionMaterialGroups = await this.requestCA("ExtensionMaterialGroup?$orderby=extensionMaterialGroupCode");
         model.setProperty("/extensionMaterialGroups", extensionMaterialGroups.value || []);
-        const profitCenters = await this.requestCA("ProfitCenter?$orderby=profitCenterCode");
+        const profitCenters = await this.requestMaster("ProfitCenter?$orderby=profitCenterCode");
         model.setProperty("/profitCenters", profitCenters.value || []);
-        const mrpTypes = await this.requestCA("MRPType?$orderby=mrpTypeCode");
+        const mrpTypes = await this.requestMaster("MRPType?$orderby=mrpTypeCode");
         model.setProperty("/mrpTypes",mrpTypes.value || []);
-        const availabilityChecks = await this.requestCA("AvailabilityCheck?$orderby=availabilityCheckCode");
+        const availabilityChecks = await this.requestMaster("AvailabilityCheck?$orderby=availabilityCheckCode");
         model.setProperty("/availabilityChecks",availabilityChecks.value || []);
-        const serialNumberProfiles = await this.requestCA("SerialNumberProfile?$orderby=serialNumberProfileCode");
+        const serialNumberProfiles = await this.requestMaster("SerialNumberProfile?$orderby=serialNumberProfileCode");
         model.setProperty("/serialNumberProfiles", serialNumberProfiles.value || []);
-        const distributionChannels = await this.requestCA("DistributionChannel?$orderby=distributionChannelCode");
+        const distributionChannels = await this.requestMaster("DistributionChannel?$orderby=distributionChannelCode");
         model.setProperty("/distributionChannels", distributionChannels.value || []);
         const contractTypes = await this.requestCA("ContractType?$orderby=contractTypeCode");
         model.setProperty("/contractTypes",contractTypes.value || []);
@@ -844,7 +844,7 @@ else if (item.type === "purchasingOrganization") {
     }
 
     await this.requestCA(
-        "AccountAssignments",
+        "AccountAssignment",
         {
             method: "POST",
             body: {
@@ -1012,7 +1012,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "MatGroup",
         {
             method: "POST",
@@ -1060,7 +1060,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "ProfitCenter",
         {
             method: "POST",
@@ -1083,7 +1083,7 @@ else if (item.type === "mrpType") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "MRPType",
         {
             method: "POST",
@@ -1106,7 +1106,7 @@ else if (item.type === "mrpType") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "AvailabilityCheck",
         {
             method: "POST",
@@ -1129,7 +1129,7 @@ else if (item.type === "mrpType") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "SerialNumberProfile",
         {
             method: "POST",
@@ -1152,7 +1152,7 @@ else if (item.type === "mrpType") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "DistributionChannel",
         {
             method: "POST",
@@ -1765,7 +1765,7 @@ onSaveSystemContractBasePO: async function (event) {
     try {
 
         await this.requestCA(
-            `SystemContractBasePOs('${encodeURIComponent(row.code)}')`,
+            `SystemContractBasePO('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
                 headers: {
@@ -1822,7 +1822,7 @@ onSaveSystemContractBasePO: async function (event) {
     try {
 
         await this.requestCA(
-            `SystemContractBasePOs('${encodeURIComponent(row.code)}')`,
+            `SystemContractBasePO('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
                 headers: {
@@ -2081,7 +2081,7 @@ onSaveAccountAssignment: async function (event) {
     try {
 
         await this.requestCA(
-            `AccountAssignments('${encodeURIComponent(row.code)}')`,
+            `AccountAssignment(${row.ID})`,
             {
                 method: "PATCH",
                 headers: {
@@ -2136,7 +2136,7 @@ onSaveAccountAssignment: async function (event) {
     try {
 
         await this.requestCA(
-            `AccountAssignments('${encodeURIComponent(row.code)}')`,
+            `AccountAssignment(${row.ID})`,
             {
                 method: "DELETE",
                 headers: {
@@ -2169,7 +2169,7 @@ onSaveServiceCategories: async function (event) {
     try {
 
         await this.requestCA(
-            `ServiceCategories('${encodeURIComponent(row.code)}')`,
+            `ServiceCategories(${encodeURIComponent(row.ID)})`,
             {
                 method: "PATCH",
                 headers: {
@@ -2225,7 +2225,7 @@ onSaveServiceCategories: async function (event) {
     try {
 
         await this.requestCA(
-            `ServiceCategories('${encodeURIComponent(row.code)}')`,
+            `ServiceCategories(${encodeURIComponent(row.ID)})`,
             {
                 method: "DELETE",
                 headers: {
@@ -2338,7 +2338,7 @@ onSaveServiceGroup: async function (oEvent) {
     try {
 
         await this.requestMaster(
-            `ServiceGroups('${item.ID}')`,
+            `ServiceGroups(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2384,7 +2384,7 @@ onDeleteServiceGroup: async function (oEvent) {
                 try {
 
                     await this.requestMaster(
-                        `ServiceGroups('${item.ID}')`,
+                        `ServiceGroups(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -2417,7 +2417,7 @@ onSaveValuationClass: async function (oEvent) {
     try {
 
         await this.requestMaster(
-            `ValuationClass('${item.ID}')`,
+            `ValuationClass(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2462,7 +2462,7 @@ onDeleteValuationClass: async function (oEvent) {
                 try {
 
                     await this.requestMaster(
-                        `ValuationClass('${item.ID}')`,
+                        `ValuationClass(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -2496,7 +2496,7 @@ onSaveEntity: async function (oEvent) {
     try {
 
         await this.requestCA(
-            `Entity('${item.ID}')`,
+            `Entity(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2541,7 +2541,7 @@ onDeleteEntity: async function (oEvent) {
                 try {
 
                     await this.requestCA(
-                        `Entity('${item.ID}')`,
+                        `Entity(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -2574,7 +2574,7 @@ onSaveProject: async function (oEvent) {
     try {
 
         await this.requestCA(
-            `Projects('${item.ID}')`,
+            `Projects(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2622,7 +2622,7 @@ onDeleteProject: async function (oEvent) {
                 try {
 
                     await this.requestCA(
-                        `Projects('${item.ID}')`,
+                        `Projects(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -2655,8 +2655,8 @@ onSaveMatGroup: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
-            `MatGroup('${item.ID}')`,
+        await this.requestMaster(
+            `MatGroup(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2702,8 +2702,8 @@ onDeleteMatGroup: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
-                        `MatGroup('${item.ID}')`,
+                    await this.requestMaster(
+                        `MatGroup(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -2736,7 +2736,7 @@ onSaveExtensionMaterialGroup: async function (oEvent) {
     try {
 
         await this.requestCA(
-            `ExtensionMaterialGroup('${item.ID}')`,
+            `ExtensionMaterialGroup(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2781,7 +2781,7 @@ onDeleteExtensionMaterialGroup: async function (oEvent) {
                 try {
 
                     await this.requestCA(
-                        `ExtensionMaterialGroup('${item.ID}')`,
+                        `ExtensionMaterialGroup(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -2813,8 +2813,8 @@ onSaveProfitCenter: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
-            `ProfitCenter('${item.ID}')`,
+        await this.requestMaster(
+            `ProfitCenter(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2859,8 +2859,8 @@ onDeleteProfitCenter: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
-                        `ProfitCenter('${item.ID}')`,
+                    await this.requestMaster(
+                        `ProfitCenter(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -2892,8 +2892,8 @@ onSaveMRPType: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
-            `MRPType('${item.ID}')`,
+        await this.requestMaster(
+            `MRPType(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2935,8 +2935,8 @@ onDeleteMRPType: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
-                        `MRPType('${item.ID}')`,
+                    await this.requestMaster(
+                        `MRPType(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -2966,8 +2966,8 @@ onSaveAvailabilityCheck: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
-            `AvailabilityCheck('${item.ID}')`,
+        await this.requestMaster(
+            `AvailabilityCheck(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -3009,8 +3009,8 @@ onDeleteAvailabilityCheck: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
-                        `AvailabilityCheck('${item.ID}')`,
+                    await this.requestMaster(
+                        `AvailabilityCheck(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -3040,8 +3040,8 @@ onSaveSerialNumberProfile: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
-            `SerialNumberProfile('${item.ID}')`,
+        await this.requestMaster(
+            `SerialNumberProfile(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -3083,8 +3083,8 @@ onDeleteSerialNumberProfile: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
-                        `SerialNumberProfile('${item.ID}')`,
+                    await this.requestMaster(
+                        `SerialNumberProfile(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -3114,8 +3114,8 @@ onSaveDistributionChannel: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
-            `DistributionChannel('${item.ID}')`,
+        await this.requestMaster(
+            `DistributionChannel(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -3157,8 +3157,8 @@ onDeleteDistributionChannel: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
-                        `DistributionChannel('${item.ID}')`,
+                    await this.requestMaster(
+                        `DistributionChannel(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -3189,7 +3189,7 @@ onSaveStorageLocation: async function (oEvent) {
     try {
 
         await this.requestMaster(
-            `StorageLocation('${item.ID}')`,
+            `StorageLocation(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -3232,7 +3232,7 @@ onDeleteStorageLocation: async function (oEvent) {
                 try {
 
                     await this.requestMaster(
-                        `StorageLocation('${item.ID}')`,
+                        `StorageLocation(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -3263,7 +3263,7 @@ onSaveSalesOrg: async function (oEvent) {
     try {
 
         await this.requestMaster(
-            `SalesOrg('${item.ID}')`,
+            `SalesOrg(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -3305,7 +3305,7 @@ onDeleteSalesOrg: async function (oEvent) {
                 try {
 
                     await this.requestMaster(
-                        `SalesOrg('${item.ID}')`,
+                        `SalesOrg(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -3336,7 +3336,7 @@ onSaveIncoterm: async function (oEvent) {
     try {
 
         await this.requestMaster(
-            `Incoterms('${item.ID}')`,
+            `Incoterms(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -3379,7 +3379,7 @@ onDeleteIncoterm: async function (oEvent) {
                 try {
 
                     await this.requestMaster(
-                        `Incoterms('${item.ID}')`,
+                        `Incoterms(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -3410,7 +3410,7 @@ onSaveContractType: async function (oEvent) {
     try {
 
         await this.requestCA(
-            `ContractType('${item.ID}')`,
+            `ContractType(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -3456,7 +3456,7 @@ onDeleteContractType: async function (oEvent) {
                 try {
 
                     await this.requestCA(
-                        `ContractType('${item.ID}')`,
+                        `ContractType(${item.ID})`,
                         {
                             method: "DELETE"
                         }
@@ -3488,7 +3488,7 @@ onSaveCostCenter: async function (oEvent) {
     try {
 
         await this.requestMaster(
-            `CostCenter('${item.ID}')`,
+            `CostCenter(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -3498,7 +3498,9 @@ onSaveCostCenter: async function (oEvent) {
             }
         );
 
-        MessageToast.show("Cost Center updated successfully.");
+        sap.m.MessageToast.show("Cost Center updated successfully.");
+
+        await this.onRefresh();
 
     } catch (error) {
 
@@ -3519,13 +3521,13 @@ onDeleteCostCenter: async function (oEvent) {
     try {
 
         await this.requestMaster(
-            `CostCenter('${item.ID}')`,
+            `CostCenter(${item.ID})`,
             {
                 method: "DELETE"
             }
         );
 
-        MessageToast.show("Cost Center deleted successfully.");
+        sap.m.MessageToast.show("Cost Center deleted successfully.");
 
         await this.onRefresh();
 

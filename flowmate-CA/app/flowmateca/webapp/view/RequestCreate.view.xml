@@ -29,6 +29,11 @@
               labelSpanXL="12"
               labelSpanL="12"
               labelSpanM="12">
+              <Label text="{i18n>requestMode}" required="true"/>
+              <Select id="requestMode" selectedKey="{form>/requestMode}" change=".onRequestModeChange">
+                <core:Item key="SINGLE" text="{i18n>singleRequest}"/>
+                <core:Item key="BULK" text="{i18n>bulkRequest}"/>
+              </Select>
               <Label text="{i18n>requestType}" required="true"/>
               <ComboBox
                 id="requestType"
@@ -43,6 +48,7 @@
                 id="requestVariant"
                 selectedKey="{form>/requestVariantCode}"
                 items="{catalog>/filteredVariants}"
+                selectionChange=".onRequestVariantChange"
                 showSecondaryValues="true">
                 <core:ListItem key="{catalog>code}" text="{catalog>name}" additionalText="{catalog>code}"/>
               </ComboBox>
@@ -88,7 +94,7 @@
         <Panel
           headerText="{form>/detailSectionTitle}"
           expandable="false"
-          visible="{= !!${form>/requestTypeCode} }"
+          visible="{= !!${form>/requestTypeCode} &amp;&amp; ${form>/requestMode} !== 'BULK' }"
           class="caFormSection">
           <content>
             <VBox id="dynamicFormHost"/>
@@ -97,7 +103,7 @@
         <Panel
           headerText="{i18n>itemsTableTitle}"
           expandable="false"
-          visible="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' || ${form>/requestTypeCode} === 'SERVICE_ENTRY_SHEET' || ${form>/requestTypeCode} === 'OUTLINE_CONTRACT' || ${form>/requestTypeCode} === 'MATERIAL_RESERVATION' }"
+          visible="{= (${form>/requestTypeCode} === 'PURCHASE_ORDER' || ${form>/requestTypeCode} === 'SERVICE_ENTRY_SHEET' || ${form>/requestTypeCode} === 'OUTLINE_CONTRACT' || ${form>/requestTypeCode} === 'MATERIAL_RESERVATION') &amp;&amp; ${form>/requestMode} !== 'BULK' }"
           class="caFormSection">
           <content>
             <Toolbar>
@@ -123,7 +129,30 @@
           </content>
         </Panel>
 
-
+        <Panel
+          headerText="{i18n>bulkRequestsTitle}"
+          expandable="false"
+          visible="{= ${form>/requestMode} === 'BULK' &amp;&amp; !!${form>/requestVariantCode} }"
+          class="caFormSection">
+          <content>
+            <Toolbar>
+              <Title text="{= ${i18n>bulkRequestsTitle} + ' (' + (${form>/bulkRows} ? ${form>/bulkRows}.length : 0) + ')' }" level="H4"/>
+              <ToolbarSpacer/>
+              <unified:FileUploader
+                id="bulkCsvUploader"
+                uploadOnChange="false"
+                buttonText="{i18n>importBulkCsv}"
+                icon="sap-icon://upload"
+                fileType="csv"
+                change=".onImportBulkCsv"/>
+              <Button text="{i18n>exportBulkTemplate}" icon="sap-icon://download" press=".onExportBulkTemplate"/>
+            </Toolbar>
+            <Text text="{i18n>bulkRequestsHint}" class="sapUiSmallMarginBottom"/>
+            <ScrollContainer horizontal="true" vertical="false" width="100%">
+              <Table id="bulkTableHost" sticky="ColumnHeaders" class="sapUiSizeCompact caItemsTable"/>
+            </ScrollContainer>
+          </content>
+        </Panel>
         <Panel headerText="Supporting Documents" expandable="false" class="caFormSection">
           <content>
             <VBox>

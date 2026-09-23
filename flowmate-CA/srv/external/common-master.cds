@@ -168,4 +168,52 @@ service CommonMasterDataService {
   costCenterName : String(180) not null;
   isActive : Boolean default true;
   }
+
+  @cds.persistence.skip
+  entity MatGroup {
+    key ID : UUID;
+    matGroupCode : String(40) not null;
+    matGroupDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity ProfitCenter {
+    key ID : UUID;
+    profitCenterCode : String(40) not null;
+    profitCenterDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity MRPType {
+    key ID : UUID;
+    mrpTypeCode : String(40) not null;
+    mrpTypeDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity AvailabilityCheck {
+    key ID : UUID;
+    availabilityCheckCode : String(40) not null;
+    availabilityCheckDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity SerialNumberProfile {
+    key ID : UUID;
+    serialNumberProfileCode : String(40) not null;
+    serialNumberProfileDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity DistributionChannel {
+    key ID : UUID;
+    distributionChannelCode : String(40) not null;
+    distributionChannelDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
 }

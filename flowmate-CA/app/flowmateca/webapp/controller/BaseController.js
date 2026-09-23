@@ -198,6 +198,25 @@ sap.ui.define([
         month: "short",
         day: "2-digit"
       }).format(new Date(value));
+    },
+
+    formatInitials: function (value) {
+      const parts = String(value || "").split("@")[0].split(/[._-]/).filter(Boolean);
+      if (!parts.length) {
+        return "";
+      }
+      const first = parts[0].charAt(0);
+      const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
+      return (first + last).toUpperCase();
+    },
+
+    formatAvatarColor: function (value) {
+      const key = String(value || "");
+      let hash = 0;
+      for (let index = 0; index < key.length; index++) {
+        hash = (hash * 31 + key.charCodeAt(index)) % 10;
+      }
+      return `Accent${hash + 1}`;
     }
   });
 });

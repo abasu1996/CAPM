@@ -25,14 +25,9 @@ entity RequestVariants : ConfigCode {
 entity RequestStatuses : ConfigCode {};
 entity TaskStatuses : ConfigCode {};
 entity Priorities : ConfigCode {};
-entity Plants : ConfigCode {};
 entity UnitsOfMeasure : ConfigCode {};
-entity MaterialGroups : ConfigCode {};
 entity ExternalMaterialGroups : ConfigCode {};
-entity ProfitCenters : ConfigCode {};
-entity ValuationClasses : ConfigCode {};
 entity CoupaCommodityCodes : ConfigCode {};
-entity ServiceGroups : ConfigCode {};
 entity Warehouses : ConfigCode {};
 entity PurchaseOrderTypes : ConfigCode {};
 entity ProcurementCategories : ConfigCode {};
@@ -42,31 +37,19 @@ entity PaymentTerms : ConfigCode {};
 entity SystemContractBasePO : ConfigCode {};
 entity ProjectTypes : ConfigCode {};
 entity ContractCategories : ConfigCode {};
-entity DocumentTypes : ConfigCode {};
 entity CompanyCodes : ConfigCode {};
-entity PurchasingGroups : ConfigCode {};
-entity Divisions : ConfigCode {};
 entity TaxCodes : ConfigCode {};
 entity ItemCategories : ConfigCode {};
 entity AccountAssignments : ConfigCode {};
 entity CostCenters : ConfigCode {};
 entity ContractTypes : ConfigCode {};
 entity Incoterms : ConfigCode {};
-entity ServiceCategories : ConfigCode {};
 entity ReservationProjects : ConfigCode {};
 entity ReservationBatches : ConfigCode {};
 entity BusinessEntities : ConfigCode {};
 entity ProjectScopes : ConfigCode {};
 entity MaterialTypes : ConfigCode {};
-entity MrpTypes : ConfigCode {};
-entity AvailabilityChecks : ConfigCode {};
-entity SerialNumberProfiles : ConfigCode {};
-entity StorageLocations : ConfigCode {};
-entity SalesOrganizations : ConfigCode {};
-entity DistributionChannels : ConfigCode {};
-entity Sites : ConfigCode {};
-entity MaterialCodes : ConfigCode {};
-entity WbsElements : ConfigCode {};
+entity ServiceCategories : ConfigCode {};
 entity ArReferences : ConfigCode {};
 entity ProjectCategories : ConfigCode {};
 
@@ -225,21 +208,21 @@ entity MaterialCodeDetails : cuid, managed {
   transactionType        : String(40);
   referenceMaterialCode  : String(40);
   dmsUpdate              : Boolean default false;
-  plant                  : Association to Plants;
+  plant_code             : String(40);
   description            : String(40);
   unitOfMeasure          : Association to UnitsOfMeasure;
-  materialGroup          : Association to MaterialGroups;
+  materialGroup_code     : String(40);
   externalMaterialGroup  : Association to ExternalMaterialGroups;
-  profitCenter           : Association to ProfitCenters;
+  profitCenter_code      : String(40);
   snp                    : String(60);
   hsCode                 : String(40);
-  valuationClass         : Association to ValuationClasses;
+  valuationClass_code    : String(40);
   coupaCommodityCode     : Association to CoupaCommodityCodes;
   storageLocation        : String(40);
   salesOrganization      : String(40);
   distributionChannel    : String(40);
   division               : String(40);
-  deliveringPlant        : Association to Plants;
+  deliveringPlant_code   : String(40);
   taxClass               : String(40);
   accountAssignmentGroup : String(60);
   productHierarchy       : String(120);
@@ -278,8 +261,8 @@ entity ServiceCodeDetails : cuid, managed {
   serviceCategory    : String(80);
   serviceDescription : String(40);
   unitOfMeasure      : Association to UnitsOfMeasure;
-  serviceGroup       : Association to ServiceGroups;
-  valuationClass     : Association to ValuationClasses;
+  serviceGroup_code   : String(40);
+  valuationClass_code : String(40);
   coupaCommodityCode : Association to CoupaCommodityCodes;
   supportingAttachment: String(255);
   remarks            : LargeString;
@@ -437,7 +420,7 @@ entity PurchaseOrderDetails : cuid, managed {
   purchasingOrganization  : Association to PurchasingOrganizations;
   siteId                  : String(80);
   currency                : Association to Currencies;
-  plant                   : Association to Plants;
+  plant_code              : String(40);
   totalValue              : Decimal(17,2);
   paymentTerms            : Association to PaymentTerms;
   remarks                 : LargeString;
@@ -539,45 +522,9 @@ entity Projects : cuid, managed{
   isActive    : Boolean default true;
 }
 
-entity MatGroup : cuid, managed {
-  matGroupCode : String(40) not null;
-  matGroupDescription : String(180) not null;
-  isActive : Boolean default true;
-}
-
 entity ExtensionMaterialGroup : cuid, managed {
   extensionMaterialGroupCode : String(40) not null;
   extensionMaterialGroupDescription : String(180) not null;
-  isActive : Boolean default true;
-}
-
-entity ProfitCenter : cuid, managed {
-  profitCenterCode : String(40) not null;
-  profitCenterDescription : String(180) not null;
-  isActive : Boolean default true;
-}
-
-entity MRPType : cuid, managed {
-  mrpTypeCode : String(40) not null;
-  mrpTypeDescription : String(180) not null;
-  isActive : Boolean default true;
-}
-
-entity AvailabilityCheck : cuid, managed {
-  availabilityCheckCode : String(40) not null;
-  availabilityCheckDescription : String(180) not null;
-  isActive : Boolean default true;
-}
-
-entity SerialNumberProfile : cuid, managed {
-  serialNumberProfileCode : String(40) not null;
-  serialNumberProfileDescription : String(180) not null;
-  isActive : Boolean default true;
-}
-
-entity DistributionChannel : cuid, managed {
-  distributionChannelCode : String(40) not null;
-  distributionChannelDescription : String(180) not null;
   isActive : Boolean default true;
 }
 

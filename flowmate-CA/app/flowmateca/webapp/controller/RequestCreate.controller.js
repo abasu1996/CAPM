@@ -43,6 +43,21 @@ sap.ui.define([
 ) {
   "use strict";
 
+  // Pick lists maintained by admins in flowmate-common; served by CAMasterDataService,
+  // not FlowmateCAService, and they carry no sortOrder column.
+  const MASTER_PICK_LISTS = new Set([
+    "Plant", "Sites", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
+    "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
+    "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel"
+  ]);
+
+  const BULK_CLASSIFICATION_COLUMNS = [
+    { name: "title", label: "Title", required: true },
+    { name: "priorityCode", label: "Priority", required: false },
+    { name: "dueDate", label: "Due Date", required: false },
+    { name: "description", label: "Description", required: false }
+  ];
+
   return BaseController.extend("flowmateca.controller.RequestCreate", {
     onInit: function () {
       this.getView().setModel(new JSONModel(this._emptyForm()), "form");
@@ -64,7 +79,7 @@ sap.ui.define([
         requestVariantCode: "",
         title: "",
         description: "",
-        priorityCode: "MEDIUM",
+        priorityCode: "",
         dueDate: "",
         predecessorId: "",
         requesterId: "",
@@ -72,6 +87,8 @@ sap.ui.define([
         requesterEmail: "",
         requestDateTime: new Date().toLocaleString(),
 
+        requestMode: "SINGLE",
+        bulkRows: [],
         processorTeamCode: "",
         processorTeamName: "",
         detailSectionTitle: "Process Details",
@@ -96,6 +113,7 @@ sap.ui.define([
       }
       this._renderDynamicForm();
       this._renderItemsTable();
+      this._renderBulkTable();
     },
     onProcessorTeamChange: function (event) {
 
@@ -187,6 +205,167 @@ sap.ui.define([
       this._filterVariants(typeCode);
       this._renderDynamicForm();
       this._renderItemsTable();
+      this._renderBulkTable();
+    },
+
+    onRequestVariantChange: function () {
+      this.getView().getModel("form").setProperty("/details", {});
+      this._renderDynamicForm();
+      this._renderItemsTable();
+      this._renderBulkTable();
+    },
+
+    onRequestModeChange: function () {
+      this._renderDynamicForm();
+      this._renderItemsTable();
+      this._renderBulkTable();
+    },
+
+    _bulkColumns: function () {
+      const variantCode = this.getView().getModel("form").getProperty("/requestVariantCode");
+      if (!variantCode) {
+        return [];
+      }
+      return BULK_CLASSIFICATION_COLUMNS.concat(
+        FormDefinitions.getFields(variantCode).map(function (definition) {
+          return { name: definition.name, label: definition.label, required: definition.required };
+        })
+      );
+    },
+
+    _renderBulkTable: function () {
+      const table = this.byId("bulkTableHost");
+      if (!table) {
+        return;
+      }
+      const columns = this._bulkColumns();
+      this._bulkCols = columns;
+      table.destroyColumns();
+      table.unbindItems();
+      if (!columns.length) {
+        return;
+      }
+      columns.forEach(function (col) {
+        table.addColumn(new Column({
+          header: new Text({ text: col.label }),
+          width: "12rem"
+        }));
+      });
+      table.bindItems({
+        path: "form>/bulkRows",
+        template: new ColumnListItem({
+          cells: columns.map(function (col) {
+            return new Text({ text: `{form>${col.name}}` });
+          })
+        })
+      });
+    },
+
+    onExportBulkTemplate: function () {
+      const columns = this._bulkColumns();
+      if (!columns.length) {
+        MessageBox.warning("Select a request type and process variant first.");
+        return;
+      }
+      const formModel = this.getView().getModel("form");
+      const rows = formModel.getProperty("/bulkRows") || [];
+      const lines = [columns.map(function (col) { return col.label; })];
+      rows.forEach(function (row) {
+        lines.push(columns.map(function (col) { return row[col.name] || ""; }));
+      });
+      const csv = lines.map(function (line) {
+        return line.map(this._csvEscape).join(",");
+      }.bind(this)).join("\r\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${formModel.getProperty("/requestVariantCode")}_bulk_template.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    },
+
+    onImportBulkCsv: function (event) {
+      const files = event.getParameter("files");
+      if (!files || !files.length) {
+        return;
+      }
+      const columns = this._bulkColumns();
+      const reader = new FileReader();
+      reader.onload = function () {
+        const parsed = this._parseCsv(String(reader.result));
+        if (!parsed.length) {
+          return;
+        }
+        const header = parsed[0].map(function (cell) {
+          return String(cell).trim().toLowerCase();
+        });
+        const nameByHeader = {};
+        columns.forEach(function (col) {
+          nameByHeader[col.label.trim().toLowerCase()] = col.name;
+        });
+        const rows = parsed.slice(1)
+          .filter(function (row) {
+            return row.some(function (cell) { return cell !== ""; });
+          })
+          .map(function (row) {
+            const entry = {};
+            header.forEach(function (headerText, index) {
+              const key = nameByHeader[headerText];
+              if (key) {
+                entry[key] = row[index] !== undefined ? row[index] : "";
+              }
+            });
+            return entry;
+          });
+        this.getView().getModel("form").setProperty("/bulkRows", rows);
+        this.showSuccess(`${rows.length} request row(s) imported`);
+      }.bind(this);
+      reader.readAsText(files[0]);
+      event.getSource().clear();
+    },
+
+    _submitBulk: async function (form) {
+      const rows = form.bulkRows || [];
+      if (!rows.length) {
+        MessageBox.warning("Import a CSV file before submitting.");
+        return;
+      }
+      const columns = this._bulkColumns();
+      for (let index = 0; index < rows.length; index++) {
+        const missing = columns.find(function (col) {
+          const value = rows[index][col.name];
+          return col.required && (value === undefined || value === null || String(value).trim() === "");
+        });
+        if (missing) {
+          MessageBox.warning(`Row ${index + 1}: ${missing.label} is required.`);
+          return;
+        }
+      }
+
+      this.setBusy(true);
+      try {
+        const result = await this.request("createBulkRequests", {
+          method: "POST",
+          body: {
+            input: {
+              requestTypeCode: form.requestTypeCode,
+              requestVariantCode: form.requestVariantCode,
+              processorTeamCode: form.processorTeamCode,
+              rows: JSON.stringify(rows)
+            }
+          }
+        });
+        this.showSuccess(`${result.created} request(s) created`);
+        this.navTo("requests");
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        this.setBusy(false);
+      }
     },
 
     _filterVariants: function (typeCode) {
@@ -209,7 +388,8 @@ sap.ui.define([
       this._dynamicFileUploads = {};
       const formModel = this.getView().getModel("form");
       const typeCode = formModel.getProperty("/requestTypeCode");
-      const fields = FormDefinitions.getFieldsByRequestType(typeCode);
+      const variantCode = formModel.getProperty("/requestVariantCode");
+      const fields = variantCode ? FormDefinitions.getFields(variantCode) : [];
       const type = (this.getView().getModel("catalog").getProperty("/requestTypes") || [])
         .find(function (entry) {
           return entry.code === typeCode;
@@ -248,20 +428,30 @@ sap.ui.define([
     },
 
     _loadFieldCatalogs: async function (fields) {
-      const entities = Array.from(new Set(fields.filter(function (definition) {
-        return definition.entity;
-      }).map(function (definition) {
-        return definition.entity;
-      })));
+      const entities = new Map();
+      fields.forEach(function (definition) {
+        if (definition.entity && !entities.has(definition.entity)) {
+          entities.set(definition.entity, definition.key || "code");
+        }
+      });
       const catalog = this.getView().getModel("catalog");
       // A failed pick list must degrade only its own field, not abort the render.
-      await Promise.all(entities.map(async function (entity) {
+      await Promise.all(Array.from(entities).map(async function (entry) {
+        const entity = entry[0];
+        const keyField = entry[1];
         if (catalog.getProperty(`/${entity}`)) {
           return;
         }
-        const orderBy = entity === "Users" || entity === "Vendors" ? "" : "&$orderby=sortOrder";
+        const fromMaster = MASTER_PICK_LISTS.has(entity);
+        let orderBy = `&$orderby=${keyField}`;
+        if (entity === "Users" || entity === "Vendors") {
+          orderBy = "";
+        } else if (!fromMaster) {
+          orderBy = "&$orderby=sortOrder";
+        }
+        const path = `${entity}?$filter=isActive eq true${orderBy}`;
         try {
-          const result = await this.request(`${entity}?$filter=isActive eq true${orderBy}`);
+          const result = fromMaster ? await this.requestMaster(path) : await this.request(path);
           catalog.setProperty(`/${entity}`, result.value || []);
         } catch (error) {
           Log.error(`Could not load the ${entity} list`, error);
@@ -574,8 +764,15 @@ sap.ui.define([
 
     onSubmit: async function () {
       const form = this.getView().getModel("form").getData();
-      if (!form.requestTypeCode || !form.requestVariantCode || !form.title.trim() || !form.processorTeamCode)  {
-        MessageBox.warning("Request type, process variant and title are required.");
+      if (form.requestMode === "BULK") {
+        if (!form.requestTypeCode || !form.requestVariantCode || !form.processorTeamCode) {
+          MessageBox.warning("Request type, process variant and processor team are required.");
+          return;
+        }
+        return this._submitBulk(form);
+      }
+      if (!form.requestTypeCode || !form.requestVariantCode || !form.title.trim() || !form.priorityCode || !form.processorTeamCode)  {
+        MessageBox.warning("Request type, process variant, title and priority are required.");
         return;
       }
       const missing = (this._fieldControls || []).find(function (entry) {

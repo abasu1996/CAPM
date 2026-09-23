@@ -18,7 +18,7 @@ sap.ui.define([], function () {
   });
   const plant = field("plant_code", "Plant", "combo", {
     required: true,
-    entity: "Plants"
+    entity: "Plant", key: "plantCode", text: "plantName"
   });
   const uom = field("unitOfMeasure_code", "Unit of Measure", "combo", {
     required: true,
@@ -50,19 +50,19 @@ sap.ui.define([], function () {
     uom,
     field("materialGroup_code", "Material Group", "combo", {
       required: true,
-      entity: "MaterialGroups"
+      entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription"
     }),
     field("externalMaterialGroup_code", "External Material Group", "combo", {
       entity: "ExternalMaterialGroups"
     }),
     field("profitCenter_code", "Profit Center", "combo", {
       required: true,
-      entity: "ProfitCenters"
+      entity: "ProfitCenter", key: "profitCenterCode", text: "profitCenterDescription"
     }),
     field("snp", "SNP", "input"),
     field("hsCode", "HS Code", "input"),
     field("valuationClass_code", "Valuation Class", "combo", {
-      entity: "ValuationClasses"
+      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
     }),
     field("coupaCommodityCode_code", "Coupa Commodity Code", "combo", {
       entity: "CoupaCommodityCodes"
@@ -72,8 +72,8 @@ sap.ui.define([], function () {
     field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
       required: true
     }),
-    field("mrpType", "MRP Type", "combo", { required: true, entity: "MrpTypes" }),
-    field("availabilityCheck", "Availability Check", "combo", { required: true, entity: "AvailabilityChecks" })
+    field("mrpType", "MRP Type", "combo", { required: true, entity: "MRPType", key: "mrpTypeCode", text: "mrpTypeDescription" }),
+    field("availabilityCheck", "Availability Check", "combo", { required: true, entity: "AvailabilityCheck", key: "availabilityCheckCode", text: "availabilityCheckDescription" })
   ];
 
   const definitions = {
@@ -87,36 +87,36 @@ sap.ui.define([], function () {
       field("referenceMaterialCode", "Reference Material Code", "input"),
       field("dmsUpdate", "DMS Update Required", "checkbox"),
       plant,
-      field("storageLocation", "Storage Location", "combo", { entity: "StorageLocations" }),
-      field("salesOrganization", "Sales Org", "combo", { entity: "SalesOrganizations" }),
-      field("distributionChannel", "Distribution Channel", "combo", { entity: "DistributionChannels" }),
+      field("storageLocation", "Storage Location", "combo", { entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName" }),
+      field("salesOrganization", "Sales Org", "combo", { entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName" }),
+      field("distributionChannel", "Distribution Channel", "combo", { entity: "DistributionChannel", key: "distributionChannelCode", text: "distributionChannelDescription" }),
       field("description", "Material Description", "input", {
         required: true,
         maxLength: 40
       }),
       field("materialGroup_code", "Material Group", "combo", {
         required: true,
-        entity: "MaterialGroups"
+        entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription"
       }),
       field("externalMaterialGroup_code", "External Material Group", "combo", {
         entity: "ExternalMaterialGroups"
       }),
-      field("division", "Division", "combo", { entity: "Divisions" }),
+      field("division", "Division", "combo", { entity: "Divisions", key: "divisionCode", text: "divisionName" }),
       field("deliveringPlant_code", "Delivering Plant", "combo", {
-        entity: "Plants"
+        entity: "Plant", key: "plantCode", text: "plantName"
       }),
       field("taxClass", "Tax Class", "input"),
       field("accountAssignmentGroup", "Account Assignment Group", "input"),
       field("productHierarchy", "Product Hierarchy", "input"),
       field("profitCenter_code", "Profit Center", "combo", {
-        entity: "ProfitCenters"
+        entity: "ProfitCenter", key: "profitCenterCode", text: "profitCenterDescription"
       }),
-      field("serialNumberProfile", "Serial Number Profile", "combo", { entity: "SerialNumberProfiles" }),
+      field("serialNumberProfile", "Serial Number Profile", "combo", { entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription" }),
       field("inspectionStock", "Post to Inspection Stock", "checkbox"),
       field("sourceList", "Source List", "checkbox"),
       field("commodityImportCode", "Commodity / Import Code", "input"),
       field("valuationClass_code", "Valuation Class", "combo", {
-        entity: "ValuationClasses"
+        entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
       }),
       field("itemName", "DMS Item Name", "input"),
       field("itemCategory", "DMS Item Category", "input"),
@@ -177,7 +177,7 @@ sap.ui.define([], function () {
     ],
     SVC_NEW: [
       transactionType,
-      field("serviceCategory", "Service Category", "combo", { required: true, entity: "ServiceCategories" }),
+      field("serviceCategory", "Service Category", "combo", { required: true, entity: "ServiceCategories", text: "description" }),
       field("serviceDescription", "Service Description", "input", {
         required: true,
         maxLength: 40
@@ -185,10 +185,10 @@ sap.ui.define([], function () {
       uom,
       field("serviceGroup_code", "Service Group", "combo", {
         required: true,
-        entity: "ServiceGroups"
+        entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
       }),
       field("valuationClass_code", "Valuation Class", "combo", {
-        entity: "ValuationClasses"
+        entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
       }),
       field("coupaCommodityCode_code", "Coupa Commodity Code", "combo", {
         entity: "CoupaCommodityCodes"
@@ -206,7 +206,7 @@ sap.ui.define([], function () {
       }),
       uom,
       field("serviceGroup_code", "Service Group", "combo", {
-        entity: "ServiceGroups"
+        entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
       }),
       field("supportingAttachment", "Supporting Attachment", "file"),
       field("remarks", "Remarks", "textarea")
@@ -215,7 +215,7 @@ sap.ui.define([], function () {
       transactionType,
       field("siteId", "Site ID", "combo", {
         required: true,
-        entity: "Sites",
+        entity: "Sites", key: "siteId", text: "siteName",
         autoFills: { field: "siteName", from: "name" }
       }),
       field("siteName", "Site Name", "readonly", {
@@ -224,7 +224,7 @@ sap.ui.define([], function () {
       }),
       field("materialCode", "Material Code", "combo", {
         required: true,
-        entity: "MaterialCodes",
+        entity: "Materials", key: "materialCode", text: "materialDescription",
         autoFills: { field: "materialDescription", from: "name" }
       }),
       field("materialDescription", "Material Description", "readonly", {
@@ -232,7 +232,7 @@ sap.ui.define([], function () {
         placeholder: "Filled from the selected Material Code"
       }),
       field("serialNumber", "Serial Number", "input", { required: true }),
-      field("wbsElement", "WBS Element", "combo", { entity: "WbsElements" }),
+      field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
       field("commissionedDate", "Commissioned Date", "date"),
       field("remarks", "Remarks", "textarea"),
       field("supportingAttachment", "Supporting Attachment", "file")
@@ -241,7 +241,7 @@ sap.ui.define([], function () {
       transactionType,
       field("siteId", "Site ID", "combo", {
         required: true,
-        entity: "Sites",
+        entity: "Sites", key: "siteId", text: "siteName",
         autoFills: { field: "siteName", from: "name" }
       }),
       field("siteName", "Site Name", "readonly", {
@@ -250,7 +250,7 @@ sap.ui.define([], function () {
       }),
       field("materialCode", "Material Code", "combo", {
         required: true,
-        entity: "MaterialCodes",
+        entity: "Materials", key: "materialCode", text: "materialDescription",
         autoFills: { field: "materialDescription", from: "name" }
       }),
       field("materialDescription", "Material Description", "readonly", {
@@ -258,7 +258,7 @@ sap.ui.define([], function () {
         placeholder: "Filled from the selected Material Code"
       }),
       field("serialNumber", "Serial Number", "input", { required: true }),
-      field("wbsElement", "WBS Element", "combo", { entity: "WbsElements" }),
+      field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
       field("commissionedDate", "Commissioned Date", "date"),
       field("approver_ID", "Approver", "combo", {
         required: true,
@@ -297,7 +297,7 @@ sap.ui.define([], function () {
       field("arReference", "AR Reference", "combo", { entity: "ArReferences" }),
       field("siteId", "Site ID", "combo", {
         required: true,
-        entity: "Sites",
+        entity: "Sites", key: "siteId", text: "siteName",
         autoFills: { field: "siteName", from: "name" }
       }),
       field("siteName", "Site Name", "readonly", {
@@ -500,7 +500,7 @@ sap.ui.define([], function () {
       required: true,
       entity: "ProcurementCategories"
     }),
-    field("division", "Division", "combo", { entity: "Divisions" }),
+    field("division", "Division", "combo", { entity: "Divisions", key: "divisionCode", text: "divisionName" }),
     field("delegatedUser_ID", "Delegation User", "combo", {
       entity: "Users",
       key: "ID",
@@ -513,15 +513,15 @@ sap.ui.define([], function () {
       })
     }),
     field("arNumber", "AR Number", "input"),
-    field("wbsElement", "WBS Element", "combo", { entity: "WbsElements" }),
-    field("documentType", "Document Type", "combo", { entity: "DocumentTypes" }),
+    field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
+    field("documentType", "Document Type", "combo", { entity: "DocumentTypes", key: "documentTypeCode", text: "documentTypeDescription" }),
     field("taxApplicable", "Tax Applicable", "checkbox"),
     field("clearanceChargeApplicable", "Clearance Charge Applicable", "checkbox"),
     field("materialImported", "Material Imported", "checkbox"),
     field("sesRequired", "Create SES Successor", "checkbox"),
     field("paymentRequestRequired", "Create Payment Successor", "checkbox"),
     field("poHeaderText", "PO Header Text", "textarea"),
-    field("campaignLocationCode", "Campaign / Location Code", "combo", { entity: "Sites" }),
+    field("campaignLocationCode", "Campaign / Location Code", "combo", { entity: "Sites", key: "siteId", text: "siteName" }),
     field("procurementDescription", "Procurement Description", "textarea", {
       required: true
     }),
@@ -543,8 +543,8 @@ sap.ui.define([], function () {
     field("companyCode", "Company Code", "readonly", {
       placeholder: "Filled from the Purchasing Organization"
     }),
-    field("purchasingGroup", "Purchasing Group", "combo", { entity: "PurchasingGroups" }),
-    field("siteId", "Site ID", "combo", { entity: "Sites" }),
+    field("purchasingGroup", "Purchasing Group", "combo", { entity: "PurchasingGroups", key: "purchasingGroupCode", text: "purchasingGroupName" }),
+    field("siteId", "Site ID", "combo", { entity: "Sites", key: "siteId", text: "siteName" }),
     field("currency_code", "Currency", "combo", {
       required: true,
       entity: "Currencies"
@@ -635,7 +635,7 @@ sap.ui.define([], function () {
       ]
     }),
     field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file"),
-    field("division", "Division", "combo", { required: true, entity: "Divisions" }),
+    field("division", "Division", "combo", { required: true, entity: "Divisions", key: "divisionCode", text: "divisionName" }),
     field("divisionalUser_ID", "Divisional User", "combo", {
       required: true,
       entity: "Users",

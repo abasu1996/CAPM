@@ -33,6 +33,13 @@ service FlowmateCAService {
 
     }
 
+  type BulkRequestInput {
+    requestTypeCode    : String(40);
+    requestVariantCode : String(40);
+    processorTeamCode  : String(40);
+    rows               : LargeString;
+  }
+
   entity RequestTypes as projection on db.RequestTypes;
   entity RequestVariants as projection on db.RequestVariants;
   entity RequestStatuses as projection on db.RequestStatuses;
@@ -44,14 +51,9 @@ service FlowmateCAService {
   entity Vendors as projection on common.Vendors;
 
 
-  entity Plants as projection on db.Plants;
   entity UnitsOfMeasure as projection on db.UnitsOfMeasure;
-  entity MaterialGroups as projection on db.MaterialGroups;
   entity ExternalMaterialGroups as projection on db.ExternalMaterialGroups;
-  entity ProfitCenters as projection on db.ProfitCenters;
-  entity ValuationClasses as projection on db.ValuationClasses;
   entity CoupaCommodityCodes as projection on db.CoupaCommodityCodes;
-  entity ServiceGroups as projection on db.ServiceGroups;
   entity Warehouses as projection on db.Warehouses;
   entity PurchaseOrderTypes as projection on db.PurchaseOrderTypes;
   entity ProcurementCategories as projection on db.ProcurementCategories;
@@ -61,25 +63,15 @@ service FlowmateCAService {
   entity ProjectTypes as projection on db.ProjectTypes;
   entity SystemContractBasePO as projection on db.SystemContractBasePO;
   entity ContractCategories as projection on db.ContractCategories;
-  entity ItemCategories as projection on db.ItemCategories;
   entity AccountAssignment as projection on db.AccountAssignment;
-  entity ServiceCategories as projection on db.ServiceCategories;
   entity Entity as projection on db.Entity;
   entity Projects as projection on db.Projects;
-  entity MatGroup as projection on db.MatGroup;
   entity ExtensionMaterialGroup as projection on db.ExtensionMaterialGroup;
-  entity ProfitCenter as projection on db.ProfitCenter;
-  entity MRPType as projection on db.MRPType;
-  entity AvailabilityCheck as projection on db.AvailabilityCheck;
-  entity SerialNumberProfile as projection on db.SerialNumberProfile;
-  entity DistributionChannel as projection on db.DistributionChannel;
   entity ContractType as projection on db.ContractType;
 
-  entity DocumentTypes as projection on db.DocumentTypes;
   entity CompanyCodes as projection on db.CompanyCodes;
-  entity PurchasingGroups as projection on db.PurchasingGroups;
-  entity Divisions as projection on db.Divisions;
   entity TaxCodes as projection on db.TaxCodes;
+  entity ItemCategories as projection on db.ItemCategories;
   entity AccountAssignments as projection on db.AccountAssignments;
   entity CostCenters as projection on db.CostCenters;
   entity ContractTypes as projection on db.ContractTypes;
@@ -89,15 +81,7 @@ service FlowmateCAService {
   entity BusinessEntities as projection on db.BusinessEntities;
   entity ProjectScopes as projection on db.ProjectScopes;
   entity MaterialTypes as projection on db.MaterialTypes;
-  entity MrpTypes as projection on db.MrpTypes;
-  entity AvailabilityChecks as projection on db.AvailabilityChecks;
-  entity SerialNumberProfiles as projection on db.SerialNumberProfiles;
-  entity StorageLocations as projection on db.StorageLocations;
-  entity SalesOrganizations as projection on db.SalesOrganizations;
-  entity DistributionChannels as projection on db.DistributionChannels;
-  entity Sites as projection on db.Sites;
-  entity MaterialCodes as projection on db.MaterialCodes;
-  entity WbsElements as projection on db.WbsElements;
+  entity ServiceCategories as projection on db.ServiceCategories;
   entity ArReferences as projection on db.ArReferences;
   entity ProjectCategories as projection on db.ProjectCategories;
 
@@ -144,6 +128,10 @@ service FlowmateCAService {
   };
 
   action createRequest(input: NewRequestInput) returns Requests;
+  action createBulkRequests(input: BulkRequestInput) returns {
+    created          : Integer;
+    referenceNumbers : LargeString;
+  };
   action submitRequest(requestId: UUID) returns Boolean;
   action addTask(
     requestId: UUID,
@@ -236,4 +224,10 @@ service CAMasterDataService {
    entity SalesOrg as projection on common.SalesOrg;
    entity Incoterms as projection on common.Incoterms;
    entity CostCenter as projection on common.CostCenter;
+   entity MatGroup as projection on common.MatGroup;
+   entity ProfitCenter as projection on common.ProfitCenter;
+   entity MRPType as projection on common.MRPType;
+   entity AvailabilityCheck as projection on common.AvailabilityCheck;
+   entity SerialNumberProfile as projection on common.SerialNumberProfile;
+   entity DistributionChannel as projection on common.DistributionChannel;
 }

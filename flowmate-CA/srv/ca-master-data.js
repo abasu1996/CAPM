@@ -20,8 +20,13 @@ const SHARED_ENTITIES = [
   "StorageLocation",
   "SalesOrg",
   "Incoterms",
-  "CostCenter"
-
+  "CostCenter",
+  "MatGroup",
+  "ProfitCenter",
+  "MRPType",
+  "AvailabilityCheck",
+  "SerialNumberProfile",
+  "DistributionChannel"
 ];
 
 module.exports = class CAMasterDataService extends cds.ApplicationService {

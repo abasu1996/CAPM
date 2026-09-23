@@ -18,7 +18,11 @@
           visible="{app>/currentUser/isAdmin}"
           press=".onAdmin"/>
         <ToolbarSeparator/>
-        <Avatar displaySize="XS" initials="CA"/>
+        <Avatar
+          displaySize="XS"
+          displayShape="Circle"
+          initials="{path: 'app>/currentUser/email', formatter: '.formatInitials'}"
+          backgroundColor="{path: 'app>/currentUser/email', formatter: '.formatAvatarColor'}"/>
         <Text text="{app>/currentUser/displayName}"/>
       </OverflowToolbar>
     </customHeader>

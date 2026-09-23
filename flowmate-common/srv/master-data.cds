@@ -157,6 +157,42 @@ entity Customers as projection on db.Customers;
   entity CostCenter as projection on db.CostCenter;
 
   @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity MatGroup as projection on db.MatGroup;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity ProfitCenter as projection on db.ProfitCenter;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity MRPType as projection on db.MRPType;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity AvailabilityCheck as projection on db.AvailabilityCheck;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity SerialNumberProfile as projection on db.SerialNumberProfile;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity DistributionChannel as projection on db.DistributionChannel;
+
+  @restrict: [
     { grant: '*', to: ['MasterDataAdmin', 'UserProvisioning'] }
   ]
   action createUserWithTeams(
