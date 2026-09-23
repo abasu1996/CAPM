@@ -1,0 +1,54 @@
+{
+  "name": "@animb1996/cds-data-drift",
+  "version": "0.1.0",
+  "description": "Read-only CSV and database drift reporting for SAP CAP projects",
+  "author": "Anim Basu",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abasu1996/cds-data-drift.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abasu1996/cds-data-drift/issues"
+  },
+  "homepage": "https://github.com/abasu1996/cds-data-drift#readme",
+  "main": "cds-plugin.js",
+  "type": "commonjs",
+  "bin": {
+    "cds-data-drift": "bin/cds-data-drift.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "cds-plugin.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@sap/cds": ">=9 <10"
+  },
+  "devDependencies": {
+    "@sap/cds": "9.9.1"
+  },
+  "dependencies": {
+    "csv-parse": "^6.1.0"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check bin/cds-data-drift.js && node --check cds-plugin.js && node --check lib/run.js"
+  },
+  "keywords": [
+    "sap",
+    "cap",
+    "hana",
+    "cds",
+    "csv",
+    "data-drift"
+  ],
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
