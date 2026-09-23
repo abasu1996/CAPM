@@ -1,5 +1,5 @@
 const cds = require("@sap/cds");
-
+//Added main plugin file from where CAP will read the configuration and set the default values for the plugin.
 cds.env.dataDrift ??= {};
 Object.assign(cds.env.dataDrift, {
   folders: cds.env.dataDrift.folders || ["db/data"],
