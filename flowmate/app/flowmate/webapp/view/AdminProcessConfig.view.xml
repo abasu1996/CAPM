@@ -361,19 +361,27 @@
                                 class="flowmateTable"
                                 mode="MultiSelect"
                                 noDataText="{i18n>noLoaApprovalsText}"
-                                items="{ path: '/LoaApproval', sorter: { path: 'amount' }, parameters: { expand: 'role' } }">
+                                items="{ path: '/LoaApproval', sorter: { path: 'priority', descending: true } }">
                                 <columns>
-                                    <Column><Text text="{i18n>amountLabel}" /></Column>
-                                    <Column><Text text="{i18n>operatorLabel}" /></Column>
-                                    <Column><Text text="{i18n>roleLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaRuleCodeLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaDescriptionLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaMinimumAmountLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaMaximumAmountLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaApprovalModeLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaApproverRolesLabel}" /></Column>
+                                    <Column><Text text="{i18n>activeLabel}" /></Column>
                                     <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items>
                                     <ColumnListItem>
                                         <cells>
-                                            <ObjectNumber number="{amount}" />
-                                            <Text text="{operator_code}" />
-                                            <Text text="{role/name}" />
+                                            <Text text="{ruleCode}" />
+                                            <Text text="{description}" wrapping="true" />
+                                            <ObjectNumber number="{minimumAmount}" />
+                                            <ObjectNumber number="{maximumAmount}" />
+                                            <Text text="{approvalMode}" />
+                                            <Text text="{approverRoleCodes}" wrapping="true" />
+                                            <ObjectStatus text="{= ${isActive} ? ${i18n>activeStatusText} : ${i18n>inactiveStatusText} }" state="{= ${isActive} ? 'Success' : 'None' }" />
                                             <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editLoaApprovalButton}" press=".onEditLoaApproval" />
                                         </cells>
                                     </ColumnListItem>
@@ -833,16 +841,35 @@
         <Dialog id="loaApprovalDialog" title="{loaApprovalEdit>/dialogTitle}" contentWidth="42rem" stretchOnPhone="true">
             <content>
                 <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
-                    <Label text="{i18n>amountLabel}" required="true" />
-                    <Input value="{loaApprovalEdit>/amount}" type="Number" required="true" />
-                    <Label text="{i18n>operatorLabel}" required="true" />
-                    <Select selectedKey="{loaApprovalEdit>/operator_code}" items="{/Operator}" required="true" forceSelection="false">
-                        <core:Item key="{code}" text="{name}" />
+                    <Label text="{i18n>loaRuleCodeLabel}" required="true" />
+                    <Input value="{loaApprovalEdit>/ruleCode}" enabled="{= !${loaApprovalEdit>/isEdit} }" required="true" />
+                    <Label text="{i18n>loaDescriptionLabel}" />
+                    <Input value="{loaApprovalEdit>/description}" />
+                    <Label text="{i18n>loaMinimumAmountLabel}" />
+                    <Input value="{loaApprovalEdit>/minimumAmount}" type="Number" />
+                    <Label text="{i18n>loaMinimumInclusiveLabel}" />
+                    <CheckBox selected="{loaApprovalEdit>/minimumInclusive}" />
+                    <Label text="{i18n>loaMaximumAmountLabel}" />
+                    <Input value="{loaApprovalEdit>/maximumAmount}" type="Number" />
+                    <Label text="{i18n>loaMaximumInclusiveLabel}" />
+                    <CheckBox selected="{loaApprovalEdit>/maximumInclusive}" />
+                    <Label text="{i18n>loaApprovalModeLabel}" required="true" />
+                    <Select selectedKey="{loaApprovalEdit>/approvalMode}" required="true">
+                        <core:Item key="SINGLE" text="{i18n>loaApprovalModeSingle}" />
+                        <core:Item key="ANY" text="{i18n>loaApprovalModeAny}" />
                     </Select>
-                    <Label text="{i18n>roleLabel}" required="true" />
-                    <Select selectedKey="{loaApprovalEdit>/roleCode}" items="{path: '/Roles', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}" required="true" forceSelection="false">
-                        <core:Item key="{code}" text="{name}" />
-                    </Select>
+                    <Label text="{i18n>loaApproverRolesLabel}" required="true" />
+                    <Input value="{loaApprovalEdit>/approverRoleCodes}" placeholder="{i18n>loaApproverRolesPlaceholder}" required="true" />
+                    <Label text="{i18n>loaConditionCodeLabel}" />
+                    <Input value="{loaApprovalEdit>/conditionCode}" />
+                    <Label text="{i18n>loaConditionDescriptionLabel}" />
+                    <TextArea value="{loaApprovalEdit>/conditionDescription}" rows="2" />
+                    <Label text="{i18n>loaPriorityLabel}" />
+                    <Input value="{loaApprovalEdit>/priority}" type="Number" />
+                    <Label text="{i18n>activeLabel}" />
+                    <CheckBox selected="{loaApprovalEdit>/isActive}" />
+                    <Label text="{i18n>remarksLabel}" />
+                    <TextArea value="{loaApprovalEdit>/remarks}" rows="2" />
                 </form:SimpleForm>
             </content>
             <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveLoaApproval" /></beginButton>

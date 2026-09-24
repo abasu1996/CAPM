@@ -149,6 +149,7 @@ sap.ui.define([
                 : "processType,subProcessType";
             if (this._bShowUnreservedOnly) {
                 oBindingParams.filters.push(new Filter("reservedBy", FilterOperator.EQ, null));
+                oBindingParams.filters.push(new Filter("status_code", FilterOperator.NE, "PENDING_APPROVAL"));
                 this._addUnreservedQueueFilters(oBindingParams.filters);
             }
             if (this._bShowReservedOnly) {

@@ -19,7 +19,9 @@
     "build": "cds build --production",
     "build:mta": "mbt build",
     "deploy": "cf deploy mta_archives/flowmate-common_1.0.0.mtar",
-    "migrate:flowmate": "node scripts/migrate-flowmate-master-data.js"
+    "migrate:flowmate": "node scripts/migrate-flowmate-master-data.js",
+    "loa:roles:apply": "node scripts/apply-loa-roles.js",
+    "loa:roles:apply:hybrid": "cds bind --profile hybrid --exec -- node scripts/apply-loa-roles.js"
   },
   "cds": {
     "requires": {

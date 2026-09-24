@@ -874,6 +874,10 @@
     --flowmateTileWash: linear-gradient(135deg, rgba(217, 119, 6, 0.16), rgba(217, 119, 6, 0));
 }
 
+.flowmateTileApprovals {
+    border-top: 0.25rem solid #7c3aed;
+}
+
 .flowmateTileCreate {
     --flowmateTileAccent: #0f766e;
     --flowmateTileAccentDark: #115e59;

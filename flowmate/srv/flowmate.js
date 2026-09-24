@@ -6,6 +6,7 @@ const SVGtoPDF = require("svg-to-pdfkit");
 
 const PROCESS_STATUS = {
   DRAFT: "DRAFT",
+  PENDING_APPROVAL: "PENDING_APPROVAL",
   IN_PROGRESS: "IN_PROGRESS",
   SENT_BACK: "SENT_BACK",
   REJECTED: "REJECTED",
@@ -21,7 +22,8 @@ const TASK_STATUS = {
   OPEN: "OPEN",
   APPROVED: "APPROVED",
   REJECTED: "REJECTED",
-  SENT_BACK: "SENT_BACK"
+  SENT_BACK: "SENT_BACK",
+  CANCELLED: "CANCELLED"
 };
 
 // const FTK_FACTORING_SUBTYPES = new Set([
@@ -579,7 +581,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return;
       }
       const oReservationUser = await this._currentReservationUser(req, Users);
-      this._applyVisibleRequestsWhere(req.query, oReservationUser);
+      const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+      this._applyVisibleRequestsWhere(req.query, oReservationUser, aDelegatorIds);
     });
 
     this.after("READ", ProcessRequests, async (data, req) => {
@@ -603,7 +606,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return;
       }
       const oReservationUser = await this._currentReservationUser(req, Users);
-      this._filterExpandedTasksByAssignment(data, oReservationUser);
+      const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+      this._filterExpandedTasksByAssignment(data, oReservationUser, aDelegatorIds);
     });
 
     this.before("READ", ProcessTasks, async (req) => {
@@ -731,22 +735,35 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(403, "Only an administrator can maintain LoA approval rules");
       }
 
-      if (req.event !== "DELETE" && (
-        req.data.amount === null
-        || req.data.amount === undefined
-        || !req.data.operator_code
-        || !String(req.data.roleCode || "").trim()
-      )) {
-        return req.reject(400, "Amount, operator, and role are required");
-      }
-
       if (req.event !== "DELETE") {
-        const oRole = await this.master.run(
-          SELECT.one.from(Roles).columns("code").where({ code: req.data.roleCode })
-        );
+        const bStructuredRule = Boolean(String(req.data.ruleCode || "").trim());
+        const aRoleCodes = String(req.data.approverRoleCodes || req.data.roleCode || "")
+          .split(";")
+          .map((roleCode) => roleCode.trim())
+          .filter(Boolean);
 
-        if (!oRole) {
-          return req.reject(400, "Selected role was not found");
+        if (!aRoleCodes.length || (!bStructuredRule && (
+          req.data.amount === null
+          || req.data.amount === undefined
+          || !req.data.operator_code
+        ))) {
+          return req.reject(400, "Rule code, amount range, and approver role(s) are required");
+        }
+
+        if (req.data.minimumAmount !== null && req.data.minimumAmount !== undefined
+          && req.data.maximumAmount !== null && req.data.maximumAmount !== undefined
+          && Number(req.data.minimumAmount) > Number(req.data.maximumAmount)) {
+          return req.reject(400, "Minimum amount cannot be greater than maximum amount");
+        }
+
+        const aExistingRoles = await this.master.run(
+          SELECT.from(Roles).columns("code").where({ code: { in: aRoleCodes } })
+        );
+        const oExistingRoleCodes = new Set(aExistingRoles.map((role) => role.code));
+        const aMissingRoles = aRoleCodes.filter((roleCode) => !oExistingRoleCodes.has(roleCode));
+
+        if (aMissingRoles.length) {
+          return req.reject(400, `Approver role(s) not found: ${aMissingRoles.join(", ")}`);
         }
       }
     });
@@ -1102,7 +1119,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "Amount is required when LoA approval is applicable");
       }
 
-      const sRoleCode = await this._resolveLoaRole(req, LoaApproval, fAmount);
+      const sRoleCode = await this._resolveLoaRole(req, LoaApproval, fAmount, {
+        ...oExisting,
+        ...req.data,
+        subProcessType_code: sSubProcessTypeCode
+      });
 
       if (!sRoleCode) {
         return req.reject(400, `No LoA approval rule is configured for amount ${fAmount}`);
@@ -1110,6 +1131,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       req.data.amount = fAmount;
       req.data.role = sRoleCode;
+      if (req.event === "CREATE") {
+        req.data.status_code = PROCESS_STATUS.PENDING_APPROVAL;
+        req.data.currentStep = 0;
+      }
     });
 
     this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
@@ -1308,6 +1333,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.after("CREATE", ProcessRequests, async (request, req) => {
+      if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+        await this._createLoaApprovalTasks(req, request, Users);
+        return;
+      }
       if (request.processorTeam_ID) {
         await this._notifyTeamAssignment(req, {
           assignmentType: "PROCESS",
@@ -1786,7 +1815,21 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.on("approveTask", async (req) => {
+      const task = await this._getTask(req, req.data.taskId);
+      if (task?.isLoaApproval) {
+        return this._decideLoaApproval(req, task, "APPROVED", req.data.remarks, Users);
+      }
       return this._approveTaskOnly(req, req.data.taskId, req.data.remarks, Users);
+    });
+
+    this.on("approveLoaRequest", async (req) => {
+      const task = await this._getTask(req, req.data.taskId);
+      return this._decideLoaApproval(req, task, "APPROVED", req.data.remarks, Users);
+    });
+
+    this.on("rejectLoaRequest", async (req) => {
+      const task = await this._getTask(req, req.data.taskId);
+      return this._decideLoaApproval(req, task, "REJECTED", req.data.remarks, Users);
     });
 
     this.on("analyzeGuidedTaskCompletion", async (req) => {
@@ -1841,14 +1884,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const oReservationUser = await this._currentReservationUser(req, Users);
 
-      if (request.reservedBy && !this._isReservedByCurrentUser(request, oReservationUser)) {
+      if (request.reservedBy && !await this._canActForReservedRequest(req, request, oReservationUser)) {
         return req.reject(403, `Request is reserved by ${request.reservedBy} and cannot be accessed by another user`);
       }
 
       return cds.tx(req).run(
         SELECT.from(this._dbProcessTasksEntity())
           .columns("ID", "stepNo", "status_code", "isMandatory")
-          .where({ request_ID: requestId })
+          .where({ request_ID: requestId, isLoaApproval: false })
       );
     });
 
@@ -1858,6 +1901,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!task) {
         return req.reject(404, `Task ${taskId} was not found`);
+      }
+
+      if (task.isLoaApproval) {
+        return this._decideLoaApproval(req, task, "REJECTED", remarks, Users);
       }
 
       await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
@@ -1968,6 +2015,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!request) {
         return req.reject(404, `Process request ${requestId} was not found`);
+      }
+
+      if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+        return req.reject(409, "This request must be approved before it can be reserved");
       }
 
       if (this._isLockedRequest(request)) {
@@ -2089,6 +2140,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Process request ${requestId} was not found`);
       }
 
+      if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+        return req.reject(409, "Use the LoA approval decision to move a pending request forward");
+      }
+
       await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
       if (this._isLockedRequest(request)) {
@@ -2137,6 +2192,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!task) {
         return req.reject(404, `Task ${taskId} was not found`);
+      }
+
+      if (task.isLoaApproval) {
+        return req.reject(409, "Use Approve or Reject to complete an LoA approval task");
       }
 
       await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
@@ -2695,7 +2754,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const [oUnreserved, oReserved] = await Promise.all([
         cds.tx(req).run(
-          qUnreserved.where({ reservedBy: null })
+          qUnreserved.where({ reservedBy: null }).where({ status_code: { "!=": PROCESS_STATUS.PENDING_APPROVAL } })
         ),
         cds.tx(req).run(qReservedByMe)
       ]);
@@ -2706,9 +2765,23 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       };
     });
 
+    this.on("getPendingApprovalCount", async (req) => {
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+      const aAssignmentPredicates = this._taskAssignmentPredicates(oReservationUser, aDelegatorIds);
+      if (!aAssignmentPredicates.length) return 0;
+      const oCount = await cds.tx(req).run(
+        SELECT.one.from(ProcessTasks).columns("count(1) as count")
+          .where({ xpr: aAssignmentPredicates })
+          .where({ isLoaApproval: true, status_code: TASK_STATUS.OPEN })
+      );
+      return Number(oCount?.count || oCount?.COUNT || 0);
+    });
+
     this.on("getMyTaskCount", async (req) => {
       const oReservationUser = await this._currentReservationUser(req, Users);
-      const aAssignmentPredicates = this._taskAssignmentPredicates(oReservationUser);
+      const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+      const aAssignmentPredicates = this._taskAssignmentPredicates(oReservationUser, aDelegatorIds);
 
       if (!aAssignmentPredicates.length) {
         return 0;
@@ -2718,6 +2791,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         SELECT.one.from(ProcessTasks)
           .columns("count(1) as count")
           .where({ xpr: aAssignmentPredicates })
+          .where({ isLoaApproval: false })
       );
 
       return Number(oTaskCount?.count || oTaskCount?.COUNT || 0);
@@ -3821,7 +3895,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     const oReservationUser = await this._currentReservationUser(req, Users);
 
-    if (!this._isReservedByCurrentUser(request, oReservationUser)) {
+    if (!await this._canActForReservedRequest(req, request, oReservationUser)) {
       return req.reject(403, `Request is reserved by ${request.reservedBy} and cannot be modified by another user`);
     }
   }
@@ -3831,9 +3905,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return;
     }
     const oReservationUser = await this._currentReservationUser(req, Users);
+    const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
     const qVisibleRequests = SELECT.from(this.entities.ProcessRequests).columns("ID");
 
-    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser);
+    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser, aDelegatorIds);
     req.query.where([
       { ref: [requestFieldName] },
       "in",
@@ -3843,10 +3918,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _filterByVisibleEmails(req, Users, ProcessEmailMessages = this.entities.ProcessEmailMessages) {
     const oReservationUser = await this._currentReservationUser(req, Users);
+    const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
     const qVisibleRequests = SELECT.from(this.entities.ProcessRequests).columns("ID");
     const qVisibleEmails = SELECT.from(ProcessEmailMessages).columns("ID");
 
-    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser);
+    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser, aDelegatorIds);
     qVisibleEmails.where([
       { ref: ["request_ID"] },
       "in",
@@ -3864,7 +3940,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return;
     }
     const oReservationUser = await this._currentReservationUser(req, Users);
-    const aPredicates = this._taskAssignmentPredicates(oReservationUser);
+    const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+    const aPredicates = this._taskAssignmentPredicates(oReservationUser, aDelegatorIds);
 
     if (!aPredicates.length) {
       req.query.where(this._alwaysFalsePredicate());
@@ -3940,11 +4017,17 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return Boolean(oMembership);
   }
 
-  _taskAssignmentPredicates(reservationUser) {
+  _taskAssignmentPredicates(reservationUser, delegatedUserIds = []) {
     const aPredicates = [];
 
-    if (reservationUser.user?.ID) {
-      this._addStringEqualsPredicate(aPredicates, "processorUser_ID", reservationUser.user.ID);
+    const aEffectiveUserIds = [...new Set([
+      reservationUser.user?.ID,
+      ...delegatedUserIds
+    ].filter(Boolean))];
+
+    for (const sUserId of aEffectiveUserIds) {
+      this._addStringEqualsPredicate(aPredicates, "processorUser_ID", sUserId);
+      this._addStringEqualsPredicate(aPredicates, "assignedUser_ID", sUserId);
     }
 
     return aPredicates;
@@ -3980,7 +4063,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     ];
   }
 
-  _filterExpandedTasksByAssignment(data, reservationUser) {
+  _filterExpandedTasksByAssignment(data, reservationUser, delegatedUserIds = []) {
     const aRequests = Array.isArray(data) ? data : [data];
 
     aRequests.filter(Boolean).forEach((request) => {
@@ -3989,13 +4072,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       if (Array.isArray(request.tasks)) {
-        request.tasks = request.tasks.filter((task) => this._isTaskVisibleForRequest(task, request, reservationUser));
+        request.tasks = request.tasks.filter((task) => this._isTaskVisibleForRequest(task, request, reservationUser, delegatedUserIds));
         this._clearUnassignedTeamTaskProcessor(request.tasks);
         return;
       }
 
       if (Array.isArray(request.tasks.results)) {
-        request.tasks.results = request.tasks.results.filter((task) => this._isTaskVisibleForRequest(task, request, reservationUser));
+        request.tasks.results = request.tasks.results.filter((task) => this._isTaskVisibleForRequest(task, request, reservationUser, delegatedUserIds));
         this._clearUnassignedTeamTaskProcessor(request.tasks.results);
       }
     });
@@ -4013,11 +4096,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _rejectIfTaskAssignedToAnotherUser(req, task, Users = this.masterEntities.Users) {
-    if (!task || this._isTaskAssignedToCurrentUser(task, await this._currentReservationUser(req, Users))) {
+    const oReservationUser = await this._currentReservationUser(req, Users);
+    const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+    if (!task || this._isTaskAssignedToCurrentUser(task, oReservationUser, aDelegatorIds)) {
       return;
     }
 
-    return req.reject(403, "Task is assigned to another user and cannot be accessed or modified");
+    return req.reject(403, "Task is not assigned to you and is not covered by an active delegation");
   }
 
   async _currentReservationUser(req, Users = this.masterEntities.Users) {
@@ -4062,12 +4147,46 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     };
   }
 
-  _applyVisibleRequestsWhere(query, reservationUser) {
+  async _activeDelegatorIds(req, delegateUserId, Delegations = this.masterEntities.Delegations) {
+    if (!delegateUserId) return [];
+
+    const sToday = new Date().toISOString().slice(0, 10);
+    const aDelegations = await this.master.run(
+      SELECT.from(Delegations)
+        .columns("delegator_ID")
+        .where({
+          delegate_ID: delegateUserId,
+          enabled: true,
+          startDate: { "<=": sToday },
+          endDate: { ">=": sToday }
+        })
+    );
+
+    return [...new Set(aDelegations.map((delegation) => delegation.delegator_ID).filter(Boolean))];
+  }
+
+  async _canActForReservedRequest(req, request, reservationUser) {
+    if (this._isReservedByCurrentUser(request, reservationUser)) return true;
+    if (!request?.reservedByUser_ID || !reservationUser.user?.ID) return false;
+
+    const aDelegatorIds = await this._activeDelegatorIds(req, reservationUser.user.ID);
+    return aDelegatorIds.includes(request.reservedByUser_ID);
+  }
+
+  _applyVisibleRequestsWhere(query, reservationUser, delegatedUserIds = []) {
     const sUserId = reservationUser.user.ID;
+    const aTaskOwnerIds = [...new Set([sUserId, ...delegatedUserIds].filter(Boolean))];
+    const qAssignedRequests = SELECT.from(this.entities.ProcessTasks)
+      .columns("request_ID")
+      .where([
+        { ref: ["processorUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) },
+        "or", { ref: ["assignedUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) }
+      ]);
     query.where([
       { ref: ["requesterUser_ID"] }, "=", { val: sUserId },
       "or", { ref: ["reservedByUser_ID"] }, "=", { val: sUserId },
-      "or", { ref: ["processorUser_ID"] }, "=", { val: sUserId }
+      "or", { ref: ["processorUser_ID"] }, "=", { val: sUserId },
+      "or", { ref: ["ID"] }, "in", qAssignedRequests
     ]);
   }
 
@@ -4083,15 +4202,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return request.reservedBy === reservationUser.displayName || request.reservedBy === reservationUser.principal;
   }
 
-  _isTaskAssignedToCurrentUser(task, reservationUser) {
+  _isTaskAssignedToCurrentUser(task, reservationUser, delegatedUserIds = []) {
     const sCurrentUserId = reservationUser.user?.ID;
+    const oPermittedUserIds = new Set([sCurrentUserId, ...delegatedUserIds].filter(Boolean));
 
     // Persisted user IDs are the authoritative assignment identity. Email and
     // display-name snapshots can become stale or differ in case from JWT claims.
     if (task.processorUser_ID || task.assignedUser_ID) {
       return Boolean(
-        sCurrentUserId
-        && (task.processorUser_ID === sCurrentUserId || task.assignedUser_ID === sCurrentUserId)
+        oPermittedUserIds.has(task.processorUser_ID)
+        || oPermittedUserIds.has(task.assignedUser_ID)
       );
     }
 
@@ -4114,8 +4234,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       .some((sOwner) => sOwner && oCurrentIdentities.has(sOwner));
   }
 
-  _isTaskVisibleForRequest(task, request, reservationUser) {
-    if (this._isTaskAssignedToCurrentUser(task, reservationUser)) {
+  _isTaskVisibleForRequest(task, request, reservationUser, delegatedUserIds = []) {
+    if (this._isTaskAssignedToCurrentUser(task, reservationUser, delegatedUserIds)) {
       return true;
     }
 
@@ -4767,33 +4887,67 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return aSteps;
   }
 
-  async _resolveLoaRole(req, LoaApproval, amount) {
+  async _resolveLoaRole(req, LoaApproval, amount, request = {}) {
     const aRules = await cds.tx(req).run(
-      SELECT.from(LoaApproval).columns("amount", "operator_code", "roleCode")
+      SELECT.from(LoaApproval).columns(
+        "ruleCode", "minimumAmount", "maximumAmount", "minimumInclusive", "maximumInclusive",
+        "approvalMode", "approverRoleCodes", "conditionCode", "priority", "isActive",
+        "amount", "operator_code", "roleCode"
+      )
     );
     let oWinner = null;
 
     for (const oRule of aRules) {
-      const fThreshold = Number(oRule.amount);
-
-      if (!Number.isFinite(fThreshold) || !this._evaluateLoaOperator(amount, oRule.operator_code, fThreshold)) {
+      if (oRule.isActive === false || !this._matchesLoaCondition(oRule.conditionCode, request)) {
         continue;
       }
 
-      if (!oWinner) {
-        oWinner = oRule;
+      const bStructuredRule = Boolean(oRule.ruleCode);
+      let bMatches = false;
+
+      if (bStructuredRule) {
+        const bAboveMinimum = oRule.minimumAmount === null || oRule.minimumAmount === undefined
+          || (oRule.minimumInclusive === false ? amount > Number(oRule.minimumAmount) : amount >= Number(oRule.minimumAmount));
+        const bBelowMaximum = oRule.maximumAmount === null || oRule.maximumAmount === undefined
+          || (oRule.maximumInclusive === false ? amount < Number(oRule.maximumAmount) : amount <= Number(oRule.maximumAmount));
+        bMatches = bAboveMinimum && bBelowMaximum;
+      } else {
+        const fThreshold = Number(oRule.amount);
+        bMatches = Number.isFinite(fThreshold) && this._evaluateLoaOperator(amount, oRule.operator_code, fThreshold);
+      }
+
+      if (!bMatches) {
         continue;
       }
 
-      const bPrefersHigher = oRule.operator_code === ">" || oRule.operator_code === ">=";
-      const fWinnerThreshold = Number(oWinner.amount);
-
-      if ((bPrefersHigher && fThreshold > fWinnerThreshold) || (!bPrefersHigher && fThreshold < fWinnerThreshold)) {
+      if (!oWinner || this._loaRuleRank(oRule) > this._loaRuleRank(oWinner)) {
         oWinner = oRule;
       }
     }
 
-    return oWinner?.roleCode || "";
+    return oWinner?.approverRoleCodes || oWinner?.roleCode || "";
+  }
+
+  _matchesLoaCondition(conditionCode, request) {
+    if (!conditionCode) return true;
+
+    if (conditionCode === "NOTE_36") {
+      return ["NON_PO_IMPORT_TRC", "NON_PO_IMPORT_DGC_ADV", "NON_PO_IMPORT_DGC_DIRECT"]
+        .includes(request.subProcessType_code);
+    }
+
+    // Notes 34 and 35 require a precise business discriminator that is not
+    // currently captured by the request. Their matrix rows remain inactive.
+    return false;
+  }
+
+  _loaRuleRank(rule) {
+    const priority = Number(rule.priority || 0);
+    const structured = rule.ruleCode ? 1 : 0;
+    const upper = rule.maximumAmount === null || rule.maximumAmount === undefined
+      ? Number.MAX_SAFE_INTEGER
+      : Number(rule.maximumAmount);
+    return priority * 1e18 + structured * 1e17 - upper;
   }
 
   _evaluateLoaOperator(amount, operator, threshold) {
@@ -5090,6 +5244,117 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _findStepByNo(steps, stepNo) {
     return steps.find((step) => Number(step.stepNo || 0) === Number(stepNo || 0)) || null;
+  }
+
+  async _createLoaApprovalTasks(req, request, Users = this.masterEntities.Users) {
+    const aRoleCodes = [...new Set(String(request.role || "")
+      .split(";")
+      .map((value) => value.trim())
+      .filter(Boolean))];
+
+    if (!aRoleCodes.length) {
+      return req.reject(400, "The matching LoA rule does not contain an approver role");
+    }
+
+    const aApprovers = await this.master.run(
+      SELECT.from(Users)
+        .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
+        .where({ isActive: true, role_code: { in: aRoleCodes } })
+    );
+
+    if (!aApprovers.length) {
+      return req.reject(409, `No active user is assigned to the required LoA role(s): ${aRoleCodes.join(", ")}`);
+    }
+
+    for (const approver of aApprovers) {
+      const sTaskId = cds.utils.uuid();
+      const sReferenceNumber = await this._nextReferenceNumber(req, this.entities.ProcessTasks, "TSK");
+      const sDisplayName = this._userDisplayName(approver);
+      const sEmail = this._userEmail(approver);
+      const task = {
+        ID: sTaskId,
+        referenceNumber: sReferenceNumber,
+        request_ID: request.ID,
+        assignedUser_ID: approver.ID,
+        processorUser_ID: approver.ID,
+        processor: sDisplayName,
+        processorEmail: sEmail,
+        stepNo: 0,
+        taskName: "LoA Approval",
+        assignedTo: sDisplayName,
+        role: approver.role_code,
+        isMandatory: true,
+        isTeamTask: false,
+        isLoaApproval: true,
+        status_code: TASK_STATUS.OPEN
+      };
+      await cds.tx(req).run(INSERT.into(this.entities.ProcessTasks).entries(task));
+      await this._notifyTaskAssignment(req, { task });
+    }
+
+    await this._writeHistory(req, {
+      requestId: request.ID,
+      stepNo: 0,
+      action: "LOA_APPROVAL_REQUESTED",
+      actor: req.user?.id,
+      oldStatus: PROCESS_STATUS.DRAFT,
+      newStatus: PROCESS_STATUS.PENDING_APPROVAL,
+      remarks: `Approval requested from ${aApprovers.length} eligible user(s) for role(s) ${aRoleCodes.join(", ")}`
+    });
+  }
+
+  async _decideLoaApproval(req, task, decision, remarks, Users = this.masterEntities.Users) {
+    if (!task) return req.reject(404, "LoA approval task was not found");
+    if (!task.isLoaApproval) return req.reject(400, "The selected task is not an LoA approval task");
+    await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
+
+    const request = await this._getRequest(req, task.request_ID);
+    if (!request) return req.reject(404, "The request for this approval was not found");
+    if (request.status_code !== PROCESS_STATUS.PENDING_APPROVAL) {
+      return req.reject(409, "This request is no longer pending LoA approval");
+    }
+
+    const bApproved = decision === "APPROVED";
+    await cds.tx(req).run([
+      UPDATE(this.entities.ProcessTasks, task.ID).set({
+        status_code: bApproved ? TASK_STATUS.APPROVED : TASK_STATUS.REJECTED,
+        decision,
+        remarks,
+        completedAt: this._now()
+      }),
+      UPDATE(this.entities.ProcessTasks).set({
+        status_code: TASK_STATUS.CANCELLED,
+        decision: "SUPERSEDED",
+        completedAt: this._now()
+      }).where({
+        request_ID: task.request_ID,
+        isLoaApproval: true,
+        status_code: TASK_STATUS.OPEN,
+        ID: { "!=": task.ID }
+      }),
+      UPDATE(this.entities.ProcessRequests, task.request_ID).set({
+        status_code: bApproved ? PROCESS_STATUS.DRAFT : PROCESS_STATUS.REJECTED,
+        completedAt: bApproved ? null : this._now()
+      })
+    ]);
+
+    if (bApproved) {
+      await this._ensureInitialGuidedTask(req, task.request_ID, {
+        ...request,
+        status_code: PROCESS_STATUS.DRAFT
+      }, { updateRequest: true });
+    }
+
+    await this._writeHistory(req, {
+      requestId: task.request_ID,
+      stepNo: 0,
+      action: bApproved ? "LOA_APPROVED" : "LOA_REJECTED",
+      actor: req.user?.id,
+      oldStatus: PROCESS_STATUS.PENDING_APPROVAL,
+      newStatus: bApproved ? PROCESS_STATUS.IN_PROGRESS : PROCESS_STATUS.REJECTED,
+      remarks
+    });
+    return true;
   }
 
   async _ensureInitialGuidedTask(req, requestId, request, options = {}) {

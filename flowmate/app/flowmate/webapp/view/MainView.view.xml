@@ -114,6 +114,18 @@
                         </TileContent>
                     </GenericTile>
                     <GenericTile
+                        class="flowmateTile flowmateTileApprovals"
+                        header="{i18n>pendingApprovalsTitle}"
+                        subheader="{i18n>pendingApprovalsSubtitle}"
+                        state="{dashboard>/pendingApprovalsState}"
+                        press=".onOpenPendingApprovals">
+                        <TileContent>
+                            <NumericContent
+                                icon="sap-icon://approvals"
+                                value="{dashboard>/pendingApprovalsCount}" />
+                        </TileContent>
+                    </GenericTile>
+                    <GenericTile
                         class="flowmateTile flowmateTileCreate"
                         header="{i18n>createRequestTitle}"
                         subheader="{i18n>createRequestSubtitle}"

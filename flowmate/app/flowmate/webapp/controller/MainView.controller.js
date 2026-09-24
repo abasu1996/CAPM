@@ -11,6 +11,8 @@ sap.ui.define([
                 reservedRequestsState: "Loading",
                 unreservedRequestsCount: 0,
                 unreservedRequestsState: "Loading",
+                pendingApprovalsCount: 0,
+                pendingApprovalsState: "Loading",
                 tasksCount: 0,
                 tasksState: "Loading",
                 teamTasksCount: 0,
@@ -37,6 +39,12 @@ sap.ui.define([
                 "?query": {
                     unreserved: "true"
                 }
+            });
+        },
+
+        onOpenPendingApprovals() {
+            this.navTo("RouteMyTasks", {
+                "?query": { approval: "true" }
             });
         },
 
@@ -73,6 +81,7 @@ sap.ui.define([
 
             oDashboardModel.setProperty("/reservedRequestsState", "Loading");
             oDashboardModel.setProperty("/unreservedRequestsState", "Loading");
+            oDashboardModel.setProperty("/pendingApprovalsState", "Loading");
             oDashboardModel.setProperty("/tasksState", "Loading");
             oDashboardModel.setProperty("/teamTasksState", "Loading");
 
@@ -87,6 +96,13 @@ sap.ui.define([
                     oDashboardModel.setProperty("/reservedRequestsState", "Failed");
                     oDashboardModel.setProperty("/unreservedRequestsState", "Failed");
                 });
+
+            this._readPendingApprovalCount()
+                .then((iCount) => {
+                    oDashboardModel.setProperty("/pendingApprovalsCount", iCount);
+                    oDashboardModel.setProperty("/pendingApprovalsState", "Loaded");
+                })
+                .catch(() => oDashboardModel.setProperty("/pendingApprovalsState", "Failed"));
 
             this._readMyTaskCount()
                 .then((iCount) => {
@@ -130,6 +146,13 @@ sap.ui.define([
             return this._fetchJsonWithTimeout(
                 this.getServiceV4Url("getMyTaskCount()"),
                 "Task count could not be loaded"
+            ).then((vResult) => Number(vResult?.value ?? vResult ?? 0));
+        },
+
+        _readPendingApprovalCount() {
+            return this._fetchJsonWithTimeout(
+                this.getServiceV4Url("getPendingApprovalCount()"),
+                "Pending approval count could not be loaded"
             ).then((vResult) => Number(vResult?.value ?? vResult ?? 0));
         },
 

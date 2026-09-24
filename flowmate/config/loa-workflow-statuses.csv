@@ -1,0 +1,3 @@
+entity,code,name,descr,isActive
+flowmate.db.ProcessStatus,PENDING_APPROVAL,Pending Approval,Request is awaiting LoA approval,true
+flowmate.db.TaskStatus,CANCELLED,Cancelled,Task was superseded by another approval decision,true

@@ -178,7 +178,7 @@
                                 type="Number"
                                 visible="{create>/isPaymentRequest}"
                                 required="{create>/isPaymentRequest}"
-                                liveChange=".onAmountChange" />
+                                change=".onAmountChange" />
                             <Label text="{i18n>approverRoleLabel}" visible="{create>/isPaymentRequest}" />
                             <Input value="{create>/role}" visible="{create>/isPaymentRequest}" editable="false" />
                             <Label text="{i18n>descriptionLabel}" />
@@ -654,6 +654,7 @@
                 value="{create>/amount}"
                 type="Number"
                 required="{create>/isFtkDutyReimbursement}"
+                change=".onAmountChange"
             />
             <Label
                 text="{i18n>vendorCodeLabel}"
@@ -5528,6 +5529,7 @@
                 value="{create>/amount}"
                 type="Number"
                 required="{create>/isBankGuarantee}"
+                change=".onAmountChange"
             />
 
             <Label text="{i18n>guaranteeTypeLabel}" required="{create>/isBankGuarantee}" />
@@ -5788,6 +5790,56 @@
         </f:content>
     </f:DynamicPage>
     <mvc:dependents>
+        <Dialog
+            id="loaApprovalPreviewDialog"
+            title="{i18n>loaPreviewDialogTitle}"
+            contentWidth="42rem"
+            stretchOnPhone="true">
+            <content>
+                <VBox class="sapUiMediumMargin" renderType="Bare">
+                    <ObjectStatus
+                        icon="sap-icon://approvals"
+                        title="{i18n>loaMatchedRuleLabel}"
+                        text="{loaPreview>/description}"
+                        state="Information"
+                        class="sapUiSmallMarginBottom" />
+                    <form:SimpleForm
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="4"
+                        labelSpanM="4">
+                        <Label text="{i18n>amountLabel}" />
+                        <ObjectNumber number="{loaPreview>/amount}" unit="LKR" emphasized="true" />
+                        <Label text="{i18n>loaApprovalModeLabel}" />
+                        <Text text="{loaPreview>/approvalModeText}" />
+                        <Label text="{i18n>loaApproverRolesLabel}" />
+                        <Text text="{loaPreview>/approverRoleCodes}" wrapping="true" />
+                    </form:SimpleForm>
+                    <Title text="{i18n>loaEligibleApproversTitle}" level="H4" class="sapUiSmallMarginTop sapUiTinyMarginBottom" />
+                    <List
+                        items="{loaPreview>/approvers}"
+                        noDataText="{i18n>loaNoApproversAssignedText}"
+                        showSeparators="Inner">
+                        <StandardListItem
+                            icon="sap-icon://person-placeholder"
+                            title="{loaPreview>displayName}"
+                            description="{loaPreview>email}"
+                            info="{loaPreview>role_code}"
+                            infoState="Information" />
+                    </List>
+                    <MessageStrip
+                        visible="{= !${loaPreview>/hasApprovers} }"
+                        text="{i18n>loaNoApproversGuidanceText}"
+                        type="Warning"
+                        showIcon="true"
+                        class="sapUiSmallMarginTop" />
+                </VBox>
+            </content>
+            <beginButton>
+                <Button text="{i18n>closeButton}" type="Emphasized" press=".onCloseLoaApprovalPreview" />
+            </beginButton>
+        </Dialog>
         <TableSelectDialog
             id="predecessorRequestValueHelpDialog"
             title="{i18n>selectLinkedRequestTitle}"

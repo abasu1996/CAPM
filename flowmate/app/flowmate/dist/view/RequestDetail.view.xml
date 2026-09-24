@@ -62,7 +62,7 @@
                                 <MenuItem
                                     text="{i18n>reserveRequestButton}"
                                     icon="sap-icon://locked"
-                                    visible="{= !${reservedBy} }"
+                                    visible="{= !${reservedBy} &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' }"
                                     press=".onReserveRequest" />
                                 <MenuItem
                                     text="{i18n>assignRequestToUserButton}"

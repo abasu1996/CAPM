@@ -135,9 +135,24 @@ entity WorkingCalendarHolidays : cuid, managed {
 }
 
 entity LoaApproval : cuid, managed {
-    amount   : Decimal(15, 2);
-    operator : Association to Operator;
-    roleCode : String(40);
+    ruleCode             : String(50);
+    description          : String(255);
+    minimumAmount        : Decimal(15, 2);
+    maximumAmount        : Decimal(15, 2);
+    minimumInclusive     : Boolean default true;
+    maximumInclusive     : Boolean default true;
+    approvalMode         : String(10) default 'SINGLE'; // SINGLE or ANY
+    approverRoleCodes    : String(500);
+    conditionCode        : String(50);
+    conditionDescription : String(1000);
+    priority             : Integer default 0;
+    isActive             : Boolean default true;
+    remarks              : String(1000);
+
+    // Kept for compatibility with existing deployments and API consumers.
+    amount               : Decimal(15, 2);
+    operator             : Association to Operator;
+    roleCode             : String(40);
 }
 
 entity Users : cuid, managed {
@@ -466,6 +481,7 @@ entity ProcessTasks : cuid, managed {
     role        : String(100);
     isMandatory : Boolean default false;
     isTeamTask  : Boolean default false;
+    isLoaApproval : Boolean default false;
     status      : Association to TaskStatus;
     decision    : String(30);
     remarks     : LargeString;

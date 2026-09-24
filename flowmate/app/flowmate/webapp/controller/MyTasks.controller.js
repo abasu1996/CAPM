@@ -39,14 +39,17 @@ sap.ui.define([
             const oQuery = oEvent.getParameter("arguments")["?query"];
             const sTaskId = oQuery && oQuery.taskId;
             const bTeamMode = oQuery?.team === "true";
+            const bApprovalMode = oQuery?.approval === "true";
 
             this._iPendingDataRequests = 0;
             this._updateBusyState();
             this._bTeamMode = bTeamMode;
+            this._bApprovalMode = bApprovalMode;
             this.getView().getModel("taskView").setData({
                 teamMode: bTeamMode,
-                title: this.getText(bTeamMode ? "myTeamTasksTitle" : "myTasksTitle"),
-                tableHeader: this.getText(bTeamMode ? "myTeamTasksTableHeader" : "tasksTableHeader")
+                approvalMode: bApprovalMode,
+                title: this.getText(bApprovalMode ? "pendingApprovalsTitle" : (bTeamMode ? "myTeamTasksTitle" : "myTasksTitle")),
+                tableHeader: this.getText(bApprovalMode ? "pendingApprovalsTableHeader" : (bTeamMode ? "myTeamTasksTableHeader" : "tasksTableHeader"))
             });
             this._bindTasksTable();
 
@@ -413,6 +416,12 @@ sap.ui.define([
 
             oTable.bindItems({
                 path: this._taskCollectionPath(),
+                filters: this._bApprovalMode
+                    ? [
+                        new Filter("isLoaApproval", FilterOperator.EQ, true),
+                        new Filter("status_code", FilterOperator.EQ, "OPEN")
+                    ]
+                    : [new Filter("isLoaApproval", FilterOperator.EQ, false)],
                 parameters: {
                     expand: "request"
                 },

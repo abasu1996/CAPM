@@ -114,8 +114,12 @@ sap.ui.define([
 
         onSearchLoa(oEvent) {
             this._filterTable(oEvent, "loaApprovalTable", [
-                "operator_code",
-                "roleCode"
+                "ruleCode",
+                "description",
+                "approverRoleCodes",
+                "conditionCode",
+                "conditionDescription",
+                "remarks"
             ]);
         },
 
@@ -338,11 +342,15 @@ sap.ui.define([
 
         async onSaveLoaApproval() {
             const oEntry = this.getView().getModel("loaApprovalEdit").getData();
-            const fAmount = Number(oEntry.amount);
-            const sOperator = String(oEntry.operator_code || "").trim();
-            const sRoleCode = String(oEntry.roleCode || "").trim();
+            const sRuleCode = String(oEntry.ruleCode || "").trim();
+            const sApproverRoleCodes = String(oEntry.approverRoleCodes || "").trim();
+            const fMinimumAmount = this._optionalNumber(oEntry.minimumAmount);
+            const fMaximumAmount = this._optionalNumber(oEntry.maximumAmount);
 
-            if (oEntry.amount === "" || !Number.isFinite(fAmount) || !sOperator || !sRoleCode) {
+            if (!sRuleCode || !sApproverRoleCodes
+                || (fMinimumAmount !== null && !Number.isFinite(fMinimumAmount))
+                || (fMaximumAmount !== null && !Number.isFinite(fMaximumAmount))
+                || (fMinimumAmount !== null && fMaximumAmount !== null && fMinimumAmount > fMaximumAmount)) {
                 MessageBox.warning(this.getText("loaApprovalRequiredMessage"));
                 return;
             }
@@ -352,9 +360,19 @@ sap.ui.define([
                 createPath: "/LoaApproval",
                 updatePath: `/LoaApproval(guid'${oEntry.ID}')`,
                 payload: {
-                    amount: fAmount,
-                    operator_code: sOperator,
-                    roleCode: sRoleCode
+                    ruleCode: sRuleCode,
+                    description: String(oEntry.description || "").trim(),
+                    minimumAmount: fMinimumAmount,
+                    maximumAmount: fMaximumAmount,
+                    minimumInclusive: oEntry.minimumInclusive !== false,
+                    maximumInclusive: oEntry.maximumInclusive !== false,
+                    approvalMode: oEntry.approvalMode || "SINGLE",
+                    approverRoleCodes: sApproverRoleCodes,
+                    conditionCode: String(oEntry.conditionCode || "").trim() || null,
+                    conditionDescription: String(oEntry.conditionDescription || "").trim() || null,
+                    priority: Number(oEntry.priority || 0),
+                    isActive: oEntry.isActive !== false,
+                    remarks: String(oEntry.remarks || "").trim() || null
                 },
                 successCreateKey: "loaApprovalCreatedMessage",
                 successUpdateKey: "loaApprovalUpdatedMessage",
@@ -983,9 +1001,19 @@ sap.ui.define([
                 dialogTitle: "",
                 isEdit: false,
                 ID: "",
-                amount: "",
-                operator_code: "",
-                roleCode: ""
+                ruleCode: "",
+                description: "",
+                minimumAmount: "",
+                maximumAmount: "",
+                minimumInclusive: true,
+                maximumInclusive: true,
+                approvalMode: "SINGLE",
+                approverRoleCodes: "",
+                conditionCode: "",
+                conditionDescription: "",
+                priority: 0,
+                isActive: true,
+                remarks: ""
             };
         },
 

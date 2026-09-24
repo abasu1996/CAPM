@@ -458,6 +458,16 @@ sap.ui.define([
             }
         },
         onInit() {
+            this.getView().setModel(new JSONModel({
+                amount: null,
+                ruleCode: "",
+                description: "",
+                approvalMode: "",
+                approvalModeText: "",
+                approverRoleCodes: "",
+                approvers: [],
+                hasApprovers: false
+            }), "loaPreview");
             this.getRouter().getRoute("RouteRequestCreate").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -3484,41 +3494,127 @@ sap.ui.define([
             }
 
             try {
-                oCreateModel.setProperty("/role", await this._resolveLoaRole(fAmount));
+                const oRule = await this._resolveLoaRule(
+                    fAmount,
+                    oCreateModel.getProperty("/subProcessType_code")
+                );
+                oCreateModel.setProperty("/role", oRule?.approverRoleCodes || oRule?.roleCode || "");
+
+                if (oRule) {
+                    await this._showLoaApprovalPreview(fAmount, oRule);
+                }
             } catch (oError) {
                 oCreateModel.setProperty("/role", "");
+                MessageBox.error(this.getErrorMessage(oError, this.getText("loaPreviewLoadErrorMessage")));
             }
         },
 
-        async _resolveLoaRole(fAmount) {
+        async _resolveLoaRole(fAmount, sSubProcessTypeCode) {
+            const oRule = await this._resolveLoaRule(fAmount, sSubProcessTypeCode);
+            return oRule?.approverRoleCodes || oRule?.roleCode || "";
+        },
+
+        async _resolveLoaRule(fAmount, sSubProcessTypeCode) {
             const aRules = await this._readList("/LoaApproval", { sorters: [] });
             let oWinner = null;
 
             aRules.forEach((oRule) => {
-                const fThreshold = Number(oRule.amount);
-
-                if (!Number.isFinite(fThreshold) || !this._evaluateOperator(fAmount, oRule.operator_code, fThreshold)) {
+                if (oRule.isActive === false || !this._matchesLoaCondition(oRule.conditionCode, sSubProcessTypeCode)) {
                     return;
                 }
 
-                if (!oWinner) {
-                    oWinner = oRule;
+                const bStructuredRule = Boolean(oRule.ruleCode);
+                let bMatches = false;
+
+                if (bStructuredRule) {
+                    const bAboveMinimum = oRule.minimumAmount === null || oRule.minimumAmount === undefined
+                        || (oRule.minimumInclusive === false ? fAmount > Number(oRule.minimumAmount) : fAmount >= Number(oRule.minimumAmount));
+                    const bBelowMaximum = oRule.maximumAmount === null || oRule.maximumAmount === undefined
+                        || (oRule.maximumInclusive === false ? fAmount < Number(oRule.maximumAmount) : fAmount <= Number(oRule.maximumAmount));
+                    bMatches = bAboveMinimum && bBelowMaximum;
+                } else {
+                    const fThreshold = Number(oRule.amount);
+                    bMatches = Number.isFinite(fThreshold) && this._evaluateOperator(fAmount, oRule.operator_code, fThreshold);
+                }
+
+                if (!bMatches) {
                     return;
                 }
 
-                const bPrefersHigher = this._prefersHigherThreshold(oRule.operator_code);
-                const fWinnerThreshold = Number(oWinner.amount);
-
-                if ((bPrefersHigher && fThreshold > fWinnerThreshold) || (!bPrefersHigher && fThreshold < fWinnerThreshold)) {
+                if (!oWinner || this._loaRuleRank(oRule) > this._loaRuleRank(oWinner)) {
                     oWinner = oRule;
                 }
             });
 
-            return oWinner?.roleCode || "";
+            return oWinner;
         },
 
-        _prefersHigherThreshold(sOperator) {
-            return sOperator === ">" || sOperator === ">=";
+        async _showLoaApprovalPreview(fAmount, oRule) {
+            const aRoleCodes = String(oRule.approverRoleCodes || oRule.roleCode || "")
+                .split(";")
+                .map((sRoleCode) => sRoleCode.trim())
+                .filter(Boolean);
+            const aRoleFilters = aRoleCodes.map((sRoleCode) =>
+                new Filter("role_code", FilterOperator.EQ, sRoleCode)
+            );
+            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+
+            if (aRoleFilters.length) {
+                aFilters.push(new Filter({ filters: aRoleFilters, and: false }));
+            }
+
+            const aApprovers = aRoleCodes.length
+                ? await this._readList("/Users", {
+                    filters: [new Filter({ filters: aFilters, and: true })],
+                    urlParameters: {
+                        "$select": "ID,displayName,email,department,role_code"
+                    }
+                })
+                : [];
+            const oPreviewModel = this.getView().getModel("loaPreview");
+
+            oPreviewModel.setData({
+                amount: fAmount,
+                ruleCode: oRule.ruleCode || "",
+                description: oRule.description || "",
+                approvalMode: oRule.approvalMode || "SINGLE",
+                approvalModeText: oRule.approvalMode === "ANY"
+                    ? this.getText("loaAnyApproverModeText")
+                    : this.getText("loaSingleApproverModeText"),
+                approverRoleCodes: aRoleCodes.join(", "),
+                approvers: aApprovers
+                    .map((oUser) => ({
+                        ...oUser,
+                        department: oUser.department || this.getText("loaDepartmentNotMaintainedText")
+                    }))
+                    .sort((a, b) => String(a.displayName || "").localeCompare(String(b.displayName || ""))),
+                hasApprovers: aApprovers.length > 0
+            });
+            this.byId("loaApprovalPreviewDialog").open();
+        },
+
+        onCloseLoaApprovalPreview() {
+            this.byId("loaApprovalPreviewDialog").close();
+        },
+
+        _matchesLoaCondition(sConditionCode, sSubProcessTypeCode) {
+            if (!sConditionCode) {
+                return true;
+            }
+            return sConditionCode === "NOTE_36" && [
+                "NON_PO_IMPORT_TRC",
+                "NON_PO_IMPORT_DGC_ADV",
+                "NON_PO_IMPORT_DGC_DIRECT"
+            ].includes(sSubProcessTypeCode);
+        },
+
+        _loaRuleRank(oRule) {
+            const iPriority = Number(oRule.priority || 0);
+            const iStructured = oRule.ruleCode ? 1 : 0;
+            const fUpper = oRule.maximumAmount === null || oRule.maximumAmount === undefined
+                ? Number.MAX_SAFE_INTEGER
+                : Number(oRule.maximumAmount);
+            return iPriority * 1e18 + iStructured * 1e17 - fUpper;
         },
 
         _evaluateOperator(fAmount, sOperator, fThreshold) {

@@ -35,6 +35,12 @@
     "swagger:generate": "node scripts/generate-openapi.js",
     "seed:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js",
     "delete:requests:hybrid": "cds bind --profile hybrid --exec -- node scripts/seed-process-requests.js --delete",
+    "loa:apply": "node scripts/apply-loa-approval-matrix.js",
+    "loa:apply:hybrid": "cds bind --profile hybrid --exec -- node scripts/apply-loa-approval-matrix.js",
+    "loa:apply:dialog": "cds bind --profile Dialog-Hybrid --exec -- node scripts/apply-loa-approval-matrix.js",
+    "loa:statuses:apply": "node scripts/apply-loa-workflow-statuses.js",
+    "loa:statuses:apply:hybrid": "cds bind --profile hybrid --exec -- node scripts/apply-loa-workflow-statuses.js",
+    "loa:statuses:apply:dialog": "cds bind --profile Dialog-Hybrid --exec -- node scripts/apply-loa-workflow-statuses.js",
     "setup:api-key": "bash scripts/create-flowmate-api-key.sh"
   },
   "private": true,
@@ -74,6 +80,9 @@
               "roles": [
                 "Admin"
               ]
+            },
+            "anim@brainbox.consulting": {
+              "password": "FlowmateApprover1!"
             },
             "venkata.manisha@ext.dialog.lk": {
               "password": "FlowmateAdmin1!",

@@ -63,7 +63,7 @@
                                 icon="sap-icon://delete"
                                 text="{i18n>deleteSelectedButton}"
                                 type="Reject"
-                                visible="{= !${taskView>/teamMode} }"
+                                visible="{= !${taskView>/teamMode} &amp;&amp; !${taskView>/approvalMode} }"
                                 press=".onDeleteSelectedTasks" />
                         </OverflowToolbar>
                         <Table
@@ -180,7 +180,7 @@
                             <Button
                                 icon="sap-icon://email"
                                 text="{i18n>notifyProcessorButton}"
-                                visible="{= !${taskView>/teamMode} }"
+                                visible="{= !${taskView>/teamMode} &amp;&amp; !${taskView>/approvalMode} }"
                                 press=".onNotifyProcessor" />
                             <Button
                                 icon="sap-icon://employee-approvals"
@@ -196,7 +196,7 @@
                                 press=".onApprove" />
                             <Button
                                 text="{i18n>sendBackButton}"
-                                visible="{= !${taskView>/teamMode} }"
+                                visible="{= !${taskView>/teamMode} &amp;&amp; !${taskView>/approvalMode} }"
                                 enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                 press=".onSendBack" />
                             <Button

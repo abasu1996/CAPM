@@ -297,6 +297,8 @@ service FlowmateService {
     action completeGuidedStep(requestId: UUID, stepNo: Integer, remarks: String, progressionMode: String(30)) returns Boolean;
     action getGuidedProcessTasks(requestId: UUID) returns many GuidedProcessTask;
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
+    action approveLoaRequest(taskId: UUID, remarks: String) returns Boolean;
+    action rejectLoaRequest(taskId: UUID, remarks: String) returns Boolean;
     action sendBack(taskId: UUID, remarks: String, targetStepNo: Integer) returns Boolean;
     action sendRequestEmail(
         requestId: UUID,
@@ -379,6 +381,7 @@ service FlowmateService {
         unreservedRequests : Integer;
         reservedRequests   : Integer;
     };
+    function getPendingApprovalCount() returns Integer;
     function getMyTaskCount() returns Integer;
     function getMyTeamTaskCount() returns Integer;
     action getReportDashboard(filter: ReportFilter) returns ReportDashboard;

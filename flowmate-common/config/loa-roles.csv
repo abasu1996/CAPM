@@ -1,0 +1,23 @@
+code,name,descr,isActive
+SPECIALIST,Specialist,Specialist within the portfolio,true
+ASSISTANT_MANAGER,Assistant Manager,Assistant Manager within the portfolio,true
+UNIT_MANAGER,Unit Manager,Unit Manager within the portfolio,true
+MANAGER,Manager,Manager within the portfolio,true
+CHIEF_MANAGER,Chief Manager,Chief Manager within the portfolio,true
+SENIOR_MANAGER,Senior Manager,Senior Manager within the portfolio,true
+SGM,Senior General Manager,Senior General Manager within the portfolio,true
+GM,General Manager,General Manager within the portfolio,true
+HEAD,Head,Head within the portfolio,true
+CHIEF_OFFICER,Chief Officer,Chief Officer within the portfolio,true
+SVP,Senior Vice President,Senior Vice President within the portfolio,true
+VP,Vice President,Vice President within the portfolio,true
+GFC,Group Financial Controller,Group Financial Controller,true
+GBC,Group Business Controller,Group Business Controller,true
+GCOO,Group Chief Operating Officer,Group Chief Operating Officer,true
+GCFO,Group Chief Financial Officer,Group Chief Financial Officer,true
+GCEO,Group Chief Executive Officer,Group Chief Executive Officer,true
+HEAD_GFAR,Head - GFAR,Head - Group Financial Accounting and Reporting,true
+HOD_TECH_FULFILMENT_ASSURANCE,HoD - Technology Fulfilment and Assurance,Head of Department - Technology Fulfilment and Assurance,true
+MANAGER_IMPORTS_SCM,Manager Imports - SCM,Manager Imports - Supply Chain Management,true
+HEAD_SCM,Head of SCM,Head of Supply Chain Management,true
+GCPO,Group Chief Procurement Officer,Group Chief Procurement Officer,true
