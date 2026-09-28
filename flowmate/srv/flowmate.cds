@@ -205,7 +205,11 @@ service FlowmateService {
         settlementEntries : redirected to SettlementEntries,
         merchantEntityValues : redirected to MerchantEntityValues,
         attachments : redirected to ProcessAttachments,
-        emailMessages : redirected to ProcessEmailMessages
+        emailMessages : redirected to ProcessEmailMessages,
+        treasuryEntity : redirected to FtkEntities,
+        treasuryCurrency : redirected to Currencies,
+        whtEntity : redirected to FtkEntities,
+        whtCurrency : redirected to Currencies,
     };
     @cds.redirection.target
     entity ProcessTasks as projection on fldb.ProcessTasks {

@@ -338,6 +338,25 @@
                                             icon="sap-icon://employee-approvals"
                                             visible="{permissions>/isAdmin}"
                                             press=".onOpenAssignRequestUserDialog" />
+                                        <MenuItem
+                                            text="{i18n>createTreasuryConfirmationButton}"
+                                            icon="sap-icon://money-bills"
+                                            visible="{viewDemandTasks>/showTreasuryConfirmation}"
+                                            press=".onOpenTreasuryConfirmationDialog" />
+
+                                        <!-- WHT Clearance -->
+                                        <MenuItem
+                                            text="{i18n>createWhtClearanceButton}"
+                                            icon="sap-icon://receipt"
+                                            visible="{viewDemandTasks>/showWhtClearance}"
+                                            press=".onOpenWhtClearanceDialog" />
+
+                                        <!-- Budget Check -->
+                                        <MenuItem
+                                            text="{i18n>createBudgetCheckButton}"
+                                            icon="sap-icon://checklist"
+                                            visible="{viewDemandTasks>/showBudgetCheck}"
+                                            press=".onTriggerBudgetCheckTask" />
                                     </Menu>
                                 </menu>
                             </MenuButton>
@@ -608,7 +627,8 @@
                     </uxap:ObjectPageSection> -->
                     <uxap:ObjectPageSection
                         title="{i18n>ftkFactoringDetailsTitle}"
-                        visible="{= ${subProcessType_code} === 'FTK_FACTORING_PO_VALIDATION' || ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' }">
+                        visible="{= ${subProcessType_code} === 'FTK_FACTORING_PO_VALIDATION_HW' || ${subProcessType_code} === 'FTK_FACTORING_PO_VALID_HW_SW'
+                        || ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' }">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
@@ -690,7 +710,7 @@
                                     <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
                                     <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
                                     <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
-                                    <Label text="{i18n>amountLabel}" /><Text text="{amount}" />
+                                    <Label text="{i18n>amountLabel}" /><Text text="{amountPayable}" />
                                     <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
                                     <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
                                     <Label text="{i18n>invoiceDebitNoteDateLabel}" />
@@ -747,6 +767,7 @@
                                     <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
                                     <Label text="{i18n>paymentSubCategoryLabel}" /><Text text="{paymentSubCategory/name}" />
                                     <Label text="{i18n>userDivisionRepresentativeNameLabel}" /><Text text="{userDivisionRepresentativeName}" />
+                                    <Label text="{i18n>highestInvoiceValueLabel}" /><Text text="{highestInvoiceValue}" />
                                     <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
                                 </form:SimpleForm>
                             </uxap:blocks>
@@ -771,6 +792,7 @@
                                     <Label text="{i18n>paymentSubCategoryLabel}" /><Text text="{paymentSubCategory/name}" />
                                     <Label text="{i18n>userDivisionRepresentativeNameLabel}" /><Text text="{userDivisionRepresentativeName}" />
                                     <Label text="{i18n>remainingBalanceAfterAdvanceSettlementLabel}" /><Text text="{remainingBalanceAfterAdvanceSettlement}" />
+                                    <Label text="{i18n>highestInvoiceValueLabel}" /><Text text="{highestInvoiceValue}" />
                                     <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
                                 </form:SimpleForm>
                             </uxap:blocks>
@@ -1024,44 +1046,314 @@
                                     labelSpanXL="3" labelSpanL="3" labelSpanM="4" columnsXL="2" columnsL="2" columnsM="1" adjustLabelSpan="false">
                                     <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
                                     <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
+                                    <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
                                 </form:SimpleForm>
                             </uxap:blocks>
                         </uxap:ObjectPageSubSection>
                     </uxap:subSections>
                 </uxap:ObjectPageSection>
 
-                <uxap:ObjectPageSection
+              <uxap:ObjectPageSection
                     title="{i18n>directForeignTravelEntriesDetailsTitle}"
-                    visible="{= ${subProcessType_code} === 'NON_PO_DIRECT_FOREIGN_TRAVEL' }">
+                    visible="{= ${subProcessType_code} === 'NON_PO_DIRECT_FOREIGN_TRAVEL' }"
+                >
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
                             <uxap:blocks>
-                                <Table class="flowmateTable" noDataText="{i18n>noDirectForeignTravelEntriesText}" items="{directForeignTravelEntries}">
+
+                                <ScrollContainer
+                                    width="100%"
+                                    horizontal="true"
+                                    vertical="false"
+                                    focusable="true"
+                                >
+                                <Table
+                                    id="directForeignTravelDetailsTable"
+                                    class="flowmateTable"
+                                    fixedLayout="false"
+                                    noDataText="{i18n>noDirectForeignTravelEntriesText}"
+                                    items="{directForeignTravelEntries}"
+                                    popinLayout="Block"
+                                >
                                     <columns>
-                                        <Column><Text text="{i18n>travelerNameLabel}" /></Column>
-                                        <Column><Text text="{i18n>vendorCodeLabel}" /></Column>
-                                        <Column><Text text="{i18n>ctmProposalNoLabel}" /></Column>
-                                        <Column><Text text="{i18n>purposeOfTravelLabel}" /></Column>
-                                        <Column><Text text="{i18n>currencyLabel}" /></Column>
-                                        <Column hAlign="End"><Text text="{i18n>perDiemCalculationLabel}" /></Column>
+
+                                        <!-- Always visible -->
+                                        <Column width="12rem">
+                                            <Text text="{i18n>travelerNameLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column width="9rem">
+                                            <Text text="{i18n>categoryLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <!-- Pop in progressively as screen narrows -->
+                                        <Column
+                                            width="9rem"
+                                            demandPopin="true"
+                                            minScreenWidth="Tablet"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>vendorCodeLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="10rem"
+                                            demandPopin="true"
+                                            minScreenWidth="30em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>ctmProposalNoLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="14rem"
+                                            demandPopin="true"
+                                            minScreenWidth="30em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>purposeOfTravelLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="12rem"
+                                            demandPopin="true"
+                                            minScreenWidth="40em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>venueLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="11rem"
+                                            demandPopin="true"
+                                            minScreenWidth="40em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>departureDateTimeLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="11rem"
+                                            demandPopin="true"
+                                            minScreenWidth="48em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>arrivalDateTimeLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="9rem"
+                                            demandPopin="true"
+                                            minScreenWidth="48em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>budgetCodeLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="7rem"
+                                            demandPopin="true"
+                                            minScreenWidth="55em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>currencyLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="9rem"
+                                            hAlign="End"
+                                            demandPopin="true"
+                                            minScreenWidth="55em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>airfareLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="9rem"
+                                            demandPopin="true"
+                                            minScreenWidth="60em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>visaFeeLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="13rem"
+                                            hAlign="End"
+                                            demandPopin="true"
+                                            minScreenWidth="60em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>perDiemCalculationLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="9rem"
+                                            hAlign="End"
+                                            demandPopin="true"
+                                            minScreenWidth="65em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>exchangeRateLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="10rem"
+                                            hAlign="End"
+                                            demandPopin="true"
+                                            minScreenWidth="65em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>totalInUSDLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="10rem"
+                                            hAlign="End"
+                                            demandPopin="true"
+                                            minScreenWidth="70em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>totalInLKRLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="13rem"
+                                            hAlign="End"
+                                            demandPopin="true"
+                                            minScreenWidth="70em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>totalCostForeignCurrencyLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="11rem"
+                                            hAlign="End"
+                                            demandPopin="true"
+                                            minScreenWidth="75em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>totalCostLKRLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="15rem"
+                                            demandPopin="true"
+                                            minScreenWidth="75em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>confirmedTravelItineraryLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="10rem"
+                                            demandPopin="true"
+                                            minScreenWidth="80em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>selectedSchemeLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="11rem"
+                                            demandPopin="true"
+                                            minScreenWidth="80em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>personalTravelInvolvedLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <Column
+                                            width="12rem"
+                                            demandPopin="true"
+                                            minScreenWidth="85em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>periodOfPersonalTravelLabel}" wrapping="false" />
+                                        </Column>
+
+                                        <!-- <Column
+                                            width="15rem"
+                                            demandPopin="true"
+                                            minScreenWidth="85em"
+                                            popinDisplay="Inline"
+                                        >
+                                            <Text text="{i18n>specialRemarksLabel}" wrapping="false" />
+                                        </Column> -->
+
                                     </columns>
+
                                     <items>
                                         <ColumnListItem>
                                             <cells>
-                                                <Text text="{travelerName}" />
-                                                <Text text="{vendorCode}" />
-                                                <Text text="{ctmProposalNo}" />
-                                                <Text text="{purposeOfTravel}" />
-                                                <Text text="{currency_code}" />
-                                                <Text text="{= ${perDayAllowanceUSD} + ' x ' + ${noOfDays} + ' = ' + ${totalInUSD} + ' USD' }" textAlign="End" />
+
+                                                <ObjectIdentifier
+                                                    title="{travelerName}"
+                                                />
+                                                <Text text="{category}" wrapping="false" />
+                                                <Text text="{vendorCode}" wrapping="false" />
+                                                <Text text="{ctmProposalNo}" wrapping="false" />
+                                                <Text text="{purposeOfTravel}" wrapping="false" />
+                                                <Text text="{venue}" wrapping="false" />
+
+                                                <Text
+                                                    text="{
+                                                        path: 'departureDateTime',
+                                                        type: 'sap.ui.model.type.DateTime',
+                                                        formatOptions: {
+                                                            pattern: 'yyyy-MM-dd HH:mm'
+                                                        }
+                                                    }"
+                                                    wrapping="false"
+                                                />
+
+                                                <Text
+                                                    text="{
+                                                        path: 'arrivalDateTime',
+                                                        type: 'sap.ui.model.type.DateTime',
+                                                        formatOptions: {
+                                                            pattern: 'yyyy-MM-dd HH:mm'
+                                                        }
+                                                    }"
+                                                    wrapping="false"
+                                                />
+
+                                                <Text text="{budgetCode}" wrapping="false" />
+                                                <Text text="{currency_code}" wrapping="false" />
+                                                <Text text="{airfare}" wrapping="false" textAlign="End" />
+                                                <Text text="{visaFee}" wrapping="false" />
+
+                                                <Text
+                                                    text="{= ${perDayAllowanceUSD} + ' x ' + ${noOfDays} + ' = ' + ${totalInUSD} + ' USD' }"
+                                                    wrapping="false"
+                                                    textAlign="End"
+                                                />
+
+                                                <Text text="{exchangeRate}" wrapping="false" textAlign="End" />
+                                                <Text text="{totalInUSD}" wrapping="false" textAlign="End" />
+                                                <Text text="{totalInLKR}" wrapping="false" textAlign="End" />
+                                                <Text text="{totalCostForeignCurrency}" wrapping="false" textAlign="End" />
+                                                <Text text="{totalCostLKR}" wrapping="false" textAlign="End" />
+                                                <Text text="{confirmedTravelItinerary}" wrapping="false" />
+                                                <Text text="{selectedScheme}" wrapping="false" />
+                                                <Text text="{= ${personalTravelInvolved} ? 'Yes' : 'No' }" wrapping="false" />
+                                                <Text text="{periodOfPersonalTravel}" wrapping="false" />
+                                                <!-- <Text text="{specialRemarks}" wrapping="false" /> -->
+
                                             </cells>
                                         </ColumnListItem>
                                     </items>
+
                                 </Table>
+                                </ScrollContainer>
+
                             </uxap:blocks>
                         </uxap:ObjectPageSubSection>
                     </uxap:subSections>
                 </uxap:ObjectPageSection>
+          
 
                 <uxap:ObjectPageSection
                     title="{= ${subProcessType_code} === 'NON_PO_FUEL_STAFF' ? ${i18n>nonPoFuelStaffDetailsTitle} : ${i18n>nonPoFuelGeneratorDetailsTitle} }"
@@ -1483,7 +1775,7 @@
 
                 <uxap:ObjectPageSection
                     title="{i18n>nonPoInterconnectRoamPayDetailsTitle}"
-                    visible="{= ${subProcessType_code} === 'NON_PO_INTERCONNECT_ROAM_PAY' }">
+                   visible="{= ${subProcessType_code} === 'NON_PO_INTERCONNECTION_PAY' || ${subProcessType_code} === 'NON_PO_ROAMING_PAY' }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
                             <uxap:blocks>
@@ -1640,7 +1932,8 @@
                                     <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
                                     <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
                                     <Label text="{i18n>sesReferenceCreditCardLabel}" /><Text text="{sesReference}" />
-                                    <Label text="{i18n>totalAmountPayableLabel}" /><Text text="{totalAmountPayable}" />
+                                    <Label text="{i18n>transactionAmountDocumentCurrencyLabel}" /><Text text="{transactionAmountDocumentCurrency}" />
+                                    <Label text="{i18n>transactionAmountLocalCurrencyLabel}" /><Text text="{transactionAmountLocalCurrency}" />
                                     <Label text="{i18n>descriptionOfPaymentLabel}" /><Text text="{descriptionOfPayment}" wrapping="true" />
                                     <Label text="{i18n>budgetCodeLabel}" /><Text text="{budgetCode}" />
                                     <Label text="{i18n>justificationForCreditCardUseLabel}" /><Text text="{justificationForCreditCardUse}" wrapping="true" />
@@ -1694,8 +1987,8 @@
                                         <Column><Text text="{i18n>invoiceNumberLabel}" /></Column>
                                         <Column><Text text="{i18n>invoiceDateLabel}" /></Column>
                                         <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>descriptionLabel}" /></Column>
-                                        <Column hAlign="End"><Text text="{i18n>transactionAmountUSDLabel}" /></Column>
-                                        <Column hAlign="End"><Text text="{i18n>paymentAmountLKRLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>transactionAmountDocumentCurrencyLabel}" /></Column>
+                                        <Column hAlign="End"><Text text="{i18n>transactionAmountLocalCurrencyLabel}" /></Column>
                                         <Column hAlign="Center"><Text text="{i18n>availabilityOfInvoiceLabel}" /></Column>
                                     </columns>
                                     <items>
@@ -1707,8 +2000,8 @@
                                                 <Text text="{invoiceNumber}" />
                                                 <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
                                                 <Text text="{description}" wrapping="true" />
-                                                <Text text="{transactionAmountUSD}" textAlign="End" />
-                                                <Text text="{paymentAmountLKR}" textAlign="End" />
+                                                <Text text="{transactionAmountDocumentCurrency}" textAlign="End" />
+                                                <Text text="{transactionAmountLocalCurrency}" textAlign="End" />
                                                 <core:Icon
                                                     src="{= ${availabilityOfInvoice} ? 'sap-icon://accept' : 'sap-icon://decline' }"
                                                     color="{= ${availabilityOfInvoice} ? '#107e3e' : '#bb0000' }" />
@@ -1781,7 +2074,7 @@
                                     <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
                                     <Label text="{i18n>depositedAmountLabel}" /><Text text="{depositedAmount}" />
                                     <Label text="{i18n>costCentreLabel}" /><Text text="{costCentre}" />
-                                    <Label text="{i18n>debitGLLabel}" /><Text text="{debitGL}" />
+                                    <!-- <Label text="{i18n>debitGLLabel}" /><Text text="{debitGL}" /> -->
                                     <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
                                 </form:SimpleForm>
                             </uxap:blocks>
@@ -1819,7 +2112,7 @@
                                     <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
                                     <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
                                     <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
-                                    <Label text="{i18n>amountLabel}" /><Text text="{amount}" />
+                                    <Label text="{i18n>amountLabel}" /><Text text="{amountPayable}" />
                                     <Label text="{i18n>guaranteeTypeLabel}" /><Text text="{guaranteeType/name}" />
                                     <Label text="{i18n>beneficiaryNameLabel}" /><Text text="{beneficiaryName}" />
                                     <Label text="{i18n>beneficiaryAddressLabel}" /><Text text="{beneficiaryAddress}" wrapping="true" />
@@ -2318,16 +2611,16 @@
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
-                                enabled="{requestEdit>/editable}"
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
                                 press=".onApproveRequestTask" />
                             <Button
                                 text="{i18n>sendBackButton}"
-                                enabled="{requestEdit>/editable}"
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
                                 press=".onSendBackRequestTask" />
                             <Button
                                 text="{i18n>rejectButton}"
                                 type="Reject"
-                                enabled="{requestEdit>/editable}"
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
                                 press=".onRejectRequestTask" />
                             <Button
                                 icon="sap-icon://decline"
@@ -2461,8 +2754,136 @@
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
+                   <uxap:ObjectPageSection
+                        title="Treasury Confirmation"
+                        visible="{= ${role} === 'Treasury' }">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanXL="3"
+                                        labelSpanL="3"
+                                        labelSpanM="4"
+                                        columnsXL="2"
+                                        columnsL="2"
+                                        columnsM="1"
+                                        adjustLabelSpan="false">
+                                        <Label text="{i18n>entityLabel}" />
+                                        <Text text="{request/treasuryEntity_code}" />
+                                        <Label text="{i18n>debitAccountNameLabel}" />
+                                        <Text text="{request/debitAccountName}" />
+                                        <Label text="{i18n>debitAccountNumberLabel}" />
+                                        <Text text="{request/debitAccountNumber}" />
+                                        <Label text="{i18n>beneficiaryLabel}" />
+                                        <Text text="{request/beneficiary}" />
+                                        <Label text="{i18n>currencyLabel}" />
+                                        <Text text="{request/treasuryCurrency_code}" />
+                                        <Label text="{i18n>amountLabel}" />
+                                        <Text text="{request/treasuryAmount}" />
+                                        <Label text="{i18n>dueDateLabel}" />
+                                        <Text
+                                            text="{
+                                                path: 'request/treasuryDueDate',
+                                                type: 'sap.ui.model.type.Date',
+                                                formatOptions: { pattern: 'yyyy-MM-dd' }
+                                            }" />
+                                        <Label text="{i18n>userDivisionRepresentativeNameLabel}" />
+                                        <Text text="{request/treasuryUserDivisionRep}" />
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        title="WHT Clearance"
+                        visible="{= ${role} === 'WHT' }">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanXL="3" labelSpanL="3" labelSpanM="4"
+                                        columnsXL="2" columnsL="2" columnsM="1"
+                                        adjustLabelSpan="false">
+                                        <Label text="{i18n>entityLabel}" />
+                                        <Text text="{request/whtEntity_code}" />
+                                        <Label text="{i18n>vendorLabel}" />
+                                        <Text text="{request/whtVendor}" />
+                                        <Label text="{i18n>currencyLabel}" />
+                                        <Text text="{request/whtCurrency_code}" />
+                                        <Label text="{i18n>amountLabel}" />
+                                        <Text text="{request/whtAmount}" />
+                                        <Label text="{i18n>dueDateLabel}" />
+                                        <Text
+                                            text="{
+                                                path: 'request/whtDueDate',
+                                                type: 'sap.ui.model.type.Date',
+                                                formatOptions: { pattern: 'yyyy-MM-dd' }
+                                            }" />
+                                        <Label text="{i18n>userDivisionRepresentativeNameLabel}" />
+                                        <Text text="{request/whtUserDivisionRep}" />
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection title="{i18n>taskActionsTitle}">
                         <uxap:subSections>
+                            <uxap:ObjectPageSubSection
+                                title="{i18n>gfaConfirmationSectionTitle}"
+                                visible="{= ${request/subProcessType_code} === 'NON_PO_MISC_RECEIPTS' &amp;&amp; ${stepNo} === 2 }">
+                                <uxap:blocks>
+                                    <VBox class="flowmateDetailBlock" width="24rem">
+                                        <Label text="{i18n>debitGLLabel}" required="true" />
+                                        <Input
+                                            id="requestGfaDebitGLInput"
+                                            value="{request/debitGL}"
+                                            maxLength="50"
+                                            placeholder="{i18n>debitGLPlaceholder}"
+                                            enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                            <uxap:ObjectPageSubSection
+                                title="{i18n>ivConfirmationSectionTitle}"
+                                visible="{= ${request/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER' &amp;&amp; ${taskName} === 'IV Confirmation and Document Archiving' }">
+                                <uxap:blocks>
+                                    <VBox class="flowmateDetailBlock" width="24rem">
+                                        <Label text="{i18n>entityLabel}" />
+                                        <Text text="{request/businessEntity_code}" class="sapUiTinyMarginBottom" />
+
+                                        <Label text="{i18n>taxTypeLabel}" />
+                                        <Text text="{request/taxType}" class="sapUiSmallMarginBottom" />
+
+                                        <Label text="{i18n>voucherNumberLabel}" required="true" />
+                                        <Input
+                                            id="requestIvVoucherNumberInput"
+                                            value="{request/voucherNumber}"
+                                            maxLength="50"
+                                            placeholder="{i18n>voucherNumberPlaceholder}"
+                                            enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
+
+                                        <Label text="{i18n>ivConfirmationValueLabel}" required="true" class="sapUiTinyMarginTop" />
+                                        <Input
+                                            id="requestIvConfirmationValueInput"
+                                            value="{request/ivConfirmationValue}"
+                                            type="Number"
+                                            placeholder="{i18n>ivConfirmationValuePlaceholder}"
+                                            enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
+
+                                        <Label text="{i18n>bankStatusLabel}" required="true" class="sapUiTinyMarginTop" />
+                                        <Input
+                                            id="requestIvBankStatusInput"
+                                            value="{request/bankStatus}"
+                                            maxLength="50"
+                                            placeholder="{i18n>bankStatusPlaceholder}"
+                                            enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
                                     <VBox class="flowmateDetailBlock flowmateRemarks">
@@ -2470,7 +2891,9 @@
                                         <TextArea
                                             id="requestTaskRemarksTextArea"
                                             rows="6"
-                                            width="100%" />
+                                            width="100%"
+                                            value="{remarks}"
+                                            editable="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
                                     </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
@@ -2927,6 +3350,113 @@
                 <Button
                     text="{i18n>cancelButton}"
                     press=".onCloseRequestEmailDialog" />
+            </endButton>
+        </Dialog>
+        <Dialog
+            id="treasuryConfirmationDialog"
+            contentWidth="34rem"
+            draggable="true"
+            resizable="true"
+            title="{i18n>treasuryConfirmationDialogTitle}">
+            <content>
+                <VBox class="flowmateDialogContent">
+                    <Text class="sapUiSmallMarginBottom" text="{i18n>treasuryConfirmationDialogDescription}" />
+                    <form:SimpleForm
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="12"
+                        adjustLabelSpan="false"
+                        columnsXL="1" columnsL="1" columnsM="1">
+                        <Label text="{i18n>entityLabel}" required="true" />
+                        <ComboBox
+                            selectedKey="{treasuryConfirmation>/treasuryEntity_code}"
+                            items="{/FtkEntities}">
+                            <core:Item key="{code}" text="{name}" />
+                        </ComboBox>
+                        <Label text="{i18n>debitAccountNameLabel}" required="true" />
+                        <Input value="{treasuryConfirmation>/debitAccountName}" maxLength="150" />
+                        <Label text="{i18n>debitAccountNumberLabel}" required="true" />
+                        <Input value="{treasuryConfirmation>/debitAccountNumber}" maxLength="50" />
+                        <Label text="{i18n>beneficiaryLabel}" required="true" />
+                        <Input value="{treasuryConfirmation>/beneficiary}" maxLength="150" />
+                        <Label text="{i18n>currencyLabel}" required="true" />
+                        <ComboBox
+                            selectedKey="{treasuryConfirmation>/treasuryCurrency_code}"
+                            items="{/Currencies}">
+                            <core:Item key="{code}" text="{name}" />
+                        </ComboBox>
+                        <Label text="{i18n>amountLabel}" required="true" />
+                        <Input value="{treasuryConfirmation>/treasuryAmount}" type="Number" />
+                        <Label text="{i18n>dueDateLabel}" required="true" />
+                        <DatePicker
+                            value="{
+                                path: 'treasuryConfirmation>/treasuryDueDate',
+                                type: 'sap.ui.model.type.Date',
+                                formatOptions: { pattern: 'yyyy-MM-dd' }
+                            }"
+                            required="true"
+                        />
+                        <Label text="{i18n>userDivisionRepresentativeNameLabel}" required="true" />
+                        <Input value="{treasuryConfirmation>/treasuryUserDivisionRep}" maxLength="50" />
+                    </form:SimpleForm>
+                </VBox>
+            </content>
+            <beginButton>
+                <Button text="{i18n>createButton}" type="Emphasized" press=".onTreasuryConfirmationConfirm" />
+            </beginButton>
+            <endButton>
+                <Button text="{i18n>cancelButton}" press=".onTreasuryConfirmationCancel" />
+            </endButton>
+        </Dialog>
+        <Dialog
+            id="whtClearanceDialog"
+            contentWidth="34rem"
+            draggable="true"
+            resizable="true"
+            title="{i18n>whtClearanceDialogTitle}">
+            <content>
+                <VBox class="flowmateDialogContent">
+                    <Text class="sapUiSmallMarginBottom" text="{i18n>whtClearanceDialogDescription}" />
+                    <form:SimpleForm
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="12"
+                        adjustLabelSpan="false"
+                        columnsXL="1" columnsL="1" columnsM="1">
+                        <Label text="{i18n>entityLabel}" required="true" />
+                        <ComboBox
+                            selectedKey="{whtClearance>/whtEntity_code}"
+                            items="{/FtkEntities}">
+                            <core:Item key="{code}" text="{name}" />
+                        </ComboBox>
+                        <Label text="{i18n>vendorLabel}" required="true" />
+                        <Input value="{whtClearance>/whtVendor}" />
+                        <Label text="{i18n>currencyLabel}" required="true" />
+                        <ComboBox
+                            selectedKey="{whtClearance>/whtCurrency_code}"
+                            items="{/Currencies}">
+                            <core:Item key="{code}" text="{name}" />
+                        </ComboBox>
+                        <Label text="{i18n>amountLabel}" required="true" />
+                        <Input value="{whtClearance>/whtAmount}" type="Number" />
+                        <Label text="{i18n>dueDateLabel}" required="true" />
+                        <DatePicker
+                            value="{
+                                path: 'whtClearance>/whtDueDate',
+                                type: 'sap.ui.model.type.Date',
+                                formatOptions: { pattern: 'yyyy-MM-dd' }
+                            }"
+                            required="true" />
+                        <Label text="{i18n>userDivisionRepresentativeNameLabel}" required="true" />
+                        <Input value="{whtClearance>/whtUserDivisionRep}" maxLength="50" />
+                    </form:SimpleForm>
+                </VBox>
+            </content>
+            <beginButton>
+                <Button text="{i18n>createButton}" type="Emphasized" press=".onWhtClearanceConfirm" />
+            </beginButton>
+            <endButton>
+                <Button text="{i18n>cancelButton}" press=".onWhtClearanceCancel" />
             </endButton>
         </Dialog>
         <TableSelectDialog

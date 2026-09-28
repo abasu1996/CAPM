@@ -651,7 +651,7 @@
                 required="{create>/isFtkDutyReimbursement}"
             />
             <Input
-                value="{create>/amount}"
+                value="{create>/amountPayable}"
                 type="Number"
                 required="{create>/isFtkDutyReimbursement}"
                 change=".onAmountChange"
@@ -750,104 +750,7 @@
         </form:SimpleForm>
     </content>
 </Panel>
-<Panel
-    class="flowmateCreateSection flowmateFtkFactoringSection"
-    backgroundDesign="Transparent"
-    expandable="false"
-    visible="{create>/isDirectForeignTravelReimb}"
->
-    <headerToolbar>
-        <OverflowToolbar>
-            <core:Icon
-                src="sap-icon://travel-request"
-            />
-            <Title
-                text="{i18n>directForeignTravelReimbTripDetailsTitle}"
-                level="H3"
-            />
-        </OverflowToolbar>
-    </headerToolbar>
-    <content>
-        <form:SimpleForm
-            class="flowmateCreateForm"
-            editable="true"
-            layout="ResponsiveGridLayout"
-            labelSpanXL="3"
-            labelSpanL="3"
-            labelSpanM="4"
-            columnsXL="2"
-            columnsL="2"
-            columnsM="1"
-            adjustLabelSpan="false"
-        >
-            <Label
-                text="{i18n>nameEmpNoLabel}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-            <Input
-                value="{create>/nameEmpNo}"
-                required="{create>/isDirectForeignTravelReimb}"
-                placeholder="{i18n>nameEmpNoPlaceholder}"
-            />
 
-            <Label
-                text="{i18n>designationLabel}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-            <Input
-                value="{create>/designation}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-
-            <Label
-                text="{i18n>purposeOfTripLabel}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-            <Input
-                value="{create>/purposeOfTrip}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-
-            <Label
-                text="{i18n>monthLabel}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-            <DatePicker
-                id="directForeignTravelReimbTripMonth"
-                value="{
-                    'path': 'create>/month',
-                    'type': 'sap.ui.model.type.Date',
-                    'formatOptions': {
-                        'pattern': 'yyyy-MM'
-                    }
-                }"
-                displayFormat="yyyy-MM"
-                valueFormat="yyyy-MM-dd"
-                required="{create>/isDirectForeignTravelReimb}"
-                placeholder="{i18n>selectMonthPlaceholder}"
-            />
-
-            <Label
-                text="{i18n>countryLabel}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-            <Input
-                value="{create>/country}"
-                required="{create>/isDirectForeignTravelReimb}"
-                placeholder="{i18n>selectCountryPlaceholder}"
-            />
-
-            <Label
-                text="{i18n>budgetCodeLabel}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-            <Input
-                value="{create>/budgetCode}"
-                required="{create>/isDirectForeignTravelReimb}"
-            />
-        </form:SimpleForm>
-    </content>
-</Panel>
 <Panel
     class="flowmateCreateSection flowmateFtkFactoringSection"
     backgroundDesign="Transparent"
@@ -1144,6 +1047,13 @@
                 required="{create>/isPoAdvance}"
             />
 
+            <Label text="{i18n>highestInvoiceValueLabel}" />
+            <Input
+                value="{create>/highestInvoiceValue}"
+                type="Number"
+                editable="false"
+            />
+
             <Label text="{i18n>remarksLabel}" />
             <TextArea
                 value="{create>/remarks}"
@@ -1299,6 +1209,13 @@
                 value="{create>/remainingBalanceAfterAdvanceSettlement}"
                 type="Number"
                 required="{create>/isPoAdvSettlement}"
+            />
+
+            <Label text="{i18n>highestInvoiceValueLabel}" />
+            <Input
+                value="{create>/highestInvoiceValue}"
+                type="Number"
+                editable="false"
             />
 
             <Label text="{i18n>remarksLabel}" />
@@ -1760,6 +1677,13 @@
             >
                 <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
             </ComboBox>
+            <Label text="{i18n>remarksLabel}" />
+                <TextArea
+                    value="{create>/remarks}"
+                    rows="4"
+                    width="100%"
+                    placeholder="{i18n>requestRemarksPlaceholder}"
+                />
         </form:SimpleForm>
     </content>
 </Panel>
@@ -3561,6 +3485,104 @@
     visible="{create>/isDirectForeignTravelReimb}"
 >
     <headerToolbar>
+        <OverflowToolbar>
+            <core:Icon
+                src="sap-icon://travel-request"
+            />
+            <Title
+                text="{i18n>directForeignTravelReimbTripDetailsTitle}"
+                level="H3"
+            />
+        </OverflowToolbar>
+    </headerToolbar>
+    <content>
+        <form:SimpleForm
+            class="flowmateCreateForm"
+            editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanXL="3"
+            labelSpanL="3"
+            labelSpanM="4"
+            columnsXL="2"
+            columnsL="2"
+            columnsM="1"
+            adjustLabelSpan="false"
+        >
+            <Label
+                text="{i18n>nameEmpNoLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/nameEmpNo}"
+                required="{create>/isDirectForeignTravelReimb}"
+                placeholder="{i18n>nameEmpNoPlaceholder}"
+            />
+
+            <Label
+                text="{i18n>designationLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/designation}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+
+            <Label
+                text="{i18n>purposeOfTripLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/purposeOfTrip}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+
+            <Label
+                text="{i18n>monthLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <DatePicker
+                id="directForeignTravelReimbTripMonth"
+                value="{
+                    'path': 'create>/month',
+                    'type': 'sap.ui.model.type.Date',
+                    'formatOptions': {
+                        'pattern': 'yyyy-MM'
+                    }
+                }"
+                displayFormat="yyyy-MM"
+                valueFormat="yyyy-MM-dd"
+                required="{create>/isDirectForeignTravelReimb}"
+                placeholder="{i18n>selectMonthPlaceholder}"
+            />
+
+            <Label
+                text="{i18n>countryLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/country}"
+                required="{create>/isDirectForeignTravelReimb}"
+                placeholder="{i18n>selectCountryPlaceholder}"
+            />
+
+            <Label
+                text="{i18n>budgetCodeLabel}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+            <Input
+                value="{create>/budgetCode}"
+                required="{create>/isDirectForeignTravelReimb}"
+            />
+        </form:SimpleForm>
+    </content>
+</Panel>
+<Panel
+    class="flowmateCreateSection flowmateFtkFactoringSection"
+    backgroundDesign="Transparent"
+    expandable="false"
+    visible="{create>/isDirectForeignTravelReimb}"
+>
+    <headerToolbar>
         <OverflowToolbar class="flowmateSectionToolbar">
             <core:Icon
                 src="sap-icon://travel-expense"
@@ -4862,9 +4884,16 @@
                 required="{create>/isNonPoCcPayment}"
             />
 
-            <Label text="{i18n>totalAmountPayableLabel}" required="{create>/isNonPoCcPayment}" />
+            <Label text="{i18n>transactionAmountDocumentCurrencyLabel}" required="{create>/isNonPoCcPayment}" />
             <Input
-                value="{create>/totalAmountPayable}"
+                value="{create>/transactionAmountDocumentCurrency}"
+                type="Number"
+                required="{create>/isNonPoCcPayment}"
+            />
+
+            <Label text="{i18n>transactionAmountLocalCurrencyLabel}" required="{create>/isNonPoCcPayment}" />
+            <Input
+                value="{create>/transactionAmountLocalCurrency}"
                 type="Number"
                 required="{create>/isNonPoCcPayment}"
             />
@@ -5080,8 +5109,8 @@
                 <Column width="8rem"><Text text="{i18n>invoiceNumberLabel}" wrapping="true" /></Column>
                 <Column width="8rem"><Text text="{i18n>invoiceDateLabel}" wrapping="true" /></Column>
                 <Column width="12rem"><Text text="{i18n>descriptionLabel}" wrapping="true" /></Column>
-                <Column width="9rem" hAlign="End"><Text text="{i18n>transactionAmountUSDLabel}" wrapping="true" /></Column>
-                <Column width="9rem" hAlign="End"><Text text="{i18n>paymentAmountLKRLabel}" wrapping="true" /></Column>
+                <Column width="12rem" hAlign="End"><Text text="{i18n>transactionAmountDocumentCurrencyLabel}" wrapping="true" /></Column>
+                <Column width="12rem" hAlign="End"><Text text="{i18n>transactionAmountLocalCurrencyLabel}" wrapping="true" /></Column>
                 <Column width="8rem" hAlign="Center"><Text text="{i18n>availabilityOfInvoiceLabel}" wrapping="true" /></Column>
                 <Column width="6rem" hAlign="Center"><Text text="{i18n>actionsLabel}" /></Column>
             </columns>
@@ -5101,8 +5130,8 @@
                             }"
                         />
                         <Text text="{create>description}" wrapping="true" />
-                        <Text text="{create>transactionAmountUSD}" textAlign="End" />
-                        <Text text="{create>paymentAmountLKR}" textAlign="End" />
+                        <Text text="{create>transactionAmountDocumentCurrency}" textAlign="End" />
+                        <Text text="{create>transactionAmountLocalCurrency}" textAlign="End" />
                         <core:Icon
                             src="{= ${create>availabilityOfInvoice} ? 'sap-icon://accept' : 'sap-icon://decline' }"
                             color="{= ${create>availabilityOfInvoice} ? '#107e3e' : '#bb0000' }"
@@ -5370,11 +5399,11 @@
             <Label text="{i18n>costCentreLabel}" />
             <Input value="{create>/costCentre}" />
 
-            <Label text="{i18n>debitGLLabel}" required="{create>/isNonPoMiscReceipts}" />
+            <!-- <Label text="{i18n>debitGLLabel}" required="{create>/isNonPoMiscReceipts}" />
             <Input
                 value="{create>/debitGL}"
                 required="{create>/isNonPoMiscReceipts}"
-            />
+            /> -->
 
             <Label text="{i18n>remarksLabel}" />
             <TextArea
@@ -5526,7 +5555,7 @@
 
             <Label text="{i18n>amountLabel}" required="{create>/isBankGuarantee}" />
             <Input
-                value="{create>/amount}"
+                value="{create>/amountPayable}"
                 type="Number"
                 required="{create>/isBankGuarantee}"
                 change=".onAmountChange"
@@ -6242,8 +6271,8 @@
                         <Label text="{i18n>periodOfPersonalTravelLabel}" />
                         <Input value="{directForeignTravelEdit>/periodOfPersonalTravel}" />
 
-                        <Label text="{i18n>specialRemarksLabel}" />
-                        <TextArea value="{directForeignTravelEdit>/specialRemarks}" rows="3" width="100%" />
+                        <!-- <Label text="{i18n>specialRemarksLabel}" />
+                        <TextArea value="{directForeignTravelEdit>/specialRemarks}" rows="3" width="100%" /> -->
                     </form:SimpleForm>
                 </content>
                 <beginButton>
@@ -6447,19 +6476,19 @@
                             editable="false"
                         />
 
-                        <Label text="{i18n>transactionAmountUSDLabel}" required="true" />
+                        <Label text="{i18n>transactionAmountDocumentCurrencyLabel}" required="true" />
                         <Input
-                            value="{settlementEntryEdit>/transactionAmountUSD}"
+                            value="{settlementEntryEdit>/transactionAmountDocumentCurrency}"
                             type="Number"
                             required="true"
-                        />
+                            editable="false" />
 
-                        <Label text="{i18n>paymentAmountLKRLabel}" required="true" />
+                        <Label text="{i18n>transactionAmountLocalCurrencyLabel}" required="true" />
                         <Input
-                            value="{settlementEntryEdit>/paymentAmountLKR}"
+                            value="{settlementEntryEdit>/transactionAmountLocalCurrency}"
                             type="Number"
                             required="true"
-                        />
+                            editable="false" />
 
                         <Label text="{i18n>availabilityOfInvoiceLabel}" />
                         <CheckBox

@@ -227,6 +227,7 @@ entity ProcessRequests : cuid, managed {
     invoiceDebitNoteNumber : String(50);
     totalDebitNoteValue : Decimal(15, 2);
     poNumber : String(50);
+    highestInvoiceValue : Decimal(15, 2);
     userDivisionRepresentativeName : String(150);
     vatAmount : Decimal(15, 2);
     sesReference : String(50);
@@ -301,7 +302,8 @@ entity ProcessRequests : cuid, managed {
     totalDeclarationValueInCusdec   : Decimal(15, 2);
     ccCustodianName               : String(150);
     whtEligibilityConfirmation    : Boolean default false;
-    totalAmountPayable            : Decimal(15, 2);
+    transactionAmountDocumentCurrency : Decimal(15, 2);
+    transactionAmountLocalCurrency    : Decimal(15, 2);
     descriptionOfPayment          : LargeString;
     justificationForCreditCardUse : LargeString;
     bankName                        : String(150);
@@ -332,6 +334,7 @@ entity ProcessRequests : cuid, managed {
     collectorNic                 : String(30);
     collectorContactNumber       : String(30);
     specificBgFormatAvailable    : Boolean default false;
+    amountPayable             : Decimal(15,2);
     vendor : Association to Vendors;
     requesterUser : Association to Users;
     processorUser : Association to Users;
@@ -363,6 +366,27 @@ entity ProcessRequests : cuid, managed {
     slaDueAt    : DateTime;
     slaCalendarCode : String(30);
     completedAt : DateTime;
+    //treasury
+    treasuryEntity     : Association to FtkEntities @assert.target;
+    debitAccountName   : String(150);
+    debitAccountNumber : String(50);
+    beneficiary         : String(150);
+    treasuryCurrency : Association to Currencies @assert.target;
+    treasuryAmount   : Decimal(15,2);
+    treasuryDueDate     : Date;
+    treasuryUserDivisionRep : String(50);
+    //wht
+    whtEntity      : Association to FtkEntities @assert.target;
+    whtCurrency    : Association to Currencies @assert.target;
+    whtVendor      : String;
+    whtDueDate     : Date;
+    whtAmount      : Decimal(15,2);
+    whtUserDivisionRep : String(50);
+    //payorderTasklevel
+    ivConfirmationValue : Decimal(15, 2);
+    bankStatus : String(50);
+    voucherNumber : String(50);
+
     invoices    : Composition of many Invoices
                     on invoices.request = $self;
     directForeignTravelEntries : Composition of many DirectForeignTravelEntries
@@ -429,8 +453,8 @@ entity SettlementEntries : cuid, managed {
     invoiceNumber            : String(50);
     invoiceDate               : Date;
     description                : String(500);
-    transactionAmountUSD     : Decimal(15, 2);
-    paymentAmountLKR          : Decimal(15, 2);
+    transactionAmountDocumentCurrency : Decimal(15, 2);
+    transactionAmountLocalCurrency    : Decimal(15, 2);
     availabilityOfInvoice     : Boolean default false;
 }
 entity MerchantEntityValues : cuid, managed {
@@ -647,6 +671,7 @@ entity ProcessStepConfig : cuid, managed {
     activityDescription : String(500);
     role          : String(100);
     slaDays       : Integer;
+    isActiveDemandTask : Boolean default false;
 }
 
 entity RequestFilterQueries : cuid, managed {

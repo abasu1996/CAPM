@@ -1095,6 +1095,10 @@
                     <Input value="{stepEdit>/role}" maxLength="100" />
                     <Label text="{i18n>slaDaysLabel}" />
                     <Input value="{stepEdit>/slaDays}" type="Number" />
+                    <Label text="{i18n>activeDemandTaskLabel}" />
+                    <CheckBox
+                        selected="{stepEdit>/isActiveDemandTask}"
+                        text="{i18n>activeDemandTaskCheckboxText}" />
                 </form:SimpleForm>
             </content>
             <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveProcessStep" /></beginButton>

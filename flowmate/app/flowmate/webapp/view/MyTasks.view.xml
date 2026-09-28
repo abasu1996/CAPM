@@ -4,7 +4,8 @@
     xmlns="sap.m"
     xmlns:f="sap.f"
     xmlns:uxap="sap.uxap"
-    xmlns:core="sap.ui.core">
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
     <f:FlexibleColumnLayout
         id="tasksFlexibleColumnLayout"
         layout="OneColumn"
@@ -188,7 +189,7 @@
                                 type="Emphasized"
                                 visible="{taskView>/teamMode}"
                                 press=".onAssignTeamTaskToMe" />
-                            <Button
+                            <!-- <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
                                 visible="{= !${taskView>/teamMode} }"
@@ -204,7 +205,24 @@
                                 type="Reject"
                                 visible="{= !${taskView>/teamMode} }"
                                 enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
-                                press=".onReject" />
+                                press=".onReject" /> -->
+                             <Button
+                                text="{i18n>approveButton}"
+                                type="Accept"
+                                visible="{= !${taskView>/teamMode} }"
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
+                                press=".onApprove" />
+                            <Button
+                                text="{i18n>sendBackButton}"
+                                visible="{= !${taskView>/teamMode} }"
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
+                                press=".onSendBack" />
+                            <Button
+                                text="{i18n>rejectButton}"
+                                type="Reject"
+                                visible="{= !${taskView>/teamMode} }"
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
+                                press=".onReject" />    
                             <Button
                                 icon="sap-icon://decline"
                                 text="{i18n>closeButton}"
@@ -312,16 +330,165 @@
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        title="Treasury Confirmation"
+                        visible="{= ${role} === 'Treasury' }">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanXL="3"
+                                        labelSpanL="3"
+                                        labelSpanM="4"
+                                        columnsXL="2"
+                                        columnsL="2"
+                                        columnsM="1"
+                                        adjustLabelSpan="false">
+
+                                        <Label text="{i18n>entityLabel}" />
+                                        <Text text="{request/treasuryEntity_code}" />
+
+                                        <Label text="{i18n>debitAccountNameLabel}" />
+                                        <Text text="{request/debitAccountName}" />
+
+                                        <Label text="{i18n>debitAccountNumberLabel}" />
+                                        <Text text="{request/debitAccountNumber}" />
+
+                                        <Label text="{i18n>beneficiaryLabel}" />
+                                        <Text text="{request/beneficiary}" />
+
+                                        <Label text="{i18n>currencyLabel}" />
+                                        <Text text="{request/treasuryCurrency_code}" />
+
+                                        <Label text="{i18n>amountLabel}" />
+                                        <Text text="{request/treasuryAmount}" />
+
+                                        <Label text="{i18n>dueDateLabel}" />
+                                        <Text
+                                            text="{
+                                                path: 'request/treasuryDueDate',
+                                                type: 'sap.ui.model.type.Date',
+                                                formatOptions: { pattern: 'yyyy-MM-dd' }
+                                            }" />
+
+                                        <Label text="{i18n>userDivisionRepresentativeNameLabel}" />
+                                        <Text text="{request/treasuryUserDivisionRep}" />
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection
+                        title="WHT Clearance"
+                        visible="{= ${role} === 'WHT' }">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection>
+                                <uxap:blocks>
+                                    <form:SimpleForm
+                                        editable="false"
+                                        layout="ResponsiveGridLayout"
+                                        labelSpanXL="3"
+                                        labelSpanL="3"
+                                        labelSpanM="4"
+                                        columnsXL="2"
+                                        columnsL="2"
+                                        columnsM="1"
+                                        adjustLabelSpan="false">
+
+                                        <Label text="{i18n>entityLabel}" />
+                                        <Text text="{request/whtEntity_code}" />
+
+                                        <Label text="{i18n>vendorLabel}" />
+                                        <Text text="{request/whtVendor}" />
+
+                                        <Label text="{i18n>currencyLabel}" />
+                                        <Text text="{request/whtCurrency_code}" />
+
+                                        <Label text="{i18n>amountLabel}" />
+                                        <Text text="{request/whtAmount}" />
+
+                                        <Label text="{i18n>dueDateLabel}" />
+                                        <Text
+                                            text="{
+                                                path: 'request/whtDueDate',
+                                                type: 'sap.ui.model.type.Date',
+                                                formatOptions: { pattern: 'yyyy-MM-dd' }
+                                            }" />
+
+                                        <Label text="{i18n>userDivisionRepresentativeNameLabel}" />
+                                        <Text text="{request/whtUserDivisionRep}" />
+
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection title="{i18n>taskActionsTitle}">
                         <uxap:subSections>
+                            <uxap:ObjectPageSubSection
+                                title="{i18n>gfaConfirmationSectionTitle}"
+                                visible="{= ${request/subProcessType_code} === 'NON_PO_MISC_RECEIPTS' &amp;&amp; ${stepNo} === 2 }">
+                                <uxap:blocks>
+                                    <VBox class="flowmateDetailBlock" width="24rem">
+                                        <Label text="{i18n>debitGLLabel}" required="true" />
+                                        <Input
+                                            id="gfaDebitGLInput"
+                                            value="{request/debitGL}"
+                                            maxLength="50"
+                                            placeholder="{i18n>debitGLPlaceholder}"
+                                            enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                            <uxap:ObjectPageSubSection
+        title="{i18n>ivConfirmationSectionTitle}"
+        visible="{= ${request/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER' &amp;&amp; ${taskName} === 'IV Confirmation and Document Archiving' }">
+        <uxap:blocks>
+            <VBox class="flowmateDetailBlock" width="24rem">
+                <Label text="{i18n>entityLabel}" />
+                <Text text="{request/businessEntity_code}" class="sapUiTinyMarginBottom" />
+
+                <Label text="{i18n>taxTypeLabel}" />
+                <Text text="{request/taxType}" class="sapUiSmallMarginBottom" />
+
+                <Label text="{i18n>voucherNumberLabel}" required="true" />
+                <Input
+                    id="taskIvVoucherNumberInput"
+                    value="{request/voucherNumber}"
+                    maxLength="50"
+                    placeholder="{i18n>voucherNumberPlaceholder}"
+                    enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
+
+                <Label text="{i18n>ivConfirmationValueLabel}" required="true" class="sapUiTinyMarginTop" />
+                <Input
+                    id="taskIvConfirmationValueInput"
+                    value="{request/ivConfirmationValue}"
+                    type="Number"
+                    placeholder="{i18n>ivConfirmationValuePlaceholder}"
+                    enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
+
+                <Label text="{i18n>bankStatusLabel}" required="true" class="sapUiTinyMarginTop" />
+                <Input
+                    id="taskIvBankStatusInput"
+                    value="{request/bankStatus}"
+                    maxLength="50"
+                    placeholder="{i18n>bankStatusPlaceholder}"
+                    enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
+            </VBox>
+        </uxap:blocks>
+    </uxap:ObjectPageSubSection>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
                                     <VBox class="flowmateDetailBlock flowmateRemarks">
                                         <Label text="{i18n>remarksLabel}" />
                                         <TextArea
                                             id="taskRemarksTextArea"
+                                            value="{remarks}"
                                             rows="6"
-                                            width="100%" />
+                                            width="100%" 
+                                            editable="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" />
                                     </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>

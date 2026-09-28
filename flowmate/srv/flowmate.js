@@ -32,6 +32,11 @@ const TASK_STATUS = {
 //   "FTK_FACTORING_PENDING_UAC"
 // ]);
 //for each sub-process type, define the required and optional fields that must be present in the request payload. This will be used to validate the form before submission.
+
+ const FTK_FACTORING_PO_VALIDATION = {
+        required: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "vendorCode", "vendorName"],
+        optional: ["remarks"]
+    };
 const PO_NON_ADV_FIELDS = {
   required: [
     "paymentCategory_code",
@@ -162,6 +167,17 @@ const NON_PO_TAX_LIABILITY_FIELDS = {
   ],
   optional: ["remarks", "din"]
 };
+const NON_PO_INTERCONNECT_ROAM_PAY_FIELDS = {
+required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "customer_ID",
+    "customerCode",
+    "customerName"
+],
+optional: ["remarks", "whtCertificateReference"]
+};
 const NON_PO_IMPORT_DGC_FIELDS = {
   required: [
     "paymentCategory_code",
@@ -179,11 +195,8 @@ const NON_PO_IMPORT_DGC_FIELDS = {
 };
 const DIN_MANDATORY_ENTITIES = ["DAP", "DBN", "DTV", "H_ONE"];
 const SUBTYPE_FIELDS = {
-  FTK_FACTORING_PO_VALIDATION: {
-    required: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "vendorCode",
-      "vendorName"],
-    optional: ["remarks"]
-  },
+  FTK_FACTORING_PO_VALIDATION_HW : FTK_FACTORING_PO_VALIDATION,
+  FTK_FACTORING_PO_VALID_HW_SW : FTK_FACTORING_PO_VALIDATION,
   FTK_FACTORING_BASED_ON_UAC: {
     required: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "currency_code", "category_code", "vendorCode",
       "vendorName"],
@@ -205,7 +218,7 @@ const SUBTYPE_FIELDS = {
   },
   FTK_DUTY_REIMBURSEMENT: {
     required: [
-      "paymentCategory_code", "businessEntity_code", "currency_code", "amount", "vendor_ID", "vendorCode",
+      "paymentCategory_code", "businessEntity_code", "currency_code", "amountPayable", "vendor_ID", "vendorCode",
       "vendorName", "invoiceDebitNoteDate", "invoiceDebitNoteNumber", "totalDebitNoteValue", "userDivisionRepresentativeName", "poNumber"
     ],
     optional: ["remarks"]
@@ -228,7 +241,7 @@ const SUBTYPE_FIELDS = {
       "businessEntity_code",
       "directForeignTravelEntries"
     ],
-    optional: []
+    optional: ["remarks"]
   },
   NON_PO_FUEL_STAFF: {
     required: ["paymentCategory_code", "businessEntity_code", "currency_code", "fuelInclVat", "highestValueInFile"],
@@ -320,17 +333,8 @@ const SUBTYPE_FIELDS = {
     ],
     optional: ["vatAmount", "remarks"]
   },
-  NON_PO_INTERCONNECT_ROAM_PAY: {
-    required: [
-      "paymentCategory_code",
-      "businessEntity_code",
-      "currency_code",
-      "customer_ID",
-      "customerCode",
-      "customerName"
-    ],
-    optional: ["remarks", "whtCertificateReference"]
-  },
+  NON_PO_INTERCONNECTION_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
+  NON_PO_ROAMING_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
   NON_PO_ROAMING_LIABILITY: {
     required: [
       "paymentCategory_code",
@@ -396,7 +400,8 @@ const SUBTYPE_FIELDS = {
       "whtEligibilityConfirmation",
       "poNumber",
       "sesReference",
-      "totalAmountPayable",
+      "transactionAmountDocumentCurrency",
+      "transactionAmountLocalCurrency",
       "descriptionOfPayment",
       "justificationForCreditCardUse"
     ],
@@ -437,7 +442,7 @@ const SUBTYPE_FIELDS = {
       "businessEntity_code",
       "currency_code",
       "depositedAmount",
-      "debitGL"
+      // "debitGL"
     ],
     optional: ["vendor_ID", "vendorCode", "vendorName", "costCentre", "remarks"]
   },
@@ -455,7 +460,7 @@ const SUBTYPE_FIELDS = {
       "paymentCategory_code",
       "businessEntity_code",
       "currency_code",
-      "amount",
+      "amountPayable",
       "guaranteeType_code",
       "beneficiaryName",
       "beneficiaryAddress",
@@ -1034,6 +1039,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ) {
         aMissing.push("din");
       }
+      if (
+          sSubProcessTypeCode === "NON_PO_CC_PAYMENT" &&
+          req.data.whtEligibilityConfirmation !== true
+      ) {
+          aMissing.push("whtEligibilityConfirmation");
+      }
 
       if (aMissing.length) {
         return req.reject(
@@ -1081,6 +1092,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
             "Each settlement entry must reference a valid Credit Card Payment request"
           );
         }
+      }
+
+      if (["PO_BEFORE_INVOICE_ADVANCE", "PO_AFTER_INVOICE_ADVANCE", "PO_BEFORE_INVOICE_ADV_STLMT", "PO_BEFORE_INVOICE_ADV_STLMT_100%", "PO_AFTER_INVOICE_ADV_STLMT", "PO_AFTER_INVOICE_ADV_STLMT_100%"].includes(sSubProcessTypeCode)) {
+        const aInvoices = Array.isArray(req.data.invoices) ? req.data.invoices : [];
+        const aAmounts = aInvoices
+          .map((oInvoice) => Number(oInvoice.amount))
+          .filter((fAmount) => Number.isFinite(fAmount));
+
+        req.data.highestInvoiceValue = aAmounts.length ? Math.max(...aAmounts) : null;
       }
 
     });
@@ -2911,9 +2931,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       "NON_PO_TAX_LIAB_PAY_PAYORDER"
     ].includes(sCode);
   }
-  _isNonPoInterconnectRoamPaySubtype(sCode) {
-    return sCode === "NON_PO_INTERCONNECT_ROAM_PAY";
-  }
+   _isNonPoInterconnectRoamPaySubtype(sCode) {
+    return [
+        "NON_PO_INTERCONNECTION_PAY",
+        "NON_PO_ROAMING_PAY"
+    ].includes(sCode);
+}
   _isSlaDeadlineBreached(request, today = new Date().toISOString().slice(0, 10)) {
     if (request?.slaDueAt) {
       const deadline = Date.parse(request.slaDueAt);

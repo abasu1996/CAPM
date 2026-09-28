@@ -11,6 +11,11 @@ sap.ui.define([
     const MAX_ATTACHMENT_SIZE_MB = 400;
     const MAX_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
 
+    const FTK_FACTORING_PO_VALIDATION = {
+        required: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "vendorCode", "vendorName"],
+        optional: ["remarks"]
+    };
+
     const PO_NON_ADV_FIELDS = {
         required: [
             "paymentCategory_code",
@@ -141,6 +146,17 @@ sap.ui.define([
         ],
         optional: ["remarks", "din"]
     };
+    const NON_PO_INTERCONNECT_ROAM_PAY_FIELDS = {
+    required: [
+        "paymentCategory_code",
+        "businessEntity_code",
+        "currency_code",
+        "customer_ID",
+        "customerCode",
+        "customerName"
+    ],
+    optional: ["remarks", "whtCertificateReference"]
+    };
     const NON_PO_IMPORT_DGC_FIELDS = {
         required: [
             "paymentCategory_code",
@@ -162,6 +178,8 @@ sap.ui.define([
             required: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "vendorCode", "vendorName"],
             optional: ["remarks"]
         },
+        FTK_FACTORING_PO_VALIDATION_HW : FTK_FACTORING_PO_VALIDATION,
+        FTK_FACTORING_PO_VALID_HW_SW : FTK_FACTORING_PO_VALIDATION,
         FTK_FACTORING_BASED_ON_UAC: {
             required: ["paymentCategory_code", "businessEntity_code", "vendor_ID", "vendorCode", "vendorName", "currency_code", "category_code"],
             optional: ["remarks"]
@@ -180,7 +198,7 @@ sap.ui.define([
         },
         FTK_DUTY_REIMBURSEMENT: {
             required: [
-                "paymentCategory_code", "businessEntity_code", "currency_code", "amount",
+                "paymentCategory_code", "businessEntity_code", "currency_code", "amountPayable",
                 "vendor_ID", "vendorCode", "vendorName",
                 "invoiceDebitNoteDate", "invoiceDebitNoteNumber", "totalDebitNoteValue", "userDivisionRepresentativeName", "poNumber"
             ],
@@ -204,7 +222,7 @@ sap.ui.define([
                 "businessEntity_code",
                 "directForeignTravelEntries"
             ],
-            optional: []
+            optional: ["remarks"]
         },
         NON_PO_FUEL_STAFF: {
             required: ["paymentCategory_code", "businessEntity_code", "currency_code", "fuelInclVat", "highestValueInFile"],
@@ -293,17 +311,8 @@ sap.ui.define([
             ],
             optional: ["vatAmount", "remarks"]
         },
-        NON_PO_INTERCONNECT_ROAM_PAY: {
-            required: [
-                "paymentCategory_code",
-                "businessEntity_code",
-                "currency_code",
-                "customer_ID",
-                "customerCode",
-                "customerName"
-            ],
-            optional: ["remarks", "whtCertificateReference"]
-        },
+        NON_PO_INTERCONNECTION_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
+        NON_PO_ROAMING_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
         NON_PO_ROAMING_LIABILITY: {
             required: [
                 "paymentCategory_code",
@@ -369,7 +378,8 @@ sap.ui.define([
                 "whtEligibilityConfirmation",
                 "poNumber",
                 "sesReference",
-                "totalAmountPayable",
+                "transactionAmountDocumentCurrency",
+                "transactionAmountLocalCurrency",
                 "descriptionOfPayment",
                 "justificationForCreditCardUse"
             ],
@@ -409,8 +419,8 @@ sap.ui.define([
                 "paymentCategory_code",
                 "businessEntity_code",
                 "currency_code",
-                "depositedAmount",
-                "debitGL"
+                "depositedAmount"
+                // "debitGL"
             ],
             optional: ["vendor_ID", "vendorCode", "vendorName", "costCentre", "remarks"]
         },
@@ -428,7 +438,7 @@ sap.ui.define([
                 "paymentCategory_code",
                 "businessEntity_code",
                 "currency_code",
-                "amount",
+                "amountPayable",
                 "guaranteeType_code",
                 "beneficiaryName",
                 "beneficiaryAddress",
@@ -503,6 +513,8 @@ sap.ui.define([
                 isPoBasedNonAdvance: false,
                 isPoAdvance: false,
                 isPoAdvSettlement: false,
+                highestInvoiceValue: null,
+                amountPayable: null,
                 isOfnAuthority: false,
                 isNonPoDirectForeignTravel: false,
                 isNonPoFuel: false,
@@ -608,7 +620,8 @@ sap.ui.define([
                 totalDeclarationValueInCusdec: null,
                 ccCustodianName: "",
                 whtEligibilityConfirmation: false,
-                totalAmountPayable: null,
+                transactionAmountDocumentCurrency: null,
+                transactionAmountLocalCurrency: null,
                 descriptionOfPayment: "",
                 justificationForCreditCardUse: "",
                 bankName: "",
@@ -625,7 +638,7 @@ sap.ui.define([
                 processingBankAccountDetails: "",
                 merchantEntityValues: [],
                 depositedAmount: null,
-                debitGL: "",
+                // debitGL: "",
                 zeroIvUserConfirmationAttached: false,
                 guaranteeType_code: "",
                 beneficiaryName: "",
@@ -696,7 +709,7 @@ sap.ui.define([
                 selectedScheme: "",
                 personalTravelInvolved: false,
                 periodOfPersonalTravel: "",
-                specialRemarks: ""
+                // specialRemarks: ""
             }), "directForeignTravelEdit");
             this.getView().setModel(new JSONModel({
                 dialogTitle: "",
@@ -729,8 +742,8 @@ sap.ui.define([
                 invoiceNumber: "",
                 invoiceDate: null,
                 description: "",
-                transactionAmountUSD: null,
-                paymentAmountLKR: null,
+                transactionAmountDocumentCurrency: null,
+                transactionAmountLocalCurrency: null,
                 availabilityOfInvoice: false
             }), "settlementEntryEdit");
             this.getView().setModel(new JSONModel({
@@ -859,7 +872,12 @@ sap.ui.define([
                 ) {
                     aMissing.push("din");
                 }
-
+                if (
+                    oPayload.subProcessType_code === "NON_PO_CC_PAYMENT" &&
+                    oPayload.whtEligibilityConfirmation !== true
+                ) {
+                    aMissing.push("whtEligibilityConfirmation");
+                }
                 if (!this._aAttachmentFiles.length) {
                     aMissing.push("Supporting Documents");
                 }
@@ -959,7 +977,7 @@ sap.ui.define([
                                     selectedScheme: oEntry.selectedScheme || "",
                                     personalTravelInvolved: Boolean(oEntry.personalTravelInvolved),
                                     periodOfPersonalTravel: oEntry.periodOfPersonalTravel || "",
-                                    specialRemarks: oEntry.specialRemarks || ""
+                                    // specialRemarks: oEntry.specialRemarks || ""
                                 }));
                                 return oResult;
                             }
@@ -989,8 +1007,8 @@ sap.ui.define([
                                     invoiceNumber: oEntry.invoiceNumber,
                                     invoiceDate: oEntry.invoiceDate,
                                     description: oEntry.description,
-                                    transactionAmountUSD: Number(oEntry.transactionAmountUSD),
-                                    paymentAmountLKR: Number(oEntry.paymentAmountLKR),
+                                    transactionAmountDocumentCurrency: Number(oEntry.transactionAmountDocumentCurrency),
+                                    transactionAmountLocalCurrency: Number(oEntry.transactionAmountLocalCurrency),
                                     availabilityOfInvoice: Boolean(oEntry.availabilityOfInvoice)
                                 }));
                                 return oResult;
@@ -1017,13 +1035,13 @@ sap.ui.define([
                                 "totalInvoiceValue", "highestMonthlyRentalValueInFile", "totalFileValue", "totalPayableValue",
                                 "totalAmountForeignCurrency", "totalAmountLKR", "balanceToBeReturned", "totalTaxPayable", "totalInvoiceValueRelevantCurrency",
                                 "totalInvoiceValueLKR",
-                                "highestPayableValueInList", "trcslProformaInvoiceTotalValue", "totalAmountPayable", "totalPivValue", "totalDeclarationValueInCusdec",
+                                "highestPayableValueInList", "trcslProformaInvoiceTotalValue", "transactionAmountDocumentCurrency", "transactionAmountLocalCurrency", "totalPivValue", "totalDeclarationValueInCusdec",
                                 "annualFee", "stampDuty",
                                 "latePaymentFee",
                                 "interestCharges",
                                 "totalAmountPayableCcSettlement",
                                 "highestValueInExcel",
-                                "aggregateTotalValueAcrossAllFiles", "depositedAmount"
+                                "aggregateTotalValueAcrossAllFiles", "depositedAmount","amountPayable","highestInvoiceValue"
                             ];
 
                             oResult[sField] =
@@ -1608,6 +1626,8 @@ sap.ui.define([
             oModel.setProperty("/invoiceNumber", oContext.getProperty("invoiceNumber") || "");
             oModel.setProperty("/invoiceDate", oContext.getProperty("invoiceDate") || null);
             oModel.setProperty("/description", oContext.getProperty("descriptionOfPayment") || "");
+            oModel.setProperty("/transactionAmountDocumentCurrency", oContext.getProperty("transactionAmountDocumentCurrency"));
+            oModel.setProperty("/transactionAmountLocalCurrency", oContext.getProperty("transactionAmountLocalCurrency"));
         },
 
         onSettlementPaymentRequestSuggest(oEvent) {
@@ -1635,6 +1655,8 @@ sap.ui.define([
             oModel.setProperty("/invoiceNumber", "");
             oModel.setProperty("/invoiceDate", null);
             oModel.setProperty("/description", "");
+            oModel.setProperty("/transactionAmountDocumentCurrency", null);
+            oModel.setProperty("/transactionAmountLocalCurrency", null);
         },
 
         onSettlementPaymentRequestValueHelpRequest() {
@@ -1754,6 +1776,7 @@ sap.ui.define([
             }
 
             oCreateModel.setProperty("/invoices", aInvoices);
+            this._updateHighestInvoiceValue();
 
             this.getView().byId("invoiceDialog").close();
         },
@@ -1815,9 +1838,29 @@ sap.ui.define([
                         if (sAction === MessageBox.Action.OK) {
                             aInvoices.splice(iIndex, 1);
                             oCreateModel.setProperty("/invoices", aInvoices);
+                            this._updateHighestInvoiceValue();
                         }
                     }
                 }
+            );
+        },
+        _updateHighestInvoiceValue() {
+            const oCreateModel = this.getView().getModel("create");
+            const sSubProcessTypeCode = oCreateModel.getProperty("/subProcessType_code");
+
+            if (!this._isPoAdvanceSubtype(sSubProcessTypeCode) && !this._isPoAdvSettlementSubtype(sSubProcessTypeCode)) {
+                oCreateModel.setProperty("/highestInvoiceValue", null);
+                return;
+            }
+
+            const aInvoices = oCreateModel.getProperty("/invoices") || [];
+            const aAmounts = aInvoices
+                .map((oInvoice) => Number(oInvoice.amount))
+                .filter((fAmount) => Number.isFinite(fAmount));
+
+            oCreateModel.setProperty(
+                "/highestInvoiceValue",
+                aAmounts.length ? Math.max(...aAmounts) : null
             );
         },
         onCalculateDirectForeignTravelTotals() {
@@ -1866,7 +1909,7 @@ sap.ui.define([
                 selectedScheme: "",
                 personalTravelInvolved: false,
                 periodOfPersonalTravel: "",
-                specialRemarks: ""
+                // specialRemarks: ""
             });
 
             this.getView().byId("directForeignTravelDialog").open();
@@ -1920,7 +1963,7 @@ sap.ui.define([
                 selectedScheme: oEntry.selectedScheme || "",
                 personalTravelInvolved: Boolean(oEntry.personalTravelInvolved),
                 periodOfPersonalTravel: oEntry.periodOfPersonalTravel || "",
-                specialRemarks: oEntry.specialRemarks || ""
+                // specialRemarks: oEntry.specialRemarks || ""
             };
 
             if (oEntry._editIndex !== undefined && oEntry._editIndex !== null) {
@@ -2234,8 +2277,8 @@ sap.ui.define([
                 invoiceNumber: "",
                 invoiceDate: null,
                 description: "",
-                transactionAmountUSD: null,
-                paymentAmountLKR: null,
+                transactionAmountDocumentCurrency: null,
+                transactionAmountLocalCurrency: null,
                 availabilityOfInvoice: false
             });
 
@@ -2250,12 +2293,12 @@ sap.ui.define([
             if (
                 !oEntry.paymentRequestRef_ID ||
                 !String(oEntry.paymentRequest || "").trim() ||
-                oEntry.transactionAmountUSD === null ||
-                oEntry.transactionAmountUSD === "" ||
-                oEntry.transactionAmountUSD === undefined ||
-                oEntry.paymentAmountLKR === null ||
-                oEntry.paymentAmountLKR === "" ||
-                oEntry.paymentAmountLKR === undefined
+                oEntry.transactionAmountDocumentCurrency === null ||
+                oEntry.transactionAmountDocumentCurrency === "" ||
+                oEntry.transactionAmountDocumentCurrency === undefined ||
+                oEntry.transactionAmountLocalCurrency === null ||
+                oEntry.transactionAmountLocalCurrency === "" ||
+                oEntry.transactionAmountLocalCurrency === undefined
             ) {
                 MessageBox.warning(this.getText("settlementEntryRequiredFieldsMessage"));
                 return;
@@ -2271,8 +2314,8 @@ sap.ui.define([
                 invoiceNumber: oEntry.invoiceNumber || "",
                 invoiceDate: oEntry.invoiceDate,
                 description: String(oEntry.description).trim(),
-                transactionAmountUSD: Number(oEntry.transactionAmountUSD),
-                paymentAmountLKR: Number(oEntry.paymentAmountLKR),
+                transactionAmountDocumentCurrency: Number(oEntry.transactionAmountDocumentCurrency),
+                transactionAmountLocalCurrency: Number(oEntry.transactionAmountLocalCurrency),
                 availabilityOfInvoice: Boolean(oEntry.availabilityOfInvoice)
             };
 
@@ -2479,7 +2522,6 @@ sap.ui.define([
         _setSubProcessType(oContext) {
             const oCreateModel = this.getView().getModel("create");
             const sCode = oContext.getProperty("code");
-            const bCodeChanged = this._sActiveSubProcessTypeCode !== sCode;
             oCreateModel.setProperty("/subProcessType_code", sCode);
             oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
             const bLoaApplicable = Boolean(oContext.getProperty("loaApprovalApplicable"));
@@ -2490,45 +2532,7 @@ sap.ui.define([
                 oCreateModel.setProperty("/amount", null);
                 oCreateModel.setProperty("/role", "");
             }
-
-            this._setFtkFactoringMode(this._isFtkFactoringSubtype(sCode));
-            this._setFtkNonFactoringMode(this._isFtkNonFactoringSubtype(sCode));
-            this._setFtkServicePaymentMode(this._isFtkServicePaymentSubtype(sCode));
-            this._setFtkDutyReimbursementMode(this._isFtkDutyReimbursementSubtype(sCode));
-            this._setPoBasedNonAdvanceMode(this._isPoBasedNonAdvanceSubtype(sCode), bCodeChanged);
-            this._setPoAdvanceMode(this._isPoAdvanceSubtype(sCode), bCodeChanged);
-            this._setPoAdvSettlementMode(this._isPoAdvSettlementSubtype(sCode), bCodeChanged);
-            this._setOfnAuthorityMode(this._isOfnAuthoritySubtype(sCode), bCodeChanged);
-            this._setNonPoDirectForeignTravelMode(this._isNonPoDirectForeignTravelSubtype(sCode));
-            this._setNonPoFuelMode(this._isNonPoFuelSubtype(sCode), bCodeChanged);
-            this._setNonPoIdeaMartAppMakerMode(this._isNonPoIdeaMartAppMakerSubtype(sCode), bCodeChanged);
-            this._setNonPoCustomerRefundsMode(this._isNonPoCustomerRefundsSubtype(sCode));
-            this._setNonPoStelacomConsignmentMode(this._isNonPoStelacomConsignmentSubtype(sCode));
-            this._setNonPoSiteShareLiabilityMode(this._isNonPoSiteShareLiabilitySubtype(sCode));
-            this._setNonPoSiteSharingMode(this._isNonPoSiteSharingSubtype(sCode), bCodeChanged);
-            this._setNonPoSiteRentTaxInvoiceMode(this._isNonPoSiteRentTaxInvoiceSubtype(sCode));
-            this._setNonPoSiteRentMonthlyFileMode(this._isNonPoSiteRentMonthlyFileSubtype(sCode));
-            this._setNonPoSiteRentStampAdhocMode(this._isNonPoSiteRentStampAdhocSubtype(sCode));
-            this._setDirectNonPoReimbursementMode(this._isDirectNonPoReimbursementSubtype(sCode), bCodeChanged);
-            this._setDirectForeignTravelReimbMode(this._isDirectForeignTravelReimbSubtype(sCode));
-            this._setNonPoTaxLiabilityMode(this._isNonPoTaxLiabilitySubtype(sCode), bCodeChanged);
-            this._setNonPoInterconnectLiabMode(this._isNonPoInterconnectLiabSubtype(sCode));
-            this._setNonPoInterconnectRoamPayMode(this._isNonPoInterconnectRoamPaySubtype(sCode));
-            this._setNonPoRoamingLiabilityMode(this._isNonPoRoamingLiabilitySubtype(sCode));
-            this._setNonPoStarPointPaymentsMode(this._isNonPoStarPointPaymentsSubtype(sCode));
-            this._setNonPoImportTrcMode(this._isNonPoImportTrcSubtype(sCode));
-            this._setNonPoImportIclMode(this._isNonPoImportIclSubtype(sCode));
-            this._setNonPoImportDgcMode(this._isNonPoImportDgcSubtype(sCode), bCodeChanged);
-            this._setNonPoCcPaymentMode(this._isNonPoCcPaymentSubtype(sCode));
-            this._setNonPoCcSettlementMode(this._isNonPoCcSettlementSubtype(sCode));
-            this._setNonPoMerchantSettlementsMode(this._isNonPoMerchantSettlementsSubtype(sCode));
-            this._setNonPoMiscReceiptsMode(this._isNonPoMiscReceiptsSubtype(sCode));
-            this._setPoZeroIvMode(this._isPoZeroIvSubtype(sCode));
-            this._setBankGuaranteeMode(this._isBankGuaranteeSubtype(sCode));
-
-            oCreateModel.setProperty("/isFtkPoValidation", sCode === "FTK_FACTORING_PO_VALIDATION");
-            this._setFtkBasedOnUacMode(sCode === "FTK_FACTORING_BASED_ON_UAC");
-            this._sActiveSubProcessTypeCode = sCode;
+            this._applySubProcessTypeFlags(sCode);
             if (sCode === "FTK_DUTY_REIMBURSEMENT" || sCode === "NON_PO_IMPORT_TRC" || sCode === "NON_PO_IMPORT_ICL"
                 || sCode === "NON_PO_FUEL_GENERATOR" ||
                 sCode === "NON_PO_FUEL_STAFF" || sCode === "NON_PO_TAX_LIAB_PAY_OTTP" ||
@@ -2556,7 +2560,8 @@ sap.ui.define([
 
         _isFtkFactoringSubtype(sCode) {
             return [
-                "FTK_FACTORING_PO_VALIDATION",
+                "FTK_FACTORING_PO_VALIDATION_HW",
+                "FTK_FACTORING_PO_VALID_HW_SW",
                 "FTK_FACTORING_BASED_ON_UAC"
             ].includes(sCode);
         },
@@ -2656,7 +2661,10 @@ sap.ui.define([
             return sCode === "NON_PO_INTERCONNECT_LIAB";
         },
         _isNonPoInterconnectRoamPaySubtype(sCode) {
-            return sCode === "NON_PO_INTERCONNECT_ROAM_PAY";
+            return [
+                "NON_PO_INTERCONNECTION_PAY",
+                "NON_PO_ROAMING_PAY"
+            ].includes(sCode);
         },
         _isNonPoRoamingLiabilitySubtype(sCode) {
             return sCode === "NON_PO_ROAMING_LIABILITY";
@@ -2695,13 +2703,13 @@ sap.ui.define([
             return sCode === "BANK_GUARANTEE";
         },
 
-        _setFtkFactoringMode(bEnabled) {
+        _setFtkFactoringMode(bEnabled,bCodeChanged) {
             const oCreateModel = this.getView().getModel("create");
 
             oCreateModel.setProperty("/isFtkFactoring", bEnabled);
-
-            if (!bEnabled) {
-                oCreateModel.setProperty("/isFtkPoValidation", false);
+            oCreateModel.setProperty("/isFtkPoValidation", bEnabled);
+            if (!bEnabled || bCodeChanged) {
+                
                 [
                     "paymentCategory_code",
                     "businessEntity_code",
@@ -2777,7 +2785,7 @@ sap.ui.define([
 
                 oCreateModel.setProperty("/invoiceDebitNoteDate", null);
 
-                ["amount", "totalDebitNoteValue"].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, null));
+                ["amountPayable", "totalDebitNoteValue"].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, null));
             }
         },
         _setPoBasedNonAdvanceMode(bEnabled, bCodeChanged) {
@@ -3222,11 +3230,11 @@ sap.ui.define([
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, null));
             }
         },
-        _setNonPoInterconnectRoamPayMode(bEnabled) {
+        _setNonPoInterconnectRoamPayMode(bEnabled, bCodeChanged) {
             const oCreateModel = this.getView().getModel("create");
             oCreateModel.setProperty("/isNonPoInterconnectRoamPay", bEnabled);
 
-            if (!bEnabled) {
+            if (!bEnabled || bCodeChanged) {
                 [
                     "paymentCategory_code",
                     "businessEntity_code",
@@ -3360,7 +3368,8 @@ sap.ui.define([
 
                 oCreateModel.setProperty("/whtEligibilityConfirmation", false);
                 oCreateModel.setProperty("/invoiceDate", null);
-                oCreateModel.setProperty("/totalAmountPayable", null);
+                oCreateModel.setProperty("/transactionAmountDocumentCurrency", null);
+                oCreateModel.setProperty("/transactionAmountLocalCurrency", null);
             }
         },
         _setNonPoCcSettlementMode(bEnabled) {
@@ -3423,7 +3432,7 @@ sap.ui.define([
                     "vendorCode",
                     "vendorName",
                     "costCentre",
-                    "debitGL",
+                    // "debitGL",
                     "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
 
@@ -3474,7 +3483,7 @@ sap.ui.define([
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, null));
 
                 oCreateModel.setProperty("/specificBgFormatAvailable", false);
-                oCreateModel.setProperty("/amount", null);
+                oCreateModel.setProperty("/amountPayable", null);
             }
         },
         async onAmountChange(oEvent) {
@@ -3664,7 +3673,7 @@ sap.ui.define([
             this._setDirectForeignTravelReimbMode(false);
             this._setNonPoTaxLiabilityMode(false, true);
             this._setNonPoInterconnectLiabMode(false);
-            this._setNonPoInterconnectRoamPayMode(false);
+            this._setNonPoInterconnectRoamPayMode(false, true);
             this._setNonPoRoamingLiabilityMode(false);
             this._setNonPoStarPointPaymentsMode(false);
             this._setNonPoImportTrcMode(false);
@@ -3700,7 +3709,19 @@ sap.ui.define([
             try {
                 const oPredecessor = await this._readEntry(`/ProcessRequests(guid'${sPredecessorId}')`, {
                     urlParameters: {
-                        "$expand": "processType,subProcessType,paymentCategory,businessEntity,priorityConfig"
+                        "$expand": [
+                            "processType",
+                            "subProcessType",
+                            "paymentCategory",
+                            "businessEntity",
+                            "priorityConfig",
+                            "invoices",
+                            "travelExpenses",
+                            "directForeignTravelEntries",
+                            "glBreakups",
+                            "settlementEntries",
+                            "merchantEntityValues"
+                        ].join(",")
                     }
                 });
 
@@ -3720,17 +3741,25 @@ sap.ui.define([
                 oCreateModel.setProperty("/processTypeName", oPredecessor.processType?.name || oPredecessor.processType_code || "");
                 oCreateModel.setProperty("/subProcessType_code", oPredecessor.subProcessType_code || "");
                 oCreateModel.setProperty("/subProcessTypeName", oPredecessor.subProcessType?.name || oPredecessor.subProcessType_code || "");
-                this._setFtkFactoringMode(this._isFtkFactoringSubtype(oPredecessor.subProcessType_code));
-                oCreateModel.setProperty(
-                    "/isFtkPoValidation",
-                    oPredecessor.subProcessType_code === "FTK_FACTORING_PO_VALIDATION"
-                );
-                oCreateModel.setProperty("/paymentCategory_code", oPredecessor.paymentCategory_code || "");
-                oCreateModel.setProperty("/businessEntity_code", oPredecessor.businessEntity_code || "");
-                oCreateModel.setProperty("/vendor_ID", oPredecessor.vendor_ID || "");
-                oCreateModel.setProperty("/vendorCode", oPredecessor.vendorCode || "");
-                oCreateModel.setProperty("/vendorName", oPredecessor.vendorName || "");
-                oCreateModel.setProperty("/remarks", oPredecessor.remarks || "");
+                // this._setFtkFactoringMode(this._isFtkFactoringSubtype(oPredecessor.subProcessType_code));
+                // oCreateModel.setProperty(
+                //     "/isFtkPoValidation",
+                //     oPredecessor.subProcessType_code === "FTK_FACTORING_PO_VALIDATION"
+                // );
+                // oCreateModel.setProperty("/paymentCategory_code", oPredecessor.paymentCategory_code || "");
+                // oCreateModel.setProperty("/businessEntity_code", oPredecessor.businessEntity_code || "");
+                // oCreateModel.setProperty("/vendor_ID", oPredecessor.vendor_ID || "");
+                // oCreateModel.setProperty("/vendorCode", oPredecessor.vendorCode || "");
+                // oCreateModel.setProperty("/vendorName", oPredecessor.vendorName || "");
+                // oCreateModel.setProperty("/remarks", oPredecessor.remarks || "");
+                const sSubProcessTypeCode = oPredecessor.subProcessType_code || "";
+                 if (sSubProcessTypeCode) {
+                    // Sets every isXxx flag correctly for THIS subtype
+                    this._applySubProcessTypeFlags(sSubProcessTypeCode);
+                    // ...then fills in the fields that subtype actually uses, incl. line items.
+                    this._prefillSubtypeFields(oPredecessor, sSubProcessTypeCode);
+                }
+                this.getView().getModel("create").getProperty("/glBreakups")
                 oCreateModel.setProperty("/title", this.getText("successorRequestTitlePrefix", [
                     oPredecessor.referenceNumber || oPredecessor.title || ""
                 ]));
@@ -3973,6 +4002,170 @@ sap.ui.define([
                 };
                 oRequest.send(oFile);
             });
+        },
+        
+        _applySubProcessTypeFlags(sCode) {
+    const oCreateModel = this.getView().getModel("create");
+    const bCodeChanged = this._sActiveSubProcessTypeCode !== sCode;
+ 
+    this._setFtkFactoringMode(this._isFtkFactoringSubtype(sCode), bCodeChanged);
+    this._setFtkNonFactoringMode(this._isFtkNonFactoringSubtype(sCode));
+    this._setFtkServicePaymentMode(this._isFtkServicePaymentSubtype(sCode));
+    this._setFtkDutyReimbursementMode(this._isFtkDutyReimbursementSubtype(sCode));
+    this._setPoBasedNonAdvanceMode(this._isPoBasedNonAdvanceSubtype(sCode), bCodeChanged);
+    this._setPoAdvanceMode(this._isPoAdvanceSubtype(sCode), bCodeChanged);
+    this._setPoAdvSettlementMode(this._isPoAdvSettlementSubtype(sCode), bCodeChanged);
+    this._setOfnAuthorityMode(this._isOfnAuthoritySubtype(sCode), bCodeChanged);
+    this._setNonPoDirectForeignTravelMode(this._isNonPoDirectForeignTravelSubtype(sCode));
+    this._setNonPoFuelMode(this._isNonPoFuelSubtype(sCode), bCodeChanged);
+    this._setNonPoIdeaMartAppMakerMode(this._isNonPoIdeaMartAppMakerSubtype(sCode), bCodeChanged);
+    this._setNonPoCustomerRefundsMode(this._isNonPoCustomerRefundsSubtype(sCode));
+    this._setNonPoStelacomConsignmentMode(this._isNonPoStelacomConsignmentSubtype(sCode));
+    this._setNonPoSiteShareLiabilityMode(this._isNonPoSiteShareLiabilitySubtype(sCode));
+    this._setNonPoSiteSharingMode(this._isNonPoSiteSharingSubtype(sCode), bCodeChanged);
+    this._setNonPoSiteRentTaxInvoiceMode(this._isNonPoSiteRentTaxInvoiceSubtype(sCode));
+    this._setNonPoSiteRentMonthlyFileMode(this._isNonPoSiteRentMonthlyFileSubtype(sCode));
+    this._setNonPoSiteRentStampAdhocMode(this._isNonPoSiteRentStampAdhocSubtype(sCode));
+    this._setDirectNonPoReimbursementMode(this._isDirectNonPoReimbursementSubtype(sCode), bCodeChanged);
+    this._setDirectForeignTravelReimbMode(this._isDirectForeignTravelReimbSubtype(sCode));
+    this._setNonPoTaxLiabilityMode(this._isNonPoTaxLiabilitySubtype(sCode), bCodeChanged);
+    this._setNonPoInterconnectLiabMode(this._isNonPoInterconnectLiabSubtype(sCode));
+    this._setNonPoInterconnectRoamPayMode(this._isNonPoInterconnectRoamPaySubtype(sCode), bCodeChanged);
+    this._setNonPoRoamingLiabilityMode(this._isNonPoRoamingLiabilitySubtype(sCode));
+    this._setNonPoStarPointPaymentsMode(this._isNonPoStarPointPaymentsSubtype(sCode));
+    this._setNonPoImportTrcMode(this._isNonPoImportTrcSubtype(sCode));
+    this._setNonPoImportIclMode(this._isNonPoImportIclSubtype(sCode));
+    this._setNonPoImportDgcMode(this._isNonPoImportDgcSubtype(sCode), bCodeChanged);
+    this._setNonPoCcPaymentMode(this._isNonPoCcPaymentSubtype(sCode));
+    this._setNonPoCcSettlementMode(this._isNonPoCcSettlementSubtype(sCode));
+    this._setNonPoMerchantSettlementsMode(this._isNonPoMerchantSettlementsSubtype(sCode));
+    this._setNonPoMiscReceiptsMode(this._isNonPoMiscReceiptsSubtype(sCode));
+    this._setPoZeroIvMode(this._isPoZeroIvSubtype(sCode));
+    this._setBankGuaranteeMode(this._isBankGuaranteeSubtype(sCode));
+ 
+    oCreateModel.setProperty(
+        "/isFtkPoValidation",
+        sCode === "FTK_FACTORING_PO_VALIDATION_HW" || sCode === "FTK_FACTORING_PO_VALID_HW_SW"
+    );
+    this._setFtkBasedOnUacMode(sCode === "FTK_FACTORING_BASED_ON_UAC");
+ 
+    this._sActiveSubProcessTypeCode = sCode;
+},
+_prefillSubtypeFields(oPredecessor, sSubProcessTypeCode) {
+    const oCreateModel = this.getView().getModel("create");
+    const oFieldSet = SUBTYPE_FIELDS[sSubProcessTypeCode];
+ 
+    if (!oFieldSet) {
+        return;
+    }
+ 
+    // Composition (0..n) fields need their child rows copied, with
+    // backend-only/audit props stripped so they don't leak into the
+    // create payload as stale keys.
+    const oCompositionMappers = {
+        invoices: (oRow) => ({
+            invoiceDate: oRow.invoiceDate,
+            invoiceNumber: oRow.invoiceNumber,
+            amount: oRow.amount,
+            vatAmount: oRow.vatAmount,
+            sesReference: oRow.sesReference,
+            remarks: oRow.remarks || "",
+            subProcessType_code: sSubProcessTypeCode
+        }),
+        travelExpenses: (oRow) => ({
+            date: oRow.date,
+            particulars: oRow.particulars,
+            transport: oRow.transport,
+            hotel: oRow.hotel,
+            meals: oRow.meals,
+            entertainment: oRow.entertainment,
+            laundry: oRow.laundry,
+            phone: oRow.phone,
+            sundry: oRow.sundry,
+            miscellaneous: oRow.miscellaneous,
+            total: oRow.total
+        }),
+        directForeignTravelEntries: (oRow) => ({
+            travelerName: oRow.travelerName,
+            category: oRow.category || "",
+            vendorCode: oRow.vendorCode,
+            ctmProposalNo: oRow.ctmProposalNo,
+            purposeOfTravel: oRow.purposeOfTravel,
+            venue: oRow.venue || "",
+            departureDateTime: oRow.departureDateTime,
+            arrivalDateTime: oRow.arrivalDateTime,
+            budgetCode: oRow.budgetCode || "",
+            currency_code: oRow.currency_code,
+            airfare: oRow.airfare ?? null,
+            visaFee: oRow.visaFee ?? null,
+            perDayAllowanceUSD: oRow.perDayAllowanceUSD,
+            noOfDays: oRow.noOfDays,
+            totalInUSD: oRow.totalInUSD ?? null,
+            exchangeRate: oRow.exchangeRate ?? null,
+            totalInLKR: oRow.totalInLKR ?? null,
+            totalCostForeignCurrency: oRow.totalCostForeignCurrency ?? null,
+            totalCostLKR: oRow.totalCostLKR ?? null,
+            confirmedTravelItinerary: oRow.confirmedTravelItinerary || "",
+            selectedScheme: oRow.selectedScheme || "",
+            personalTravelInvolved: Boolean(oRow.personalTravelInvolved),
+            periodOfPersonalTravel: oRow.periodOfPersonalTravel || ""
+        }),
+        glBreakups: (oRow) => ({
+            glAccount: oRow.glAccount,
+            relevantDescription: oRow.relevantDescription,
+            relevantAmount: oRow.relevantAmount,
+            costCentre: oRow.costCentre,
+            profitCentre: oRow.profitCentre || ""
+        }),
+        settlementEntries: (oRow) => ({
+            paymentRequestRef_ID: oRow.paymentRequestRef_ID || "",
+            paymentRequest: oRow.paymentRequest,
+            poNumber: oRow.poNumber || "",
+            sesReference: oRow.sesReference || "",
+            invoiceNumber: oRow.invoiceNumber || "",
+            invoiceDate: oRow.invoiceDate,
+            description: oRow.description,
+            transactionAmountDocumentCurrency: oRow.transactionAmountDocumentCurrency,
+            transactionAmountLocalCurrency: oRow.transactionAmountLocalCurrency,
+            availabilityOfInvoice: Boolean(oRow.availabilityOfInvoice)
+        }),
+        merchantEntityValues: (oRow) => ({
+            businessEntity_code: oRow.businessEntity_code,
+            totalPayableValue: oRow.totalPayableValue
+        })
+    };
+ 
+    const fnToArray = (vValue) => {
+        if (Array.isArray(vValue)) {
+            return vValue;
         }
+        if (vValue && Array.isArray(vValue.results)) {
+            return vValue.results;
+        }
+        return [];
+    };
+ 
+    [...oFieldSet.required, ...oFieldSet.optional].forEach((sField) => {
+        const fnMapper = oCompositionMappers[sField];
+ 
+        if (fnMapper) {
+            const aRows = fnToArray(oPredecessor[sField]);
+            oCreateModel.setProperty(`/${sField}`, aRows.map(fnMapper));
+            return;
+        }
+ 
+        const vValue = oPredecessor[sField];
+ 
+        if (vValue !== undefined) {
+            oCreateModel.setProperty(`/${sField}`, vValue);
+        }
+    });
+    
+    // Derived/edge-case fields the validation logic checks for but that
+    // aren't plain 1:1 copies of a SUBTYPE_FIELDS entry.
+    if (this._isPoAdvanceSubtype(sSubProcessTypeCode) || this._isPoAdvSettlementSubtype(sSubProcessTypeCode)) {
+        this._updateHighestInvoiceValue();
+    }
+},
     });
 });

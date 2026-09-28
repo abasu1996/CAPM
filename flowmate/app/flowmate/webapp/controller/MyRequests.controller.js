@@ -82,6 +82,14 @@ sap.ui.define([
             this.getView().setModel(new JSONModel({
                 name: ""
             }), "newRequestQuery");
+            this.getView().setModel(new JSONModel(this._createEmptyTreasuryConfirmation()), "treasuryConfirmation");
+            this.getView().setModel(new JSONModel(this._createEmptyWhtClearance()), "whtClearance");
+            this.getView().setModel(new JSONModel({
+                showUnreservedOnly: false,
+                showTreasuryConfirmation: false,
+                showWhtClearance: false,
+                 showBudgetCheck: false
+            }), "viewDemandTasks");
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -908,6 +916,69 @@ sap.ui.define([
         },
 
         async onApproveRequestTask() {
+            const oContext = this.byId("requestTaskObjectPage").getBindingContext();
+            const sTaskName = oContext?.getProperty("taskName");
+            const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
+            const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
+
+            if (sTaskName === "GFA Team Confirmation" && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
+                const sDebitGL = (this.byId("requestGfaDebitGLInput").getValue() || "").trim();
+
+                if (!sDebitGL) {
+                    MessageBox.warning(this.getText("debitGLRequiredMessage"));
+                    return;
+                }
+
+                if (!sRequestId) {
+                    MessageBox.error(this.getText("selectRequestMessage"));
+                    return;
+                }
+
+                this.showBusy();
+
+                try {
+                    await this.updateEntry(`/ProcessRequests(guid'${sRequestId}')`, {
+                        debitGL: sDebitGL
+                    });
+                } catch (oError) {
+                    this.hideBusy();
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("debitGLSaveErrorMessage")));
+                    return;
+                }
+
+                this.hideBusy();
+            }
+             if (sTaskName === "IV Confirmation and Document Archiving" && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
+                const sVoucherNumber = (this.byId("requestIvVoucherNumberInput").getValue() || "").trim();
+                const sConfirmationValue = (this.byId("requestIvConfirmationValueInput").getValue() || "").trim();
+                const sBankStatus = (this.byId("requestIvBankStatusInput").getValue() || "").trim();
+
+                if (!sVoucherNumber || !sConfirmationValue || !sBankStatus) {
+                    MessageBox.warning(this.getText("ivConfirmationFieldsRequiredMessage"));
+                    return;
+                }
+
+                if (!sRequestId) {
+                    MessageBox.error(this.getText("selectRequestMessage"));
+                    return;
+                }
+
+                this.showBusy();
+
+                try {
+                    await this.updateEntry(`/ProcessRequests(guid'${sRequestId}')`, {
+                        voucherNumber: sVoucherNumber,
+                        ivConfirmationValue: sConfirmationValue,
+                        bankStatus: sBankStatus
+                    });
+                } catch (oError) {
+                    this.hideBusy();
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("ivConfirmationSaveErrorMessage")));
+                    return;
+                }
+
+                this.hideBusy();
+            }
             await this._completeRequestTask("approveTask", "taskApprovedMessage");
         },
 
@@ -1107,6 +1178,457 @@ sap.ui.define([
             }
         },
 
+    async _getCurrentUserActor() {
+        
+        try {
+            const oResponse = await this.callAction("getCurrentUserDetails");
+            const oUser = oResponse.value || oResponse;
+
+            this._sCurrentUserActor = oUser?.email || oUser?.displayName || oUser?.userPrincipalName || "";
+        } catch (oError) {
+            this._sCurrentUserActor = "";
+        }
+
+        return this._sCurrentUserActor;
+    },    
+    async _updateDemandTaskVisibility(oRequest) {
+    const oViewDemandTasks = this.getView().getModel("viewDemandTasks");
+    const oVisibility = {
+        showTreasuryConfirmation: false,
+        showWhtClearance: false,
+        showBudgetCheck: false
+    };
+
+    const sSubProcessTypeCode = oRequest?.subProcessType_code;
+    const iCurrentStep = Number(oRequest?.currentStep);
+
+    if (!sSubProcessTypeCode || !Number.isInteger(iCurrentStep) || iCurrentStep <= 0) {
+        oViewDemandTasks.setData(oVisibility);
+        return;
+    }
+
+    try {
+        const aConfigs = await this._readList("/ProcessStepConfig", {
+            filters: [
+                new Filter("subProcessType_code", FilterOperator.EQ, sSubProcessTypeCode),
+                new Filter("stepNo", FilterOperator.EQ, iCurrentStep)
+            ]
+        });
+
+        const bActive = aConfigs.some((oConfig) => this._isTruthy(oConfig.isActiveDemandTask));
+
+        oVisibility.showTreasuryConfirmation = bActive;
+        oVisibility.showWhtClearance = bActive;
+        oVisibility.showBudgetCheck = bActive;
+    } catch (oError) {
+        // Fail closed: no demand-task buttons if config can't be read
+    }
+
+    oViewDemandTasks.setData(oVisibility);
+},
+        _createEmptyTreasuryConfirmation() {
+            return {
+                treasuryEntity_code: "",
+                debitAccountName: "",
+                debitAccountNumber: "",
+                beneficiary: "",
+                treasuryCurrency_code: "",
+                treasuryAmount: null,
+                treasuryDueDate: null,
+                treasuryUserDivisionRep: ""
+            };
+        },
+
+      onOpenTreasuryConfirmationDialog() {
+            if (!this._sSelectedRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            const oRequest = this.byId("requestObjectPage").getBindingContext()?.getObject() || {};
+
+            this.getView().getModel("treasuryConfirmation").setData({
+                treasuryEntity_code: oRequest.treasuryEntity_code || "",
+                debitAccountName: oRequest.debitAccountName || "",
+                debitAccountNumber: oRequest.debitAccountNumber || "",
+                beneficiary: oRequest.beneficiary || "",
+                treasuryCurrency_code: oRequest.treasuryCurrency_code || "",
+                treasuryAmount: oRequest.treasuryAmount ?? null,
+                treasuryDueDate: oRequest.treasuryDueDate ?? null,
+                treasuryUserDivisionRep: oRequest.treasuryUserDivisionRep || ""
+            });
+            this.byId("treasuryConfirmationDialog").open();
+        },
+
+        onTreasuryConfirmationCancel() {
+            this.byId("treasuryConfirmationDialog").close();
+        },
+
+        async onTreasuryConfirmationConfirm() {
+            const oData = this.getView().getModel("treasuryConfirmation").getData();
+            const aMissing = [
+                "treasuryEntity_code", "debitAccountName", "debitAccountNumber",
+                "beneficiary", "treasuryCurrency_code", "treasuryAmount", "treasuryDueDate", "treasuryUserDivisionRep"
+            ].filter((sField) => !this._hasFormValue(oData[sField]));
+
+            if (aMissing.length) {
+                MessageBox.warning(this.getText("treasuryConfirmationRequiredMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                const oRequest = this.byId("requestObjectPage").getBindingContext()?.getObject() || {};
+                const iStepNo = oRequest.currentStep;
+
+                if (!oRequest.reservedBy) {
+                    MessageBox.warning(this.getText("reserveRequestFirstMessage"));
+                    return;
+                }
+
+                if (!Number.isInteger(Number(iStepNo)) || Number(iStepNo) <= 0) {
+                    MessageBox.warning(this.getText("noActiveStepMessage"));
+                    return;
+                }
+
+                const fAmount = Number(oData.treasuryAmount);
+                if (!Number.isFinite(fAmount)) {
+                    MessageBox.warning(this.getText("invalidAmountMessage"));
+                    return;
+                }
+                const aExistingTasks = await this._readList("/ProcessTasks", {
+                    filters: [
+                        new Filter("request_ID", FilterOperator.EQ, this._sSelectedRequestId),
+                        new Filter("stepNo", FilterOperator.EQ, iStepNo),
+                        new Filter("role", FilterOperator.EQ, "Treasury")
+                    ]
+                });
+                if (aExistingTasks.some((oTask) => this._isOpenLikeTask(oTask))) {
+                    MessageBox.error(this.getText("treasuryTaskAlreadyExistsMessage"));
+                    return;
+                }
+
+                const aTeams = await this._readList("/Teams", {
+                    filters: [
+                        new Filter("teamCode", FilterOperator.EQ, "TREASURY"),
+                        new Filter("isActive", FilterOperator.EQ, true)
+                    ]
+                });
+                const oTreasuryTeam = aTeams[0];
+                if (!oTreasuryTeam) {
+                    MessageBox.error(this.getText("noTreasuryTeamMessage"));
+                    return;
+                }
+
+                await this.updateEntry(`/ProcessRequests(${this._sSelectedRequestId})`, {
+                    treasuryEntity_code: oData.treasuryEntity_code,
+                    debitAccountName: oData.debitAccountName,
+                    debitAccountNumber: oData.debitAccountNumber,
+                    beneficiary: oData.beneficiary,
+                    treasuryCurrency_code: oData.treasuryCurrency_code,
+                    treasuryAmount: fAmount,
+                    treasuryDueDate: oData.treasuryDueDate,
+                    treasuryUserDivisionRep: oData.treasuryUserDivisionRep
+                });
+
+                // referenceNumber, processorTeamName, isTeamTask, team-member sync,
+                // team notification, and the parent request's SLA/currentStep refresh
+                // all happen automatically via the ProcessTasks before/after CREATE hooks
+                await this.createEntry("/ProcessTasks", {
+                    request_ID: this._sSelectedRequestId,
+                    stepNo: iStepNo,
+                    taskName: "Treasury Confirmation",
+                    role: "Treasury",
+                    isMandatory: true,
+                    processorTeam_ID: oTreasuryTeam.ID,
+                    status_code: "OPEN"
+                });
+
+                // Not written automatically outside the custom action - add it explicitly
+                const sActor = await this._getCurrentUserActor();
+                await this.createEntry("/ProcessHistory", {
+                    request_ID: this._sSelectedRequestId,
+                    stepNo: iStepNo,
+                    action: "TREASURY_CONFIRMATION_CREATED",
+                    actor: sActor,
+                    oldStatus: oRequest.status_code,
+                    newStatus: oRequest.status_code,
+                    remarks: `Treasury confirmation submitted; Treasury task created at step ${iStepNo}`
+                });
+
+                this.byId("treasuryConfirmationDialog").close();
+                MessageToast.show(this.getText("treasuryConfirmationCreatedMessage"));
+                this._refreshRequestHeader();
+                this._refreshTaskSection();
+                this._refreshHistorySection();
+                this._refreshProcessFlow();
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("treasuryConfirmationCreateErrorMessage")));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        _isOpenLikeTask(oTask) {
+            const sStatus = String(oTask?.status_code?.code || oTask?.status_code || "").toUpperCase();
+            return sStatus === "OPEN" || sStatus === "SENT_BACK";
+        },
+
+        _hasFormValue(vValue) {
+            return vValue !== null && vValue !== undefined && String(vValue).trim() !== "";
+        },
+
+        _createEmptyWhtClearance() {
+            return {
+                whtEntity_code: "",
+                whtVendor: "",
+                whtCurrency_code: "",
+                whtAmount: null,
+                whtDueDate: null,
+                whtUserDivisionRep: ""
+            };
+        },
+
+        onOpenWhtClearanceDialog() {
+            if (!this._sSelectedRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            const oRequest = this.byId("requestObjectPage").getBindingContext()?.getObject() || {};
+
+            // Autofill from whatever the request already has
+            this.getView().getModel("whtClearance").setData({
+                whtEntity_code: oRequest.whtEntity_code || "",
+                whtVendor: oRequest.whtVendor || "",
+                whtCurrency_code: oRequest.whtCurrency_code || "",
+                whtAmount: oRequest.whtAmount ?? null,
+                whtDueDate: oRequest.whtDueDate ?? null,
+                whtUserDivisionRep: oRequest.whtUserDivisionRep || ""
+            });
+            this.byId("whtClearanceDialog").open();
+        },
+
+        onWhtClearanceCancel() {
+            this.byId("whtClearanceDialog").close();
+        },
+
+        async onWhtClearanceConfirm() {
+            const oData = this.getView().getModel("whtClearance").getData();
+            const aMissing = [
+                "whtEntity_code", "whtVendor", "whtCurrency_code",
+                "whtAmount", "whtDueDate", "whtUserDivisionRep"
+            ].filter((sField) => !this._hasFormValue(oData[sField]));
+
+            if (aMissing.length) {
+                MessageBox.warning(this.getText("whtClearanceRequiredMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                const oRequest = this.byId("requestObjectPage").getBindingContext()?.getObject() || {};
+                const iStepNo = oRequest.currentStep;
+
+                if (!oRequest.reservedBy) {
+                    MessageBox.warning(this.getText("reserveRequestFirstMessage"));
+                    return;
+                }
+
+                if (!Number.isInteger(Number(iStepNo)) || Number(iStepNo) <= 0) {
+                    MessageBox.warning(this.getText("noActiveStepMessage"));
+                    return;
+                }
+
+                const fAmount = Number(oData.whtAmount);
+                if (!Number.isFinite(fAmount)) {
+                    MessageBox.warning(this.getText("invalidAmountMessage"));
+                    return;
+                }
+
+                const aExistingTasks = await this._readList("/ProcessTasks", {
+                    filters: [
+                        new Filter("request_ID", FilterOperator.EQ, this._sSelectedRequestId),
+                        new Filter("stepNo", FilterOperator.EQ, iStepNo),
+                        new Filter("role", FilterOperator.EQ, "WHT")
+                    ]
+                });
+                if (aExistingTasks.some((oTask) => this._isOpenLikeTask(oTask))) {
+                    MessageBox.error(this.getText("whtTaskAlreadyExistsMessage"));
+                    return;
+                }
+                const aTeams = await this._readList("/Teams", {
+                    filters: [
+                        new Filter("teamCode", FilterOperator.EQ, "TAX"),
+                        new Filter("isActive", FilterOperator.EQ, true)
+                    ]
+                });
+                const oTaxTeam = aTeams[0];
+                if (!oTaxTeam) {
+                    MessageBox.error(this.getText("noTaxTeamMessage"));
+                    return;
+                }
+
+                await this.updateEntry(`/ProcessRequests(${this._sSelectedRequestId})`, {
+                    whtEntity_code: oData.whtEntity_code,
+                    whtVendor: oData.whtVendor,
+                    whtCurrency_code: oData.whtCurrency_code,
+                    whtAmount: fAmount,
+                    whtDueDate: oData.whtDueDate,
+                    whtUserDivisionRep: oData.whtUserDivisionRep
+                });
+
+                await this.createEntry("/ProcessTasks", {
+                    request_ID: this._sSelectedRequestId,
+                    stepNo: iStepNo,
+                    taskName: "WHT Clearance",
+                    role: "WHT",
+                    isMandatory: true,
+                    processorTeam_ID: oTaxTeam.ID,
+                    status_code: "OPEN"
+                });
+                const sActor = await this._getCurrentUserActor();
+                await this.createEntry("/ProcessHistory", {
+                    request_ID: this._sSelectedRequestId,
+                    stepNo: iStepNo,
+                    action: "WHT_CLEARANCE_CREATED",
+                    actor: sActor,
+                    oldStatus: oRequest.status_code,
+                    newStatus: oRequest.status_code,
+                    remarks: `WHT clearance requested; Tax task created at step ${iStepNo}`
+                });
+
+                this.byId("whtClearanceDialog").close();
+                MessageToast.show(this.getText("whtClearanceCreatedMessage"));
+                this._refreshRequestHeader();
+                this._refreshTaskSection();
+                this._refreshHistorySection();
+                this._refreshProcessFlow();
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("whtClearanceCreateErrorMessage")));
+            } finally {
+                this.hideBusy();
+            }
+        },
+        async onTriggerBudgetCheckTask() {
+            if (!this._sSelectedRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                const oRequest = this.byId("requestObjectPage")
+                    .getBindingContext()
+                    ?.getObject() || {};
+
+                const iStepNo = Number(oRequest.currentStep);
+
+                if (!oRequest.reservedBy) {
+                    MessageBox.warning(this.getText("reserveRequestFirstMessage"));
+                    return;
+                }
+
+                if (!Number.isInteger(iStepNo) || iStepNo <= 0) {
+                    MessageBox.warning(this.getText("noActiveStepMessage"));
+                    return;
+                }
+
+                const aExistingTasks = await this._readList("/ProcessTasks", {
+                    filters: [
+                        new Filter(
+                            "request_ID",
+                            FilterOperator.EQ,
+                            this._sSelectedRequestId
+                        ),
+                        new Filter(
+                            "stepNo",
+                            FilterOperator.EQ,
+                            iStepNo
+                        ),
+                        new Filter(
+                            "role",
+                            FilterOperator.EQ,
+                            "Budget"
+                        )
+                    ]
+                });
+
+                if (aExistingTasks.some((oTask) => this._isOpenLikeTask(oTask))) {
+                    MessageBox.error(
+                        this.getText("budgetTaskAlreadyExistsMessage")
+                    );
+                    return;
+                }
+
+                const aTeams = await this._readList("/Teams", {
+                    filters: [
+                        new Filter(
+                            "teamCode",
+                            FilterOperator.EQ,
+                            "BUDGET"
+                        ),
+                        new Filter(
+                            "isActive",
+                            FilterOperator.EQ,
+                            true
+                        )
+                    ]
+                });
+
+                const oBudgetTeam = aTeams[0];
+
+                if (!oBudgetTeam) {
+                    MessageBox.error(
+                        this.getText("noBudgetTeamMessage")
+                    );
+                    return;
+                }
+
+                await this.createEntry("/ProcessTasks", {
+                    request_ID: this._sSelectedRequestId,
+                    stepNo: iStepNo,
+                    taskName: "Budget Check",
+                    role: "Budget",
+                    isMandatory: true,
+                    processorTeam_ID: oBudgetTeam.ID,
+                    status_code: "OPEN"
+                });
+
+                const sActor = await this._getCurrentUserActor();
+                await this.createEntry("/ProcessHistory", {
+                    request_ID: this._sSelectedRequestId,
+                    stepNo: iStepNo,
+                    action: "BUDGET_CHECK_CREATED",
+                    actor: sActor,
+                    oldStatus: oRequest.status_code,
+                    newStatus: oRequest.status_code,
+                    remarks: `Budget Check task created at step ${iStepNo}`
+                });
+
+                MessageToast.show(
+                    this.getText("budgetCheckCreatedMessage")
+                );
+
+                this._refreshRequestHeader();
+                this._refreshTaskSection();
+                this._refreshHistorySection();
+                this._refreshProcessFlow();
+
+            } catch (oError) {
+                MessageBox.error(
+                    this.getErrorMessage(
+                        oError,
+                        this.getText("budgetCheckCreateErrorMessage")
+                    )
+                );
+            } finally {
+                this.hideBusy();
+            }
+        },
         onOpenAddPartyDialog() {
             if (!this._sSelectedRequestId) {
                 MessageToast.show(this.getText("selectRequestMessage"));
@@ -1769,10 +2291,14 @@ sap.ui.define([
                             "/requestTeamName",
                             oRequest?.processorTeamName || ""
                         );
+                        this._updateDemandTaskVisibility(oRequest);
                     }
                 }
             });
             this._bindRequestSectionTables(sRequestId);
+            const oRequestContext = this.byId("requestObjectPage").getBindingContext();
+            const oRequest = oRequestContext?.getObject();
+            this._updateDemandTaskVisibility(oRequest);
             this._setRequestsLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
             this._refreshProcessFlow();
         },
@@ -1965,7 +2491,7 @@ sap.ui.define([
                 }
 
                 MessageToast.show(this.getText(sSuccessTextKey));
-                this.byId("requestTaskRemarksTextArea").setValue("");
+                // this.byId("requestTaskRemarksTextArea").setValue("");
                 this._refreshAfterTaskChange();
                 this.byId("requestTaskObjectPage").getElementBinding().refresh();
             } catch (oError) {

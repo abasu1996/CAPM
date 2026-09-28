@@ -683,7 +683,8 @@ sap.ui.define([
                 processorTeam_ID: oEntry.processorTeam_ID || null,
                 processorTeamName: oEntry.processorTeamName || null,
                 role: oEntry.role,
-                slaDays: this._optionalNumber(oEntry.slaDays)
+                slaDays: this._optionalNumber(oEntry.slaDays),
+                isActiveDemandTask: Boolean(oEntry.isActiveDemandTask)
             };
 
             this.showBusy();
