@@ -139,6 +139,12 @@
                                                 visible="{= !${taskView>/teamMode} }"
                                                 press=".onNotifyProcessor" />
                                             <Button
+                                                icon="sap-icon://group"
+                                                type="Transparent"
+                                                tooltip="{i18n>notifyTeamMembersButton}"
+                                                visible="{= !!${processorTeam_ID} }"
+                                                press=".onNotifyTaskTeamMembers" />
+                                            <Button
                                                 icon="sap-icon://employee-approvals"
                                                 type="Transparent"
                                                 tooltip="{i18n>assignTeamTaskToMeButton}"
@@ -183,6 +189,11 @@
                                 text="{i18n>notifyProcessorButton}"
                                 visible="{= !${taskView>/teamMode} &amp;&amp; !${taskView>/approvalMode} }"
                                 press=".onNotifyProcessor" />
+                            <Button
+                                icon="sap-icon://group"
+                                text="{i18n>notifyTeamMembersButton}"
+                                visible="{= !!${processorTeam_ID} }"
+                                press=".onNotifyTaskTeamMembers" />
                             <Button
                                 icon="sap-icon://employee-approvals"
                                 text="{i18n>assignTeamTaskToMeButton}"

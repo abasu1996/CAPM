@@ -415,31 +415,10 @@ sap.ui.define([
             this.showBusy();
 
             try {
-                const oResolvedRecipients = await this.callAction("resolveTaskTeamNotificationRecipients", {
+                const oResult = await this.callAction("notifyTaskTeam", {
                     taskId: sTaskId
                 });
-                const oValue = oResolvedRecipients.value || oResolvedRecipients;
-                const sRecipients = oValue.recipients || "";
-
-                if (!sRecipients) {
-                    MessageToast.show(this.getText("teamMembersEmailMissingMessage"));
-                    return;
-                }
-
-                if (oValue.delegatedCount) {
-                    MessageToast.show(this.getText("teamNotificationDelegatedMessage", [oValue.delegatedCount]));
-                }
-
-                const sTaskName = oContext.getProperty("taskName") || this.getText("taskFallbackName");
-                const sRequestTitle = oContext.getProperty("request/title") || oContext.getProperty("request/referenceNumber") || "";
-                const sSubject = this.getText("taskNotificationSubject", [sTaskName]);
-                const sBody = this.getText("taskNotificationBody", [
-                    sTaskName,
-                    sRequestTitle,
-                    window.location.href
-                ]);
-
-                window.location.href = `mailto:${encodeURIComponent(sRecipients)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
+                MessageToast.show(this.getText("teamNotificationSentMessage", [oResult.recipientCount]));
             } catch (oError) {
                 MessageToast.show(this.getErrorMessage(oError, this.getText("teamMembersEmailMissingMessage")));
             } finally {

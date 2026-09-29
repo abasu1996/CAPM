@@ -348,6 +348,9 @@ service FlowmateService {
     action notifyTaskProcessor(taskId: UUID) returns {
         recipientCount : Integer;
     };
+    action notifyTaskTeam(taskId: UUID) returns {
+        recipientCount : Integer;
+    };
     action getCurrentUserDetails() returns {
         ID                : UUID;
         displayName       : String(150);

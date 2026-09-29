@@ -2283,6 +2283,12 @@
                                                                 tooltip="{i18n>notifyProcessorButton}"
                                                                 press=".onNotifyProcessor" />
                                                             <Button
+                                                                icon="sap-icon://group"
+                                                                type="Transparent"
+                                                                tooltip="{i18n>notifyTeamMembersButton}"
+                                                                visible="{= !!${processorTeam_ID} }"
+                                                                press=".onNotifyTaskTeamMembers" />
+                                                            <Button
                                                                 icon="sap-icon://delete"
                                                                 type="Transparent"
                                                                 enabled="{requestEdit>/editable}"
@@ -2608,6 +2614,11 @@
                                 icon="sap-icon://email"
                                 text="{i18n>notifyProcessorButton}"
                                 press=".onNotifyProcessor" />
+                            <Button
+                                icon="sap-icon://group"
+                                text="{i18n>notifyTeamMembersButton}"
+                                visible="{= !!${processorTeam_ID} }"
+                                press=".onNotifyTaskTeamMembers" />
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"

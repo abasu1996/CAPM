@@ -2549,7 +2549,24 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const iRecipientCount = await this._notifyTaskAssignment(req, {
         task: oTask,
-        failWhenUnassigned: true
+        failWhenUnassigned: true,
+        recipientScope: "PROCESSOR"
+      });
+
+      return { recipientCount: iRecipientCount };
+    });
+
+    this.on("notifyTaskTeam", async (req) => {
+      const oTask = await this._getTask(req, req.data.taskId);
+
+      if (!oTask) {
+        return req.reject(404, `Task ${req.data.taskId} was not found`);
+      }
+
+      const iRecipientCount = await this._notifyTaskAssignment(req, {
+        task: oTask,
+        failWhenUnassigned: true,
+        recipientScope: "TEAM"
       });
 
       return { recipientCount: iRecipientCount };
@@ -5870,33 +5887,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
   }
 
-  async _notifyTaskAssignment(req, { task, failWhenUnassigned = false }) {
+  async _notifyTaskAssignment(req, { task, failWhenUnassigned = false, recipientScope = "AUTO" }) {
     const oLog = cds.log("task-assignment-notifications");
 
     try {
       const oRequest = await this._getRequest(req, task.request_ID);
       const aRecipients = [];
+      const bNotifyProcessor = recipientScope === "PROCESSOR"
+        || recipientScope === "AUTO" && Boolean(task.processorUser_ID || task.assignedUser_ID || task.processorEmail);
+      const bNotifyTeam = recipientScope === "TEAM"
+        || recipientScope === "AUTO" && !bNotifyProcessor && Boolean(task.processorTeam_ID);
 
-      if (task.processorTeam_ID) {
-        const aMembers = await this.master.run(
-          SELECT.from(this.masterEntities.TeamMembers).where({
-            team_ID: task.processorTeam_ID,
-            isActive: true
-          })
-        );
-
-        for (const oMember of aMembers) {
-          const sEmail = String(oMember.email || "").trim().toLowerCase();
-          if (sEmail) {
-            aRecipients.push({ email: sEmail, displayName: oMember.displayName || sEmail });
-          }
-        }
-      } else if (task.processorEmail) {
-        aRecipients.push({
-          email: String(task.processorEmail).trim().toLowerCase(),
-          displayName: task.processor || task.assignedTo || task.processorEmail
-        });
-      } else if (task.processorUser_ID || task.assignedUser_ID) {
+      if (bNotifyProcessor && (task.processorUser_ID || task.assignedUser_ID)) {
         const oUser = await this.master.run(
           SELECT.one.from(this.masterEntities.Users).where({
             ID: task.processorUser_ID || task.assignedUser_ID,
@@ -5908,6 +5910,35 @@ module.exports = class FlowmateService extends cds.ApplicationService {
             email: this._userEmail(oUser).trim().toLowerCase(),
             displayName: this._userDisplayName(oUser)
           });
+        }
+      }
+
+      if (bNotifyProcessor && !aRecipients.length && task.processorEmail) {
+        aRecipients.push({
+          email: String(task.processorEmail).trim().toLowerCase(),
+          displayName: task.processor || task.assignedTo || task.processorEmail
+        });
+      }
+
+      if (bNotifyTeam && task.processorTeam_ID) {
+        let aMembers = await cds.tx(req).run(
+          SELECT.from(this.entities.ProcessTaskTeamMembers).where({ task_ID: task.ID })
+        );
+
+        if (!aMembers.length) {
+          aMembers = await this.master.run(
+            SELECT.from(this.masterEntities.TeamMembers).where({
+              team_ID: task.processorTeam_ID,
+              isActive: true
+            })
+          );
+        }
+
+        for (const oMember of aMembers) {
+          const sEmail = String(oMember.email || "").trim().toLowerCase();
+          if (sEmail) {
+            aRecipients.push({ email: sEmail, displayName: oMember.displayName || sEmail });
+          }
         }
       }
 
@@ -5929,7 +5960,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!aResolvedRecipients.length) {
         if (failWhenUnassigned) {
-          return req.reject(400, "Please assign a processor with a maintained email address first.");
+          const sMessage = recipientScope === "TEAM"
+            ? "Please assign a team with at least one maintained member email address first."
+            : "Please assign a processor with a maintained email address first.";
+          return req.reject(400, sMessage);
         }
         oLog.warn(`No notification recipient is maintained for task ${task.ID}`);
         return 0;
@@ -5941,7 +5975,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         recipients: aResolvedRecipients
       });
 
-      if (task.processorTeam_ID) {
+      if (bNotifyTeam) {
         await cds.tx(req).run(
           UPDATE(this.entities.ProcessTaskTeamMembers)
             .set({ notifiedAt: this._now() })
