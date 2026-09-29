@@ -73,7 +73,8 @@ sap.ui.define([], function () {
       required: true
     }),
     field("mrpType", "MRP Type", "combo", { required: true, entity: "MRPType", key: "mrpTypeCode", text: "mrpTypeDescription" }),
-    field("availabilityCheck", "Availability Check", "combo", { required: true, entity: "AvailabilityCheck", key: "availabilityCheckCode", text: "availabilityCheckDescription" })
+    field("availabilityCheck", "Availability Check", "combo", { required: true, entity: "AvailabilityCheck", key: "availabilityCheckCode", text: "availabilityCheckDescription" }),
+    field("serialNumberProfile", "Serial Number Profile", "combo", { entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription" })
   ];
 
   const definitions = {
@@ -152,6 +153,7 @@ sap.ui.define([], function () {
       field("referenceMaterialCode", "Existing Material Code", "input", {
         required: true
       }),
+      field("serialNumberProfile", "Serial Number Profile", "combo", { entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription" }),
       field("dmsUpdate", "DMS Update Required", "checkbox"),
       field("itemName", "DMS Item Name", "input"),
       field("itemCategory", "DMS Item Category", "input"),
@@ -215,8 +217,8 @@ sap.ui.define([], function () {
       transactionType,
       field("siteId", "Site ID", "combo", {
         required: true,
-        entity: "Sites", key: "siteId", text: "siteName",
-        autoFills: { field: "siteName", from: "name" }
+        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
+        autoFills: { field: "siteName", from: "siteName" }
       }),
       field("siteName", "Site Name", "readonly", {
         required: true,
@@ -224,8 +226,8 @@ sap.ui.define([], function () {
       }),
       field("materialCode", "Material Code", "combo", {
         required: true,
-        entity: "Materials", key: "materialCode", text: "materialDescription",
-        autoFills: { field: "materialDescription", from: "name" }
+        entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription",
+        autoFills: { field: "materialDescription", from: "materialDescription" }
       }),
       field("materialDescription", "Material Description", "readonly", {
         required: true,
@@ -241,8 +243,8 @@ sap.ui.define([], function () {
       transactionType,
       field("siteId", "Site ID", "combo", {
         required: true,
-        entity: "Sites", key: "siteId", text: "siteName",
-        autoFills: { field: "siteName", from: "name" }
+        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
+        autoFills: { field: "siteName", from: "siteName" }
       }),
       field("siteName", "Site Name", "readonly", {
         required: true,
@@ -250,8 +252,8 @@ sap.ui.define([], function () {
       }),
       field("materialCode", "Material Code", "combo", {
         required: true,
-        entity: "Materials", key: "materialCode", text: "materialDescription",
-        autoFills: { field: "materialDescription", from: "name" }
+        entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription",
+        autoFills: { field: "materialDescription", from: "materialDescription" }
       }),
       field("materialDescription", "Material Description", "readonly", {
         required: true,
@@ -289,7 +291,12 @@ sap.ui.define([], function () {
       field("activityRequired", "Activity Required", "checkbox"),
       field("projectName", "Project Name", "input", { required: true }),
       vendor,
-      field("scope", "Scope", "combo", { required: true, entity: "ProjectScopes" }),
+      // Spec 8: Scope applies to engineering requests only.
+      field("scope", "Scope", "combo", {
+        required: true,
+        entity: "ProjectScopes",
+        visibleWhen: { field: "requestedByArea", equals: "ENGINEERING" }
+      }),
       field("entityCode", "Entity", "combo", { entity: "BusinessEntities" }),
       field("projectType_code", "Project Type", "combo", {
         entity: "ProjectTypes"
@@ -297,8 +304,8 @@ sap.ui.define([], function () {
       field("arReference", "AR Reference", "combo", { entity: "ArReferences" }),
       field("siteId", "Site ID", "combo", {
         required: true,
-        entity: "Sites", key: "siteId", text: "siteName",
-        autoFills: { field: "siteName", from: "name" }
+        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
+        autoFills: { field: "siteName", from: "siteName" }
       }),
       field("siteName", "Site Name", "readonly", {
         required: true,
@@ -330,13 +337,21 @@ sap.ui.define([], function () {
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     RES_DIRECT: [
-      field("project", "Project", "combo", { required: true, entity: "ReservationProjects" }),
-      field("batch", "Batch", "combo", { entity: "ReservationBatches" }),
       field("engineeringType", "Engineering Type", "select", {
         options: [
           { key: "ENGINEERING", text: "Engineering" },
           { key: "NON_ENGINEERING", text: "Non-Engineering" }
         ]
+      }),
+      // Spec 7: Project and Batch apply to engineering requests only.
+      field("project", "Project", "combo", {
+        required: true,
+        entity: "ReservationProjects",
+        visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
+      }),
+      field("batch", "Batch", "combo", {
+        entity: "ReservationBatches",
+        visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
       }),
       field("requestType", "Request Type", "input"),
       field("deliveryType", "Delivery Type", "select", {
@@ -356,13 +371,21 @@ sap.ui.define([], function () {
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     RES_WAREHOUSE: [
-      field("project", "Project", "combo", { required: true, entity: "ReservationProjects" }),
-      field("batch", "Batch", "combo", { entity: "ReservationBatches" }),
       field("engineeringType", "Engineering Type", "select", {
         options: [
           { key: "ENGINEERING", text: "Engineering" },
           { key: "NON_ENGINEERING", text: "Non-Engineering" }
         ]
+      }),
+      // Spec 7: Project and Batch apply to engineering requests only.
+      field("project", "Project", "combo", {
+        required: true,
+        entity: "ReservationProjects",
+        visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
+      }),
+      field("batch", "Batch", "combo", {
+        entity: "ReservationBatches",
+        visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
       }),
       field("requestType", "Request Type", "input"),
       field("deliveryType", "Delivery Type", "select", {
@@ -544,7 +567,7 @@ sap.ui.define([], function () {
       placeholder: "Filled from the Purchasing Organization"
     }),
     field("purchasingGroup", "Purchasing Group", "combo", { entity: "PurchasingGroups", key: "purchasingGroupCode", text: "purchasingGroupName" }),
-    field("siteId", "Site ID", "combo", { entity: "Sites", key: "siteId", text: "siteName" }),
+    field("siteId", "Site ID", "combo", { entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName" }),
     field("currency_code", "Currency", "combo", {
       required: true,
       entity: "Currencies"
@@ -656,9 +679,11 @@ sap.ui.define([], function () {
   ];
   sesFields.push(...requesterFields);
   definitions.SES_NEW = sesFields;
-  definitions.SES_MOD = sesFields;
+  // LOA approval applies to new SES only; a modification is approved by the divisional head
+  // (spec 5.1 #8), so the LOA approver is not collected on SES_MOD.
+  definitions.SES_MOD = sesFields.filter(function (f) { return f.name !== "loaApprover_ID"; });
 
-  const column = (name, label, type) => ({ name, label, type: type || "input" });
+  const column = (name, label, type, extra) => Object.assign({ name, label, type: type || "input" }, extra || {});
 
   const itemColumns = {
     PURCHASE_ORDER: [
@@ -704,7 +729,7 @@ sap.ui.define([], function () {
       column("targetQuantity", "Target Quantity", "number"),
       column("coupaSourcingEventNo", "Coupa Sourcing Event No."),
       column("serviceLine", "Service Line"),
-      column("shortTextForServices", "Short Text for Services"),
+      column("shortTextForServices", "Short Text for Services", "input", { maxLength: 40 }),
       column("materialServiceCode", "Material / Service Code"),
       column("quantity", "Quantity", "number"),
       column("grossPrice", "Gross Price", "number"),

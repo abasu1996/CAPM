@@ -525,10 +525,10 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{admin>purchasingOrganizationCode}"/>
 
                     <Input
-                        value="{admin>name}"/>
+                        value="{admin>purchasingOrganizationName}"/>
 
                     <Switch
                         state="{admin>isActive}"
@@ -2967,11 +2967,23 @@
             </VBox>
 
             <VBox visible="{newItem>/isPurchasingOrganization}">
-            <Label text="Purchasing Organization Code" required="true"/>
-            <Input value="{newItem>/purchasingOrgCode}"  placeholder="Enter Purchasing Organization Code"/>
-            <Label text="Purchasing Organization Name" required="true" class="sapUiSmallMarginTop"/>
-            <Input value="{newItem>/purchasingOrgName}" placeholder="Enter Purchasing Organization Name"/>
-            </VBox>
+    <Label
+        text="Purchasing Organization Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/purchasingOrganizationCode}"
+        placeholder="Enter Purchasing Organization Code"/>
+
+    <Label
+        text="Purchasing Organization Name"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/purchasingOrganizationName}"
+        placeholder="Enter Purchasing Organization Name"/>
+</VBox>
 
             <VBox visible="{newItem>/isPurchasingGroup}">
             <Label text="Purchasing Group Code" required="true"/>

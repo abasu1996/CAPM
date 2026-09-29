@@ -3,12 +3,16 @@
   "version": "0.1.0",
   "description": "Flowmate CA - Commerce Automation workflow application",
   "private": true,
+  "engines": {
+    "node": "^22.13.0",
+    "npm": ">=10 <11"
+  },
   "workspaces": [
     "app/*"
   ],
   "dependencies": {
     "@cap-js-community/odata-v2-adapter": "^1.15.12",
-    "@cap-js/attachments": "^3.13.3",
+    "@cap-js/attachments": "^3.13.4",
     "@cap-js/hana": "^2",
     "@sap-cloud-sdk/connectivity": "^4.8.0",
     "@sap-cloud-sdk/http-client": "^4.8.0",
@@ -18,7 +22,7 @@
     "express": "^4.21.2"
   },
   "devDependencies": {
-    "@cap-js/sqlite": "^2",
+    "@cap-js/sqlite": "^2", 
     "@sap/cds-dk": "9.9.1"
   },
   "scripts": {

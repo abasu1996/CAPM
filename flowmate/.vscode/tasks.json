@@ -6,7 +6,10 @@
       "label": "cds watch local",
       "command": "npx cds watch --in-memory --livereload false --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "/Users/megamind/.nvm/versions/node/v22.23.2/bin:${env:PATH}"
+        }
       },
       "isBackground": true,
       "problemMatcher": []
@@ -16,7 +19,10 @@
       "label": "cds watch hybrid",
       "command": "npx cds bind --profile hybrid --exec -- npx cds watch --profile hybrid --livereload false --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PATH": "/Users/megamind/.nvm/versions/node/v22.23.2/bin:${env:PATH}"
+        }
       },
       "isBackground": true,
       "problemMatcher": []

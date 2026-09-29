@@ -94,9 +94,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   _filterMyRequests = async (req) => {
-    if (req.user.is("CAAdmin")) {
-      return;
-    }
     const user = await this._ensureCurrentUser(req);
     req.query.where({ requester_ID: user.ID });
   };
@@ -141,7 +138,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _getDashboardCounts = async (req) => {
     const user = await this._ensureCurrentUser(req);
     const isAdmin = req.user.is("CAAdmin");
-    const requestedBy = isAdmin ? {} : { requester_ID: user.ID };
+    const requestedBy = { requester_ID: user.ID };
     const assignedToMe = isAdmin ? {} : { assignedUser_ID: user.ID };
     const openStatus = { status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] } };
     const teamIds = isAdmin ? [] : await this._teamIdsOf(user);
@@ -240,6 +237,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const requestId = cds.utils.uuid();
     const referenceNumber = this._referenceNumber(requestType.code);
     const details = this._parseDetails(req, input.details);
+    await this._assertNoDuplicateMaterialDescription(req, requestType.code, details);
 
     await tx.run(INSERT.into(this.db.CARequests).entries({
       ID: requestId,
@@ -314,7 +312,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const referenceNumbers = [];
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index] || {};
-      const { title, priorityCode, dueDate, description, ...details } = row;
+      const { title, priorityCode, dueDate, ...details } = row;
       if (!String(title || "").trim()) {
         return req.reject(400, `Row ${index + 1}: Title is required`);
       }
@@ -325,7 +323,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           processorTeam,
           input: {
             title: String(title).trim(),
-            description: description || null,
+            description: null,
             priorityCode: priorityCode || "MEDIUM",
             dueDate: dueDate || null,
             details: JSON.stringify(details)
@@ -704,12 +702,19 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   async _createConfiguredTaskIfMissing(tx, requestId, step) {
-    const existing = await SELECT.one.from(this.db.CATasks).where({
+    const existing = await SELECT.from(this.db.CATasks).where({
       request_ID: requestId,
-      stepNo: step.stepNo,
-      status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
+      stepNo: step.stepNo
     });
-    if (existing) {
+    if (existing.some((task) => task.status_code === TASK_STATUS.OPEN)) {
+      return;
+    }
+    if (existing.length) {
+      await tx.run(UPDATE(this.db.CATasks).set({
+        status_code: TASK_STATUS.OPEN,
+        decision: null,
+        completedAt: null
+      }).where({ ID: { in: existing.map((task) => task.ID) } }));
       return;
     }
 
@@ -735,6 +740,25 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       isApproval: config?.isApproval ?? false,
       dueDate: this._addDays(config?.slaDays || 2)
     }));
+  }
+  async _assertNoDuplicateMaterialDescription(req, requestTypeCode, details) {
+    if (requestTypeCode !== "MATERIAL_CODE") {
+      return;
+    }
+    const description = String(details?.description || "").trim();
+    if (!description) {
+      return;
+    }
+    const existing = await SELECT.one.from(this.db.MaterialCodeDetails)
+      .columns("request_ID")
+      .where({ description });
+    if (!existing) {
+      return;
+    }
+    const owner = await SELECT.one.from(this.db.CARequests)
+      .columns("referenceNumber")
+      .where({ ID: existing.request_ID });
+    return req.reject(400, `Material description "${description}" already exists on request ${owner?.referenceNumber || "another request"}`);
   }
 
   async _insertDetails(tx, requestTypeCode, requestId, details) {

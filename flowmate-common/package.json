@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Shared master data service for Flowmate applications",
   "private": true,
+  "engines": {
+    "node": "^22.13.0",
+    "npm": ">=10 <11"
+  },
   "dependencies": {
     "@cap-js/hana": "^2",
     "@sap/cds": "9.9.1",

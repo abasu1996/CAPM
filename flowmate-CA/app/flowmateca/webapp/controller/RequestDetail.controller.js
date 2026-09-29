@@ -234,6 +234,7 @@ sap.ui.define([
 
     onAddTask: async function () {
       const form = this.getView().getModel("taskForm").getData();
+      console.log('assignedTeamId at submit:', form.assignedTeamId)
       if (!form.stepNo || !form.taskName.trim()) {
         MessageBox.warning("Workflow step and task name are required.");
         return;

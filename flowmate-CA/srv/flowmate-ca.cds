@@ -58,7 +58,6 @@ service FlowmateCAService {
   entity PurchaseOrderTypes as projection on db.PurchaseOrderTypes;
   entity ProcurementCategories as projection on db.ProcurementCategories;
   entity Currencies as projection on db.Currencies;
-  entity PurchasingOrganizations as projection on db.PurchasingOrganizations;
   entity PaymentTerms as projection on db.PaymentTerms;
   entity ProjectTypes as projection on db.ProjectTypes;
   entity SystemContractBasePO as projection on db.SystemContractBasePO;
@@ -67,15 +66,16 @@ service FlowmateCAService {
   entity Entity as projection on db.Entity;
   entity Projects as projection on db.Projects;
   entity ExtensionMaterialGroup as projection on db.ExtensionMaterialGroup;
+  entity ProfitCenter as projection on common.ProfitCenter;
+  entity MRPType as projection on common.MRPType;
+  entity AvailabilityCheck as projection on common.AvailabilityCheck;
+  entity SerialNumberProfile as projection on common.SerialNumberProfile;
+  entity DistributionChannel as projection on common.DistributionChannel;
   entity ContractType as projection on db.ContractType;
 
-  entity CompanyCodes as projection on db.CompanyCodes;
-  entity TaxCodes as projection on db.TaxCodes;
   entity ItemCategories as projection on db.ItemCategories;
   entity AccountAssignments as projection on db.AccountAssignments;
-  entity CostCenters as projection on db.CostCenters;
   entity ContractTypes as projection on db.ContractTypes;
-  entity Incoterms as projection on db.Incoterms;
   entity ReservationProjects as projection on db.ReservationProjects;
   entity ReservationBatches as projection on db.ReservationBatches;
   entity BusinessEntities as projection on db.BusinessEntities;
@@ -211,6 +211,7 @@ service CAMasterDataService {
   entity WorkflowStepConfigs as projection on db.WorkflowStepConfigs;
    entity Sites as projection on common.Sites;
    entity Materials as projection on common.Materials;
+   entity PurchasingOrganizations as projection on common.PurchasingOrganizations;
    entity Wbs as projection on common.Wbs;
    entity DocumentTypes as projection on common.DocumentTypes;
    entity CompanyCodes as projection on common.CompanyCodes;

@@ -32,18 +32,13 @@ entity Warehouses : ConfigCode {};
 entity PurchaseOrderTypes : ConfigCode {};
 entity ProcurementCategories : ConfigCode {};
 entity Currencies : ConfigCode {};
-entity PurchasingOrganizations : ConfigCode {};
 entity PaymentTerms : ConfigCode {};
 entity SystemContractBasePO : ConfigCode {};
 entity ProjectTypes : ConfigCode {};
 entity ContractCategories : ConfigCode {};
-entity CompanyCodes : ConfigCode {};
-entity TaxCodes : ConfigCode {};
 entity ItemCategories : ConfigCode {};
 entity AccountAssignments : ConfigCode {};
-entity CostCenters : ConfigCode {};
 entity ContractTypes : ConfigCode {};
-entity Incoterms : ConfigCode {};
 entity ReservationProjects : ConfigCode {};
 entity ReservationBatches : ConfigCode {};
 entity BusinessEntities : ConfigCode {};
@@ -230,8 +225,8 @@ entity MaterialCodeDetails : cuid, managed {
   inspectionStock        : Boolean default false;
   sourceList             : Boolean default false;
   commodityImportCode    : String(60);
-  itemName               : Association to ItemCategories;
-  itemCategory           : Association to ItemCategories;
+  itemName               : String(160);
+  itemCategory           : String(40);
   unitsPerItem           : Decimal(15,3);
   unitPrice              : Decimal(15,2);
   taxPercentage          : Decimal(5,2);
@@ -417,7 +412,7 @@ entity PurchaseOrderDetails : cuid, managed {
   vendor                  : Association to common.Vendors;
   companyCode             : String(40);
   purchasingGroup         : String(40);
-  purchasingOrganization  : Association to PurchasingOrganizations;
+  purchasingOrganization  : Association to common.PurchasingOrganizations;
   siteId                  : String(80);
   currency                : Association to Currencies;
   plant_code              : String(40);
@@ -533,3 +528,4 @@ entity ContractType : cuid, managed {
   contractTypeDescription : String(180) not null;
   isActive : Boolean default true;
 }
+

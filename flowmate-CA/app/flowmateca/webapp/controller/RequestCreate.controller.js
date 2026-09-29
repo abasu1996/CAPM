@@ -51,11 +51,12 @@ sap.ui.define([
     "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel"
   ]);
 
+  // Only request-level fields that no variant defines itself. `description` and `dueDate`
+  // were removed: `description` collided with the material variants' own Material Description
+  // column and silently overwrote it.
   const BULK_CLASSIFICATION_COLUMNS = [
     { name: "title", label: "Title", required: true },
-    { name: "priorityCode", label: "Priority", required: false },
-    { name: "dueDate", label: "Due Date", required: false },
-    { name: "description", label: "Description", required: false }
+    { name: "priorityCode", label: "Priority", required: false }
   ];
 
   return BaseController.extend("flowmateca.controller.RequestCreate", {
@@ -421,10 +422,12 @@ sap.ui.define([
         simpleForm.addContent(control);
         this._fieldControls.push({
           definition,
+          label,
           control
         });
       }.bind(this));
       host.addItem(simpleForm);
+      this._applyConditionalVisibility();
     },
 
     _loadFieldCatalogs: async function (fields) {
@@ -476,6 +479,41 @@ sap.ui.define([
       );
     },
 
+    // Spec-driven conditional fields: a definition may carry
+    // visibleWhen: { field: "<driver>", equals: "<value>" }.
+    _isFieldVisible: function (definition) {
+      const rule = definition.visibleWhen;
+      if (!rule) {
+        return true;
+      }
+      const form = this.getView().getModel("form").getData();
+      const source = definition.source === "request" ? form : (form.details || {});
+      return source[rule.field] === rule.equals;
+    },
+
+    _applyConditionalVisibility: function () {
+      const formModel = this.getView().getModel("form");
+      (this._fieldControls || []).forEach(function (entry) {
+        if (!entry.definition.visibleWhen) {
+          return;
+        }
+        const visible = this._isFieldVisible(entry.definition);
+        entry.control.setVisible(visible);
+        if (entry.label) {
+          entry.label.setVisible(visible);
+        }
+        // A hidden field must not carry a stale value into the payload.
+        if (!visible) {
+          const path = entry.definition.source === "request"
+            ? `/${entry.definition.name}`
+            : `/details/${entry.definition.name}`;
+          if (formModel.getProperty(path) !== undefined && formModel.getProperty(path) !== "") {
+            formModel.setProperty(path, "");
+          }
+        }
+      }.bind(this));
+    },
+
     _createFieldControl: function (definition) {
       const dataPath = definition.source === "request"
         ? `/${definition.name}`
@@ -504,6 +542,7 @@ sap.ui.define([
         control = new ComboBox({
           width: "100%",
           placeholder: definition.placeholder || ""
+          ,selectionChange: this._applyConditionalVisibility.bind(this)
         }).bindProperty("selectedKey", path);
         (definition.options || []).forEach(function (option) {
           control.addItem(new Item({
@@ -539,6 +578,7 @@ sap.ui.define([
           selectionChange: function (event) {
             const item = event.getParameter("selectedItem");
             this._applyAutoFill(definition, item ? item.getKey() : "");
+            this._applyConditionalVisibility();
           }.bind(this)
         }).bindProperty("selectedKey", path);
         control.bindItems({
@@ -601,6 +641,7 @@ sap.ui.define([
             }
             return new Input({
               type: col.type === "number" ? "Number" : "Text",
+              maxLength: col.maxLength || 0,
               width: "100%"
             }).bindValue(`form>${col.name}`);
           }).concat([
@@ -776,6 +817,9 @@ sap.ui.define([
         return;
       }
       const missing = (this._fieldControls || []).find(function (entry) {
+        if (!this._isFieldVisible(entry.definition)) {
+          return false;
+        }
         if (!entry.definition.required) {
           return false;
         }
@@ -783,7 +827,7 @@ sap.ui.define([
           ? form[entry.definition.name]
           : form.details[entry.definition.name];
         return value === undefined || value === null || value === "";
-      });
+      }.bind(this));
       if (missing) {
         MessageBox.warning(`${missing.definition.label} is required.`);
         missing.control.focus();

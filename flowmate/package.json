@@ -1,6 +1,10 @@
 {
   "name": "flowmate",
   "version": "1.0.0",
+  "engines": {
+    "node": "^22.13.0",
+    "npm": ">=10 <11"
+  },
   "dependencies": {
     "@cap-js-community/odata-v2-adapter": "^1.15.12",
     "@cap-js/attachments": "^3.12.2",

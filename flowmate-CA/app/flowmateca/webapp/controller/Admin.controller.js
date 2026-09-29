@@ -58,7 +58,7 @@ sap.ui.define([
     onRefresh: async function () {
       this.setBusy(true);
       try {
-        const [steps, requestTypes, variants, users, teams, teamMembers, vendors, sites, materials, wbs, documentTypes, companyCodes, purchasingGroups, divisions, applicableTaxes, plant, serviceGroups, valuationClasses, storageLocations, salesOrgs, incoterms, costCenters] = await Promise.all([
+        const [steps, requestTypes, variants, users, teams, teamMembers, vendors, sites, materials, purchasingOrganizations, wbs, documentTypes, companyCodes, purchasingGroups, divisions, applicableTaxes, plant, serviceGroups, valuationClasses, storageLocations, salesOrgs, incoterms, costCenters] = await Promise.all([
           this.requestMaster("WorkflowStepConfigs?$expand=requestType,requestVariant&$orderby=requestType_code,requestVariant_code,stepNo"),
           this.requestMaster("RequestTypes?$orderby=sortOrder"),
           this.requestMaster("RequestVariants?$expand=requestType&$orderby=requestType_code,sortOrder"),
@@ -68,6 +68,7 @@ sap.ui.define([
           this.requestMaster("Vendors?$orderby=vendorName"),
           this.requestMaster("Sites?$orderby=siteName"),
           this.requestMaster("Materials?$orderby=materialDescription"),
+          this.requestMaster("PurchasingOrganizations?$orderby=purchasingOrganizationCode"),
           this.requestMaster("Wbs?$orderby=wbsDescription"),
           this.requestMaster("DocumentTypes?$orderby=documentTypeCode"),
           this.requestMaster("CompanyCodes?$orderby=companyCode"),
@@ -92,6 +93,7 @@ sap.ui.define([
         model.setProperty("/vendors", vendors.value || []);
         model.setProperty("/sites", sites.value || []);
         model.setProperty("/materials", materials.value || []);
+        model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || [] );
         model.setProperty("/wbs", wbs.value || []);
         model.setProperty("/documentTypes", documentTypes.value || []);
         model.setProperty("/companyCodes", companyCodes.value || []);
@@ -105,11 +107,7 @@ sap.ui.define([
         model.setProperty("/salesOrgs", salesOrgs.value || []);
         model.setProperty("/incoterms",incoterms.value || []);
         model.setProperty("/costCenters", costCenters.value || []);
-          // Purchasing Organizations are local to Flowmate CA
-        const purchasingOrganizations =
-            await this.requestCA(
-                "PurchasingOrganizations?$orderby=code"
-            );
+
 
         const currencies = await this.requestCA("Currencies?$orderby=code");
         model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || []);
@@ -445,8 +443,6 @@ onAddCostCenter: function () {
         managerId: "",
         teamId: "",
         taskName: "",
-        purchasingOrgCode: "",
-        purchasingOrgName: "",
         currencyCode: "",
         currencyName: "",
         paymentTermCode: "",
@@ -659,22 +655,21 @@ onAddCostCenter: function () {
 
 else if (item.type === "purchasingOrganization") {
 
-    const code = item.purchasingOrgCode?.trim();
-    const name = item.purchasingOrgName?.trim();
-
-    if (!code || !name) {
+    if (!item.purchasingOrganizationCode || !item.purchasingOrganizationName) {
         throw new Error(
             "Purchasing Organization Code and Purchasing Organization Name are required."
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "PurchasingOrganizations",
         {
             method: "POST",
             body: {
-                code: code,
-                name: name,
+                 purchasingOrganizationCode:
+                item.purchasingOrganizationCode,
+            purchasingOrganizationName:
+                item.purchasingOrganizationName,
                 isActive: true
             }
         }
@@ -1488,93 +1483,19 @@ onDeleteCompanyCode: function (event) {
 
     },
 
-    onSavePurchasingOrganization: async function (event) {
+   onSavePurchasingOrganization: function (event) {
+      const row = event.getSource().getBindingContext("admin").getObject();
+      return this._patch("PurchasingOrganizations", row.ID, {
+        purchasingOrganizationCode: row.purchasingOrganizationCode,
+        purchasingOrganizationName: row.purchasingOrganizationName,
+        isActive: row.isActive
+      });
+    },
 
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
 
-    try {
-
-        await this.requestCA(
-            `PurchasingOrganizations('${encodeURIComponent(row.code)}')`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "If-Match": "*"
-                },
-                body: {
-                    code: row.code,
-                    name: row.name,
-                    description: row.description,
-                    isActive: row.isActive,
-                    sortOrder: row.sortOrder
-                }
-            }
-        );
-
-        this.showSuccess("Changes saved");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-    onDeletePurchasingOrganization: async function (event) {
-
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    const confirmed = await new Promise(function (resolve) {
-
-        MessageBox.confirm(
-            "Delete this Purchasing Organization?",
-            {
-                onClose: function (action) {
-                    resolve(
-                        action === MessageBox.Action.OK
-                    );
-                }
-            }
-        );
-
-    });
-
-    if (!confirmed) {
-        return;
-    }
-
-    try {
-
-        await this.requestCA(
-            `PurchasingOrganizations('${encodeURIComponent(row.code)}')`,
-            {
-                method: "DELETE",
-                headers: {
-                    "If-Match": "*"
-                }
-            }
-        );
-
-        this.showSuccess(
-            "Purchasing Organization deleted"
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
+onDeletePurchasingOrganization: function (event) {
+      return this._delete("PurchasingOrganizations", event.getSource().getBindingContext("admin").getObject());
+    },
 
  onSaveCurrency: async function (event) {
 

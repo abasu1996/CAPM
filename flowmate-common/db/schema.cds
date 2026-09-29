@@ -98,6 +98,12 @@ entity DocumentTypes : cuid, managed {
   isActive     : Boolean default true;
 }
 
+entity PurchasingOrganizations : cuid, managed {
+  purchasingOrganizationCode : String (40) not null;
+  purchasingOrganizationName : String (180) not null;
+  isActive : Boolean default true;
+}
+
 entity CompanyCodes : cuid, managed {
   companyCode : String(40) not null;
   companyName : String(180) not null;

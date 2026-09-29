@@ -1,0 +1,5 @@
+{
+  "terminal.integrated.env.osx": {
+    "PATH": "/Users/megamind/.nvm/versions/node/v22.23.2/bin:${env:PATH}"
+  }
+}
