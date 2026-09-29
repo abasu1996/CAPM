@@ -76,6 +76,14 @@ service CommonMasterDataService {
   purchasingOrganizationName : String (180) not null;
   isActive : Boolean default true;
 }
+  @cds.persistence.skip
+  entity Currencies {
+    key code        : String(40);
+        name        : String(160) not null;
+        description : String(500);
+        isActive    : Boolean default true;
+        sortOrder   : Integer default 0;
+  }
    @cds.persistence.skip
   entity Wbs {
     key ID       : UUID;

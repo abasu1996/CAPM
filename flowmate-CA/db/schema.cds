@@ -31,7 +31,6 @@ entity CoupaCommodityCodes : ConfigCode {};
 entity Warehouses : ConfigCode {};
 entity PurchaseOrderTypes : ConfigCode {};
 entity ProcurementCategories : ConfigCode {};
-entity Currencies : ConfigCode {};
 entity PaymentTerms : ConfigCode {};
 entity SystemContractBasePO : ConfigCode {};
 entity ProjectTypes : ConfigCode {};
@@ -414,7 +413,7 @@ entity PurchaseOrderDetails : cuid, managed {
   purchasingGroup         : String(40);
   purchasingOrganization  : Association to common.PurchasingOrganizations;
   siteId                  : String(80);
-  currency                : Association to Currencies;
+  currency                : Association to common.Currencies;
   plant_code              : String(40);
   totalValue              : Decimal(17,2);
   paymentTerms            : Association to PaymentTerms;
@@ -468,7 +467,7 @@ entity ServiceEntrySheetDetails : cuid, managed {
   existingSesNo    : String(80);
   loaApprover      : Association to common.Users;
   foreignCurrency  : Boolean default false;
-  currency         : Association to Currencies;
+  currency         : Association to common.Currencies;
   totalValue       : Decimal(17,2);
   paymentRequestRequired: Boolean default false;
   remarks          : LargeString;
@@ -528,4 +527,3 @@ entity ContractType : cuid, managed {
   contractTypeDescription : String(180) not null;
   isActive : Boolean default true;
 }
-

@@ -109,7 +109,7 @@ sap.ui.define([
         model.setProperty("/costCenters", costCenters.value || []);
 
 
-        const currencies = await this.requestCA("Currencies?$orderby=code");
+        const currencies = await this.requestMaster("Currencies?$orderby=code");
         model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || []);
         model.setProperty("/currencies", currencies.value || []);
         const paymentTerms = await this.requestCA("PaymentTerms?$orderby=code");
@@ -687,7 +687,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "Currencies",
         {
             method: "POST",
@@ -1506,7 +1506,7 @@ onDeletePurchasingOrganization: function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `Currencies('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
@@ -1563,7 +1563,7 @@ onDeletePurchasingOrganization: function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `Currencies('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",

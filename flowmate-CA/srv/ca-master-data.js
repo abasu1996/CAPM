@@ -9,6 +9,7 @@ const SHARED_ENTITIES = [
   "Sites",
   "Materials",
   "PurchasingOrganizations",
+  "Currencies",
   "Wbs",
   "DocumentTypes",
   "CompanyCodes",

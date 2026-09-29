@@ -57,7 +57,6 @@ service FlowmateCAService {
   entity Warehouses as projection on db.Warehouses;
   entity PurchaseOrderTypes as projection on db.PurchaseOrderTypes;
   entity ProcurementCategories as projection on db.ProcurementCategories;
-  entity Currencies as projection on db.Currencies;
   entity PaymentTerms as projection on db.PaymentTerms;
   entity ProjectTypes as projection on db.ProjectTypes;
   entity SystemContractBasePO as projection on db.SystemContractBasePO;
@@ -212,6 +211,7 @@ service CAMasterDataService {
    entity Sites as projection on common.Sites;
    entity Materials as projection on common.Materials;
    entity PurchasingOrganizations as projection on common.PurchasingOrganizations;
+   entity Currencies as projection on common.Currencies;
    entity Wbs as projection on common.Wbs;
    entity DocumentTypes as projection on common.DocumentTypes;
    entity CompanyCodes as projection on common.CompanyCodes;

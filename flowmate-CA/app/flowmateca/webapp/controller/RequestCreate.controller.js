@@ -48,7 +48,8 @@ sap.ui.define([
   const MASTER_PICK_LISTS = new Set([
     "Plant", "Sites", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
     "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
-    "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel"
+    "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
+    "Currencies"
   ]);
 
   // Only request-level fields that no variant defines itself. `description` and `dueDate`

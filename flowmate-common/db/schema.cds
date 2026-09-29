@@ -104,6 +104,14 @@ entity PurchasingOrganizations : cuid, managed {
   isActive : Boolean default true;
 }
 
+entity Currencies {
+  key code        : String(40);
+      name        : String(160) not null;
+      description : String(500);
+      isActive    : Boolean default true;
+      sortOrder   : Integer default 0;
+}
+
 entity CompanyCodes : cuid, managed {
   companyCode : String(40) not null;
   companyName : String(180) not null;

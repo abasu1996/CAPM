@@ -114,6 +114,12 @@ entity Customers as projection on db.Customers;
   ]
   entity PurchasingOrganizations as projection on db.PurchasingOrganizations;
 
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity Currencies as projection on db.Currencies;
+
     @restrict: [
     { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
     { grant: '*', to: 'MasterDataAdmin' }
