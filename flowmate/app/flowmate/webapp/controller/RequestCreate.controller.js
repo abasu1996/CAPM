@@ -820,6 +820,11 @@ sap.ui.define([
                 return;
             }
 
+            if (!oPayload.processorTeam_ID) {
+                MessageBox.warning(this.getText("processorTeamRequiredMessage"));
+                return;
+            }
+
             // if (oPayload.loaApprovalApplicable && (
             //     oPayload.amount === ""
             //     || oPayload.amount === null

@@ -544,6 +544,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ProcessRequests,
       ProcessTasks,
       MyAssignedTasks,
+      MyPendingApprovalTasks,
       MyTeamTasks,
       RequestDetailTasks,
       ProcessTaskTeamMembers,
@@ -633,7 +634,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
       const oReservationUser = await this._currentReservationUser(req, Users);
       const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
-      this._applyVisibleRequestsWhere(req.query, oReservationUser, aDelegatorIds);
+      const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
+      this._applyVisibleRequestsWhere(req.query, oReservationUser, aDelegatorIds, aTeamIds);
     });
 
     this.after("READ", ProcessRequests, async (data, req) => {
@@ -671,6 +673,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.before("READ", MyAssignedTasks, async (req) => {
       await this._filterByAssignedTasks(req, Users, true);
+    });
+
+    this.before("READ", MyPendingApprovalTasks, async (req) => {
+      await this._filterByAssignedTasks(req, Users, true);
+      await this._filterTasksByRequestTeams(req, Users, TeamMembers);
+      req.query.where({ isLoaApproval: true });
     });
 
     this.before("READ", MyTeamTasks, async (req) => {
@@ -1421,6 +1429,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         }
 
         this._setProcessorSnapshot(req.data, oProcessor);
+      }
+
+      if (!req.data.processorTeam_ID) {
+        return req.reject(400, "Processor Team is required when creating a request");
       }
 
       if (req.data.processorTeam_ID) {
@@ -2201,6 +2213,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const oReservationUser = await this._currentReservationUser(req, Users);
       const oCurrentUser = oReservationUser.user;
+
+      if (!this._isAdministrator(req)) {
+        const aTeamIds = await this._activeTeamIdsForUser(oCurrentUser?.ID, TeamMembers);
+        if (!request.processorTeam_ID || !aTeamIds.includes(request.processorTeam_ID)) {
+          return req.reject(403, "Only an active member of the request's processor team can reserve this request");
+        }
+      }
+
       const sReservedBy = oReservationUser.displayName;
       const sProcessorEmail = oReservationUser.email || null;
 
@@ -2944,7 +2964,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       const qReservedByMe = SELECT.one.from(ProcessRequests).columns("count(1) as count");
 
       if (!this._isAdministrator(req)) {
-        qUnreserved.where({ requesterUser_ID: oReservationUser.user.ID });
+        const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
+        if (!aTeamIds.length) {
+          qUnreserved.where(this._alwaysFalsePredicate());
+        } else {
+          qUnreserved.where({ processorTeam_ID: { in: aTeamIds } });
+        }
       }
 
       if (oReservationUser.user?.ID) {
@@ -2971,9 +2996,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
       const aAssignmentPredicates = this._taskAssignmentPredicates(oReservationUser, aDelegatorIds);
       if (!aAssignmentPredicates.length) return 0;
+      const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
+      if (!aTeamIds.length && !this._isAdministrator(req)) return 0;
+      const qTeamRequests = SELECT.from(ProcessRequests).columns("ID");
+      if (!this._isAdministrator(req)) {
+        qTeamRequests.where({ processorTeam_ID: { in: aTeamIds } });
+      }
       const oCount = await cds.tx(req).run(
         SELECT.one.from(ProcessTasks).columns("count(1) as count")
           .where({ xpr: aAssignmentPredicates })
+          .where({ request_ID: { in: qTeamRequests } })
           .where({ isLoaApproval: true, status_code: TASK_STATUS.OPEN })
       );
       return Number(oCount?.count || oCount?.COUNT || 0);
@@ -4110,9 +4142,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
     const oReservationUser = await this._currentReservationUser(req, Users);
     const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+    const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID);
     const qVisibleRequests = SELECT.from(this.entities.ProcessRequests).columns("ID");
 
-    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser, aDelegatorIds);
+    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser, aDelegatorIds, aTeamIds);
     req.query.where([
       { ref: [requestFieldName] },
       "in",
@@ -4123,10 +4156,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   async _filterByVisibleEmails(req, Users, ProcessEmailMessages = this.entities.ProcessEmailMessages) {
     const oReservationUser = await this._currentReservationUser(req, Users);
     const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+    const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID);
     const qVisibleRequests = SELECT.from(this.entities.ProcessRequests).columns("ID");
     const qVisibleEmails = SELECT.from(ProcessEmailMessages).columns("ID");
 
-    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser, aDelegatorIds);
+    this._applyVisibleRequestsWhere(qVisibleRequests, oReservationUser, aDelegatorIds, aTeamIds);
     qVisibleEmails.where([
       { ref: ["request_ID"] },
       "in",
@@ -4385,7 +4419,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return aDelegatorIds.includes(request.processorUser_ID);
   }
 
-  _applyVisibleRequestsWhere(query, reservationUser, delegatedUserIds = []) {
+  _applyVisibleRequestsWhere(query, reservationUser, delegatedUserIds = [], teamIds = []) {
     const sUserId = reservationUser.user.ID;
     const aTaskOwnerIds = [...new Set([sUserId, ...delegatedUserIds].filter(Boolean))];
     const qAssignedRequests = SELECT.from(this.entities.ProcessTasks)
@@ -4394,12 +4428,43 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         { ref: ["processorUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) },
         "or", { ref: ["assignedUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) }
       ]);
-    query.where([
+    const aVisibility = [
+      "(", { ref: ["reservedBy"] }, "is not", "null", "and", "(",
       { ref: ["requesterUser_ID"] }, "=", { val: sUserId },
       "or", { ref: ["reservedByUser_ID"] }, "=", { val: sUserId },
       "or", { ref: ["processorUser_ID"] }, "=", { val: sUserId },
-      "or", { ref: ["ID"] }, "in", qAssignedRequests
-    ]);
+      "or", { ref: ["ID"] }, "in", qAssignedRequests,
+      ")", ")"
+    ];
+    if (teamIds.length) {
+      aVisibility.push(
+        "or", "(", { ref: ["reservedBy"] }, "is", "null",
+        "and", { ref: ["processorTeam_ID"] }, "in", { list: teamIds.map((id) => ({ val: id })) }, ")"
+      );
+    }
+    query.where(aVisibility);
+  }
+
+  async _activeTeamIdsForUser(userId, TeamMembers = this.masterEntities.TeamMembers) {
+    if (!userId) return [];
+    const aMemberships = await this.master.run(
+      SELECT.from(TeamMembers).columns("team_ID").where({ user_ID: userId, isActive: true })
+    );
+    return [...new Set(aMemberships.map((membership) => membership.team_ID).filter(Boolean))];
+  }
+
+  async _filterTasksByRequestTeams(req, Users, TeamMembers = this.masterEntities.TeamMembers) {
+    if (this._isAdministrator(req)) return;
+    const oReservationUser = await this._currentReservationUser(req, Users);
+    const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
+    if (!aTeamIds.length) {
+      req.query.where(this._alwaysFalsePredicate());
+      return;
+    }
+    const qTeamRequests = SELECT.from(this.entities.ProcessRequests)
+      .columns("ID")
+      .where({ processorTeam_ID: { in: aTeamIds } });
+    req.query.where({ request_ID: { in: qTeamRequests } });
   }
 
   _isReservedByCurrentUser(request, reservationUser) {
@@ -5546,6 +5611,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     const request = await this._getRequest(req, task.request_ID);
     if (!request) return req.reject(404, "The request for this approval was not found");
+    if (!this._isAdministrator(req)) {
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID);
+      if (!request.processorTeam_ID || !aTeamIds.includes(request.processorTeam_ID)) {
+        return req.reject(403, "Only an active member of the request's processor team can decide this LoA approval");
+      }
+    }
     if (request.status_code !== PROCESS_STATUS.PENDING_APPROVAL) {
       return req.reject(409, "This request is no longer pending LoA approval");
     }

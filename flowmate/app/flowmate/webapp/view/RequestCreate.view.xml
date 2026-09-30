@@ -5788,9 +5788,10 @@
                             <Input
                                 value="{create>/requesterName}"
                                 editable="false" />
-                            <Label text="{i18n>processorTeamLabel}" />
+                            <Label text="{i18n>processorTeamLabel}" required="true" />
                             <Input
                                 value="{create>/processorTeamName}"
+                                required="true"
                                 placeholder="{i18n>selectTeamPlaceholder}"
                                 showValueHelp="true"
                                 showSuggestion="true"

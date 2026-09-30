@@ -221,6 +221,10 @@ service FlowmateService {
         *,
         request : redirected to ProcessRequests
     };
+    entity MyPendingApprovalTasks as projection on fldb.ProcessTasks {
+        *,
+        request : redirected to ProcessRequests
+    };
     entity MyTeamTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests,

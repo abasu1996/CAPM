@@ -472,6 +472,9 @@ sap.ui.define([
         },
 
         _taskCollectionPath() {
+            if (this._bApprovalMode) {
+                return "/MyPendingApprovalTasks";
+            }
             return this._bTeamMode ? "/MyTeamTasks" : "/MyAssignedTasks";
         },
 
