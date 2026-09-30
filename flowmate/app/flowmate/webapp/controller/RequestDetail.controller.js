@@ -17,11 +17,25 @@ sap.ui.define([
                 processorUser_ID: "",
                 processorName: ""
             }), "processorEdit");
+            this.getView().setModel(new JSONModel({
+                currentUserId: "",
+                canModifyRequest: false
+            }), "requestAccess");
             this.getRouter().getRoute("RouteRequestDetail").attachPatternMatched(this.onRouteMatched, this);
         },
 
-        onRouteMatched(oEvent) {
+        async onRouteMatched(oEvent) {
             const sRequestId = decodeURIComponent(oEvent.getParameter("arguments").requestId);
+
+            try {
+                const oResponse = await this.callAction("getCurrentUserDetails");
+                this.getView().getModel("requestAccess").setProperty(
+                    "/currentUserId",
+                    (oResponse.value || oResponse).ID || ""
+                );
+            } catch (oError) {
+                this.getView().getModel("requestAccess").setProperty("/currentUserId", "");
+            }
 
             this.setTwoColumnLayout();
             this.getView().bindElement({
@@ -33,6 +47,17 @@ sap.ui.define([
                     dataRequested: this.onDataRequested.bind(this),
                     dataReceived: () => {
                         this.onDataReceived();
+                        const oRequest = this.getView().getBindingContext()?.getObject();
+                        const sCurrentUserId = this.getView().getModel("requestAccess").getProperty("/currentUserId");
+                        this.getView().getModel("requestAccess").setProperty(
+                            "/canModifyRequest",
+                            Boolean(
+                                oRequest?.reservedBy
+                                && oRequest?.processorUser_ID
+                                && oRequest.processorUser_ID === sCurrentUserId
+                                && !["COMPLETED", "REJECTED"].includes(oRequest?.status_code)
+                            )
+                        );
                         this.getView().getModel("statusEdit").setProperty(
                             "/requestStatus",
                             this.getView().getBindingContext()?.getProperty("status_code") || ""

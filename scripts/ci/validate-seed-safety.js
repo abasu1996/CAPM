@@ -8,18 +8,18 @@ const applicationManagedEntity = /(?:flowmate\.common\.db-(?:Roles|Delegations)|
 
 let csvCount = 0;
 for (const project of projects) {
-  const dataDirectory = path.join(repositoryRoot, project, "db", "data");
+  const dataDirectory = path.join(repositoryRoot, project, "db", "reference-data");
   for (const filename of fs.readdirSync(dataDirectory).filter((name) => name.endsWith(".csv"))) {
     csvCount += 1;
     if (operationalEntity.test(filename)) {
-      throw new Error(`Operational entity must not be deployed as seed data: ${project}/db/data/${filename}`);
+      throw new Error(`Operational entity must not be stored as reference data: ${project}/db/reference-data/${filename}`);
     }
     if (applicationManagedEntity.test(filename)) {
-      throw new Error(`Application-managed entity must not be deployed as seed data: ${project}/db/data/${filename}`);
+      throw new Error(`Application-managed entity must not be stored as reference data: ${project}/db/reference-data/${filename}`);
     }
     const content = fs.readFileSync(path.join(dataDirectory, filename), "utf8");
-    if (!content.trim()) throw new Error(`Empty seed file: ${project}/db/data/${filename}`);
+    if (!content.trim()) throw new Error(`Empty reference file: ${project}/db/reference-data/${filename}`);
   }
 }
 
-console.log(`Seed safety check passed for ${csvCount} CSV files`);
+console.log(`Reference-data safety check passed for ${csvCount} CSV files`);

@@ -1,5 +1,5 @@
 /**
- * Restore master/configuration db/data CSVs from an authoritative HANA catalog
+ * Restore master/configuration reference CSVs from an authoritative HANA catalog
  * export. Operational request/task/history/attachment/outbox tables are excluded.
  *
  * Usage:
@@ -202,7 +202,10 @@ if (!fs.existsSync(exportRoot)) throw new Error(`Export not found: ${exportRoot}
 if (!fs.existsSync(repositoryRoot)) throw new Error(`Repository not found: ${repositoryRoot}`);
 
 for (const [project, definition] of Object.entries(definitions)) {
-  const dataDir = path.join(repositoryRoot, project, "db", "data");
+  // Keep recovery/reference CSVs outside CAP's reserved db/data and db/csv
+  // folders. Files in either reserved folder are automatically converted into
+  // HDI table-data artifacts and can overwrite application-maintained HANA data.
+  const dataDir = path.join(repositoryRoot, project, "db", "reference-data");
   let totalRows = 0;
   let restoredFiles = 0;
   const skipped = [];

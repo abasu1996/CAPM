@@ -1487,6 +1487,21 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (sRequestId) {
         await this._rejectIfRequestLocked(req, sRequestId);
       }
+
+      if (req.event === "UPDATE") {
+        const aOwnershipFields = [
+          "reservedByUser_ID",
+          "reservedBy",
+          "reservedAt",
+          "processorUser_ID",
+          "processor",
+          "processorEmail"
+        ];
+
+        if (aOwnershipFields.some((sField) => Object.prototype.hasOwnProperty.call(req.data, sField))) {
+          return req.reject(403, "Use Assign to me or the administrator assignment action to change request ownership");
+        }
+      }
     });
 
     this.before("UPDATE", ProcessRequests, async (req) => {
@@ -1953,7 +1968,17 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("CREATE", ProcessHistory, async (req) => {
+      await this._rejectIfRequestLocked(req, req.data.request_ID);
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessHistory, "HIS");
+    });
+
+    this.before(["UPDATE", "DELETE"], ProcessHistory, async (req) => {
+      const sHistoryId = this._requestIdFromReq(req);
+      const oHistory = sHistoryId
+        ? await cds.tx(req).run(SELECT.one.from(ProcessHistory).columns("request_ID").where({ ID: sHistoryId }))
+        : null;
+
+      await this._rejectIfRequestLocked(req, oHistory?.request_ID || req.data?.request_ID);
     });
 
     this.on("approveTask", async (req) => {
@@ -2097,6 +2122,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const request = await this._getRequest(req, task.request_ID);
 
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
+
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
       }
@@ -2222,6 +2249,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!request) {
         return req.reject(404, `Process request ${requestId} was not found`);
       }
+      if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+        return req.reject(409, "This request must be approved before it can be assigned");
+      }
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
       }
@@ -2303,7 +2333,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (statusCode === PROCESS_STATUS.COMPLETED) {
         const steps = await this._getSteps(req, request.subProcessType_code);
         const incompleteStep = await this._findIncompleteGuidedStep(req, requestId, steps, {
-          includeClosingSteps: true
+          includeClosingSteps: true,
+          allowTerminalTasks: true
         });
 
         if (incompleteStep) {
@@ -2390,6 +2421,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "Select an active request processor");
       }
 
+      const oCurrentUser = await this._currentReservationUser(req, Users);
+      if (oCurrentUser.user.ID !== processorUserId) {
+        return req.reject(403, "Only an administrator can assign a request to another user");
+      }
+
       const sProcessor = this._userDisplayName(oProcessor);
       const sProcessorEmail = this._userEmail(oProcessor);
 
@@ -2440,10 +2476,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "Select an active processor team");
       }
 
-      const oPayload = {};
-      this._setProcessorTeamSnapshot(oPayload, oTeam);
-      oPayload.processorUser_ID = null;
-      oPayload.processorEmail = null;
+      const oPayload = {
+        processorTeam_ID: oTeam.ID,
+        processorTeamName: oTeam.name || oTeam.teamCode
+      };
 
       await cds.tx(req).run(
         UPDATE(ProcessRequests, requestId).set(oPayload)
@@ -2607,6 +2643,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return this._rejectLockedRequest(req);
       }
 
+      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
+
       const oReservationUser = await this._currentReservationUser(req, Users);
       const oCurrentUser = oReservationUser.user;
 
@@ -2669,6 +2707,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(404, `Task ${req.data.taskId} was not found`);
       }
 
+      await this._rejectIfRequestLocked(req, oTask.request_ID);
+
       const iRecipientCount = await this._notifyTaskAssignment(req, {
         task: oTask,
         failWhenUnassigned: true,
@@ -2684,6 +2724,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!oTask) {
         return req.reject(404, `Task ${req.data.taskId} was not found`);
       }
+
+      await this._rejectIfRequestLocked(req, oTask.request_ID);
 
       const iRecipientCount = await this._notifyTaskAssignment(req, {
         task: oTask,
@@ -4051,14 +4093,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _rejectIfRequestReservedByAnotherUser(req, request, Users = this.masterEntities.Users) {
-    if (!request?.reservedBy) {
-      return;
+    if (!request?.reservedBy || !request?.processorUser_ID) {
+      return req.reject(409, "Reserve or assign the request to a processor before making changes");
     }
 
     const oReservationUser = await this._currentReservationUser(req, Users);
 
-    if (!await this._canActForReservedRequest(req, request, oReservationUser)) {
-      return req.reject(403, `Request is reserved by ${request.reservedBy} and cannot be modified by another user`);
+    if (!await this._canActForRequestProcessor(req, request, oReservationUser)) {
+      return req.reject(403, `Request is assigned to ${request.processor || request.reservedBy} and can only be modified by that processor`);
     }
   }
 
@@ -4333,6 +4375,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     const aDelegatorIds = await this._activeDelegatorIds(req, reservationUser.user.ID);
     return aDelegatorIds.includes(request.reservedByUser_ID);
+  }
+
+  async _canActForRequestProcessor(req, request, reservationUser) {
+    if (!request?.processorUser_ID || !reservationUser.user?.ID) return false;
+    if (request.processorUser_ID === reservationUser.user.ID) return true;
+
+    const aDelegatorIds = await this._activeDelegatorIds(req, reservationUser.user.ID);
+    return aDelegatorIds.includes(request.processorUser_ID);
   }
 
   _applyVisibleRequestsWhere(query, reservationUser, delegatedUserIds = []) {
@@ -4872,6 +4922,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     const request = await this._getRequest(req, task.request_ID);
 
+    await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
+
     if (this._isLockedRequest(request)) {
       return this._rejectLockedRequest(req);
     }
@@ -4997,7 +5049,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       );
     } else {
       const incompleteStep = await this._findIncompleteGuidedStep(req, requestId, steps, {
-        includeClosingSteps: true
+        includeClosingSteps: true,
+        allowTerminalTasks: true
       });
 
       if (incompleteStep) {
@@ -5291,7 +5344,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       .find((step) => {
         const aStepTasks = tasksByStep.get(String(Number(step.stepNo || 0))) || [];
 
-        return !this._areStepTasksComplete(aStepTasks);
+        return !(options.allowTerminalTasks
+          ? this._areStepTasksFinalized(aStepTasks)
+          : this._areStepTasksComplete(aStepTasks));
       }) || null;
   }
 
@@ -5301,7 +5356,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       .filter((oTask) => options.beforeStepNo == null || Number(oTask.stepNo || 0) < Number(options.beforeStepNo || 0))
       .filter((oTask) => options.assumeCompletedStepNo == null || Number(oTask.stepNo || 0) !== Number(options.assumeCompletedStepNo || 0))
       .find((oTask) =>
-        this._taskStatusCode(oTask) !== TASK_STATUS.APPROVED &&
+        !(options.allowTerminalTasks
+          ? this._isTaskFinalized(oTask)
+          : this._taskStatusCode(oTask) === TASK_STATUS.APPROVED) &&
         !this._findStepByNo(steps, oTask.stepNo)
       );
 
@@ -5326,6 +5383,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _areStepTasksComplete(tasks) {
     return Boolean(tasks.length) && tasks.every((task) => this._taskStatusCode(task) === TASK_STATUS.APPROVED);
+  }
+
+  _areStepTasksFinalized(tasks) {
+    return Boolean(tasks.length) && tasks.every((task) => this._isTaskFinalized(task));
+  }
+
+  _isTaskFinalized(task) {
+    const sStatus = this._taskStatusCode(task);
+    const sDecision = String(task?.decision || "").toUpperCase();
+
+    return [TASK_STATUS.APPROVED, TASK_STATUS.CANCELLED, "SUSPENDED", "SUPERSEDED"].includes(sStatus)
+      || sDecision === "SUPERSEDED";
   }
 
   _isOpenLikeTask(task) {
@@ -5357,7 +5426,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   async _rejectUnlessGuidedStepCanComplete(req, requestId, steps, currentStep) {
     if (this._isFinalGuidedStep(steps, currentStep)) {
       const incompleteStep = await this._findIncompleteGuidedStep(req, requestId, steps, {
-        includeClosingSteps: true
+        includeClosingSteps: true,
+        allowTerminalTasks: true
       });
 
       if (incompleteStep) {

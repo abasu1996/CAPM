@@ -274,7 +274,7 @@
                                                 <Button
                                                     icon="sap-icon://delete"
                                                     type="Transparent"
-                                                    enabled="{= ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
+                                                    enabled="{= !!${processorUser_ID} &amp;&amp; ${processorUser_ID} === ${requestAccess>/currentUserId} &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
                                                     tooltip="{i18n>deleteRequestButton}"
                                                     press=".onDeleteRequest" />
                                             </HBox>
@@ -336,12 +336,13 @@
                                         <MenuItem
                                             text="{i18n>assignRequestToUserButton}"
                                             icon="sap-icon://employee-approvals"
-                                            visible="{permissions>/isAdmin}"
+                                            visible="{= ${permissions>/isAdmin} &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
                                             press=".onOpenAssignRequestUserDialog" />
                                         <MenuItem
                                             text="{i18n>createTreasuryConfirmationButton}"
                                             icon="sap-icon://money-bills"
                                             visible="{viewDemandTasks>/showTreasuryConfirmation}"
+                                            enabled="{requestEdit>/editable}"
                                             press=".onOpenTreasuryConfirmationDialog" />
 
                                         <!-- WHT Clearance -->
@@ -349,6 +350,7 @@
                                             text="{i18n>createWhtClearanceButton}"
                                             icon="sap-icon://receipt"
                                             visible="{viewDemandTasks>/showWhtClearance}"
+                                            enabled="{requestEdit>/editable}"
                                             press=".onOpenWhtClearanceDialog" />
 
                                         <!-- Budget Check -->
@@ -356,6 +358,7 @@
                                             text="{i18n>createBudgetCheckButton}"
                                             icon="sap-icon://checklist"
                                             visible="{viewDemandTasks>/showBudgetCheck}"
+                                            enabled="{requestEdit>/editable}"
                                             press=".onOpenBudgetCheckDialog" />
                                     </Menu>
                                 </menu>
@@ -364,6 +367,7 @@
                                 icon="sap-icon://chain-link"
                                 text="{i18n>createSuccessorRequestButton}"
                                 type="Emphasized"
+                                enabled="{requestEdit>/editable}"
                                 press=".onCreateSuccessorRequest" />
                             <Button
                                 icon="sap-icon://email"
@@ -2309,12 +2313,14 @@
                                                                 icon="sap-icon://email"
                                                                 type="Transparent"
                                                                 tooltip="{i18n>notifyProcessorButton}"
+                                                                enabled="{requestEdit>/editable}"
                                                                 press=".onNotifyProcessor" />
                                                             <Button
                                                                 icon="sap-icon://group"
                                                                 type="Transparent"
                                                                 tooltip="{i18n>notifyTeamMembersButton}"
                                                                 visible="{= !!${processorTeam_ID} }"
+                                                                enabled="{requestEdit>/editable}"
                                                                 press=".onNotifyTaskTeamMembers" />
                                                             <Button
                                                                 icon="sap-icon://delete"

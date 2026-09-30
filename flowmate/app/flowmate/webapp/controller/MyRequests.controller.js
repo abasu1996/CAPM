@@ -54,8 +54,11 @@ sap.ui.define([
                 endFullScreen: false
             }), "fclState");
             this.getView().setModel(new JSONModel({
-                editable: true
+                editable: false
             }), "requestEdit");
+            this.getView().setModel(new JSONModel({
+                currentUserId: ""
+            }), "requestAccess");
             this.getView().setModel(new JSONModel({
                 visible: false,
                 loading: false,
@@ -108,14 +111,16 @@ sap.ui.define([
             this._bShowUnreservedOnly = oQuery?.unreserved === "true";
             this._bShowReservedOnly = oQuery?.reserved === "true";
             this._sCurrentReservationUserId = null;
-            if (this._bShowReservedOnly) {
-                try {
-                    const oResponse = await this.callAction("getCurrentUserDetails");
-                    this._sCurrentReservationUserId = (oResponse.value || oResponse).ID || null;
-                } catch (oError) {
-                    this._sCurrentReservationUserId = null;
-                }
+            try {
+                const oResponse = await this.callAction("getCurrentUserDetails");
+                this._sCurrentReservationUserId = (oResponse.value || oResponse).ID || null;
+            } catch (oError) {
+                this._sCurrentReservationUserId = null;
             }
+            this.getView().getModel("requestAccess").setProperty(
+                "/currentUserId",
+                this._sCurrentReservationUserId || ""
+            );
             this.getView().getModel("viewState").setProperty("/showUnreservedOnly", this._bShowUnreservedOnly);
             if (this._bShowUnreservedOnly) {
                 this._loadRequestFilterQueries();
@@ -2042,6 +2047,11 @@ async onBudgetCheckConfirm() {
                 return;
             }
 
+            if (!this._canCurrentUserModifyRequest(oContext.getObject())) {
+                MessageBox.warning(this.getText("requestNotEditableMessage"));
+                return;
+            }
+
             const bConfirmed = await this._confirmDelete("deleteRequestConfirmMessage");
 
             if (!bConfirmed) {
@@ -2070,10 +2080,16 @@ async onBudgetCheckConfirm() {
 
         async onDeleteSelectedRequests() {
             const oTable = this.byId("requestsTable");
-            const aRequestIds = oTable.getSelectedContexts().map((oContext) => oContext.getProperty("ID"));
+            const aSelectedContexts = oTable.getSelectedContexts();
+            const aRequestIds = aSelectedContexts.map((oContext) => oContext.getProperty("ID"));
 
             if (!aRequestIds.length) {
                 MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+
+            if (aSelectedContexts.some((oContext) => !this._canCurrentUserModifyRequest(oContext.getObject()))) {
+                MessageBox.warning(this.getText("requestNotEditableMessage"));
                 return;
             }
 
@@ -2446,7 +2462,7 @@ async onBudgetCheckConfirm() {
             this._sTaskDetailLoadToken = null;
             this._sSelectedPartyId = null;
             this._setRequestsLayout(fLibrary.LayoutType.OneColumn);
-            this.getView().getModel("requestEdit").setProperty("/editable", true);
+            this.getView().getModel("requestEdit").setProperty("/editable", false);
             this.getView().getModel("processFlow").setData({
                 visible: false,
                 loading: false,
@@ -3204,7 +3220,16 @@ async onBudgetCheckConfirm() {
         },
 
         _isRequestEditable(oRequest) {
-            return Boolean(oRequest?.reservedBy) && !["COMPLETED", "REJECTED"].includes(oRequest?.status_code);
+            return this._canCurrentUserModifyRequest(oRequest);
+        },
+
+        _canCurrentUserModifyRequest(oRequest) {
+            return Boolean(
+                oRequest?.reservedBy
+                && oRequest?.processorUser_ID
+                && oRequest.processorUser_ID === this._sCurrentReservationUserId
+                && !["COMPLETED", "REJECTED"].includes(oRequest?.status_code)
+            );
         },
 
         _normalizeCollection(vCollection) {

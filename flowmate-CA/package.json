@@ -30,7 +30,7 @@
     "watch": "cds watch --port 4010 --open flowmateca/webapp/index.html?sap-ui-xx-viewCache=false",
     "watch:hybrid": "cds bind --exec --profile hybrid -- cds watch --profile hybrid --port 4010 --open flowmateca/webapp/index.html?sap-ui-xx-viewCache=false",
     "watch:flp": "cds watch --port 4010 --open \"flowmateca/webapp/test/flpSandbox.html#FlowmateCA-manage\"",
-    "build": "cds build --production",
+    "build": "cds build --production --opts contentHdbtabledata=false && node ../scripts/ci/remove-hana-seed-artifacts.js gen/db",
     "build:mta": "mbt build",
     "deploy": "cf deploy mta_archives/flowmate-ca_0.1.0.mtar"
   },

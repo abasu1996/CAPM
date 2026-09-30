@@ -2,4 +2,4 @@
 
 This folder holds local recovery snapshots exported from the Flowmate HANA HDI container.
 
-Snapshot data is intentionally ignored by Git and is not part of CAP production seed data. Do not move these files into `db/data` without an explicit data-migration plan.
+Snapshot data is intentionally ignored by Git and is not part of CAP production seed data. Keep reference CSVs in `db/reference-data`; never move them into CAP's reserved `db/data` or `db/csv` folders.

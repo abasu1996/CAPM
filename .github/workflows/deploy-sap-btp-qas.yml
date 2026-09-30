@@ -103,7 +103,7 @@ jobs:
           retention-days: 7
           compression-level: 9
 
-      - name: Refresh master and configuration CSVs
+      - name: Refresh non-deployable master-data reference snapshots
         shell: bash
         run: |
           set -euo pipefail
@@ -183,7 +183,8 @@ jobs:
           set -euo pipefail
           post_directory="${RUNNER_TEMP}/hana-postdeploy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           bash scripts/ci/export-hana.sh "${post_directory}"
-          node scripts/ci/compare-deployed-seed-counts.js "${post_directory}"
+          node scripts/ci/compare-deployed-seed-counts.js \
+            "${{ steps.backup.outputs.directory }}" "${post_directory}"
 
       - name: Write deployment summary
         if: always()

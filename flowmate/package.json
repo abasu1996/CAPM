@@ -26,6 +26,7 @@
   },
   "scripts": {
     "start": "cds-serve",
+    "build": "cds build --production --opts contentHdbtabledata=false && node ../scripts/ci/remove-hana-seed-artifacts.js gen/db",
     "serve-flowmate": "cds serve --in-memory --port 4004",
     "watch-flowmate": "cds watch --in-memory --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false",
     "watch-flowmate-hybrid": "cds bind --profile hybrid --exec -- cds watch --profile hybrid --port 4004 --open flowmate/webapp/index.html?sap-ui-xx-viewCache=false --livereload false",

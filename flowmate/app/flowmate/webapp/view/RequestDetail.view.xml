@@ -53,7 +53,7 @@
                                 <MenuItem
                                     text="{i18n>changeRequestStatusAction}"
                                     icon="sap-icon://status-in-process"
-                                    visible="{= !!${reservedBy} &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
+                                    visible="{requestAccess>/canModifyRequest}"
                                     items="{/ProcessStatus}">
                                     <items>
                                         <MenuItem key="{code}" text="{name}" press=".onRequestStatusAction" />
@@ -67,7 +67,7 @@
                                 <MenuItem
                                     text="{i18n>assignRequestToUserButton}"
                                     icon="sap-icon://employee-approvals"
-                                    visible="{permissions>/isAdmin}"
+                                    visible="{= ${permissions>/isAdmin} &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
                                     press=".onOpenAssignRequestUserDialog" />
                             </Menu>
                         </menu>
@@ -76,6 +76,7 @@
                         icon="sap-icon://chain-link"
                         text="{i18n>createSuccessorRequestButton}"
                         type="Emphasized"
+                        enabled="{requestAccess>/canModifyRequest}"
                         press=".onCreateSuccessorRequest" />
                     <Button
                         icon="sap-icon://decline"
@@ -209,7 +210,7 @@
                                 id="requestDetailTasksTable"
                                 class="flowmateTable"
                                 noDataText="{i18n>noTasksText}"
-                                mode="MultiSelect"
+                                mode="{= ${requestAccess>/canModifyRequest} ? 'MultiSelect' : 'None' }"
                                 items="{tasks}">
                                 <headerToolbar>
                                     <OverflowToolbar class="flowmateToolbar">
@@ -219,6 +220,7 @@
                                             icon="sap-icon://delete"
                                             text="{i18n>deleteSelectedButton}"
                                             type="Reject"
+                                            enabled="{requestAccess>/canModifyRequest}"
                                             press=".onDeleteSelectedTasks" />
                                     </OverflowToolbar>
                                 </headerToolbar>
@@ -271,18 +273,20 @@
                                                     icon="sap-icon://email"
                                                     type="Transparent"
                                                     tooltip="{i18n>notifyProcessorButton}"
+                                                    enabled="{requestAccess>/canModifyRequest}"
                                                     press=".onNotifyProcessor" />
                                                 <Button
                                                     icon="sap-icon://group"
                                                     type="Transparent"
                                                     tooltip="{i18n>notifyTeamMembersButton}"
                                                     visible="{= !!${processorTeam_ID} }"
+                                                    enabled="{requestAccess>/canModifyRequest}"
                                                     press=".onNotifyTaskTeamMembers" />
                                                 <Button
                                                     icon="sap-icon://delete"
                                                     type="Transparent"
                                                     tooltip="{i18n>deleteTaskButton}"
-                                                    visible="{= !${isMandatory} }"
+                                                    visible="{= !${isMandatory} &amp;&amp; ${requestAccess>/canModifyRequest} }"
                                                     press=".onDeleteTask" />
                                             </HBox>
                                         </cells>
@@ -308,7 +312,7 @@
                                 id="requestDetailAttachmentsTable"
                                 class="flowmateTable"
                                 noDataText="{i18n>noAttachmentsText}"
-                                mode="MultiSelect"
+                                mode="{= ${requestAccess>/canModifyRequest} ? 'MultiSelect' : 'None' }"
                                 items="{attachments}">
                                 <headerToolbar>
                                     <OverflowToolbar class="flowmateToolbar">
@@ -318,6 +322,7 @@
                                             icon="sap-icon://delete"
                                             text="{i18n>deleteSelectedButton}"
                                             type="Reject"
+                                            enabled="{requestAccess>/canModifyRequest}"
                                             press=".onDeleteSelectedAttachments" />
                                     </OverflowToolbar>
                                 </headerToolbar>
@@ -354,6 +359,7 @@
                                                     icon="sap-icon://delete"
                                                     type="Transparent"
                                                     tooltip="{i18n>deleteAttachmentButton}"
+                                                    visible="{requestAccess>/canModifyRequest}"
                                                     press=".onDeleteAttachment" />
                                             </HBox>
                                         </cells>

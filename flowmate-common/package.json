@@ -20,7 +20,7 @@
     "start": "cds-serve",
     "watch": "cds watch --port 4020",
     "watch:hybrid": "cds bind --profile hybrid --exec -- cds watch --profile hybrid --port 4020",
-    "build": "cds build --production",
+    "build": "cds build --production --opts contentHdbtabledata=false && node ../scripts/ci/remove-hana-seed-artifacts.js gen/db",
     "build:mta": "mbt build",
     "deploy": "cf deploy mta_archives/flowmate-common_1.0.0.mtar",
     "migrate:flowmate": "node scripts/migrate-flowmate-master-data.js",

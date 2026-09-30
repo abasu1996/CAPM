@@ -414,7 +414,7 @@ The UI model points to `/odata/v2/flowmate/`, uses server-side operation mode, i
 
 ## 11. Data Persistence and Initial Data
 
-Initial data is loaded from CSV files in `db/data`. Important seed sets include:
+Reference snapshots are stored in `db/reference-data`. They are deliberately outside CAP's reserved `db/data` folder and are never deployed automatically to HANA. Important sets include:
 
 - Process types such as `PURCHASE_REQUEST`, `DOCUMENT_REVIEW`, `ACCESS_REQUEST`, `EXCEPTION_REQUEST`, and `PAYMENT_REQUEST`.
 - Request and task statuses.
@@ -574,5 +574,5 @@ npx cds build --production
 | Cloud Foundry deployment | `mta.yaml` |
 | App router route config | `router/xs-app.json` |
 | Security roles | `xs-security.json` |
-| Seed/reference data | `db/data/*.csv` |
+| Non-deployable reference snapshots | `db/reference-data/*.csv` |
 | Load-test data generator | `scripts/seed-process-requests.js` |
