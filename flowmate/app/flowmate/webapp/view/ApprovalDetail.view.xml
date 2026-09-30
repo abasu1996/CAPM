@@ -152,7 +152,7 @@
                 </HBox>
                <VBox
                     class="sapUiSmallMarginTop flowmateDetailBlock"
-                    visible="{= ${role} === 'Treasury' }">
+                    visible="{= ${taskName} === 'Treasury Confirmation' }">
 
                     <Title
                         text="Treasury Confirmation"
@@ -206,7 +206,7 @@
                 </VBox>
                 <VBox
                     class="sapUiSmallMarginTop flowmateDetailBlock"
-                    visible="{= ${role} === 'WHT' }">
+                    visible="{= ${taskName} === 'WHT Clearance' }">
 
                     <Title
                         text="WHT Clearance"

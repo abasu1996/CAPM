@@ -328,6 +328,11 @@ sap.ui.define([
                 return;
             }
 
+            if (this._isTruthy(oContext.getProperty("isMandatory"))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
+                return;
+            }
+
             const bConfirmed = await this._confirmDelete("deleteTaskConfirmMessage");
 
             if (!bConfirmed) {
@@ -349,10 +354,16 @@ sap.ui.define([
 
         async onDeleteSelectedTasks() {
             const oTable = this.byId("requestDetailTasksTable");
-            const aTaskIds = oTable.getSelectedContexts().map((oContext) => oContext.getProperty("ID"));
+            const aSelectedContexts = oTable.getSelectedContexts();
+            const aTaskIds = aSelectedContexts.map((oContext) => oContext.getProperty("ID"));
 
             if (!aTaskIds.length) {
                 MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+
+            if (aSelectedContexts.some((oContext) => this._isTruthy(oContext.getProperty("isMandatory")))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
                 return;
             }
 

@@ -459,6 +459,52 @@ sap.ui.define([
 
     };
 
+    const LOA_AMOUNT_SOURCE_FIELD = {
+    PO_BEFORE_INVOICE_ADVANCE: "highestInvoiceValue",
+    PO_AFTER_INVOICE_ADVANCE: "highestInvoiceValue",
+    PO_BEFORE_INVOICE_ADV_STLMT: "highestInvoiceValue",
+    "PO_BEFORE_INVOICE_ADV_STLMT_100%": "highestInvoiceValue",
+    PO_AFTER_INVOICE_ADV_STLMT: "highestInvoiceValue",
+    "PO_AFTER_INVOICE_ADV_STLMT_100%": "highestInvoiceValue",
+    NON_PO_DIRECT_OFN_AUTHORITY: "totalValue",
+    NON_PO_ADV_SETTLE_OFN_OTHER: "totalValue",
+    NON_PO_FUEL_STAFF: "highestValueInFile",
+    NON_PO_FUEL_GENERATOR: "highestValueInFile",
+     NON_PO_CUSTOMER_REFUNDS: "highestRefundValueOfFile",
+    NON_PO_STELACOM_CONSIGNMENT: "totalInvoiceValue",
+    NON_PO_SITE_SHARE_LIABILITY: "totalInvoiceValue",
+    NON_PO_SITE_RENT_MONTHLY_FILE: "highestMonthlyRentalValueInFile",
+    NON_PO_SITE_RENT_STAMP_ADHOC: "totalPayableValue",
+    DIRECT_NON_PO_REIMB_LIAB: "totalValue",
+    DIRECT_NON_PO_REIMB_PAYMENT: "totalValue",
+    DIRECT_FOREIGN_TRAVEL_REIMB: "totalAmountLKR",
+    NON_PO_TAX_LIAB_PAY_OTTP: "totalTaxPayable",
+    NON_PO_TAX_LIAB_PAY_PAYORDER: "totalTaxPayable",
+    NON_PO_INTERCONNECT_LIAB: "totalInvoiceValueLKR",
+    NON_PO_ROAMING_LIABILITY: "totalInvoiceValueLKR",
+    NON_PO_STAR_POINT_PAYMENTS: "highestPayableValueInList",
+    NON_PO_CC_PAYMENT: "transactionAmountLocalCurrency",
+    NON_PO_MERCHANT_SETTLEMENTS: "highestValueInExcel",
+    BANK_GUARANTEE: "amountPayable",
+       NON_PO_IDEAMART: [
+        "brcHighestTransactionValue",
+        "whtNicHighestTransactionValue",
+        "lessThan100kNicBlankHighestTransactionValue",
+        "retentionRepaymentValue"
+    ],
+
+    NON_PO_APPMAKER: [
+        "brcHighestTransactionValue",
+        "whtNicHighestTransactionValue",
+        "lessThan100kNicBlankHighestTransactionValue",
+        "retentionRepaymentValue"
+    ],
+    NON_PO_IMPORT_TRC: "trcslProformaInvoiceTotalValue",
+    NON_PO_IMPORT_ICL: "totalPivValue",
+    NON_PO_IMPORT_DGC_ADV: "totalDeclarationValueInCusdec",
+    NON_PO_IMPORT_DGC_DIRECT: "totalDeclarationValueInCusdec"
+
+    };
 
     return BaseController.extend("flowmate.controller.RequestCreate", {
         formatter: {
@@ -501,6 +547,7 @@ sap.ui.define([
                 subProcessTypeName: "",
                 hasSubProcessTypes: false,
                 loaApprovalApplicable: false,
+                loaAmountDerived: false,
                 isPaymentRequest: false,
                 amount: null,
                 role: "",
@@ -773,15 +820,15 @@ sap.ui.define([
                 return;
             }
 
-            if (oPayload.loaApprovalApplicable && (
-                oPayload.amount === ""
-                || oPayload.amount === null
-                || oPayload.amount === undefined
-                || !Number.isFinite(Number(oPayload.amount))
-            )) {
-                MessageBox.warning(this.getText("amountRequiredMessage"));
-                return;
-            }
+            // if (oPayload.loaApprovalApplicable && (
+            //     oPayload.amount === ""
+            //     || oPayload.amount === null
+            //     || oPayload.amount === undefined
+            //     || !Number.isFinite(Number(oPayload.amount))
+            // )) {
+            //     MessageBox.warning(this.getText("amountRequiredMessage"));
+            //     return;
+            // }
 
             // if (oPayload.isFtkPoValidation && (
             //     !String(oPayload.paymentCategory_code || "").trim()
@@ -1776,7 +1823,8 @@ sap.ui.define([
             }
 
             oCreateModel.setProperty("/invoices", aInvoices);
-            this._updateHighestInvoiceValue();
+            this._updateHighestInvoiceValue(true);
+            
 
             this.getView().byId("invoiceDialog").close();
         },
@@ -1838,13 +1886,13 @@ sap.ui.define([
                         if (sAction === MessageBox.Action.OK) {
                             aInvoices.splice(iIndex, 1);
                             oCreateModel.setProperty("/invoices", aInvoices);
-                            this._updateHighestInvoiceValue();
+                            this._updateHighestInvoiceValue(true);
                         }
                     }
                 }
             );
         },
-        _updateHighestInvoiceValue() {
+        _updateHighestInvoiceValue(bTriggerLoa = false) {
             const oCreateModel = this.getView().getModel("create");
             const sSubProcessTypeCode = oCreateModel.getProperty("/subProcessType_code");
 
@@ -1858,10 +1906,12 @@ sap.ui.define([
                 .map((oInvoice) => Number(oInvoice.amount))
                 .filter((fAmount) => Number.isFinite(fAmount));
 
-            oCreateModel.setProperty(
-                "/highestInvoiceValue",
-                aAmounts.length ? Math.max(...aAmounts) : null
-            );
+            const fHighest = aAmounts.length ? Math.max(...aAmounts) : null;
+
+            oCreateModel.setProperty("/highestInvoiceValue", fHighest);
+            if (bTriggerLoa) {
+                this._syncLoaAmountFromSource(fHighest);
+            }
         },
         onCalculateDirectForeignTravelTotals() {
             const oModel = this.getView().getModel("directForeignTravelEdit");
@@ -3517,6 +3567,58 @@ sap.ui.define([
                 MessageBox.error(this.getErrorMessage(oError, this.getText("loaPreviewLoadErrorMessage")));
             }
         },
+    async _syncLoaAmountFromSource(vValue) {
+            const oCreateModel = this.getView().getModel("create");
+            const sSubProcessTypeCode = oCreateModel.getProperty("/subProcessType_code");
+
+            const vSource = LOA_AMOUNT_SOURCE_FIELD[sSubProcessTypeCode];
+
+            if (!vSource) {
+                return;
+            }
+
+            let vAmount = vValue;
+
+            // For flows where LoA is based on the highest of multiple fields
+            if (Array.isArray(vSource)) {
+                const aValues = vSource
+                    .map((sField) => oCreateModel.getProperty(`/${sField}`))
+                    .filter((vFieldValue) =>
+                        vFieldValue !== "" &&
+                        vFieldValue !== null &&
+                        vFieldValue !== undefined &&
+                        Number.isFinite(Number(vFieldValue))
+                    )
+                    .map((vFieldValue) => Number(vFieldValue));
+
+                vAmount = aValues.length ? Math.max(...aValues) : "";
+            }
+
+            const bEmpty =
+                vAmount === "" ||
+                vAmount === null ||
+                vAmount === undefined ||
+                !Number.isFinite(Number(vAmount));
+
+            const sValue = bEmpty ? "" : String(vAmount);
+
+            oCreateModel.setProperty(
+                "/amount",
+                bEmpty ? null : Number(vAmount)
+            );
+
+            await this.onAmountChange({
+                getParameter: (sName) =>
+                    sName === "value" ? sValue : undefined
+            });
+        },
+
+        // Handler for the source input in the view (e.g. totalValue)
+        onLoaSourceFieldChange(oEvent) {
+            return this._syncLoaAmountFromSource(oEvent.getParameter("value"));
+        },
+
+
 
         async _resolveLoaRole(fAmount, sSubProcessTypeCode) {
             const oRule = await this._resolveLoaRule(fAmount, sSubProcessTypeCode);
@@ -3758,8 +3860,9 @@ sap.ui.define([
                     this._applySubProcessTypeFlags(sSubProcessTypeCode);
                     // ...then fills in the fields that subtype actually uses, incl. line items.
                     this._prefillSubtypeFields(oPredecessor, sSubProcessTypeCode);
+                    oCreateModel.setProperty("/amount", oPredecessor.amount ?? null);
+                    oCreateModel.setProperty("/role", oPredecessor.role || "");
                 }
-                this.getView().getModel("create").getProperty("/glBreakups")
                 oCreateModel.setProperty("/title", this.getText("successorRequestTitlePrefix", [
                     oPredecessor.referenceNumber || oPredecessor.title || ""
                 ]));
@@ -4050,6 +4153,16 @@ sap.ui.define([
     this._setFtkBasedOnUacMode(sCode === "FTK_FACTORING_BASED_ON_UAC");
  
     this._sActiveSubProcessTypeCode = sCode;
+     const bDerived = Boolean(LOA_AMOUNT_SOURCE_FIELD[sCode]);
+    oCreateModel.setProperty("/loaAmountDerived", bDerived);
+    if (bCodeChanged) {
+    // the clear-functions wipe invoices/totalValue but not these, so reset to avoid stale LOA
+    oCreateModel.setProperty("/highestInvoiceValue", null);
+    if (bDerived) {
+        oCreateModel.setProperty("/amount", null);
+        oCreateModel.setProperty("/role", "");
+    }
+    }
 },
 _prefillSubtypeFields(oPredecessor, sSubProcessTypeCode) {
     const oCreateModel = this.getView().getModel("create");

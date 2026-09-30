@@ -672,6 +672,7 @@ entity ProcessStepConfig : cuid, managed {
     role          : String(100);
     slaDays       : Integer;
     isActiveDemandTask : Boolean default false;
+    isVendorNotification : Boolean default false;
 }
 
 entity RequestFilterQueries : cuid, managed {

@@ -205,6 +205,12 @@ entity Customers as projection on db.Customers;
   entity DistributionChannel as projection on db.DistributionChannel;
 
   @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity ArReferences as projection on db.ArReferences;
+
+  @restrict: [
     { grant: '*', to: ['MasterDataAdmin', 'UserProvisioning'] }
   ]
   action createUserWithTeams(

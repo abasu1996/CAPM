@@ -479,6 +479,52 @@ const SUBTYPE_FIELDS = {
     optional: ["remarks"]
   }
 };
+const LOA_AMOUNT_SOURCE_FIELD = {
+  PO_BEFORE_INVOICE_ADVANCE: "highestInvoiceValue",
+  PO_AFTER_INVOICE_ADVANCE: "highestInvoiceValue",
+  PO_BEFORE_INVOICE_ADV_STLMT: "highestInvoiceValue",
+  "PO_BEFORE_INVOICE_ADV_STLMT_100%": "highestInvoiceValue",
+  PO_AFTER_INVOICE_ADV_STLMT: "highestInvoiceValue",
+  "PO_AFTER_INVOICE_ADV_STLMT_100%": "highestInvoiceValue",
+  NON_PO_DIRECT_OFN_AUTHORITY: "totalValue",
+  NON_PO_ADV_SETTLE_OFN_OTHER: "totalValue",
+  NON_PO_FUEL_STAFF: "highestValueInFile",
+  NON_PO_FUEL_GENERATOR: "highestValueInFile",
+  NON_PO_CUSTOMER_REFUNDS: "highestRefundValueOfFile",
+  NON_PO_STELACOM_CONSIGNMENT: "totalInvoiceValue",
+  NON_PO_SITE_SHARE_LIABILITY: "totalInvoiceValue",
+  NON_PO_SITE_RENT_MONTHLY_FILE: "highestMonthlyRentalValueInFile",
+  NON_PO_SITE_RENT_STAMP_ADHOC: "totalPayableValue",
+  DIRECT_NON_PO_REIMB_LIAB: "totalValue",
+  DIRECT_NON_PO_REIMB_PAYMENT: "totalValue",
+  DIRECT_FOREIGN_TRAVEL_REIMB: "totalAmountLKR",
+  NON_PO_TAX_LIAB_PAY_OTTP: "totalTaxPayable",
+  NON_PO_TAX_LIAB_PAY_PAYORDER: "totalTaxPayable",
+  NON_PO_INTERCONNECT_LIAB: "totalInvoiceValueLKR",
+  NON_PO_ROAMING_LIABILITY: "totalInvoiceValueLKR",
+  NON_PO_STAR_POINT_PAYMENTS: "highestPayableValueInList",
+  NON_PO_CC_PAYMENT: "transactionAmountLocalCurrency",
+  NON_PO_MERCHANT_SETTLEMENTS: "highestValueInExcel",
+  BANK_GUARANTEE: "amountPayable",
+  NON_PO_IDEAMART: [
+      "brcHighestTransactionValue",
+      "whtNicHighestTransactionValue",
+      "lessThan100kNicBlankHighestTransactionValue",
+      "retentionRepaymentValue"
+  ],
+
+  NON_PO_APPMAKER: [
+      "brcHighestTransactionValue",
+      "whtNicHighestTransactionValue",
+      "lessThan100kNicBlankHighestTransactionValue",
+      "retentionRepaymentValue"
+  ],
+
+  NON_PO_IMPORT_TRC: "trcslProformaInvoiceTotalValue",
+  NON_PO_IMPORT_ICL: "totalPivValue",
+  NON_PO_IMPORT_DGC_ADV: "totalDeclarationValueInCusdec",
+  NON_PO_IMPORT_DGC_DIRECT: "totalDeclarationValueInCusdec"
+};
 const DEFAULT_CONFIG_CACHE_TTL_MS = 60 * 1000;
 const BPA_USER_DESTINATION = "bpa_workflow";
 const BPA_TECHNICAL_DESTINATION = "bpa_workflow_technical";
@@ -831,6 +877,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         ? await cds.tx(req).run(SELECT.one.from(ProcessStepConfig).where({ ID: sStepId }))
         : {};
       const oStep = { ...oExisting, ...req.data };
+      if (Object.prototype.hasOwnProperty.call(req.data, "isVendorNotification")) {
+        req.data.isVendorNotification = Boolean(req.data.isVendorNotification);
+      }
+      if (oStep.isVendorNotification === true || req.data.isVendorNotification === true) {
+        req.data.processorTeam_ID = null;
+        req.data.processorTeamName = null;
+        oStep.processorTeam_ID = null;
+      }
 
       if (!oStep.subProcessType_code || !oStep.stepNo || !oStep.stepName) {
         return req.reject(400, "Process subtype, step number, and step name are required");
@@ -1106,10 +1160,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
     this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
       const sRequestId = this._requestIdFromReq(req);
+      // const aSourceColumns = [...new Set(Object.values(LOA_AMOUNT_SOURCE_FIELD))];
+      const aSourceColumns = [
+        ...new Set(
+          Object.values(LOA_AMOUNT_SOURCE_FIELD).flat()
+        )
+      ];
       const oExisting = req.event === "UPDATE" && sRequestId
         ? await cds.tx(req).run(
           SELECT.one.from(ProcessRequests)
-            .columns("subProcessType_code", "amount")
+            .columns("subProcessType_code", "amount", ...aSourceColumns)
             .where({ ID: sRequestId })
         )
         : null;
@@ -1130,10 +1190,48 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return;
       }
 
-      const vAmount = Object.prototype.hasOwnProperty.call(req.data, "amount")
-        ? req.data.amount
-        : oExisting?.amount;
-      const fAmount = Number(vAmount);
+      let vAmount = Object.prototype.hasOwnProperty.call(req.data, "amount")
+      ? req.data.amount
+      : oExisting?.amount;
+
+    // For subtypes whose LoA basis is another field, that field is the source of truth
+    // const sSourceField = LOA_AMOUNT_SOURCE_FIELD[sSubProcessTypeCode];
+    // if (sSourceField) {
+    //   vAmount = Object.prototype.hasOwnProperty.call(req.data, sSourceField)
+    //     ? req.data[sSourceField]
+    //     : oExisting?.[sSourceField];
+    // }
+      const vSourceField = LOA_AMOUNT_SOURCE_FIELD[sSubProcessTypeCode];
+        if (Array.isArray(vSourceField)) {
+
+      const aValues = vSourceField
+        .map((sField) => {
+          if (Object.prototype.hasOwnProperty.call(req.data, sField)) {
+            return req.data[sField];
+          }
+
+          return oExisting?.[sField];
+        })
+        .filter((vValue) =>
+          vValue !== null &&
+          vValue !== undefined &&
+          vValue !== "" &&
+          Number.isFinite(Number(vValue))
+        )
+        .map((vValue) => Number(vValue));
+
+      vAmount = aValues.length > 0
+        ? Math.max(...aValues)
+        : null;
+
+    } else if (vSourceField) {
+
+      vAmount = Object.prototype.hasOwnProperty.call(req.data, vSourceField)
+        ? req.data[vSourceField]
+        : oExisting?.[vSourceField];
+    }
+
+    const fAmount = Number(vAmount);
 
       if (vAmount === null || vAmount === undefined || vAmount === "" || !Number.isFinite(fAmount)) {
         return req.reject(400, "Amount is required when LoA approval is applicable");
@@ -1186,36 +1284,38 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       const sSubProcessTypeCode = valueOf("subProcessType_code");
+      // if (sSubProcessTypeCode === "FTK_FACTORING_PENDING_UAC") {
+      //   return;
+      // }
+      // if (sSubProcessTypeCode !== "FTK_FACTORING_PO_VALIDATION") {
+      //   return;
+      // }
 
-      if (sSubProcessTypeCode !== "FTK_FACTORING_PO_VALIDATION") {
-        return;
-      }
+      // const aMissingFields = [
+      //   ["Payment category", valueOf("paymentCategory_code")],
+      //   ["Entity", valueOf("businessEntity_code")],
+      //   ["Vendor code and vendor name", valueOf("vendor_ID")]
+      // ]
+      //   .filter(([, vValue]) => !String(vValue || "").trim())
+      //   .map(([sLabel]) => sLabel);
+      // const sVendorId = valueOf("vendor_ID");
 
-      const aMissingFields = [
-        ["Payment category", valueOf("paymentCategory_code")],
-        ["Entity", valueOf("businessEntity_code")],
-        ["Vendor code and vendor name", valueOf("vendor_ID")]
-      ]
-        .filter(([, vValue]) => !String(vValue || "").trim())
-        .map(([sLabel]) => sLabel);
-      const sVendorId = valueOf("vendor_ID");
+      // if (sVendorId) {
+      //   const oVendor = await this.master.run(
+      //     SELECT.one.from(Vendors)
+      //       .columns("vendorCode", "vendorName")
+      //       .where({ ID: sVendorId })
+      //   );
 
-      if (sVendorId) {
-        const oVendor = await this.master.run(
-          SELECT.one.from(Vendors)
-            .columns("vendorCode", "vendorName")
-            .where({ ID: sVendorId })
-        );
-
-        if (!oVendor?.vendorCode || !oVendor?.vendorName) {
-          if (!aMissingFields.includes("Vendor code and vendor name")) {
-            aMissingFields.push("Vendor code and vendor name");
-          }
-        } else {
-          req.data.vendorCode = oVendor.vendorCode;
-          req.data.vendorName = oVendor.vendorName;
-        }
-      }
+      //   if (!oVendor?.vendorCode || !oVendor?.vendorName) {
+      //     if (!aMissingFields.includes("Vendor code and vendor name")) {
+      //       aMissingFields.push("Vendor code and vendor name");
+      //     }
+      //   } else {
+      //     req.data.vendorCode = oVendor.vendorCode;
+      //     req.data.vendorName = oVendor.vendorName;
+      //   }
+      // }
 
       let bHasAttachment;
 
@@ -1257,16 +1357,23 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         bHasAttachment = Boolean(oAttachment);
       }
 
-      if (!bHasAttachment) {
-        aMissingFields.push("At least one attachment");
-      }
+      // if (!bHasAttachment) {
+      //   aMissingFields.push("At least one attachment");
+      // }
 
-      if (aMissingFields.length) {
-        return req.reject(
-          400,
-          `${aMissingFields.join(", ")} ${aMissingFields.length === 1 ? "is" : "are"} mandatory for FTK Factoring PO Validation`
-        );
-      }
+      // if (aMissingFields.length) {
+      //   return req.reject(
+      //     400,
+      //     `${aMissingFields.join(", ")} ${aMissingFields.length === 1 ? "is" : "are"} mandatory for FTK Factoring PO Validation`
+      //   );
+      // }
+      // Attachment is mandatory except for FTK Factoring Pending UAC
+        if (sSubProcessTypeCode !== "FTK_FACTORING_PENDING_UAC" && !bHasAttachment) {
+          return req.reject(
+            400,
+            "At least one attachment is mandatory"
+          );
+        }
     });
 
     this.before("CREATE", ProcessRequests, async (req) => {
@@ -1365,7 +1472,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           teamName: request.processorTeamName
         });
       }
-      await this._ensureInitialGuidedTask(req, request.ID, request, { updateRequest: true });
+      // await this._ensureInitialGuidedTask(req, request.ID, request, { updateRequest: true, autoCompleteFirstStep: true });
+       await this._ensureInitialGuidedTask(req, request.ID, request, {
+        updateRequest: true,
+        autoCompleteSteps: 1,
+        autoCompleteReason: "Request raised by requester"
+      });
     });
 
 
@@ -1590,6 +1702,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("DELETE", ProcessTasks, async (req) => {
+      const sTaskId = this._requestIdFromReq(req);
+      const oTask = sTaskId ? await this._getTask(req, sTaskId) : null;
+
+      if (this._isMandatoryTask(oTask)) {
+        return req.reject(
+          409,
+          "Mandatory tasks cannot be deleted. If the task is not required, approve it and record the reason in the comments."
+        );
+      }
+
       await this._rejectIfTaskRequestLocked(req);
     });
 
@@ -4714,6 +4836,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       delegationId: oDelegation?.ID || null
     };
   }
+  _isVendorNotificationStep(step) {
+    const v = step?.isVendorNotification;
+    return v === true || v === 1 || v === "true" || v === "1";
+  }
 
   _isAdministrator(req) {
     return Boolean(req.user?.is("Admin") || req.user?.is("admin"));
@@ -5378,11 +5504,27 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       })
     ]);
 
+    // if (bApproved) {
+    //   await this._ensureInitialGuidedTask(req, task.request_ID, {
+    //     ...request,
+    //     status_code: PROCESS_STATUS.DRAFT
+    //   }, { updateRequest: true });
+    // }
+
     if (bApproved) {
       await this._ensureInitialGuidedTask(req, task.request_ID, {
         ...request,
         status_code: PROCESS_STATUS.DRAFT
-      }, { updateRequest: true });
+      }, {
+        updateRequest: true,
+        autoCompleteSteps: 2,
+        autoCompleteReason: "Auto-completed after LoA approval"
+      });
+    }else {
+      await this._closeLeadingStepsOnLoaRejection(req, task.request_ID, {
+        ...request,
+        status_code: PROCESS_STATUS.REJECTED
+      }, remarks);
     }
 
     await this._writeHistory(req, {
@@ -5396,11 +5538,25 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
     return true;
   }
-
   async _ensureInitialGuidedTask(req, requestId, request, options = {}) {
     const oRequest = request?.processType_code ? request : await this._getRequest(req, requestId);
     const steps = await this._getSteps(req, oRequest?.subProcessType_code);
     const firstTaskStep = this._getInitialGuidedStep(steps);
+
+    const iAutoCompleteSteps = Number(options.autoCompleteSteps || 0);
+    if (iAutoCompleteSteps > 0) {
+      const vResult = await this._autoCompleteLeadingSteps(
+        req,
+        requestId,
+        oRequest,
+        steps,
+        iAutoCompleteSteps,
+        options.autoCompleteReason || "Auto-completed on request submission"
+      );
+      if (vResult !== null) {
+        return { steps, firstTaskStep, autoCompleted: vResult };
+      }
+    }
 
     if (firstTaskStep) {
       await this._createTask(req, requestId, firstTaskStep, { skipIfExistingStep: true, request: oRequest });
@@ -5425,6 +5581,150 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       firstTaskStep
     };
   }
+    async _autoCompleteLeadingSteps(req, requestId, request, steps, iCount, sReason) {
+    const tx = cds.tx(req);
+    const aAutoSteps = steps.filter((step) => !this._isClosingStep(step)).slice(0, iCount);
+
+    if (!aAutoSteps.length) {
+      return null; // nothing configured – caller falls back to normal behaviour
+    }
+
+    // Idempotency: if any of these steps already has a task, don't redo it
+    const aExisting = await tx.run(
+      SELECT.from(this.entities.ProcessTasks)
+        .columns("stepNo")
+        .where({ request_ID: requestId, isLoaApproval: false })
+    );
+    const oExistingSteps = new Set(aExisting.map((task) => Number(task.stepNo || 0)));
+    if (aAutoSteps.some((step) => oExistingSteps.has(Number(step.stepNo || 0)))) {
+      return false;
+    }
+
+    const oldStatus = request.status_code || PROCESS_STATUS.DRAFT;
+
+    // 1. Create auto-approved tasks for the leading steps (no notifications)
+    for (const step of aAutoSteps) {
+      await this._createTask(req, requestId, step, {
+        request,
+        autoComplete: true,
+        autoCompleteRemarks: sReason
+      });
+    }
+
+    const oLastAutoStep = aAutoSteps[aAutoSteps.length - 1];
+    const oLandingStep = this._getNextStep(steps, oLastAutoStep);
+    const sStepList = aAutoSteps.map((step) => step.stepNo).join(", ");
+
+    // 2a. No further step -> request complete
+    if (!oLandingStep) {
+      await tx.run(
+        UPDATE(this.entities.ProcessRequests, requestId).set({
+          status_code: PROCESS_STATUS.COMPLETED,
+          currentStep: oLastAutoStep.stepNo,
+          completedAt: this._now()
+        })
+      );
+      await this._writeHistory(req, {
+        requestId,
+        stepNo: oLastAutoStep.stepNo,
+        action: "STEP_AUTO_COMPLETED",
+        actor: req.user?.id,
+        oldStatus,
+        newStatus: PROCESS_STATUS.COMPLETED,
+        remarks: `Step(s) ${sStepList} auto-completed. ${sReason}`
+      });
+      return true;
+    }
+
+    // 2b. Create the landing step task (sends assignment notification)
+    await this._createTask(req, requestId, oLandingStep, { request });
+
+    // 3. Move request to the landing step with its SLA
+    const oDeadline = await this._calculateSlaDeadline(
+      req, request.subProcessType_code, oLandingStep.slaDays
+    );
+    await tx.run(
+      UPDATE(this.entities.ProcessRequests, requestId).set({
+        status_code: PROCESS_STATUS.IN_PROGRESS,
+        currentStep: oLandingStep.stepNo,
+        ...oDeadline,
+        completedAt: null
+      })
+    );
+
+    // 4. Audit
+    await this._writeHistory(req, {
+      requestId,
+      stepNo: oLastAutoStep.stepNo,
+      action: "STEP_AUTO_COMPLETED",
+      actor: req.user?.id,
+      oldStatus,
+      newStatus: PROCESS_STATUS.IN_PROGRESS,
+      remarks: `Step(s) ${sStepList} auto-completed; moved to step ${oLandingStep.stepNo}. ${sReason}`
+    });
+
+    return true;
+  }
+    async _closeLeadingStepsOnLoaRejection(req, requestId, request, remarks) {
+    const tx = cds.tx(req);
+    const steps = await this._getSteps(req, request.subProcessType_code);
+    const [oFirstStep, oSecondStep] = steps.filter((step) => !this._isClosingStep(step));
+
+    if (!oFirstStep) {
+      return false;
+    }
+
+    // Idempotency: don't recreate if guided tasks already exist
+    const aExisting = await tx.run(
+      SELECT.from(this.entities.ProcessTasks)
+        .columns("ID")
+        .where({ request_ID: requestId, isLoaApproval: false })
+    );
+    if (aExisting.length) {
+      return false;
+    }
+
+    // Step 1: requester submission – approved
+    await this._createTask(req, requestId, oFirstStep, {
+      request,
+      autoComplete: true,
+      autoDecision: "APPROVED",
+      autoCompleteRemarks: "Auto-completed: request raised by requester"
+    });
+
+    // Step 2: rejected because LoA was rejected
+    if (oSecondStep) {
+      await this._createTask(req, requestId, oSecondStep, {
+        request,
+        autoComplete: true,
+        autoDecision: "REJECTED",
+        autoCompleteRemarks: `Rejected via LoA approval${remarks ? `: ${remarks}` : ""}`
+      });
+    }
+
+    const oLastStep = oSecondStep || oFirstStep;
+
+    // Status is already REJECTED; only record where the flow stopped
+    await tx.run(
+      UPDATE(this.entities.ProcessRequests, requestId).set({
+        currentStep: oLastStep.stepNo
+      })
+    );
+
+    await this._writeHistory(req, {
+      requestId,
+      stepNo: oLastStep.stepNo,
+      action: "STEP_AUTO_REJECTED",
+      actor: req.user?.id,
+      oldStatus: PROCESS_STATUS.REJECTED,
+      newStatus: PROCESS_STATUS.REJECTED,
+      remarks: oSecondStep
+        ? `Step ${oFirstStep.stepNo} auto-completed; step ${oSecondStep.stepNo} rejected after LoA rejection`
+        : `Step ${oFirstStep.stepNo} auto-completed after LoA rejection`
+    });
+
+    return true;
+  }
 
   async _createTask(req, requestId, step, options = {}) {
     const request = options.request || await this._getRequest(req, requestId);
@@ -5446,6 +5746,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     const sTaskId = cds.utils.uuid();
     const sReferenceNumber = await this._nextReferenceNumber(req, this.entities.ProcessTasks, "TSK");
+    //  const sTaskStatus = options.autoComplete ? TASK_STATUS.APPROVED : TASK_STATUS.OPEN;
+      const sAutoDecision = options.autoDecision === "REJECTED" ? "REJECTED" : "APPROVED";
+    const sTaskStatus = options.autoComplete
+      ? (sAutoDecision === "REJECTED" ? TASK_STATUS.REJECTED : TASK_STATUS.APPROVED)
+      : TASK_STATUS.OPEN;
+
 
     await cds.tx(req).run(
       INSERT.into(this.entities.ProcessTasks).entries({
@@ -5465,9 +5771,29 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         role: step.role,
         isMandatory: true,
         isTeamTask: Boolean(oTaskOwnership.processorTeam_ID),
-        status_code: TASK_STATUS.OPEN
+        // status_code: TASK_STATUS.OPEN
+         status_code: sTaskStatus,                                   
+        // NEW: completion metadata, only for auto-completed tasks
+        // ...(options.autoComplete ? {
+        //   decision: "APPROVED",
+        //   remarks: "Auto-completed: request raised by requester",
+        //   completedAt: this._now()
+        // } : {})
+      //     ...(options.autoComplete ? {
+      //   decision: "APPROVED",
+      //   remarks: options.autoCompleteRemarks || "Auto-completed: request raised by requester",
+      //   completedAt: this._now()
+      // } : {})
+       ...(options.autoComplete ? {
+          decision: sAutoDecision,
+          remarks: options.autoCompleteRemarks || "Auto-completed: request raised by requester",
+          completedAt: this._now()
+        } : {})
       })
     );
+    if (options.autoComplete) {
+      return;
+    }
 
     if (oTaskOwnership.processorTeam_ID) {
       await this._syncTaskTeamMembersFromTeam(req, sTaskId, oTaskOwnership.processorTeam_ID);
@@ -5504,6 +5830,17 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const sProcessorName = request?.processor || null;
     const sProcessorEmail = request?.processorEmail || null;
 
+    if (this._isVendorNotificationStep(step) && request?.requesterUser_ID) {
+      return {
+        assignedUser_ID: request.requesterUser_ID,
+        processorUser_ID: request.requesterUser_ID,
+        processorTeam_ID: null,
+        processorTeamName: null,
+        assignedTo: sRequesterName || step?.role || null,
+        processor: sRequesterName,
+        processorEmail: null
+      };
+    }
     if (step?.processorTeam_ID) {
       return {
         assignedUser_ID: null,

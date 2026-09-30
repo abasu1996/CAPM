@@ -10,8 +10,9 @@ sap.ui.define([
     "sap/ui/core/Item",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
     "sap/ui/model/json/JSONModel"
-], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, JSONModel) => {
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, Sorter, JSONModel) => {
     "use strict";
 
     return BaseController.extend("flowmate.controller.MyTasks", {
@@ -352,6 +353,11 @@ sap.ui.define([
                 return;
             }
 
+            if (this._isTruthy(oContext.getProperty("isMandatory"))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
+                return;
+            }
+
             const bConfirmed = await this._confirmDelete("deleteTaskConfirmMessage");
 
             if (!bConfirmed) {
@@ -379,10 +385,16 @@ sap.ui.define([
 
         async onDeleteSelectedTasks() {
             const oTable = this.byId("tasksTable");
-            const aTaskIds = oTable.getSelectedContexts().map((oContext) => oContext.getProperty("ID"));
+            const aSelectedContexts = oTable.getSelectedContexts();
+            const aTaskIds = aSelectedContexts.map((oContext) => oContext.getProperty("ID"));
 
             if (!aTaskIds.length) {
                 MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+
+            if (aSelectedContexts.some((oContext) => this._isTruthy(oContext.getProperty("isMandatory")))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
                 return;
             }
 
@@ -485,6 +497,7 @@ sap.ui.define([
                         new Filter("status_code", FilterOperator.EQ, "OPEN")
                     ]
                     : [new Filter("isLoaApproval", FilterOperator.EQ, false)],
+                sorter: new Sorter("referenceNumber", true),
                 parameters: {
                     expand: "request"
                 },
@@ -515,6 +528,14 @@ sap.ui.define([
                     and: false
                 })
             ]);
+        },
+
+        _isTruthy(vValue) {
+            if (typeof vValue === "string") {
+                return vValue.toLowerCase() === "true" || vValue === "1";
+            }
+
+            return Boolean(vValue);
         },
 
         _confirmDelete(sMessageKey, aArguments) {

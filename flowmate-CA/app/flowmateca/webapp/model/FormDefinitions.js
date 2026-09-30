@@ -9,13 +9,6 @@ sap.ui.define([], function () {
     placeholder: ""
   }, extra || {});
 
-  const transactionType = field("transactionType", "Transaction Type", "select", {
-    required: true,
-    options: [
-      { key: "NEW", text: "New" },
-      { key: "MODIFICATION", text: "Modification" }
-    ]
-  });
   const plant = field("plant_code", "Plant", "combo", {
     required: true,
     entity: "Plant", key: "plantCode", text: "plantName"
@@ -32,7 +25,6 @@ sap.ui.define([], function () {
   });
 
   const materialBase = [
-    transactionType,
     field("industrySector", "Industry Sector", "select", {
       required: true,
       options: [{ key: "TELECOMMUNICATION", text: "Telecommunication" }]
@@ -77,14 +69,149 @@ sap.ui.define([], function () {
     field("serialNumberProfile", "Serial Number Profile", "combo", { entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription" })
   ];
 
+  const matCore = [
+    field("industrySector", "Industry Sector", "select", {
+      required: true,
+      options: [{ key: "TELECOMMUNICATION", text: "Telecommunication" }]
+    }),
+    field("materialType", "Material Type", "combo", { required: true, entity: "MaterialTypes" }),
+    plant,
+    field("description", "Material Description", "input", {
+      required: true,
+      maxLength: 40,
+      placeholder: "Maximum 40 characters"
+    }),
+    uom,
+    field("materialGroup_code", "Material Group", "combo", {
+      required: true,
+      entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription"
+    }),
+    field("externalMaterialGroup_code", "External Material Group", "combo", {
+      entity: "ExternalMaterialGroups"
+    }),
+    field("profitCenter_code", "Profit Center", "combo", {
+      required: true,
+      entity: "ProfitCenter", key: "profitCenterCode", text: "profitCenterDescription"
+    }),
+    field("mrpType", "MRP Type", "combo", {
+      required: true,
+      entity: "MRPType", key: "mrpTypeCode", text: "mrpTypeDescription"
+    }),
+    field("grProcessingTime", "GR Processing Time", "input"),
+    field("availabilityCheck", "Availability Check", "combo", {
+      required: true,
+      entity: "AvailabilityCheck", key: "availabilityCheckCode", text: "availabilityCheckDescription"
+    }),
+    field("serialNumberProfile", "Serial Number Profile", "combo", {
+      entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription"
+    }),
+    field("hsCode", "HS Code", "input", { required: true }),
+    field("valuationClass_code", "Valuation Class", "combo", {
+      required: true,
+      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
+    }),
+    field("perUnitPrice", "Per Unit Price", "number"),
+    field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
+      required: true
+    })
+  ];
+
+  const matTrading = [
+    field("storageLocation", "Storage Location", "combo", {
+      required: true,
+      entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName"
+    }),
+    field("salesOrganization", "Sales Org", "combo", {
+      required: true,
+      entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName"
+    }),
+    field("distributionChannel", "Distribution Channel", "combo", {
+      required: true,
+      entity: "DistributionChannel", key: "distributionChannelCode", text: "distributionChannelDescription"
+    }),
+    field("division", "Division", "combo", {
+      required: true,
+      entity: "Divisions", key: "divisionCode", text: "divisionName"
+    }),
+    field("deliveringPlant_code", "Delivering Plant", "combo", {
+      required: true,
+      entity: "Plant", key: "plantCode", text: "plantName"
+    }),
+    field("taxClass", "Tax Class", "input", { required: true }),
+    field("accountAssignmentGroup", "Account Assignment Group", "input", { required: true }),
+    field("productHierarchy", "Product Hierarchy", "input", { required: true }),
+    field("inspectionStock", "Post to Inspection Stock", "checkbox"),
+    field("sourceList", "Source List", "checkbox")
+  ];
+
+  const dmsToggle = field("dmsUpdate", "DMS Update Required", "checkbox");
+
+  const whenDms = { field: "dmsUpdate", equals: true };
+  const dmsBlock = [
+    field("dmsSapMaterialCode", "SAP Material Code", "input", { required: true, visibleWhen: whenDms }),
+    field("itemName", "Item Name", "input", { required: true, visibleWhen: whenDms }),
+    field("itemCategory", "Item Category", "input", { required: true, visibleWhen: whenDms }),
+    field("unitsPerItem", "Units per Item", "number", { required: true, visibleWhen: whenDms }),
+    field("unitPrice", "Unit Price", "number", { required: true, visibleWhen: whenDms }),
+    field("taxPercentage", "Tax Percentage", "number", { required: true, visibleWhen: whenDms }),
+    field("isSaleable", "Is Saleable", "checkbox", { visibleWhen: whenDms }),
+    field("isSerialized", "Is Serialized", "checkbox", { visibleWhen: whenDms }),
+    field("requiredAgents", "Required Agents", "input", { required: true, visibleWhen: whenDms }),
+    Object.assign({}, vendor, { label: "Vendor ERP", required: true, visibleWhen: whenDms }),
+    field("defaultWarrantyPeriod", "Default Warranty Period", "number", { required: true, visibleWhen: whenDms }),
+    field("warrantyType", "Warranty Type", "input", { required: true, visibleWhen: whenDms }),
+    field("valueType", "Value Type", "input", { required: true, visibleWhen: whenDms }),
+    field("sbu", "SBU", "input", { required: true, visibleWhen: whenDms }),
+    field("configurationId", "Config ID", "input", {
+      required: true,
+      visibleWhen: whenDms,
+      placeholder: "1 = serials from 2500, 2 = from 1000, 3 = random or sequential, 4 = alphanumeric"
+    })
+  ];
+
+  const referenceMaterial = field("referenceMaterialCode", "Reference Material Code", "input", {
+    required: true,
+    placeholder: "Existing SAP material code"
+  });
+
+  const materialCategoryFields = {
+    ENG_IT: matCore,
+    ADMIN_CONS: matCore,
+    TRADING: matCore.concat(matTrading, [dmsToggle], dmsBlock)
+  };
+
+  const materialDefinitions = {};
+  Object.keys(materialCategoryFields).forEach(function (categoryCode) {
+    const base = materialCategoryFields[categoryCode];
+    materialDefinitions[categoryCode + ":MAT_NEW"] = base;
+    materialDefinitions[categoryCode + ":MAT_EXISTING"] = [referenceMaterial].concat(base);
+    materialDefinitions[categoryCode + ":MAT_NEW_REF"] = [referenceMaterial].concat(base);
+  });
+
+  const serviceNewBase = [
+    field("serviceCategory", "Service Category", "combo", { required: true, entity: "ServiceCategories", text: "description" }),
+    field("serviceDescription", "Service Description", "input", {
+      required: true,
+      maxLength: 40,
+      placeholder: "Maximum 40 characters"
+    }),
+    uom,
+    field("serviceGroup_code", "Service Group", "combo", {
+      required: true,
+      entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
+    }),
+    field("valuationClass_code", "Valuation Class", "combo", {
+      required: true,
+      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
+    }),
+    field("supportingAttachment", "Supporting Attachment", "file"),
+    field("remarks", "Remarks", "textarea")
+  ];
+
   const definitions = {
     MAT_ENG_IT: materialBase,
     MAT_ADMIN_CONS: materialBase,
     MAT_ZTRD_NEW: [
-      field("transactionType", "Transaction Type", "select", {
-        required: true,
-        options: [{ key: "NEW", text: "New Trading Material" }]
-      }),
       field("referenceMaterialCode", "Reference Material Code", "input"),
       field("dmsUpdate", "DMS Update Required", "checkbox"),
       plant,
@@ -177,34 +304,22 @@ sap.ui.define([], function () {
         required: true
       })
     ],
-    SVC_NEW: [
-      transactionType,
-      field("serviceCategory", "Service Category", "combo", { required: true, entity: "ServiceCategories", text: "description" }),
-      field("serviceDescription", "Service Description", "input", {
+    SVC_NEW: serviceNewBase,
+    SVC_NEW_REF: [
+      field("referenceServiceCode", "Reference Service Code", "input", {
         required: true,
-        maxLength: 40
+        maxLength: 40,
+        placeholder: "Existing service code to copy from"
       }),
-      uom,
-      field("serviceGroup_code", "Service Group", "combo", {
-        required: true,
-        entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
-      }),
-      field("valuationClass_code", "Valuation Class", "combo", {
-        entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
-      }),
-      field("coupaCommodityCode_code", "Coupa Commodity Code", "combo", {
-        entity: "CoupaCommodityCodes"
-      }),
-      field("supportingAttachment", "Supporting Attachment", "file"),
-      field("remarks", "Remarks", "textarea")
+      ...serviceNewBase
     ],
     SVC_EXISTING: [
-      transactionType,
       field("referenceServiceCode", "Existing Service Code", "input", {
         required: true
       }),
       field("serviceDescription", "Requested Description", "input", {
-        maxLength: 40
+        maxLength: 40,
+        placeholder: "Maximum 40 characters"
       }),
       uom,
       field("serviceGroup_code", "Service Group", "combo", {
@@ -214,7 +329,6 @@ sap.ui.define([], function () {
       field("remarks", "Remarks", "textarea")
     ],
     EQP_NEW: [
-      transactionType,
       field("siteId", "Site ID", "combo", {
         required: true,
         entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
@@ -240,7 +354,6 @@ sap.ui.define([], function () {
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     EQP_EXISTING: [
-      transactionType,
       field("siteId", "Site ID", "combo", {
         required: true,
         entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
@@ -273,22 +386,27 @@ sap.ui.define([], function () {
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     PROJECT_NEW_MOD: [
-      field("selectionMode", "Selection", "select", {
-        required: true,
-        options: [
-          { key: "SINGLE", text: "Single" },
-          { key: "BULK", text: "Bulk" }
-        ]
-      }),
-      transactionType,
       field("requestedByArea", "Requested By", "select", {
+        required: true,
         options: [
           { key: "ENGINEERING", text: "Engineering" },
           { key: "NON_ENGINEERING", text: "Non-Engineering" }
         ]
       }),
       field("functionLocationRequired", "Function Location Required", "checkbox"),
+      field("functionLocation", "Function Location", "input", {
+        required: true,
+        maxLength: 80,
+        placeholder: "Enter the function location",
+        visibleWhen: { field: "functionLocationRequired", equals: true }
+      }),
       field("activityRequired", "Activity Required", "checkbox"),
+      field("activityNumber", "Activity", "input", {
+        required: true,
+        maxLength: 80,
+        placeholder: "Enter the activity",
+        visibleWhen: { field: "activityRequired", equals: true }
+      }),
       field("projectName", "Project Name", "input", { required: true }),
       vendor,
       // Spec 8: Scope applies to engineering requests only.
@@ -297,11 +415,12 @@ sap.ui.define([], function () {
         entity: "ProjectScopes",
         visibleWhen: { field: "requestedByArea", equals: "ENGINEERING" }
       }),
-      field("entityCode", "Entity", "combo", { entity: "BusinessEntities" }),
+      field("entityCode", "Entity", "combo", { required: true, entity: "BusinessEntities" }),
       field("projectType_code", "Project Type", "combo", {
+        required: true,
         entity: "ProjectTypes"
       }),
-      field("arReference", "AR Reference", "combo", { entity: "ArReferences" }),
+      field("arReference", "AR Reference", "combo", { entity: "ArReferences", key: "arReferenceCode", text: "arReferenceDescription" }),
       field("siteId", "Site ID", "combo", {
         required: true,
         entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
@@ -312,10 +431,12 @@ sap.ui.define([], function () {
         placeholder: "Filled from the selected Site ID"
       }),
       field("projectId", "Project ID", "readonly", {
+        required: true,
         placeholder: "Derived by BTP once the integration is live"
       }),
-      field("projectCategory", "Project Category", "combo", { entity: "ProjectCategories" }),
+      field("projectCategory", "Project Category", "combo", { required: true, entity: "ProjectCategories" }),
       field("projectDescription", "Project Description", "readonly", {
+        required: true,
         placeholder: "Derived by BTP once the integration is live"
       }),
       field("remarks", "Remarks", "textarea"),
@@ -330,7 +451,7 @@ sap.ui.define([], function () {
         ]
       }),
       field("projectName", "Project Name", "input", { required: true }),
-      field("functionLocation", "Function Location", "input"),
+      field("functionLocation", "Function Location", "input", { required: true, maxLength: 80 }),
       field("activityNumber", "Activity Number", "input"),
       field("scope", "Scope", "combo", { entity: "ProjectScopes" }),
       field("remarks", "Remarks", "textarea"),
@@ -544,6 +665,8 @@ sap.ui.define([], function () {
     field("sesRequired", "Create SES Successor", "checkbox"),
     field("paymentRequestRequired", "Create Payment Successor", "checkbox"),
     field("poHeaderText", "PO Header Text", "textarea"),
+    field("WorkHubID", "WorkHub  ID", "input"),
+    field("WorkHubAppID", "WorkHub Application ID", "input"),
     field("campaignLocationCode", "Campaign / Location Code", "combo", { entity: "Sites", key: "siteId", text: "siteName" }),
     field("procurementDescription", "Procurement Description", "textarea", {
       required: true
@@ -617,7 +740,6 @@ sap.ui.define([], function () {
   definitions.PO_OPEX = poFields;
 
   const sesFields = [
-    transactionType,
     field("sourceMode", "Creation Source", "select", {
       required: true,
       options: [
@@ -746,9 +868,12 @@ sap.ui.define([], function () {
     ]
   };
 
+  Object.assign(definitions, materialDefinitions);
+
   const variantsByRequestType = {
-    MATERIAL_CODE: ["MAT_ENG_IT", "MAT_ADMIN_CONS", "MAT_ZTRD_NEW", "MAT_ZTRD_EXISTING"],
-    SERVICE_CODE: ["SVC_NEW", "SVC_EXISTING"],
+    MATERIAL_CODE: Object.keys(materialDefinitions)
+      .concat(["MAT_ENG_IT", "MAT_ADMIN_CONS", "MAT_ZTRD_NEW", "MAT_ZTRD_EXISTING"]),
+    SERVICE_CODE: ["SVC_NEW", "SVC_NEW_REF", "SVC_EXISTING"],
     EQUIPMENT_CODE: ["EQP_NEW", "EQP_EXISTING"],
     PROJECT_CODE: ["PROJECT_NEW_MOD", "PROJECT_FL_ACTIVITY"],
     MATERIAL_RESERVATION: ["RES_DIRECT", "RES_WAREHOUSE"],
@@ -758,7 +883,10 @@ sap.ui.define([], function () {
   };
 
   return {
-    getFields: function (variantCode) {
+    getFields: function (variantCode, categoryCode) {
+      if (categoryCode && definitions[categoryCode + ":" + variantCode]) {
+        return definitions[categoryCode + ":" + variantCode];
+      }
       return definitions[variantCode] || [];
     },
     getFieldsByRequestType: function (requestTypeCode) {

@@ -43,12 +43,23 @@
                 showSecondaryValues="true">
                 <core:ListItem key="{catalog>code}" text="{catalog>name}" additionalText="{catalog>code}"/>
               </ComboBox>
+              <Label text="Material Category" required="true" visible="{= ${form>/requestTypeCode} === 'MATERIAL_CODE'}"/>
+              <ComboBox
+                id="materialCategory"
+                selectedKey="{form>/materialCategoryCode}"
+                items="{catalog>/materialCategories}"
+                selectionChange=".onMaterialCategoryChange"
+                visible="{= ${form>/requestTypeCode} === 'MATERIAL_CODE'}"
+                showSecondaryValues="true">
+                <core:ListItem key="{catalog>code}" text="{catalog>name}" additionalText="{catalog>code}"/>
+              </ComboBox>
               <Label text="{i18n>requestVariant}" required="true"/>
               <ComboBox
                 id="requestVariant"
                 selectedKey="{form>/requestVariantCode}"
                 items="{catalog>/filteredVariants}"
                 selectionChange=".onRequestVariantChange"
+                enabled="{= ${form>/requestTypeCode} !== 'MATERIAL_CODE' || !!${form>/materialCategoryCode}}"
                 showSecondaryValues="true">
                 <core:ListItem key="{catalog>code}" text="{catalog>name}" additionalText="{catalog>code}"/>
               </ComboBox>
@@ -132,7 +143,7 @@
         <Panel
           headerText="{i18n>bulkRequestsTitle}"
           expandable="false"
-          visible="{= ${form>/requestMode} === 'BULK' &amp;&amp; !!${form>/requestVariantCode} }"
+          visible="{= ${form>/requestMode} === 'BULK' &amp;&amp; (!!${form>/requestVariantCode} || !!${form>/materialCategoryCode}) }"
           class="caFormSection">
           <content>
             <Toolbar>

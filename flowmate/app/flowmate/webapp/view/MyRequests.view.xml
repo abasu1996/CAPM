@@ -356,7 +356,7 @@
                                             text="{i18n>createBudgetCheckButton}"
                                             icon="sap-icon://checklist"
                                             visible="{viewDemandTasks>/showBudgetCheck}"
-                                            press=".onTriggerBudgetCheckTask" />
+                                            press=".onOpenBudgetCheckDialog" />
                                     </Menu>
                                 </menu>
                             </MenuButton>
@@ -632,6 +632,17 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
+                                <VBox width="100%">
+
+                                    <Title
+                                        text="{= ${subProcessType_code} === 'FTK_FACTORING_PO_VALIDATION_HW'
+                                            ? ${i18n>ftkFactoringPoValidationHwTitle}
+                                            : ${subProcessType_code} === 'FTK_FACTORING_PO_VALID_HW_SW'
+                                            ? ${i18n>ftkFactoringPoValidHwSwTitle}
+                                            : ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC'
+                                            ? ${i18n>ftkFactoringBasedOnUacTitle}
+                                            : ${i18n>ftkFactoringDetailsTitle} }"
+                                        level="H3" />
                                     <form:SimpleForm
                                         class="flowmateDetailBlock flowmateFactoringDetailForm"
                                         editable="false"
@@ -654,6 +665,7 @@
                                         <Label text="{i18n>remarksLabel}" />
                                         <Text text="{remarks}" wrapping="true" />
                                     </form:SimpleForm>
+                                </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
@@ -1378,7 +1390,11 @@
                 </uxap:ObjectPageSection>
 
                 <uxap:ObjectPageSection
-                    title="{i18n>nonPoIdeaMartDetailsTitle}"
+                     title="{= ${subProcessType_code} === 'NON_PO_IDEAMART'
+                    ? ${i18n>nonPoIdeaMartDetailsTitle}
+                    : ${subProcessType_code} === 'NON_PO_APPMAKER'
+                    ? ${i18n>nonPoAppMakerDetailsTitle}
+                    : ${i18n>nonPoIdeaMartDetailsTitle} }"
                     visible="{= ['NON_PO_IDEAMART','NON_PO_APPMAKER'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
@@ -1477,7 +1493,11 @@
                 </uxap:ObjectPageSection>
 
                 <uxap:ObjectPageSection
-                    title="{i18n>nonPoSiteSharingDetailsTitle}"
+                    title="{= ${subProcessType_code} === 'NON_PO_SITE_SHARING_SETOFF'
+                    ? ${i18n>nonPoSiteSharingSetoffDetailsTitle}
+                    : ${subProcessType_code} === 'NON_PO_SITE_SHARING_SETOFF&amp;PAY'
+                    ? ${i18n>nonPoSiteSharingSetoffPayDetailsTitle}
+                    : ${i18n>nonPoSiteSharingSetoffDetailsTitle} }"
                     visible="{= ['NON_PO_SITE_SHARING_SETOFF','NON_PO_SITE_SHARING_SETOFF&amp;PAY'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
@@ -1689,7 +1709,11 @@
                 </uxap:ObjectPageSection>
 
                 <uxap:ObjectPageSection
-                    title="{i18n>nonPoTaxLiabilityDetailsTitle}"
+                    title="{= ${subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_OTTP'
+                    ? ${i18n>nonPoTaxLiabilityOttpDetailsTitle}
+                    : ${subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER'
+                    ? ${i18n>nonPoTaxLiabilityPayOrderDetailsTitle}
+                    : ${i18n>nonPoTaxLiabilityOttpDetailsTitle} }"
                     visible="{= ['NON_PO_TAX_LIAB_PAY_OTTP','NON_PO_TAX_LIAB_PAY_PAYORDER'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
@@ -1774,7 +1798,11 @@
                 </uxap:ObjectPageSection>
 
                 <uxap:ObjectPageSection
-                    title="{i18n>nonPoInterconnectRoamPayDetailsTitle}"
+                    title="{= ${subProcessType_code} === 'NON_PO_INTERCONNECTION_PAY'
+                    ? ${i18n>nonPoInterconnectPayDetailsTitle}
+                    : ${subProcessType_code} === 'NON_PO_ROAMING_PAY'
+                    ? ${i18n>nonPoRoamingPayDetailsTitle}
+                    : ${i18n>nonPoInterconnectPayDetailsTitle} }"
                    visible="{= ${subProcessType_code} === 'NON_PO_INTERCONNECTION_PAY' || ${subProcessType_code} === 'NON_PO_ROAMING_PAY' }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
@@ -2292,6 +2320,7 @@
                                                                 icon="sap-icon://delete"
                                                                 type="Transparent"
                                                                 enabled="{requestEdit>/editable}"
+                                                                visible="{= !${isMandatory} }"
                                                                 tooltip="{i18n>deleteTaskButton}"
                                                                 press=".onDeleteRequestTask" />
                                                         </HBox>
@@ -2767,7 +2796,7 @@
                     </uxap:ObjectPageSection>
                    <uxap:ObjectPageSection
                         title="Treasury Confirmation"
-                        visible="{= ${role} === 'Treasury' }">
+                        visible="{= ${taskName} === 'Treasury Confirmation' }">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
@@ -2809,7 +2838,7 @@
                     </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection
                         title="WHT Clearance"
-                        visible="{= ${role} === 'WHT' }">
+                        visible="{= ${taskName} === 'WHT Clearance' }">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
@@ -3106,11 +3135,19 @@
                         <Label
                             text="{i18n>stepLabel}"
                             required="true" />
-                        <Input
+                        <!-- <Input
                             value="{newTask>/stepNo}"
                             type="Number"
                             placeholder="{i18n>stepPlaceholder}"
-                            required="true" />
+                            required="true" />     -->
+                        <Select
+                            width="100%"
+                            forceSelection="false"
+                            required="true"
+                            selectedKey="{newTask>/stepNo}"
+                            items="{newTask>/steps}">
+                            <core:Item key="{newTask>stepNo}" text="{newTask>text}" />
+                        </Select>
                         <Label text="{i18n>processorLabel}" />
                         <Input
                             value="{newTask>/processorName}"
@@ -3409,7 +3446,53 @@
                         />
                         <Label text="{i18n>userDivisionRepresentativeNameLabel}" required="true" />
                         <Input value="{treasuryConfirmation>/treasuryUserDivisionRep}" maxLength="50" />
+                        <Label text="{i18n>processorLabel}" />
+                        <Input
+                            value="{treasuryConfirmation>/processorName}"
+                            placeholder="{i18n>selectProcessorPlaceholder}"
+                            showValueHelp="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onUserSuggest"
+                            suggestionItemSelected=".onDemandProcessorSuggestionSelected"
+                            liveChange=".onDemandProcessorLiveChange"
+                            valueHelpRequest=".onDemandProcessorValueHelpRequest"
+                            suggestionItems="{/Users}">
+                            <customData>
+                                <core:CustomData key="target" value="treasury" />
+                            </customData>
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
+
+                        <Label text="{i18n>processorTeamLabel}" />
+                        <Input
+                            value="{treasuryConfirmation>/processorTeamName}"
+                            placeholder="{i18n>selectTeamPlaceholder}"
+                            showValueHelp="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onTeamSuggest"
+                            suggestionItemSelected=".onDemandTeamSuggestionSelected"
+                            liveChange=".onDemandTeamLiveChange"
+                            valueHelpRequest=".onDemandTeamValueHelpRequest"
+                            suggestionItems="{/Teams}">
+                            <customData>
+                                <core:CustomData key="target" value="treasury" />
+                            </customData>
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                            </suggestionItems>
+                        </Input>
+                        <Label text="{i18n>mandatoryLabel}" />
+                        <CheckBox
+                            selected="{treasuryConfirmation>/isMandatory}"
+                            text="{i18n>mandatoryTaskCheckboxText}" />
                     </form:SimpleForm>
+
                 </VBox>
             </content>
             <beginButton>
@@ -3460,6 +3543,51 @@
                             required="true" />
                         <Label text="{i18n>userDivisionRepresentativeNameLabel}" required="true" />
                         <Input value="{whtClearance>/whtUserDivisionRep}" maxLength="50" />
+                        <Label text="{i18n>processorLabel}" />
+                        <Input
+                            value="{whtClearance>/processorName}"
+                            placeholder="{i18n>selectProcessorPlaceholder}"
+                            showValueHelp="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onUserSuggest"
+                            suggestionItemSelected=".onDemandProcessorSuggestionSelected"
+                            liveChange=".onDemandProcessorLiveChange"
+                            valueHelpRequest=".onDemandProcessorValueHelpRequest"
+                            suggestionItems="{/Users}">
+                            <customData>
+                                <core:CustomData key="target" value="wht" />
+                            </customData>
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
+
+                        <Label text="{i18n>processorTeamLabel}" />
+                        <Input
+                            value="{whtClearance>/processorTeamName}"
+                            placeholder="{i18n>selectTeamPlaceholder}"
+                            showValueHelp="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onTeamSuggest"
+                            suggestionItemSelected=".onDemandTeamSuggestionSelected"
+                            liveChange=".onDemandTeamLiveChange"
+                            valueHelpRequest=".onDemandTeamValueHelpRequest"
+                            suggestionItems="{/Teams}">
+                            <customData>
+                                <core:CustomData key="target" value="wht" />
+                            </customData>
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                            </suggestionItems>
+                        </Input>
+                        <Label text="{i18n>mandatoryLabel}" />
+                        <CheckBox
+                            selected="{whtClearance>/isMandatory}"
+                            text="{i18n>mandatoryTaskCheckboxText}" />
                     </form:SimpleForm>
                 </VBox>
             </content>
@@ -3468,6 +3596,76 @@
             </beginButton>
             <endButton>
                 <Button text="{i18n>cancelButton}" press=".onWhtClearanceCancel" />
+            </endButton>
+        </Dialog>
+
+         <Dialog
+            id="budgetCheckDialog"
+            contentWidth="34rem"
+            draggable="true"
+            resizable="true"
+            title="{i18n>budgetCheckDialogTitle}">
+            <content>
+                <VBox class="flowmateDialogContent">
+                    <Text class="sapUiSmallMarginBottom" text="{i18n>budgetCheckDialogDescription}" />
+                    <form:SimpleForm
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="12"
+                        adjustLabelSpan="false"
+                        columnsXL="1" columnsL="1" columnsM="1">
+                        <Label text="{i18n>processorLabel}" />
+                        <Input
+                            value="{budgetCheck>/processorName}"
+                            placeholder="{i18n>selectProcessorPlaceholder}"
+                            showValueHelp="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onUserSuggest"
+                            suggestionItemSelected=".onDemandProcessorSuggestionSelected"
+                            liveChange=".onDemandProcessorLiveChange"
+                            valueHelpRequest=".onDemandProcessorValueHelpRequest"
+                            suggestionItems="{/Users}">
+                            <customData>
+                                <core:CustomData key="target" value="budget" />
+                            </customData>
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
+                        <Label text="{i18n>processorTeamLabel}" />
+                        <Input
+                            value="{budgetCheck>/processorTeamName}"
+                            placeholder="{i18n>selectTeamPlaceholder}"
+                            showValueHelp="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onTeamSuggest"
+                            suggestionItemSelected=".onDemandTeamSuggestionSelected"
+                            liveChange=".onDemandTeamLiveChange"
+                            valueHelpRequest=".onDemandTeamValueHelpRequest"
+                            suggestionItems="{/Teams}">
+                            <customData>
+                                <core:CustomData key="target" value="budget" />
+                            </customData>
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{name}" additionalText="{teamCode}" />
+                            </suggestionItems>
+                        </Input>
+                        <Label text="{i18n>mandatoryLabel}" />
+                        <CheckBox
+                            selected="{budgetCheck>/isMandatory}"
+                            text="{i18n>mandatoryTaskCheckboxText}" />
+                    </form:SimpleForm>
+                </VBox>
+            </content>
+            <beginButton>
+                <Button text="{i18n>createButton}" type="Emphasized" press=".onBudgetCheckConfirm" />
+            </beginButton>
+            <endButton>
+                <Button text="{i18n>cancelButton}" press=".onBudgetCheckCancel" />
             </endButton>
         </Dialog>
         <TableSelectDialog

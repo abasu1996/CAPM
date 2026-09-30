@@ -45,6 +45,7 @@ sap.ui.define([
         availabilityChecks: [],
         serialNumberProfiles: [],
         distributionChannels: [],
+        arReferences: [],
         storageLocations: [],
         salesOrgs: [],
         incoterms: [],
@@ -144,6 +145,8 @@ sap.ui.define([
         model.setProperty("/serialNumberProfiles", serialNumberProfiles.value || []);
         const distributionChannels = await this.requestMaster("DistributionChannel?$orderby=distributionChannelCode");
         model.setProperty("/distributionChannels", distributionChannels.value || []);
+        const arReferences = await this.requestMaster("ArReferences?$orderby=arReferenceCode");
+        model.setProperty("/arReferences", arReferences.value || []);
         const contractTypes = await this.requestCA("ContractType?$orderby=contractTypeCode");
         model.setProperty("/contractTypes",contractTypes.value || []);
         model.setProperty("/teamTree", this._teamTree(teams.value || [], teamMembers.value || []));
@@ -362,6 +365,12 @@ onAddDistributionChannel: function () {
         "Add Distribution Channel"
     );
 },
+onAddArReference: function () {
+    this._openAddDialog(
+        "arReference",
+        "Add AR Reference"
+    );
+},
 onAddStorageLocation: function () {
     this._openAddDialog("storageLocation", "Add Storage Location"
 );
@@ -427,6 +436,7 @@ onAddCostCenter: function () {
         isAvailabilityCheck: type === "availabilityCheck",
         isSerialNumberProfile: type === "serialNumberProfile",
         isDistributionChannel: type === "distributionChannel",
+        isArReference: type === "arReference",
         isStorageLocation: type === "storageLocation",
         isSalesOrg: type === "salesOrg",
         isIncoterm: type === "incoterm",
@@ -479,6 +489,8 @@ onAddCostCenter: function () {
         serialNumberProfileDescription: "",
         distributionChannelCode: "",
         distributionChannelDescription: "",
+        arReferenceCode: "",
+        arReferenceDescription: "",
         contractTypeCode: "",
         contractTypeDescription: "",
 
@@ -1154,6 +1166,29 @@ else if (item.type === "mrpType") {
             body: {
                 distributionChannelCode: code,
                 distributionChannelDescription: description,
+                isActive: true
+            }
+        }
+    );
+}else if (item.type === "arReference") {
+
+    const code = item.arReferenceCode?.trim();
+    const description =
+        item.arReferenceDescription?.trim();
+
+    if (!code || !description) {
+        throw new Error(
+            "AR Reference Code and AR Reference Description are required."
+        );
+    }
+
+    await this.requestMaster(
+        "ArReferences",
+        {
+            method: "POST",
+            body: {
+                arReferenceCode: code,
+                arReferenceDescription: description,
                 isActive: true
             }
         }
@@ -3087,6 +3122,80 @@ onDeleteDistributionChannel: async function (oEvent) {
 
                     MessageBox.success(
                         "Distribution Channel deleted successfully."
+                    );
+
+                    await this.onRefresh();
+
+                } catch (error) {
+                    this.showError(error);
+                }
+
+            }.bind(this)
+        }
+    );
+},
+onSaveArReference: async function (oEvent) {
+
+    const context = oEvent
+        .getSource()
+        .getBindingContext("admin");
+
+    const item = context.getObject();
+
+    try {
+
+        await this.requestMaster(
+            `ArReferences(${item.ID})`,
+            {
+                method: "PATCH",
+                body: {
+                    arReferenceDescription:
+                        item.arReferenceDescription,
+                    isActive: item.isActive
+                }
+            }
+        );
+
+        sap.m.MessageToast.show(
+            "AR Reference updated successfully."
+        );
+
+        await this.onRefresh();
+
+    } catch (error) {
+        this.showError(error);
+    }
+},
+onDeleteArReference: async function (oEvent) {
+
+    const context = oEvent
+        .getSource()
+        .getBindingContext("admin");
+
+    const item = context.getObject();
+
+    MessageBox.confirm(
+        `Are you sure you want to delete AR Reference "${item.arReferenceCode}"?`,
+        {
+            title: "Delete AR Reference",
+
+            onClose: async function (action) {
+
+                if (action !== MessageBox.Action.OK) {
+                    return;
+                }
+
+                try {
+
+                    await this.requestMaster(
+                        `ArReferences(${item.ID})`,
+                        {
+                            method: "DELETE"
+                        }
+                    );
+
+                    MessageBox.success(
+                        "AR Reference deleted successfully."
                     );
 
                     await this.onRefresh();

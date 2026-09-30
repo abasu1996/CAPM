@@ -1088,7 +1088,7 @@
                             class="sapUiTinyMarginBegin"
                             icon="sap-icon://decline"
                             tooltip="{i18n>clearButton}"
-                            enabled="{= !!${stepEdit>/processorTeam_ID} }"
+                            enabled="{= !!${stepEdit>/processorTeam_ID} &amp;&amp; !${stepEdit>/isVendorNotification} }"
                             press=".onClearStepProcessorTeam" />
                     </HBox>
                     <Label text="{i18n>roleLabel}" />
@@ -1099,6 +1099,11 @@
                     <CheckBox
                         selected="{stepEdit>/isActiveDemandTask}"
                         text="{i18n>activeDemandTaskCheckboxText}" />
+                    <Label text="{i18n>vendorNotificationLabel}" />
+                    <CheckBox
+                        selected="{stepEdit>/isVendorNotification}"
+                        text="{i18n>vendorNotificationCheckboxText}"
+                        select=".onStepVendorNotificationSelect" />     
                 </form:SimpleForm>
             </content>
             <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveProcessStep" /></beginButton>

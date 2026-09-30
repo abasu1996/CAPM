@@ -172,13 +172,16 @@
                             </ComboBox>
                             <Label text="{i18n>departmentLabel}" />
                             <Input value="{create>/department}" maxLength="100" />
-                            <Label text="{i18n>amountLabel}" visible="{create>/isPaymentRequest}" required="{create>/isPaymentRequest}" />
+                            <Label text="{i18n>amountLabel}"
+                                visible="{= ${create>/isPaymentRequest} &amp;&amp; !${create>/loaAmountDerived} }"
+                                required="{= ${create>/isPaymentRequest} &amp;&amp; !${create>/loaAmountDerived} }" />
                             <Input
                                 value="{create>/amount}"
                                 type="Number"
-                                visible="{create>/isPaymentRequest}"
-                                required="{create>/isPaymentRequest}"
+                                visible="{= ${create>/isPaymentRequest} &amp;&amp; !${create>/loaAmountDerived} }"
+                                required="{= ${create>/isPaymentRequest} &amp;&amp; !${create>/loaAmountDerived} }"
                                 change=".onAmountChange" />
+
                             <Label text="{i18n>approverRoleLabel}" visible="{create>/isPaymentRequest}" />
                             <Input value="{create>/role}" visible="{create>/isPaymentRequest}" editable="false" />
                             <Label text="{i18n>descriptionLabel}" />
@@ -195,7 +198,14 @@
                     <headerToolbar>
                         <OverflowToolbar>
                             <core:Icon src="sap-icon://business-objects-experience" />
-                            <Title text="{i18n>ftkFactoringDetailsTitle}" level="H3" />
+                            <!-- <Title text="{i18n>ftkFactoringDetailsTitle}" level="H3" /> -->
+                             <Title
+                            text="{= ${create>/subProcessType_code} === 'FTK_FACTORING_PO_VALIDATION_HW' ? ${i18n>ftkFactoringPoValidationHwTitle}
+                                : ${create>/subProcessType_code} === 'FTK_FACTORING_PO_VALID_HW_SW' ? ${i18n>ftkFactoringPoValidHwSwTitle}
+                                : ${create>/subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' ? ${i18n>ftkFactoringBasedOnUacTitle}
+                                : ${i18n>ftkFactoringDetailsTitle} }"
+                            level="H3" />
+
                             <ToolbarSpacer />
                             <ObjectStatus
                                 text="{i18n>ftkFactoringSubtypeText}"
@@ -1590,6 +1600,7 @@
                 value="{create>/totalValue}"
                 type="Number"
                 required="{create>/isOfnAuthority}"
+                change=".onLoaSourceFieldChange"
             />
             <Label
                 text="{i18n>ofnReferenceLabel}"
@@ -1869,6 +1880,7 @@
                             value="{create>/highestValueInFile}"
                             type="Number"
                             required="{create>/isNonPoFuel}"
+                            change=".onLoaSourceFieldChange"
                         />
 
                         <Label text="{i18n>remarksLabel}" />
@@ -1892,13 +1904,20 @@
                         <core:Icon
                             src="sap-icon://business-objects-experience"
                         />
-                        <Title
-                            text="{i18n>nonPoIdeaMartDetailsTitle}"
-                            level="H3"
-                        />
+                            <Title
+                        text="{= ${create>/subProcessType_code} === 'NON_PO_IDEAMART'
+                        ? ${i18n>nonPoIdeaMartDetailsTitle}
+                        : ${create>/subProcessType_code} === 'NON_PO_APPMAKER'
+                        ? ${i18n>nonPoAppMakerDetailsTitle}
+                        : ${i18n>nonPoIdeaMartDetailsTitle} }"
+                        level="H3" />
                         <ToolbarSpacer />
                         <ObjectStatus
-                            text="{i18n>nonPoIdeaMartSubtypeText}"
+                            text="{= ${create>/subProcessType_code} === 'NON_PO_IDEAMART'
+                            ? ${i18n>nonPoIdeaMartSubtypeText}
+                            : ${create>/subProcessType_code} === 'NON_PO_APPMAKER'
+                            ? ${i18n>nonPoAppMakerSubtypeText}
+                            : ${i18n>nonPoIdeaMartSubtypeText} }"
                             state="Information"
                             inverted="true"
                         />
@@ -2022,6 +2041,7 @@
                             value="{create>/brcHighestTransactionValue}"
                             type="Number"
                             required="{= ${create>/subProcessType_code} === 'NON_PO_IDEAMART' }"
+                            change=".onLoaSourceFieldChange"
                         />
 
                         <Label
@@ -2032,6 +2052,7 @@
                             value="{create>/whtNicHighestTransactionValue}"
                             required="{create>/isNonPoIdeaMartAppMaker}"
                             type="Number"
+                            change=".onLoaSourceFieldChange"
                         />
 
                         <Label
@@ -2042,6 +2063,7 @@
                             value="{create>/lessThan100kNicBlankHighestTransactionValue}"
                             required="{create>/isNonPoIdeaMartAppMaker}"
                             type="Number"
+                            change=".onLoaSourceFieldChange"
                         />
 
                         <Label
@@ -2062,6 +2084,7 @@
                             value="{create>/retentionRepaymentValue}"
                             required="{create>/isNonPoIdeaMartAppMaker}"
                             type="Number"
+                            change=".onLoaSourceFieldChange"
                         />
 
                         <Label
@@ -2166,6 +2189,7 @@
                             value="{create>/highestRefundValueOfFile}"
                             type="Number"
                             required="{create>/isNonPoCustomerRefunds}"
+                            change=".onLoaSourceFieldChange"
                         />
 
                         <Label text="{i18n>remarksLabel}" />
@@ -2306,6 +2330,7 @@
                         value="{create>/totalInvoiceValue}"
                         type="Number"
                         required="{create>/isNonPoStelacomConsignment}"
+                        change=".onLoaSourceFieldChange"
                     />
 
                     <Label
@@ -2507,6 +2532,7 @@
                 value="{create>/totalInvoiceValue}"
                 type="Number"
                 required="{create>/isNonPoSiteShareLiability}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label
@@ -2537,22 +2563,33 @@
     visible="{create>/isNonPoSiteSharing}"
 >
     <headerToolbar>
-        <OverflowToolbar>
-            <core:Icon
-                src="sap-icon://business-objects-experience"
-            />
-            <Title
-                text="{i18n>nonPoSiteSharingDetailsTitle}"
-                level="H3"
-            />
-            <ToolbarSpacer />
-            <ObjectStatus
-                text="{create>/subProcessTypeName}"
-                state="Information"
-                inverted="true"
-            />
-        </OverflowToolbar>
-    </headerToolbar>
+    <OverflowToolbar>
+        <core:Icon
+            src="sap-icon://business-objects-experience"
+        />
+
+        <Title
+            text="{= ${create>/subProcessType_code} === 'NON_PO_SITE_SHARING_SETOFF'
+                ? ${i18n>nonPoSiteSharingSetoffDetailsTitle}
+                : ${create>/subProcessType_code} === 'NON_PO_SITE_SHARING_SETOFF&amp;PAY'
+                ? ${i18n>nonPoSiteSharingSetoffPayDetailsTitle}
+                : ${i18n>nonPoSiteSharingSetoffDetailsTitle} }"
+            level="H3"
+        />
+
+        <ToolbarSpacer />
+
+        <ObjectStatus
+            text="{= ${create>/subProcessType_code} === 'NON_PO_SITE_SHARING_SETOFF'
+                ? ${i18n>nonPoSiteSharingSetoffSubtypeText}
+                : ${create>/subProcessType_code} === 'NON_PO_SITE_SHARING_SETOFF&amp;PAY'
+                ? ${i18n>nonPoSiteSharingSetoffPaySubtypeText}
+                : ${i18n>nonPoSiteSharingSetoffSubtypeText} }"
+            state="Information"
+            inverted="true"
+        />
+    </OverflowToolbar>
+</headerToolbar>
     <content>
         <form:SimpleForm
             class="flowmateCreateForm"
@@ -2893,6 +2930,7 @@
                 value="{create>/highestMonthlyRentalValueInFile}"
                 type="Number"
                 required="{create>/isNonPoSiteRentMonthlyFile}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label
@@ -3064,6 +3102,7 @@
                 value="{create>/totalPayableValue}"
                 type="Number"
                 required="{create>/isNonPoSiteRentStampAdhoc}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label
@@ -3280,6 +3319,7 @@
                 value="{create>/totalValue}"
                 type="Number"
                 required="{create>/isDirectNonPoReimbursement}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label
@@ -3458,6 +3498,7 @@
                 value="{create>/totalAmountLKR}"
                 type="Number"
                 required="{create>/isDirectForeignTravelReimb}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>balanceToBeReturnedLabel}"
@@ -3676,12 +3717,20 @@
         <OverflowToolbar>
             <core:Icon src="sap-icon://business-objects-experience" />
             <Title
-                text="{i18n>nonPoTaxLiabilityDetailsTitle}"
+                text="{= ${subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_OTTP'
+                    ? ${i18n>nonPoTaxLiabilityOttpDetailsTitle}
+                    : ${subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER'
+                    ? ${i18n>nonPoTaxLiabilityPayOrderDetailsTitle}
+                    : ${i18n>nonPoTaxLiabilityOttpDetailsTitle} }"
                 level="H3"
             />
             <ToolbarSpacer />
             <ObjectStatus
-                text="{create>/subProcessTypeName}"
+                text="{= ${subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_OTTP'
+                    ? ${i18n>nonPoTaxLiabilityOttpSubtypeText}
+                    : ${subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER'
+                    ? ${i18n>nonPoTaxLiabilityPayOrderSubtypeText}
+                    : ${i18n>nonPoTaxLiabilityOttpSubtypeText} }"
                 state="Information"
                 inverted="true"
             />
@@ -3812,6 +3861,7 @@
                 value="{create>/totalTaxPayable}"
                 type="Number"
                 required="{create>/isNonPoTaxLiability}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label
@@ -4049,6 +4099,7 @@
                 value="{create>/totalInvoiceValueLKR}"
                 type="Number"
                 required="{create>/isNonPoInterconnectLiab}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>vatAmountLabel}" />
@@ -4076,10 +4127,20 @@
     <headerToolbar>
         <OverflowToolbar>
             <core:Icon src="sap-icon://business-objects-experience" />
-            <Title text="{i18n>nonPoInterconnectRoamPayDetailsTitle}" level="H3" />
+            <Title
+            text="{= ${subProcessType_code} === 'NON_PO_INTERCONNECTION_PAY'
+                ? ${i18n>nonPoInterconnectPayDetailsTitle}
+                : ${subProcessType_code} === 'NON_PO_ROAMING_PAY'
+                ? ${i18n>nonPoRoamingPayDetailsTitle}
+                : ${i18n>nonPoInterconnectPayDetailsTitle} }"
+            level="H3" />
             <ToolbarSpacer />
             <ObjectStatus
-                text="{i18n>nonPoInterconnectRoamPaySubtypeText}"
+                text="{= ${subProcessType_code} === 'NON_PO_INTERCONNECTION_PAY'
+                ? ${i18n>nonPoInterconnectPaySubtypeText}
+                : ${subProcessType_code} === 'NON_PO_ROAMING_PAY'
+                ? ${i18n>nonPoRoamingPaySubtypeText}
+                : ${i18n>nonPoInterconnectPaySubtypeText} }"
                 state="Information"
                 inverted="true"
             />
@@ -4274,6 +4335,7 @@
                 value="{create>/totalInvoiceValueLKR}"
                 type="Number"
                 required="{create>/isNonPoRoamingLiability}"
+                change=".onLoaSourceFieldChange"
             />
         </form:SimpleForm>
     </content>
@@ -4345,6 +4407,7 @@
                 value="{create>/highestPayableValueInList}"
                 type="Number"
                 required="{create>/isNonPoStarPointPayments}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>ivDocumentPostingDateLabel}" required="{create>/isNonPoStarPointPayments}" />
@@ -4490,6 +4553,7 @@
                 value="{create>/trcslProformaInvoiceTotalValue}"
                 type="Number"
                 required="{create>/isNonPoImportTrc}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>remarksLabel}" />
@@ -4613,6 +4677,7 @@
                 value="{create>/totalPivValue}"
                 type="Number"
                 required="{create>/isNonPoImportIcl}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>remarksLabel}" />
@@ -4747,6 +4812,7 @@
                 value="{create>/totalDeclarationValueInCusdec}"
                 type="Number"
                 required="{create>/isNonPoImportDgc}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>remarksLabel}" />
@@ -4896,6 +4962,7 @@
                 value="{create>/transactionAmountLocalCurrency}"
                 type="Number"
                 required="{create>/isNonPoCcPayment}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>descriptionOfPaymentLabel}" required="{create>/isNonPoCcPayment}" />
@@ -5222,6 +5289,7 @@
                 value="{create>/highestValueInExcel}"
                 type="Number"
                 required="{create>/isNonPoMerchantSettlements}"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>aggregateTotalValueAcrossAllFilesLabel}" required="{create>/isNonPoMerchantSettlements}" />
@@ -5558,7 +5626,7 @@
                 value="{create>/amountPayable}"
                 type="Number"
                 required="{create>/isBankGuarantee}"
-                change=".onAmountChange"
+                change=".onLoaSourceFieldChange"
             />
 
             <Label text="{i18n>guaranteeTypeLabel}" required="{create>/isBankGuarantee}" />

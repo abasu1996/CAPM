@@ -230,4 +230,12 @@ service CommonMasterDataService {
     distributionChannelDescription : String(180) not null;
     isActive : Boolean default true;
   }
+
+  @cds.persistence.skip
+  entity ArReferences {
+    key ID : UUID;
+    arReferenceCode : String(80) not null;
+    arReferenceDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
 }

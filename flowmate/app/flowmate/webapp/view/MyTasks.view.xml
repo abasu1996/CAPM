@@ -154,7 +154,7 @@
                                                 icon="sap-icon://delete"
                                                 type="Transparent"
                                                 tooltip="{i18n>deleteTaskButton}"
-                                                visible="{= !${taskView>/teamMode} }"
+                                                visible="{= !${taskView>/teamMode} &amp;&amp; !${isMandatory} }"
                                                 press=".onDeleteTask" />
                                         </HBox>
                                     </cells>
@@ -343,7 +343,7 @@
                     </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection
                         title="Treasury Confirmation"
-                        visible="{= ${role} === 'Treasury' }">
+                        visible="{= ${taskName} === 'Treasury Confirmation' }">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
@@ -393,7 +393,7 @@
                     </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection
                         title="WHT Clearance"
-                        visible="{= ${role} === 'WHT' }">
+                        visible="{= ${taskName} === 'WHT Clearance' }">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>

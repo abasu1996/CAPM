@@ -213,3 +213,9 @@ entity DistributionChannel : cuid, managed {
   distributionChannelDescription : String(180) not null;
   isActive : Boolean default true;
 }
+
+entity ArReferences : cuid, managed {
+  arReferenceCode : String(80) not null;
+  arReferenceDescription : String(180) not null;
+  isActive : Boolean default true;
+}

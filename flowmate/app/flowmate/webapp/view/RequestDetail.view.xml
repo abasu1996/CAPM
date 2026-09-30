@@ -282,6 +282,7 @@
                                                     icon="sap-icon://delete"
                                                     type="Transparent"
                                                     tooltip="{i18n>deleteTaskButton}"
+                                                    visible="{= !${isMandatory} }"
                                                     press=".onDeleteTask" />
                                             </HBox>
                                         </cells>

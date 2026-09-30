@@ -657,6 +657,8 @@ sap.ui.define([
 
             this.getView().getModel("stepEdit").setData({
                 ...oEntry,
+                isActiveDemandTask: Boolean(oEntry.isActiveDemandTask),
+                isVendorNotification: Boolean(oEntry.isVendorNotification),
                 isEdit: true,
                 dialogTitle: this.getText("editProcessStepButton")
             });
@@ -674,17 +676,18 @@ sap.ui.define([
                 MessageBox.warning(this.getText("processStepRequiredMessage"));
                 return;
             }
-
+            const bRequesterNotification = Boolean(oEntry.isVendorNotification);
             const oPayload = {
                 subProcessType_code: oEntry.subProcessType_code,
                 stepNo: Number(oEntry.stepNo),
                 stepName: oEntry.stepName,
                 activityDescription: oEntry.activityDescription,
-                processorTeam_ID: oEntry.processorTeam_ID || null,
-                processorTeamName: oEntry.processorTeamName || null,
+                processorTeam_ID: bRequesterNotification ? null : (oEntry.processorTeam_ID || null),
+                processorTeamName: bRequesterNotification ? null : (oEntry.processorTeamName || null),
                 role: oEntry.role,
                 slaDays: this._optionalNumber(oEntry.slaDays),
-                isActiveDemandTask: Boolean(oEntry.isActiveDemandTask)
+                isActiveDemandTask: Boolean(oEntry.isActiveDemandTask),
+                isVendorNotification: bRequesterNotification
             };
 
             this.showBusy();
@@ -799,7 +802,16 @@ sap.ui.define([
             oModel.setProperty("/processorTeam_ID", "");
             oModel.setProperty("/processorTeamName", "");
         },
+         onStepVendorNotificationSelect(oEvent) {
+            if (!oEvent.getParameter("selected")) {
+                return;
+            }
 
+            const oModel = this.getView().getModel("stepEdit");
+
+            oModel.setProperty("/processorTeam_ID", "");
+            oModel.setProperty("/processorTeamName", "");
+        },
         onAddSubType() {
             const oEntry = this._emptySubType();
 
@@ -891,7 +903,9 @@ sap.ui.define([
                 processorTeam_ID: "",
                 processorTeamName: "",
                 role: "",
-                slaDays: ""
+                slaDays: "",
+                isActiveDemandTask: false,
+                isVendorNotification: false
             };
         },
 

@@ -28,7 +28,8 @@ const SHARED_ENTITIES = [
   "MRPType",
   "AvailabilityCheck",
   "SerialNumberProfile",
-  "DistributionChannel"
+  "DistributionChannel",
+  "ArReferences"
 ];
 
 module.exports = class CAMasterDataService extends cds.ApplicationService {

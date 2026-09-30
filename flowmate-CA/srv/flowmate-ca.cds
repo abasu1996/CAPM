@@ -81,8 +81,9 @@ service FlowmateCAService {
   entity ProjectScopes as projection on db.ProjectScopes;
   entity MaterialTypes as projection on db.MaterialTypes;
   entity ServiceCategories as projection on db.ServiceCategories;
-  entity ArReferences as projection on db.ArReferences;
+  entity ArReferences as projection on common.ArReferences;
   entity ProjectCategories as projection on db.ProjectCategories;
+  entity MaterialCategories as projection on db.MaterialCategories;
 
   @cds.redirection.target
   entity Requests as projection on db.CARequests;
@@ -231,4 +232,5 @@ service CAMasterDataService {
    entity AvailabilityCheck as projection on common.AvailabilityCheck;
    entity SerialNumberProfile as projection on common.SerialNumberProfile;
    entity DistributionChannel as projection on common.DistributionChannel;
+   entity ArReferences as projection on common.ArReferences;
 }

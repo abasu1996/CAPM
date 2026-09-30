@@ -16,7 +16,7 @@
           class="sapUiSmallMarginBottom"/>
 
 
-        <IconTabBar id="adminTabBar" expandable="false" headerMode="Inline" showOverflowSelectList="true" class="caAdminTabs" width="100%">
+        <IconTabBar id="adminTabBar" expandable="false" headerMode="Inline" showOverflowSelectList="true" class="caAdminTabs">
 
           <items>
             <IconTabFilter key="steps" text="Process Steps" icon="sap-icon://process">
@@ -2479,6 +2479,76 @@
     </Table>
 
 </IconTabFilter>
+<IconTabFilter key="arReferences" text="AR References" icon="sap-icon://document-text">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="AR Reference Master" level="H3"/>
+        <ToolbarSpacer/>
+
+        <Button
+            text="Add AR Reference"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddArReference"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/arReferences}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="AR Reference Code"/>
+            </Column>
+
+            <Column>
+                <Text text="AR Reference Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>arReferenceCode}"/>
+
+                    <Input value="{admin>arReferenceDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveArReference"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteArReference"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
 <IconTabFilter key="storageLocations" text="Storage Locations" icon="sap-icon://inventory">
 
     <Toolbar class="caSectionToolbar">
@@ -3255,6 +3325,27 @@
     <Input
         value="{newItem>/distributionChannelDescription}"
         placeholder="Enter Distribution Channel Description"/>
+
+</VBox>
+<VBox visible="{newItem>/isArReference}">
+
+    <Label
+        text="AR Reference Code"
+        required="true"/>
+
+    <Input
+        value="{newItem>/arReferenceCode}"
+        maxLength="80"
+        placeholder="Enter AR Reference Code"/>
+
+    <Label
+        text="AR Reference Description"
+        required="true"
+        class="sapUiSmallMarginTop"/>
+
+    <Input
+        value="{newItem>/arReferenceDescription}"
+        placeholder="Enter AR Reference Description"/>
 
 </VBox>
 <VBox visible="{newItem>/isStorageLocation}">

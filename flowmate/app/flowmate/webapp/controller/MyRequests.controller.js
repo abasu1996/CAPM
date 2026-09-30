@@ -16,6 +16,11 @@ sap.ui.define([
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
     const MAX_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
+    const DEMAND_TASK_MODELS = {
+    treasury: "treasuryConfirmation",
+    wht: "whtClearance",
+    budget: "budgetCheck"
+};
 
     return BaseController.extend("flowmate.controller.MyRequests", {
         onInit() {
@@ -90,6 +95,7 @@ sap.ui.define([
                 showWhtClearance: false,
                  showBudgetCheck: false
             }), "viewDemandTasks");
+            this.getView().setModel(new JSONModel(this._createEmptyDemandAssignee()), "budgetCheck");
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -1128,13 +1134,39 @@ sap.ui.define([
             }
         },
 
-        onOpenAddTaskDialog() {
+        async onOpenAddTaskDialog() {
             if (!this._sSelectedRequestId) {
                 MessageToast.show(this.getText("selectRequestMessage"));
                 return;
             }
 
-            this.getView().getModel("newTask").setData(this._createEmptyTask());
+            const oTaskModel = this.getView().getModel("newTask");
+            oTaskModel.setData(this._createEmptyTask());
+
+            const oContext = this.byId("requestObjectPage")?.getBindingContext();
+            const sSubProcessTypeCode = oContext?.getProperty("subProcessType_code");
+            const iCurrentStepNo = Number(oContext?.getProperty("currentStep") || 0);
+
+            if (sSubProcessTypeCode) {
+                try {
+                    const aSteps = await this._readList("/ProcessStepConfig", {
+                        filters: [new Filter("subProcessType_code", FilterOperator.EQ, sSubProcessTypeCode)]
+                    });
+                    const aStepItems = aSteps
+                        .sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0))
+                        .filter((oStep) => Number(oStep.stepNo || 0) <= iCurrentStepNo)
+                        .map((oStep) => ({
+                            stepNo: String(oStep.stepNo),
+                            text: this.getText("sendBackStepOptionText", [oStep.stepNo, oStep.stepName || ""])
+                        }));
+
+                    oTaskModel.setProperty("/steps", aStepItems);
+                    oTaskModel.setProperty("/stepNo", aStepItems[0]?.stepNo || "");
+                } catch (oError) {
+                    MessageToast.show(this.getText("sendBackStepsLoadErrorMessage"));
+                }
+            }
+
             this.byId("addTaskDialog").open();
         },
 
@@ -1177,6 +1209,30 @@ sap.ui.define([
                 this.hideBusy();
             }
         },
+        _createEmptyDemandAssignee() {
+            return {
+                processorUser_ID: "",
+                processor: "",
+                processorEmail: "",
+                processorTeam_ID: "",
+                isMandatory: false
+            };
+        },
+
+        _demandTaskAssignment(oData) {
+            return {
+                isMandatory: Boolean(oData.isMandatory),
+                processorUser_ID: oData.processorUser_ID || undefined,
+                processorTeam_ID: oData.processorTeam_ID || undefined,
+                processor: oData.processor || undefined,
+                processorEmail: oData.processorEmail || undefined
+            };
+        },
+
+        _demandAssigneeText(oData) {
+            return oData.processorTeamName || oData.processorName || "";
+        },
+
 
     async _getCurrentUserActor() {
         
@@ -1235,7 +1291,8 @@ sap.ui.define([
                 treasuryCurrency_code: "",
                 treasuryAmount: null,
                 treasuryDueDate: null,
-                treasuryUserDivisionRep: ""
+                treasuryUserDivisionRep: "",
+                ...this._createEmptyDemandAssignee()
             };
         },
 
@@ -1255,7 +1312,8 @@ sap.ui.define([
                 treasuryCurrency_code: oRequest.treasuryCurrency_code || "",
                 treasuryAmount: oRequest.treasuryAmount ?? null,
                 treasuryDueDate: oRequest.treasuryDueDate ?? null,
-                treasuryUserDivisionRep: oRequest.treasuryUserDivisionRep || ""
+                treasuryUserDivisionRep: oRequest.treasuryUserDivisionRep || "",
+                ...this._createEmptyDemandAssignee()
             });
             this.byId("treasuryConfirmationDialog").open();
         },
@@ -1273,6 +1331,10 @@ sap.ui.define([
 
             if (aMissing.length) {
                 MessageBox.warning(this.getText("treasuryConfirmationRequiredMessage"));
+                return;
+            }
+            if (!oData.processorUser_ID && !oData.processorTeam_ID) {
+                MessageBox.warning(this.getText("selectProcessorOrTeamMessage"));
                 return;
             }
 
@@ -1301,7 +1363,7 @@ sap.ui.define([
                     filters: [
                         new Filter("request_ID", FilterOperator.EQ, this._sSelectedRequestId),
                         new Filter("stepNo", FilterOperator.EQ, iStepNo),
-                        new Filter("role", FilterOperator.EQ, "Treasury")
+                        new Filter("taskName", FilterOperator.EQ, "Treasury Confirmation")
                     ]
                 });
                 if (aExistingTasks.some((oTask) => this._isOpenLikeTask(oTask))) {
@@ -1309,17 +1371,17 @@ sap.ui.define([
                     return;
                 }
 
-                const aTeams = await this._readList("/Teams", {
-                    filters: [
-                        new Filter("teamCode", FilterOperator.EQ, "TREASURY"),
-                        new Filter("isActive", FilterOperator.EQ, true)
-                    ]
-                });
-                const oTreasuryTeam = aTeams[0];
-                if (!oTreasuryTeam) {
-                    MessageBox.error(this.getText("noTreasuryTeamMessage"));
-                    return;
-                }
+                // const aTeams = await this._readList("/Teams", {
+                //     filters: [
+                //         new Filter("teamCode", FilterOperator.EQ, "TREASURY"),
+                //         new Filter("isActive", FilterOperator.EQ, true)
+                //     ]
+                // });
+                // const oTreasuryTeam = aTeams[0];
+                // if (!oTreasuryTeam) {
+                //     MessageBox.error(this.getText("noTreasuryTeamMessage"));
+                //     return;
+                // }
 
                 await this.updateEntry(`/ProcessRequests(${this._sSelectedRequestId})`, {
                     treasuryEntity_code: oData.treasuryEntity_code,
@@ -1339,9 +1401,8 @@ sap.ui.define([
                     request_ID: this._sSelectedRequestId,
                     stepNo: iStepNo,
                     taskName: "Treasury Confirmation",
-                    role: "Treasury",
-                    isMandatory: true,
-                    processorTeam_ID: oTreasuryTeam.ID,
+                    // processorTeam_ID: oTreasuryTeam.ID,
+                    ...this._demandTaskAssignment(oData),
                     status_code: "OPEN"
                 });
 
@@ -1354,7 +1415,7 @@ sap.ui.define([
                     actor: sActor,
                     oldStatus: oRequest.status_code,
                     newStatus: oRequest.status_code,
-                    remarks: `Treasury confirmation submitted; Treasury task created at step ${iStepNo}`
+                    remarks: `Treasury confirmation submitted; Treasury task created at step ${iStepNo} and assigned to ${this._demandAssigneeText(oData)}`
                 });
 
                 this.byId("treasuryConfirmationDialog").close();
@@ -1386,7 +1447,8 @@ sap.ui.define([
                 whtCurrency_code: "",
                 whtAmount: null,
                 whtDueDate: null,
-                whtUserDivisionRep: ""
+                whtUserDivisionRep: "",
+                ...this._createEmptyDemandAssignee()
             };
         },
 
@@ -1405,7 +1467,8 @@ sap.ui.define([
                 whtCurrency_code: oRequest.whtCurrency_code || "",
                 whtAmount: oRequest.whtAmount ?? null,
                 whtDueDate: oRequest.whtDueDate ?? null,
-                whtUserDivisionRep: oRequest.whtUserDivisionRep || ""
+                whtUserDivisionRep: oRequest.whtUserDivisionRep || "",
+                ...this._createEmptyDemandAssignee()
             });
             this.byId("whtClearanceDialog").open();
         },
@@ -1423,6 +1486,10 @@ sap.ui.define([
 
             if (aMissing.length) {
                 MessageBox.warning(this.getText("whtClearanceRequiredMessage"));
+                return;
+            }
+             if (!oData.processorUser_ID && !oData.processorTeam_ID) {
+                MessageBox.warning(this.getText("selectProcessorOrTeamMessage"));
                 return;
             }
 
@@ -1452,24 +1519,24 @@ sap.ui.define([
                     filters: [
                         new Filter("request_ID", FilterOperator.EQ, this._sSelectedRequestId),
                         new Filter("stepNo", FilterOperator.EQ, iStepNo),
-                        new Filter("role", FilterOperator.EQ, "WHT")
+                        new Filter("taskName", FilterOperator.EQ, "WHT Clearance")
                     ]
                 });
                 if (aExistingTasks.some((oTask) => this._isOpenLikeTask(oTask))) {
                     MessageBox.error(this.getText("whtTaskAlreadyExistsMessage"));
                     return;
                 }
-                const aTeams = await this._readList("/Teams", {
-                    filters: [
-                        new Filter("teamCode", FilterOperator.EQ, "TAX"),
-                        new Filter("isActive", FilterOperator.EQ, true)
-                    ]
-                });
-                const oTaxTeam = aTeams[0];
-                if (!oTaxTeam) {
-                    MessageBox.error(this.getText("noTaxTeamMessage"));
-                    return;
-                }
+                // const aTeams = await this._readList("/Teams", {
+                //     filters: [
+                //         new Filter("teamCode", FilterOperator.EQ, "TAX"),
+                //         new Filter("isActive", FilterOperator.EQ, true)
+                //     ]
+                // });
+                // const oTaxTeam = aTeams[0];
+                // if (!oTaxTeam) {
+                //     MessageBox.error(this.getText("noTaxTeamMessage"));
+                //     return;
+                // }
 
                 await this.updateEntry(`/ProcessRequests(${this._sSelectedRequestId})`, {
                     whtEntity_code: oData.whtEntity_code,
@@ -1484,9 +1551,8 @@ sap.ui.define([
                     request_ID: this._sSelectedRequestId,
                     stepNo: iStepNo,
                     taskName: "WHT Clearance",
-                    role: "WHT",
-                    isMandatory: true,
-                    processorTeam_ID: oTaxTeam.ID,
+                    // processorTeam_ID: oTaxTeam.ID,
+                    ...this._demandTaskAssignment(oData),
                     status_code: "OPEN"
                 });
                 const sActor = await this._getCurrentUserActor();
@@ -1497,7 +1563,7 @@ sap.ui.define([
                     actor: sActor,
                     oldStatus: oRequest.status_code,
                     newStatus: oRequest.status_code,
-                    remarks: `WHT clearance requested; Tax task created at step ${iStepNo}`
+                    remarks: `WHT clearance requested; Tax task created at step ${iStepNo} and assigned to ${this._demandAssigneeText(oData)}`
                 });
 
                 this.byId("whtClearanceDialog").close();
@@ -1512,122 +1578,116 @@ sap.ui.define([
                 this.hideBusy();
             }
         },
-        async onTriggerBudgetCheckTask() {
-            if (!this._sSelectedRequestId) {
-                MessageToast.show(this.getText("selectRequestMessage"));
-                return;
-            }
+        onOpenBudgetCheckDialog() {
+    if (!this._sSelectedRequestId) {
+        MessageToast.show(this.getText("selectRequestMessage"));
+        return;
+    }
 
-            this.showBusy();
+    this.getView().getModel("budgetCheck").setData(this._createEmptyDemandAssignee());
+    this.byId("budgetCheckDialog").open();
+},
 
-            try {
-                const oRequest = this.byId("requestObjectPage")
-                    .getBindingContext()
-                    ?.getObject() || {};
+onBudgetCheckCancel() {
+    this.byId("budgetCheckDialog").close();
+},
 
-                const iStepNo = Number(oRequest.currentStep);
+async onBudgetCheckConfirm() {
+    const oData = this.getView().getModel("budgetCheck").getData();
 
-                if (!oRequest.reservedBy) {
-                    MessageBox.warning(this.getText("reserveRequestFirstMessage"));
-                    return;
-                }
+    if (!oData.processorUser_ID && !oData.processorTeam_ID) {
+        MessageBox.warning(this.getText("selectProcessorOrTeamMessage"));
+        return;
+    }
 
-                if (!Number.isInteger(iStepNo) || iStepNo <= 0) {
-                    MessageBox.warning(this.getText("noActiveStepMessage"));
-                    return;
-                }
+    this.showBusy();
 
-                const aExistingTasks = await this._readList("/ProcessTasks", {
-                    filters: [
-                        new Filter(
-                            "request_ID",
-                            FilterOperator.EQ,
-                            this._sSelectedRequestId
-                        ),
-                        new Filter(
-                            "stepNo",
-                            FilterOperator.EQ,
-                            iStepNo
-                        ),
-                        new Filter(
-                            "role",
-                            FilterOperator.EQ,
-                            "Budget"
-                        )
-                    ]
-                });
+    try {
+        const oRequest = this.byId("requestObjectPage").getBindingContext()?.getObject() || {};
+        const iStepNo = Number(oRequest.currentStep);
 
-                if (aExistingTasks.some((oTask) => this._isOpenLikeTask(oTask))) {
-                    MessageBox.error(
-                        this.getText("budgetTaskAlreadyExistsMessage")
-                    );
-                    return;
-                }
+        if (!oRequest.reservedBy) {
+            MessageBox.warning(this.getText("reserveRequestFirstMessage"));
+            return;
+        }
 
-                const aTeams = await this._readList("/Teams", {
-                    filters: [
-                        new Filter(
-                            "teamCode",
-                            FilterOperator.EQ,
-                            "BUDGET"
-                        ),
-                        new Filter(
-                            "isActive",
-                            FilterOperator.EQ,
-                            true
-                        )
-                    ]
-                });
+        if (!Number.isInteger(iStepNo) || iStepNo <= 0) {
+            MessageBox.warning(this.getText("noActiveStepMessage"));
+            return;
+        }
 
-                const oBudgetTeam = aTeams[0];
+        const aExistingTasks = await this._readList("/ProcessTasks", {
+            filters: [
+                new Filter("request_ID", FilterOperator.EQ, this._sSelectedRequestId),
+                new Filter("stepNo", FilterOperator.EQ, iStepNo),
+                new Filter("taskName", FilterOperator.EQ, "Budget Check")
+            ]
+        });
 
-                if (!oBudgetTeam) {
-                    MessageBox.error(
-                        this.getText("noBudgetTeamMessage")
-                    );
-                    return;
-                }
+        if (aExistingTasks.some((oTask) => this._isOpenLikeTask(oTask))) {
+            MessageBox.error(this.getText("budgetTaskAlreadyExistsMessage"));
+            return;
+        }
 
-                await this.createEntry("/ProcessTasks", {
-                    request_ID: this._sSelectedRequestId,
-                    stepNo: iStepNo,
-                    taskName: "Budget Check",
-                    role: "Budget",
-                    isMandatory: true,
-                    processorTeam_ID: oBudgetTeam.ID,
-                    status_code: "OPEN"
-                });
+        await this.createEntry("/ProcessTasks", {
+            request_ID: this._sSelectedRequestId,
+            stepNo: iStepNo,
+            taskName: "Budget Check",
+            ...this._demandTaskAssignment(oData),
+            status_code: "OPEN"
+        });
 
-                const sActor = await this._getCurrentUserActor();
-                await this.createEntry("/ProcessHistory", {
-                    request_ID: this._sSelectedRequestId,
-                    stepNo: iStepNo,
-                    action: "BUDGET_CHECK_CREATED",
-                    actor: sActor,
-                    oldStatus: oRequest.status_code,
-                    newStatus: oRequest.status_code,
-                    remarks: `Budget Check task created at step ${iStepNo}`
-                });
+        const sActor = await this._getCurrentUserActor();
+        await this.createEntry("/ProcessHistory", {
+            request_ID: this._sSelectedRequestId,
+            stepNo: iStepNo,
+            action: "BUDGET_CHECK_CREATED",
+            actor: sActor,
+            oldStatus: oRequest.status_code,
+            newStatus: oRequest.status_code,
+            remarks: `Budget Check task created at step ${iStepNo} and assigned to ${this._demandAssigneeText(oData)}`
+        });
 
-                MessageToast.show(
-                    this.getText("budgetCheckCreatedMessage")
-                );
+        this.byId("budgetCheckDialog").close();
+        MessageToast.show(this.getText("budgetCheckCreatedMessage"));
+        this._refreshRequestHeader();
+        this._refreshTaskSection();
+        this._refreshHistorySection();
+        this._refreshProcessFlow();
+    } catch (oError) {
+        MessageBox.error(this.getErrorMessage(oError, this.getText("budgetCheckCreateErrorMessage")));
+    } finally {
+        this.hideBusy();
+    }
+},
+        onDemandProcessorValueHelpRequest(oEvent) {
+            this._sProcessorValueHelpTarget = oEvent.getSource().data("target");
+            this.byId("myRequestsProcessorValueHelpDialog").open();
+        },
 
-                this._refreshRequestHeader();
-                this._refreshTaskSection();
-                this._refreshHistorySection();
-                this._refreshProcessFlow();
+        onDemandTeamValueHelpRequest(oEvent) {
+            this._sTeamValueHelpTarget = oEvent.getSource().data("target");
+            this.byId("myRequestsTeamValueHelpDialog").open();
+        },
 
-            } catch (oError) {
-                MessageBox.error(
-                    this.getErrorMessage(
-                        oError,
-                        this.getText("budgetCheckCreateErrorMessage")
-                    )
-                );
-            } finally {
-                this.hideBusy();
-            }
+        onDemandProcessorSuggestionSelected(oEvent) {
+            this._applyProcessorSelection(this._getSuggestionContext(oEvent), oEvent.getSource().data("target"));
+        },
+
+        onDemandTeamSuggestionSelected(oEvent) {
+            this._applyTeamSelection(this._getSuggestionContext(oEvent), oEvent.getSource().data("target"));
+        },
+
+        onDemandProcessorLiveChange(oEvent) {
+            const oModel = this.getView().getModel(DEMAND_TASK_MODELS[oEvent.getSource().data("target")]);
+            oModel.setProperty("/processorUser_ID", "");
+            oModel.setProperty("/processor", "");
+            oModel.setProperty("/processorEmail", "");
+        },
+
+        onDemandTeamLiveChange(oEvent) {
+            this.getView().getModel(DEMAND_TASK_MODELS[oEvent.getSource().data("target")])
+                .setProperty("/processorTeam_ID", "");
         },
         onOpenAddPartyDialog() {
             if (!this._sSelectedRequestId) {
@@ -1898,6 +1958,11 @@ sap.ui.define([
                 return;
             }
 
+            if (this._isTruthy(oContext.getProperty("isMandatory"))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
+                return;
+            }
+
             const bConfirmed = await this._confirmDelete("deleteTaskConfirmMessage");
 
             if (!bConfirmed) {
@@ -1926,10 +1991,16 @@ sap.ui.define([
 
         async onDeleteSelectedRequestTasks() {
             const oTable = this.byId("requestTasksTable");
-            const aTaskIds = oTable.getSelectedContexts().map((oContext) => oContext.getProperty("ID"));
+            const aSelectedContexts = oTable.getSelectedContexts();
+            const aTaskIds = aSelectedContexts.map((oContext) => oContext.getProperty("ID"));
 
             if (!aTaskIds.length) {
                 MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+
+            if (aSelectedContexts.some((oContext) => this._isTruthy(oContext.getProperty("isMandatory")))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
                 return;
             }
 
@@ -2439,7 +2510,8 @@ sap.ui.define([
             this.byId("requestPartyObjectPage").bindElement({
                 path: `/ProcessInvolvedParties(guid'${sPartyId}')`,
                 parameters: {
-                    expand: "request,user"
+                    // expand: "request,user"
+                    expand: "request"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -2603,6 +2675,7 @@ sap.ui.define([
             return {
                 taskName: "",
                 stepNo: "",
+                steps: [],
                 processorUser_ID: "",
                 processorName: "",
                 processor: "",
@@ -2645,6 +2718,17 @@ sap.ui.define([
             const sName = oContext.getProperty("displayName");
             const sEmail = oContext.getProperty("email") || oContext.getProperty("userPrincipalName");
 
+            const sDemandModel = DEMAND_TASK_MODELS[sTarget];
+            if (sDemandModel) {
+            const oDemandModel = this.getView().getModel(sDemandModel);
+            oDemandModel.setProperty("/processorUser_ID", sId);
+            oDemandModel.setProperty("/processorName", sName);
+            oDemandModel.setProperty("/processor", sName);
+            oDemandModel.setProperty("/processorEmail", sEmail);
+            oDemandModel.setProperty("/processorTeam_ID", "");
+            oDemandModel.setProperty("/processorTeamName", "");
+            return;
+        }
             if (sTarget === "newTask") {
                 const oTaskModel = this.getView().getModel("newTask");
                 oTaskModel.setProperty("/processorUser_ID", sId);
@@ -2675,6 +2759,19 @@ sap.ui.define([
 
             const sTeamId = oContext.getProperty("ID");
             const sTeamName = oContext.getProperty("name");
+
+            const sDemandModel = DEMAND_TASK_MODELS[sTarget];
+
+            if (sDemandModel) {
+                const oDemandModel = this.getView().getModel(sDemandModel);
+                oDemandModel.setProperty("/processorTeam_ID", sTeamId);
+                oDemandModel.setProperty("/processorTeamName", sTeamName);
+                oDemandModel.setProperty("/processorUser_ID", "");
+                oDemandModel.setProperty("/processorName", "");
+                oDemandModel.setProperty("/processor", "");
+                oDemandModel.setProperty("/processorEmail", "");
+                return;
+            }
 
             if (sTarget === "newTask") {
                 const oTaskModel = this.getView().getModel("newTask");

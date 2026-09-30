@@ -260,7 +260,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }));
 
     await this._insertDetails(tx, requestType.code, requestId, details);
-    await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, user);
+    await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, user, details);
     await this._writeHistory(tx, requestId, 0, "REQUEST_CREATED", user, null, REQUEST_STATUS.SUBMITTED);
     return requestId;
   }
@@ -286,17 +286,20 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(400, "Select a valid request type");
     }
 
-    let requestVariant = null;
-    if (input.requestVariantCode) {
-      requestVariant = await SELECT.one.from(this.db.RequestVariants).where({
-        code: input.requestVariantCode,
-        requestType_code: requestType.code,
-        isActive: true
-      });
-      if (!requestVariant) {
-        return req.reject(400, "The selected request variant does not belong to this request type");
+    const variantCache = new Map();
+    const resolveVariant = async (code) => {
+      if (!code) {
+        return null;
       }
-    }
+      if (!variantCache.has(code)) {
+        variantCache.set(code, await SELECT.one.from(this.db.RequestVariants).where({
+          code,
+          requestType_code: requestType.code,
+          isActive: true
+        }));
+      }
+      return variantCache.get(code);
+    };
 
     let processorTeam = null;
     if (input.processorTeamCode) {
@@ -312,9 +315,14 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const referenceNumbers = [];
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index] || {};
-      const { title, priorityCode, dueDate, ...details } = row;
+      const { title, priorityCode, dueDate, requestVariantCode, ...details } = row;
       if (!String(title || "").trim()) {
         return req.reject(400, `Row ${index + 1}: Title is required`);
+      }
+      const variantCode = requestVariantCode || input.requestVariantCode;
+      const requestVariant = await resolveVariant(variantCode);
+      if (variantCode && !requestVariant) {
+        return req.reject(400, `Row ${index + 1}: "${variantCode}" is not a valid process variant for this request type`);
       }
       try {
         const requestId = await this._insertOneRequest(req, tx, user, {
@@ -642,11 +650,13 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     };
   };
 
-  async _initializeWorkflow(tx, requestId, requestTypeCode, requestVariantCode, user) {
+  async _initializeWorkflow(tx, requestId, requestTypeCode, requestVariantCode, user, details) {
     const configs = await SELECT.from(this.db.WorkflowStepConfigs)
       .where({ requestType_code: requestTypeCode, isActive: true })
       .orderBy("stepNo");
-    const selectedConfigs = this._selectWorkflowConfigs(configs, requestVariantCode);
+    const conditionSource = details || await this._loadDetails(tx, requestTypeCode, requestId);
+    const selectedConfigs = this._selectWorkflowConfigs(configs, requestVariantCode)
+      .filter((config) => this._isStepApplicable(config, conditionSource));
 
     if (!selectedConfigs.length) {
       throw new Error(`No active workflow is configured for ${requestTypeCode}`);
@@ -658,7 +668,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       ID: cds.utils.uuid(),
       request_ID: requestId,
       config_ID: config.ID,
-      stepNo: config.stepNo,
+      stepNo: index + 1,
       stepName: config.stepName,
       activityDescription: config.activityDescription,
       processorTeam_ID: config.processorTeam_ID,
@@ -691,6 +701,33 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: REQUEST_STATUS.SUBMITTED,
       submittedAt: new Date().toISOString()
     }).where({ ID: requestId }));
+  }
+
+  _isStepApplicable(config, details) {
+    if (!config.conditionField) {
+      return true;
+    }
+    const value = details ? details[config.conditionField] : undefined;
+    return this._normalizeFlag(value) === this._normalizeFlag(config.conditionValue);
+  }
+
+  _normalizeFlag(value) {
+    const text = String(value === undefined || value === null ? "" : value).trim().toLowerCase();
+    if (text === "1" || text === "true" || text === "yes") {
+      return "true";
+    }
+    if (text === "" || text === "0" || text === "false" || text === "no") {
+      return "false";
+    }
+    return text;
+  }
+
+  async _loadDetails(tx, requestTypeCode, requestId) {
+    const entityName = DETAIL_ENTITY_BY_REQUEST_TYPE[requestTypeCode];
+    if (!entityName) {
+      return null;
+    }
+    return tx.run(SELECT.one.from(this.db[entityName]).where({ request_ID: requestId }));
   }
 
   _selectWorkflowConfigs(configs, requestVariantCode) {

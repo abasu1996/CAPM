@@ -46,6 +46,7 @@ entity MaterialTypes : ConfigCode {};
 entity ServiceCategories : ConfigCode {};
 entity ArReferences : ConfigCode {};
 entity ProjectCategories : ConfigCode {};
+entity MaterialCategories : ConfigCode {};
 
 
 entity WorkflowStepConfigs : cuid, managed {
@@ -60,6 +61,8 @@ entity WorkflowStepConfigs : cuid, managed {
   isApproval          : Boolean default false;
   isMandatory         : Boolean default true;
   slaDays             : Integer default 2;
+  conditionField      : String(80);
+  conditionValue      : String(40);
   isActive            : Boolean default true;
 }
 

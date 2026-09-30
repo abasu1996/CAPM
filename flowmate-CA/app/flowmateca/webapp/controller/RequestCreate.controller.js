@@ -49,7 +49,7 @@ sap.ui.define([
     "Plant", "Sites", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
     "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
     "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
-    "Currencies"
+    "ArReferences", "Currencies"
   ]);
 
   // Only request-level fields that no variant defines itself. `description` and `dueDate`
@@ -60,12 +60,16 @@ sap.ui.define([
     { name: "priorityCode", label: "Priority", required: false }
   ];
 
+  const PER_ROW_VARIANT_COLUMN = { name: "requestVariantCode", label: "Process Variant", required: true };
+  const MATERIAL_VARIANTS = ["MAT_NEW", "MAT_EXISTING", "MAT_NEW_REF"];
+
   return BaseController.extend("flowmateca.controller.RequestCreate", {
     onInit: function () {
       this.getView().setModel(new JSONModel(this._emptyForm()), "form");
       this.getView().setModel(new JSONModel({
         requestTypes: [],
         variants: [],
+        materialCategories: [],
         filteredVariants: [],
         priorities: [],
         myRequests: [],
@@ -78,6 +82,7 @@ sap.ui.define([
     _emptyForm: function () {
       return {
         requestTypeCode: "",
+        materialCategoryCode: "",
         requestVariantCode: "",
         title: "",
         description: "",
@@ -148,19 +153,30 @@ sap.ui.define([
     _loadCatalog: async function () {
       this.setBusy(true);
       try {
-        const [types, variants, priorities, requests, teams] = await Promise.all([
+        const [types, variants, materialCategories, priorities, requests, teams, stepConfigs] = await Promise.all([
           this.request("RequestTypes?$filter=isActive eq true&$orderby=sortOrder"),
           this.request("RequestVariants?$filter=isActive eq true&$orderby=sortOrder"),
+          this.request("MaterialCategories?$filter=isActive eq true&$orderby=sortOrder"),
           this.request("Priorities?$filter=isActive eq true&$orderby=sortOrder"),
           this.request("MyRequests?$select=ID,referenceNumber,title&$orderby=createdAt desc&$top=100"),
-          this.request("Teams?$filter=isActive eq true&$orderby=name")
+          this.request("Teams?$filter=isActive eq true&$orderby=name"),
+          this.request("WorkflowStepConfigs?$select=processorTeam_ID&$filter=isActive eq true")
         ]);
         const catalog = this.getView().getModel("catalog");
         catalog.setProperty("/requestTypes", types.value || []);
         catalog.setProperty("/variants", variants.value || []);
+        catalog.setProperty("/materialCategories", materialCategories.value || []);
         catalog.setProperty("/priorities", priorities.value || []);
         catalog.setProperty("/myRequests", requests.value || []);
-        catalog.setProperty("/teams", teams.value || []);
+        // Only teams that a workflow step actually routes to are selectable as the processor
+        // team. flowmate-common carries the full Dialog org (110+ teams); offering all of them
+        // here is noise, since the rest never receive a task.
+        const workflowTeamIds = new Set((stepConfigs.value || [])
+          .map(function (config) { return config.processorTeam_ID; })
+          .filter(Boolean));
+        const allTeams = teams.value || [];
+        const processorTeams = allTeams.filter(function (team) { return workflowTeamIds.has(team.ID); });
+        catalog.setProperty("/teams", processorTeams.length ? processorTeams : allTeams);
       } catch (error) {
         this.showError(error);
       } finally {
@@ -202,16 +218,10 @@ sap.ui.define([
 
     onRequestTypeChange: function () {
       const typeCode = this.getView().getModel("form").getProperty("/requestTypeCode");
+      this.getView().getModel("form").setProperty("/materialCategoryCode", "");
       this.getView().getModel("form").setProperty("/requestVariantCode", "");
       this.getView().getModel("form").setProperty("/details", {});
       this._filterVariants(typeCode);
-      this._renderDynamicForm();
-      this._renderItemsTable();
-      this._renderBulkTable();
-    },
-
-    onRequestVariantChange: function () {
-      this.getView().getModel("form").setProperty("/details", {});
       this._renderDynamicForm();
       this._renderItemsTable();
       this._renderBulkTable();
@@ -224,15 +234,41 @@ sap.ui.define([
     },
 
     _bulkColumns: function () {
-      const variantCode = this.getView().getModel("form").getProperty("/requestVariantCode");
-      if (!variantCode) {
+      const formModel = this.getView().getModel("form");
+      const variantCode = formModel.getProperty("/requestVariantCode");
+      const categoryCode = formModel.getProperty("/materialCategoryCode");
+      const isMaterial = formModel.getProperty("/requestTypeCode") === "MATERIAL_CODE";
+
+      if (isMaterial && !categoryCode) {
         return [];
       }
-      return BULK_CLASSIFICATION_COLUMNS.concat(
-        FormDefinitions.getFields(variantCode).map(function (definition) {
-          return { name: definition.name, label: definition.label, required: definition.required };
-        })
-      );
+      if (!isMaterial && !variantCode) {
+        return [];
+      }
+
+      const seen = new Set();
+      const fields = [];
+      const variantCodes = isMaterial ? MATERIAL_VARIANTS : [variantCode];
+      variantCodes.forEach(function (code) {
+        FormDefinitions.getFields(code, categoryCode).forEach(function (definition) {
+          if (seen.has(definition.name)) {
+            return;
+          }
+          seen.add(definition.name);
+          fields.push({
+            name: definition.name,
+            label: definition.label,
+            required: definition.required,
+            visibleWhen: definition.visibleWhen,
+            fromVariant: true
+          });
+        });
+      });
+
+      const classification = isMaterial
+        ? BULK_CLASSIFICATION_COLUMNS.concat([PER_ROW_VARIANT_COLUMN])
+        : BULK_CLASSIFICATION_COLUMNS;
+      return classification.concat(fields);
     },
 
     _renderBulkTable: function () {
@@ -330,6 +366,31 @@ sap.ui.define([
       event.getSource().clear();
     },
 
+    _rowRequiredNames: function (row) {
+      const formModel = this.getView().getModel("form");
+      const categoryCode = formModel.getProperty("/materialCategoryCode");
+      const variantCode = row.requestVariantCode || formModel.getProperty("/requestVariantCode");
+      const names = new Set();
+      FormDefinitions.getFields(variantCode, categoryCode).forEach(function (definition) {
+        if (definition.required) {
+          names.add(definition.name);
+        }
+      });
+      return names;
+    },
+
+    _isRowFieldVisible: function (column, row) {
+      const rule = column.visibleWhen;
+      if (!rule) {
+        return true;
+      }
+      const raw = row ? row[rule.field] : undefined;
+      const value = typeof rule.equals === "boolean"
+        ? String(raw).toLowerCase() === "true"
+        : raw;
+      return value === rule.equals;
+    },
+
     _submitBulk: async function (form) {
       const rows = form.bulkRows || [];
       if (!rows.length) {
@@ -338,10 +399,17 @@ sap.ui.define([
       }
       const columns = this._bulkColumns();
       for (let index = 0; index < rows.length; index++) {
+        const requiredNames = this._rowRequiredNames(rows[index]);
         const missing = columns.find(function (col) {
+          if (col.fromVariant ? !requiredNames.has(col.name) : !col.required) {
+            return false;
+          }
+          if (col.visibleWhen && !this._isRowFieldVisible(col, rows[index])) {
+            return false;
+          }
           const value = rows[index][col.name];
-          return col.required && (value === undefined || value === null || String(value).trim() === "");
-        });
+          return value === undefined || value === null || String(value).trim() === "";
+        }.bind(this));
         if (missing) {
           MessageBox.warning(`Row ${index + 1}: ${missing.label} is required.`);
           return;
@@ -357,7 +425,11 @@ sap.ui.define([
               requestTypeCode: form.requestTypeCode,
               requestVariantCode: form.requestVariantCode,
               processorTeamCode: form.processorTeamCode,
-              rows: JSON.stringify(rows)
+              rows: JSON.stringify(form.materialCategoryCode
+                ? rows.map(function (row) {
+                    return Object.assign({ materialCategory: form.materialCategoryCode }, row);
+                  })
+                : rows)
             }
           }
         });
@@ -379,8 +451,17 @@ sap.ui.define([
     },
 
     onRequestVariantChange: async function () {
+      this.getView().getModel("form").setProperty("/details", {});
       await this._renderDynamicForm();
       this._renderItemsTable();
+      this._renderBulkTable();
+    },
+
+    onMaterialCategoryChange: async function () {
+      this.getView().getModel("form").setProperty("/requestVariantCode", "");
+      this.getView().getModel("form").setProperty("/details", {});
+      await this._renderDynamicForm();
+      this._renderBulkTable();
     },
 
     _renderDynamicForm: async function () {
@@ -391,7 +472,8 @@ sap.ui.define([
       const formModel = this.getView().getModel("form");
       const typeCode = formModel.getProperty("/requestTypeCode");
       const variantCode = formModel.getProperty("/requestVariantCode");
-      const fields = variantCode ? FormDefinitions.getFields(variantCode) : [];
+      const categoryCode = formModel.getProperty("/materialCategoryCode");
+      const fields = variantCode ? FormDefinitions.getFields(variantCode, categoryCode) : [];
       const type = (this.getView().getModel("catalog").getProperty("/requestTypes") || [])
         .find(function (entry) {
           return entry.code === typeCode;
@@ -538,7 +620,9 @@ sap.ui.define([
           displayFormat: "medium"
         }).bindValue(path);
       } else if (definition.type === "checkbox") {
-        control = new CheckBox().bindProperty("selected", path);
+        control = new CheckBox({
+          select: this._applyConditionalVisibility.bind(this)
+        }).bindProperty("selected", path);
       } else if (definition.type === "select") {
         control = new ComboBox({
           width: "100%",
@@ -807,7 +891,8 @@ sap.ui.define([
     onSubmit: async function () {
       const form = this.getView().getModel("form").getData();
       if (form.requestMode === "BULK") {
-        if (!form.requestTypeCode || !form.requestVariantCode || !form.processorTeamCode) {
+        const hasClassification = form.materialCategoryCode || form.requestVariantCode;
+        if (!form.requestTypeCode || !hasClassification || !form.processorTeamCode) {
           MessageBox.warning("Request type, process variant and processor team are required.");
           return;
         }
@@ -849,7 +934,13 @@ sap.ui.define([
               dueDate: form.dueDate || null,
               predecessorId: form.predecessorId || null,
               processorTeamCode: form.processorTeamCode,
-              details: JSON.stringify(form.details || {})
+              details: JSON.stringify(Object.assign(
+                {},
+                form.details || {},
+                form.materialCategoryCode
+                  ? { materialCategory: form.materialCategoryCode, transactionType: form.requestVariantCode }
+                  : {}
+              ))
             }
           }
         });
