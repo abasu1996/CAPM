@@ -135,7 +135,7 @@
                         <smartTable:SmartTable
                             id="requestsSmartTable"
                             class="flowmateSmartTable"
-                            entitySet="ProcessRequests"
+                            entitySet="{viewState>/requestEntitySet}"
                             tableType="ResponsiveTable"
                             useVariantManagement="false"
                             useTablePersonalisation="true"

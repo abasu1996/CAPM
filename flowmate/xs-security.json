@@ -2,10 +2,7 @@
   "scopes": [
     {
       "name": "$XSAPPNAME.Admin",
-      "description": "Administer Flowmate configuration, users, and delegate assignments",
-      "grant-as-authority-to-apps": [
-        "$XSAPPNAME(application,flowmate-api-client)"
-      ]
+      "description": "Administer Flowmate configuration, users, and delegate assignments"
     },
     {
       "name": "$XSAPPNAME.UserProvisioning",
@@ -31,6 +28,20 @@
     {
       "name": "$XSAPPNAME.CustomerProvisioning",
       "description": "Create, update, and delete Flowmate customers through the integration API",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.TeamProvisioning",
+      "description": "Create and maintain Flowmate teams and team memberships through the integration API",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
+    },
+    {
+      "name": "$XSAPPNAME.RequestProvisioning",
+      "description": "Create Flowmate requests and their attachments through the integration API",
       "grant-as-authority-to-apps": [
         "$XSAPPNAME(application,flowmate-api-client)"
       ]

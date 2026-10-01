@@ -542,6 +542,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     const {
       ProcessRequests,
+      TeamUnreservedRequests,
       ProcessTasks,
       MyAssignedTasks,
       MyPendingApprovalTasks,
@@ -632,10 +633,41 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (this._isAdministrator(req)) {
         return;
       }
+      if (this._canProvisionRequests(req)) {
+        req.query.where({ createdBy: req.user.id });
+        return;
+      }
       const oReservationUser = await this._currentReservationUser(req, Users);
       const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
       const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
       this._applyVisibleRequestsWhere(req.query, oReservationUser, aDelegatorIds, aTeamIds);
+    });
+
+    this.before("READ", TeamUnreservedRequests, async (req) => {
+      if (this._isAdministrator(req)) {
+        req.query.where({ reservedBy: null }).where({ status_code: { "!=": PROCESS_STATUS.PENDING_APPROVAL } });
+        return;
+      }
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
+      if (!aTeamIds.length) {
+        req.query.where(this._alwaysFalsePredicate());
+        return;
+      }
+      req.query
+        .where({ reservedBy: null })
+        .where({ status_code: { "!=": PROCESS_STATUS.PENDING_APPROVAL } })
+        .where({ processorTeam_ID: { in: aTeamIds } });
+    });
+
+    this.after("READ", TeamUnreservedRequests, (data) => {
+      const aRequests = Array.isArray(data) ? data : [data];
+      aRequests.filter(Boolean).forEach((request) => {
+        if (!request.processorUser_ID && !request.reservedByUser_ID) {
+          request.processor = null;
+          request.processorEmail = null;
+        }
+      });
     });
 
     this.after("READ", ProcessRequests, async (data, req) => {
@@ -655,7 +687,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         }
       });
 
-      if (this._isAdministrator(req)) {
+      if (this._isAdministrator(req) || this._canProvisionRequests(req)) {
         return;
       }
       const oReservationUser = await this._currentReservationUser(req, Users);
@@ -705,6 +737,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("READ", ProcessAttachments, async (req) => {
+      if (this._canProvisionRequests(req)) {
+        const qCreatedRequests = SELECT.from(ProcessRequests)
+          .columns("ID")
+          .where({ createdBy: req.user.id });
+        req.query.where({ request_ID: { in: qCreatedRequests } });
+        return;
+      }
       await this._filterByVisibleRequests(req, Users, "request_ID");
     });
 
@@ -866,8 +905,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
     this.before(["CREATE", "UPDATE", "DELETE"], [ServiceTeams, ServiceTeamMembers], (req) => {
-      if (!this._isAdministrator(req)) {
-        return req.reject(403, "Only an administrator can maintain teams and team members");
+      if (!this._canProvisionTeams(req)) {
+        return req.reject(403, "Team administration or team provisioning authority is required");
       }
     });
 
@@ -1387,7 +1426,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     this.before("CREATE", ProcessRequests, async (req) => {
 
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessRequests, "REQ");
-      const oReservationUser = await this._currentReservationUser(req, Users);
+      const bIntegrationRequest = this._canProvisionRequests(req);
+      if (bIntegrationRequest && !req.data.requesterUser_ID) {
+        return req.reject(400, "requesterUser_ID is required for an integration-created request");
+      }
+      const oReservationUser = bIntegrationRequest
+        ? { user: null, displayName: req.user?.id || "integration-client" }
+        : await this._currentReservationUser(req, Users);
 
       req.data.priorityConfig_code ??= "MEDIUM";
       const oPriority = await cds.tx(req).run(
@@ -1832,7 +1877,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "Selected request was not found");
       }
 
-      await this._rejectIfRequestLocked(req, req.data.request_ID);
+      await this._rejectIfAttachmentRequestLocked(req);
       req.data.referenceNumber ??= await this._nextReferenceNumber(req, ProcessAttachments, "ATT");
     });
 
@@ -4429,19 +4474,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         "or", { ref: ["assignedUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) }
       ]);
     const aVisibility = [
-      "(", { ref: ["reservedBy"] }, "is not", "null", "and", "(",
       { ref: ["requesterUser_ID"] }, "=", { val: sUserId },
-      "or", { ref: ["reservedByUser_ID"] }, "=", { val: sUserId },
+      "or", "(", { ref: ["reservedBy"] }, "is not", "null", "and", "(",
+      { ref: ["reservedByUser_ID"] }, "=", { val: sUserId },
       "or", { ref: ["processorUser_ID"] }, "=", { val: sUserId },
       "or", { ref: ["ID"] }, "in", qAssignedRequests,
       ")", ")"
     ];
-    if (teamIds.length) {
-      aVisibility.push(
-        "or", "(", { ref: ["reservedBy"] }, "is", "null",
-        "and", { ref: ["processorTeam_ID"] }, "in", { list: teamIds.map((id) => ({ val: id })) }, ")"
-      );
-    }
     query.where(aVisibility);
   }
 
@@ -4577,7 +4616,31 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ? await cds.tx(req).run(SELECT.one.from(this.entities.ProcessAttachments).where({ ID: attachmentId }))
       : null;
 
-    await this._rejectIfRequestLocked(req, attachment?.request_ID || req.data?.request_ID);
+    const requestId = attachment?.request_ID || req.data?.request_ID;
+    if (!requestId) return;
+
+    const request = await this._getRequest(req, requestId);
+    if (!request) {
+      return req.reject(404, "The request for this attachment was not found");
+    }
+    if (this._isLockedRequest(request)) {
+      return this._rejectLockedRequest(req);
+    }
+    if (this._isAdministrator(req)) return;
+
+    // An integration may only mutate attachments of requests created by the
+    // same OAuth client. This keeps RequestProvisioning narrower than Admin.
+    if (this._canProvisionRequests(req)) {
+      if (request.createdBy === req.user?.id) return;
+      return req.reject(403, "The integration client can only change attachments for requests it created");
+    }
+
+    // The requester must be able to finish the metadata + binary upload while
+    // a newly created request is still unreserved.
+    const oReservationUser = await this._currentReservationUser(req);
+    if (request.requesterUser_ID === oReservationUser.user.ID) return;
+
+    await this._rejectIfRequestReservedByAnotherUser(req, request);
   }
 
   async _getUser(req, userId, Users) {
@@ -4970,6 +5033,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _canProvisionCustomers(req) {
     return Boolean(this._isAdministrator(req) || req.user?.is("CustomerProvisioning"));
+  }
+
+  _canProvisionTeams(req) {
+    return Boolean(this._isAdministrator(req) || req.user?.is("TeamProvisioning"));
+  }
+
+  _canProvisionRequests(req) {
+    return Boolean(this._isAdministrator(req) || req.user?.is("RequestProvisioning"));
   }
 
   _canProvisionPaymentCategories(req){

@@ -76,7 +76,8 @@ sap.ui.define([
                 hasSteps: false
             }), "requestProgress");
             this.getView().setModel(new JSONModel({
-                showUnreservedOnly: false
+                showUnreservedOnly: false,
+                requestEntitySet: "ProcessRequests"
             }), "viewState");
             this.getView().setModel(new JSONModel({
                 processType_code: "",
@@ -122,6 +123,10 @@ sap.ui.define([
                 this._sCurrentReservationUserId || ""
             );
             this.getView().getModel("viewState").setProperty("/showUnreservedOnly", this._bShowUnreservedOnly);
+            this.getView().getModel("viewState").setProperty(
+                "/requestEntitySet",
+                this._bShowUnreservedOnly ? "TeamUnreservedRequests" : "ProcessRequests"
+            );
             if (this._bShowUnreservedOnly) {
                 this._loadRequestFilterQueries();
             }

@@ -185,6 +185,7 @@ service FlowmateService {
         request : redirected to ProcessRequests,
         paymentRequestRef : redirected to ProcessRequests
     };
+    @cds.redirection.target
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
         paymentCategory : redirected to PaymentCategories,
@@ -210,6 +211,26 @@ service FlowmateService {
         treasuryCurrency : redirected to Currencies,
         whtEntity : redirected to FtkEntities,
         whtCurrency : redirected to Currencies,
+    };
+    // Queue-only projection. Unlike ProcessRequests, this endpoint never exposes
+    // another team's unreserved work to an interactive user.
+    @readonly
+    entity TeamUnreservedRequests as projection on fldb.ProcessRequests {
+        *,
+        paymentCategory : redirected to PaymentCategories,
+        businessEntity  : redirected to FtkEntities,
+        priorityConfig  : redirected to Priorities,
+        currency        : redirected to Currencies,
+        category        : redirected to Categories,
+        paymentSubCategory : redirected to PaymentSubCategories,
+        paymentMethod   : redirected to PaymentMethod,
+        requestingDivision : redirected to RequestDivision,
+        typeOfPayment   : redirected to TypeOfPayment,
+        guaranteeType   : redirected to GuaranteeTypes,
+        tasks           : redirected to ProcessTasks,
+        attachments     : redirected to ProcessAttachments,
+        processType     : redirected to ProcessTypes,
+        subProcessType  : redirected to ProcessSubTypes
     };
     @cds.redirection.target
     entity ProcessTasks as projection on fldb.ProcessTasks {
