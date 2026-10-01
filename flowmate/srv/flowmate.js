@@ -2280,16 +2280,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         })
       );
 
-      await cds.tx(req).run(
-        UPDATE(ProcessTasks)
-          .set({
-            processorUser_ID: oCurrentUser?.ID || null,
-            processor: sReservedBy,
-            processorEmail: sProcessorEmail
-          })
-          .where("request_ID =", requestId, "and processorUser_ID is null")
-      );
-
       await this._writeHistory(req, {
         requestId,
         stepNo: request.currentStep || 0,
@@ -2297,7 +2287,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         actor: req.user?.id,
         oldStatus: request.status_code,
         newStatus: request.status_code,
-        remarks: `Request reserved by ${sReservedBy} and assigned to ${sReservedBy}`
+        remarks: `Request reserved by ${sReservedBy}`
       });
 
       return true;
@@ -2342,20 +2332,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         })
       );
 
-      await cds.tx(req).run(
-        UPDATE(ProcessTasks)
-          .set({
-            processorUser_ID: oUser.ID,
-            processor: sDisplayName,
-            processorEmail: sEmail
-          })
-          .where({
-            request_ID: requestId,
-            processorUser_ID: null,
-            processorTeam_ID: null
-          })
-      );
-
       await this._writeHistory(req, {
         requestId,
         stepNo: request.currentStep || 0,
@@ -2363,7 +2339,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         actor: req.user?.id,
         oldStatus: request.status_code,
         newStatus: request.status_code,
-        remarks: `Request assigned and reserved to ${sDisplayName}`
+        remarks: `Request assigned to ${sDisplayName}`
       });
 
       return true;
@@ -5941,7 +5917,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _createTask(req, requestId, step, options = {}) {
     const request = options.request || await this._getRequest(req, requestId);
-    const oTaskOwnership = this._taskOwnershipForStep(request, step);
+    const oPredecessor = this._isVendorNotificationStep(step)
+      && request?.subProcessType_code === "FTK_FACTORING_PENDING_UAC"
+      && request?.predecessor_ID
+      ? await this._getRequest(req, request.predecessor_ID)
+      : null;
+    const oTaskOwnership = this._taskOwnershipForStep(request, step, oPredecessor);
     const aExistingTasks = await cds.tx(req).run(
       SELECT.from(this.entities.ProcessTasks).where({ request_ID: requestId, stepNo: step.stepNo })
     );
@@ -6037,11 +6018,26 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
   }
 
-  _taskOwnershipForStep(request, step) {
+  _taskOwnershipForStep(request, step, predecessor = null) {
     const bRequesterStep = /requester/i.test(step?.role || "") || Number(step?.stepNo || 0) === 1;
     const sRequesterName = request?.requester || null;
     const sProcessorName = request?.processor || null;
     const sProcessorEmail = request?.processorEmail || null;
+
+    // Pending-UAC vendor steps continue with the requester of the predecessor
+    // request, rather than inheriting the successor request's processor.
+    if (this._isVendorNotificationStep(step) && predecessor?.requesterUser_ID) {
+      const sPredecessorRequester = predecessor.requester || null;
+      return {
+        assignedUser_ID: predecessor.requesterUser_ID,
+        processorUser_ID: predecessor.requesterUser_ID,
+        processorTeam_ID: null,
+        processorTeamName: null,
+        assignedTo: sPredecessorRequester || step?.role || null,
+        processor: sPredecessorRequester,
+        processorEmail: null
+      };
+    }
 
     if (this._isVendorNotificationStep(step) && request?.requesterUser_ID) {
       return {
@@ -6081,11 +6077,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (bRequesterStep && (request?.requesterUser_ID || sRequesterName)) {
       return {
         assignedUser_ID: request?.requesterUser_ID || null,
-        processorUser_ID: null,
+        processorUser_ID: request?.requesterUser_ID || null,
         processorTeam_ID: null,
         processorTeamName: null,
         assignedTo: sRequesterName || step?.role || null,
-        processor: null,
+        processor: sRequesterName,
         processorEmail: null
       };
     }

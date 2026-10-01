@@ -103,7 +103,7 @@
                                         enabled="{= !!${requestQueueFilter>/processType_code} }"
                                         selectedKey="{requestQueueFilter>/subProcessType_code}"
                                         selectionChange=".onUnreservedQueueFilterSearch"
-                                        items="{/ProcessSubTypes}">
+                                        items="{path: '/ProcessSubTypes', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
                                         <core:Item key="{code}" text="{name}" />
                                     </ComboBox>
                                 </VBox>
