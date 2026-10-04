@@ -1,0 +1,4 @@
+ID,taxCode,taxDescription,isActive
+959ae4e0-cba8-5003-b7f1-9ee6696afe6d,V023,V023 - SSCL 2.564% & VAT 18%,true
+6b35bff4-7fe5-5d4a-91c3-4204f4757c1c,V000,V000 - Exempt,true
+27b7aa59-33e2-5029-9e6c-eb35c4288024,V018,V018 - VAT 18%,true

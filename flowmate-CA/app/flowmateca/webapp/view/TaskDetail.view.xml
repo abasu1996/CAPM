@@ -20,6 +20,12 @@
         visible="{task>/canProcess}"
         press=".onApprove"/>
       <Button
+        text="{i18n>reject}"
+        icon="sap-icon://decline"
+        type="Reject"
+        press=".onReject"
+        visible="{task>/canProcess}"/>
+      <Button
         text="{i18n>sendBack}"
         icon="sap-icon://undo"
         type="Reject"

@@ -25,13 +25,13 @@ sap.ui.define([
         purchasingGroups: [],
         currencies: [],
         paymentTerms: [],
-        SystemContractBasePO: [],
+        systemContractBasePO: [],
         divisions: [],
         procurementCategories: [],
         applicableTaxes: [],
         plant: [],
         itemCategories: [],
-        accountAssignment: [],
+        accountAssignments: [],
         serviceCategories: [],
         unitsOfMeasure: [],
         serviceGroups: [],
@@ -59,7 +59,14 @@ sap.ui.define([
     onRefresh: async function () {
       this.setBusy(true);
       try {
-        const [steps, requestTypes, variants, users, teams, teamMembers, vendors, sites, materials, purchasingOrganizations, wbs, documentTypes, companyCodes, purchasingGroups, divisions, applicableTaxes, plant, serviceGroups, valuationClasses, storageLocations, salesOrgs, incoterms, costCenters] = await Promise.all([
+        const [steps, requestTypes, variants, users, teams, teamMembers, vendors, sites, materials,
+          purchasingOrganizations, wbs, documentTypes, companyCodes, purchasingGroups, divisions,
+          applicableTaxes, plant, serviceGroups, valuationClasses, storageLocations, salesOrgs,
+          incoterms, costCenters, currencies, paymentTerms, systemContractBasePO,
+          procurementCategories, itemCategories, accountAssignments, serviceCategories,
+          unitsOfMeasure, entities, projects, matGroups, extensionMaterialGroups, profitCenters,
+          mrpTypes, availabilityChecks, serialNumberProfiles, distributionChannels, arReferences,
+          contractTypes] = await Promise.all([
           this.requestMaster("WorkflowStepConfigs?$expand=requestType,requestVariant&$orderby=requestType_code,requestVariant_code,stepNo"),
           this.requestMaster("RequestTypes?$orderby=sortOrder"),
           this.requestMaster("RequestVariants?$expand=requestType&$orderby=requestType_code,sortOrder"),
@@ -82,7 +89,26 @@ sap.ui.define([
           this.requestMaster("StorageLocation?$orderby=storageLocationCode"),
           this.requestMaster("SalesOrg?$orderby=salesOrgCode"),
           this.requestMaster("Incoterms?$orderby=incotermsCode"),
-        this.requestMaster("CostCenter?$orderby=costCenterCode")
+          this.requestMaster("CostCenter?$orderby=costCenterCode"),
+          this.requestMaster("Currencies?$orderby=code"),
+          this.requestMaster("PaymentTerms?$orderby=code"),
+          this.requestMaster("SystemContractBasePO?$orderby=code"),
+          this.requestMaster("ProcurementCategories?$orderby=code"),
+          this.requestMaster("ItemCategories?$orderby=code"),
+          this.requestMaster("AccountAssignments?$orderby=code"),
+          this.requestMaster("ServiceCategories?$orderby=code"),
+          this.requestMaster("UnitsOfMeasure?$orderby=code"),
+          this.requestMaster("Entity?$orderby=code"),
+          this.requestMaster("Projects?$orderby=projectID"),
+          this.requestMaster("MatGroup?$orderby=matGroupCode"),
+          this.requestMaster("ExtensionMaterialGroup?$orderby=extensionMaterialGroupCode"),
+          this.requestMaster("ProfitCenter?$orderby=profitCenterCode"),
+          this.requestMaster("MRPType?$orderby=mrpTypeCode"),
+          this.requestMaster("AvailabilityCheck?$orderby=availabilityCheckCode"),
+          this.requestMaster("SerialNumberProfile?$orderby=serialNumberProfileCode"),
+          this.requestMaster("DistributionChannel?$orderby=distributionChannelCode"),
+          this.requestMaster("ArReferences?$orderby=arReferenceCode"),
+          this.requestMaster("ContractType?$orderby=contractTypeCode")
         ]);
         const model = this.getView().getModel("admin");
         model.setProperty("/steps", steps.value || []);
@@ -94,7 +120,7 @@ sap.ui.define([
         model.setProperty("/vendors", vendors.value || []);
         model.setProperty("/sites", sites.value || []);
         model.setProperty("/materials", materials.value || []);
-        model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || [] );
+        model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || []);
         model.setProperty("/wbs", wbs.value || []);
         model.setProperty("/documentTypes", documentTypes.value || []);
         model.setProperty("/companyCodes", companyCodes.value || []);
@@ -102,53 +128,31 @@ sap.ui.define([
         model.setProperty("/divisions", divisions.value || []);
         model.setProperty("/applicableTaxes", applicableTaxes.value || []);
         model.setProperty("/plant", plant.value || []);
-        model.setProperty("/serviceGroups",serviceGroups.value || []);
+        model.setProperty("/serviceGroups", serviceGroups.value || []);
         model.setProperty("/valuationClasses", valuationClasses.value || []);
         model.setProperty("/storageLocations", storageLocations.value || []);
         model.setProperty("/salesOrgs", salesOrgs.value || []);
-        model.setProperty("/incoterms",incoterms.value || []);
+        model.setProperty("/incoterms", incoterms.value || []);
         model.setProperty("/costCenters", costCenters.value || []);
-
-
-        const currencies = await this.requestMaster("Currencies?$orderby=code");
-        model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || []);
         model.setProperty("/currencies", currencies.value || []);
-        const paymentTerms = await this.requestCA("PaymentTerms?$orderby=code");
         model.setProperty("/paymentTerms", paymentTerms.value || []);
-        const systemContractBasePO = await this.requestCA("SystemContractBasePO?$orderby=code");
         model.setProperty("/systemContractBasePO", systemContractBasePO.value || []);
-        const procurementCategories = await this.requestCA("ProcurementCategories?$orderby=code");
         model.setProperty("/procurementCategories", procurementCategories.value || []);
-        const itemCategories = await this.requestCA("ItemCategories?$orderby=code");
         model.setProperty("/itemCategories", itemCategories.value || []);
-        const accountAssignment = await this.requestCA("AccountAssignments?$orderby=code");
-        model.setProperty("/accountAssignments", accountAssignment.value || []);
-        const serviceCategories = await this.requestCA("ServiceCategories?$orderby=code");
+        model.setProperty("/accountAssignments", accountAssignments.value || []);
         model.setProperty("/serviceCategories", serviceCategories.value || []);
-        const unitsOfMeasure = await this.requestCA("UnitsOfMeasure?$orderby=code");
         model.setProperty("/unitsOfMeasure", unitsOfMeasure.value || []);
-        const entities = await this.requestCA("Entity?$orderby=code");
-        model.setProperty("/entities",entities.value || []);
-        const projects = await this.requestCA("Projects?$orderby=projectID");
-        model.setProperty("/projects",projects.value || []);
-        const matGroups = await this.requestMaster("MatGroup?$orderby=matGroupCode");
+        model.setProperty("/entities", entities.value || []);
+        model.setProperty("/projects", projects.value || []);
         model.setProperty("/matGroups", matGroups.value || []);
-        const extensionMaterialGroups = await this.requestCA("ExtensionMaterialGroup?$orderby=extensionMaterialGroupCode");
         model.setProperty("/extensionMaterialGroups", extensionMaterialGroups.value || []);
-        const profitCenters = await this.requestMaster("ProfitCenter?$orderby=profitCenterCode");
         model.setProperty("/profitCenters", profitCenters.value || []);
-        const mrpTypes = await this.requestMaster("MRPType?$orderby=mrpTypeCode");
-        model.setProperty("/mrpTypes",mrpTypes.value || []);
-        const availabilityChecks = await this.requestMaster("AvailabilityCheck?$orderby=availabilityCheckCode");
-        model.setProperty("/availabilityChecks",availabilityChecks.value || []);
-        const serialNumberProfiles = await this.requestMaster("SerialNumberProfile?$orderby=serialNumberProfileCode");
+        model.setProperty("/mrpTypes", mrpTypes.value || []);
+        model.setProperty("/availabilityChecks", availabilityChecks.value || []);
         model.setProperty("/serialNumberProfiles", serialNumberProfiles.value || []);
-        const distributionChannels = await this.requestMaster("DistributionChannel?$orderby=distributionChannelCode");
         model.setProperty("/distributionChannels", distributionChannels.value || []);
-        const arReferences = await this.requestMaster("ArReferences?$orderby=arReferenceCode");
         model.setProperty("/arReferences", arReferences.value || []);
-        const contractTypes = await this.requestCA("ContractType?$orderby=contractTypeCode");
-        model.setProperty("/contractTypes",contractTypes.value || []);
+        model.setProperty("/contractTypes", contractTypes.value || []);
         model.setProperty("/teamTree", this._teamTree(teams.value || [], teamMembers.value || []));
       } catch (error) {
         this.showError(error);
@@ -156,42 +160,6 @@ sap.ui.define([
         this.setBusy(false);
       }
     },
-
-
-
-    requestCA: async function (path, options = {}) {
-
-    const response = await fetch(
-        "/odata/v4/flowmate-ca/" + path,
-        {
-            method: options.method || "GET",
-
-            headers: {
-                "Content-Type": "application/json",
-                ...(options.headers || {})
-            },
-
-            body: options.body
-                ? JSON.stringify(options.body)
-                : undefined
-        }
-    );
-
-    if (!response.ok) {
-
-        const errorText = await response.text();
-
-        throw new Error(
-            `CA service request failed (${response.status}): ${errorText}`
-        );
-    }
-
-    if (response.status === 204) {
-        return null;
-    }
-
-    return response.json();
-},
 
     _teamTree: function (teams, memberships) {
       return teams.map(function (team) {
@@ -721,7 +689,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "PaymentTerms",
         {
             method: "POST",
@@ -746,7 +714,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "SystemContractBasePO",
         {
             method: "POST",
@@ -781,7 +749,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "ProcurementCategories",
         {
             method: "POST",
@@ -828,7 +796,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "ItemCategories",
         {
             method: "POST",
@@ -850,8 +818,8 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
-        "AccountAssignment",
+    await this.requestMaster(
+        "AccountAssignments",
         {
             method: "POST",
             body: {
@@ -873,7 +841,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "ServiceCategories",
         {
             method: "POST",
@@ -900,7 +868,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "UnitsOfMeasure",
         {
             method: "POST",
@@ -970,7 +938,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "Entity",
         {
             method: "POST",
@@ -994,7 +962,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "Projects",
         {
             method: "POST",
@@ -1044,7 +1012,7 @@ else if (item.type === "purchasingOrganization") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "ExtensionMaterialGroup",
         {
             method: "POST",
@@ -1271,7 +1239,7 @@ else if (item.type === "mrpType") {
         );
     }
 
-    await this.requestCA(
+    await this.requestMaster(
         "ContractType",
         {
             method: "POST",
@@ -1630,7 +1598,7 @@ onSavePaymentTerm: async function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `PaymentTerms('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
@@ -1687,7 +1655,7 @@ onDeletePaymentTerm: async function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `PaymentTerms('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
@@ -1720,7 +1688,7 @@ onSaveSystemContractBasePO: async function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `SystemContractBasePO('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
@@ -1777,7 +1745,7 @@ onSaveSystemContractBasePO: async function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `SystemContractBasePO('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
@@ -1823,7 +1791,7 @@ onDeleteDivision: function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `ProcurementCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
@@ -1879,7 +1847,7 @@ onDeleteDivision: function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `ProcurementCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
@@ -1944,7 +1912,7 @@ onSaveItemCategory: async function (event) {
             throw new Error("Item Category Code is missing.");
         }
 
-        await this.requestCA(
+        await this.requestMaster(
             `ItemCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
@@ -2004,7 +1972,7 @@ onDeleteItemCategory: async function (event) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `ItemCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
@@ -2036,8 +2004,8 @@ onSaveAccountAssignment: async function (event) {
 
     try {
 
-        await this.requestCA(
-            `AccountAssignment(${row.ID})`,
+        await this.requestMaster(
+            `AccountAssignments('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
                 headers: {
@@ -2045,7 +2013,6 @@ onSaveAccountAssignment: async function (event) {
                     "If-Match": "*"
                 },
                 body: {
-                    code: row.code,
                     description: row.description,
                     isActive: row.isActive,
                 }
@@ -2091,8 +2058,8 @@ onSaveAccountAssignment: async function (event) {
 
     try {
 
-        await this.requestCA(
-            `AccountAssignment(${row.ID})`,
+        await this.requestMaster(
+            `AccountAssignments('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
                 headers: {
@@ -2124,8 +2091,8 @@ onSaveServiceCategories: async function (event) {
 
     try {
 
-        await this.requestCA(
-            `ServiceCategories(${encodeURIComponent(row.ID)})`,
+        await this.requestMaster(
+            `ServiceCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "PATCH",
                 headers: {
@@ -2133,7 +2100,6 @@ onSaveServiceCategories: async function (event) {
                     "If-Match": "*"
                 },
                 body: {
-                    code: row.code,
                     name: row.name || row.description,
                     description: row.description,
                     isActive: row.isActive,
@@ -2180,8 +2146,8 @@ onSaveServiceCategories: async function (event) {
 
     try {
 
-        await this.requestCA(
-            `ServiceCategories(${encodeURIComponent(row.ID)})`,
+        await this.requestMaster(
+            `ServiceCategories('${encodeURIComponent(row.code)}')`,
             {
                 method: "DELETE",
                 headers: {
@@ -2212,7 +2178,7 @@ onSaveUnitOfMeasure: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `UnitsOfMeasure('${item.code}')`,
             {
                 method: "PATCH",
@@ -2259,7 +2225,7 @@ onDeleteUnitOfMeasure: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
+                    await this.requestMaster(
                         `UnitsOfMeasure('${item.code}')`,
                         {
                             method: "DELETE"
@@ -2451,7 +2417,7 @@ onSaveEntity: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `Entity(${item.ID})`,
             {
                 method: "PATCH",
@@ -2496,7 +2462,7 @@ onDeleteEntity: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
+                    await this.requestMaster(
                         `Entity(${item.ID})`,
                         {
                             method: "DELETE"
@@ -2529,7 +2495,7 @@ onSaveProject: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `Projects(${item.ID})`,
             {
                 method: "PATCH",
@@ -2577,7 +2543,7 @@ onDeleteProject: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
+                    await this.requestMaster(
                         `Projects(${item.ID})`,
                         {
                             method: "DELETE"
@@ -2691,7 +2657,7 @@ onSaveExtensionMaterialGroup: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `ExtensionMaterialGroup(${item.ID})`,
             {
                 method: "PATCH",
@@ -2736,7 +2702,7 @@ onDeleteExtensionMaterialGroup: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
+                    await this.requestMaster(
                         `ExtensionMaterialGroup(${item.ID})`,
                         {
                             method: "DELETE"
@@ -3439,7 +3405,7 @@ onSaveContractType: async function (oEvent) {
 
     try {
 
-        await this.requestCA(
+        await this.requestMaster(
             `ContractType(${item.ID})`,
             {
                 method: "PATCH",
@@ -3485,7 +3451,7 @@ onDeleteContractType: async function (oEvent) {
 
                 try {
 
-                    await this.requestCA(
+                    await this.requestMaster(
                         `ContractType(${item.ID})`,
                         {
                             method: "DELETE"

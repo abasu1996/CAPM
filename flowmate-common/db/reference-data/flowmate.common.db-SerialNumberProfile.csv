@@ -1,0 +1,4 @@
+ID,serialNumberProfileCode,serialNumberProfileDescription,isActive
+0c9b6e44-de7f-5ed8-b036-db518cf5c016,0001,0001 - Standard Serial Profile,true
+ec72d7ae-8cec-5b0b-98e8-73bc34d0cd69,0002,0002 - Equipment Serial Profile,true
+50a47ed8-ae54-5406-b959-22c94ae73546,0003,0003 - Trading Serial Profile,true

@@ -450,15 +450,28 @@ sap.ui.define([], function () {
           { key: "ACTIVITY", text: "Activity" }
         ]
       }),
-      field("projectName", "Project Name", "input", { required: true }),
-      field("functionLocation", "Function Location", "input", { required: true, maxLength: 80 }),
-      field("activityNumber", "Activity Number", "input"),
-      field("scope", "Scope", "combo", { entity: "ProjectScopes" }),
+      field("siteId", "Site ID", "combo", {
+        required: true,
+        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
+        autoFills: { field: "siteName", from: "siteName" },
+        visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" }
+      }),
+      field("siteName", "Site Name", "readonly", {
+        required: true,
+        placeholder: "Filled from the selected Site ID",
+        visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" }
+      }),
+      field("projectId", "Project Code", "combo", {
+        required: true,
+        entity: "Projects", key: "projectID", text: "projectID", secondaryText: "projectDescription",
+        visibleWhen: { field: "transactionType", equals: "ACTIVITY" }
+      }),
       field("remarks", "Remarks", "textarea"),
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     RES_DIRECT: [
-      field("engineeringType", "Engineering Type", "select", {
+      field("engineeringType", "Request Type", "select", {
+        required: true,
         options: [
           { key: "ENGINEERING", text: "Engineering" },
           { key: "NON_ENGINEERING", text: "Non-Engineering" }
@@ -471,15 +484,22 @@ sap.ui.define([], function () {
         visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
       }),
       field("batch", "Batch", "combo", {
+        required: true,
         entity: "ReservationBatches",
         visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
       }),
-      field("requestType", "Request Type", "input"),
-      field("deliveryType", "Delivery Type", "select", {
+      field("materialType", "Material Type", "select", {
         required: true,
-        options: [{ key: "DIRECT", text: "Direct Delivery" }]
+        options: [
+          { key: "WAREHOUSE", text: "Warehouse" },
+          { key: "DIRECT", text: "Direct Delivery" }
+        ]
       }),
-      field("warehouse_code", "Warehouse", "combo", {
+      field("deliveryType", "Delivery Type", "readonly", {
+        required: true,
+        defaultValue: "Direct Delivery"
+      }),
+      field("warehouse_code", "Warehouse Location", "combo", {
         entity: "Warehouses"
       }),
       field("allocationOwner_ID", "Vendor Allocation Owner", "combo", {
@@ -492,7 +512,8 @@ sap.ui.define([], function () {
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     RES_WAREHOUSE: [
-      field("engineeringType", "Engineering Type", "select", {
+      field("engineeringType", "Request Type", "select", {
+        required: true,
         options: [
           { key: "ENGINEERING", text: "Engineering" },
           { key: "NON_ENGINEERING", text: "Non-Engineering" }
@@ -505,15 +526,22 @@ sap.ui.define([], function () {
         visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
       }),
       field("batch", "Batch", "combo", {
+        required: true,
         entity: "ReservationBatches",
         visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
       }),
-      field("requestType", "Request Type", "input"),
-      field("deliveryType", "Delivery Type", "select", {
+      field("materialType", "Material Type", "select", {
         required: true,
-        options: [{ key: "WAREHOUSE", text: "Warehouse" }]
+        options: [
+          { key: "WAREHOUSE", text: "Warehouse" },
+          { key: "DIRECT", text: "Direct Delivery" }
+        ]
       }),
-      field("warehouse_code", "Warehouse", "combo", {
+      field("deliveryType", "Delivery Type", "readonly", {
+        required: true,
+        defaultValue: "Warehouse"
+      }),
+      field("warehouse_code", "Warehouse Location", "combo", {
         required: true,
         entity: "Warehouses"
       }),
@@ -807,21 +835,49 @@ sap.ui.define([], function () {
 
   const column = (name, label, type, extra) => Object.assign({ name, label, type: type || "input" }, extra || {});
 
+  const COLUMN_KEYS = [
+    "name", "label", "type", "required", "entity", "key", "text", "secondaryText",
+    "options", "maxLength", "autoFills", "placeholder"
+  ];
+
+  const isHeaderOnlyField = (field, drivers) =>
+    field.type === "file" || !!field.visibleWhen || field.source === "request" || drivers.has(field.name);
+
+  const fieldToColumn = (field) => {
+    const col = {};
+    COLUMN_KEYS.forEach(function (prop) {
+      if (field[prop] !== undefined) {
+        col[prop] = field[prop];
+      }
+    });
+    return col;
+  };
+
+  const visibilityDrivers = (fields) => {
+    const drivers = new Set();
+    fields.forEach(function (field) {
+      if (field.visibleWhen && field.visibleWhen.field) {
+        drivers.add(field.visibleWhen.field);
+      }
+    });
+    return drivers;
+  };
+
   const itemColumns = {
     PURCHASE_ORDER: [
       column("materialOrService", "Service Code / Material Code"),
-      column("wbsElement", "WBS Element / Cost Center / Budget Code"),
+      column("wbsElement", "WBS Element / Cost Center / Budget Code", "combo", { entity: "Wbs", key: "wbsElement", text: "wbsElement" }),
       column("quantity", "Quantity", "number"),
       column("unitPrice", "Unit Price", "number"),
-      column("currency", "Currency"),
-      column("taxCode", "Applicable Taxes"),
+      column("currency", "Currency", "combo", { entity: "Currencies" }),
+      column("taxCode", "Applicable Taxes", "combo", { entity: "TaxCodes" }),
       column("contractNo", "Contract No"),
       column("campaignLocationCode", "Campaign / Location Code"),
-      column("siteId", "Site ID"),
-      column("plant", "Plant"),
-      column("itemCategory", "Item Category"),
-      column("accountAssignment", "Account Assignment"),
-      column("materialGroup", "Material Group")
+      column("siteId", "Site ID", "combo", { entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName" }),
+      column("plant", "Plant", "combo", { entity: "Plant", key: "plantCode", text: "plantName" }),
+      column("itemCategory", "Item Category", "combo", { entity: "ItemCategories" }),
+      column("accountAssignment", "Account Assignment", "combo", { entity: "AccountAssignments" }),
+      column("materialGroup", "Material Group", "combo", { entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription" })
     ],
     SERVICE_ENTRY_SHEET: [
       column("poNumber", "PO Number"),
@@ -830,23 +886,45 @@ sap.ui.define([], function () {
       column("value", "SES Amount", "number")
     ],
     MATERIAL_RESERVATION: [
-      column("materialCode", "Material Code"),
-      column("description", "Description"),
-      column("quantity", "Quantity", "number"),
-      column("unitOfMeasure_code", "Unit of Measure")
+      column("itemNo", "ID", "readonly"),
+      column("siteId", "Site ID", "combo", {
+        required: true,
+        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
+        autoFills: { field: "siteName", from: "siteName" }
+      }),
+      column("siteName", "Site Name", "readonly"),
+      column("sapCode", "SAP Code"),
+      column("indentWo", "Indent/WO"),
+      column("equipmentNo", "Equipment No. (if CTL)"),
+      column("materialCode", "Material Code", "combo", {
+        required: true,
+        entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription",
+        autoFills: { field: "description", from: "materialDescription" }
+      }),
+      column("description", "Material Description", "readonly"),
+      column("plant", "Plant", "combo", { entity: "Plant", key: "plantCode", text: "plantName" }),
+      column("storageLocation", "Storage Location", "combo", {
+        entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName"
+      }),
+      column("ctlType", "CTL / Non_CTL", "select", {
+        options: [{ key: "CTL", text: "CTL" }, { key: "NON_CTL", text: "Non-CTL" }]
+      }),
+      column("quantity", "Quantity", "number", { required: true }),
+      column("unitOfMeasure_code", "Unit of Measure", "combo", { required: true, entity: "UnitsOfMeasure" }),
+      column("comments", "Comments")
     ],
     OUTLINE_CONTRACT: [
-      column("contractType", "Contract Type"),
+      column("contractType", "Contract Type", "combo", { entity: "ContractTypes" }),
       column("lineItem", "Line Item"),
-      column("itemCategory", "Item Category"),
-      column("purchaseOrg", "Purchase Org"),
-      column("purchaseGroup", "Purchase Group"),
-      column("vendorId", "Vendor ID"),
-      column("companyCode", "Company Code"),
-      column("plant", "Plant"),
+      column("itemCategory", "Item Category", "combo", { entity: "ItemCategories" }),
+      column("purchaseOrg", "Purchase Org", "combo", { entity: "PurchasingOrganizations", key: "purchasingOrgCode", text: "purchasingOrgName" }),
+      column("purchaseGroup", "Purchase Group", "combo", { entity: "PurchasingGroups" }),
+      column("vendorId", "Vendor ID", "combo", { entity: "Vendors", key: "vendorCode", text: "vendorName", secondaryText: "vendorCode" }),
+      column("companyCode", "Company Code", "combo", { entity: "CompanyCodes" }),
+      column("plant", "Plant", "combo", { entity: "Plant", key: "plantCode", text: "plantName" }),
       column("validityStartDate", "Validity Start Date", "date"),
       column("validityEndDate", "Validity End Date", "date"),
-      column("incoterms", "Incoterms"),
+      column("incoterms", "Incoterms", "combo", { entity: "Incoterms" }),
       column("incotermsLocation", "Incoterms Location"),
       column("targetQuantity", "Target Quantity", "number"),
       column("coupaSourcingEventNo", "Coupa Sourcing Event No."),
@@ -856,15 +934,15 @@ sap.ui.define([], function () {
       column("quantity", "Quantity", "number"),
       column("grossPrice", "Gross Price", "number"),
       column("priceUnit", "Price Unit"),
-      column("currency", "Currency"),
+      column("currency", "Currency", "combo", { entity: "Currencies" }),
       column("materialSavingPct", "Material Saving %", "number"),
       column("serviceSavingPct", "Service Saving %", "number"),
-      column("taxCode", "Tax Code"),
-      column("paymentTerm", "Payment Term"),
-      column("accountAssignment", "Account Assignment"),
-      column("costCenter", "Cost Center"),
+      column("taxCode", "Tax Code", "combo", { entity: "TaxCodes" }),
+      column("paymentTerm", "Payment Term", "combo", { entity: "PaymentTerms" }),
+      column("accountAssignment", "Account Assignment", "combo", { entity: "AccountAssignments" }),
+      column("costCenter", "Cost Center", "combo", { entity: "CostCenters" }),
       column("orderNumber", "Order Number"),
-      column("wbsElement", "WBS Element")
+      column("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsElement", text: "wbsElement" })
     ]
   };
 
@@ -903,8 +981,25 @@ sap.ui.define([], function () {
       });
       return merged;
     },
-    getItemColumns: function (requestTypeCode) {
-      return itemColumns[requestTypeCode] || [];
+    getItemColumns: function (requestTypeCode, variantCode, categoryCode) {
+      if (itemColumns[requestTypeCode]) {
+        return itemColumns[requestTypeCode];
+      }
+      const fields = this.getFields(variantCode, categoryCode);
+      const drivers = visibilityDrivers(fields);
+      return fields.filter(function (field) {
+        return !isHeaderOnlyField(field, drivers);
+      }).map(fieldToColumn);
+    },
+    getHeaderFields: function (requestTypeCode, variantCode, categoryCode) {
+      const fields = this.getFields(variantCode, categoryCode);
+      if (itemColumns[requestTypeCode]) {
+        return fields;
+      }
+      const drivers = visibilityDrivers(fields);
+      return fields.filter(function (field) {
+        return isHeaderOnlyField(field, drivers);
+      });
     }
   };
 });

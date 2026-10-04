@@ -1,0 +1,5 @@
+ID,wbsCode,wbsDescription,isActive
+4f237431-c9f9-57f4-b49f-ba13c76fef4e,WBS-NW-001,WBS-NW-001 Network Rollout,true
+2ce2c4ea-6c7e-5509-a185-e89a82d04382,WBS-NW-002,WBS-NW-002 Capacity Upgrade,true
+0d842fe8-9b4c-5bfc-ae50-d7e5db026097,WBS-IT-001,WBS-IT-001 IT Platform,true
+b31c1da2-cbee-5d0c-b58d-5a0aabbc1920,WBS-MK-001,WBS-MK-001 Marketing Campaign,true

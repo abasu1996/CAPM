@@ -11,6 +11,7 @@ sap.ui.define([
         myOpenTasks: 0,
         myTeamTasks: 0,
         sentBackRequests: 0,
+        rejectedRequests: 0,
         pendingApproval: 0,
         completedRequests: 0
       }), "dashboard");
@@ -60,6 +61,15 @@ sap.ui.define([
         "?query": {
           mode: "mine",
           status: "SENT_BACK"
+        }
+      });
+    },
+
+    onRejected: function () {
+      this.navTo("requests", {
+        "?query": {
+          mode: "mine",
+          status: "REJECTED"
         }
       });
     },

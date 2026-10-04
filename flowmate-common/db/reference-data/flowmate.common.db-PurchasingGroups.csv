@@ -1,0 +1,5 @@
+ID,purchasingGroupCode,purchasingGroupName,isActive
+2a813c55-aefd-524a-9762-cbbf7ad3cee2,P01,P01 - Network Procurement,true
+055ff75e-2f48-596b-b904-14305ae6ad45,P02,P02 - IT Procurement,true
+384d0f26-408e-5514-8592-72e2203769db,P03,P03 - Corporate Services,true
+e1b3a400-b119-583b-85be-301dacbe3c20,P04,P04 - Marketing Procurement,true

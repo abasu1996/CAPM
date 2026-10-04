@@ -9,6 +9,7 @@ service FlowmateCAService {
     myOpenTasks      : Integer;
     myTeamTasks      : Integer;
     sentBackRequests : Integer;
+    rejectedRequests : Integer;
     pendingApproval  : Integer;
     completedRequests: Integer;
   }
@@ -51,36 +52,24 @@ service FlowmateCAService {
   entity Vendors as projection on common.Vendors;
 
 
-  entity UnitsOfMeasure as projection on db.UnitsOfMeasure;
   entity ExternalMaterialGroups as projection on db.ExternalMaterialGroups;
   entity CoupaCommodityCodes as projection on db.CoupaCommodityCodes;
   entity Warehouses as projection on db.Warehouses;
   entity PurchaseOrderTypes as projection on db.PurchaseOrderTypes;
-  entity ProcurementCategories as projection on db.ProcurementCategories;
-  entity PaymentTerms as projection on db.PaymentTerms;
   entity ProjectTypes as projection on db.ProjectTypes;
-  entity SystemContractBasePO as projection on db.SystemContractBasePO;
   entity ContractCategories as projection on db.ContractCategories;
-  entity AccountAssignment as projection on db.AccountAssignment;
-  entity Entity as projection on db.Entity;
-  entity Projects as projection on db.Projects;
-  entity ExtensionMaterialGroup as projection on db.ExtensionMaterialGroup;
   entity ProfitCenter as projection on common.ProfitCenter;
   entity MRPType as projection on common.MRPType;
   entity AvailabilityCheck as projection on common.AvailabilityCheck;
   entity SerialNumberProfile as projection on common.SerialNumberProfile;
   entity DistributionChannel as projection on common.DistributionChannel;
-  entity ContractType as projection on db.ContractType;
 
-  entity ItemCategories as projection on db.ItemCategories;
-  entity AccountAssignments as projection on db.AccountAssignments;
   entity ContractTypes as projection on db.ContractTypes;
   entity ReservationProjects as projection on db.ReservationProjects;
   entity ReservationBatches as projection on db.ReservationBatches;
   entity BusinessEntities as projection on db.BusinessEntities;
   entity ProjectScopes as projection on db.ProjectScopes;
   entity MaterialTypes as projection on db.MaterialTypes;
-  entity ServiceCategories as projection on db.ServiceCategories;
   entity ArReferences as projection on common.ArReferences;
   entity ProjectCategories as projection on db.ProjectCategories;
   entity MaterialCategories as projection on db.MaterialCategories;
@@ -103,9 +92,13 @@ service FlowmateCAService {
   entity WorkflowStepConfigs as projection on db.WorkflowStepConfigs;
 
   entity MaterialCodeDetails as projection on db.MaterialCodeDetails;
+  entity MaterialCodeItems as projection on db.MaterialCodeItems;
   entity ServiceCodeDetails as projection on db.ServiceCodeDetails;
+  entity ServiceCodeItems as projection on db.ServiceCodeItems;
   entity EquipmentCodeDetails as projection on db.EquipmentCodeDetails;
+  entity EquipmentCodeItems as projection on db.EquipmentCodeItems;
   entity ProjectCodeDetails as projection on db.ProjectCodeDetails;
+  entity ProjectCodeItems as projection on db.ProjectCodeItems;
   entity MaterialReservationDetails as projection on db.MaterialReservationDetails;
   entity MaterialReservationItems as projection on db.MaterialReservationItems;
   entity OutlineContractDetails as projection on db.OutlineContractDetails;
@@ -146,6 +139,7 @@ service FlowmateCAService {
   ) returns Tasks;
   action claimTeamTask(taskId: UUID) returns Boolean;
   action approveTask(taskId: UUID, remarks: LargeString) returns Boolean;
+  action rejectTask(taskId: UUID, remarks: LargeString) returns Boolean;
   action sendBackTask(taskId: UUID, targetStepNo: Integer, remarks: LargeString) returns Boolean;
   action completeStep(requestId: UUID, stepNo: Integer, remarks: LargeString) returns Boolean;
   action addComment(requestId: UUID, comment: LargeString) returns Comments;
@@ -233,4 +227,15 @@ service CAMasterDataService {
    entity SerialNumberProfile as projection on common.SerialNumberProfile;
    entity DistributionChannel as projection on common.DistributionChannel;
    entity ArReferences as projection on common.ArReferences;
+   entity PaymentTerms as projection on common.PaymentTerms;
+   entity SystemContractBasePO as projection on common.SystemContractBasePO;
+   entity ProcurementCategories as projection on common.ProcurementCategories;
+   entity ItemCategories as projection on common.ItemCategories;
+   entity AccountAssignments as projection on common.AccountAssignments;
+   entity ServiceCategories as projection on common.ServiceCategories;
+   entity UnitsOfMeasure as projection on common.UnitsOfMeasure;
+   entity Entity as projection on common.Entity;
+   entity Projects as projection on common.Projects;
+   entity ExtensionMaterialGroup as projection on common.ExtensionMaterialGroup;
+   entity ContractType as projection on common.ContractType;
 }

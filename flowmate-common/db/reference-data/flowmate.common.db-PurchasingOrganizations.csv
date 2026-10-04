@@ -1,0 +1,5 @@
+ID,purchasingOrganizationCode,purchasingOrganizationName,isActive
+455bf9bd-4d9a-5d32-ac0d-6c2287f2a420,DIALOG,Dialog Purchasing,true
+15e4dd37-da1c-5db3-bb7d-233b5380c96c,LK00,LK00 - Dialog Central Purchasing,true
+41afe9eb-6f3d-5b6a-b3bf-39b9a0882395,LK10,LK10 - Broadband Purchasing,true
+176c4aff-73e7-5671-9b88-2affbd7ac610,LK20,LK20 - Television Purchasing,true

@@ -1,0 +1,5 @@
+ID,mrpTypeCode,mrpTypeDescription,isActive
+edad9b67-6b9e-5130-8095-f9c2b3451b5b,ND,ND - No Planning,true
+96c36265-21d6-5214-90b1-89c3106a1164,PD,PD - Deterministic MRP,true
+5def3bed-786e-542d-8081-0f9c3c3f2df0,VB,VB - Manual Reorder Point,true
+a191824d-d88b-5244-8c1e-da586cc788f7,VM,VM - Automatic Reorder Point,true

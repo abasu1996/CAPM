@@ -73,6 +73,13 @@
               </TileContent>
             </tileContent>
           </GenericTile>
+          <GenericTile class="caTile caTileRed" header="{i18n>rejected}" subheader="Raise a new request" press=".onRejected">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/rejectedRequests}" icon="sap-icon://decline" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
           <GenericTile class="caTile caTileIndigo" header="{i18n>pendingApproval}" subheader="Approval tasks assigned to you" press=".onPendingApproval">
             <tileContent>
               <TileContent>

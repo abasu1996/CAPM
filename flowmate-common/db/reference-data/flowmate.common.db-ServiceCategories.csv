@@ -1,0 +1,6 @@
+code,name,description,isActive,sortOrder
+INSTALL,Installation Services,Site and equipment installation,true,10
+MAINT,Maintenance Services,Preventive and corrective maintenance,true,20
+CONSULT,Consultancy Services,Advisory and consultancy,true,30
+TRANSPORT,Transport Services,Logistics and transport,true,40
+CIVIL,Civil Works,Civil and construction works,true,50

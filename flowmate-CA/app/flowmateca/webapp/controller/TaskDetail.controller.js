@@ -65,21 +65,33 @@ sap.ui.define([
       this.byId("decisionDialog").open();
     },
 
+    onReject: function () {
+      this.getView().getModel("decision").setData({
+        title: "Reject Request",
+        action: "reject",
+        remarks: ""
+      });
+      this.byId("decisionDialog").open();
+    },
+
     onConfirmDecision: async function () {
       const decision = this.getView().getModel("decision").getData();
+      const rejecting = decision.action === "reject";
+      if (rejecting && !String(decision.remarks || "").trim()) {
+        MessageBox.warning("A reason is required to reject a request.");
+        return;
+      }
       this.setBusy(true);
       try {
-        if (decision.action === "approve") {
-          await this.request("approveTask", {
-            method: "POST",
-            body: {
-              taskId: this._taskId,
-              remarks: decision.remarks
-            }
-          });
-        }
+        await this.request(rejecting ? "rejectTask" : "approveTask", {
+          method: "POST",
+          body: {
+            taskId: this._taskId,
+            remarks: decision.remarks
+          }
+        });
         this.byId("decisionDialog").close();
-        this.showSuccess("Task approved");
+        this.showSuccess(rejecting ? "Request rejected" : "Task approved");
         await this.onRefresh();
       } catch (error) {
         this.showError(error);
@@ -96,7 +108,7 @@ sap.ui.define([
       const task = this.getView().getModel("task").getData();
       try {
         const result = await this.request(
-          `RequestSteps?$filter=request_ID eq ${task.request.ID} and stepNo lt ${task.stepNo}&$orderby=stepNo`
+          `RequestSteps?$filter=request_ID eq ${task.request.ID} and stepNo lt ${task.stepNo} and stepNo gt 1&$orderby=stepNo`
         );
         this.getView().getModel("sendBack").setData({
           targetStepNo: "",

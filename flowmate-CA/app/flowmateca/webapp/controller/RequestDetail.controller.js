@@ -51,10 +51,10 @@ sap.ui.define([
           "comments",
           "involvedParties",
           "history",
-          "materialCode",
-          "serviceCode",
-          "equipmentCode",
-          "projectCode",
+          "materialCode($expand=items)",
+          "serviceCode($expand=items)",
+          "equipmentCode($expand=items)",
+          "projectCode($expand=items)",
           "materialReservation($expand=items)",
           "outlineContract($expand=items)",
           "purchaseOrder($expand=items)",
@@ -131,7 +131,13 @@ sap.ui.define([
       if (!table) {
         return;
       }
-      const columns = FormDefinitions.getItemColumns(typeCode);
+      const detail = this.getView().getModel("detail").getData() || {};
+      const details = detail[DETAIL_NAVIGATION[typeCode]] || {};
+      const columns = FormDefinitions.getItemColumns(
+        typeCode,
+        detail.requestVariant && detail.requestVariant.code,
+        details.materialCategory
+      );
       table.destroyColumns();
       table.unbindItems();
 

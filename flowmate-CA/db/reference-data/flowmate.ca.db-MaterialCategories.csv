@@ -1,0 +1,4 @@
+code,name,description,isActive,sortOrder
+ENG_IT,Engineering and IT,Engineering and IT material code,true,10
+ADMIN_CONS,Admin and Consumables,Admin and consumable material code,true,20
+TRADING,Trading Materials,ZTRD trading material,true,30

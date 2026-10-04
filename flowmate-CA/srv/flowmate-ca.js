@@ -6,13 +6,15 @@ const REQUEST_STATUS = {
   SUBMITTED: "SUBMITTED",
   IN_PROGRESS: "IN_PROGRESS",
   SENT_BACK: "SENT_BACK",
-  COMPLETED: "COMPLETED"
+  COMPLETED: "COMPLETED",
+  REJECTED: "REJECTED"
 };
 
 const TASK_STATUS = {
   OPEN: "OPEN",
   APPROVED: "APPROVED",
-  SENT_BACK: "SENT_BACK"
+  SENT_BACK: "SENT_BACK",
+  REJECTED: "REJECTED"
 };
 
 const DETAIL_ENTITY_BY_REQUEST_TYPE = {
@@ -27,6 +29,10 @@ const DETAIL_ENTITY_BY_REQUEST_TYPE = {
 };
 
 const ITEMS_ENTITY_BY_REQUEST_TYPE = {
+  MATERIAL_CODE: "MaterialCodeItems",
+  SERVICE_CODE: "ServiceCodeItems",
+  EQUIPMENT_CODE: "EquipmentCodeItems",
+  PROJECT_CODE: "ProjectCodeItems",
   MATERIAL_RESERVATION: "MaterialReservationItems",
   OUTLINE_CONTRACT: "OutlineContractItems",
   PURCHASE_ORDER: "PurchaseOrderItems",
@@ -57,6 +63,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("addTask", this._addTask);
     this.on("claimTeamTask", this._claimTeamTask);
     this.on("approveTask", this._approveTask);
+    this.on("rejectTask", this._rejectTask);
     this.on("sendBackTask", this._sendBackTask);
     this.on("completeStep", this._completeStep);
     this.on("addComment", this._addComment);
@@ -99,9 +106,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   _filterMyTasks = async (req) => {
-    if (req.user.is("CAAdmin")) {
-      return;
-    }
     const user = await this._ensureCurrentUser(req);
     req.query.where({ assignedUser_ID: user.ID });
   };
@@ -139,7 +143,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const user = await this._ensureCurrentUser(req);
     const isAdmin = req.user.is("CAAdmin");
     const requestedBy = { requester_ID: user.ID };
-    const assignedToMe = isAdmin ? {} : { assignedUser_ID: user.ID };
+    const assignedToMe = { assignedUser_ID: user.ID };
     const openStatus = { status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] } };
     const teamIds = isAdmin ? [] : await this._teamIdsOf(user);
 
@@ -147,6 +151,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       myRequests,
       myOpenTasks,
       sentBackRequests,
+      rejectedRequests,
       pendingApproval,
       completedRequests
     ] = await Promise.all([
@@ -155,6 +160,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       this._count(this.db.CARequests, {
         ...requestedBy,
         status_code: REQUEST_STATUS.SENT_BACK
+      }),
+      this._count(this.db.CARequests, {
+        ...requestedBy,
+        status_code: REQUEST_STATUS.REJECTED
       }),
       this._count(this.db.CATasks, {
         ...assignedToMe,
@@ -183,6 +192,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       myOpenTasks,
       myTeamTasks,
       sentBackRequests,
+      rejectedRequests,
       pendingApproval,
       completedRequests
     };
@@ -490,6 +500,49 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return true;
   };
 
+  _rejectTask = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req, tx);
+    const task = await SELECT.one.from(this.db.CATasks).where({ ID: req.data.taskId });
+
+    if (!task) {
+      return req.reject(404, "Task not found");
+    }
+    await this._assertTaskAccess(req, task, user);
+    if (task.status_code !== TASK_STATUS.OPEN) {
+      return req.reject(409, "Only open tasks can be rejected");
+    }
+    if (!String(req.data.remarks || "").trim()) {
+      return req.reject(400, "A reason is required to reject a request");
+    }
+
+    const rejectedAt = new Date().toISOString();
+    await tx.run(UPDATE(this.db.CATasks).set({
+      status_code: TASK_STATUS.REJECTED,
+      decision: "REJECTED",
+      remarks: req.data.remarks,
+      completedAt: rejectedAt
+    }).where({ ID: task.ID }));
+    await tx.run(UPDATE(this.db.CATasks).set({
+      status_code: TASK_STATUS.REJECTED,
+      decision: "REJECTED",
+      completedAt: rejectedAt
+    }).where({
+      request_ID: task.request_ID,
+      status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
+    }));
+    await tx.run(UPDATE(this.db.RequestStepInstances).set({
+      status: "REJECTED",
+      completedAt: rejectedAt
+    }).where({ request_ID: task.request_ID, stepNo: task.stepNo }));
+    await tx.run(UPDATE(this.db.CARequests).set({
+      status_code: REQUEST_STATUS.REJECTED,
+      completedAt: rejectedAt
+    }).where({ ID: task.request_ID }));
+    await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_REJECTED", user, task.status_code, TASK_STATUS.REJECTED, req.data.remarks);
+    return true;
+  };
+
   _sendBackTask = async (req) => {
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req, tx);
@@ -664,6 +717,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     const teams = await this.master.run(SELECT.from(this.masterEntities.Teams));
     const teamsById = new Map(teams.map((team) => [team.ID, team]));
+    const submittedAt = new Date().toISOString();
     const stepEntries = selectedConfigs.map((config, index) => ({
       ID: cds.utils.uuid(),
       request_ID: requestId,
@@ -673,33 +727,67 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       activityDescription: config.activityDescription,
       processorTeam_ID: config.processorTeam_ID,
       processorTeamName: teamsById.get(config.processorTeam_ID)?.name || null,
-      status: index === 0 ? "OPEN" : "PENDING",
-      startedAt: index === 0 ? new Date().toISOString() : null
+      status: index === 0 ? "COMPLETED" : (index === 1 ? "OPEN" : "PENDING"),
+      startedAt: index <= 1 ? submittedAt : null,
+      completedAt: index === 0 ? submittedAt : null
     }));
     await tx.run(INSERT.into(this.db.RequestStepInstances).entries(stepEntries));
 
-    const firstStep = stepEntries[0];
-    const firstConfig = selectedConfigs[0];
-    const firstTeam = teamsById.get(firstConfig.processorTeam_ID);
+    const requesterStep = stepEntries[0];
+    const requesterConfig = selectedConfigs[0];
     await tx.run(INSERT.into(this.db.CATasks).entries({
       ID: cds.utils.uuid(),
       referenceNumber: this._taskReferenceNumber(requestId),
       request_ID: requestId,
-      stepInstance_ID: firstStep.ID,
-      stepNo: firstStep.stepNo,
-      taskName: firstConfig.taskName || firstConfig.stepName,
-      description: firstConfig.activityDescription,
-      assignedTeam_ID: firstConfig.processorTeam_ID,
-      assignedTeamName: firstTeam?.name || null,
+      stepInstance_ID: requesterStep.ID,
+      stepNo: requesterStep.stepNo,
+      taskName: requesterConfig.taskName || requesterConfig.stepName,
+      description: requesterConfig.activityDescription,
+      assignedTeam_ID: requesterConfig.processorTeam_ID,
+      assignedTeamName: teamsById.get(requesterConfig.processorTeam_ID)?.name || null,
+      assignedUser_ID: user.ID,
+      assignedName: user.displayName,
+      assignedEmail: user.email,
+      status_code: TASK_STATUS.APPROVED,
+      decision: "APPROVED",
+      isMandatory: requesterConfig.isMandatory,
+      isApproval: requesterConfig.isApproval,
+      completedAt: submittedAt,
+      dueDate: this._addDays(requesterConfig.slaDays || 2)
+    }));
+    await this._writeHistory(tx, requestId, requesterStep.stepNo, "STEP_COMPLETED", user, "OPEN", "COMPLETED", null);
+
+    const activeStep = stepEntries[1];
+    if (!activeStep) {
+      await tx.run(UPDATE(this.db.CARequests).set({
+        currentStep: requesterStep.stepNo,
+        status_code: REQUEST_STATUS.COMPLETED,
+        submittedAt,
+        completedAt: submittedAt
+      }).where({ ID: requestId }));
+      return;
+    }
+
+    const activeConfig = selectedConfigs[1];
+    await tx.run(INSERT.into(this.db.CATasks).entries({
+      ID: cds.utils.uuid(),
+      referenceNumber: this._taskReferenceNumber(requestId),
+      request_ID: requestId,
+      stepInstance_ID: activeStep.ID,
+      stepNo: activeStep.stepNo,
+      taskName: activeConfig.taskName || activeConfig.stepName,
+      description: activeConfig.activityDescription,
+      assignedTeam_ID: activeConfig.processorTeam_ID,
+      assignedTeamName: teamsById.get(activeConfig.processorTeam_ID)?.name || null,
       status_code: TASK_STATUS.OPEN,
-      isMandatory: firstConfig.isMandatory,
-      isApproval: firstConfig.isApproval,
-      dueDate: this._addDays(firstConfig.slaDays || 2)
+      isMandatory: activeConfig.isMandatory,
+      isApproval: activeConfig.isApproval,
+      dueDate: this._addDays(activeConfig.slaDays || 2)
     }));
     await tx.run(UPDATE(this.db.CARequests).set({
-      currentStep: firstStep.stepNo,
+      currentStep: activeStep.stepNo,
       status_code: REQUEST_STATUS.SUBMITTED,
-      submittedAt: new Date().toISOString()
+      submittedAt
     }).where({ ID: requestId }));
   }
 
@@ -869,7 +957,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   _assertMutableRequest(req, request) {
-    if ([REQUEST_STATUS.COMPLETED, "REJECTED"].includes(request.status_code)) {
+    if ([REQUEST_STATUS.COMPLETED, REQUEST_STATUS.REJECTED].includes(request.status_code)) {
       req.reject(409, "Completed or rejected requests cannot be changed");
     }
   }

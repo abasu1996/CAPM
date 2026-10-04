@@ -49,19 +49,9 @@ sap.ui.define([
     "Plant", "Sites", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
     "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
     "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
-    "ArReferences", "Currencies"
+    "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
+    "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments"
   ]);
-
-  // Only request-level fields that no variant defines itself. `description` and `dueDate`
-  // were removed: `description` collided with the material variants' own Material Description
-  // column and silently overwrote it.
-  const BULK_CLASSIFICATION_COLUMNS = [
-    { name: "title", label: "Title", required: true },
-    { name: "priorityCode", label: "Priority", required: false }
-  ];
-
-  const PER_ROW_VARIANT_COLUMN = { name: "requestVariantCode", label: "Process Variant", required: true };
-  const MATERIAL_VARIANTS = ["MAT_NEW", "MAT_EXISTING", "MAT_NEW_REF"];
 
   return BaseController.extend("flowmateca.controller.RequestCreate", {
     onInit: function () {
@@ -94,8 +84,7 @@ sap.ui.define([
         requesterEmail: "",
         requestDateTime: new Date().toLocaleString(),
 
-        requestMode: "SINGLE",
-        bulkRows: [],
+        bulkUpload: "SINGLE_LINE",
         processorTeamCode: "",
         processorTeamName: "",
         detailSectionTitle: "Process Details",
@@ -120,7 +109,6 @@ sap.ui.define([
       }
       this._renderDynamicForm();
       this._renderItemsTable();
-      this._renderBulkTable();
     },
     onProcessorTeamChange: function (event) {
 
@@ -224,197 +212,78 @@ sap.ui.define([
       this._filterVariants(typeCode);
       this._renderDynamicForm();
       this._renderItemsTable();
-      this._renderBulkTable();
     },
 
-    onRequestModeChange: function () {
-      this._renderDynamicForm();
+    onBulkUploadChange: async function () {
+      await this._renderDynamicForm();
       this._renderItemsTable();
-      this._renderBulkTable();
     },
 
-    _bulkColumns: function () {
-      const formModel = this.getView().getModel("form");
-      const variantCode = formModel.getProperty("/requestVariantCode");
-      const categoryCode = formModel.getProperty("/materialCategoryCode");
-      const isMaterial = formModel.getProperty("/requestTypeCode") === "MATERIAL_CODE";
+    _groupItemsBySite: function (items) {
+      const groups = new Map();
+      items.forEach(function (row) {
+        const siteId = String(row.siteId || "").trim();
+        if (!groups.has(siteId)) {
+          groups.set(siteId, { siteId: siteId, siteName: row.siteName || siteId, items: [] });
+        }
+        groups.get(siteId).items.push(row);
+      });
+      return Array.from(groups.values());
+    },
 
-      if (isMaterial && !categoryCode) {
-        return [];
-      }
-      if (!isMaterial && !variantCode) {
-        return [];
-      }
-
-      const seen = new Set();
-      const fields = [];
-      const variantCodes = isMaterial ? MATERIAL_VARIANTS : [variantCode];
-      variantCodes.forEach(function (code) {
-        FormDefinitions.getFields(code, categoryCode).forEach(function (definition) {
-          if (seen.has(definition.name)) {
-            return;
+    _firstMissingItemCell: function (items) {
+      for (let index = 0; index < items.length; index++) {
+        const missing = (this._itemColumns || []).find(function (col) {
+          if (!col.required) {
+            return false;
           }
-          seen.add(definition.name);
-          fields.push({
-            name: definition.name,
-            label: definition.label,
-            required: definition.required,
-            visibleWhen: definition.visibleWhen,
-            fromVariant: true
-          });
+          const value = items[index][col.name];
+          return value === undefined || value === null || String(value).trim() === "";
         });
-      });
-
-      const classification = isMaterial
-        ? BULK_CLASSIFICATION_COLUMNS.concat([PER_ROW_VARIANT_COLUMN])
-        : BULK_CLASSIFICATION_COLUMNS;
-      return classification.concat(fields);
-    },
-
-    _renderBulkTable: function () {
-      const table = this.byId("bulkTableHost");
-      if (!table) {
-        return;
-      }
-      const columns = this._bulkColumns();
-      this._bulkCols = columns;
-      table.destroyColumns();
-      table.unbindItems();
-      if (!columns.length) {
-        return;
-      }
-      columns.forEach(function (col) {
-        table.addColumn(new Column({
-          header: new Text({ text: col.label }),
-          width: "12rem"
-        }));
-      });
-      table.bindItems({
-        path: "form>/bulkRows",
-        template: new ColumnListItem({
-          cells: columns.map(function (col) {
-            return new Text({ text: `{form>${col.name}}` });
-          })
-        })
-      });
-    },
-
-    onExportBulkTemplate: function () {
-      const columns = this._bulkColumns();
-      if (!columns.length) {
-        MessageBox.warning("Select a request type and process variant first.");
-        return;
-      }
-      const formModel = this.getView().getModel("form");
-      const rows = formModel.getProperty("/bulkRows") || [];
-      const lines = [columns.map(function (col) { return col.label; })];
-      rows.forEach(function (row) {
-        lines.push(columns.map(function (col) { return row[col.name] || ""; }));
-      });
-      const csv = lines.map(function (line) {
-        return line.map(this._csvEscape).join(",");
-      }.bind(this)).join("\r\n");
-
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${formModel.getProperty("/requestVariantCode")}_bulk_template.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    },
-
-    onImportBulkCsv: function (event) {
-      const files = event.getParameter("files");
-      if (!files || !files.length) {
-        return;
-      }
-      const columns = this._bulkColumns();
-      const reader = new FileReader();
-      reader.onload = function () {
-        const parsed = this._parseCsv(String(reader.result));
-        if (!parsed.length) {
-          return;
+        if (missing) {
+          return `Row ${index + 1}: ${missing.label} is required.`;
         }
-        const header = parsed[0].map(function (cell) {
-          return String(cell).trim().toLowerCase();
-        });
-        const nameByHeader = {};
-        columns.forEach(function (col) {
-          nameByHeader[col.label.trim().toLowerCase()] = col.name;
-        });
-        const rows = parsed.slice(1)
-          .filter(function (row) {
-            return row.some(function (cell) { return cell !== ""; });
-          })
-          .map(function (row) {
-            const entry = {};
-            header.forEach(function (headerText, index) {
-              const key = nameByHeader[headerText];
-              if (key) {
-                entry[key] = row[index] !== undefined ? row[index] : "";
-              }
-            });
-            return entry;
-          });
-        this.getView().getModel("form").setProperty("/bulkRows", rows);
-        this.showSuccess(`${rows.length} request row(s) imported`);
-      }.bind(this);
-      reader.readAsText(files[0]);
-      event.getSource().clear();
-    },
-
-    _rowRequiredNames: function (row) {
-      const formModel = this.getView().getModel("form");
-      const categoryCode = formModel.getProperty("/materialCategoryCode");
-      const variantCode = row.requestVariantCode || formModel.getProperty("/requestVariantCode");
-      const names = new Set();
-      FormDefinitions.getFields(variantCode, categoryCode).forEach(function (definition) {
-        if (definition.required) {
-          names.add(definition.name);
-        }
-      });
-      return names;
-    },
-
-    _isRowFieldVisible: function (column, row) {
-      const rule = column.visibleWhen;
-      if (!rule) {
-        return true;
       }
-      const raw = row ? row[rule.field] : undefined;
-      const value = typeof rule.equals === "boolean"
-        ? String(raw).toLowerCase() === "true"
-        : raw;
-      return value === rule.equals;
+      return null;
     },
 
     _submitBulk: async function (form) {
-      const rows = form.bulkRows || [];
-      if (!rows.length) {
-        MessageBox.warning("Import a CSV file before submitting.");
+      const items = (form.details && form.details.items) || [];
+      if (!items.length) {
+        MessageBox.warning("Add at least one line item before submitting.");
         return;
       }
-      const columns = this._bulkColumns();
-      for (let index = 0; index < rows.length; index++) {
-        const requiredNames = this._rowRequiredNames(rows[index]);
-        const missing = columns.find(function (col) {
-          if (col.fromVariant ? !requiredNames.has(col.name) : !col.required) {
-            return false;
-          }
-          if (col.visibleWhen && !this._isRowFieldVisible(col, rows[index])) {
-            return false;
-          }
-          const value = rows[index][col.name];
-          return value === undefined || value === null || String(value).trim() === "";
-        }.bind(this));
-        if (missing) {
-          MessageBox.warning(`Row ${index + 1}: ${missing.label} is required.`);
-          return;
-        }
+      const unsited = items.findIndex(function (row) {
+        return !String(row.siteId || "").trim();
+      });
+      if (unsited >= 0) {
+        MessageBox.warning(`Row ${unsited + 1}: Site ID is required to group the requests.`);
+        return;
       }
+      const missing = this._firstMissingItemCell(items);
+      if (missing) {
+        MessageBox.warning(missing);
+        return;
+      }
+
+      const details = form.details || {};
+      const headerFields = {};
+      Object.keys(details).forEach(function (key) {
+        if (key !== "items") {
+          headerFields[key] = details[key];
+        }
+      });
+
+      const rows = this._groupItemsBySite(items).map(function (group) {
+        return Object.assign({}, headerFields, {
+          title: `Material Reservation - ${group.siteName}`,
+          priorityCode: form.priorityCode || "MEDIUM",
+          dueDate: form.dueDate || null,
+          items: group.items.map(function (row, index) {
+            return Object.assign({}, row, { itemNo: index + 1 });
+          })
+        });
+      });
 
       this.setBusy(true);
       try {
@@ -425,15 +294,11 @@ sap.ui.define([
               requestTypeCode: form.requestTypeCode,
               requestVariantCode: form.requestVariantCode,
               processorTeamCode: form.processorTeamCode,
-              rows: JSON.stringify(form.materialCategoryCode
-                ? rows.map(function (row) {
-                    return Object.assign({ materialCategory: form.materialCategoryCode }, row);
-                  })
-                : rows)
+              rows: JSON.stringify(rows)
             }
           }
         });
-        this.showSuccess(`${result.created} request(s) created`);
+        this.showSuccess(`${result.created} request(s) created from ${items.length} line item(s)`);
         this.navTo("requests");
       } catch (error) {
         this.showError(error);
@@ -454,14 +319,12 @@ sap.ui.define([
       this.getView().getModel("form").setProperty("/details", {});
       await this._renderDynamicForm();
       this._renderItemsTable();
-      this._renderBulkTable();
     },
 
     onMaterialCategoryChange: async function () {
       this.getView().getModel("form").setProperty("/requestVariantCode", "");
       this.getView().getModel("form").setProperty("/details", {});
       await this._renderDynamicForm();
-      this._renderBulkTable();
     },
 
     _renderDynamicForm: async function () {
@@ -473,7 +336,13 @@ sap.ui.define([
       const typeCode = formModel.getProperty("/requestTypeCode");
       const variantCode = formModel.getProperty("/requestVariantCode");
       const categoryCode = formModel.getProperty("/materialCategoryCode");
-      const fields = variantCode ? FormDefinitions.getFields(variantCode, categoryCode) : [];
+      const multipleItems = formModel.getProperty("/bulkUpload") === "MULTIPLE_LINE"
+        || typeCode === "MATERIAL_RESERVATION";
+      const fields = !variantCode
+        ? []
+        : (multipleItems
+          ? FormDefinitions.getHeaderFields(typeCode, variantCode, categoryCode)
+          : FormDefinitions.getFields(variantCode, categoryCode));
       const type = (this.getView().getModel("catalog").getProperty("/requestTypes") || [])
         .find(function (entry) {
           return entry.code === typeCode;
@@ -483,6 +352,16 @@ sap.ui.define([
       if (!fields.length) {
         return;
       }
+
+      fields.forEach(function (definition) {
+        if (!definition.defaultValue) {
+          return;
+        }
+        const path = `/details/${definition.name}`;
+        if (!formModel.getProperty(path)) {
+          formModel.setProperty(path, definition.defaultValue);
+        }
+      });
 
       await this._loadFieldCatalogs(fields);
       const simpleForm = new SimpleForm({
@@ -546,7 +425,7 @@ sap.ui.define([
       }.bind(this)));
     },
 
-    _applyAutoFill: function (definition, selectedKey) {
+    _applyAutoFill: function (definition, selectedKey, basePath) {
       if (!definition.autoFills || !definition.entity) {
         return;
       }
@@ -556,10 +435,10 @@ sap.ui.define([
       const match = rows.find(function (row) {
         return String(row[keyProperty]) === String(selectedKey);
       });
-      this.getView().getModel("form").setProperty(
-        `/details/${definition.autoFills.field}`,
-        match ? (match[definition.autoFills.from] || "") : ""
-      );
+      const target = basePath
+        ? `${basePath}/${definition.autoFills.field}`
+        : `/details/${definition.autoFills.field}`;
+      this.getView().getModel("form").setProperty(target, match ? (match[definition.autoFills.from] || "") : "");
     },
 
     // Spec-driven conditional fields: a definition may carry
@@ -597,11 +476,11 @@ sap.ui.define([
       }.bind(this));
     },
 
-    _createFieldControl: function (definition) {
+    _createFieldControl: function (definition, explicitPath) {
       const dataPath = definition.source === "request"
         ? `/${definition.name}`
         : `/details/${definition.name}`;
-      const path = `form>${dataPath}`;
+      const path = explicitPath || `form>${dataPath}`;
       let control;
       if (definition.type === "readonly") {
         control = new Input({
@@ -662,12 +541,14 @@ sap.ui.define([
           placeholder: definition.placeholder || `Search ${definition.label}`,
           selectionChange: function (event) {
             const item = event.getParameter("selectedItem");
-            this._applyAutoFill(definition, item ? item.getKey() : "");
+            const context = event.getSource().getBindingContext("form");
+            this._applyAutoFill(definition, item ? item.getKey() : "", context ? context.getPath() : null);
             this._applyConditionalVisibility();
           }.bind(this)
         }).bindProperty("selectedKey", path);
         control.bindItems({
           path: `catalog>/${definition.entity}`,
+          templateShareable: true,
           template: new ListItem({
             key: `{catalog>${key}}`,
             text: `{catalog>${text}}`,
@@ -691,7 +572,9 @@ sap.ui.define([
       }
       const formModel = this.getView().getModel("form");
       const typeCode = formModel.getProperty("/requestTypeCode");
-      const columns = FormDefinitions.getItemColumns(typeCode);
+      const variantCode = formModel.getProperty("/requestVariantCode");
+      const categoryCode = formModel.getProperty("/materialCategoryCode");
+      const columns = FormDefinitions.getItemColumns(typeCode, variantCode, categoryCode);
       this._itemColumns = columns;
 
       host.destroyColumns();
@@ -705,10 +588,11 @@ sap.ui.define([
         return;
       }
 
+      this._loadFieldCatalogs(columns);
       columns.forEach(function (col) {
         host.addColumn(new Column({
-          header: new Text({ text: col.label }),
-          width: col.type === "date" ? "11rem" : "12rem"
+          header: new Label({ text: col.label, required: !!col.required, wrapping: true }),
+          width: col.type === "date" ? "11rem" : "13rem"
         }));
       });
       host.addColumn(new Column({ hAlign: "End", width: "3rem" }));
@@ -717,19 +601,8 @@ sap.ui.define([
         path: "form>/details/items",
         template: new ColumnListItem({
           cells: columns.map(function (col) {
-            if (col.type === "date") {
-              return new DatePicker({
-                valueFormat: "yyyy-MM-dd",
-                displayFormat: "medium",
-                width: "100%"
-              }).bindValue(`form>${col.name}`);
-            }
-            return new Input({
-              type: col.type === "number" ? "Number" : "Text",
-              maxLength: col.maxLength || 0,
-              width: "100%"
-            }).bindValue(`form>${col.name}`);
-          }).concat([
+            return this._createFieldControl(col, `form>${col.name}`);
+          }.bind(this)).concat([
             new Button({
               icon: "sap-icon://delete",
               type: "Transparent",
@@ -740,14 +613,21 @@ sap.ui.define([
       });
     },
 
+    _renumberItems: function (items) {
+      items.forEach(function (row, index) {
+        row.itemNo = index + 1;
+      });
+      return items;
+    },
+
     onAddItemRow: function () {
       const formModel = this.getView().getModel("form");
       const items = formModel.getProperty("/details/items") || [];
       const blank = {};
       (this._itemColumns || []).forEach(function (col) {
-        blank[col.name] = "";
+        blank[col.name] = col.type === "checkbox" ? false : "";
       });
-      formModel.setProperty("/details/items", items.concat([blank]));
+      formModel.setProperty("/details/items", this._renumberItems(items.concat([blank])));
     },
 
     _onRemoveItemRow: function (event) {
@@ -756,9 +636,9 @@ sap.ui.define([
       const index = Number(path.slice(path.lastIndexOf("/") + 1));
       const formModel = this.getView().getModel("form");
       const items = formModel.getProperty("/details/items") || [];
-      formModel.setProperty("/details/items", items.filter(function (_row, rowIndex) {
+      formModel.setProperty("/details/items", this._renumberItems(items.filter(function (_row, rowIndex) {
         return rowIndex !== index;
-      }));
+      })));
     },
 
     onExportItemsCsv: function () {
@@ -818,19 +698,29 @@ sap.ui.define([
           })
           .map(function (row) {
             const item = {};
+            columns.forEach(function (col) {
+              item[col.name] = col.type === "checkbox" ? false : "";
+            });
             header.forEach(function (headerText, index) {
               const key = columnByHeader[headerText];
-              if (key) {
-                item[key] = row[index] !== undefined ? row[index] : "";
+              if (!key) {
+                return;
               }
-            });
+              const raw = row[index] !== undefined ? row[index] : "";
+              const col = columns.find(function (entry) { return entry.name === key; });
+              item[key] = col && col.type === "checkbox" ? this._asBoolean(raw) : raw;
+            }.bind(this));
             return item;
-          });
-        this.getView().getModel("form").setProperty("/details/items", items);
+          }.bind(this));
+        this.getView().getModel("form").setProperty("/details/items", this._renumberItems(items));
         this.showSuccess(`${items.length} row(s) imported`);
       }.bind(this);
       reader.readAsText(files[0]);
       event.getSource().clear();
+    },
+
+    _asBoolean: function (value) {
+      return value === true || ["true", "yes", "x", "1"].indexOf(String(value).trim().toLowerCase()) >= 0;
     },
 
     _parseCsv: function (text) {
@@ -890,10 +780,9 @@ sap.ui.define([
 
     onSubmit: async function () {
       const form = this.getView().getModel("form").getData();
-      if (form.requestMode === "BULK") {
-        const hasClassification = form.materialCategoryCode || form.requestVariantCode;
-        if (!form.requestTypeCode || !hasClassification || !form.processorTeamCode) {
-          MessageBox.warning("Request type, process variant and processor team are required.");
+      if (form.requestTypeCode === "MATERIAL_RESERVATION") {
+        if (!form.requestVariantCode || !form.processorTeamCode) {
+          MessageBox.warning("Process variant and processor team are required.");
           return;
         }
         return this._submitBulk(form);
@@ -918,6 +807,27 @@ sap.ui.define([
         MessageBox.warning(`${missing.definition.label} is required.`);
         missing.control.focus();
         return;
+      }
+
+      const itemRows = (form.details && form.details.items) || [];
+      if (form.bulkUpload === "MULTIPLE_LINE") {
+        if (!itemRows.length) {
+          MessageBox.warning("Add at least one line item, or switch back to Single Line Items.");
+          return;
+        }
+        for (let index = 0; index < itemRows.length; index++) {
+          const missingCell = (this._itemColumns || []).find(function (col) {
+            if (!col.required) {
+              return false;
+            }
+            const value = itemRows[index][col.name];
+            return value === undefined || value === null || String(value).trim() === "";
+          });
+          if (missingCell) {
+            MessageBox.warning(`Row ${index + 1}: ${missingCell.label} is required.`);
+            return;
+          }
+        }
       }
 
       this.setBusy(true);

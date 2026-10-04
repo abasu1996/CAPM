@@ -1,8 +1,11 @@
 code,name,description,isActive,sortOrder,requestType_code
-MAT_ENG_IT,Engineering and IT,Engineering and IT material code,1,10,MATERIAL_CODE
-MAT_ADMIN_CONS,Admin and Consumables,Admin and consumable material code,1,20,MATERIAL_CODE
-MAT_ZTRD_NEW,Trading Material - New,New ZTRD trading material,1,30,MATERIAL_CODE
-MAT_ZTRD_EXISTING,Trading Material - Existing,Change extension or DMS update,1,40,MATERIAL_CODE
+MAT_ENG_IT,Engineering and IT,Engineering and IT material code,false,10,MATERIAL_CODE
+MAT_ADMIN_CONS,Admin and Consumables,Admin and consumable material code,false,20,MATERIAL_CODE
+MAT_ZTRD_NEW,Trading Material - New,New ZTRD trading material,false,30,MATERIAL_CODE
+MAT_ZTRD_EXISTING,Trading Material - Existing,Change extension or DMS update,false,40,MATERIAL_CODE
+MAT_NEW,New,New material code,true,10,MATERIAL_CODE
+MAT_EXISTING,Existing,Change extension or DMS update of an existing material,true,20,MATERIAL_CODE
+MAT_NEW_REF,New with Reference,New material code copied from an existing one,true,30,MATERIAL_CODE
 SVC_NEW,New Service Code,Create a new service code,1,10,SERVICE_CODE
 SVC_EXISTING,Existing Service Code,Modify an existing service code,1,20,SERVICE_CODE
 EQP_NEW,New Equipment Code,Create a new equipment code,1,10,EQUIPMENT_CODE

@@ -2339,7 +2339,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         actor: req.user?.id,
         oldStatus: request.status_code,
         newStatus: request.status_code,
-        remarks: `Request assigned to ${sDisplayName}`
+        remarks: `Request assigned and reserved to ${sDisplayName}`
       });
 
       return true;
@@ -5693,12 +5693,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       })
     ]);
 
-    // if (bApproved) {
-    //   await this._ensureInitialGuidedTask(req, task.request_ID, {
-    //     ...request,
-    //     status_code: PROCESS_STATUS.DRAFT
-    //   }, { updateRequest: true });
-    // }
+    const oReservationUser = await this._currentReservationUser(req, Users);
+    const oApprover = oReservationUser.user;
 
     if (bApproved) {
       await this._ensureInitialGuidedTask(req, task.request_ID, {
@@ -5707,13 +5703,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }, {
         updateRequest: true,
         autoCompleteSteps: 2,
-        autoCompleteReason: "Auto-completed after LoA approval"
+        autoCompleteReason: "Auto-completed after LoA approval",
+        autoCompleteOwner: oApprover
       });
     }else {
       await this._closeLeadingStepsOnLoaRejection(req, task.request_ID, {
         ...request,
         status_code: PROCESS_STATUS.REJECTED
-      }, remarks);
+      }, remarks, oApprover);
     }
 
     await this._writeHistory(req, {
@@ -5740,7 +5737,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         oRequest,
         steps,
         iAutoCompleteSteps,
-        options.autoCompleteReason || "Auto-completed on request submission"
+        options.autoCompleteReason || "Auto-completed on request submission",
+        options.autoCompleteOwner
       );
       if (vResult !== null) {
         return { steps, firstTaskStep, autoCompleted: vResult };
@@ -5770,7 +5768,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       firstTaskStep
     };
   }
-    async _autoCompleteLeadingSteps(req, requestId, request, steps, iCount, sReason) {
+    async _autoCompleteLeadingSteps(req, requestId, request, steps, iCount, sReason, oOwner = null) {
     const tx = cds.tx(req);
     const aAutoSteps = steps.filter((step) => !this._isClosingStep(step)).slice(0, iCount);
 
@@ -5796,7 +5794,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await this._createTask(req, requestId, step, {
         request,
         autoComplete: true,
-        autoCompleteRemarks: sReason
+        autoCompleteRemarks: sReason,
+        ownerUser: Number(step.stepNo) === 2 ? oOwner : null
       });
     }
 
@@ -5854,7 +5853,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     return true;
   }
-    async _closeLeadingStepsOnLoaRejection(req, requestId, request, remarks) {
+    async _closeLeadingStepsOnLoaRejection(req, requestId, request, remarks, oOwner = null) {
     const tx = cds.tx(req);
     const steps = await this._getSteps(req, request.subProcessType_code);
     const [oFirstStep, oSecondStep] = steps.filter((step) => !this._isClosingStep(step));
@@ -5887,7 +5886,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         request,
         autoComplete: true,
         autoDecision: "REJECTED",
-        autoCompleteRemarks: `Rejected via LoA approval${remarks ? `: ${remarks}` : ""}`
+        autoCompleteRemarks: `Rejected via LoA approval${remarks ? `: ${remarks}` : ""}`,
+        ownerUser: Number(oSecondStep.stepNo) === 2 ? oOwner : null
       });
     }
 
@@ -5922,7 +5922,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       && request?.predecessor_ID
       ? await this._getRequest(req, request.predecessor_ID)
       : null;
-    const oTaskOwnership = this._taskOwnershipForStep(request, step, oPredecessor);
+    const oTaskOwnership = this._taskOwnershipForStep(
+      request,
+      step,
+      oPredecessor,
+      options.autoComplete ? options.ownerUser : null
+    );
     const aExistingTasks = await cds.tx(req).run(
       SELECT.from(this.entities.ProcessTasks).where({ request_ID: requestId, stepNo: step.stepNo })
     );
@@ -6018,11 +6023,24 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
   }
 
-  _taskOwnershipForStep(request, step, predecessor = null) {
+  _taskOwnershipForStep(request, step, predecessor = null, ownerUser = null) {
     const bRequesterStep = /requester/i.test(step?.role || "") || Number(step?.stepNo || 0) === 1;
     const sRequesterName = request?.requester || null;
     const sProcessorName = request?.processor || null;
     const sProcessorEmail = request?.processorEmail || null;
+
+    if (ownerUser?.ID) {
+      const sOwnerName = this._userDisplayName(ownerUser);
+      return {
+        assignedUser_ID: ownerUser.ID,
+        processorUser_ID: ownerUser.ID,
+        processorTeam_ID: null,
+        processorTeamName: null,
+        assignedTo: sOwnerName,
+        processor: sOwnerName,
+        processorEmail: this._userEmail(ownerUser)
+      };
+    }
 
     // Pending-UAC vendor steps continue with the requester of the predecessor
     // request, rather than inheriting the successor request's processor.

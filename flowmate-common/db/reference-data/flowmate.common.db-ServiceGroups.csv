@@ -1,0 +1,4 @@
+ID,servicegroupCode,servicegroupDescription,isActive
+8a95c68b-6a64-5395-af7e-0fe819940422,SG100,Technical Services,true
+b5cd662f-8874-5ac4-b1fa-2df677899020,SG200,Professional Services,true
+e798a1b7-5baa-56ae-8598-a31a55db442f,SG300,Maintenance Services,true

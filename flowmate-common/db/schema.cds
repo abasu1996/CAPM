@@ -219,3 +219,84 @@ entity ArReferences : cuid, managed {
   arReferenceDescription : String(180) not null;
   isActive : Boolean default true;
 }
+
+entity PaymentTerms {
+  key code        : String(40);
+      name        : String(160) not null;
+      description : String(500);
+      isActive    : Boolean default true;
+      sortOrder   : Integer default 0;
+}
+
+entity SystemContractBasePO {
+  key code        : String(40);
+      name        : String(160) not null;
+      description : String(500);
+      isActive    : Boolean default true;
+      sortOrder   : Integer default 0;
+}
+
+entity ProcurementCategories {
+  key code        : String(40);
+      name        : String(160) not null;
+      description : String(500);
+      isActive    : Boolean default true;
+      sortOrder   : Integer default 0;
+}
+
+entity ItemCategories {
+  key code        : String(40);
+      name        : String(160) not null;
+      description : String(500);
+      isActive    : Boolean default true;
+      sortOrder   : Integer default 0;
+}
+
+entity AccountAssignments {
+  key code        : String(40);
+      name        : String(160) not null;
+      description : String(500);
+      isActive    : Boolean default true;
+      sortOrder   : Integer default 0;
+}
+
+entity ServiceCategories {
+  key code        : String(40);
+      name        : String(160) not null;
+      description : String(500);
+      isActive    : Boolean default true;
+      sortOrder   : Integer default 0;
+}
+
+entity UnitsOfMeasure {
+  key code        : String(40);
+      name        : String(160) not null;
+      description : String(500);
+      isActive    : Boolean default true;
+      sortOrder   : Integer default 0;
+}
+
+entity Entity : cuid, managed {
+  code : String(40);
+  description : String(160) not null;
+  isActive : Boolean default true;
+}
+
+entity Projects : cuid, managed {
+  projectID : String(40);
+  projectCategory : String(160) not null;
+  projectDescription : LargeString;
+  isActive : Boolean default true;
+}
+
+entity ExtensionMaterialGroup : cuid, managed {
+  extensionMaterialGroupCode : String(40) not null;
+  extensionMaterialGroupDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity ContractType : cuid, managed {
+  contractTypeCode : String(40) not null;
+  contractTypeDescription : String(180) not null;
+  isActive : Boolean default true;
+}

@@ -1,0 +1,7 @@
+ID,materialCode,materialDescription,isActive
+a873a029-ce48-5228-9776-db733db6f640,MAT-100001,Outdoor Antenna Unit 900MHz,true
+f6c74def-6606-5d0d-a2a3-69a36cb9035c,MAT-100002,Baseband Processing Unit,true
+c922a19c-3cad-53bc-bf6c-24f26a818951,MAT-100003,Fibre Optic Cable 24-Core,true
+39eb5708-d90f-5464-b13c-5af38bc06109,MAT-100004,Rectifier Module 48V,true
+a77306fd-5a7e-55c1-a2ca-b292c2aa4a89,MAT-100005,Battery Bank 48V 200Ah,true
+a3733b34-2ffa-5f7f-be58-c368515616f4,MAT-100006,Microwave Radio Link Unit,true

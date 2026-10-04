@@ -29,7 +29,18 @@ const SHARED_ENTITIES = [
   "AvailabilityCheck",
   "SerialNumberProfile",
   "DistributionChannel",
-  "ArReferences"
+  "ArReferences",
+  "PaymentTerms",
+  "SystemContractBasePO",
+  "ProcurementCategories",
+  "ItemCategories",
+  "AccountAssignments",
+  "ServiceCategories",
+  "UnitsOfMeasure",
+  "Entity",
+  "Projects",
+  "ExtensionMaterialGroup",
+  "ContractType"
 ];
 
 module.exports = class CAMasterDataService extends cds.ApplicationService {

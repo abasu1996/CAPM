@@ -1,0 +1,5 @@
+ID,costCenterCode,costCenterName,isActive
+6d8971ea-5465-5321-966b-a7bb9631ba32,CC1000,CC1000 - Network Operations,true
+368d16f4-342a-5ef8-92e5-6b7e736b6810,CC2000,CC2000 - Information Technology,true
+4bd8abe9-fdbf-59ab-9084-71fd2d422f28,CC3000,CC3000 - Marketing,true
+c8f6b966-843a-5dac-b4ad-b1431b6b4598,CC4000,CC4000 - Corporate Services,true

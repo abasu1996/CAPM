@@ -1,0 +1,7 @@
+ID,siteId,siteName,isActive
+3a6324c3-1e05-5674-b236-8a03b6dce06a,SITE-CMB-001,Colombo Central Tower,true
+70c807b6-a56e-5bd5-8965-05bd4a7b2b7b,SITE-CMB-002,Colombo Fort Rooftop,true
+c4eb2d9b-04a3-5209-882b-d4a21b4884b8,SITE-KDY-001,Kandy Hill Tower,true
+d11c0aee-b5cc-5a46-9ab3-39dadbbb20b4,SITE-GLE-001,Galle Coastal Tower,true
+289dd8aa-f372-5e23-8eb0-315c04bee5ff,SITE-JAF-001,Jaffna North Tower,true
+f9cff136-5154-5f9a-a351-41b3feb9a354,SITE-NEG-001,Negombo Beach Tower,true

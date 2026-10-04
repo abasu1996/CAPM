@@ -1,0 +1,6 @@
+ID,incotermsCode,incotermsDescription,isActive
+7ee457eb-2f79-5828-9b52-9081f1dd448d,CIF,CIF - Cost Insurance and Freight,true
+47033726-6438-5b6d-b8e1-6bfcb402bd38,FOB,FOB - Free On Board,true
+a8f18e7f-63f2-555a-95a3-ac6e77d73ce3,EXW,EXW - Ex Works,true
+a45cdd52-fc9c-5930-9b1e-49cef62ac03b,DDP,DDP - Delivered Duty Paid,true
+8efbcb2a-d156-57ac-bd55-686adea79f0b,CFR,CFR - Cost and Freight,true

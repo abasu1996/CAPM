@@ -238,4 +238,100 @@ service CommonMasterDataService {
     arReferenceDescription : String(180) not null;
     isActive : Boolean default true;
   }
+
+  @cds.persistence.skip
+  entity PaymentTerms {
+    key code        : String(40);
+        name        : String(160) not null;
+        description : String(500);
+        isActive    : Boolean default true;
+        sortOrder   : Integer default 0;
+  }
+
+  @cds.persistence.skip
+  entity SystemContractBasePO {
+    key code        : String(40);
+        name        : String(160) not null;
+        description : String(500);
+        isActive    : Boolean default true;
+        sortOrder   : Integer default 0;
+  }
+
+  @cds.persistence.skip
+  entity ProcurementCategories {
+    key code        : String(40);
+        name        : String(160) not null;
+        description : String(500);
+        isActive    : Boolean default true;
+        sortOrder   : Integer default 0;
+  }
+
+  @cds.persistence.skip
+  entity ItemCategories {
+    key code        : String(40);
+        name        : String(160) not null;
+        description : String(500);
+        isActive    : Boolean default true;
+        sortOrder   : Integer default 0;
+  }
+
+  @cds.persistence.skip
+  entity AccountAssignments {
+    key code        : String(40);
+        name        : String(160) not null;
+        description : String(500);
+        isActive    : Boolean default true;
+        sortOrder   : Integer default 0;
+  }
+
+  @cds.persistence.skip
+  entity ServiceCategories {
+    key code        : String(40);
+        name        : String(160) not null;
+        description : String(500);
+        isActive    : Boolean default true;
+        sortOrder   : Integer default 0;
+  }
+
+  @cds.persistence.skip
+  entity UnitsOfMeasure {
+    key code        : String(40);
+        name        : String(160) not null;
+        description : String(500);
+        isActive    : Boolean default true;
+        sortOrder   : Integer default 0;
+  }
+
+  @cds.persistence.skip
+  entity Entity {
+    key ID : UUID;
+    code : String(40);
+    description : String(160) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity Projects {
+    key ID : UUID;
+    projectID : String(40);
+    projectCategory : String(160) not null;
+    projectDescription : LargeString;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity ExtensionMaterialGroup {
+    key ID : UUID;
+    extensionMaterialGroupCode : String(40) not null;
+    extensionMaterialGroupDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity ContractType {
+    key ID : UUID;
+    contractTypeCode : String(40) not null;
+    contractTypeDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
 }

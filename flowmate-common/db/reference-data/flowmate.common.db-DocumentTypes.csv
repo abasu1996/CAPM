@@ -1,0 +1,6 @@
+ID,documentTypeCode,documentTypeDescription,isActive
+6d5953c3-7d72-55be-87c5-e931bf525e7d,NB,NB - Standard PO,true
+978f6af3-64fa-55db-bbe3-6048b5618594,FO,FO - Framework Order,true
+ae5d2263-a5ea-5f31-9225-4e66355d0ab3,ZCTR,ZCTR - Contract Release,true
+614604ea-bf7a-5a4e-b9fc-f2d1dccad1d0,ZFOC,ZFOC - Free of Charge,true
+7dbdcf9c-6a57-5d4c-8284-8a347bcc18ec,ZCON,ZCON - Consumables,true

@@ -126,7 +126,7 @@
                     </FlexBox>
                   </content>
                 </Panel>
-                <Panel headerText="Bulk Upload Items" class="caFormSection" visible="{= ${detail>/hasDetailItems} }">
+                <Panel headerText="Line Items" class="caFormSection" visible="{= ${detail>/hasDetailItems} }">
                   <content>
                     <ScrollContainer horizontal="true" vertical="false" width="100%">
                       <Table id="detailItemsTable" class="caWorklistTable"/>

@@ -25,26 +25,18 @@ entity RequestVariants : ConfigCode {
 entity RequestStatuses : ConfigCode {};
 entity TaskStatuses : ConfigCode {};
 entity Priorities : ConfigCode {};
-entity UnitsOfMeasure : ConfigCode {};
 entity ExternalMaterialGroups : ConfigCode {};
 entity CoupaCommodityCodes : ConfigCode {};
 entity Warehouses : ConfigCode {};
 entity PurchaseOrderTypes : ConfigCode {};
-entity ProcurementCategories : ConfigCode {};
-entity PaymentTerms : ConfigCode {};
-entity SystemContractBasePO : ConfigCode {};
 entity ProjectTypes : ConfigCode {};
 entity ContractCategories : ConfigCode {};
-entity ItemCategories : ConfigCode {};
-entity AccountAssignments : ConfigCode {};
 entity ContractTypes : ConfigCode {};
 entity ReservationProjects : ConfigCode {};
 entity ReservationBatches : ConfigCode {};
 entity BusinessEntities : ConfigCode {};
 entity ProjectScopes : ConfigCode {};
 entity MaterialTypes : ConfigCode {};
-entity ServiceCategories : ConfigCode {};
-entity ArReferences : ConfigCode {};
 entity ProjectCategories : ConfigCode {};
 entity MaterialCategories : ConfigCode {};
 
@@ -207,7 +199,61 @@ entity MaterialCodeDetails : cuid, managed {
   dmsUpdate              : Boolean default false;
   plant_code             : String(40);
   description            : String(40);
-  unitOfMeasure          : Association to UnitsOfMeasure;
+  unitOfMeasure          : Association to common.UnitsOfMeasure;
+  materialGroup_code     : String(40);
+  externalMaterialGroup  : Association to ExternalMaterialGroups;
+  profitCenter_code      : String(40);
+  snp                    : String(60);
+  hsCode                 : String(40);
+  valuationClass_code    : String(40);
+  coupaCommodityCode     : Association to CoupaCommodityCodes;
+  storageLocation        : String(40);
+  salesOrganization      : String(40);
+  distributionChannel    : String(40);
+  division               : String(40);
+  deliveringPlant_code   : String(40);
+  taxClass               : String(40);
+  accountAssignmentGroup : String(60);
+  productHierarchy       : String(120);
+  serialNumberProfile    : String(80);
+  inspectionStock        : Boolean default false;
+  sourceList             : Boolean default false;
+  commodityImportCode    : String(60);
+  itemName               : String(160);
+  itemCategory           : String(40);
+  unitsPerItem           : Decimal(15,3);
+  unitPrice              : Decimal(15,2);
+  taxPercentage          : Decimal(5,2);
+  isSaleable             : Boolean;
+  isSerialized           : Boolean;
+  requiredAgents         : String(255);
+  vendor                 : Association to common.Vendors;
+  defaultWarrantyPeriod  : Integer;
+  warrantyType           : String(80);
+  valueType              : String(80);
+  sbu                    : String(80);
+  configurationId        : String(80);
+  grProcessingTime       : String(60);
+  perUnitPrice           : Decimal(15,2);
+  approvalDocumentsAttachment: String(255);
+  dmsSapMaterialCode     : String(40);
+  materialType           : String(60);
+  mrpType                : String(60);
+  availabilityCheck      : String(60);
+  industrySector         : String(60) default 'TELECOMMUNICATION';
+  items : Composition of many MaterialCodeItems
+            on items.details = $self;
+}
+entity MaterialCodeItems : cuid, managed {
+  details : Association to MaterialCodeDetails not null;
+  itemNo  : Integer;
+  materialCategory       : String(40);
+  transactionType        : String(40);
+  referenceMaterialCode  : String(40);
+  dmsUpdate              : Boolean default false;
+  plant_code             : String(40);
+  description            : String(40);
+  unitOfMeasure          : Association to common.UnitsOfMeasure;
   materialGroup_code     : String(40);
   externalMaterialGroup  : Association to ExternalMaterialGroups;
   profitCenter_code      : String(40);
@@ -251,19 +297,37 @@ entity MaterialCodeDetails : cuid, managed {
   industrySector         : String(60) default 'TELECOMMUNICATION';
 }
 
+
 entity ServiceCodeDetails : cuid, managed {
   request            : Association to CARequests not null;
   transactionType    : String(40);
   referenceServiceCode: String(40);
   serviceCategory    : String(80);
   serviceDescription : String(40);
-  unitOfMeasure      : Association to UnitsOfMeasure;
+  unitOfMeasure      : Association to common.UnitsOfMeasure;
+  serviceGroup_code   : String(40);
+  valuationClass_code : String(40);
+  coupaCommodityCode : Association to CoupaCommodityCodes;
+  supportingAttachment: String(255);
+  remarks            : LargeString;
+  items : Composition of many ServiceCodeItems
+            on items.details = $self;
+}
+entity ServiceCodeItems : cuid, managed {
+  details : Association to ServiceCodeDetails not null;
+  itemNo  : Integer;
+  transactionType    : String(40);
+  referenceServiceCode: String(40);
+  serviceCategory    : String(80);
+  serviceDescription : String(40);
+  unitOfMeasure      : Association to common.UnitsOfMeasure;
   serviceGroup_code   : String(40);
   valuationClass_code : String(40);
   coupaCommodityCode : Association to CoupaCommodityCodes;
   supportingAttachment: String(255);
   remarks            : LargeString;
 }
+
 
 entity EquipmentCodeDetails : cuid, managed {
   request          : Association to CARequests not null;
@@ -278,7 +342,25 @@ entity EquipmentCodeDetails : cuid, managed {
   supportingAttachment: String(255);
   siteName         : String(180);
   materialDescription: String(180);
+  items : Composition of many EquipmentCodeItems
+            on items.details = $self;
 }
+entity EquipmentCodeItems : cuid, managed {
+  details : Association to EquipmentCodeDetails not null;
+  itemNo  : Integer;
+  transactionType  : String(40);
+  siteId           : String(80);
+  materialCode     : String(40);
+  serialNumber     : String(100);
+  wbsElement       : String(80);
+  commissionedDate : Date;
+  approver          : Association to common.Users;
+  remarks          : LargeString;
+  supportingAttachment: String(255);
+  siteName         : String(180);
+  materialDescription: String(180);
+}
+
 
 entity ProjectCodeDetails : cuid, managed {
   request                 : Association to CARequests not null;
@@ -302,7 +384,34 @@ entity ProjectCodeDetails : cuid, managed {
   projectId               : String(80);
   projectCategory         : String(80);
   projectDescription      : String(255);
+  items : Composition of many ProjectCodeItems
+            on items.details = $self;
 }
+entity ProjectCodeItems : cuid, managed {
+  details : Association to ProjectCodeDetails not null;
+  itemNo  : Integer;
+  selectionMode           : String(20);
+  transactionType         : String(40);
+  requestedByArea         : String(40);
+  functionLocationRequired: Boolean default false;
+  activityRequired        : Boolean default false;
+  projectName             : String(180);
+  vendor                  : Association to common.Vendors;
+  scope                   : LargeString;
+  entityCode              : String(60);
+  projectType             : Association to ProjectTypes;
+  arReference             : String(80);
+  functionLocation        : String(80);
+  activityNumber          : String(80);
+  remarks                 : LargeString;
+  supportingAttachment    : String(255);
+  siteId                  : String(80);
+  siteName                : String(180);
+  projectId               : String(80);
+  projectCategory         : String(80);
+  projectDescription      : String(255);
+}
+
 
 entity MaterialReservationDetails : cuid, managed {
   request          : Association to CARequests not null;
@@ -310,6 +419,7 @@ entity MaterialReservationDetails : cuid, managed {
   batch            : String(60);
   engineeringType  : String(40);
   requestType      : String(40);
+  materialType     : String(40);
   deliveryType     : String(40);
   warehouse        : Association to Warehouses;
   allocationOwner  : Association to common.Users;
@@ -322,10 +432,19 @@ entity MaterialReservationDetails : cuid, managed {
 entity MaterialReservationItems : cuid, managed {
   details      : Association to MaterialReservationDetails not null;
   itemNo       : Integer;
+  siteId       : String(80);
+  siteName     : String(180);
+  sapCode      : String(60);
+  indentWo     : String(80);
+  equipmentNo  : String(80);
   materialCode: String(40);
   description : String(180);
+  plant        : String(40);
+  storageLocation: String(40);
+  ctlType      : String(20);
   quantity    : Decimal(15,3);
-  unitOfMeasure: Association to UnitsOfMeasure;
+  unitOfMeasure: Association to common.UnitsOfMeasure;
+  comments     : LargeString;
   vendor      : Association to common.Vendors;
 }
 
@@ -396,7 +515,7 @@ entity PurchaseOrderDetails : cuid, managed {
   purchaseOrderType       : Association to PurchaseOrderTypes;
   contractBased           : Boolean default false;
   contractNumber          : String(80);
-  procurementCategory     : Association to ProcurementCategories;
+  procurementCategory     : Association to common.ProcurementCategories;
   division                : String(80);
   delegatedUser           : Association to common.Users;
   specialPersonArea       : String(80);
@@ -419,7 +538,7 @@ entity PurchaseOrderDetails : cuid, managed {
   currency                : Association to common.Currencies;
   plant_code              : String(40);
   totalValue              : Decimal(17,2);
-  paymentTerms            : Association to PaymentTerms;
+  paymentTerms            : Association to common.PaymentTerms;
   remarks                 : LargeString;
   termsOfDelivery         : LargeString;
   warranty                : LargeString;
@@ -447,7 +566,7 @@ entity PurchaseOrderItems : cuid, managed {
   materialOrService: String(80);
   description      : String(180);
   quantity         : Decimal(15,3);
-  unitOfMeasure    : Association to UnitsOfMeasure;
+  unitOfMeasure    : Association to common.UnitsOfMeasure;
   unitPrice        : Decimal(17,2);
   taxCode          : String(40);
   deliveryDate     : Date;
@@ -494,39 +613,8 @@ entity ServiceEntrySheetItems : cuid, managed {
   serviceCode: String(80);
   description: String(180);
   quantity   : Decimal(15,3);
-  unitOfMeasure: Association to UnitsOfMeasure;
+  unitOfMeasure: Association to common.UnitsOfMeasure;
   value      : Decimal(17,2);
   poNumber     : String(80);
   poLineItemNo : String(40);
-}
-
-entity AccountAssignment : cuid, managed {
-  code : String(40);
-  description : String(160) not null;
-  isActive    : Boolean default true;
-}
-
-entity Entity: cuid, managed{
-  code : String(40);
-  description : String(160) not null;
-  isActive    : Boolean default true;
-}
-
-entity Projects : cuid, managed{
-  projectID : String(40);
-  projectCategory : String(160) not null;
-  projectDescription : LargeString;
-  isActive    : Boolean default true;
-}
-
-entity ExtensionMaterialGroup : cuid, managed {
-  extensionMaterialGroupCode : String(40) not null;
-  extensionMaterialGroupDescription : String(180) not null;
-  isActive : Boolean default true;
-}
-
-entity ContractType : cuid, managed {
-  contractTypeCode : String(40) not null;
-  contractTypeDescription : String(180) not null;
-  isActive : Boolean default true;
 }

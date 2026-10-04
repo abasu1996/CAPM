@@ -1056,7 +1056,11 @@
             <content>
                 <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
                     <Label text="{i18n>subProcessTypeLabel}" required="true" />
-                    <Select selectedKey="{stepEdit>/subProcessType_code}" items="{/ProcessSubTypes}" required="true" forceSelection="false">
+                    <Select
+                        selectedKey="{stepEdit>/subProcessType_code}"
+                        items="{path: '/ProcessSubTypes', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
+                        required="true"
+                        forceSelection="false">
                         <core:Item key="{code}" text="{name}" />
                     </Select>
                     <Label text="{i18n>stepLabel}" required="true" />
