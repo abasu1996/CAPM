@@ -1751,14 +1751,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("UPDATE", ProcessTasks, async (req) => {
-      await this._rejectIfTaskRequestLocked(req);
+      const sTaskId = this._requestIdFromReq(req);
+      const oExistingTask = sTaskId ? await this._getTask(req, sTaskId) : null;
+
+      if (!oExistingTask) {
+        return req.reject(404, "Selected task was not found");
+      }
+
+      await this._rejectIfTaskAssignedToAnotherUser(req, oExistingTask, Users);
+      await this._rejectIfParentRequestTerminal(req, oExistingTask.request_ID);
 
       if (!req.data.processorUser_ID) {
         return;
       }
-
-      const sTaskId = this._requestIdFromReq(req);
-      const oExistingTask = sTaskId ? await this._getTask(req, sTaskId) : null;
 
       if (oExistingTask?.processorTeam_ID && !oExistingTask.processorUser_ID) {
         return req.reject(409, "A configured team task cannot be assigned through the Processor field; claim it from the team queue");
@@ -1784,7 +1789,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         );
       }
 
-      await this._rejectIfTaskRequestLocked(req);
+      await this._rejectIfTaskAssignedToAnotherUser(req, oTask, Users);
+      await this._rejectIfParentRequestTerminal(req, oTask?.request_ID);
     });
 
     this.after("CREATE", ProcessTasks, async (task, req) => {
@@ -2135,8 +2141,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const request = await this._getRequest(req, task.request_ID);
 
-      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
-
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
       }
@@ -2178,8 +2182,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
 
       const request = await this._getRequest(req, task.request_ID);
-
-      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
@@ -2414,8 +2416,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
 
-      await this._rejectIfRequestLocked(req, task.request_ID);
-      await this._rejectIfRequestReservedByAnotherUser(req, await this._getRequest(req, task.request_ID), Users);
+      await this._rejectIfParentRequestTerminal(req, task.request_ID);
 
       if (!await this._isConfiguredStatus(req, TaskStatus, statusCode)) {
         return req.reject(400, "Select a valid task status");
@@ -2562,8 +2563,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
 
-      await this._rejectIfRequestLocked(req, task.request_ID);
-      await this._rejectIfRequestReservedByAnotherUser(req, await this._getRequest(req, task.request_ID), Users);
+      await this._rejectIfParentRequestTerminal(req, task.request_ID);
 
       const oProcessor = await this._getUser(req, processorUserId, Users);
 
@@ -2683,8 +2683,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
       }
-
-      await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
       const oReservationUser = await this._currentReservationUser(req, Users);
       const oCurrentUser = oReservationUser.user;
@@ -4561,11 +4559,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     await this._rejectIfRequestReservedByAnotherUser(req, request);
   }
 
-  async _rejectIfTaskRequestLocked(req) {
-    const taskId = this._requestIdFromReq(req);
-    const task = taskId ? await this._getTask(req, taskId) : null;
+  async _rejectIfParentRequestTerminal(req, requestId) {
+    if (!requestId) return;
 
-    await this._rejectIfRequestLocked(req, task?.request_ID || req.data?.request_ID);
+    const request = await this._getRequest(req, requestId);
+    if (!request) {
+      return req.reject(404, "The request for this task was not found");
+    }
+    if (this._isLockedRequest(request)) {
+      return this._rejectLockedRequest(req);
+    }
   }
 
   async _rejectIfInvolvedPartyRequestLocked(req) {
@@ -5033,8 +5036,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
 
     const request = await this._getRequest(req, task.request_ID);
-
-    await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
     if (this._isLockedRequest(request)) {
       return this._rejectLockedRequest(req);
