@@ -657,6 +657,7 @@ sap.ui.define([
 
             this.getView().getModel("stepEdit").setData({
                 ...oEntry,
+                stepType: oEntry.stepType || "PROCESSING",
                 isActiveDemandTask: Boolean(oEntry.isActiveDemandTask),
                 isVendorNotification: Boolean(oEntry.isVendorNotification),
                 isEdit: true,
@@ -667,6 +668,17 @@ sap.ui.define([
 
         onCloseProcessStepDialog() {
             this.byId("processStepDialog").close();
+        },
+
+        onStepTypeChange() {
+            const oModel = this.getView().getModel("stepEdit");
+            if (oModel.getProperty("/stepType") === "LOA") {
+                oModel.setProperty("/processorTeam_ID", null);
+                oModel.setProperty("/processorTeamName", null);
+                oModel.setProperty("/role", null);
+                oModel.setProperty("/isVendorNotification", false);
+                oModel.setProperty("/isActiveDemandTask", false);
+            }
         },
 
         async onSaveProcessStep() {
@@ -681,6 +693,7 @@ sap.ui.define([
                 subProcessType_code: oEntry.subProcessType_code,
                 stepNo: Number(oEntry.stepNo),
                 stepName: oEntry.stepName,
+                stepType: oEntry.stepType || "PROCESSING",
                 activityDescription: oEntry.activityDescription,
                 processorTeam_ID: bRequesterNotification ? null : (oEntry.processorTeam_ID || null),
                 processorTeamName: bRequesterNotification ? null : (oEntry.processorTeamName || null),
@@ -899,6 +912,7 @@ sap.ui.define([
                 subProcessType_code: "",
                 stepNo: "",
                 stepName: "",
+                stepType: "PROCESSING",
                 activityDescription: "",
                 processorTeam_ID: "",
                 processorTeamName: "",

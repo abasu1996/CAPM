@@ -5895,6 +5895,7 @@
             stretchOnPhone="true">
             <content>
                 <VBox class="sapUiMediumMargin" renderType="Bare">
+                    <MessageStrip text="{i18n>loaPreviewTimingHint}" type="Information" showIcon="true" class="sapUiSmallMarginBottom" />
                     <ObjectStatus
                         icon="sap-icon://approvals"
                         title="{i18n>loaMatchedRuleLabel}"

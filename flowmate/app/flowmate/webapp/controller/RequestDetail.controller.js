@@ -2,10 +2,12 @@ sap.ui.define([
     "flowmate/controller/BaseController",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
+    "sap/m/SelectDialog",
+    "sap/m/StandardListItem",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/json/JSONModel"
-], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
+], (BaseController, MessageBox, MessageToast, SelectDialog, StandardListItem, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     return BaseController.extend("flowmate.controller.RequestDetail", {
@@ -55,7 +57,7 @@ sap.ui.define([
                                 oRequest?.reservedBy
                                 && oRequest?.processorUser_ID
                                 && oRequest.processorUser_ID === sCurrentUserId
-                                && !["COMPLETED", "REJECTED"].includes(oRequest?.status_code)
+                                && !["COMPLETED", "REJECTED", "PENDING_APPROVAL"].includes(oRequest?.status_code)
                             )
                         );
                         this.getView().getModel("statusEdit").setProperty(
@@ -77,6 +79,75 @@ sap.ui.define([
 
             if (oBinding) {
                 oBinding.refresh(true);
+            }
+        },
+
+        onChangeRequestTeamAndRelease() {
+            if (!this._oChangeRequestTeamDialog) {
+                this._oChangeRequestTeamDialog = new SelectDialog({
+                    title: this.getText("changeRequestTeamDialogTitle"),
+                    noDataText: this.getText("noProcessorTeamsMessage"),
+                    search: (oEvent) => this._filterProcessorTeams(oEvent.getSource(), oEvent.getParameter("value")),
+                    liveChange: (oEvent) => this._filterProcessorTeams(oEvent.getSource(), oEvent.getParameter("value")),
+                    confirm: (oEvent) => this._confirmProcessorTeamChange(oEvent.getParameter("selectedItem"))
+                });
+                this._oChangeRequestTeamDialog.bindAggregation("items", {
+                    path: "/Teams",
+                    filters: [new Filter("isActive", FilterOperator.EQ, true)],
+                    template: new StandardListItem({ title: "{name}", description: "{teamCode}" })
+                });
+                this.getView().addDependent(this._oChangeRequestTeamDialog);
+            }
+            this._oChangeRequestTeamDialog.open();
+        },
+
+        _filterProcessorTeams(oDialog, sValue) {
+            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+            const sQuery = (sValue || "").trim();
+            if (sQuery) {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("name", FilterOperator.Contains, sQuery),
+                        new Filter("teamCode", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                }));
+            }
+            oDialog.getBinding("items")?.filter(aFilters);
+        },
+
+        _confirmProcessorTeamChange(oTeamItem) {
+            const oRequest = this.getView().getBindingContext()?.getObject();
+            const oTeamContext = oTeamItem?.getBindingContext();
+            const sTeamId = oTeamContext?.getProperty("ID");
+            const sTeamName = oTeamContext?.getProperty("name") || oTeamContext?.getProperty("teamCode");
+            if (!oRequest || !sTeamId) return;
+            if (sTeamId === oRequest.processorTeam_ID) {
+                MessageToast.show(this.getText("selectDifferentTeamMessage"));
+                return;
+            }
+
+            MessageBox.confirm(this.getText("confirmRequestTeamReleaseMessage", [sTeamName]), {
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.OK,
+                onClose: (sAction) => {
+                    if (sAction === MessageBox.Action.OK) this._releaseRequestToTeam(sTeamId, sTeamName);
+                }
+            });
+        },
+
+        async _releaseRequestToTeam(sTeamId, sTeamName) {
+            const sRequestId = this.getView().getBindingContext()?.getProperty("ID");
+            if (!sRequestId) return;
+            this.showBusy();
+            try {
+                await this.callAction("changeRequestTeamAndRelease", { requestId: sRequestId, teamId: sTeamId });
+                MessageToast.show(this.getText("requestReleasedToTeamMessage", [sTeamName]));
+                this.getView().getElementBinding()?.refresh(true);
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestTeamReleaseErrorMessage")));
+            } finally {
+                this.hideBusy();
             }
         },
 

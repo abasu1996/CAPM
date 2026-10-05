@@ -334,6 +334,11 @@
                                             visible="{= !${reservedBy} &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' }"
                                             press=".onReserveRequest" />
                                         <MenuItem
+                                            text="{i18n>changeRequestTeamButton}"
+                                            icon="sap-icon://group"
+                                            visible="{requestEdit>/editable}"
+                                            press=".onChangeRequestTeamAndRelease" />
+                                        <MenuItem
                                             text="{i18n>assignRequestToUserButton}"
                                             icon="sap-icon://employee-approvals"
                                             visible="{= ${permissions>/isAdmin} &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"

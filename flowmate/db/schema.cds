@@ -358,6 +358,11 @@ entity ProcessRequests : cuid, managed {
     department  : String(100);
     amount      : Decimal(15, 2);
     role        : String(100);
+    // Server-managed LoA position and state; null mode preserves legacy requests.
+    loaWorkflowMode : String(10);
+    loaStepNo : Integer;
+    loaBeforeProcessing : Boolean;
+    loaApprovalState : String(12);
     status      : Association to ProcessStatus;
     priority    : String(20);
     currentStep : Integer;
@@ -668,6 +673,7 @@ entity ProcessStepConfig : cuid, managed {
     processorTeamName : String(150);
     stepNo        : Integer;
     stepName      : String(100);
+    stepType      : String(20) enum { PROCESSING; LOA; } default 'PROCESSING';
     activityDescription : String(500);
     role          : String(100);
     slaDays       : Integer;

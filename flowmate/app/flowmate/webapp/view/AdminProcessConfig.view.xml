@@ -51,6 +51,7 @@
                                     <Column width="12rem"><Text text="{i18n>subProcessTypeLabel}" wrapping="true" /></Column>
                                     <Column width="5rem"><Text text="{i18n>stepLabel}" wrapping="true" /></Column>
                                     <Column width="10rem"><Text text="{i18n>stepNameLabel}" wrapping="true" /></Column>
+                                    <Column width="9rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>stepTypeLabel}" /></Column>
                                     <Column width="16rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
                                     <Column width="12rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>processorTeamLabel}" wrapping="true" /></Column>
                                     <Column width="8rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" wrapping="true" /></Column>
@@ -64,6 +65,7 @@
                                             <Text text="{subProcessType_code}" />
                                             <Text text="{stepNo}" />
                                             <ObjectIdentifier title="{stepName}" />
+                                            <ObjectStatus text="{= ${stepType} === 'LOA' ? ${i18n>loaStepTypeLabel} : ${i18n>processingStepTypeLabel} }" state="{= ${stepType} === 'LOA' ? 'Information' : 'None' }" />
                                             <Text text="{activityDescription}" wrapping="true" />
                                             <Text text="{processorTeamName}" wrapping="true" />
                                             <Text text="{role}" />
@@ -1054,6 +1056,7 @@
         </Dialog>
         <Dialog id="processStepDialog" title="{stepEdit>/dialogTitle}" contentWidth="50rem" stretchOnPhone="true">
             <content>
+                <MessageStrip text="{i18n>loaStepConfigurationHint}" type="Information" showIcon="true" class="sapUiSmallMargin" />
                 <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
                     <Label text="{i18n>subProcessTypeLabel}" required="true" />
                     <Select
@@ -1067,12 +1070,18 @@
                     <Input value="{stepEdit>/stepNo}" type="Number" required="true" />
                     <Label text="{i18n>stepNameLabel}" required="true" />
                     <Input value="{stepEdit>/stepName}" maxLength="100" required="true" />
+                    <Label text="{i18n>stepTypeLabel}" required="true" />
+                    <Select selectedKey="{stepEdit>/stepType}" change=".onStepTypeChange">
+                        <core:Item key="PROCESSING" text="{i18n>processingStepTypeLabel}" />
+                        <core:Item key="LOA" text="{i18n>loaStepTypeLabel}" />
+                    </Select>
                     <Label text="{i18n>activityDescriptionLabel}" />
                     <TextArea value="{stepEdit>/activityDescription}" maxLength="500" rows="4" />
                     <Label text="{i18n>processorTeamLabel}" />
                     <HBox width="100%" alignItems="Center">
                         <Input
                             value="{stepEdit>/processorTeamName}"
+                            enabled="{= ${stepEdit>/stepType} !== 'LOA' }"
                             placeholder="{i18n>selectTeamPlaceholder}"
                             showValueHelp="true"
                             showSuggestion="true"
@@ -1096,16 +1105,18 @@
                             press=".onClearStepProcessorTeam" />
                     </HBox>
                     <Label text="{i18n>roleLabel}" />
-                    <Input value="{stepEdit>/role}" maxLength="100" />
+                    <Input value="{stepEdit>/role}" maxLength="100" enabled="{= ${stepEdit>/stepType} !== 'LOA' }" />
                     <Label text="{i18n>slaDaysLabel}" />
                     <Input value="{stepEdit>/slaDays}" type="Number" />
                     <Label text="{i18n>activeDemandTaskLabel}" />
                     <CheckBox
                         selected="{stepEdit>/isActiveDemandTask}"
+                        enabled="{= ${stepEdit>/stepType} !== 'LOA' }"
                         text="{i18n>activeDemandTaskCheckboxText}" />
                     <Label text="{i18n>vendorNotificationLabel}" />
                     <CheckBox
                         selected="{stepEdit>/isVendorNotification}"
+                        enabled="{= ${stepEdit>/stepType} !== 'LOA' }"
                         text="{i18n>vendorNotificationCheckboxText}"
                         select=".onStepVendorNotificationSelect" />     
                 </form:SimpleForm>

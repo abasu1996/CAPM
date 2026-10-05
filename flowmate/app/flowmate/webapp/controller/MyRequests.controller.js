@@ -6,12 +6,14 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/m/MessageToast",
     "sap/m/Select",
+    "sap/m/SelectDialog",
+    "sap/m/StandardListItem",
     "sap/m/Text",
     "sap/ui/core/Item",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/json/JSONModel"
-], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, JSONModel) => {
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, SelectDialog, StandardListItem, Text, Item, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
@@ -423,6 +425,97 @@ sap.ui.define([
                 this.byId("requestsTable").getBinding("items")?.refresh();
             } catch (oError) {
                 MessageBox.error(this.getErrorMessage(oError, this.getText("requestReserveErrorMessage")));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        onChangeRequestTeamAndRelease() {
+            if (!this._sSelectedRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            if (!this._oChangeRequestTeamDialog) {
+                this._oChangeRequestTeamDialog = new SelectDialog({
+                    title: this.getText("changeRequestTeamDialogTitle"),
+                    noDataText: this.getText("noProcessorTeamsMessage"),
+                    liveChange: (oEvent) => this._filterChangeRequestTeams(oEvent.getSource(), oEvent.getParameter("value")),
+                    search: (oEvent) => this._filterChangeRequestTeams(oEvent.getSource(), oEvent.getParameter("value")),
+                    confirm: (oEvent) => this._confirmRequestTeamChange(oEvent.getParameter("selectedItem"))
+                });
+                this._oChangeRequestTeamDialog.bindAggregation("items", {
+                    path: "/Teams",
+                    filters: [new Filter("isActive", FilterOperator.EQ, true)],
+                    template: new StandardListItem({
+                        title: "{name}",
+                        description: "{teamCode}",
+                        type: "Active"
+                    })
+                });
+                this.getView().addDependent(this._oChangeRequestTeamDialog);
+            }
+
+            this._oChangeRequestTeamDialog.getBinding("items")?.filter([
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
+            this._oChangeRequestTeamDialog.open();
+        },
+
+        _filterChangeRequestTeams(oDialog, sValue) {
+            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+            const sQuery = (sValue || "").trim();
+            if (sQuery) {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("name", FilterOperator.Contains, sQuery),
+                        new Filter("teamCode", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                }));
+            }
+            oDialog.getBinding("items")?.filter(aFilters);
+        },
+
+        _confirmRequestTeamChange(oTeamItem) {
+            const oTeamContext = oTeamItem?.getBindingContext();
+            const sTeamId = oTeamContext?.getProperty("ID");
+            const sTeamName = oTeamContext?.getProperty("name") || oTeamContext?.getProperty("teamCode");
+            const oRequest = this.byId("requestObjectPage")?.getBindingContext()?.getObject();
+
+            if (!sTeamId || !oRequest) {
+                return;
+            }
+            if (sTeamId === oRequest.processorTeam_ID) {
+                MessageToast.show(this.getText("selectDifferentTeamMessage"));
+                return;
+            }
+
+            MessageBox.confirm(this.getText("confirmRequestTeamReleaseMessage", [sTeamName]), {
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.OK,
+                onClose: (sAction) => {
+                    if (sAction === MessageBox.Action.OK) {
+                        this._releaseRequestToTeam(sTeamId, sTeamName);
+                    }
+                }
+            });
+        },
+
+        async _releaseRequestToTeam(sTeamId, sTeamName) {
+            this.showBusy();
+            try {
+                await this.callAction("changeRequestTeamAndRelease", {
+                    requestId: this._sSelectedRequestId,
+                    teamId: sTeamId
+                });
+                MessageToast.show(this.getText("requestReleasedToTeamMessage", [sTeamName]));
+                this._refreshRequestHeader();
+                this._refreshTaskSection();
+                this._refreshHistorySection();
+                this.byId("requestsTable").getBinding("items")?.refresh(true);
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestTeamReleaseErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -3051,17 +3144,18 @@ async onBudgetCheckConfirm() {
             }, new Map());
 
             const bAllProcessTasksApproved = Boolean(aTasks.length)
-                && aTasks.every((oTask) => this._taskStatusCode(oTask) === "APPROVED");
+                && aTasks.every((oTask) => this._isGuidedTaskApproved(oTask));
 
             return aSteps.map((oStep, iIndex) => {
                 const aStepTasks = mTasksByStep.get(String(Number(oStep.stepNo || 0))) || [];
                 const aMandatoryTasks = aStepTasks.filter((oTask) => this._isTruthy(oTask.isMandatory));
-                const bMandatory = aMandatoryTasks.some((oTask) => this._taskStatusCode(oTask) !== "APPROVED");
+                const bMandatory = aMandatoryTasks.some((oTask) => !this._isGuidedTaskApproved(oTask));
                 const bMandatoryTasksApproved = Boolean(aMandatoryTasks.length)
-                    && aMandatoryTasks.every((oTask) => this._taskStatusCode(oTask) === "APPROVED");
+                    && aMandatoryTasks.every((oTask) => this._isGuidedTaskApproved(oTask));
                 const oOpenTask = aStepTasks.find((oTask) => this._isOpenLikeTask(oTask));
                 const bAllTasksApproved = Boolean(aStepTasks.length)
-                    && aStepTasks.every((oTask) => this._taskStatusCode(oTask) === "APPROVED");
+                    && aStepTasks.some((oTask) => this._taskStatusCode(oTask) === "APPROVED")
+                    && aStepTasks.every((oTask) => this._isGuidedTaskApproved(oTask));
                 const bRejected = aStepTasks.some((oTask) => this._taskStatusCode(oTask) === "REJECTED");
                 const bSentBack = aStepTasks.some((oTask) => this._taskStatusCode(oTask) === "SENT_BACK");
                 const bCurrent = Number(oStep.stepNo || 0) === iCurrentStep;
@@ -3119,13 +3213,18 @@ async onBudgetCheckConfirm() {
                     isCurrent: bCurrent && !bRequestCompleted,
                     selected: false,
                     taskId: oOpenTask?.ID || "",
-                    completeEnabled: bRequestEditable && bCurrent && bCanCompleteStep
+                    completeEnabled: oStep.stepType !== "LOA" && bRequestEditable && bCurrent && bCanCompleteStep
                 };
             });
         },
 
         _isClosingProcessStep(oStep) {
             return /closed|complete|completed/i.test(oStep?.stepName || "");
+        },
+
+        _isGuidedTaskApproved(oTask) {
+            return this._taskStatusCode(oTask) === "APPROVED"
+                || (this._isTruthy(oTask.isLoaApproval) && oTask.decision === "SUPERSEDED");
         },
 
         _taskStatusCode(oTask) {
@@ -3233,7 +3332,7 @@ async onBudgetCheckConfirm() {
                 oRequest?.reservedBy
                 && oRequest?.processorUser_ID
                 && oRequest.processorUser_ID === this._sCurrentReservationUserId
-                && !["COMPLETED", "REJECTED"].includes(oRequest?.status_code)
+                && !["COMPLETED", "REJECTED", "PENDING_APPROVAL"].includes(oRequest?.status_code)
             );
         },
 

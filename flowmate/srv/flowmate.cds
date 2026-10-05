@@ -113,6 +113,8 @@ service FlowmateService {
         stepNo      : Integer;
         status_code : String(30);
         isMandatory : Boolean;
+        isLoaApproval : Boolean;
+        decision    : String(100);
     }
 
     entity ProcessTypes as projection on fldb.ProcessTypes;
@@ -238,19 +240,25 @@ service FlowmateService {
         request : redirected to ProcessRequests,
         teamMembers : redirected to ProcessTaskTeamMembers
     };
+    // Queue projections are read-only. All writes use ProcessTasks/workflow
+    // actions so ownership and LoA transition validations cannot be bypassed.
+    @readonly
     entity MyAssignedTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests
     };
+    @readonly
     entity MyPendingApprovalTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests
     };
+    @readonly
     entity MyTeamTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests,
         teamMembers : redirected to ProcessTaskTeamMembers
     };
+    @readonly
     entity RequestDetailTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests,
@@ -367,6 +375,7 @@ service FlowmateService {
     action updateTaskStatus(taskId: UUID, statusCode: String(20)) returns Boolean;
     action assignRequestProcessor(requestId: UUID, processorUserId: UUID) returns Boolean;
     action assignRequestTeam(requestId: UUID, teamId: UUID) returns Boolean;
+    action changeRequestTeamAndRelease(requestId: UUID, teamId: UUID) returns Boolean;
     action assignTaskProcessor(taskId: UUID, processorUserId: UUID) returns Boolean;
     action assignTaskTeam(taskId: UUID, teamId: UUID) returns Boolean;
     action assignTeamTaskToMe(taskId: UUID) returns Boolean;

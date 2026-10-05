@@ -25,6 +25,7 @@
     "cds-plugin-ui5": "^0.13.0"
   },
   "scripts": {
+    "test:loa": "node --test test/loa-workflow.test.js",
     "start": "cds-serve",
     "build": "cds build --production --opts contentHdbtabledata=false && node ../scripts/ci/remove-hana-seed-artifacts.js gen/db",
     "serve-flowmate": "cds serve --in-memory --port 4004",
@@ -69,7 +70,7 @@
           }
         },
         "auth": {
-          "kind": "mocked",
+          "kind": "dummy",
           "users": {
             "*": false,
             "alice": false,

@@ -3473,6 +3473,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -5717,6 +5721,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -6902,6 +6910,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -8108,6 +8120,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -8382,40 +8398,6 @@
         },
         "x-flowmate-project": "flowmate",
         "x-cap-service": "FlowmateService"
-      },
-      "post": {
-        "summary": "Creates a single my assigned task.",
-        "tags": [
-          "Flowmate — My Assigned Tasks"
-        ],
-        "requestBody": {
-          "description": "New my assigned task",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowmateService.MyAssignedTasks-create"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created my assigned task",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FlowmateService.MyAssignedTasks"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
       }
     },
     "/odata/v4/flowmate/MyAssignedTasks({ID})": {
@@ -8507,49 +8489,6 @@
                 }
               }
             }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      },
-      "patch": {
-        "summary": "Changes a single my assigned task.",
-        "tags": [
-          "Flowmate — My Assigned Tasks"
-        ],
-        "requestBody": {
-          "description": "New property values",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowmateService.MyAssignedTasks-update"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      },
-      "delete": {
-        "summary": "Deletes a single my assigned task.",
-        "tags": [
-          "Flowmate — My Assigned Tasks"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
           },
           "4XX": {
             "$ref": "#/components/responses/error"
@@ -8737,6 +8676,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -9277,40 +9220,6 @@
         },
         "x-flowmate-project": "flowmate",
         "x-cap-service": "FlowmateService"
-      },
-      "post": {
-        "summary": "Creates a single my pending approval task.",
-        "tags": [
-          "Flowmate — My Pending Approval Tasks"
-        ],
-        "requestBody": {
-          "description": "New my pending approval task",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowmateService.MyPendingApprovalTasks-create"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created my pending approval task",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FlowmateService.MyPendingApprovalTasks"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
       }
     },
     "/odata/v4/flowmate/MyPendingApprovalTasks({ID})": {
@@ -9402,49 +9311,6 @@
                 }
               }
             }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      },
-      "patch": {
-        "summary": "Changes a single my pending approval task.",
-        "tags": [
-          "Flowmate — My Pending Approval Tasks"
-        ],
-        "requestBody": {
-          "description": "New property values",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowmateService.MyPendingApprovalTasks-update"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      },
-      "delete": {
-        "summary": "Deletes a single my pending approval task.",
-        "tags": [
-          "Flowmate — My Pending Approval Tasks"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
           },
           "4XX": {
             "$ref": "#/components/responses/error"
@@ -9632,6 +9498,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -10172,40 +10042,6 @@
         },
         "x-flowmate-project": "flowmate",
         "x-cap-service": "FlowmateService"
-      },
-      "post": {
-        "summary": "Creates a single my team task.",
-        "tags": [
-          "Flowmate — My Team Tasks"
-        ],
-        "requestBody": {
-          "description": "New my team task",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowmateService.MyTeamTasks-create"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created my team task",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FlowmateService.MyTeamTasks"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
       }
     },
     "/odata/v4/flowmate/MyTeamTasks({ID})": {
@@ -10297,49 +10133,6 @@
                 }
               }
             }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      },
-      "patch": {
-        "summary": "Changes a single my team task.",
-        "tags": [
-          "Flowmate — My Team Tasks"
-        ],
-        "requestBody": {
-          "description": "New property values",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowmateService.MyTeamTasks-update"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      },
-      "delete": {
-        "summary": "Deletes a single my team task.",
-        "tags": [
-          "Flowmate — My Team Tasks"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
           },
           "4XX": {
             "$ref": "#/components/responses/error"
@@ -10527,6 +10320,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -14459,6 +14256,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -15102,6 +14903,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -16359,6 +16164,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -16940,6 +16749,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -17517,6 +17330,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -17943,6 +17760,14 @@
                   "amount desc",
                   "role",
                   "role desc",
+                  "loaWorkflowMode",
+                  "loaWorkflowMode desc",
+                  "loaStepNo",
+                  "loaStepNo desc",
+                  "loaBeforeProcessing",
+                  "loaBeforeProcessing desc",
+                  "loaApprovalState",
+                  "loaApprovalState desc",
                   "status_code",
                   "status_code desc",
                   "priority",
@@ -18154,6 +17979,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -18473,6 +18302,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -21114,6 +20947,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -22155,6 +21992,14 @@
                   "amount desc",
                   "role",
                   "role desc",
+                  "loaWorkflowMode",
+                  "loaWorkflowMode desc",
+                  "loaStepNo",
+                  "loaStepNo desc",
+                  "loaBeforeProcessing",
+                  "loaBeforeProcessing desc",
+                  "loaApprovalState",
+                  "loaApprovalState desc",
                   "status_code",
                   "status_code desc",
                   "priority",
@@ -22366,6 +22211,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -23985,6 +23834,8 @@
                   "stepNo desc",
                   "stepName",
                   "stepName desc",
+                  "stepType",
+                  "stepType desc",
                   "activityDescription",
                   "activityDescription desc",
                   "role",
@@ -24022,6 +23873,7 @@
                   "processorTeamName",
                   "stepNo",
                   "stepName",
+                  "stepType",
                   "activityDescription",
                   "role",
                   "slaDays",
@@ -24158,6 +24010,7 @@
                   "processorTeamName",
                   "stepNo",
                   "stepName",
+                  "stepType",
                   "activityDescription",
                   "role",
                   "slaDays",
@@ -26133,6 +25986,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -27275,40 +27132,6 @@
         },
         "x-flowmate-project": "flowmate",
         "x-cap-service": "FlowmateService"
-      },
-      "post": {
-        "summary": "Creates a single request detail task.",
-        "tags": [
-          "Flowmate — Request Detail Tasks"
-        ],
-        "requestBody": {
-          "description": "New request detail task",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowmateService.RequestDetailTasks-create"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created request detail task",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FlowmateService.RequestDetailTasks"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
       }
     },
     "/odata/v4/flowmate/RequestDetailTasks({ID})": {
@@ -27400,49 +27223,6 @@
                 }
               }
             }
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      },
-      "patch": {
-        "summary": "Changes a single request detail task.",
-        "tags": [
-          "Flowmate — Request Detail Tasks"
-        ],
-        "requestBody": {
-          "description": "New property values",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowmateService.RequestDetailTasks-update"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "4XX": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "x-flowmate-project": "flowmate",
-        "x-cap-service": "FlowmateService"
-      },
-      "delete": {
-        "summary": "Deletes a single request detail task.",
-        "tags": [
-          "Flowmate — Request Detail Tasks"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
           },
           "4XX": {
             "$ref": "#/components/responses/error"
@@ -27630,6 +27410,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -31195,6 +30979,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -31469,6 +31257,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -32945,6 +32737,14 @@
                   "amount desc",
                   "role",
                   "role desc",
+                  "loaWorkflowMode",
+                  "loaWorkflowMode desc",
+                  "loaStepNo",
+                  "loaStepNo desc",
+                  "loaBeforeProcessing",
+                  "loaBeforeProcessing desc",
+                  "loaApprovalState",
+                  "loaApprovalState desc",
                   "status_code",
                   "status_code desc",
                   "priority",
@@ -33156,6 +32956,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -33441,6 +33245,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -36039,6 +35847,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -37080,6 +36892,14 @@
                   "amount desc",
                   "role",
                   "role desc",
+                  "loaWorkflowMode",
+                  "loaWorkflowMode desc",
+                  "loaStepNo",
+                  "loaStepNo desc",
+                  "loaBeforeProcessing",
+                  "loaBeforeProcessing desc",
+                  "loaApprovalState",
+                  "loaApprovalState desc",
                   "status_code",
                   "status_code desc",
                   "priority",
@@ -37291,6 +37111,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -39153,6 +38977,10 @@
                   "department",
                   "amount",
                   "role",
+                  "loaWorkflowMode",
+                  "loaStepNo",
+                  "loaBeforeProcessing",
+                  "loaApprovalState",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -107604,6 +107432,15 @@
           "isMandatory": {
             "type": "boolean",
             "nullable": true
+          },
+          "isLoaApproval": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "decision": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
           }
         }
       },
@@ -108621,233 +108458,6 @@
           }
         }
       },
-      "FlowmateService.MyAssignedTasks-create": {
-        "title": "MyAssignedTasks (for create)",
-        "type": "object",
-        "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef"
-          },
-          "referenceNumber": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "request_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "assignedUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorTeam_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "stepNo": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "assignedTo": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "processor": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorEmail": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorTeamName": {
-            "type": "string",
-            "maxLength": 150,
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "isMandatory": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isTeamTask": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isLoaApproval": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "status_code": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "decision": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "remarks": {
-            "type": "string",
-            "nullable": true
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2017-04-13T15:51:04Z",
-            "nullable": true
-          },
-          "teamMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowmateService.ProcessTaskTeamMembers-create"
-            }
-          }
-        }
-      },
-      "FlowmateService.MyAssignedTasks-update": {
-        "title": "MyAssignedTasks (for update)",
-        "type": "object",
-        "properties": {
-          "referenceNumber": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "request_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "assignedUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorTeam_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "stepNo": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "assignedTo": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "processor": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorEmail": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorTeamName": {
-            "type": "string",
-            "maxLength": 150,
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "isMandatory": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isTeamTask": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isLoaApproval": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "status_code": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "decision": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "remarks": {
-            "type": "string",
-            "nullable": true
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2017-04-13T15:51:04Z",
-            "nullable": true
-          },
-          "teamMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowmateService.ProcessTaskTeamMembers-create"
-            }
-          }
-        }
-      },
       "FlowmateService.MyPendingApprovalTasks": {
         "title": "MyPendingApprovalTasks",
         "type": "object",
@@ -109007,233 +108617,6 @@
           }
         }
       },
-      "FlowmateService.MyPendingApprovalTasks-create": {
-        "title": "MyPendingApprovalTasks (for create)",
-        "type": "object",
-        "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef"
-          },
-          "referenceNumber": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "request_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "assignedUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorTeam_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "stepNo": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "assignedTo": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "processor": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorEmail": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorTeamName": {
-            "type": "string",
-            "maxLength": 150,
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "isMandatory": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isTeamTask": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isLoaApproval": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "status_code": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "decision": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "remarks": {
-            "type": "string",
-            "nullable": true
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2017-04-13T15:51:04Z",
-            "nullable": true
-          },
-          "teamMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowmateService.ProcessTaskTeamMembers-create"
-            }
-          }
-        }
-      },
-      "FlowmateService.MyPendingApprovalTasks-update": {
-        "title": "MyPendingApprovalTasks (for update)",
-        "type": "object",
-        "properties": {
-          "referenceNumber": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "request_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "assignedUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorTeam_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "stepNo": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "assignedTo": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "processor": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorEmail": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorTeamName": {
-            "type": "string",
-            "maxLength": 150,
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "isMandatory": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isTeamTask": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isLoaApproval": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "status_code": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "decision": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "remarks": {
-            "type": "string",
-            "nullable": true
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2017-04-13T15:51:04Z",
-            "nullable": true
-          },
-          "teamMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowmateService.ProcessTaskTeamMembers-create"
-            }
-          }
-        }
-      },
       "FlowmateService.MyTeamTasks": {
         "title": "MyTeamTasks",
         "type": "object",
@@ -109390,233 +108773,6 @@
           },
           "teamMembers@count": {
             "$ref": "#/components/schemas/count"
-          }
-        }
-      },
-      "FlowmateService.MyTeamTasks-create": {
-        "title": "MyTeamTasks (for create)",
-        "type": "object",
-        "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef"
-          },
-          "referenceNumber": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "request_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "assignedUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorTeam_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "stepNo": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "assignedTo": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "processor": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorEmail": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorTeamName": {
-            "type": "string",
-            "maxLength": 150,
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "isMandatory": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isTeamTask": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isLoaApproval": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "status_code": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "decision": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "remarks": {
-            "type": "string",
-            "nullable": true
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2017-04-13T15:51:04Z",
-            "nullable": true
-          },
-          "teamMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowmateService.ProcessTaskTeamMembers-create"
-            }
-          }
-        }
-      },
-      "FlowmateService.MyTeamTasks-update": {
-        "title": "MyTeamTasks (for update)",
-        "type": "object",
-        "properties": {
-          "referenceNumber": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "request_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "assignedUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorTeam_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "stepNo": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "assignedTo": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "processor": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorEmail": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorTeamName": {
-            "type": "string",
-            "maxLength": 150,
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "isMandatory": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isTeamTask": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isLoaApproval": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "status_code": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "decision": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "remarks": {
-            "type": "string",
-            "nullable": true
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2017-04-13T15:51:04Z",
-            "nullable": true
-          },
-          "teamMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowmateService.ProcessTaskTeamMembers-create"
-            }
           }
         }
       },
@@ -113079,6 +112235,25 @@
             "maxLength": 100,
             "nullable": true
           },
+          "loaWorkflowMode": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "loaStepNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "loaBeforeProcessing": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "loaApprovalState": {
+            "type": "string",
+            "maxLength": 12,
+            "nullable": true
+          },
           "status": {
             "allOf": [
               {
@@ -114689,6 +113864,25 @@
             "maxLength": 100,
             "nullable": true
           },
+          "loaWorkflowMode": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "loaStepNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "loaBeforeProcessing": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "loaApprovalState": {
+            "type": "string",
+            "maxLength": 12,
+            "nullable": true
+          },
           "status_code": {
             "type": "string",
             "maxLength": 20,
@@ -116218,6 +115412,25 @@
             "maxLength": 100,
             "nullable": true
           },
+          "loaWorkflowMode": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "loaStepNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "loaBeforeProcessing": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "loaApprovalState": {
+            "type": "string",
+            "maxLength": 12,
+            "nullable": true
+          },
           "status_code": {
             "type": "string",
             "maxLength": 20,
@@ -116717,6 +115930,16 @@
             "maxLength": 100,
             "nullable": true
           },
+          "stepType": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "PROCESSING",
+              "LOA"
+            ],
+            "nullable": true,
+            "default": "PROCESSING"
+          },
           "activityDescription": {
             "type": "string",
             "maxLength": 500,
@@ -116789,6 +116012,16 @@
             "maxLength": 100,
             "nullable": true
           },
+          "stepType": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "PROCESSING",
+              "LOA"
+            ],
+            "nullable": true,
+            "default": "PROCESSING"
+          },
           "activityDescription": {
             "type": "string",
             "maxLength": 500,
@@ -116855,6 +116088,16 @@
             "type": "string",
             "maxLength": 100,
             "nullable": true
+          },
+          "stepType": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "PROCESSING",
+              "LOA"
+            ],
+            "nullable": true,
+            "default": "PROCESSING"
           },
           "activityDescription": {
             "type": "string",
@@ -118602,233 +117845,6 @@
           },
           "teamMembers@count": {
             "$ref": "#/components/schemas/count"
-          }
-        }
-      },
-      "FlowmateService.RequestDetailTasks-create": {
-        "title": "RequestDetailTasks (for create)",
-        "type": "object",
-        "properties": {
-          "ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef"
-          },
-          "referenceNumber": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "request_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "assignedUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorTeam_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "stepNo": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "assignedTo": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "processor": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorEmail": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorTeamName": {
-            "type": "string",
-            "maxLength": 150,
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "isMandatory": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isTeamTask": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isLoaApproval": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "status_code": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "decision": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "remarks": {
-            "type": "string",
-            "nullable": true
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2017-04-13T15:51:04Z",
-            "nullable": true
-          },
-          "teamMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowmateService.ProcessTaskTeamMembers-create"
-            }
-          }
-        }
-      },
-      "FlowmateService.RequestDetailTasks-update": {
-        "title": "RequestDetailTasks (for update)",
-        "type": "object",
-        "properties": {
-          "referenceNumber": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "request_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "assignedUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorUser_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "processorTeam_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef",
-            "nullable": true
-          },
-          "stepNo": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "assignedTo": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "processor": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorEmail": {
-            "type": "string",
-            "maxLength": 255,
-            "nullable": true
-          },
-          "processorTeamName": {
-            "type": "string",
-            "maxLength": 150,
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "maxLength": 100,
-            "nullable": true
-          },
-          "isMandatory": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isTeamTask": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "isLoaApproval": {
-            "type": "boolean",
-            "nullable": true,
-            "default": false
-          },
-          "status_code": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "decision": {
-            "type": "string",
-            "maxLength": 30,
-            "nullable": true
-          },
-          "remarks": {
-            "type": "string",
-            "nullable": true
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2017-04-13T15:51:04Z",
-            "nullable": true
-          },
-          "teamMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowmateService.ProcessTaskTeamMembers-create"
-            }
           }
         }
       },
@@ -121730,6 +120746,25 @@
           "role": {
             "type": "string",
             "maxLength": 100,
+            "nullable": true
+          },
+          "loaWorkflowMode": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "loaStepNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "loaBeforeProcessing": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "loaApprovalState": {
+            "type": "string",
+            "maxLength": 12,
             "nullable": true
           },
           "status": {

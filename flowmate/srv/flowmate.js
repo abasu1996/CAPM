@@ -785,6 +785,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
     this.after(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, () => this._clearConfigCache());
+    this.before("DELETE", ProcessStepConfig, (req) => this._validateLoaStepConfig(req));
 
     this.before(["CREATE", "UPDATE", "DELETE"], [WorkingCalendars, WorkingCalendarDays, WorkingCalendarHolidays], async (req) => {
       if (!this._isAdministrator(req)) {
@@ -879,7 +880,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       this.after(["CREATE", "UPDATE", "DELETE"], oCodeList, () => this._clearConfigCache());
     });
 
-    this.before(["CREATE", "UPDATE", "DELETE"], ProcessSubTypes, (req) => {
+    this.before(["CREATE", "UPDATE", "DELETE"], ProcessSubTypes, async (req) => {
       if (!this._isAdministrator(req)) {
         return req.reject(403, "Only an administrator can maintain process subtypes");
       }
@@ -890,6 +891,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (Object.prototype.hasOwnProperty.call(req.data, "loaApprovalApplicable")) {
         req.data.loaApprovalApplicable = Boolean(req.data.loaApprovalApplicable);
+        if (!req.data.loaApprovalApplicable) {
+          const code = req.data.code || req.params?.[0]?.code;
+          const approvalStep = code && await cds.tx(req).run(SELECT.one.from(ProcessStepConfig)
+            .columns("ID").where({ subProcessType_code: code, stepType: "LOA" }));
+          if (approvalStep) return req.reject(409, "Remove the configured LoA step before disabling LoA approval for this subtype");
+        }
       }
     });
     this.after(["CREATE", "UPDATE", "DELETE"], ProcessSubTypes, () => this._clearConfigCache());
@@ -915,6 +922,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before(["CREATE", "UPDATE"], ProcessStepConfig, async (req) => {
+      await this._validateLoaStepConfig(req);
       if (req.data.processorTeam_ID === "") {
         req.data.processorTeam_ID = null;
       }
@@ -1195,7 +1203,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         }
       }
 
-      if (["PO_BEFORE_INVOICE_ADVANCE", "PO_AFTER_INVOICE_ADVANCE", "PO_BEFORE_INVOICE_ADV_STLMT", "PO_BEFORE_INVOICE_ADV_STLMT_100%", "PO_AFTER_INVOICE_ADV_STLMT", "PO_AFTER_INVOICE_ADV_STLMT_100%"].includes(sSubProcessTypeCode)) {
+      if (["PO_BEFORE_INVOICE_ADVANCE", "PO_AFTER_INVOICE_ADVANCE", "PO_BEFORE_INVOICE_ADV_STLMT", "PO_BEFORE_INVOICE_ADV_STLMT_100%", "PO_AFTER_INVOICE_ADV_STLMT", "PO_AFTER_INVOICE_ADV_STLMT_100%"].includes(sSubProcessTypeCode)
+        && (req.event === "CREATE" || Object.hasOwn(req.data, "invoices"))) {
         const aInvoices = Array.isArray(req.data.invoices) ? req.data.invoices : [];
         const aAmounts = aInvoices
           .map((oInvoice) => Number(oInvoice.amount))
@@ -1207,17 +1216,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
     this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
       const sRequestId = this._requestIdFromReq(req);
-      // const aSourceColumns = [...new Set(Object.values(LOA_AMOUNT_SOURCE_FIELD))];
-      const aSourceColumns = [
-        ...new Set(
-          Object.values(LOA_AMOUNT_SOURCE_FIELD).flat()
-        )
-      ];
       const oExisting = req.event === "UPDATE" && sRequestId
         ? await cds.tx(req).run(
           SELECT.one.from(ProcessRequests)
-            .columns("subProcessType_code", "amount", ...aSourceColumns)
-            .where({ ID: sRequestId })
+            .where({ ID: sRequestId }).forUpdate()
         )
         : null;
       const sSubProcessTypeCode = Object.prototype.hasOwnProperty.call(req.data, "subProcessType_code")
@@ -1230,6 +1232,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
             .where({ code: sSubProcessTypeCode })
         )
         : null;
+
+      await this._prepareLoaSnapshot(req, oExisting, oSubProcessType);
+
+      if (oExisting?.loaWorkflowMode === "GUIDED" && oExisting.loaApprovalState === "APPROVED") {
+        req.data.amount = oExisting.amount;
+        req.data.role = oExisting.role;
+        return;
+      }
 
       if (!oSubProcessType?.loaApprovalApplicable) {
         req.data.amount = null;
@@ -1296,9 +1306,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       req.data.amount = fAmount;
       req.data.role = sRoleCode;
-      if (req.event === "CREATE") {
+      if (req.event === "CREATE" && req.data.loaBeforeProcessing) {
         req.data.status_code = PROCESS_STATUS.PENDING_APPROVAL;
-        req.data.currentStep = 0;
+        req.data.currentStep = req.data.loaStepNo || 0;
       }
     });
 
@@ -1518,6 +1528,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.after("CREATE", ProcessRequests, async (request, req) => {
       if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+        if (request.loaWorkflowMode === "GUIDED") {
+          const steps = await this._getSteps(req, request.subProcessType_code);
+          for (const step of steps.filter((entry) => entry.stepNo < request.loaStepNo)) {
+            await this._createTask(req, request.ID, step, { request, autoComplete: true,
+              autoCompleteRemarks: "Request raised by requester", skipIfExistingStep: true });
+          }
+          await this._startConfiguredLoa(req, request.ID, this._findStepByNo(steps, request.loaStepNo));
+          return;
+        }
         await this._createLoaApprovalTasks(req, request, Users);
         return;
       }
@@ -1630,8 +1649,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
 
+    this.before(["CREATE", "UPDATE", "DELETE"], this.entities.Invoices, (req) => this._validateLoaInvoiceWrite(req));
+
     this.before("CREATE", ProcessTasks, async (req) => {
       await this._rejectIfRequestLocked(req, req.data.request_ID);
+      await this._validateManualTaskLoaFields(req);
 
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessTasks, "TSK");
 
@@ -1757,6 +1779,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!oExistingTask) {
         return req.reject(404, "Selected task was not found");
       }
+      if (oExistingTask.isLoaApproval) return req.reject(409, "Use the LoA approval actions to update approval tasks");
+      await this._validateManualTaskLoaFields(req, oExistingTask);
 
       await this._rejectIfTaskAssignedToAnotherUser(req, oExistingTask, Users);
       await this._rejectIfParentRequestTerminal(req, oExistingTask.request_ID);
@@ -2120,8 +2144,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       return cds.tx(req).run(
         SELECT.from(this._dbProcessTasksEntity())
-          .columns("ID", "stepNo", "status_code", "isMandatory")
-          .where({ request_ID: requestId, isLoaApproval: false })
+          .columns("ID", "stepNo", "status_code", "isMandatory", "isLoaApproval", "decision")
+          .where({ request_ID: requestId })
       );
     });
 
@@ -2136,6 +2160,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (task.isLoaApproval) {
         return this._decideLoaApproval(req, task, "REJECTED", remarks, Users);
       }
+      await this._rejectIfParentRequestTerminal(req, task.request_ID);
 
       await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
 
@@ -2182,6 +2207,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
 
       const request = await this._getRequest(req, task.request_ID);
+
+      if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL || task.isLoaApproval) {
+        return req.reject(409, "Use the LoA approval decision before sending this request back");
+      }
+      if (request.loaWorkflowMode === "GUIDED" && request.loaApprovalState === "APPROVED"
+        && Number(targetStepNo) <= Number(request.loaStepNo)) {
+        return req.reject(409, "An approved LoA step cannot be reopened; create a successor request for revised approval");
+      }
 
       if (this._isLockedRequest(request)) {
         return this._rejectLockedRequest(req);
@@ -2327,8 +2360,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           reservedBy: sDisplayName,
           reservedAt: this._now(),
           processorUser_ID: oUser.ID,
-          processorTeam_ID: null,
-          processorTeamName: null,
           processor: sDisplayName,
           processorEmail: sEmail
         })
@@ -2349,7 +2380,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.on("updateRequestStatus", async (req) => {
       const { requestId, statusCode } = req.data;
-      const request = await this._getRequest(req, requestId);
+      const request = await cds.tx(req).run(SELECT.one.from(ProcessRequests).where({ ID: requestId }).forUpdate());
 
       if (!request) {
         return req.reject(404, `Process request ${requestId} was not found`);
@@ -2372,8 +2403,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (request.status_code === statusCode) {
         return true;
       }
+      if (request.loaWorkflowMode === "GUIDED" && statusCode === PROCESS_STATUS.PENDING_APPROVAL) {
+        return req.reject(409, "LoA approval starts automatically when the configured guided step is reached");
+      }
 
       if (statusCode === PROCESS_STATUS.COMPLETED) {
+        if (request.loaWorkflowMode === "GUIDED" && request.loaApprovalState !== "APPROVED") {
+          return req.reject(409, "Complete the configured LoA approval before completing this request");
+        }
         const steps = await this._getSteps(req, request.subProcessType_code);
         const incompleteStep = await this._findIncompleteGuidedStep(req, requestId, steps, {
           includeClosingSteps: true,
@@ -2478,8 +2515,6 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await cds.tx(req).run(
         UPDATE(ProcessRequests, requestId).set({
           processorUser_ID: processorUserId,
-          processorTeam_ID: null,
-          processorTeamName: null,
           processor: sProcessor,
           processorEmail: sProcessorEmail
         })
@@ -2545,6 +2580,101 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           teamName: oTeam.name
         });
       }
+
+      return true;
+    });
+
+    this.on("changeRequestTeamAndRelease", async (req) => {
+      const { requestId, teamId } = req.data;
+      const request = await cds.tx(req).run(
+        SELECT.one.from(ProcessRequests).where({ ID: requestId }).forUpdate()
+      );
+
+      if (!request) {
+        return req.reject(404, `Process request ${requestId} was not found`);
+      }
+      if (this._isLockedRequest(request)) {
+        return this._rejectLockedRequest(req);
+      }
+      if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+        return req.reject(409, "A request awaiting LoA approval cannot be handed to another team");
+      }
+      if (!request.reservedBy || !request.processorUser_ID) {
+        return req.reject(409, "Only a reserved request can be handed to another team");
+      }
+
+      const oReservationUser = await this._currentReservationUser(req, Users);
+      if (!this._isReservedByCurrentUser(request, oReservationUser)
+        || request.processorUser_ID !== oReservationUser.user?.ID) {
+        return req.reject(403, "Only the person who reserved this request can change its processor team");
+      }
+
+      const oTeam = await this._getTeam(req, teamId, Teams);
+      if (!oTeam) {
+        return req.reject(400, "Select an active processor team");
+      }
+      if (request.processorTeam_ID === oTeam.ID) {
+        return req.reject(409, "Select a different processor team to release this request");
+      }
+
+      const oTeamSnapshot = {
+        processorTeam_ID: oTeam.ID,
+        processorTeamName: oTeam.name || oTeam.teamCode
+      };
+      const oReleaseSnapshot = {
+        ...oTeamSnapshot,
+        processorUser_ID: null,
+        processor: null,
+        processorEmail: null,
+        reservedByUser_ID: null,
+        reservedBy: null,
+        reservedAt: null
+      };
+      const tx = cds.tx(req);
+
+      // Move open work at the current step to the destination team's queue as
+      // well; otherwise an old individual assignment could strand the task.
+      const aCurrentTasks = await tx.run(
+        SELECT.from(ProcessTasks).where({
+          request_ID: requestId,
+          stepNo: request.currentStep || 0,
+          status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] },
+          isLoaApproval: false
+        })
+      );
+      await tx.run(UPDATE(ProcessRequests, requestId).set(oReleaseSnapshot));
+
+      for (const task of aCurrentTasks) {
+        await tx.run(UPDATE(ProcessTasks, task.ID).set({
+          assignedUser_ID: null,
+          processorUser_ID: null,
+          processorTeam_ID: oTeam.ID,
+          processorTeamName: oTeam.name || oTeam.teamCode,
+          assignedTo: null,
+          processor: null,
+          processorEmail: null,
+          isTeamTask: true
+        }));
+        await tx.run(DELETE.from(ProcessTaskTeamMembers).where({ task_ID: task.ID }));
+        await this._syncTaskTeamMembersFromTeam(req, task.ID, oTeam.ID, ProcessTaskTeamMembers, TeamMembers);
+      }
+
+      await this._writeHistory(req, {
+        requestId,
+        stepNo: request.currentStep || 0,
+        action: "REQUEST_TEAM_CHANGED_AND_RELEASED",
+        actor: req.user?.id,
+        oldStatus: request.status_code,
+        newStatus: request.status_code,
+        remarks: `Request released from ${request.processorTeamName || "its previous team"} to ${oTeam.name || oTeam.teamCode}; it is available for reservation by that team`
+      });
+
+      await this._notifyTeamAssignment(req, {
+        assignmentType: "PROCESS",
+        request: { ...request, ...oReleaseSnapshot },
+        teamId: oTeam.ID,
+        teamName: oTeam.name || oTeam.teamCode
+      });
 
       return true;
     });
@@ -4144,6 +4274,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _rejectIfRequestReservedByAnotherUser(req, request, Users = this.masterEntities.Users) {
+    if (request?.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+      return req.reject(409, "This request is awaiting LoA approval and cannot be changed");
+    }
     if (!request?.reservedBy || !request?.processorUser_ID) {
       return req.reject(409, "Reserve or assign the request to a processor before making changes");
     }
@@ -4550,7 +4683,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return;
     }
 
-    const request = await this._getRequest(req, requestId);
+    const request = await cds.tx(req).run(SELECT.one.from(this.entities.ProcessRequests).where({ ID: requestId }).forUpdate());
 
     if (this._isLockedRequest(request)) {
       return this._rejectLockedRequest(req);
@@ -4562,12 +4695,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   async _rejectIfParentRequestTerminal(req, requestId) {
     if (!requestId) return;
 
-    const request = await this._getRequest(req, requestId);
+    const request = await cds.tx(req).run(SELECT.one.from(this.entities.ProcessRequests).where({ ID: requestId }).forUpdate());
     if (!request) {
       return req.reject(404, "The request for this task was not found");
     }
     if (this._isLockedRequest(request)) {
       return this._rejectLockedRequest(req);
+    }
+    if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+      return req.reject(409, "Tasks cannot be changed while the request is awaiting LoA approval");
     }
   }
 
@@ -5034,6 +5170,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
 
     await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
+    await this._rejectIfParentRequestTerminal(req, task.request_ID);
 
     const request = await this._getRequest(req, task.request_ID);
 
@@ -5085,7 +5222,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   async _getStepCompletionContext(req, requestId, stepNo, Users = this.masterEntities.Users) {
-    const request = await this._getRequest(req, requestId);
+    const request = await cds.tx(req).run(SELECT.one.from(this.entities.ProcessRequests).where({ ID: requestId }).forUpdate());
 
     if (!request) {
       return req.reject(404, `Request ${requestId} was not found`);
@@ -5107,6 +5244,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (!currentStep) {
       return req.reject(400, `Guided step ${stepNo} is not configured for this request type`);
     }
+    if (this._isLoaStep(currentStep)) return req.reject(409, "LoA steps are completed through approval decisions only");
 
     if (Number(request.currentStep || 0) !== Number(currentStep.stepNo || 0)) {
       return req.reject(400, `Complete the current guided step ${request.currentStep} before processing step ${currentStep.stepNo}`);
@@ -5145,10 +5283,21 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       beforeStepNo: nextStep?.stepNo
     });
     const oChoice = await this._guidedCompletionChoice(req, requestId, steps, currentStep);
-    const guidedNextStep = mandatoryStep || this._guidedNextStepForProgression(steps, nextStep, oChoice, progressionMode);
+    let guidedNextStep = mandatoryStep || this._guidedNextStepForProgression(steps, nextStep, oChoice, progressionMode);
+    if (request.loaWorkflowMode === "GUIDED" && request.loaApprovalState !== "APPROVED") {
+      const approvalStep = this._findStepByNo(steps, request.loaStepNo);
+      if (!approvalStep || !this._isLoaStep(approvalStep)) return req.reject(409, "The configured LoA step is missing");
+      if (!guidedNextStep || Number(guidedNextStep.stepNo) >= Number(approvalStep.stepNo)) guidedNextStep = approvalStep;
+    }
     let sNewRequestStatus = PROCESS_STATUS.COMPLETED;
 
     if (guidedNextStep) {
+      if (request.loaWorkflowMode === "GUIDED" && this._isLoaStep(guidedNextStep)) {
+        await this._startConfiguredLoa(req, requestId, guidedNextStep);
+        await this._writeHistory(req, { requestId, stepNo: currentStep.stepNo, action: actionNames.action,
+          actor: req.user?.id, oldStatus, newStatus: PROCESS_STATUS.PENDING_APPROVAL, remarks });
+        return true;
+      }
       await this._createTask(req, requestId, guidedNextStep);
       sNewRequestStatus = PROCESS_STATUS.IN_PROGRESS;
       const oDeadline = await this._calculateSlaDeadline(req, request.subProcessType_code, guidedNextStep.slaDays);
@@ -5495,7 +5644,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   }
 
   _areStepTasksComplete(tasks) {
-    return Boolean(tasks.length) && tasks.every((task) => this._taskStatusCode(task) === TASK_STATUS.APPROVED);
+    return tasks.some((task) => this._taskStatusCode(task) === TASK_STATUS.APPROVED)
+      && tasks.every((task) => this._taskStatusCode(task) === TASK_STATUS.APPROVED
+      || (task.decision === "SUPERSEDED" && task.isLoaApproval));
   }
 
   _areStepTasksFinalized(tasks) {
@@ -5595,7 +5746,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return steps.find((step) => Number(step.stepNo || 0) === Number(stepNo || 0)) || null;
   }
 
-  async _createLoaApprovalTasks(req, request, Users = this.masterEntities.Users) {
+  async _createLoaApprovalTasks(req, request, Users = this.masterEntities.Users, previousStatus = PROCESS_STATUS.DRAFT) {
+    const existing = await cds.tx(req).run(SELECT.one.from(this.entities.ProcessTasks).columns("ID")
+      .where({ request_ID: request.ID, isLoaApproval: true, status_code: TASK_STATUS.OPEN }));
+    if (existing) return;
     const aRoleCodes = [...new Set(String(request.role || "")
       .split(";")
       .map((value) => value.trim())
@@ -5605,7 +5759,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return req.reject(400, "The matching LoA rule does not contain an approver role");
     }
 
-    const aApprovers = await this.master.run(
+    let aApprovers = await this.master.run(
       SELECT.from(Users)
         .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
         .where({ isActive: true, role_code: { in: aRoleCodes } })
@@ -5613,6 +5767,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     if (!aApprovers.length) {
       return req.reject(409, `No active user is assigned to the required LoA role(s): ${aRoleCodes.join(", ")}`);
+    }
+    if (request.loaWorkflowMode === "GUIDED") {
+      const memberships = await Promise.all(aApprovers.map((user) => this._activeTeamIdsForUser(user.ID)));
+      aApprovers = aApprovers.filter((user, index) => memberships[index].includes(request.processorTeam_ID));
+      if (!aApprovers.length) {
+        return req.reject(409, "No eligible LoA approver belongs to the request's processor team. Maintain the approver's role and active team membership first");
+      }
     }
 
     for (const approver of aApprovers) {
@@ -5628,7 +5789,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         processorUser_ID: approver.ID,
         processor: sDisplayName,
         processorEmail: sEmail,
-        stepNo: 0,
+        stepNo: request.loaWorkflowMode === "GUIDED" ? request.loaStepNo : 0,
         taskName: "LoA Approval",
         assignedTo: sDisplayName,
         role: approver.role_code,
@@ -5643,10 +5804,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     await this._writeHistory(req, {
       requestId: request.ID,
-      stepNo: 0,
+      stepNo: request.loaWorkflowMode === "GUIDED" ? request.loaStepNo : 0,
       action: "LOA_APPROVAL_REQUESTED",
       actor: req.user?.id,
-      oldStatus: PROCESS_STATUS.DRAFT,
+      oldStatus: previousStatus,
       newStatus: PROCESS_STATUS.PENDING_APPROVAL,
       remarks: `Approval requested from ${aApprovers.length} eligible user(s) for role(s) ${aRoleCodes.join(", ")}`
     });
@@ -5657,8 +5818,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (!task.isLoaApproval) return req.reject(400, "The selected task is not an LoA approval task");
     await this._rejectIfTaskAssignedToAnotherUser(req, task, Users);
 
-    const request = await this._getRequest(req, task.request_ID);
+    const request = await cds.tx(req).run(SELECT.one.from(this.entities.ProcessRequests).where({ ID: task.request_ID }).forUpdate());
     if (!request) return req.reject(404, "The request for this approval was not found");
+    task = await this._getTask(req, task.ID);
+    if (!task || task.status_code !== TASK_STATUS.OPEN) return req.reject(409, "This approval task has already been decided");
+    if (request.loaWorkflowMode === "GUIDED" && Number(task.stepNo) !== Number(request.loaStepNo)) {
+      return req.reject(409, "This task does not belong to the request's active LoA step");
+    }
     if (!this._isAdministrator(req)) {
       const oReservationUser = await this._currentReservationUser(req, Users);
       const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID);
@@ -5690,6 +5856,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }),
       UPDATE(this.entities.ProcessRequests, task.request_ID).set({
         status_code: bApproved ? PROCESS_STATUS.DRAFT : PROCESS_STATUS.REJECTED,
+        loaApprovalState: bApproved ? "APPROVED" : "REJECTED",
         completedAt: bApproved ? null : this._now()
       })
     ]);
@@ -5697,7 +5864,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const oReservationUser = await this._currentReservationUser(req, Users);
     const oApprover = oReservationUser.user;
 
-    if (bApproved) {
+    let configuredStatus;
+    if (request.loaWorkflowMode === "GUIDED") {
+      configuredStatus = await this._resumeConfiguredLoa(req, request, task, bApproved);
+    } else if (bApproved) {
       await this._ensureInitialGuidedTask(req, task.request_ID, {
         ...request,
         status_code: PROCESS_STATUS.DRAFT
@@ -5716,11 +5886,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     await this._writeHistory(req, {
       requestId: task.request_ID,
-      stepNo: 0,
+      stepNo: request.loaWorkflowMode === "GUIDED" ? request.loaStepNo : 0,
       action: bApproved ? "LOA_APPROVED" : "LOA_REJECTED",
       actor: req.user?.id,
       oldStatus: PROCESS_STATUS.PENDING_APPROVAL,
-      newStatus: bApproved ? PROCESS_STATUS.IN_PROGRESS : PROCESS_STATUS.REJECTED,
+      newStatus: configuredStatus || (bApproved ? PROCESS_STATUS.IN_PROGRESS : PROCESS_STATUS.REJECTED),
       remarks
     });
     return true;
@@ -5730,7 +5900,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const steps = await this._getSteps(req, oRequest?.subProcessType_code);
     const firstTaskStep = this._getInitialGuidedStep(steps);
 
-    const iAutoCompleteSteps = Number(options.autoCompleteSteps || 0);
+    const iAutoCompleteSteps = oRequest?.loaWorkflowMode === "GUIDED"
+      ? (this._isRequesterSubmissionStep(firstTaskStep) && !this._isLoaStep(firstTaskStep) ? 1 : 0)
+      : Number(options.autoCompleteSteps || 0);
     if (iAutoCompleteSteps > 0) {
       const vResult = await this._autoCompleteLeadingSteps(
         req,
@@ -5772,6 +5944,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     async _autoCompleteLeadingSteps(req, requestId, request, steps, iCount, sReason, oOwner = null) {
     const tx = cds.tx(req);
     const aAutoSteps = steps.filter((step) => !this._isClosingStep(step)).slice(0, iCount);
+    if (aAutoSteps.some((step) => this._isLoaStep(step))) return req.reject(409, "An LoA approval step cannot be auto-completed");
 
     if (!aAutoSteps.length) {
       return null; // nothing configured – caller falls back to normal behaviour
@@ -5826,6 +5999,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
 
     // 2b. Create the landing step task (sends assignment notification)
+    if (request.loaWorkflowMode === "GUIDED" && this._isLoaStep(oLandingStep)) {
+      await this._startConfiguredLoa(req, requestId, oLandingStep);
+      return true;
+    }
     await this._createTask(req, requestId, oLandingStep, { request });
 
     // 3. Move request to the landing step with its SLA
@@ -5918,6 +6095,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _createTask(req, requestId, step, options = {}) {
     const request = options.request || await this._getRequest(req, requestId);
+    if (this._isLoaStep(step)) {
+      if (options.autoComplete) return req.reject(409, "An LoA approval step cannot be auto-completed");
+      return this._startConfiguredLoa(req, requestId, step);
+    }
     const oPredecessor = this._isVendorNotificationStep(step)
       && request?.subProcessType_code === "FTK_FACTORING_PENDING_UAC"
       && request?.predecessor_ID
@@ -6746,3 +6927,4 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     );
   }
 };
+Object.assign(module.exports.prototype, require("./lib/loa-workflow")(LOA_AMOUNT_SOURCE_FIELD));
