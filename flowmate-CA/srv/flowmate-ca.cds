@@ -31,6 +31,8 @@ service FlowmateCAService {
     dueDate            : Date;
     predecessorId      : UUID;
     processorTeamCode  : String(40);
+    @description: 'Active shared Users.ID of the business requester. Required for technical PO creation; browser requests use the signed-in user.'
+    requesterUser_ID   : UUID;
     details            : LargeString;
 
     }
@@ -121,7 +123,7 @@ service FlowmateCAService {
     message       : String(500);
   };
 
-  @description: 'Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and a server-configured active integration user. Human users require active shared master-data provisioning. Workflow initialization runs during creation.'
+  @description: 'Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and input.requesterUser_ID identifying an active shared user. No client-to-user environment mapping is required. Human users use their active signed-in identity. Workflow initialization runs during creation.'
   action createRequest(input: NewRequestInput) returns Requests;
   action createBulkRequests(input: BulkRequestInput) returns {
     created          : Integer;

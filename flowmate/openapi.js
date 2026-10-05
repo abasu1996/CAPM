@@ -54,7 +54,7 @@ function createServiceOpenApiDocument(oModel, oService) {
     if (createRequest) {
       createRequest.description = [
         createRequest.description,
-        "Technical PO creation: use a client-credentials token from flowmate-api-auth with the CA PORequestCreate scope. The authenticated client ID must map to an active shared user through FLOWMATE_CA_PO_INTEGRATION_CLIENTS on flowmate-ca-srv. CAAdmin alone does not authorize this action. Human users continue to require active shared-user provisioning.",
+        "Technical PO creation: use a client-credentials token from flowmate-api-auth with the CA PORequestCreate scope. Supply input.requesterUser_ID with an active shared Users.ID, following the Flowmate requester model. No client-to-user environment mapping is required. CAAdmin alone does not authorize this action. Human users continue to use their active signed-in identity and cannot supply a different requester. The authenticated client ID is recorded separately in creation history.",
         "The input.details property is a JSON-encoded string matching PurchaseOrderDetails, including optional WorkHUBID and WorkHubAppID (String, maximum 100 characters each). The configured workflow initializes during creation; the response status depends on the applicable steps. Use reference codes that exist in the target environment."
       ].filter(Boolean).join("\n\n");
       const content = createRequest.requestBody?.content?.["application/json"];
@@ -66,6 +66,7 @@ function createServiceOpenApiDocument(oModel, oService) {
               input: {
                 requestTypeCode: "PURCHASE_ORDER",
                 requestVariantCode: "PO_OPEX",
+                requesterUser_ID: "01234567-89ab-cdef-0123-456789abcdef",
                 title: "WorkHUB PO integration example",
                 description: "Sample purchase order sent by an external system",
                 priorityCode: "MEDIUM",

@@ -209,8 +209,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const tx = cds.tx(req);
     const integration = resolveTechnicalCreator(req);
     const user = integration
-      ? await this._getPOIntegrationUser(req, integration.userId)
+      ? await this._getPORequester(req, integration.userId)
       : await this._ensureCurrentUser(req, tx);
+    if (!integration && input.requesterUser_ID
+      && String(input.requesterUser_ID).toLowerCase() !== String(user.ID).toLowerCase()) {
+      return req.reject(403, "Browser requests must use the signed-in user as requester");
+    }
     const requestType = await SELECT.one.from(this.db.RequestTypes)
       .where({ code: input.requestTypeCode, isActive: true });
 
@@ -285,7 +289,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const creationRemarks = integration ? JSON.stringify({
       source: "TECHNICAL_API",
       clientId: integration.clientId,
-      integrationUserId: user.ID
+      requesterUserId: user.ID
     }) : undefined;
     await this._writeHistory(tx, requestId, 0, "REQUEST_CREATED", user, null, REQUEST_STATUS.SUBMITTED, creationRemarks);
     return requestId;
@@ -926,11 +930,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
   }
 
-  async _getPOIntegrationUser(req, userId) {
+  async _getPORequester(req, userId) {
     const user = await this.master.run(SELECT.one.from(this.masterEntities.Users)
       .where({ ID: userId, isActive: true }));
     if (!user) {
-      return req.reject(403, "The configured PO integration user is missing or inactive in shared Flowmate master data");
+      return req.reject(400, "Selected requester was not found or is inactive in shared Flowmate master data");
     }
     return user;
   }

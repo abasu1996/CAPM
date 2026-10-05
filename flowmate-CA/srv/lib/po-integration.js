@@ -1,9 +1,9 @@
-const CLIENT_MAPPING_ENV = "FLOWMATE_CA_PO_INTEGRATION_CLIENTS";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Only use the security context produced by CAP's authentication middleware.
-// Never accept the client ID or integration user from headers or the payload.
-function resolveTechnicalCreator(req, mappingJson = process.env[CLIENT_MAPPING_ENV]) {
+// The authorized client supplies the business requester separately in the
+// payload. Its active shared-user record is validated by the action handler.
+function resolveTechnicalCreator(req) {
   if (!req.user.is("system-user")) return null;
 
   if (req.event !== "createRequest" || !req.user.is("PORequestCreate")) {
@@ -18,24 +18,15 @@ function resolveTechnicalCreator(req, mappingJson = process.env[CLIENT_MAPPING_E
     return req.reject(403, "The authenticated API client could not be identified");
   }
 
-  let clients;
-  try {
-    clients = JSON.parse(mappingJson || "{}");
-  } catch {
-    return req.reject(503, "PO integration configuration is invalid. Contact your administrator");
+  const userId = req.data.input?.requesterUser_ID;
+  if (!userId) {
+    return req.reject(400, "requesterUser_ID is required for an integration-created request");
   }
-  if (!clients || typeof clients !== "object" || Array.isArray(clients)) {
-    return req.reject(503, "PO integration configuration is invalid. Contact your administrator");
-  }
-  if (!Object.hasOwn(clients, clientId)) {
-    return req.reject(403, "This API client has no configured PO integration user. Contact your administrator");
-  }
-  const userId = clients[clientId];
   if (typeof userId !== "string" || !UUID.test(userId)) {
-    return req.reject(503, "The configured PO integration user ID is invalid. Contact your administrator");
+    return req.reject(400, "requesterUser_ID must be a valid shared-user UUID");
   }
 
-  return { clientId, userId };
+  return { clientId, userId: userId.toLowerCase() };
 }
 
 function guardTechnicalOperation(req) {

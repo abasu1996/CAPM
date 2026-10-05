@@ -5,7 +5,7 @@
   "scopes": [
     {
       "name": "$XSAPPNAME.PORequestCreate",
-      "description": "Create purchase order requests using a configured technical integration identity",
+      "description": "Create purchase order requests on behalf of an active shared user supplied as requesterUser_ID",
       "grant-as-authority-to-apps": [
         "$XSAPPNAME(application,flowmate-api-client)"
       ]

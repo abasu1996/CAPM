@@ -81666,7 +81666,7 @@
     },
     "/odata/v4/flowmate-ca/createRequest": {
       "post": {
-        "summary": "Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and a server-configured active integration user. Human users require active shared master-data provisioning. Workflow initialization runs during creation.",
+        "summary": "Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and input.requesterUser_ID identifying an active shared user. No client-to-user environment mapping is required. Human users use their active signed-in identity. Workflow initialization runs during creation.",
         "tags": [
           "Flowmate CA — Requests"
         ],
@@ -81714,6 +81714,7 @@
                     "input": {
                       "requestTypeCode": "PURCHASE_ORDER",
                       "requestVariantCode": "PO_OPEX",
+                      "requesterUser_ID": "01234567-89ab-cdef-0123-456789abcdef",
                       "title": "WorkHUB PO integration example",
                       "description": "Sample purchase order sent by an external system",
                       "priorityCode": "MEDIUM",
@@ -81726,7 +81727,7 @@
             }
           }
         },
-        "description": "Technical PO creation: use a client-credentials token from flowmate-api-auth with the CA PORequestCreate scope. The authenticated client ID must map to an active shared user through FLOWMATE_CA_PO_INTEGRATION_CLIENTS on flowmate-ca-srv. CAAdmin alone does not authorize this action. Human users continue to require active shared-user provisioning.\n\nThe input.details property is a JSON-encoded string matching PurchaseOrderDetails, including optional WorkHUBID and WorkHubAppID (String, maximum 100 characters each). The configured workflow initializes during creation; the response status depends on the applicable steps. Use reference codes that exist in the target environment.",
+        "description": "Technical PO creation: use a client-credentials token from flowmate-api-auth with the CA PORequestCreate scope. Supply input.requesterUser_ID with an active shared Users.ID, following the Flowmate requester model. No client-to-user environment mapping is required. CAAdmin alone does not authorize this action. Human users continue to use their active signed-in identity and cannot supply a different requester. The authenticated client ID is recorded separately in creation history.\n\nThe input.details property is a JSON-encoded string matching PurchaseOrderDetails, including optional WorkHUBID and WorkHubAppID (String, maximum 100 characters each). The configured workflow initializes during creation; the response status depends on the applicable steps. Use reference codes that exist in the target environment.",
         "x-flowmate-project": "flowmate-CA",
         "x-cap-service": "FlowmateCAService"
       }
@@ -131001,6 +131002,13 @@
             "type": "string",
             "maxLength": 40,
             "nullable": true
+          },
+          "requesterUser_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
+            "nullable": true,
+            "description": "Active shared Users.ID of the business requester. Required for technical PO creation; browser requests use the signed-in user."
           },
           "details": {
             "type": "string",
