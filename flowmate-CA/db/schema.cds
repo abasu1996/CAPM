@@ -511,6 +511,8 @@ entity OutlineContractItems : cuid, managed {
 
 entity PurchaseOrderDetails : cuid, managed {
   request                 : Association to CARequests not null;
+  WorkHUBID               : String(100);
+  WorkHubAppID            : String(100);
   selectionMode           : String(20);
   purchaseOrderType       : Association to PurchaseOrderTypes;
   contractBased           : Boolean default false;

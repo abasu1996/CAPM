@@ -693,7 +693,7 @@ sap.ui.define([], function () {
     field("sesRequired", "Create SES Successor", "checkbox"),
     field("paymentRequestRequired", "Create Payment Successor", "checkbox"),
     field("poHeaderText", "PO Header Text", "textarea"),
-    field("WorkHubID", "WorkHub  ID", "input"),
+    field("WorkHUBID", "WorkHub ID", "input"),
     field("WorkHubAppID", "WorkHub Application ID", "input"),
     field("campaignLocationCode", "Campaign / Location Code", "combo", { entity: "Sites", key: "siteId", text: "siteName" }),
     field("procurementDescription", "Procurement Description", "textarea", {

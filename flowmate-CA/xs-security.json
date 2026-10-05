@@ -4,6 +4,13 @@
   "description": "Flowmate CA authorization model",
   "scopes": [
     {
+      "name": "$XSAPPNAME.PORequestCreate",
+      "description": "Create purchase order requests using a configured technical integration identity",
+      "grant-as-authority-to-apps": [
+        "$XSAPPNAME(application,flowmate-api-client)"
+      ]
+    },
+    {
       "name": "$XSAPPNAME.CARequester",
       "description": "Create and track Commerce Automation requests"
     },

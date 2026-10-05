@@ -45,6 +45,13 @@
         </HBox>
 
         <FlexBox wrap="Wrap" class="caTileGrid" renderType="Div">
+          <GenericTile class="caTile caTileIndigo" header="{i18n>allRequests}" subheader="{i18n>allRequestsSubtitle}" press=".onAllRequests">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/allRequests}" icon="sap-icon://overview-chart" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
           <GenericTile class="caTile caTileBlue" header="{i18n>myRequests}" subheader="Requests raised by you" press=".onMyRequests">
             <tileContent>
               <TileContent>

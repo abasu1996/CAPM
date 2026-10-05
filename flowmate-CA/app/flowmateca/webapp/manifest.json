@@ -123,6 +123,11 @@
       },
       "routes": [
         {
+          "name": "allRequests",
+          "pattern": "all-requests",
+          "target": "allRequests"
+        },
+        {
           "name": "dashboard",
           "pattern": "",
           "target": "dashboard"
@@ -159,6 +164,10 @@
         }
       ],
       "targets": {
+        "allRequests": {
+          "id": "AllRequests",
+          "name": "AllRequests"
+        },
         "dashboard": {
           "id": "Dashboard",
           "name": "Dashboard"

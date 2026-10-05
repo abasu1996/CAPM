@@ -5,6 +5,7 @@ using { CommonMasterDataService as common } from './external/common-master';
 @requires: 'authenticated-user'
 service FlowmateCAService {
   type DashboardCounts {
+    allRequests     : Integer;
     myRequests       : Integer;
     myOpenTasks      : Integer;
     myTeamTasks      : Integer;
@@ -120,6 +121,7 @@ service FlowmateCAService {
     message       : String(500);
   };
 
+  @description: 'Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and a server-configured active integration user. Human users require active shared master-data provisioning. Workflow initialization runs during creation.'
   action createRequest(input: NewRequestInput) returns Requests;
   action createBulkRequests(input: BulkRequestInput) returns {
     created          : Integer;

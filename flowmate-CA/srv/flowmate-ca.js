@@ -1,4 +1,5 @@
 const cds = require("@sap/cds");
+const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails } = require("./lib/po-integration");
 const { SELECT, INSERT, UPDATE } = cds.ql;
 
 const REQUEST_STATUS = {
@@ -45,6 +46,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.master = await cds.connect.to("CommonMasterDataService");
     this.masterEntities = this.master.entities;
     this.flowmate = await cds.connect.to("FlowmateService");
+
+    this.before("*", guardTechnicalOperation);
 
     this.on("READ", ["Users", "Teams", "TeamMembers", "Vendors"], (req) => {
       return this.master.run(req.query);
@@ -148,6 +151,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const teamIds = isAdmin ? [] : await this._teamIdsOf(user);
 
     const [
+      allRequests,
       myRequests,
       myOpenTasks,
       sentBackRequests,
@@ -155,6 +159,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       pendingApproval,
       completedRequests
     ] = await Promise.all([
+      this._count(this.db.CARequests, {}),
       this._count(this.db.CARequests, requestedBy),
       this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }),
       this._count(this.db.CARequests, {
@@ -188,6 +193,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
 
     return {
+      allRequests,
       myRequests,
       myOpenTasks,
       myTeamTasks,
@@ -201,7 +207,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _createRequest = async (req) => {
     const input = req.data.input || {};
     const tx = cds.tx(req);
-    const user = await this._ensureCurrentUser(req, tx);
+    const integration = resolveTechnicalCreator(req);
+    const user = integration
+      ? await this._getPOIntegrationUser(req, integration.userId)
+      : await this._ensureCurrentUser(req, tx);
     const requestType = await SELECT.one.from(this.db.RequestTypes)
       .where({ code: input.requestTypeCode, isActive: true });
 
@@ -237,16 +246,18 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       requestType,
       requestVariant,
       processorTeam,
-      input
+      input,
+      integration
     });
 
     return tx.run(SELECT.one.from(this.db.CARequests).where({ ID: requestId }));
   };
 
-  async _insertOneRequest(req, tx, user, { requestType, requestVariant, processorTeam, input }) {
+  async _insertOneRequest(req, tx, user, { requestType, requestVariant, processorTeam, input, integration }) {
     const requestId = cds.utils.uuid();
     const referenceNumber = this._referenceNumber(requestType.code);
     const details = this._parseDetails(req, input.details);
+    if (integration) assertTechnicalDetails(req, details);
     await this._assertNoDuplicateMaterialDescription(req, requestType.code, details);
 
     await tx.run(INSERT.into(this.db.CARequests).entries({
@@ -271,7 +282,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     await this._insertDetails(tx, requestType.code, requestId, details);
     await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, user, details);
-    await this._writeHistory(tx, requestId, 0, "REQUEST_CREATED", user, null, REQUEST_STATUS.SUBMITTED);
+    const creationRemarks = integration ? JSON.stringify({
+      source: "TECHNICAL_API",
+      clientId: integration.clientId,
+      integrationUserId: user.ID
+    }) : undefined;
+    await this._writeHistory(tx, requestId, 0, "REQUEST_CREATED", user, null, REQUEST_STATUS.SUBMITTED, creationRemarks);
     return requestId;
   }
 
@@ -910,7 +926,19 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
   }
 
+  async _getPOIntegrationUser(req, userId) {
+    const user = await this.master.run(SELECT.one.from(this.masterEntities.Users)
+      .where({ ID: userId, isActive: true }));
+    if (!user) {
+      return req.reject(403, "The configured PO integration user is missing or inactive in shared Flowmate master data");
+    }
+    return user;
+  }
+
   async _ensureCurrentUser(req) {
+    if (req.user.is("system-user")) {
+      return req.reject(403, "This operation requires a provisioned business user");
+    }
     const loginId = String(req.user.id || "").trim();
     const emailFromToken = String(
       req.user.attr?.email || req.user.attr?.mail || loginId

@@ -49,6 +49,58 @@ function createServiceOpenApiDocument(oModel, oService) {
     });
   }
 
+  if (oService.name === "FlowmateCAService") {
+    const createRequest = oDocument.paths?.["/createRequest"]?.post;
+    if (createRequest) {
+      createRequest.description = [
+        createRequest.description,
+        "Technical PO creation: use a client-credentials token from flowmate-api-auth with the CA PORequestCreate scope. The authenticated client ID must map to an active shared user through FLOWMATE_CA_PO_INTEGRATION_CLIENTS on flowmate-ca-srv. CAAdmin alone does not authorize this action. Human users continue to require active shared-user provisioning.",
+        "The input.details property is a JSON-encoded string matching PurchaseOrderDetails, including optional WorkHUBID and WorkHubAppID (String, maximum 100 characters each). The configured workflow initializes during creation; the response status depends on the applicable steps. Use reference codes that exist in the target environment."
+      ].filter(Boolean).join("\n\n");
+      const content = createRequest.requestBody?.content?.["application/json"];
+      if (content) {
+        content.examples = {
+          purchaseOrder: {
+            summary: "PO creation with WorkHUB references",
+            value: {
+              input: {
+                requestTypeCode: "PURCHASE_ORDER",
+                requestVariantCode: "PO_OPEX",
+                title: "WorkHUB PO integration example",
+                description: "Sample purchase order sent by an external system",
+                priorityCode: "MEDIUM",
+                processorTeamCode: "REPLACE_WITH_ACTIVE_TEAM_CODE",
+                details: JSON.stringify({
+                  WorkHUBID: "WH-000123",
+                  WorkHubAppID: "WH-APP-001",
+                  purchaseOrderType_code: "GENERAL",
+                  procurementCategory_code: "OPEX",
+                  currency_code: "LKR",
+                  totalValue: 1000,
+                  items: [{ description: "Sample material", quantity: 2, unitPrice: 500, unitOfMeasure_code: "EA" }]
+                })
+              }
+            }
+          }
+        };
+      }
+    }
+    const requests = oDocument.paths?.["/Requests"]?.get;
+    if (requests) {
+      requests.description = [
+        requests.description,
+        "Used by the All Requests tile. Returns CA requests across all users and teams; MyRequests remains the personal list. Supports server-side filtering, sorting and paging with $filter, $orderby, $top, $skip and $count=true.",
+        "Example $filter: status_code eq 'SUBMITTED' and requestType_code eq 'PURCHASE_ORDER' and createdAt ge 2026-10-01T00:00:00Z and createdAt lt 2026-11-01T00:00:00Z. Convert selected local dates to UTC and use an exclusive next-day upper bound to include the entire end date."
+      ].filter(Boolean).join("\n\n");
+    }
+    const counts = oDocument.paths?.["/getDashboardCounts()"]?.get || oDocument.paths?.["/getDashboardCounts"]?.get;
+    if (counts) {
+      counts.description = [counts.description,
+        "allRequests counts every CA request across users, teams and statuses. Personal request/task counts retain their existing user filters."
+      ].filter(Boolean).join("\n\n");
+    }
+  }
+
   return oDocument;
 }
 

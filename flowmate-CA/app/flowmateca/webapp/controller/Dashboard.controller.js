@@ -7,6 +7,7 @@ sap.ui.define([
   return BaseController.extend("flowmateca.controller.Dashboard", {
     onInit: function () {
       this.getView().setModel(new JSONModel({
+        allRequests: 0,
         myRequests: 0,
         myOpenTasks: 0,
         myTeamTasks: 0,
@@ -54,6 +55,10 @@ sap.ui.define([
           mode: "mine"
         }
       });
+    },
+
+    onAllRequests: function () {
+      this.navTo("allRequests");
     },
 
     onSentBack: function () {

@@ -26,6 +26,8 @@
     "@sap/cds-dk": "9.9.1"
   },
   "scripts": {
+    "test:all-requests": "node --test test/all-requests.test.js",
+    "test:po-integration": "node --test test/po-integration.test.js",
     "start": "cds-serve",
     "watch": "cds watch --port 4010 --open flowmateca/webapp/index.html?sap-ui-xx-viewCache=false",
     "watch:hybrid": "cds bind --exec --profile hybrid -- cds watch --profile hybrid --port 4010 --open flowmateca/webapp/index.html?sap-ui-xx-viewCache=false",
