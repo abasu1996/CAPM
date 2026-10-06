@@ -267,6 +267,7 @@
                             <Column><Text text="{i18n>userNameLabel}" /></Column>
                             <Column><Text text="{i18n>emailLabel}" /></Column>
                             <Column><Text text="{i18n>statusLabel}" /></Column>
+                            <Column hAlign="Center" width="8rem"><Text text="{i18n>primaryTeamLabel}" /></Column>
                         </columns>
                         <items>
                             <ColumnListItem>
@@ -277,6 +278,11 @@
                                         text="{path: 'teamMembers>isActive', formatter: '.formatActiveText'}"
                                         state="{path: 'teamMembers>isActive', formatter: '.formatActiveState'}"
                                         inverted="true" />
+                                    <CheckBox
+                                        selected="{teamMembers>isPrimary}"
+                                        enabled="{teamMembers>isActive}"
+                                        tooltip="{i18n>primaryTeamTooltip}"
+                                        select=".onPrimaryTeamMemberSelect" />
                                 </cells>
                             </ColumnListItem>
                         </items>

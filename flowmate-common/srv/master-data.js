@@ -122,7 +122,15 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       }
 
       req.data.referenceNumber ||= await this._nextReferenceNumber(req, TeamMembers, "TMM");
+      req.data.isPrimary ??= false;
       this._setTeamMemberSnapshot(req.data, oUser);
+      await this._validatePrimaryTeamMembership(req, {
+        membershipId: null,
+        membership: req.data,
+        user: oUser,
+        TeamMembers,
+        Teams
+      });
     });
 
     this.before("UPDATE", TeamMembers, async (req) => {
@@ -142,6 +150,13 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       }
 
       this._setTeamMemberSnapshot(req.data, oUser);
+      await this._validatePrimaryTeamMembership(req, {
+        membershipId: sMembershipId,
+        membership: { ...oMembership, ...req.data, user_ID: sUserId },
+        user: oUser,
+        TeamMembers,
+        Teams
+      });
     });
 
     this.on("getUserAdministrationCapabilities", (req) => ({
@@ -354,6 +369,54 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
     oData.displayName = oUser.displayName;
     oData.email = oUser.email;
     oData.isActive ??= oUser.isActive !== false;
+  }
+
+  async _validatePrimaryTeamMembership(req, {
+    membershipId,
+    membership,
+    user,
+    TeamMembers,
+    Teams
+  }) {
+    if (!membership.isPrimary) {
+      return;
+    }
+
+    if (membership.isActive === false) {
+      return req.reject(400, "An inactive team membership cannot be marked as primary");
+    }
+
+    const oSelectedTeam = await this._getTeam(req, membership.team_ID, Teams);
+    if (!oSelectedTeam) {
+      return req.reject(400, "Only an active team can be selected as the user's primary team");
+    }
+
+    const aExistingPrimaryMemberships = await cds.tx(req).run(
+      SELECT.from(TeamMembers)
+        .columns("ID", "team_ID")
+        .where({
+          user_ID: membership.user_ID,
+          isActive: true,
+          isPrimary: true
+        })
+    );
+    const oConflict = aExistingPrimaryMemberships.find((oMembership) =>
+      oMembership.ID !== membershipId
+    );
+
+    if (!oConflict) {
+      return;
+    }
+
+    const oExistingTeam = await cds.tx(req).run(
+      SELECT.one.from(Teams).columns("name", "teamCode").where({ ID: oConflict.team_ID })
+    );
+    const sUserName = user.displayName || user.email || "This user";
+    const sTeamName = oExistingTeam?.name || oExistingTeam?.teamCode || oConflict.team_ID;
+    return req.reject(
+      409,
+      `${sUserName} is already marked as a primary member of ${sTeamName}. Remove the existing primary assignment before selecting another team`
+    );
   }
 
   _requestId(req) {

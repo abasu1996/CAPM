@@ -2350,9 +2350,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!oUser) {
         return req.reject(400, "Select an active user");
       }
+      const oPrimaryTeam = await this._getPrimaryTeamForUser(req, oUser.ID, TeamMembers, Teams);
 
       const sDisplayName = this._userDisplayName(oUser);
       const sEmail = this._userEmail(oUser);
+      const sPrimaryTeamName = oPrimaryTeam.name || oPrimaryTeam.teamCode;
 
       await cds.tx(req).run(
         UPDATE(ProcessRequests, requestId).set({
@@ -2361,7 +2363,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           reservedAt: this._now(),
           processorUser_ID: oUser.ID,
           processor: sDisplayName,
-          processorEmail: sEmail
+          processorEmail: sEmail,
+          processorTeam_ID: oPrimaryTeam.ID,
+          processorTeamName: sPrimaryTeamName
         })
       );
 
@@ -2372,7 +2376,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         actor: req.user?.id,
         oldStatus: request.status_code,
         newStatus: request.status_code,
-        remarks: `Request assigned and reserved to ${sDisplayName}`
+        remarks: `Request assigned and reserved to ${sDisplayName}; processor team set to ${sPrimaryTeamName}`
       });
 
       return true;
@@ -4642,6 +4646,43 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       SELECT.from(TeamMembers).columns("team_ID").where({ user_ID: userId, isActive: true })
     );
     return [...new Set(aMemberships.map((membership) => membership.team_ID).filter(Boolean))];
+  }
+
+  async _getPrimaryTeamForUser(
+    req,
+    userId,
+    TeamMembers = this.masterEntities.TeamMembers,
+    Teams = this.masterEntities.Teams
+  ) {
+    const aPrimaryMemberships = await this.master.run(
+      SELECT.from(TeamMembers)
+        .columns("ID", "team_ID")
+        .where({ user_ID: userId, isActive: true, isPrimary: true })
+    );
+
+    if (!aPrimaryMemberships.length) {
+      return req.reject(
+        409,
+        "The selected user has no active primary team. Maintain a primary team in User Administration before assigning the request"
+      );
+    }
+
+    if (aPrimaryMemberships.length > 1) {
+      return req.reject(
+        409,
+        "The selected user has multiple active primary teams. Correct the team memberships before assigning the request"
+      );
+    }
+
+    const oPrimaryTeam = await this._getTeam(req, aPrimaryMemberships[0].team_ID, Teams);
+    if (!oPrimaryTeam) {
+      return req.reject(
+        409,
+        "The selected user's primary team is inactive or no longer exists. Correct the team membership before assigning the request"
+      );
+    }
+
+    return oPrimaryTeam;
   }
 
   async _filterTasksByRequestTeams(req, Users, TeamMembers = this.masterEntities.TeamMembers) {

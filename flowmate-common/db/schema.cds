@@ -46,6 +46,7 @@ entity TeamMembers : cuid, managed {
   displayName     : String(160);
   email           : String(255);
   isActive        : Boolean default true;
+  isPrimary       : Boolean default false;
 }
 
 @assert.unique.vendorCode: [vendorCode]

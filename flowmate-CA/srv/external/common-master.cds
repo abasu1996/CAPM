@@ -32,6 +32,7 @@ service CommonMasterDataService {
         displayName: String(160);
         email      : String(255);
         isActive : Boolean;
+        isPrimary: Boolean;
   }
 
   @cds.persistence.skip
