@@ -91,6 +91,7 @@ modules:
       - name: flowmate-auth
       - name: flowmate-db
       - name: flowmate-destination
+      - name: flowmate-connectivity
       - name: dialog-job
 
   - name: flowmate-db-deployer
@@ -168,6 +169,12 @@ resources:
             destinations: []
             existing_destinations_policy: update
       service: destination
+      service-plan: lite
+
+  - name: flowmate-connectivity
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: connectivity
       service-plan: lite
 
   - name: flowmate-html5-runtime

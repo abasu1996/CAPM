@@ -799,6 +799,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       description: activeConfig.activityDescription,
       assignedTeam_ID: activeConfig.processorTeam_ID,
       assignedTeamName: teamsById.get(activeConfig.processorTeam_ID)?.name || null,
+      ...await this._approverAssignment(activeConfig, conditionSource),
       status_code: TASK_STATUS.OPEN,
       isMandatory: activeConfig.isMandatory,
       isApproval: activeConfig.isApproval,
@@ -809,6 +810,27 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: REQUEST_STATUS.SUBMITTED,
       submittedAt
     }).where({ ID: requestId }));
+  }
+
+  // Route configured APPROVER steps to the requester-selected approver when supplied.
+  // If no approver is selected or the user is no longer maintained, leave the task in its team queue.
+  async _approverAssignment(config, details) {
+    const approverId = config?.roleCode === "APPROVER"
+      ? (details?.approver_ID || details?.loaApprover_ID)
+      : null;
+    if (!approverId) {
+      return {};
+    }
+    const approver = await this.master.run(SELECT.one.from(this.masterEntities.Users)
+      .where({ ID: approverId, isActive: true }));
+    if (!approver) {
+      return {};
+    }
+    return {
+      assignedUser_ID: approver.ID,
+      assignedName: approver.displayName,
+      assignedEmail: approver.email
+    };
   }
 
   _isStepApplicable(config, details) {
@@ -870,6 +892,14 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const team = teamId
       ? await this.master.run(SELECT.one.from(this.masterEntities.Teams).where({ ID: teamId }))
       : null;
+    let approver = {};
+    if (config?.roleCode === "APPROVER") {
+      const request = await tx.run(SELECT.one.from(this.db.CARequests)
+        .columns("requestType_code")
+        .where({ ID: requestId }));
+      const details = await this._loadDetails(tx, request?.requestType_code, requestId);
+      approver = await this._approverAssignment(config, details);
+    }
     await tx.run(INSERT.into(this.db.CATasks).entries({
       ID: cds.utils.uuid(),
       referenceNumber: this._taskReferenceNumber(requestId),
@@ -880,6 +910,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       description: config?.activityDescription || step.activityDescription,
       assignedTeam_ID: teamId,
       assignedTeamName: team?.name || step.processorTeamName || null,
+      ...approver,
       status_code: TASK_STATUS.OPEN,
       isMandatory: config?.isMandatory ?? true,
       isApproval: config?.isApproval ?? false,

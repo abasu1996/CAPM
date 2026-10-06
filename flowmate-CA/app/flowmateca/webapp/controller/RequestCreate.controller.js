@@ -425,20 +425,26 @@ sap.ui.define([
       }.bind(this)));
     },
 
-    _applyAutoFill: function (definition, selectedKey, basePath) {
+    // autoFills may be one rule or several. Prefer the selected catalog row when
+    // keys are not unique (for example, more than one project can share a category).
+    _applyAutoFill: function (definition, selectedKey, basePath, selectedRow) {
       if (!definition.autoFills || !definition.entity) {
         return;
       }
-      const rows = this.getView().getModel("catalog")
-        .getProperty(`/${definition.entity}`) || [];
-      const keyProperty = definition.key || "code";
-      const match = rows.find(function (row) {
-        return String(row[keyProperty]) === String(selectedKey);
+      let match = selectedRow;
+      if (!match && selectedKey) {
+        const rows = this.getView().getModel("catalog")
+          .getProperty(`/${definition.entity}`) || [];
+        const keyProperty = definition.key || "code";
+        match = rows.find(function (row) {
+          return String(row[keyProperty]) === String(selectedKey);
+        });
+      }
+      const formModel = this.getView().getModel("form");
+      [].concat(definition.autoFills).forEach(function (rule) {
+        const target = basePath ? `${basePath}/${rule.field}` : `/details/${rule.field}`;
+        formModel.setProperty(target, match ? (match[rule.from] || "") : "");
       });
-      const target = basePath
-        ? `${basePath}/${definition.autoFills.field}`
-        : `/details/${definition.autoFills.field}`;
-      this.getView().getModel("form").setProperty(target, match ? (match[definition.autoFills.from] || "") : "");
     },
 
     // Spec-driven conditional fields: a definition may carry
@@ -542,7 +548,9 @@ sap.ui.define([
           selectionChange: function (event) {
             const item = event.getParameter("selectedItem");
             const context = event.getSource().getBindingContext("form");
-            this._applyAutoFill(definition, item ? item.getKey() : "", context ? context.getPath() : null);
+            const rowContext = item ? item.getBindingContext("catalog") : null;
+            this._applyAutoFill(definition, item ? item.getKey() : "", context ? context.getPath() : null,
+              rowContext ? rowContext.getObject() : null);
             this._applyConditionalVisibility();
           }.bind(this)
         }).bindProperty("selectedKey", path);

@@ -3103,6 +3103,51 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       endpoint: "flowmate-ca-api"
     }));
 
+    this.on("getAribaBusinessPartners", async (req) => {
+      try {
+        const response = await executeHttpRequest(
+          { destinationName: "RISE_QA_ARIBA" },
+          {
+            method: "GET",
+            url: "/sap/opu/odata/sap/API_BUSINESS_PARTNER/A_BusinessPartner?$top=10&$select=BusinessPartner,BusinessPartnerCategory,BusinessPartnerGrouping,OrganizationBPName1&$format=json",
+            headers: { accept: "application/json" },
+            timeout: 30000
+          }
+        );
+
+        const payload = response.data;
+        const records = Array.isArray(payload?.d?.results)
+          ? payload.d.results
+          : Array.isArray(payload?.value)
+            ? payload.value
+            : null;
+
+        if (!records) {
+          cds.log("ariba-business-partner").error("SAP Business Partner API returned an unsupported response shape");
+          return req.reject(502, "The SAP Business Partner service returned an unexpected response");
+        }
+
+        return records.slice(0, 10).map((record) => ({
+          BusinessPartner: record.BusinessPartner,
+          BusinessPartnerCategory: record.BusinessPartnerCategory,
+          BusinessPartnerGrouping: record.BusinessPartnerGrouping,
+          OrganizationBPName1: record.OrganizationBPName1
+        }));
+      } catch (error) {
+        const status = Number(error.response?.status || error.statusCode || 0);
+        cds.log("ariba-business-partner").error("Destination call to SAP Business Partner API failed", {
+          status: status || undefined
+        });
+
+        if (status === 401 || status === 403) {
+          return req.reject(502, `SAP Business Partner API rejected the destination authentication (HTTP ${status}). Check the RISE_QA_ARIBA destination credentials and SAP authorizations.`);
+        }
+        return req.reject(502, status
+          ? `SAP Business Partner API call failed (HTTP ${status})`
+          : "Could not connect to the SAP Business Partner service through the RISE_QA_ARIBA destination");
+      }
+    });
+
     this.on("getUserAdministrationCapabilities", (req) => ({
       canMaintainUsers: this._isAdministrator(req)
     }));

@@ -11,6 +11,12 @@ service FlowmateService {
         subProcessTypeCode : String(30);
         statusCode      : String(20);
     }
+    type AribaBusinessPartnerPreview {
+        BusinessPartner           : String(10);
+        BusinessPartnerCategory   : String(2);
+        BusinessPartnerGrouping   : String(4);
+        OrganizationBPName1       : String(81);
+    }
     type ReportChartSnapshot {
         chartKey : String(100);
         title    : String(150);
@@ -368,6 +374,8 @@ service FlowmateService {
         checkedAt     : DateTime;
         message       : String(500);
     };
+    @requires: 'RequestProvisioning'
+    action getAribaBusinessPartners() returns many AribaBusinessPartnerPreview;
     action reserveRequest(requestId: UUID) returns Boolean;
     @requires: 'Admin'
     action assignRequestToUser(requestId: UUID, userId: UUID) returns Boolean;

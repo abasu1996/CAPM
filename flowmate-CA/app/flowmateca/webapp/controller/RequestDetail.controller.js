@@ -5,8 +5,9 @@ sap.ui.define([
   "sap/m/MessageBox",
   "sap/m/Column",
   "sap/m/ColumnListItem",
-  "sap/m/Text"
-], function (BaseController, FormDefinitions, JSONModel, MessageBox, Column, ColumnListItem, Text) {
+  "sap/m/Text",
+  "sap/base/Log"
+], function (BaseController, FormDefinitions, JSONModel, MessageBox, Column, ColumnListItem, Text, Log) {
   "use strict";
 
   const DETAIL_NAVIGATION = {
@@ -64,6 +65,7 @@ sap.ui.define([
         this._prepareDetail(request);
         this.getView().getModel("detail").setData(request);
         this._renderDetailItems(request.requestType?.code);
+        await this._resolveIdLabels(request);
       } catch (error) {
         this.showError(error);
       } finally {
@@ -124,6 +126,29 @@ sap.ui.define([
           value: value === null || value === undefined || value === "" ? "Not provided" : String(value)
         };
       });
+    },
+
+    // Fields backed by UUIDs are stored as IDs; display the corresponding maintained label.
+    // If a lookup fails, retain the ID already rendered by _detailFields.
+    _resolveIdLabels: async function (request) {
+      const details = request[DETAIL_NAVIGATION[request.requestType?.code]] || {};
+      const definitions = FormDefinitions.getFieldsByRequestType(request.requestType?.code);
+      const model = this.getView().getModel("detail");
+      await Promise.all(definitions.map(async function (definition, index) {
+        const value = details[definition.name];
+        if (definition.key !== "ID" || !definition.entity || !value) {
+          return;
+        }
+        try {
+          const row = await this.request(`${definition.entity}(${value})`);
+          const label = row && row[definition.text || "name"];
+          if (label) {
+            model.setProperty(`/detailFields/${index}/value`, String(label));
+          }
+        } catch (error) {
+          Log.warning(`Could not resolve ${definition.name} ${value}`, error);
+        }
+      }.bind(this)));
     },
 
     _renderDetailItems: function (typeCode) {

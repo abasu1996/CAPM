@@ -430,14 +430,21 @@ sap.ui.define([], function () {
         required: true,
         placeholder: "Filled from the selected Site ID"
       }),
+      field("projectCategory", "Project Category", "combo", {
+        required: true,
+        entity: "Projects", key: "projectCategory", text: "projectCategory", secondaryText: "projectID",
+        autoFills: [
+          { field: "projectId", from: "projectID" },
+          { field: "projectDescription", from: "projectDescription" }
+        ]
+      }),
       field("projectId", "Project ID", "readonly", {
         required: true,
-        placeholder: "Derived by BTP once the integration is live"
+        placeholder: "Filled from the selected Project Category"
       }),
-      field("projectCategory", "Project Category", "combo", { required: true, entity: "ProjectCategories" }),
       field("projectDescription", "Project Description", "readonly", {
         required: true,
-        placeholder: "Derived by BTP once the integration is live"
+        placeholder: "Filled from the selected Project Category"
       }),
       field("remarks", "Remarks", "textarea"),
       field("supportingAttachment", "Supporting Attachment", "file")

@@ -1,0 +1,5 @@
+ID,projectID,projectCategory,projectDescription,isActive
+fd586e55-dd1a-4e44-bf10-0d5782c4c76f,PRJ-NW-001,Network Infrastructure,Network infrastructure rollout,true
+698d3f7f-8c90-4ee1-91db-0f2d8c1231d3,PRJ-IT-001,Information Technology,IT and platform modernisation,true
+368c156d-02c4-46a6-82e1-9c86a7e5b682,PRJ-RT-001,Retail Expansion,Retail and channel expansion,true
+71efbaa2-ee31-431a-8835-b3b7aa5ac0b3,PRJ-CS-001,Corporate Services,Corporate and support services,true
