@@ -45,18 +45,19 @@
                                 mode="MultiSelect"
                                 growing="true"
                                 growingScrollToLoad="true"
+                                autoPopinMode="true"
                                 items="{path: '/ProcessStepConfig', events: {dataRequested: '.onDataRequested', dataReceived: '.onDataReceived'}}">
                                 <columns>
-                                    <Column width="8rem"><Text text="{i18n>referenceNumberLabel}" wrapping="true" /></Column>
-                                    <Column width="12rem"><Text text="{i18n>subProcessTypeLabel}" wrapping="true" /></Column>
-                                    <Column width="5rem"><Text text="{i18n>stepLabel}" wrapping="true" /></Column>
-                                    <Column width="10rem"><Text text="{i18n>stepNameLabel}" wrapping="true" /></Column>
-                                    <Column width="9rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>stepTypeLabel}" /></Column>
-                                    <Column width="16rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
-                                    <Column width="12rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>processorTeamLabel}" wrapping="true" /></Column>
-                                    <Column width="8rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" wrapping="true" /></Column>
-                                    <Column width="6rem" demandPopin="true" minScreenWidth="Desktop"><Text text="{i18n>slaDaysLabel}" wrapping="true" /></Column>
-                                    <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                    <Column width="7rem" importance="High"><Text text="{i18n>referenceNumberLabel}" wrapping="true" /></Column>
+                                    <Column width="11rem" importance="High"><Text text="{i18n>subProcessTypeLabel}" wrapping="true" /></Column>
+                                    <Column width="4rem" importance="High"><Text text="{i18n>stepLabel}" wrapping="true" /></Column>
+                                    <Column width="9rem" importance="High"><Text text="{i18n>stepNameLabel}" wrapping="true" /></Column>
+                                    <Column width="8rem" importance="Medium" demandPopin="true"><Text text="{i18n>stepTypeLabel}" /></Column>
+                                    <Column width="13rem" importance="Low" demandPopin="true"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
+                                    <Column width="10rem" importance="Medium" demandPopin="true"><Text text="{i18n>processorTeamLabel}" wrapping="true" /></Column>
+                                    <Column width="7rem" importance="Low" demandPopin="true"><Text text="{i18n>roleLabel}" wrapping="true" /></Column>
+                                    <Column width="5rem" importance="Low" demandPopin="true"><Text text="{i18n>slaDaysLabel}" wrapping="true" /></Column>
+                                    <Column width="4rem" hAlign="Center" importance="High"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items>
                                     <ColumnListItem>
