@@ -113,7 +113,7 @@ const definitions = {
     entities: {
       Users: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "referenceNumber", "userPrincipalName", "displayName", "email", "azureObjectId", "department", "role_code", "manager_ID", "isActive"],
       Teams: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "referenceNumber", "teamCode", "name", "description", "isActive"],
-      TeamMembers: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "referenceNumber", "team_ID", "user_ID", "displayName", "email", "isActive"],
+      TeamMembers: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "referenceNumber", "team_ID", "user_ID", "displayName", "email", "isActive", "isPrimary"],
       Vendors: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "vendorCode", "vendorName", "vendorEmail", "isActive"],
       Customers: ["ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "customerCode", "customerName", "customerEmail", "isActive"]
     }
@@ -197,6 +197,10 @@ const csvCell = (value) => {
 
 const physicalColumn = (column) => column.replace(/\./g, "_").toUpperCase();
 const physicalTable = (prefix, entity) => `${prefix}${entity.replace(/\./g, "_").toUpperCase()}`;
+const columnDefaults = {
+  isActive: true,
+  isPrimary: false
+};
 
 if (!fs.existsSync(exportRoot)) throw new Error(`Export not found: ${exportRoot}`);
 if (!fs.existsSync(repositoryRoot)) throw new Error(`Repository not found: ${repositoryRoot}`);
@@ -220,7 +224,8 @@ for (const [project, definition] of Object.entries(definitions)) {
     const available = new Set(rows.flatMap((row) => Object.keys(row)));
     for (const column of columns) {
       const physical = physicalColumn(column);
-      if (rows.length && !available.has(physical) && column !== "isActive") {
+      if (rows.length && !available.has(physical)
+        && !Object.prototype.hasOwnProperty.call(columnDefaults, column)) {
         throw new Error(`${table}: recovered column ${physical} is missing`);
       }
     }
@@ -228,8 +233,9 @@ for (const [project, definition] of Object.entries(definitions)) {
     let outputRows = rows.map((row) => Object.fromEntries(
       columns.map((column) => [
         column,
-        column === "isActive" && row[physicalColumn(column)] === undefined
-          ? true
+        row[physicalColumn(column)] === undefined
+          && Object.prototype.hasOwnProperty.call(columnDefaults, column)
+          ? columnDefaults[column]
           : row[physicalColumn(column)]
       ])
     ));

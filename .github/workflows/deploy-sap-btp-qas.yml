@@ -178,13 +178,25 @@ jobs:
           done
 
       - name: Export and verify HANA after deployment
+        id: post_export
         shell: bash
         run: |
           set -euo pipefail
           post_directory="${RUNNER_TEMP}/hana-postdeploy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "directory=${post_directory}" >> "${GITHUB_OUTPUT}"
           bash scripts/ci/export-hana.sh "${post_directory}"
           node scripts/ci/compare-deployed-seed-counts.js \
             "${{ steps.backup.outputs.directory }}" "${post_directory}"
+
+      - name: Upload post-deployment verification export
+        if: always() && steps.post_export.outputs.directory != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: hana-postdeploy-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ steps.post_export.outputs.directory }}
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 9
 
       - name: Write deployment summary
         if: always()

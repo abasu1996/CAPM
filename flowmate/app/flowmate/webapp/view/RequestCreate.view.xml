@@ -4252,6 +4252,7 @@
                     ? ${i18n>nonPoTaxLiabilityOttpDetailsTitle}
                     : ${create>/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER'
                     ? ${i18n>nonPoTaxLiabilityPayOrderDetailsTitle}
+                    : ${i18n>nonPoTaxLiabilityDetailsTitle}
                     }"
                                 level="H3"
                             />
@@ -4261,6 +4262,7 @@
                 ? ${i18n>nonPoTaxLiabilityOttpSubtypeText}
                 : ${create>/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER'
                 ? ${i18n>nonPoTaxLiabilityPayOrderSubtypeText}
+                : ''
                 }"
                                 state="Information"
                                 inverted="true"
@@ -4777,6 +4779,7 @@
                 ? ${i18n>nonPoInterconnectPayDetailsTitle}
                 : ${create>/subProcessType_code} === 'NON_PO_ROAMING_PAY'
                 ? ${i18n>nonPoRoamingPayDetailsTitle}
+                : ${i18n>nonPoInterconnectRoamPayDetailsTitle}
                 }"
                                 level="H3"
                             />
@@ -4786,6 +4789,7 @@
                 ? ${i18n>nonPoInterconnectPaySubtypeText}
                 : ${create>/subProcessType_code} === 'NON_PO_ROAMING_PAY'
                 ? ${i18n>nonPoRoamingPaySubtypeText}
+                : ${i18n>nonPoInterconnectRoamPaySubtypeText}
                 }"
                                 state="Information"
                                 inverted="true"
