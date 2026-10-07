@@ -126,10 +126,18 @@
                     </FlexBox>
                   </content>
                 </Panel>
-                <Panel headerText="Line Items" class="caFormSection" visible="{= ${detail>/hasDetailItems} }">
+                <Panel headerText="Header Creation" class="caFormSection" visible="{= ${detail>/hasDetailHeaders} }">
                   <content>
                     <ScrollContainer horizontal="true" vertical="false" width="100%">
-                      <Table id="detailItemsTable" class="caWorklistTable"/>
+                      <Table id="detailHeadersTable" class="caWorklistTable"/>
+                    </ScrollContainer>
+                  </content>
+                </Panel>
+                <VBox id="detailChangeTablesHost"/>
+                <Panel headerText="{detail>/detailItemsTitle}" class="caFormSection caItemsSection" visible="{= ${detail>/hasDetailItems} }">
+                  <content>
+                    <ScrollContainer horizontal="true" vertical="false" width="100%">
+                      <Table id="detailItemsTable" fixedLayout="true" class="caWorklistTable"/>
                     </ScrollContainer>
                   </content>
                 </Panel>

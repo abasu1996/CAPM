@@ -18,7 +18,13 @@ sap.ui.define([
   "sap/m/ColumnListItem",
   "sap/m/Text",
   "sap/m/Button",
-  "sap/base/Log"
+  "sap/base/Log",
+  "sap/m/Panel",
+  "sap/m/Toolbar",
+  "sap/m/ToolbarSpacer",
+  "sap/m/Title",
+  "sap/m/ScrollContainer",
+  "sap/ui/core/Title"
 ], function (
   BaseController,
   FormDefinitions,
@@ -39,7 +45,13 @@ sap.ui.define([
   ColumnListItem,
   Text,
   Button,
-  Log
+  Log,
+  Panel,
+  Toolbar,
+  ToolbarSpacer,
+  MTitle,
+  ScrollContainer,
+  FormTitle
 ) {
   "use strict";
 
@@ -50,8 +62,18 @@ sap.ui.define([
     "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
     "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
-    "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments"
+    "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments",
+    "ContractType", "PurchasingOrganizations", "CompanyCodes", "Incoterms", "CostCenter", "ApplicableTaxes"
   ]);
+
+  // Editable row tables on the create page. "items" is the line-item table every multi-line
+  // variant uses; "headers" is the extra header-row table of variants such as CONTRACT_NEW.
+  // Conditional grids (FormDefinitions.getConditionalGrids) are registered here at runtime
+  // with their own columns, driver field and panel.
+  const GRIDS = {
+    items: { tableId: "itemsTableHost", path: "/details/items" },
+    headers: { tableId: "headersTableHost", path: "/details/headers" }
+  };
 
   return BaseController.extend("flowmateca.controller.RequestCreate", {
     onInit: function () {
@@ -76,7 +98,6 @@ sap.ui.define([
         requestVariantCode: "",
         title: "",
         description: "",
-        priorityCode: "",
         dueDate: "",
         predecessorId: "",
         requesterId: "",
@@ -85,6 +106,7 @@ sap.ui.define([
         requestDateTime: new Date().toLocaleString(),
 
         bulkUpload: "SINGLE_LINE",
+        hasHeaderTable: false,
         processorTeamCode: "",
         processorTeamName: "",
         detailSectionTitle: "Process Details",
@@ -231,9 +253,9 @@ sap.ui.define([
       return Array.from(groups.values());
     },
 
-    _firstMissingItemCell: function (items) {
+    _firstMissingItemCell: function (items, columns) {
       for (let index = 0; index < items.length; index++) {
-        const missing = (this._itemColumns || []).find(function (col) {
+        const missing = (columns || this._itemColumns || []).find(function (col) {
           if (!col.required) {
             return false;
           }
@@ -277,7 +299,6 @@ sap.ui.define([
       const rows = this._groupItemsBySite(items).map(function (group) {
         return Object.assign({}, headerFields, {
           title: `Material Reservation - ${group.siteName}`,
-          priorityCode: form.priorityCode || "MEDIUM",
           dueDate: form.dueDate || null,
           items: group.items.map(function (row, index) {
             return Object.assign({}, row, { itemNo: index + 1 });
@@ -336,13 +357,14 @@ sap.ui.define([
       const typeCode = formModel.getProperty("/requestTypeCode");
       const variantCode = formModel.getProperty("/requestVariantCode");
       const categoryCode = formModel.getProperty("/materialCategoryCode");
-      const multipleItems = formModel.getProperty("/bulkUpload") === "MULTIPLE_LINE"
-        || typeCode === "MATERIAL_RESERVATION";
+      // Header-table variants have no Single/Multiple choice: their form keeps every field.
+      const multipleItems = !FormDefinitions.hasHeaderTable(variantCode)
+        && (formModel.getProperty("/bulkUpload") === "MULTIPLE_LINE" || typeCode === "MATERIAL_RESERVATION");
       const fields = !variantCode
         ? []
         : (multipleItems
           ? FormDefinitions.getHeaderFields(typeCode, variantCode, categoryCode)
-          : FormDefinitions.getFields(variantCode, categoryCode));
+          : FormDefinitions.getFields(variantCode, categoryCode, formModel.getProperty("/bulkUpload")));
       const type = (this.getView().getModel("catalog").getProperty("/requestTypes") || [])
         .find(function (entry) {
           return entry.code === typeCode;
@@ -364,31 +386,42 @@ sap.ui.define([
       });
 
       await this._loadFieldCatalogs(fields);
-      const simpleForm = new SimpleForm({
-        editable: true,
-        layout: "ColumnLayout",
-        columnsXL: 3,
-        columnsL: 3,
-        columnsM: 2,
-        labelSpanXL: 12,
-        labelSpanL: 12,
-        labelSpanM: 12
-      });
+      // One form per section, stacked top to bottom. A single ColumnLayout form would place
+      // each titled section in its own column, side by side. Fields without a section share
+      // one untitled form.
+      const formsBySection = new Map();
       fields.forEach(function (definition) {
+        const section = definition.section || "";
+        if (!formsBySection.has(section)) {
+          const simpleForm = new SimpleForm({
+            editable: true,
+            layout: "ColumnLayout",
+            columnsXL: 3,
+            columnsL: 3,
+            columnsM: 2,
+            labelSpanXL: 12,
+            labelSpanL: 12,
+            labelSpanM: 12
+          });
+          if (section) {
+            simpleForm.setTitle(new FormTitle({ text: section }));
+          }
+          formsBySection.set(section, simpleForm);
+          host.addItem(simpleForm);
+        }
         const label = new Label({
           text: definition.label,
           required: definition.required
         });
         const control = this._createFieldControl(definition);
-        simpleForm.addContent(label);
-        simpleForm.addContent(control);
+        formsBySection.get(section).addContent(label);
+        formsBySection.get(section).addContent(control);
         this._fieldControls.push({
           definition,
           label,
           control
         });
       }.bind(this));
-      host.addItem(simpleForm);
       this._applyConditionalVisibility();
     },
 
@@ -480,6 +513,14 @@ sap.ui.define([
           }
         }
       }.bind(this));
+
+      const details = formModel.getProperty("/details") || {};
+      Object.keys(GRIDS).forEach(function (gridKey) {
+        const grid = GRIDS[gridKey];
+        if (grid.panel && grid.driver) {
+          grid.panel.setVisible(details[grid.driver] === "YES");
+        }
+      });
     },
 
     _createFieldControl: function (definition, explicitPath) {
@@ -511,6 +552,7 @@ sap.ui.define([
       } else if (definition.type === "select") {
         control = new ComboBox({
           width: "100%",
+          editable: !definition.readOnly,
           placeholder: definition.placeholder || ""
           ,selectionChange: this._applyConditionalVisibility.bind(this)
         }).bindProperty("selectedKey", path);
@@ -573,23 +615,152 @@ sap.ui.define([
       return control;
     },
 
+    // Renders both row tables for the current selection. The header table only gets
+    // columns for variants that define one (FormDefinitions.getHeaderTableColumns).
     _renderItemsTable: function () {
-      const host = this.byId("itemsTableHost");
-      if (!host) {
-        return;
-      }
       const formModel = this.getView().getModel("form");
       const typeCode = formModel.getProperty("/requestTypeCode");
       const variantCode = formModel.getProperty("/requestVariantCode");
       const categoryCode = formModel.getProperty("/materialCategoryCode");
-      const columns = FormDefinitions.getItemColumns(typeCode, variantCode, categoryCode);
-      this._itemColumns = columns;
+      formModel.setProperty("/hasHeaderTable", FormDefinitions.hasHeaderTable(variantCode));
+      this._itemColumns = FormDefinitions.getItemColumns(typeCode, variantCode, categoryCode);
+      this._headerColumns = FormDefinitions.getHeaderTableColumns(variantCode);
+      this._renderGrid("items");
+      this._renderGrid("headers");
+      this._renderConditionalGrids(typeCode, variantCode);
+    },
+
+    // Builds one panel per conditional grid of the variant (Single Line Items only) inside
+    // conditionalGridsHost; _applyConditionalVisibility shows a panel while its driver is "YES".
+    _renderConditionalGrids: function (typeCode, variantCode) {
+      Object.keys(GRIDS).forEach(function (gridKey) {
+        if (GRIDS[gridKey].conditional) {
+          delete GRIDS[gridKey];
+        }
+      });
+      const host = this.byId("conditionalGridsHost");
+      if (!host) {
+        return;
+      }
+      host.destroyItems();
+      const singleLine = this.getView().getModel("form").getProperty("/bulkUpload") === "SINGLE_LINE"
+        && typeCode !== "MATERIAL_RESERVATION";
+      if (!singleLine) {
+        return;
+      }
+      FormDefinitions.getConditionalGrids(variantCode).forEach(function (definition) {
+        GRIDS[definition.key] = {
+          tableId: `conditionalGrid-${definition.key}`,
+          path: `/details/${definition.key}`,
+          columns: definition.columns,
+          driver: definition.driver,
+          title: definition.title,
+          conditional: true
+        };
+        GRIDS[definition.key].panel = this._buildGridPanel(definition.key);
+        host.addItem(GRIDS[definition.key].panel);
+        this._renderGrid(definition.key);
+      }.bind(this));
+      this._applyConditionalVisibility();
+    },
+
+    // Same toolbar and table as the XML line-item panels, built for a runtime grid.
+    _buildGridPanel: function (gridKey) {
+      const grid = GRIDS[gridKey];
+      const withGrid = function (control) {
+        control.data("grid", gridKey);
+        return control;
+      };
+      const toolbar = new Toolbar({
+        content: [
+          new MTitle({
+            level: "H4",
+            text: {
+              path: `form>${grid.path}`,
+              formatter: function (rows) {
+                return `${grid.title} (${rows ? rows.length : 0})`;
+              }
+            }
+          }),
+          new ToolbarSpacer(),
+          withGrid(new FileUploader({
+            buttonOnly: true,
+            buttonText: "{i18n>importCsv}",
+            icon: "sap-icon://upload",
+            change: this.onImportItemsCsv.bind(this)
+          })),
+          withGrid(new Button({
+            text: "{i18n>exportCsvTemplate}",
+            icon: "sap-icon://download",
+            press: this.onExportItemsCsv.bind(this)
+          })),
+          withGrid(new Button({
+            text: "{i18n>addRow}",
+            icon: "sap-icon://add",
+            type: "Emphasized",
+            press: this.onAddItemRow.bind(this)
+          }))
+        ]
+      });
+      const table = new Table(this.createId(grid.tableId), {
+        noDataText: "{i18n>noItemsYet}",
+        sticky: ["ColumnHeaders"]
+      }).addStyleClass("sapUiSizeCompact caItemsTable");
+      return new Panel({
+        headerText: grid.title,
+        visible: false,
+        content: [
+          toolbar,
+          new ScrollContainer({ height: "14rem", horizontal: true, vertical: true, width: "100%", content: [table] })
+        ]
+      }).addStyleClass("caFormSection");
+    },
+
+    // Empty table cells are sent as null so number and date columns are not given "".
+    _blankCellsToNull: function (details) {
+      const result = {};
+      Object.keys(GRIDS).forEach(function (gridKey) {
+        const rows = details && details[gridKey];
+        if (!Array.isArray(rows)) {
+          return;
+        }
+        result[gridKey] = rows.map(function (row) {
+          const clean = {};
+          Object.keys(row).forEach(function (key) {
+            clean[key] = row[key] === "" ? null : row[key];
+          });
+          return clean;
+        });
+      });
+      return result;
+    },
+
+    _gridColumns: function (gridKey) {
+      if (GRIDS[gridKey] && GRIDS[gridKey].columns) {
+        return GRIDS[gridKey].columns;
+      }
+      return (gridKey === "headers" ? this._headerColumns : this._itemColumns) || [];
+    },
+
+    // The grid a toolbar control acts on, from its data:grid custom data (default "items").
+    _gridOf: function (control) {
+      return (control && control.data("grid")) || "items";
+    },
+
+    _renderGrid: function (gridKey) {
+      const grid = GRIDS[gridKey];
+      const host = this.byId(grid.tableId);
+      if (!host) {
+        return;
+      }
+      const formModel = this.getView().getModel("form");
+      const columns = this._gridColumns(gridKey);
 
       host.destroyColumns();
       host.unbindItems();
 
-      if (!formModel.getProperty("/details/items")) {
-        formModel.setProperty("/details/items", []);
+      if (!formModel.getProperty(grid.path)) {
+        formModel.setProperty(grid.path, []);
       }
 
       if (!columns.length) {
@@ -606,7 +777,7 @@ sap.ui.define([
       host.addColumn(new Column({ hAlign: "End", width: "3rem" }));
 
       host.bindItems({
-        path: "form>/details/items",
+        path: `form>${grid.path}`,
         template: new ColumnListItem({
           cells: columns.map(function (col) {
             return this._createFieldControl(col, `form>${col.name}`);
@@ -614,7 +785,7 @@ sap.ui.define([
             new Button({
               icon: "sap-icon://delete",
               type: "Transparent",
-              press: this._onRemoveItemRow.bind(this)
+              press: this._onRemoveItemRow.bind(this, gridKey)
             })
           ])
         })
@@ -628,35 +799,39 @@ sap.ui.define([
       return items;
     },
 
-    onAddItemRow: function () {
+    onAddItemRow: function (event) {
+      const gridKey = this._gridOf(event && event.getSource());
+      const path = GRIDS[gridKey].path;
       const formModel = this.getView().getModel("form");
-      const items = formModel.getProperty("/details/items") || [];
+      const items = formModel.getProperty(path) || [];
       const blank = {};
-      (this._itemColumns || []).forEach(function (col) {
+      this._gridColumns(gridKey).forEach(function (col) {
         blank[col.name] = col.type === "checkbox" ? false : "";
       });
-      formModel.setProperty("/details/items", this._renumberItems(items.concat([blank])));
+      formModel.setProperty(path, this._renumberItems(items.concat([blank])));
     },
 
-    _onRemoveItemRow: function (event) {
+    _onRemoveItemRow: function (gridKey, event) {
+      const gridPath = GRIDS[gridKey].path;
       const context = event.getSource().getBindingContext("form");
       const path = context.getPath();
       const index = Number(path.slice(path.lastIndexOf("/") + 1));
       const formModel = this.getView().getModel("form");
-      const items = formModel.getProperty("/details/items") || [];
-      formModel.setProperty("/details/items", this._renumberItems(items.filter(function (_row, rowIndex) {
+      const items = formModel.getProperty(gridPath) || [];
+      formModel.setProperty(gridPath, this._renumberItems(items.filter(function (_row, rowIndex) {
         return rowIndex !== index;
       })));
     },
 
-    onExportItemsCsv: function () {
-      const columns = this._itemColumns || [];
+    onExportItemsCsv: function (event) {
+      const gridKey = this._gridOf(event && event.getSource());
+      const columns = this._gridColumns(gridKey);
       if (!columns.length) {
         return;
       }
       const formModel = this.getView().getModel("form");
       const typeCode = formModel.getProperty("/requestTypeCode");
-      const items = formModel.getProperty("/details/items") || [];
+      const items = formModel.getProperty(GRIDS[gridKey].path) || [];
       const rows = [columns.map(function (col) { return col.label; })];
       items.forEach(function (item) {
         rows.push(columns.map(function (col) { return item[col.name] || ""; }));
@@ -669,7 +844,7 @@ sap.ui.define([
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${typeCode || "items"}_template.csv`;
+      link.download = `${typeCode || "items"}${gridKey === "headers" ? "_headers" : ""}_template.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -686,7 +861,8 @@ sap.ui.define([
       if (!files || !files.length) {
         return;
       }
-      const columns = this._itemColumns || [];
+      const gridKey = this._gridOf(event.getSource());
+      const columns = this._gridColumns(gridKey);
       const reader = new FileReader();
       reader.onload = function () {
         const rows = this._parseCsv(String(reader.result));
@@ -720,7 +896,7 @@ sap.ui.define([
             }.bind(this));
             return item;
           }.bind(this));
-        this.getView().getModel("form").setProperty("/details/items", this._renumberItems(items));
+        this.getView().getModel("form").setProperty(GRIDS[gridKey].path, this._renumberItems(items));
         this.showSuccess(`${items.length} row(s) imported`);
       }.bind(this);
       reader.readAsText(files[0]);
@@ -795,8 +971,8 @@ sap.ui.define([
         }
         return this._submitBulk(form);
       }
-      if (!form.requestTypeCode || !form.requestVariantCode || !form.title.trim() || !form.priorityCode || !form.processorTeamCode)  {
-        MessageBox.warning("Request type, process variant, title and priority are required.");
+      if (!form.requestTypeCode || !form.requestVariantCode || !form.title.trim() || !form.processorTeamCode)  {
+        MessageBox.warning("Request type, process variant and title are required.");
         return;
       }
       const missing = (this._fieldControls || []).find(function (entry) {
@@ -818,23 +994,58 @@ sap.ui.define([
       }
 
       const itemRows = (form.details && form.details.items) || [];
-      if (form.bulkUpload === "MULTIPLE_LINE") {
+      if (form.hasHeaderTable) {
+        const headerRows = (form.details && form.details.headers) || [];
+        if (!headerRows.length) {
+          MessageBox.warning("Add at least one row to the Header Creation table.");
+          return;
+        }
+        if (!itemRows.length) {
+          MessageBox.warning("Add at least one row to the Contract Creation Details table.");
+          return;
+        }
+        const missingHeader = this._firstMissingItemCell(headerRows, this._headerColumns);
+        if (missingHeader) {
+          MessageBox.warning(`Header Creation - ${missingHeader}`);
+          return;
+        }
+        const missingItem = this._firstMissingItemCell(itemRows);
+        if (missingItem) {
+          MessageBox.warning(`Contract Creation Details - ${missingItem}`);
+          return;
+        }
+      } else if (form.bulkUpload === "MULTIPLE_LINE") {
         if (!itemRows.length) {
           MessageBox.warning("Add at least one line item, or switch back to Single Line Items.");
           return;
         }
-        for (let index = 0; index < itemRows.length; index++) {
-          const missingCell = (this._itemColumns || []).find(function (col) {
-            if (!col.required) {
-              return false;
-            }
-            const value = itemRows[index][col.name];
-            return value === undefined || value === null || String(value).trim() === "";
-          });
-          if (missingCell) {
-            MessageBox.warning(`Row ${index + 1}: ${missingCell.label} is required.`);
-            return;
-          }
+        const missingCell = this._firstMissingItemCell(itemRows);
+        if (missingCell) {
+          MessageBox.warning(missingCell);
+          return;
+        }
+      }
+
+      // Conditional grids: an open grid (driver "YES") needs rows; a closed one sends nothing.
+      const submittedDetails = Object.assign({}, form.details || {});
+      const conditionalKeys = Object.keys(GRIDS).filter(function (gridKey) {
+        return GRIDS[gridKey].conditional;
+      });
+      for (let index = 0; index < conditionalKeys.length; index++) {
+        const grid = GRIDS[conditionalKeys[index]];
+        if (submittedDetails[grid.driver] !== "YES") {
+          delete submittedDetails[conditionalKeys[index]];
+          continue;
+        }
+        const rows = submittedDetails[conditionalKeys[index]] || [];
+        if (!rows.length) {
+          MessageBox.warning(`Add at least one row to the ${grid.title} table.`);
+          return;
+        }
+        const missingRow = this._firstMissingItemCell(rows, grid.columns);
+        if (missingRow) {
+          MessageBox.warning(`${grid.title} - ${missingRow}`);
+          return;
         }
       }
 
@@ -848,13 +1059,13 @@ sap.ui.define([
               requestVariantCode: form.requestVariantCode,
               title: form.title.trim(),
               description: form.description,
-              priorityCode: form.priorityCode,
               dueDate: form.dueDate || null,
               predecessorId: form.predecessorId || null,
               processorTeamCode: form.processorTeamCode,
               details: JSON.stringify(Object.assign(
                 {},
-                form.details || {},
+                submittedDetails,
+                this._blankCellsToNull(submittedDetails),
                 form.materialCategoryCode
                   ? { materialCategory: form.materialCategoryCode, transactionType: form.requestVariantCode }
                   : {}
@@ -873,7 +1084,7 @@ sap.ui.define([
           });
         }.bind(this));
         if (uploads.length) {
-          this._uploadFilesInBackground(request.ID, uploads);
+          await this._uploadFiles(request.ID, uploads);
         }
         this.navTo("requestDetail", {
           requestId: request.ID
@@ -885,7 +1096,7 @@ sap.ui.define([
       }
     },
 
-    _uploadFilesInBackground: async function (requestId, uploads) {
+    _uploadFiles: async function (requestId, uploads) {
       const results = await Promise.allSettled(uploads.map(async function (upload) {
         const file = upload.file;
         // Only elements that exist on FlowmateCAService.Attachments may be sent - CAP
@@ -909,14 +1120,33 @@ sap.ui.define([
           body: file
         });
         if (!response.ok) {
-          throw new Error(`Upload failed for ${file.name}`);
+          // The row was created before the content was accepted; drop it so the
+          // request does not keep an attachment that has no file behind it.
+          let reason = "";
+          try {
+            const body = await response.json();
+            reason = (body && body.error && body.error.message) || "";
+          } catch (parseError) {
+            reason = "";
+          }
+          try {
+            await this.request(`Attachments(${attachment.ID})`, { method: "DELETE" });
+          } catch (cleanupError) {
+            Log.warning("Could not remove the incomplete attachment " + attachment.ID, cleanupError);
+          }
+          throw new Error(reason || `Upload failed for ${file.name}`);
         }
       }.bind(this)));
       const failed = results.filter(function (result) {
         return result.status === "rejected";
       });
       if (failed.length) {
-        MessageBox.warning(`${failed.length} attachment(s) could not be uploaded. Open the request and try again.`);
+        const reasons = failed.map(function (result) {
+          return result.reason && result.reason.message;
+        }).filter(Boolean);
+        MessageBox.warning(`${failed.length} attachment(s) could not be uploaded.
+
+${reasons.join("\n")}`);
       } else {
         this.showSuccess("Supporting documents uploaded");
       }

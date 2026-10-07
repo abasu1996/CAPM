@@ -827,3 +827,33 @@
     transition: none;
   }
 }
+
+.caBtnSendBack .sapMBtnInner.sapMBtnDefault {
+  background: var(--ca-orange) !important;
+  border-color: var(--ca-orange) !important;
+}
+
+.caBtnSendBack .sapMBtnInner.sapMBtnDefault .sapMBtnContent,
+.caBtnSendBack .sapMBtnInner.sapMBtnDefault .sapUiIcon {
+  color: #fff !important;
+}
+
+.caBtnSendBack .sapMBtnInner.sapMBtnDefault:hover {
+  background: #a93d0f !important;
+  border-color: #a93d0f !important;
+}
+
+.caItemsSection.sapMPanel,
+.caItemsSection .sapMPanelContent {
+  overflow: visible;
+}
+
+.caItemsSection .caWorklistTable.sapMList {
+  overflow: visible;
+  border-radius: 0;
+}
+
+.caItemsSection .sapMScrollCont {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

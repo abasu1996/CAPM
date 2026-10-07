@@ -158,6 +158,7 @@ annotate CAAttachments with {
             'application/pdf',
             'image/*',
             'text/plain',
+            'text/csv',
             'application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/vnd.ms-excel',
@@ -421,6 +422,7 @@ entity MaterialReservationDetails : cuid, managed {
   requestType      : String(40);
   materialType     : String(40);
   deliveryType     : String(40);
+  poNumber         : String(80);
   warehouse        : Association to Warehouses;
   allocationOwner  : Association to common.Users;
   remarks          : LargeString;
@@ -473,11 +475,68 @@ entity OutlineContractDetails : cuid, managed {
   sapOtherCommercialTerms: LargeString;
   items            : Composition of many OutlineContractItems
                        on items.details = $self;
+  headers          : Composition of many OutlineContractHeaders
+                       on headers.details = $self;
+
+  // Contract Modification (Single Line) - Header Change section
+  headerTaxCode          : String(80);
+  headerServiceCode      : String(80);
+  headerMaterialCode     : String(80);
+  targetValue            : String(80);
+  targetDate             : Date;
+  headerPaymentTerms     : String(120);
+  contractRevoked        : String(10);
+  scmAssignUser          : String(255);
+  headerChangesAttachment: String(255);
+  headerComment          : LargeString;
+
+  // Contract Modification (Single Line) - Details section
+  amendmentContractNumber: String(80);
+  priceChange            : String(10);
+  serviceAddition        : String(10);
+  materialAddition       : String(10);
+  ceilingValueChange     : String(10);
+  ceilingValue           : String(80);
+  othersChange           : String(10);
+  otherDetails           : LargeString;
+  dateExtension          : String(10);
+  extendedDate           : Date;
+  conditionChange        : String(10);
+  conditionChangeDetails : LargeString;
+  amendmentComments      : LargeString;
+  changeItems      : Composition of many OutlineContractChangeItems
+                       on changeItems.details = $self;
+}
+
+// Price Change / Service Addition / Material Addition rows of a Contract Modification.
+entity OutlineContractChangeItems : cuid, managed {
+  details    : Association to OutlineContractDetails not null;
+  changeType : String(30); // PRICE_CHANGE | SERVICE_ADDITION | MATERIAL_ADDITION
+  itemNo     : Integer;
+  code       : String(80);
+  price      : Decimal(17,2);
+  quantity   : Decimal(15,3);
+}
+
+// One row per SAP contract header (New Contract: "Details of Header Creation").
+entity OutlineContractHeaders : cuid, managed {
+  details              : Association to OutlineContractDetails not null;
+  itemNo               : Integer;
+  vendorCode           : String(40);
+  coupaSourcingEventNo : String(80);
+  poHeaderText         : LargeString;
+  paymentTerms         : String(80);
+  warranty             : LargeString;
+  penalties            : LargeString;
+  termsOfDelivery      : LargeString;
+  guarantees           : LargeString;
+  otherCommercialTerms : LargeString;
 }
 
 entity OutlineContractItems : cuid, managed {
   details            : Association to OutlineContractDetails not null;
   itemNo             : Integer;
+  contractCount        : Integer;
   contractType        : String(40);
   lineItem            : String(40);
   itemCategory         : String(40);
@@ -490,6 +549,7 @@ entity OutlineContractItems : cuid, managed {
   validityEndDate      : Date;
   incoterms            : String(40);
   incotermsLocation    : String(120);
+  totalTargetValue     : Decimal(17,2);
   targetQuantity       : Decimal(15,3);
   coupaSourcingEventNo : String(80);
   serviceLine          : String(80);
@@ -507,6 +567,7 @@ entity OutlineContractItems : cuid, managed {
   costCenter           : String(80);
   orderNumber          : String(80);
   wbsElement           : String(80);
+  scmSpocUserId        : String(255);
 }
 
 entity PurchaseOrderDetails : cuid, managed {

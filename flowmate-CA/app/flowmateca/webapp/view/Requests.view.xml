@@ -60,7 +60,6 @@
           <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestVariant}"/></Column>
           <Column><Text text="{i18n>title}"/></Column>
           <Column width="9rem"><Text text="{i18n>status}"/></Column>
-          <Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>priority}"/></Column>
           <Column width="9rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>dueDate}"/></Column>
         </columns>
         <items>
@@ -71,7 +70,6 @@
               <Text text="{list>requestVariant/name}"/>
               <Text text="{list>title}" maxLines="2"/>
               <ObjectStatus text="{list>status/name}" state="{path: 'list>status/code', formatter: '.statusState'}"/>
-              <ObjectStatus text="{list>priority/name}" state="{path: 'list>priority/code', formatter: '.priorityState'}"/>
               <Text text="{path: 'list>dueDate', formatter: '.formatDate'}"/>
             </cells>
           </ColumnListItem>

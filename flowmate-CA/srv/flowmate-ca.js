@@ -40,6 +40,19 @@ const ITEMS_ENTITY_BY_REQUEST_TYPE = {
   SERVICE_ENTRY_SHEET: "ServiceEntrySheetItems"
 };
 
+// Second row table carried in details.headers (Outline Contract - New Contract).
+const HEADERS_ENTITY_BY_REQUEST_TYPE = {
+  OUTLINE_CONTRACT: "OutlineContractHeaders"
+};
+
+// Contract Modification change tables: details.<key> rows are stored in
+// OutlineContractChangeItems with the matching changeType.
+const CHANGE_ITEM_TYPES = {
+  priceChanges: "PRICE_CHANGE",
+  serviceAdditions: "SERVICE_ADDITION",
+  materialAdditions: "MATERIAL_ADDITION"
+};
+
 module.exports = class FlowmateCAService extends cds.ApplicationService {
   async init() {
     this.db = cds.entities("flowmate.ca.db");
@@ -595,6 +608,13 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       completedAt: null,
       startedAt: new Date().toISOString()
     }).where({ ID: targetStep.ID }));
+    // A send-back replays the workflow from the target step, so every step after it
+    // returns to PENDING; otherwise the next completion skips straight past them.
+    await tx.run(UPDATE(this.db.RequestStepInstances).set({
+      status: "PENDING",
+      startedAt: null,
+      completedAt: null
+    }).where({ request_ID: task.request_ID, stepNo: { ">": targetStep.stepNo } }));
     await tx.run(UPDATE(this.db.CARequests).set({
       currentStep: targetStep.stepNo,
       status_code: REQUEST_STATUS.SENT_BACK,
@@ -942,7 +962,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!entityName) {
       return;
     }
-    const { items, ...headerFields } = details;
+    const { items, headers, priceChanges, serviceAdditions, materialAdditions, ...headerFields } = details;
+    const changeRows = { priceChanges, serviceAdditions, materialAdditions };
     const detailsId = cds.utils.uuid();
     await tx.run(INSERT.into(this.db[entityName]).entries({
       ID: detailsId,
@@ -958,6 +979,32 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         itemNo: index + 1,
         ...item
       }))));
+    }
+
+    const headersEntityName = HEADERS_ENTITY_BY_REQUEST_TYPE[requestTypeCode];
+    if (headersEntityName && Array.isArray(headers) && headers.length) {
+      await tx.run(INSERT.into(this.db[headersEntityName]).entries(headers.map((header, index) => ({
+        ID: cds.utils.uuid(),
+        details_ID: detailsId,
+        itemNo: index + 1,
+        ...header
+      }))));
+    }
+
+    if (requestTypeCode === "OUTLINE_CONTRACT") {
+      const changeItems = Object.entries(CHANGE_ITEM_TYPES).flatMap(([key, changeType]) =>
+        (Array.isArray(changeRows[key]) ? changeRows[key] : []).map((row, index) => ({
+          ID: cds.utils.uuid(),
+          details_ID: detailsId,
+          changeType,
+          itemNo: index + 1,
+          code: row.code,
+          price: row.price ?? null,
+          quantity: row.quantity ?? null
+        })));
+      if (changeItems.length) {
+        await tx.run(INSERT.into(this.db.OutlineContractChangeItems).entries(changeItems));
+      }
     }
   }
 

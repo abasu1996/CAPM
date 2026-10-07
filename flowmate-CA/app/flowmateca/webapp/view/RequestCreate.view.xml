@@ -4,6 +4,7 @@
   xmlns:core="sap.ui.core"
   xmlns:form="sap.ui.layout.form"
   xmlns:unified="sap.ui.unified"
+  xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
   xmlns="sap.m">
   <Page class="caPage" title="{i18n>createRequest}" showNavButton="true" navButtonPress=".onCancel">
     <headerContent>
@@ -58,15 +59,11 @@
                 showSecondaryValues="true">
                 <core:ListItem key="{catalog>code}" text="{catalog>name}" additionalText="{catalog>code}"/>
               </ComboBox>
-              <Label text="{i18n>bulkUpload}" required="true" visible="{= ${form>/requestTypeCode} !== 'MATERIAL_RESERVATION'}"/>
-              <Select id="bulkUpload" selectedKey="{form>/bulkUpload}" change=".onBulkUploadChange" visible="{= ${form>/requestTypeCode} !== 'MATERIAL_RESERVATION'}">
+              <Label text="{i18n>bulkUpload}" required="true" visible="{= ${form>/requestTypeCode} !== 'MATERIAL_RESERVATION' &amp;&amp; !${form>/hasHeaderTable} }"/>
+              <Select id="bulkUpload" selectedKey="{form>/bulkUpload}" change=".onBulkUploadChange" visible="{= ${form>/requestTypeCode} !== 'MATERIAL_RESERVATION' &amp;&amp; !${form>/hasHeaderTable} }">
                 <core:Item key="SINGLE_LINE" text="{i18n>singleLineItems}"/>
                 <core:Item key="MULTIPLE_LINE" text="{i18n>multipleLineItems}"/>
               </Select>
-              <Label text="{i18n>priority}" required="true"/>
-              <ComboBox selectedKey="{form>/priorityCode}" items="{catalog>/priorities}">
-                <core:Item key="{catalog>code}" text="{catalog>name}"/>
-              </ComboBox>
               <Label text="{i18n>title}" required="true"/>
               <Input value="{form>/title}" maxLength="255" placeholder="Briefly describe the required outcome"/>
               <Label text="{i18n>dueDate}"/>
@@ -109,25 +106,56 @@
           class="caFormSection">
           <content>
             <VBox id="dynamicFormHost"/>
+            <VBox id="conditionalGridsHost"/>
           </content>
         </Panel>
         <Panel
-          headerText="{i18n>itemsTableTitle}"
+          headerText="{i18n>headersTableTitle}"
           expandable="false"
-          visible="{= !!${form>/requestVariantCode} &amp;&amp; (${form>/bulkUpload} === 'MULTIPLE_LINE' || ${form>/requestTypeCode} === 'MATERIAL_RESERVATION') }"
+          visible="{= !!${form>/requestVariantCode} &amp;&amp; ${form>/hasHeaderTable} }"
           class="caFormSection">
           <content>
             <Toolbar>
-              <Title text="{= ${i18n>itemsTableTitle} + ' (' + (${form>/details/items} ? ${form>/details/items}.length : 0) + ')' }" level="H4"/>
+              <Title text="{= ${i18n>headersTableTitle} + ' (' + (${form>/details/headers} ? ${form>/details/headers}.length : 0) + ')' }" level="H4"/>
+              <ToolbarSpacer/>
+              <unified:FileUploader
+                id="headersCsvUploader"
+                buttonOnly="true"
+                buttonText="{i18n>importCsv}"
+                icon="sap-icon://upload"
+                change=".onImportItemsCsv"
+                app:grid="headers"/>
+              <Button text="{i18n>exportCsvTemplate}" icon="sap-icon://download" press=".onExportItemsCsv" app:grid="headers"/>
+              <Button text="{i18n>addRow}" icon="sap-icon://add" type="Emphasized" press=".onAddItemRow" app:grid="headers"/>
+            </Toolbar>
+            <Text text="{i18n>itemsTableHint}" class="sapUiTinyMarginBottom sapUiTinyMarginBeginEnd"/>
+            <ScrollContainer height="18rem" horizontal="true" vertical="true" focusable="false" width="100%">
+              <Table
+                id="headersTableHost"
+                noDataText="{i18n>noItemsYet}"
+                sticky="ColumnHeaders"
+                class="sapUiSizeCompact caItemsTable"/>
+            </ScrollContainer>
+          </content>
+        </Panel>
+        <Panel
+          headerText="{= ${form>/hasHeaderTable} ? ${i18n>contractItemsTableTitle} : ${i18n>itemsTableTitle} }"
+          expandable="false"
+          visible="{= !!${form>/requestVariantCode} &amp;&amp; (${form>/bulkUpload} === 'MULTIPLE_LINE' || ${form>/requestTypeCode} === 'MATERIAL_RESERVATION' || ${form>/hasHeaderTable}) }"
+          class="caFormSection">
+          <content>
+            <Toolbar>
+              <Title text="{= (${form>/hasHeaderTable} ? ${i18n>contractItemsTableTitle} : ${i18n>itemsTableTitle}) + ' (' + (${form>/details/items} ? ${form>/details/items}.length : 0) + ')' }" level="H4"/>
               <ToolbarSpacer/>
               <unified:FileUploader
                 id="itemsCsvUploader"
                 buttonOnly="true"
                 buttonText="{i18n>importCsv}"
                 icon="sap-icon://upload"
-                change=".onImportItemsCsv"/>
-              <Button text="{i18n>exportCsvTemplate}" icon="sap-icon://download" press=".onExportItemsCsv"/>
-              <Button text="{i18n>addRow}" icon="sap-icon://add" type="Emphasized" press=".onAddItemRow"/>
+                change=".onImportItemsCsv"
+                app:grid="items"/>
+              <Button text="{i18n>exportCsvTemplate}" icon="sap-icon://download" press=".onExportItemsCsv" app:grid="items"/>
+              <Button text="{i18n>addRow}" icon="sap-icon://add" type="Emphasized" press=".onAddItemRow" app:grid="items"/>
             </Toolbar>
             <Text text="{i18n>itemsTableHint}" class="sapUiTinyMarginBottom sapUiTinyMarginBeginEnd"/>
             <ScrollContainer height="24rem" horizontal="true" vertical="true" focusable="false" width="100%">

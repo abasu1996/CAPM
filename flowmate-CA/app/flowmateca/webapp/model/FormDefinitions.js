@@ -9,6 +9,11 @@ sap.ui.define([], function () {
     placeholder: ""
   }, extra || {});
 
+  const YES_NO = [
+    { key: "YES", text: "Yes" },
+    { key: "NO", text: "No" }
+  ];
+
   const plant = field("plant_code", "Plant", "combo", {
     required: true,
     entity: "Plant", key: "plantCode", text: "plantName"
@@ -27,6 +32,8 @@ sap.ui.define([], function () {
   const materialBase = [
     field("industrySector", "Industry Sector", "select", {
       required: true,
+      readOnly: true,
+      defaultValue: "TELECOMMUNICATION",
       options: [{ key: "TELECOMMUNICATION", text: "Telecommunication" }]
     }),
     field("materialType", "Material Type", "combo", { required: true, entity: "MaterialTypes" }),
@@ -72,6 +79,8 @@ sap.ui.define([], function () {
   const matCore = [
     field("industrySector", "Industry Sector", "select", {
       required: true,
+      readOnly: true,
+      defaultValue: "TELECOMMUNICATION",
       options: [{ key: "TELECOMMUNICATION", text: "Telecommunication" }]
     }),
     field("materialType", "Material Type", "combo", { required: true, entity: "MaterialTypes" }),
@@ -502,10 +511,7 @@ sap.ui.define([], function () {
           { key: "DIRECT", text: "Direct Delivery" }
         ]
       }),
-      field("deliveryType", "Delivery Type", "readonly", {
-        required: true,
-        defaultValue: "Direct Delivery"
-      }),
+      field("poNumber", "PO Number", "input"),
       field("warehouse_code", "Warehouse Location", "combo", {
         entity: "Warehouses"
       }),
@@ -544,10 +550,6 @@ sap.ui.define([], function () {
           { key: "DIRECT", text: "Direct Delivery" }
         ]
       }),
-      field("deliveryType", "Delivery Type", "readonly", {
-        required: true,
-        defaultValue: "Warehouse"
-      }),
       field("warehouse_code", "Warehouse Location", "combo", {
         required: true,
         entity: "Warehouses"
@@ -563,45 +565,10 @@ sap.ui.define([], function () {
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     CONTRACT_NEW: [
-      field("transactionType", "Contract Action", "select", {
-        required: true,
-        options: [{ key: "NEW_CONTRACT", text: "New Contract Creation" }]
-      }),
-      field("selectionMode", "Selection", "select", {
-        options: [
-          { key: "SINGLE", text: "Single" },
-          { key: "MULTIPLE", text: "Multiple" }
-        ]
-      }),
-      field("category_code", "Contract Category", "combo", {
-        required: true,
-        entity: "ContractCategories"
-      }),
-      field("approvalReference", "Approval Reference", "input"),
-      field("remarks", "Remarks", "textarea"),
-      field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
-        required: true
-      }),
-      field("otherSupportingDocumentsAttachment", "Other Supporting Documents", "file"),
-      field("otherComments", "Other Comments", "textarea"),
-      field("contractCount", "Contract Count", "number", { required: true }),
-      field("scmSpocUserId", "User ID - SCM SPOC", "input", { required: true }),
-      field("totalTargetValue", "Total Target Value (Contract Ceiling)", "number", {
-        required: true
-      }),
-      field("sapVendorCode", "SAP Header - Vendor Code", "input", { required: true }),
-      field("sapSourcingEventNo", "SAP Header - Sourcing Event No.", "input", {
-        required: true
-      }),
-      field("sapPoHeaderText", "SAP Header - PO Header Text", "textarea", {
-        required: true
-      }),
-      field("sapPaymentTerms", "SAP Header - Payment Terms", "input", { required: true }),
-      field("sapWarranty", "SAP Header - Warranty", "textarea"),
-      field("sapPenalties", "SAP Header - Penalties for Breach of Contract (LD / Service Credits)", "textarea"),
-      field("sapTermsOfDelivery", "SAP Header - Terms of Delivery / Delivery SLA", "textarea"),
-      field("sapGuarantees", "SAP Header - Guarantees / Performance Bond", "textarea"),
-      field("sapOtherCommercialTerms", "SAP Header - Any Other Commercial Terms for PO", "textarea")
+      field("approvalDocumentsAttachment", "Approval Documents Attachment", "file"),
+      field("otherComments", "Other Comments", "textarea")
+      // Contract count, SCM SPOC, target value and the SAP header terms are captured per row
+      // in the Header Creation and Contract Creation Details tables (see headerTableColumns).
     ],
     CONTRACT_MOD: [
       field("transactionType", "Contract Action", "select", {
@@ -647,6 +614,53 @@ sap.ui.define([], function () {
       field("sapTermsOfDelivery", "SAP Header - Terms of Delivery / Delivery SLA", "textarea"),
       field("sapGuarantees", "SAP Header - Guarantees / Performance Bond", "textarea"),
       field("sapOtherCommercialTerms", "SAP Header - Any Other Commercial Terms for PO", "textarea")
+    ],
+    // Contract Modification with Single Line Items (getFields lineMode "SINGLE_LINE").
+    // Fields carry a section; the Yes drivers of the Details section also open the change
+    // tables defined in conditionalGrids.
+    CONTRACT_MOD_SINGLE: [
+      field("contractNumber", "Contract Number", "input", { section: "Header Change" }),
+      field("headerTaxCode", "Tax Code", "input", { section: "Header Change" }),
+      field("headerServiceCode", "Service Code", "input", { section: "Header Change" }),
+      field("headerMaterialCode", "Material Code", "input", { section: "Header Change" }),
+      field("targetValue", "Target Value", "input", { section: "Header Change" }),
+      field("targetDate", "Target Date", "date", { section: "Header Change" }),
+      field("headerPaymentTerms", "Payment Terms", "input", { section: "Header Change" }),
+      field("contractRevoked", "Contract Revoked", "select", { section: "Header Change", options: YES_NO }),
+      field("scmAssignUser", "SCM Assign User", "combo", {
+        section: "Header Change",
+        required: true,
+        entity: "Users", key: "email", text: "displayName", secondaryText: "email"
+      }),
+      field("headerChangesAttachment", "Header Changes Attachment", "file", { section: "Header Change" }),
+      field("headerComment", "Comment", "textarea", { section: "Header Change" }),
+
+      field("amendmentContractNumber", "Contract Number", "input", { section: "Details" }),
+      field("priceChange", "Price Change", "select", { section: "Details", options: YES_NO }),
+      field("serviceAddition", "Service Addition", "select", { section: "Details", options: YES_NO }),
+      field("materialAddition", "Material Addition", "select", { section: "Details", options: YES_NO }),
+      field("ceilingValueChange", "Ceiling Value", "select", { section: "Details", options: YES_NO }),
+      field("ceilingValue", "Ceiling Value Amount", "input", {
+        section: "Details", required: true,
+        visibleWhen: { field: "ceilingValueChange", equals: "YES" }
+      }),
+      field("othersChange", "Others", "select", { section: "Details", options: YES_NO }),
+      field("otherDetails", "Other Details", "input", {
+        section: "Details", required: true,
+        visibleWhen: { field: "othersChange", equals: "YES" }
+      }),
+      field("dateExtension", "Date Extension", "select", { section: "Details", options: YES_NO }),
+      field("extendedDate", "Extended Date", "date", {
+        section: "Details", required: true,
+        visibleWhen: { field: "dateExtension", equals: "YES" }
+      }),
+      field("conditionChange", "Condition Change", "select", { section: "Details", options: YES_NO }),
+      field("conditionChangeDetails", "Condition Change Details", "input", {
+        section: "Details", required: true,
+        visibleWhen: { field: "conditionChange", equals: "YES" }
+      }),
+      field("approvalDocumentsAttachment", "Approval Attachments", "file", { section: "Details" }),
+      field("amendmentComments", "Comments", "textarea", { section: "Details" })
     ],
     PO_CAPEX_IM: [],
     PO_CAPEX_FM: [],
@@ -870,6 +884,43 @@ sap.ui.define([], function () {
     return drivers;
   };
 
+  // Outline contract dropdowns, bound to the Admin-maintained master data (flowmate-common).
+  const contractColumn = {
+    contractType: column("contractType", "Contract Type", "combo", {
+      entity: "ContractType", key: "contractTypeCode", text: "contractTypeDescription", secondaryText: "contractTypeCode"
+    }),
+    itemCategory: column("itemCategory", "Item Category", "combo", { entity: "ItemCategories" }),
+    purchaseOrg: column("purchaseOrg", "Purchase Org", "combo", {
+      entity: "PurchasingOrganizations", key: "purchasingOrganizationCode", text: "purchasingOrganizationName",
+      secondaryText: "purchasingOrganizationCode"
+    }),
+    purchaseGroup: column("purchaseGroup", "Purchase Group", "combo", {
+      entity: "PurchasingGroups", key: "purchasingGroupCode", text: "purchasingGroupName", secondaryText: "purchasingGroupCode"
+    }),
+    vendorId: column("vendorId", "Vendor ID", "combo", {
+      entity: "Vendors", key: "vendorCode", text: "vendorName", secondaryText: "vendorCode"
+    }),
+    companyCode: column("companyCode", "Company Code", "combo", {
+      entity: "CompanyCodes", key: "companyCode", text: "companyName", secondaryText: "companyCode"
+    }),
+    plant: column("plant", "Plant", "combo", { entity: "Plant", key: "plantCode", text: "plantName" }),
+    incoterms: column("incoterms", "Incoterms", "combo", {
+      entity: "Incoterms", key: "incotermsCode", text: "incotermsDescription", secondaryText: "incotermsCode"
+    }),
+    currency: column("currency", "Currency", "combo", { entity: "Currencies" }),
+    taxCode: column("taxCode", "Tax Code", "combo", {
+      entity: "ApplicableTaxes", key: "taxCode", text: "taxDescription", secondaryText: "taxCode"
+    }),
+    paymentTerm: column("paymentTerm", "Payment Term", "combo", { entity: "PaymentTerms" }),
+    accountAssignment: column("accountAssignment", "Account Assignment", "combo", { entity: "AccountAssignments" }),
+    costCenter: column("costCenter", "Cost Center", "combo", {
+      entity: "CostCenter", key: "costCenterCode", text: "costCenterName", secondaryText: "costCenterCode"
+    }),
+    wbsElement: column("wbsElement", "WBS Element", "combo", {
+      entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "wbsCode"
+    })
+  };
+
   const itemColumns = {
     PURCHASE_ORDER: [
       column("materialOrService", "Service Code / Material Code"),
@@ -896,10 +947,9 @@ sap.ui.define([], function () {
       column("itemNo", "ID", "readonly"),
       column("siteId", "Site ID", "combo", {
         required: true,
-        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
-        autoFills: { field: "siteName", from: "siteName" }
+        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName"
       }),
-      column("siteName", "Site Name", "readonly"),
+      column("siteName", "Site Name", "input"),
       column("sapCode", "SAP Code"),
       column("indentWo", "Indent/WO"),
       column("equipmentNo", "Equipment No. (if CTL)"),
@@ -914,6 +964,7 @@ sap.ui.define([], function () {
         entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName"
       }),
       column("ctlType", "CTL / Non_CTL", "select", {
+        required: true,
         options: [{ key: "CTL", text: "CTL" }, { key: "NON_CTL", text: "Non-CTL" }]
       }),
       column("quantity", "Quantity", "number", { required: true }),
@@ -921,35 +972,90 @@ sap.ui.define([], function () {
       column("comments", "Comments")
     ],
     OUTLINE_CONTRACT: [
-      column("contractType", "Contract Type", "combo", { entity: "ContractTypes" }),
+      contractColumn.contractType,
       column("lineItem", "Line Item"),
-      column("itemCategory", "Item Category", "combo", { entity: "ItemCategories" }),
-      column("purchaseOrg", "Purchase Org", "combo", { entity: "PurchasingOrganizations", key: "purchasingOrgCode", text: "purchasingOrgName" }),
-      column("purchaseGroup", "Purchase Group", "combo", { entity: "PurchasingGroups" }),
-      column("vendorId", "Vendor ID", "combo", { entity: "Vendors", key: "vendorCode", text: "vendorName", secondaryText: "vendorCode" }),
-      column("companyCode", "Company Code", "combo", { entity: "CompanyCodes" }),
-      column("plant", "Plant", "combo", { entity: "Plant", key: "plantCode", text: "plantName" }),
+      contractColumn.itemCategory,
+      contractColumn.purchaseOrg,
+      contractColumn.purchaseGroup,
+      contractColumn.vendorId,
+      contractColumn.companyCode,
+      contractColumn.plant,
       column("validityStartDate", "Validity Start Date", "date"),
       column("validityEndDate", "Validity End Date", "date"),
-      column("incoterms", "Incoterms", "combo", { entity: "Incoterms" }),
+      contractColumn.incoterms,
       column("incotermsLocation", "Incoterms Location"),
       column("targetQuantity", "Target Quantity", "number"),
-      column("coupaSourcingEventNo", "Coupa Sourcing Event No."),
+      column("coupaSourcingEventNo", "Ariba Sourcing Event No"),
       column("serviceLine", "Service Line"),
       column("shortTextForServices", "Short Text for Services", "input", { maxLength: 40 }),
       column("materialServiceCode", "Material / Service Code"),
       column("quantity", "Quantity", "number"),
       column("grossPrice", "Gross Price", "number"),
       column("priceUnit", "Price Unit"),
-      column("currency", "Currency", "combo", { entity: "Currencies" }),
+      contractColumn.currency,
       column("materialSavingPct", "Material Saving %", "number"),
       column("serviceSavingPct", "Service Saving %", "number"),
-      column("taxCode", "Tax Code", "combo", { entity: "TaxCodes" }),
-      column("paymentTerm", "Payment Term", "combo", { entity: "PaymentTerms" }),
-      column("accountAssignment", "Account Assignment", "combo", { entity: "AccountAssignments" }),
-      column("costCenter", "Cost Center", "combo", { entity: "CostCenters" }),
+      contractColumn.taxCode,
+      contractColumn.paymentTerm,
+      contractColumn.accountAssignment,
+      contractColumn.costCenter,
       column("orderNumber", "Order Number"),
-      column("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsElement", text: "wbsElement" })
+      contractColumn.wbsElement
+    ],
+    // Labels follow "Details of Contract Creation-SCC M-212.csv" so that file imports as-is.
+    CONTRACT_NEW: [
+      column("itemNo", "ID", "readonly"),
+      column("contractCount", "Contract Count", "number", { required: true }),
+      contractColumn.contractType,
+      column("lineItem", "Line Item"),
+      contractColumn.itemCategory,
+      contractColumn.purchaseOrg,
+      contractColumn.purchaseGroup,
+      Object.assign({}, contractColumn.vendorId, { required: true }),
+      contractColumn.companyCode,
+      contractColumn.plant,
+      column("validityStartDate", "Validity Start Date", "date"),
+      column("validityEndDate", "Validity End Date", "date"),
+      contractColumn.incoterms,
+      column("incotermsLocation", "Incoterms Location"),
+      column("totalTargetValue", "Total Target Value", "number", { required: true }),
+      column("targetQuantity", "Target Quantity", "number"),
+      column("coupaSourcingEventNo", "Ariba Sourcing Event No"),
+      column("serviceLine", "Service Line"),
+      column("shortTextForServices", "Short Text for Services", "input", { maxLength: 40 }),
+      column("materialServiceCode", "Material/Service Code"),
+      column("quantity", "Quantity", "number"),
+      column("grossPrice", "Gross Price", "number"),
+      column("priceUnit", "Price Unit"),
+      contractColumn.currency,
+      column("materialSavingPct", "Material Saving %", "number"),
+      column("serviceSavingPct", "Service Saving %", "number"),
+      contractColumn.taxCode,
+      contractColumn.paymentTerm,
+      contractColumn.accountAssignment,
+      contractColumn.costCenter,
+      column("orderNumber", "Order Number"),
+      Object.assign({}, contractColumn.wbsElement, { label: "Work Breakdown Structure Element (WBS Element)" }),
+      column("scmSpocUserId", "User ID - SCM SPOC", "combo", {
+        required: true,
+        entity: "Users", key: "email", text: "displayName", secondaryText: "email"
+      })
+    ]
+  };
+
+  // Second row table, keyed by variant. Labels follow "Details of Header Creation-SCC M-212.csv".
+  const headerTableColumns = {
+    CONTRACT_NEW: [
+      column("itemNo", "ID", "readonly"),
+      Object.assign({}, contractColumn.vendorId, { name: "vendorCode", label: "Vendor Code", required: true }),
+      column("coupaSourcingEventNo", "Ariba Sourcing Event No", "input", { required: true }),
+      column("poHeaderText", "PO header text", "input", { required: true }),
+      Object.assign({}, contractColumn.paymentTerm, { name: "paymentTerms", label: "Payment terms", required: true }),
+      column("warranty", "Warranty"),
+      column("penalties", "Penalties for breach of contract"),
+      column("termsOfDelivery", "Terms of delivery/delivery SLA"),
+      column("guarantees", "Guarantees/Performance Bond"),
+      column("otherCommercialTerms", "Any other commercial term(s) to be included in PO")
     ]
   };
 
@@ -962,13 +1068,57 @@ sap.ui.define([], function () {
     EQUIPMENT_CODE: ["EQP_NEW", "EQP_EXISTING"],
     PROJECT_CODE: ["PROJECT_NEW_MOD", "PROJECT_FL_ACTIVITY"],
     MATERIAL_RESERVATION: ["RES_DIRECT", "RES_WAREHOUSE"],
-    OUTLINE_CONTRACT: ["CONTRACT_NEW", "CONTRACT_MOD"],
+    OUTLINE_CONTRACT: ["CONTRACT_NEW", "CONTRACT_MOD", "CONTRACT_MOD_SINGLE"],
     PURCHASE_ORDER: ["PO_CAPEX_IM", "PO_CAPEX_FM", "PO_OPEX"],
     SERVICE_ENTRY_SHEET: ["SES_NEW", "SES_MOD"]
   };
 
+  // Tables shown inside the details section while their driver field is "YES".
+  // Labels follow the agreed Excel headers so filled sheets import as-is.
+  const conditionalGrids = {
+    CONTRACT_MOD: [
+      {
+        key: "priceChanges", title: "Price Change", driver: "priceChange",
+        columns: [
+          column("itemNo", "ID", "readonly"),
+          column("code", "Material or service code", "input", { required: true }),
+          column("price", "Price", "number")
+        ]
+      },
+      {
+        key: "serviceAdditions", title: "Service Addition", driver: "serviceAddition",
+        columns: [
+          column("itemNo", "ID", "readonly"),
+          column("code", "Service code", "input", { required: true }),
+          column("price", "Pricing", "number"),
+          column("quantity", "Quantity", "number")
+        ]
+      },
+      {
+        key: "materialAdditions", title: "Material Addition", driver: "materialAddition",
+        columns: [
+          column("itemNo", "ID", "readonly"),
+          column("code", "Material code", "input", { required: true }),
+          column("price", "Pricing", "number"),
+          column("quantity", "Quantity", "number")
+        ]
+      }
+    ]
+  };
+
+  // changeType stored by the backend for each conditional grid key.
+  const CHANGE_TYPE_BY_GRID = {
+    priceChanges: "PRICE_CHANGE",
+    serviceAdditions: "SERVICE_ADDITION",
+    materialAdditions: "MATERIAL_ADDITION"
+  };
+
   return {
-    getFields: function (variantCode, categoryCode) {
+    // lineMode "SINGLE_LINE" picks a "<variant>_SINGLE" definition when one exists.
+    getFields: function (variantCode, categoryCode, lineMode) {
+      if (lineMode === "SINGLE_LINE" && definitions[variantCode + "_SINGLE"]) {
+        return definitions[variantCode + "_SINGLE"];
+      }
       if (categoryCode && definitions[categoryCode + ":" + variantCode]) {
         return definitions[categoryCode + ":" + variantCode];
       }
@@ -989,6 +1139,9 @@ sap.ui.define([], function () {
       return merged;
     },
     getItemColumns: function (requestTypeCode, variantCode, categoryCode) {
+      if (variantCode && itemColumns[variantCode]) {
+        return itemColumns[variantCode];
+      }
       if (itemColumns[requestTypeCode]) {
         return itemColumns[requestTypeCode];
       }
@@ -997,6 +1150,19 @@ sap.ui.define([], function () {
       return fields.filter(function (field) {
         return !isHeaderOnlyField(field, drivers);
       }).map(fieldToColumn);
+    },
+    // Variants that capture rows in two tables (header rows + item rows) instead of offering
+    // the Single/Multiple line choice.
+    hasHeaderTable: function (variantCode) {
+      return !!headerTableColumns[variantCode];
+    },
+    getHeaderTableColumns: function (variantCode) {
+      return headerTableColumns[variantCode] || [];
+    },
+    getConditionalGrids: function (variantCode) {
+      return (conditionalGrids[variantCode] || []).map(function (grid) {
+        return Object.assign({ changeType: CHANGE_TYPE_BY_GRID[grid.key] }, grid);
+      });
     },
     getHeaderFields: function (requestTypeCode, variantCode, categoryCode) {
       const fields = this.getFields(variantCode, categoryCode);

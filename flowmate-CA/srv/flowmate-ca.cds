@@ -106,6 +106,8 @@ service FlowmateCAService {
   entity MaterialReservationItems as projection on db.MaterialReservationItems;
   entity OutlineContractDetails as projection on db.OutlineContractDetails;
   entity OutlineContractItems as projection on db.OutlineContractItems;
+  entity OutlineContractHeaders as projection on db.OutlineContractHeaders;
+  entity OutlineContractChangeItems as projection on db.OutlineContractChangeItems;
   entity PurchaseOrderDetails as projection on db.PurchaseOrderDetails;
   entity PurchaseOrderItems as projection on db.PurchaseOrderItems;
   entity ServiceEntrySheetDetails as projection on db.ServiceEntrySheetDetails;

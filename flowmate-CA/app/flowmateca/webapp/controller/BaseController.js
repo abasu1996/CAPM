@@ -3,9 +3,26 @@ sap.ui.define([
   "sap/ui/core/UIComponent",
   "sap/m/MessageBox",
   "sap/m/MessageToast",
+  "sap/m/Column",
+  "sap/m/ColumnListItem",
+  "sap/m/Text",
+  "flowmateca/model/FormDefinitions",
   "flowmateca/model/serviceUrl"
-], function (Controller, UIComponent, MessageBox, MessageToast, serviceUrl) {
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, serviceUrl) {
   "use strict";
+
+  // A request carries exactly one detail child, named per request type. Shared so the
+  // request page and the task page resolve it the same way.
+  const DETAIL_NAVIGATION = {
+    MATERIAL_CODE: "materialCode",
+    SERVICE_CODE: "serviceCode",
+    EQUIPMENT_CODE: "equipmentCode",
+    PROJECT_CODE: "projectCode",
+    MATERIAL_RESERVATION: "materialReservation",
+    OUTLINE_CONTRACT: "outlineContract",
+    PURCHASE_ORDER: "purchaseOrder",
+    SERVICE_ENTRY_SHEET: "serviceEntrySheet"
+  };
 
   const MAIN_SERVICE_URL = "odata/v4/flowmate-ca/";
   const MASTER_SERVICE_URL = "odata/v4/flowmate-ca-master/";
@@ -180,15 +197,6 @@ sap.ui.define([
       }[status] || "None";
     },
 
-    priorityState: function (priority) {
-      return {
-        CRITICAL: "Error",
-        HIGH: "Warning",
-        MEDIUM: "Information",
-        LOW: "Success"
-      }[priority] || "None";
-    },
-
     formatDate: function (value) {
       if (!value) {
         return "";
@@ -217,6 +225,76 @@ sap.ui.define([
         hash = (hash * 31 + key.charCodeAt(index)) % 10;
       }
       return `Accent${hash + 1}`;
+    },
+
+    detailNavigationFor: function (requestTypeCode) {
+      return DETAIL_NAVIGATION[requestTypeCode];
+    },
+
+    detailExpandClause: function () {
+      return Object.values(DETAIL_NAVIGATION)
+        .map(function (navigation) {
+          return `${navigation}($expand=items)`;
+        })
+        .join(",");
+    },
+
+    // Header-level fields only. The item-level ones belong to the line items table,
+    // and on a bulk request they are empty here, which rendered as "Not provided".
+    buildDetailFields: function (request, details) {
+      const definitions = FormDefinitions.getHeaderFields(
+        request.requestType?.code,
+        request.requestVariant?.code,
+        details.materialCategory
+      );
+      return definitions.map(function (definition) {
+        let value = definition.source === "request"
+          ? (definition.name === "requestDateTime" ? request.createdAt : request[definition.name])
+          : details[definition.name];
+        if (typeof value === "boolean") {
+          value = value ? "Yes" : "No";
+        }
+        return {
+          label: definition.label,
+          value: value === null || value === undefined || value === "" ? "Not provided" : String(value)
+        };
+      });
+    },
+
+    renderDetailItemsTable: function (table, request, details, modelName, itemsPath) {
+      if (!table) {
+        return;
+      }
+      const columns = FormDefinitions.getItemColumns(
+        request.requestType?.code,
+        request.requestVariant?.code,
+        details.materialCategory
+      );
+      table.destroyColumns();
+      table.unbindItems();
+      if (!columns.length) {
+        return;
+      }
+
+      table.addColumn(new Column({
+        header: new Text({ text: "#" }),
+        width: "4rem"
+      }));
+      columns.forEach(function (col) {
+        table.addColumn(new Column({
+          header: new Text({ text: col.label }),
+          width: col.type === "date" ? "11rem" : "12rem"
+        }));
+      });
+
+      table.bindItems({
+        path: itemsPath,
+        template: new ColumnListItem({
+          cells: [new Text({ text: `{${modelName}>itemNo}` })].concat(columns.map(function (col) {
+            return new Text({ text: `{${modelName}>${col.name}}` });
+          }))
+        })
+      });
     }
   });
 });

@@ -21,16 +21,36 @@ sap.ui.define([
     onRefresh: async function () {
       this.setBusy(true);
       try {
+        const requestExpand = [
+          "status",
+          "requestType",
+          "requestVariant",
+          this.detailExpandClause()
+        ].join(",");
         const task = await this.request(
-          `Tasks(${this._taskId})?$expand=status,request($expand=status,requestType,requestVariant)`
+          `Tasks(${this._taskId})?$expand=status,request($expand=${requestExpand})`
         );
         const user = this.getAppModel().getProperty("/currentUser") || await this.loadCurrentUser();
         const processableStatus = ["OPEN", "SENT_BACK"].includes(task.status?.code);
         task.canClaim = processableStatus && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID;
-        task.canProcess = processableStatus
-          && (task.assignedUser_ID === user?.ID || user?.isAdmin);
+        task.canProcess = processableStatus && task.assignedUser_ID === user?.ID;
         task.canSendBack = task.canProcess && task.stepNo > 1;
+
+        const request = task.request || {};
+        const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
+        task.detailFields = this.buildDetailFields(request, details);
+        task.detailItems = details.items || [];
+        task.hasDetailItems = task.detailItems.length > 0;
+        task.hasDetailFields = task.detailFields.length > 0;
+
         this.getView().getModel("task").setData(task);
+        this.renderDetailItemsTable(
+          this.byId("taskItemsTable"),
+          request,
+          details,
+          "task",
+          "task>/detailItems"
+        );
       } catch (error) {
         this.showError(error);
       } finally {

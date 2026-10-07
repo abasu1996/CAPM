@@ -6,20 +6,13 @@ sap.ui.define([
   "sap/m/Column",
   "sap/m/ColumnListItem",
   "sap/m/Text",
-  "sap/base/Log"
-], function (BaseController, FormDefinitions, JSONModel, MessageBox, Column, ColumnListItem, Text, Log) {
+  "sap/base/Log",
+  "sap/m/Table",
+  "sap/m/Panel",
+  "sap/m/ScrollContainer"
+], function (BaseController, FormDefinitions, JSONModel, MessageBox, Column, ColumnListItem, Text, Log,
+  Table, Panel, ScrollContainer) {
   "use strict";
-
-  const DETAIL_NAVIGATION = {
-    MATERIAL_CODE: "materialCode",
-    SERVICE_CODE: "serviceCode",
-    EQUIPMENT_CODE: "equipmentCode",
-    PROJECT_CODE: "projectCode",
-    MATERIAL_RESERVATION: "materialReservation",
-    OUTLINE_CONTRACT: "outlineContract",
-    PURCHASE_ORDER: "purchaseOrder",
-    SERVICE_ENTRY_SHEET: "serviceEntrySheet"
-  };
 
   return BaseController.extend("flowmateca.controller.RequestDetail", {
     onInit: function () {
@@ -57,7 +50,7 @@ sap.ui.define([
           "equipmentCode($expand=items)",
           "projectCode($expand=items)",
           "materialReservation($expand=items)",
-          "outlineContract($expand=items)",
+          "outlineContract($expand=items,headers,changeItems)",
           "purchaseOrder($expand=items)",
           "serviceEntrySheet($expand=items)"
         ].join(",");
@@ -106,33 +99,28 @@ sap.ui.define([
         ? "Workflow completed"
         : `Step ${request.currentStep} of ${request.stepInstances.length}`;
       request.detailFields = this._detailFields(request);
-      request.detailItems = (request[DETAIL_NAVIGATION[request.requestType?.code]] || {}).items || [];
+      request.detailItems = (request[this.detailNavigationFor(request.requestType?.code)] || {}).items || [];
       request.hasDetailItems = request.detailItems.length > 0;
+      request.detailHeaders = ((request[this.detailNavigationFor(request.requestType?.code)] || {}).headers || [])
+        .slice().sort(function (left, right) { return left.itemNo - right.itemNo; });
+      request.hasDetailHeaders = request.detailHeaders.length > 0;
+      request.detailItemsTitle = request.hasDetailHeaders ? "Contract Creation Details" : "Line Items";
     },
 
     _detailFields: function (request) {
-      const navigation = DETAIL_NAVIGATION[request.requestType?.code];
-      const details = request[navigation] || {};
-      const definitions = FormDefinitions.getFieldsByRequestType(request.requestType?.code);
-      return definitions.map(function (definition) {
-        let value = definition.source === "request"
-          ? (definition.name === "requestDateTime" ? request.createdAt : request[definition.name])
-          : details[definition.name];
-        if (typeof value === "boolean") {
-          value = value ? "Yes" : "No";
-        }
-        return {
-          label: definition.label,
-          value: value === null || value === undefined || value === "" ? "Not provided" : String(value)
-        };
-      });
+      const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
+      return this.buildDetailFields(request, details);
     },
 
     // Fields backed by UUIDs are stored as IDs; display the corresponding maintained label.
     // If a lookup fails, retain the ID already rendered by _detailFields.
     _resolveIdLabels: async function (request) {
-      const details = request[DETAIL_NAVIGATION[request.requestType?.code]] || {};
-      const definitions = FormDefinitions.getFieldsByRequestType(request.requestType?.code);
+      const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
+      const definitions = FormDefinitions.getHeaderFields(
+        request.requestType?.code,
+        request.requestVariant?.code,
+        details.materialCategory
+      );
       const model = this.getView().getModel("detail");
       await Promise.all(definitions.map(async function (definition, index) {
         const value = details[definition.name];
@@ -152,17 +140,51 @@ sap.ui.define([
     },
 
     _renderDetailItems: function (typeCode) {
-      const table = this.byId("detailItemsTable");
+      const detail = this.getView().getModel("detail").getData() || {};
+      const details = detail[DETAIL_NAVIGATION[typeCode]] || {};
+      const variantCode = detail.requestVariant && detail.requestVariant.code;
+      this._renderReadOnlyRows("detailItemsTable", "detail>/detailItems",
+        FormDefinitions.getItemColumns(typeCode, variantCode, details.materialCategory));
+      this._renderReadOnlyRows("detailHeadersTable", "detail>/detailHeaders",
+        FormDefinitions.getHeaderTableColumns(variantCode));
+      this._renderChangeTables(variantCode, details.changeItems || []);
+    },
+
+    // Contract Modification change rows, one read-only table per changeType that has rows.
+    _renderChangeTables: function (variantCode, changeItems) {
+      const host = this.byId("detailChangeTablesHost");
+      if (!host) {
+        return;
+      }
+      host.destroyItems();
+      const model = this.getView().getModel("detail");
+      FormDefinitions.getConditionalGrids(variantCode).forEach(function (grid) {
+        const rows = changeItems
+          .filter(function (row) { return row.changeType === grid.changeType; })
+          .sort(function (left, right) { return left.itemNo - right.itemNo; });
+        if (!rows.length) {
+          return;
+        }
+        model.setProperty(`/changeRows_${grid.key}`, rows);
+        const tableId = `detailChange-${grid.key}`;
+        const table = new Table(this.createId(tableId)).addStyleClass("caWorklistTable");
+        host.addItem(new Panel({
+          headerText: grid.title,
+          content: [new ScrollContainer({ horizontal: true, vertical: false, width: "100%", content: [table] })]
+        }).addStyleClass("caFormSection"));
+        this._renderReadOnlyRows(tableId, `detail>/changeRows_${grid.key}`, grid.columns);
+      }.bind(this));
+    },
+
+    _renderReadOnlyRows: function (tableId, path, allColumns) {
+      const table = this.byId(tableId);
       if (!table) {
         return;
       }
-      const detail = this.getView().getModel("detail").getData() || {};
-      const details = detail[DETAIL_NAVIGATION[typeCode]] || {};
-      const columns = FormDefinitions.getItemColumns(
-        typeCode,
-        detail.requestVariant && detail.requestVariant.code,
-        details.materialCategory
-      );
+      // itemNo is always shown as the leading "#" column.
+      const columns = allColumns.filter(function (col) {
+        return col.name !== "itemNo";
+      });
       table.destroyColumns();
       table.unbindItems();
 
@@ -182,7 +204,7 @@ sap.ui.define([
       });
 
       table.bindItems({
-        path: "detail>/detailItems",
+        path: path,
         template: new ColumnListItem({
           cells: [new Text({ text: "{detail>itemNo}" })].concat(columns.map(function (col) {
             return new Text({ text: `{detail>${col.name}}` });
@@ -340,7 +362,19 @@ sap.ui.define([
             body: file
           });
           if (!response.ok) {
-            throw new Error(`Upload failed for ${file.name}`);
+            let reason = "";
+            try {
+              const body = await response.json();
+              reason = (body && body.error && body.error.message) || "";
+            } catch (parseError) {
+              reason = "";
+            }
+            try {
+              await this.request(`Attachments(${attachment.ID})`, { method: "DELETE" });
+            } catch (cleanupError) {
+              Log.warning("Could not remove the incomplete attachment " + attachment.ID, cleanupError);
+            }
+            throw new Error(reason || `Upload failed for ${file.name}`);
           }
         }
         this.showSuccess("Attachment upload complete");

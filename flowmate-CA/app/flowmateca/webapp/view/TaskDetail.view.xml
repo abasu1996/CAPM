@@ -28,7 +28,7 @@
       <Button
         text="{i18n>sendBack}"
         icon="sap-icon://undo"
-        type="Reject"
+        class="caBtnSendBack"
         visible="{task>/canSendBack}"
         press=".onOpenSendBack"/>
     </headerContent>
@@ -97,6 +97,24 @@
                 <Label text="{i18n>status}"/>
                 <ObjectStatus text="{task>/request/status/name}" state="{path: 'task>/request/status/code', formatter: '.statusState'}"/>
               </form:SimpleForm>
+            </content>
+          </Panel>
+          <Panel headerText="Process-Specific Details" class="caFormSection" visible="{= ${task>/hasDetailFields} }">
+            <content>
+              <FlexBox items="{task>/detailFields}" wrap="Wrap" renderType="Div" class="caDetailFieldGrid">
+                <VBox class="caDetailField">
+                  <Label text="{task>label}"/>
+                  <Text text="{task>value}" wrapping="true"/>
+                </VBox>
+              </FlexBox>
+            </content>
+          </Panel>
+
+          <Panel headerText="Line Items" class="caFormSection caItemsSection" visible="{= ${task>/hasDetailItems} }">
+            <content>
+              <ScrollContainer horizontal="true" vertical="false" width="100%">
+                <Table id="taskItemsTable" fixedLayout="true" class="caWorklistTable"/>
+              </ScrollContainer>
             </content>
           </Panel>
         </VBox>
