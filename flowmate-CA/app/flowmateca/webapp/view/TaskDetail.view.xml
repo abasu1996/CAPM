@@ -110,7 +110,15 @@
             </content>
           </Panel>
 
-          <Panel headerText="Line Items" class="caFormSection caItemsSection" visible="{= ${task>/hasDetailItems} }">
+          <Panel headerText="Header Creation" class="caFormSection caItemsSection" visible="{= ${task>/hasDetailHeaders} }">
+            <content>
+              <ScrollContainer horizontal="true" vertical="false" width="100%">
+                <Table id="taskHeadersTable" fixedLayout="true" class="caWorklistTable"/>
+              </ScrollContainer>
+            </content>
+          </Panel>
+          <VBox id="taskChangeTablesHost"/>
+          <Panel headerText="{task>/detailItemsTitle}" class="caFormSection caItemsSection" visible="{= ${task>/hasDetailItems} }">
             <content>
               <ScrollContainer horizontal="true" vertical="false" width="100%">
                 <Table id="taskItemsTable" fixedLayout="true" class="caWorklistTable"/>

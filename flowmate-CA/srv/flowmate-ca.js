@@ -832,17 +832,25 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }).where({ ID: requestId }));
   }
 
-  // Route configured APPROVER steps to the requester-selected approver when supplied.
-  // If no approver is selected or the user is no longer maintained, leave the task in its team queue.
+  // An APPROVER step goes straight to the user the requester picked on the form
+  // (approver_ID, or loaApprover_ID for SES), so it lands in that user's Pending Approval.
+  // Without a selection the task stays in the processor team's queue.
+  // SCM steps of an outline contract go to the SCM user named on the form: SCM Assign User
+  // (Contract Modification) or row 1's SCM SPOC (New Contract). Both store an email.
   async _approverAssignment(config, details) {
-    const approverId = config?.roleCode === "APPROVER"
-      ? (details?.approver_ID || details?.loaApprover_ID)
-      : null;
-    if (!approverId) {
+    let where = null;
+    if (config?.roleCode === "APPROVER") {
+      const approverId = details?.approver_ID || details?.loaApprover_ID;
+      where = approverId ? { ID: approverId } : null;
+    } else if (config?.roleCode === "SCM") {
+      const email = details?.scmAssignUser || details?.items?.[0]?.scmSpocUserId;
+      where = email ? { email } : null;
+    }
+    if (!where) {
       return {};
     }
     const approver = await this.master.run(SELECT.one.from(this.masterEntities.Users)
-      .where({ ID: approverId, isActive: true }));
+      .where({ ...where, isActive: true }));
     if (!approver) {
       return {};
     }
@@ -913,11 +921,18 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       ? await this.master.run(SELECT.one.from(this.masterEntities.Teams).where({ ID: teamId }))
       : null;
     let approver = {};
-    if (config?.roleCode === "APPROVER") {
+    if (["APPROVER", "SCM"].includes(config?.roleCode)) {
       const request = await tx.run(SELECT.one.from(this.db.CARequests)
         .columns("requestType_code")
         .where({ ID: requestId }));
       const details = await this._loadDetails(tx, request?.requestType_code, requestId);
+      // New Contract keeps the SCM SPOC on its line items, which _loadDetails does not read.
+      const itemsEntityName = ITEMS_ENTITY_BY_REQUEST_TYPE[request?.requestType_code];
+      if (details && itemsEntityName) {
+        details.items = await tx.run(SELECT.from(this.db[itemsEntityName])
+          .where({ details_ID: details.ID })
+          .orderBy("itemNo"));
+      }
       approver = await this._approverAssignment(config, details);
     }
     await tx.run(INSERT.into(this.db.CATasks).entries({

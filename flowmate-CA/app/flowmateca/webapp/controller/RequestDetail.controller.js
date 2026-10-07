@@ -3,15 +3,8 @@ sap.ui.define([
   "flowmateca/model/FormDefinitions",
   "sap/ui/model/json/JSONModel",
   "sap/m/MessageBox",
-  "sap/m/Column",
-  "sap/m/ColumnListItem",
-  "sap/m/Text",
-  "sap/base/Log",
-  "sap/m/Table",
-  "sap/m/Panel",
-  "sap/m/ScrollContainer"
-], function (BaseController, FormDefinitions, JSONModel, MessageBox, Column, ColumnListItem, Text, Log,
-  Table, Panel, ScrollContainer) {
+  "sap/base/Log"
+], function (BaseController, FormDefinitions, JSONModel, MessageBox, Log) {
   "use strict";
 
   return BaseController.extend("flowmateca.controller.RequestDetail", {
@@ -101,8 +94,7 @@ sap.ui.define([
       request.detailFields = this._detailFields(request);
       request.detailItems = (request[this.detailNavigationFor(request.requestType?.code)] || {}).items || [];
       request.hasDetailItems = request.detailItems.length > 0;
-      request.detailHeaders = ((request[this.detailNavigationFor(request.requestType?.code)] || {}).headers || [])
-        .slice().sort(function (left, right) { return left.itemNo - right.itemNo; });
+      request.detailHeaders = this.sortedDetailHeaders(request[this.detailNavigationFor(request.requestType?.code)]);
       request.hasDetailHeaders = request.detailHeaders.length > 0;
       request.detailItemsTitle = request.hasDetailHeaders ? "Contract Creation Details" : "Line Items";
     },
@@ -141,76 +133,13 @@ sap.ui.define([
 
     _renderDetailItems: function (typeCode) {
       const detail = this.getView().getModel("detail").getData() || {};
-      const details = detail[DETAIL_NAVIGATION[typeCode]] || {};
+      const details = detail[this.detailNavigationFor(typeCode)] || {};
       const variantCode = detail.requestVariant && detail.requestVariant.code;
-      this._renderReadOnlyRows("detailItemsTable", "detail>/detailItems",
+      this.renderReadOnlyRows("detailItemsTable", "detail>/detailItems",
         FormDefinitions.getItemColumns(typeCode, variantCode, details.materialCategory));
-      this._renderReadOnlyRows("detailHeadersTable", "detail>/detailHeaders",
+      this.renderReadOnlyRows("detailHeadersTable", "detail>/detailHeaders",
         FormDefinitions.getHeaderTableColumns(variantCode));
-      this._renderChangeTables(variantCode, details.changeItems || []);
-    },
-
-    // Contract Modification change rows, one read-only table per changeType that has rows.
-    _renderChangeTables: function (variantCode, changeItems) {
-      const host = this.byId("detailChangeTablesHost");
-      if (!host) {
-        return;
-      }
-      host.destroyItems();
-      const model = this.getView().getModel("detail");
-      FormDefinitions.getConditionalGrids(variantCode).forEach(function (grid) {
-        const rows = changeItems
-          .filter(function (row) { return row.changeType === grid.changeType; })
-          .sort(function (left, right) { return left.itemNo - right.itemNo; });
-        if (!rows.length) {
-          return;
-        }
-        model.setProperty(`/changeRows_${grid.key}`, rows);
-        const tableId = `detailChange-${grid.key}`;
-        const table = new Table(this.createId(tableId)).addStyleClass("caWorklistTable");
-        host.addItem(new Panel({
-          headerText: grid.title,
-          content: [new ScrollContainer({ horizontal: true, vertical: false, width: "100%", content: [table] })]
-        }).addStyleClass("caFormSection"));
-        this._renderReadOnlyRows(tableId, `detail>/changeRows_${grid.key}`, grid.columns);
-      }.bind(this));
-    },
-
-    _renderReadOnlyRows: function (tableId, path, allColumns) {
-      const table = this.byId(tableId);
-      if (!table) {
-        return;
-      }
-      // itemNo is always shown as the leading "#" column.
-      const columns = allColumns.filter(function (col) {
-        return col.name !== "itemNo";
-      });
-      table.destroyColumns();
-      table.unbindItems();
-
-      if (!columns.length) {
-        return;
-      }
-
-      table.addColumn(new Column({
-        header: new Text({ text: "#" }),
-        width: "4rem"
-      }));
-      columns.forEach(function (col) {
-        table.addColumn(new Column({
-          header: new Text({ text: col.label }),
-          width: col.type === "date" ? "11rem" : "12rem"
-        }));
-      });
-
-      table.bindItems({
-        path: path,
-        template: new ColumnListItem({
-          cells: [new Text({ text: "{detail>itemNo}" })].concat(columns.map(function (col) {
-            return new Text({ text: `{detail>${col.name}}` });
-          }))
-        })
-      });
+      this.renderChangeTables("detailChangeTablesHost", "detail", variantCode, details.changeItems);
     },
 
     onStepPress: function (event) {

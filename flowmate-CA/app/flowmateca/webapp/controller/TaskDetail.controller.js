@@ -1,8 +1,9 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
   "sap/ui/model/json/JSONModel",
-  "sap/m/MessageBox"
-], function (BaseController, JSONModel, MessageBox) {
+  "sap/m/MessageBox",
+  "flowmateca/model/FormDefinitions"
+], function (BaseController, JSONModel, MessageBox, FormDefinitions) {
   "use strict";
 
   return BaseController.extend("flowmateca.controller.TaskDetail", {
@@ -42,6 +43,9 @@ sap.ui.define([
         task.detailItems = details.items || [];
         task.hasDetailItems = task.detailItems.length > 0;
         task.hasDetailFields = task.detailFields.length > 0;
+        task.detailHeaders = this.sortedDetailHeaders(details);
+        task.hasDetailHeaders = task.detailHeaders.length > 0;
+        task.detailItemsTitle = task.hasDetailHeaders ? "Contract Creation Details" : "Line Items";
 
         this.getView().getModel("task").setData(task);
         this.renderDetailItemsTable(
@@ -51,6 +55,10 @@ sap.ui.define([
           "task",
           "task>/detailItems"
         );
+        const variantCode = request.requestVariant?.code;
+        this.renderReadOnlyRows("taskHeadersTable", "task>/detailHeaders",
+          FormDefinitions.getHeaderTableColumns(variantCode));
+        this.renderChangeTables("taskChangeTablesHost", "task", variantCode, details.changeItems);
       } catch (error) {
         this.showError(error);
       } finally {

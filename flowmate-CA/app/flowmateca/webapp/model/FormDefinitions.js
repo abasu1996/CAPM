@@ -626,7 +626,7 @@ sap.ui.define([], function () {
       field("targetValue", "Target Value", "input", { section: "Header Change" }),
       field("targetDate", "Target Date", "date", { section: "Header Change" }),
       field("headerPaymentTerms", "Payment Terms", "input", { section: "Header Change" }),
-      field("contractRevoked", "Contract Revoked", "select", { section: "Header Change", options: YES_NO }),
+      field("contractRevoked", "Contract Revoked", "select", { section: "Header Change", required: true, options: YES_NO }),
       field("scmAssignUser", "SCM Assign User", "combo", {
         section: "Header Change",
         required: true,
@@ -1164,8 +1164,8 @@ sap.ui.define([], function () {
         return Object.assign({ changeType: CHANGE_TYPE_BY_GRID[grid.key] }, grid);
       });
     },
-    getHeaderFields: function (requestTypeCode, variantCode, categoryCode) {
-      const fields = this.getFields(variantCode, categoryCode);
+    getHeaderFields: function (requestTypeCode, variantCode, categoryCode, lineMode) {
+      const fields = this.getFields(variantCode, categoryCode, lineMode);
       if (itemColumns[requestTypeCode]) {
         return fields;
       }

@@ -7,8 +7,12 @@ sap.ui.define([
   "sap/m/ColumnListItem",
   "sap/m/Text",
   "flowmateca/model/FormDefinitions",
-  "flowmateca/model/serviceUrl"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, serviceUrl) {
+  "flowmateca/model/serviceUrl",
+  "sap/m/Table",
+  "sap/m/Panel",
+  "sap/m/ScrollContainer"
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, serviceUrl,
+  Table, Panel, ScrollContainer) {
   "use strict";
 
   // A request carries exactly one detail child, named per request type. Shared so the
@@ -234,18 +238,96 @@ sap.ui.define([
     detailExpandClause: function () {
       return Object.values(DETAIL_NAVIGATION)
         .map(function (navigation) {
-          return `${navigation}($expand=items)`;
+          // Outline contracts also carry header rows and Contract Modification change rows.
+          return navigation === DETAIL_NAVIGATION.OUTLINE_CONTRACT
+            ? `${navigation}($expand=items,headers,changeItems)`
+            : `${navigation}($expand=items)`;
         })
         .join(",");
+    },
+
+    // Read-only row table: a leading "#" (itemNo) column plus one Text column per definition.
+    renderReadOnlyRows: function (tableId, path, allColumns) {
+      const table = this.byId(tableId);
+      if (!table) {
+        return;
+      }
+      const modelName = path.slice(0, path.indexOf(">"));
+      const columns = allColumns.filter(function (col) {
+        return col.name !== "itemNo";
+      });
+      table.destroyColumns();
+      table.unbindItems();
+
+      if (!columns.length) {
+        return;
+      }
+
+      table.addColumn(new Column({
+        header: new Text({ text: "#" }),
+        width: "4rem"
+      }));
+      columns.forEach(function (col) {
+        table.addColumn(new Column({
+          header: new Text({ text: col.label }),
+          width: col.type === "date" ? "11rem" : "12rem"
+        }));
+      });
+
+      table.bindItems({
+        path: path,
+        template: new ColumnListItem({
+          cells: [new Text({ text: `{${modelName}>itemNo}` })].concat(columns.map(function (col) {
+            return new Text({ text: `{${modelName}>${col.name}}` });
+          }))
+        })
+      });
+    },
+
+    // Contract Modification change rows: one read-only table per changeType that has rows,
+    // built inside the VBox hostId. Rows are published on the model as /changeRows_<key>.
+    renderChangeTables: function (hostId, modelName, variantCode, changeItems) {
+      const host = this.byId(hostId);
+      if (!host) {
+        return;
+      }
+      host.destroyItems();
+      const model = this.getView().getModel(modelName);
+      FormDefinitions.getConditionalGrids(variantCode).forEach(function (grid) {
+        const rows = (changeItems || [])
+          .filter(function (row) { return row.changeType === grid.changeType; })
+          .sort(function (left, right) { return left.itemNo - right.itemNo; });
+        if (!rows.length) {
+          return;
+        }
+        model.setProperty(`/changeRows_${grid.key}`, rows);
+        const tableId = `${hostId}-${grid.key}`;
+        const table = new Table(this.createId(tableId)).addStyleClass("caWorklistTable");
+        host.addItem(new Panel({
+          headerText: grid.title,
+          content: [new ScrollContainer({ horizontal: true, vertical: false, width: "100%", content: [table] })]
+        }).addStyleClass("caFormSection caItemsSection"));
+        this.renderReadOnlyRows(tableId, `${modelName}>/changeRows_${grid.key}`, grid.columns);
+      }.bind(this));
+    },
+
+    // Header rows of an outline contract (New Contract), sorted for display.
+    sortedDetailHeaders: function (details) {
+      return ((details && details.headers) || []).slice().sort(function (left, right) {
+        return left.itemNo - right.itemNo;
+      });
     },
 
     // Header-level fields only. The item-level ones belong to the line items table,
     // and on a bulk request they are empty here, which rendered as "Not provided".
     buildDetailFields: function (request, details) {
+      // The Single/Multiple choice is not stored; SCM Assign User is mandatory only on the
+      // Single Line form (Contract Modification), so its presence selects that field set.
       const definitions = FormDefinitions.getHeaderFields(
         request.requestType?.code,
         request.requestVariant?.code,
-        details.materialCategory
+        details.materialCategory,
+        details.scmAssignUser ? "SINGLE_LINE" : undefined
       );
       return definitions.map(function (definition) {
         let value = definition.source === "request"
@@ -253,6 +335,12 @@ sap.ui.define([
           : details[definition.name];
         if (typeof value === "boolean") {
           value = value ? "Yes" : "No";
+        }
+        if (definition.type === "select" && value) {
+          const option = (definition.options || []).find(function (entry) {
+            return entry.key === value;
+          });
+          value = option ? option.text : value;
         }
         return {
           label: definition.label,
