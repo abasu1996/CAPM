@@ -24,10 +24,6 @@
                 text="{detail>/status/name}"
                 state="{path: 'detail>/status/code', formatter: '.statusState'}"
                 inverted="true"/>
-              <ObjectStatus
-                text="{detail>/priority/name}"
-                state="{path: 'detail>/priority/code', formatter: '.priorityState'}"
-                inverted="true"/>
             </HBox>
           </HBox>
           <FlexBox wrap="Wrap" class="caFactGrid">
@@ -126,10 +122,10 @@
                     </FlexBox>
                   </content>
                 </Panel>
-                <Panel headerText="Header Creation" class="caFormSection" visible="{= ${detail>/hasDetailHeaders} }">
+                <Panel headerText="Header Creation" class="caFormSection caItemsSection" visible="{= ${detail>/hasDetailHeaders} }">
                   <content>
                     <ScrollContainer horizontal="true" vertical="false" width="100%">
-                      <Table id="detailHeadersTable" class="caWorklistTable"/>
+                      <Table id="detailHeadersTable" fixedLayout="true" class="caWorklistTable"/>
                     </ScrollContainer>
                   </content>
                 </Panel>
@@ -246,7 +242,7 @@
               <List items="{detail>/history}" noDataText="No history entries" class="caHistoryList">
                 <CustomListItem>
                   <HBox class="caHistoryRow" alignItems="Start">
-                    <Avatar icon="sap-icon://history" displaySize="XS" displayShape="Circle"/>
+                    <Avatar src="sap-icon://history" displaySize="XS" displayShape="Circle"/>
                     <VBox>
                       <ObjectStatus text="{detail>action}" state="Information"/>
                       <Text text="{detail>remarks}" visible="{= !!${detail>remarks} }"/>
