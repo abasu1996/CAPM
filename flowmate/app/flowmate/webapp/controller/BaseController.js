@@ -283,6 +283,7 @@ sap.ui.define([
         onDataReceived() {
             this._iPendingDataRequests = Math.max((this._iPendingDataRequests || 0) - 1, 0);
             this._updateBusyState();
+            this._reconcileDataRequestBusyState();
         },
 
         showBusy() {
@@ -293,6 +294,18 @@ sap.ui.define([
         hideBusy() {
             this._iPendingOperations = Math.max((this._iPendingOperations || 0) - 1, 0);
             this._updateBusyState();
+            this._reconcileDataRequestBusyState();
+        },
+
+        _reconcileDataRequestBusyState() {
+            setTimeout(() => {
+                const oModel = this.getModel();
+
+                if (typeof oModel?.hasPendingRequests === "function" && !oModel.hasPendingRequests()) {
+                    this._iPendingDataRequests = 0;
+                    this._updateBusyState();
+                }
+            }, 0);
         },
 
         _updateBusyState() {

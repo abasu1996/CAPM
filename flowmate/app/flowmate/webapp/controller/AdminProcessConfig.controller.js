@@ -7,7 +7,7 @@ sap.ui.define([
     "sap/m/MessageToast"
 ], (BaseController, Filter, FilterOperator, JSONModel, MessageBox, MessageToast) => {
     "use strict";
-
+//Code list for the different configuration entities with their corresponding table IDs and title keys for display purposes.
     const CODE_LISTS = {
         ProcessTypes: { tableId: "processTypesTable", titleKey: "processTypesConfigTitle" },
         PaymentCategories: { tableId: "paymentCategoriesTable", titleKey: "paymentCategoriesConfigTitle" },
@@ -668,6 +668,7 @@ sap.ui.define([
 
         onCloseProcessStepDialog() {
             this.byId("processStepDialog").close();
+            this._reconcileDataRequestBusyState();
         },
 
         onStepTypeChange() {
