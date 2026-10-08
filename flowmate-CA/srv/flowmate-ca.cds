@@ -127,6 +127,13 @@ service FlowmateCAService {
 
   @description: 'Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and input.requesterUser_ID identifying an active shared user. No client-to-user environment mapping is required. Human users use their active signed-in identity. Workflow initialization runs during creation.'
   action createRequest(input: NewRequestInput) returns Requests;
+  function getFlowmateRequestFormCatalog() returns LargeString;
+  action createFlowmatePaymentRun(requestId: UUID) returns {
+    created          : Boolean;
+    requestId        : UUID;
+    referenceNumber  : String(30);
+    attachmentCount  : Integer;
+  };
   action createBulkRequests(input: BulkRequestInput) returns {
     created          : Integer;
     referenceNumbers : LargeString;

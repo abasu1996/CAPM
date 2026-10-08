@@ -713,6 +713,7 @@ sap.ui.define([], function () {
     field("materialImported", "Material Imported", "checkbox"),
     field("sesRequired", "Create SES Successor", "checkbox"),
     field("paymentRequestRequired", "Create Payment Successor", "checkbox"),
+    field("paymentRun", "Payment Run", "checkbox", { onSelect: "onPaymentRunSelect" }),
     field("poHeaderText", "PO Header Text", "textarea"),
     field("WorkHUBID", "WorkHub ID", "input"),
     field("WorkHubAppID", "WorkHub Application ID", "input"),

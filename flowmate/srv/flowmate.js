@@ -779,6 +779,185 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       });
     });
 
+    this.on("createRequestWithAttachments", async (req) => {
+      if (!this._canProvisionRequests(req)) {
+        return req.reject(403, "Request provisioning authority is required");
+      }
+
+      let input;
+      let attachments;
+      try {
+        input = typeof req.data.input === "string"
+          ? JSON.parse(req.data.input)
+          : (req.data.input || {});
+        attachments = typeof req.data.attachments === "string"
+          ? JSON.parse(req.data.attachments)
+          : (req.data.attachments || []);
+      } catch (_error) {
+        return req.reject(400, "The Flowmate request or attachment payload contains invalid JSON");
+      }
+
+      if (!input || typeof input !== "object" || Array.isArray(input)) {
+        return req.reject(400, "The Flowmate request payload must be a JSON object");
+      }
+      if (!Array.isArray(attachments)) {
+        return req.reject(400, "The attachment payload must be an array");
+      }
+
+      const cleanInput = { ...input };
+      ["ID", "referenceNumber", "createdAt", "createdBy", "modifiedAt", "modifiedBy"].forEach((field) => {
+        delete cleanInput[field];
+      });
+      cleanInput.ID = cds.utils.uuid();
+
+      if (!cleanInput.requesterUser_ID) {
+        return req.reject(400, "requesterUser_ID is required for a provisioned Flowmate request");
+      }
+      if (!cleanInput.processType_code || !cleanInput.subProcessType_code || !String(cleanInput.title || "").trim()) {
+        return req.reject(400, "Process type, subprocess type, and title are required");
+      }
+      if (!cleanInput.processorTeam_ID) {
+        return req.reject(400, "Processor Team is required when creating a Flowmate request");
+      }
+      if (!attachments.length) {
+        return req.reject(400, "At least one attachment is required for the Flowmate request");
+      }
+
+      const attachmentRows = [];
+      for (const attachment of attachments) {
+        if (!attachment || !String(attachment.filename || "").trim()) {
+          return req.reject(400, "Every Flowmate attachment must have a filename");
+        }
+        if (!attachment.contentBase64 || typeof attachment.contentBase64 !== "string") {
+          return req.reject(400, `Attachment ${attachment.filename} does not contain file content`);
+        }
+        let content;
+        try {
+          content = Buffer.from(attachment.contentBase64, "base64");
+        } catch (_error) {
+          return req.reject(400, `Attachment ${attachment.filename} contains invalid file content`);
+        }
+        if (!content.length) {
+          return req.reject(400, `Attachment ${attachment.filename} is empty`);
+        }
+        attachmentRows.push({
+          ID: cds.utils.uuid(),
+          filename: String(attachment.filename).trim(),
+          mimeType: String(attachment.mimeType || "application/octet-stream"),
+          content
+        });
+      }
+
+      const tx = cds.tx(req);
+      const [processType, processSubtype, priority] = await Promise.all([
+        tx.run(SELECT.one.from(ProcessTypes).where({
+          code: cleanInput.processType_code,
+          isActive: true
+        })),
+        tx.run(SELECT.one.from(ProcessSubTypes).where({
+          code: cleanInput.subProcessType_code,
+          processType_code: cleanInput.processType_code,
+          isActive: true
+        })),
+        tx.run(SELECT.one.from(Priorities).where({
+          code: cleanInput.priorityConfig_code || "MEDIUM",
+          isActive: true
+        }))
+      ]);
+
+      if (!processType) {
+        return req.reject(400, "Selected process type is inactive or was not found");
+      }
+      if (!processSubtype) {
+        return req.reject(400, "Selected process subtype is inactive or does not belong to the process type");
+      }
+      if (!priority) {
+        return req.reject(400, "Selected priority was not found");
+      }
+
+      const requester = await this._getUser(req, cleanInput.requesterUser_ID, Users);
+      if (!requester) {
+        return req.reject(400, "The provisioned requester was not found or is inactive");
+      }
+      cleanInput.requester = this._userDisplayName(requester);
+      cleanInput.department ||= requester.department;
+
+      const processorTeam = await this._getTeam(req, cleanInput.processorTeam_ID, Teams);
+      if (!processorTeam) {
+        return req.reject(400, "Selected processor team was not found or is inactive");
+      }
+      cleanInput.processorTeamName = processorTeam.name || processorTeam.teamCode;
+
+      if (cleanInput.processorUser_ID) {
+        const processor = await this._getUser(req, cleanInput.processorUser_ID, Users);
+        if (!processor) {
+          return req.reject(400, "Selected processor was not found or is inactive");
+        }
+        this._setProcessorSnapshot(cleanInput, processor);
+      }
+
+      cleanInput.priority = priority.name || priority.code;
+
+      // Apply the same server-managed LoA plan used by the normal CREATE
+      // handler. Without this, a provisioned request could skip approval
+      // positioning even though the same subprocess created in the UI would
+      // enter LoA or a later guided step.
+      const createRequest = Object.create(req);
+      createRequest.data = cleanInput;
+      createRequest.event = "CREATE";
+      await this._prepareLoaSnapshot(createRequest, null, processSubtype);
+      await this._applyLoaApprovalRule(createRequest, processSubtype, LoaApproval);
+
+      cleanInput.status_code ??= PROCESS_STATUS.DRAFT;
+      cleanInput.referenceNumber ??= await this._nextReferenceNumber(req, ProcessRequests, "REQ");
+      cleanInput.attachments = attachmentRows.map(({ ID, filename, mimeType }) => ({
+        ID,
+        filename,
+        mimeType
+      }));
+
+      await tx.run(INSERT.into(ProcessRequests).entries(cleanInput));
+      // Deep inserts normally create the composition rows. The fallback keeps
+      // this service safe across CAP database adapters that flatten nested CQN
+      // inserts, while the request validation above still sees the attachments.
+      const existingAttachments = await tx.run(
+        SELECT.from(ProcessAttachments).columns("ID").where({ request_ID: cleanInput.ID })
+      );
+      const existingAttachmentIds = new Set(existingAttachments.map((entry) => entry.ID));
+      const missingAttachments = attachmentRows
+        .filter((attachment) => !existingAttachmentIds.has(attachment.ID))
+        .map((attachment) => ({
+          ID: attachment.ID,
+          request_ID: cleanInput.ID,
+          filename: attachment.filename,
+          mimeType: attachment.mimeType,
+          content: attachment.content
+        }));
+      if (missingAttachments.length) {
+        await tx.run(INSERT.into(ProcessAttachments).entries(missingAttachments));
+      }
+      for (const attachment of attachmentRows) {
+        await tx.run(
+          UPDATE(ProcessAttachments, attachment.ID).set({
+            content: attachment.content
+          })
+        );
+      }
+
+      const createdRequest = await tx.run(
+        SELECT.one.from(ProcessRequests).where({ ID: cleanInput.ID })
+      );
+
+      // This action is used by Flowmate CA and writes directly to the
+      // persistence layer so that attachment bytes can be stored in the same
+      // transaction. A direct INSERT does not execute the normal
+      // ProcessRequests CREATE after-handler, so explicitly run the same
+      // workflow post-processing as a request created from the Flowmate UI.
+      await this._afterProcessRequestCreate(req, createdRequest);
+
+      return tx.run(SELECT.one.from(ProcessRequests).where({ ID: cleanInput.ID }));
+    });
+
     this.before(["CREATE", "UPDATE", "DELETE"], ProcessStepConfig, (req) => {
       if (!this._isAdministrator(req)) {
         return req.reject(403, "Only an administrator can maintain process configuration");
@@ -1587,33 +1766,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.after("CREATE", ProcessRequests, async (request, req) => {
-      if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
-        if (request.loaWorkflowMode === "GUIDED") {
-          const steps = await this._getSteps(req, request.subProcessType_code);
-          for (const step of steps.filter((entry) => entry.stepNo < request.loaStepNo)) {
-            await this._createTask(req, request.ID, step, { request, autoComplete: true,
-              autoCompleteRemarks: "Request raised by requester", skipIfExistingStep: true });
-          }
-          await this._startConfiguredLoa(req, request.ID, this._findStepByNo(steps, request.loaStepNo));
-          return;
-        }
-        await this._createLoaApprovalTasks(req, request, Users);
-        return;
-      }
-      if (request.processorTeam_ID) {
-        await this._notifyTeamAssignment(req, {
-          assignmentType: "PROCESS",
-          request,
-          teamId: request.processorTeam_ID,
-          teamName: request.processorTeamName
-        });
-      }
-      // await this._ensureInitialGuidedTask(req, request.ID, request, { updateRequest: true, autoCompleteFirstStep: true });
-       await this._ensureInitialGuidedTask(req, request.ID, request, {
-        updateRequest: true,
-        autoCompleteSteps: 1,
-        autoCompleteReason: "Request raised by requester"
-      });
+      await this._afterProcessRequestCreate(req, request, Users);
     });
 
 
@@ -6115,6 +6268,95 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
     return true;
   }
+  async _afterProcessRequestCreate(req, request, Users = this.masterEntities.Users) {
+    if (!request) {
+      return;
+    }
+
+    if (request.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+      if (request.loaWorkflowMode === "GUIDED") {
+        const steps = await this._getSteps(req, request.subProcessType_code);
+        for (const step of steps.filter((entry) => entry.stepNo < request.loaStepNo)) {
+          await this._createTask(req, request.ID, step, {
+            request,
+            autoComplete: true,
+            autoCompleteRemarks: "Request raised by requester",
+            skipIfExistingStep: true
+          });
+        }
+        await this._startConfiguredLoa(req, request.ID, this._findStepByNo(steps, request.loaStepNo));
+        return;
+      }
+      await this._createLoaApprovalTasks(req, request, Users);
+      return;
+    }
+
+    if (request.processorTeam_ID) {
+      await this._notifyTeamAssignment(req, {
+        assignmentType: "PROCESS",
+        request,
+        teamId: request.processorTeam_ID,
+        teamName: request.processorTeamName
+      });
+    }
+
+    await this._ensureInitialGuidedTask(req, request.ID, request, {
+      updateRequest: true,
+      autoCompleteSteps: 1,
+      autoCompleteReason: "Request raised by requester"
+    });
+  }
+
+  async _applyLoaApprovalRule(req, subtype, LoaApproval) {
+    const data = req.data;
+    if (!subtype?.loaApprovalApplicable) {
+      data.amount = null;
+      data.role = null;
+      data.loaRequiresAll = false;
+      data.loaApproverSource = null;
+      data.loaApproverUserIds = null;
+      data.loaApprovalRuleCode = null;
+      return;
+    }
+
+    const sourceField = LOA_AMOUNT_SOURCE_FIELD[data.subProcessType_code];
+    let value = data.amount;
+    if (Array.isArray(sourceField)) {
+      const values = sourceField
+        .map((field) => data[field])
+        .filter((entry) => entry !== null && entry !== undefined && entry !== "" && Number.isFinite(Number(entry)))
+        .map(Number);
+      value = values.length ? Math.max(...values) : null;
+    } else if (sourceField) {
+      value = data[sourceField];
+    }
+
+    const amount = Number(value);
+    if (value === null || value === undefined || value === "" || !Number.isFinite(amount)) {
+      return req.reject(400, "Amount is required when LoA approval is applicable");
+    }
+
+    const rule = await this._resolveLoaRule(req, LoaApproval, amount, {
+      ...data,
+      subProcessType_code: data.subProcessType_code
+    });
+    if (!rule) {
+      return req.reject(400, `No LoA approval rule is configured for amount ${amount}`);
+    }
+
+    const directUsers = this._booleanValue(rule.directUserAssignment);
+    data.amount = amount;
+    data.role = directUsers ? "DIRECT_USER" : (rule.approverRoleCodes || rule.roleCode || "");
+    data.loaRequiresAll = this._booleanValue(rule.requireAllApprovers);
+    data.loaApproverSource = directUsers ? "USER" : "ROLE";
+    data.loaApproverUserIds = directUsers ? rule.approverUserIds : null;
+    data.loaApprovalRuleCode = rule.ruleCode || null;
+    if (data.loaBeforeProcessing) {
+      data.status_code = PROCESS_STATUS.PENDING_APPROVAL;
+      data.currentStep = data.loaStepNo || 0;
+    }
+  }
+
   async _ensureInitialGuidedTask(req, requestId, request, options = {}) {
     const oRequest = request?.processType_code ? request : await this._getRequest(req, requestId);
     const steps = await this._getSteps(req, oRequest?.subProcessType_code);

@@ -1,6 +1,7 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
   "flowmateca/model/FormDefinitions",
+  "flowmateca/model/FlowmateRequestFormDefinitions",
   "sap/ui/model/json/JSONModel",
   "sap/ui/layout/form/SimpleForm",
   "sap/m/Label",
@@ -24,10 +25,14 @@ sap.ui.define([
   "sap/m/ToolbarSpacer",
   "sap/m/Title",
   "sap/m/ScrollContainer",
-  "sap/ui/core/Title"
+  "sap/ui/core/Title",
+  "sap/m/HBox",
+  "sap/m/VBox",
+  "sap/m/Dialog"
 ], function (
   BaseController,
   FormDefinitions,
+  FlowmateRequestFormDefinitions,
   JSONModel,
   SimpleForm,
   Label,
@@ -51,7 +56,10 @@ sap.ui.define([
   ToolbarSpacer,
   MTitle,
   ScrollContainer,
-  FormTitle
+  FormTitle,
+  HBox,
+  VBox,
+  Dialog
 ) {
   "use strict";
 
@@ -75,6 +83,117 @@ sap.ui.define([
     headers: { tableId: "headersTableHost", path: "/details/headers" }
   };
 
+  // These are the repeating sections from Flowmate's request creation form.
+  // They are rendered as the same editable table + Add/Edit dialog pattern in
+  // the Payment Run dialog, rather than exposing raw JSON to the user.
+  const PAYMENT_RUN_GRIDS = {
+    invoices: {
+      title: "Invoice Details",
+      addText: "Add Invoice",
+      noDataText: "No invoice details added",
+      fields: [
+        { name: "invoiceNumber", label: "Invoice Number", type: "input", required: true },
+        { name: "invoiceDate", label: "Invoice Date", type: "date", required: true },
+        { name: "amount", label: "Amount", type: "number", required: true },
+        { name: "vatAmount", label: "VAT Amount", type: "number" },
+        { name: "sesReference", label: "SES Reference", type: "input" },
+        { name: "remarks", label: "Remarks", type: "textarea" }
+      ],
+      displayFields: ["invoiceNumber", "invoiceDate", "amount", "vatAmount", "sesReference", "remarks"]
+    },
+    directForeignTravelEntries: {
+      title: "Direct Foreign Travel Entries",
+      addText: "Add Travel Entry",
+      noDataText: "No travel entries added",
+      fields: [
+        { name: "travelerName", label: "Traveler Name", type: "input", required: true },
+        { name: "category", label: "Category", type: "input" },
+        { name: "vendorCode", label: "Vendor Code", type: "input", required: true },
+        { name: "ctmProposalNo", label: "CTM Proposal No", type: "input", required: true },
+        { name: "purposeOfTravel", label: "Purpose of Travel", type: "textarea", required: true },
+        { name: "venue", label: "Venue", type: "input" },
+        { name: "departureDateTime", label: "Departure", type: "datetime" },
+        { name: "arrivalDateTime", label: "Arrival", type: "datetime" },
+        { name: "budgetCode", label: "Budget Code", type: "input" },
+        { name: "currency_code", label: "Currency", type: "combo", catalog: "flowmateCurrencies", key: "code", text: "name", secondaryText: "code" },
+        { name: "airfare", label: "Airfare", type: "number" },
+        { name: "visaFee", label: "Visa Fee", type: "number" },
+        { name: "perDayAllowanceUSD", label: "Per Day Allowance (USD)", type: "number", required: true },
+        { name: "noOfDays", label: "No. of Days", type: "number", required: true },
+        { name: "exchangeRate", label: "Exchange Rate", type: "number" },
+        { name: "totalInUSD", label: "Total (USD)", type: "number", readOnly: true },
+        { name: "totalInLKR", label: "Total (LKR)", type: "number", readOnly: true },
+        { name: "totalCostForeignCurrency", label: "Total Cost (Foreign Currency)", type: "number", readOnly: true },
+        { name: "totalCostLKR", label: "Total Cost (LKR)", type: "number", readOnly: true },
+        { name: "confirmedTravelItinerary", label: "Confirmed Travel Itinerary", type: "textarea" },
+        { name: "selectedScheme", label: "Selected Scheme", type: "input" },
+        { name: "personalTravelInvolved", label: "Personal Travel Involved", type: "checkbox" },
+        { name: "periodOfPersonalTravel", label: "Period of Personal Travel", type: "input" }
+      ],
+      displayFields: ["travelerName", "vendorCode", "ctmProposalNo", "purposeOfTravel", "departureDateTime", "arrivalDateTime", "totalCostLKR"]
+    },
+    travelExpenses: {
+      title: "Travel Expenses",
+      addText: "Add Travel Expense",
+      noDataText: "No travel expenses added",
+      fields: [
+        { name: "date", label: "Date", type: "date", required: true },
+        { name: "particulars", label: "Particulars", type: "input", required: true },
+        { name: "transport", label: "Transport", type: "number" },
+        { name: "hotel", label: "Hotel / Accommodation", type: "number" },
+        { name: "meals", label: "Meals", type: "number" },
+        { name: "entertainment", label: "Entertainment", type: "number" },
+        { name: "laundry", label: "Laundry", type: "number" },
+        { name: "phone", label: "Phone", type: "number" },
+        { name: "sundry", label: "Sundry", type: "number" },
+        { name: "miscellaneous", label: "Miscellaneous", type: "number" },
+        { name: "total", label: "Total", type: "number", readOnly: true }
+      ],
+      displayFields: ["date", "particulars", "transport", "hotel", "meals", "entertainment", "laundry", "phone", "sundry", "miscellaneous", "total"]
+    },
+    glBreakups: {
+      title: "GL Breakups",
+      addText: "Add GL Breakup",
+      noDataText: "No GL breakups added",
+      fields: [
+        { name: "glAccount", label: "GL Account", type: "input", required: true },
+        { name: "relevantDescription", label: "Relevant Description", type: "input", required: true },
+        { name: "relevantAmount", label: "Relevant Amount", type: "number", required: true },
+        { name: "costCentre", label: "Cost Centre", type: "input", required: true },
+        { name: "profitCentre", label: "Profit Centre", type: "input" }
+      ],
+      displayFields: ["glAccount", "relevantDescription", "relevantAmount", "costCentre", "profitCentre"]
+    },
+    settlementEntries: {
+      title: "Settlement Entries",
+      addText: "Add Settlement Entry",
+      noDataText: "No settlement entries added",
+      fields: [
+        { name: "paymentRequestRef_ID", label: "Payment Request", type: "input" },
+        { name: "paymentRequest", label: "Payment Request Reference", type: "input" },
+        { name: "poNumber", label: "PO Number", type: "input" },
+        { name: "sesReference", label: "SES Reference", type: "input" },
+        { name: "invoiceNumber", label: "Invoice Number", type: "input" },
+        { name: "invoiceDate", label: "Invoice Date", type: "date" },
+        { name: "description", label: "Description", type: "textarea" },
+        { name: "transactionAmountDocumentCurrency", label: "Amount (Document Currency)", type: "number" },
+        { name: "transactionAmountLocalCurrency", label: "Amount (Local Currency)", type: "number" },
+        { name: "availabilityOfInvoice", label: "Availability of Invoice", type: "checkbox" }
+      ],
+      displayFields: ["paymentRequest", "poNumber", "sesReference", "invoiceNumber", "invoiceDate", "transactionAmountDocumentCurrency", "transactionAmountLocalCurrency", "availabilityOfInvoice"]
+    },
+    merchantEntityValues: {
+      title: "Merchant Entity Values",
+      addText: "Add Merchant Entity",
+      noDataText: "No merchant entity values added",
+      fields: [
+        { name: "businessEntity_code", label: "Entity", type: "combo", catalog: "flowmateFtkEntities", key: "code", text: "name", secondaryText: "code", required: true },
+        { name: "totalPayableValue", label: "Total Payable Value", type: "number", required: true }
+      ],
+      displayFields: ["businessEntity_code", "totalPayableValue"]
+    }
+  };
+
   return BaseController.extend("flowmateca.controller.RequestCreate", {
     onInit: function () {
       this.getView().setModel(new JSONModel(this._emptyForm()), "form");
@@ -88,7 +207,33 @@ sap.ui.define([
         teams:[]
       }), "catalog");
       this.getView().setModel(new JSONModel({ items: [] }), "files");
+      this.getView().setModel(new JSONModel({ items: [] }), "paymentRunFiles");
+      this.getView().setModel(new JSONModel(this._emptyPaymentRunForm()), "paymentRun");
+      this.getView().setModel(new JSONModel({}), "paymentRunGridEdit");
+      this._paymentRunGridDialogs = {};
       this.getRouter().getRoute("requestCreate").attachPatternMatched(this._onRouteMatched, this);
+    },
+
+    _emptyPaymentRunForm: function () {
+      return {
+        processType_code: "",
+        processTypeName: "",
+        subProcessType_code: "",
+        subProcessTypeName: "",
+        hasSubProcessTypes: false,
+        loaApprovalApplicable: false,
+        title: "",
+        predecessorDisplay: "",
+        priorityConfig_code: "MEDIUM",
+        department: "",
+        amount: null,
+        role: "Payment Run",
+        description: "",
+        requesterName: "",
+        processorTeamName: "",
+        processorTeam_ID: "",
+        details: {}
+      };
     },
 
     _emptyForm: function () {
@@ -117,7 +262,10 @@ sap.ui.define([
     _onRouteMatched: async function (event) {
       this.getView().getModel("form").setData(this._emptyForm());
       this.getView().getModel("files").setData({ items: [] });
+      this.getView().getModel("paymentRun").setData(this._emptyPaymentRunForm());
+      this._paymentRunSaved = false;
       this._selectedFiles = [];
+      this._paymentRunFiles = [];
       this._dynamicFileUploads = {};
       await Promise.all([
         this._loadCatalog(),
@@ -547,7 +695,12 @@ sap.ui.define([
         }).bindValue(path);
       } else if (definition.type === "checkbox") {
         control = new CheckBox({
-          select: this._applyConditionalVisibility.bind(this)
+          select: function (event) {
+            this._applyConditionalVisibility();
+            if (definition.onSelect && typeof this[definition.onSelect] === "function") {
+              this[definition.onSelect](event);
+            }
+          }.bind(this)
         }).bindProperty("selected", path);
       } else if (definition.type === "select") {
         control = new ComboBox({
@@ -613,6 +766,696 @@ sap.ui.define([
         }).bindValue(path);
       }
       return control;
+    },
+
+    _loadFlowmateRequestFormCatalog: async function () {
+      if (this._flowmateRequestFormCatalog) {
+        return this._flowmateRequestFormCatalog;
+      }
+      const result = await this.request("getFlowmateRequestFormCatalog()");
+      const raw = typeof result === "string" ? result : (result && result.value) || result;
+      const catalog = typeof raw === "string" ? JSON.parse(raw) : (raw || {});
+      const model = this.getView().getModel("catalog");
+      Object.keys(catalog || {}).forEach(function (key) {
+        model.setProperty(`/flowmate${key.charAt(0).toUpperCase()}${key.slice(1)}`, catalog[key] || []);
+      });
+      this._flowmateRequestFormCatalog = catalog || {};
+      return this._flowmateRequestFormCatalog;
+    },
+
+    _paymentRunContext: function () {
+      const form = this.getView().getModel("form").getData();
+      const details = form.details || {};
+      let saved = {};
+      if (details.paymentRunDetails) {
+        try {
+          saved = typeof details.paymentRunDetails === "string"
+            ? JSON.parse(details.paymentRunDetails)
+            : details.paymentRunDetails;
+        } catch (_error) {
+          saved = {};
+        }
+      }
+      return Object.assign(this._emptyPaymentRunForm(), {
+        title: form.title || "",
+        priorityConfig_code: form.priorityCode || "MEDIUM",
+        department: details.division || details.companyCode || "",
+        amount: details.totalValue === undefined || details.totalValue === null
+          ? (details.poValueWithTaxes === undefined || details.poValueWithTaxes === null
+            ? null
+            : details.poValueWithTaxes)
+          : details.totalValue,
+        role: "Payment Run",
+        description: form.description || details.procurementDescription || "",
+        requesterName: form.requesterName || "",
+        processorTeamName: form.processorTeamName || "",
+        processorTeam_ID: form.processorTeamCode || ""
+      }, saved);
+    },
+
+    _paymentRunFormValue: function (path, properties) {
+      return new Input(Object.assign({ width: "100%" }, properties || {}))
+        .bindValue(`paymentRun>/${path}`);
+    },
+
+    _paymentRunGridField: function (definition, path, modelName) {
+      const modelPath = `${modelName}>/${path}`;
+      if (definition.type === "date") {
+        return new DatePicker({
+          width: "100%",
+          valueFormat: "yyyy-MM-dd",
+          displayFormat: "medium"
+        }).bindValue(modelPath);
+      }
+      if (definition.type === "datetime") {
+        return new Input({ width: "100%", placeholder: "YYYY-MM-DDTHH:mm:ss" }).bindValue(modelPath);
+      }
+      if (definition.type === "textarea") {
+        return new TextArea({ rows: 3, width: "100%" }).bindValue(modelPath);
+      }
+      if (definition.type === "checkbox") {
+        return new CheckBox().bindProperty("selected", modelPath);
+      }
+      if (definition.type === "combo") {
+        return new ComboBox({
+          width: "100%",
+          showSecondaryValues: true,
+          filterSecondaryValues: true,
+          items: {
+            path: `catalog>/${definition.catalog}`,
+            templateShareable: true,
+            template: new ListItem({
+              key: `{catalog>${definition.key || "code"}}`,
+              text: `{catalog>${definition.text || "name"}}`,
+              additionalText: `{catalog>${definition.secondaryText || "code"}}`
+            })
+          }
+        }).bindProperty("selectedKey", modelPath);
+      }
+      return new Input({
+        width: "100%",
+        editable: definition.readOnly !== true,
+        type: definition.type === "number" ? "Number" : "Text"
+      }).bindValue(modelPath);
+    },
+
+    _paymentRunGridDefault: function (definition) {
+      const data = { dialogTitle: "" };
+      definition.fields.forEach(function (field) {
+        data[field.name] = field.type === "checkbox" ? false : (field.type === "number" || field.type === "date" ? null : "");
+      });
+      return data;
+    },
+
+    _isPaymentRunInvoiceVatSesVisible: function (subtype) {
+      return subtype === "PO_BEFORE_INVOICE_NON_ADV" || subtype === "PO_BEFORE_INVOICE_NON_ADV_LIAB" ||
+        subtype === "PO_AFTER_INVOICE_NON_ADV" || subtype === "PO_AFTER_INVOICE_NON_ADV_LIAB" ||
+        subtype === "PO_BEFORE_INVOICE_ADV_STLMT" || subtype === "PO_BEFORE_INVOICE_ADV_STLMT_100%" ||
+        subtype === "PO_AFTER_INVOICE_ADV_STLMT" || subtype === "PO_AFTER_INVOICE_ADV_STLMT_100%";
+    },
+
+    _openPaymentRunGridDialog: function (gridName, index) {
+      const definition = PAYMENT_RUN_GRIDS[gridName];
+      if (!definition) {
+        return;
+      }
+      const model = this.getView().getModel("paymentRunGridEdit");
+      const rows = this.getView().getModel("paymentRun").getProperty(`/details/${gridName}`) || [];
+      const data = Object.assign(this._paymentRunGridDefault(definition), index >= 0 ? (rows[index] || {}) : {});
+      data.dialogTitle = `${index >= 0 ? "Edit" : "Add"} ${definition.title}`;
+      data._editIndex = index >= 0 ? index : null;
+      model.setData(data);
+
+      if (!this._paymentRunGridDialogs[gridName]) {
+        const form = new SimpleForm({
+          editable: true,
+          layout: "ResponsiveGridLayout",
+          labelSpanXL: 4,
+          labelSpanL: 4,
+          labelSpanM: 4,
+          columnsXL: 2,
+          columnsL: 2,
+          columnsM: 1,
+          adjustLabelSpan: false
+        });
+        definition.fields.forEach(function (field) {
+          const isInvoiceVatSes = gridName === "invoices" && (field.name === "vatAmount" || field.name === "sesReference");
+          const label = new Label({ text: field.label, required: !!field.required });
+          const control = this._paymentRunGridField(field, field.name, "paymentRunGridEdit");
+          if (isInvoiceVatSes) {
+            const visibility = {
+              path: "paymentRun>/subProcessType_code",
+              formatter: this._isPaymentRunInvoiceVatSesVisible.bind(this)
+            };
+            label.bindProperty("visible", visibility);
+            control.bindProperty("visible", visibility);
+            label.bindProperty("required", visibility);
+          }
+          form.addContent(label);
+          form.addContent(control);
+        }.bind(this));
+        const dialog = new Dialog({
+          title: "{paymentRunGridEdit>/dialogTitle}",
+          contentWidth: "48rem",
+          stretchOnPhone: true,
+          content: [form],
+          beginButton: new Button({ text: "Save", type: "Emphasized", press: this._savePaymentRunGridRow.bind(this, gridName) }),
+          endButton: new Button({ text: "Cancel", press: function () { dialog.close(); } })
+        });
+        this.getView().addDependent(dialog);
+        this._paymentRunGridDialogs[gridName] = dialog;
+      }
+      this._paymentRunGridDialogs[gridName].open();
+    },
+
+    _paymentRunGridValueMissing: function (value, definition) {
+      if (definition.type === "checkbox") {
+        return false;
+      }
+      return value === undefined || value === null || String(value).trim() === "";
+    },
+
+    _savePaymentRunGridRow: function (gridName) {
+      const definition = PAYMENT_RUN_GRIDS[gridName];
+      const model = this.getView().getModel("paymentRunGridEdit");
+      const data = model.getData();
+      const missing = definition.fields.find(function (field) {
+        return field.required && this._paymentRunGridValueMissing(data[field.name], field);
+      }.bind(this));
+      const subtype = this.getView().getModel("paymentRun").getProperty("/subProcessType_code");
+      const requiresVatSes = gridName === "invoices" && (
+        subtype === "PO_BEFORE_INVOICE_NON_ADV" || subtype === "PO_BEFORE_INVOICE_NON_ADV_LIAB" ||
+        subtype === "PO_AFTER_INVOICE_NON_ADV" || subtype === "PO_AFTER_INVOICE_NON_ADV_LIAB" ||
+        subtype === "PO_BEFORE_INVOICE_ADV_STLMT" || subtype === "PO_BEFORE_INVOICE_ADV_STLMT_100%" ||
+        subtype === "PO_AFTER_INVOICE_ADV_STLMT" || subtype === "PO_AFTER_INVOICE_ADV_STLMT_100%"
+      );
+      if (missing || (requiresVatSes && (
+        this._paymentRunGridValueMissing(data.vatAmount, { type: "number" }) ||
+        this._paymentRunGridValueMissing(data.sesReference, { type: "input" })
+      ))) {
+        MessageBox.warning(requiresVatSes && gridName === "invoices"
+          ? "Invoice date, number, amount, VAT amount and SES reference are required."
+          : `${(missing || {}).label || "Please complete the required fields."} ` + (missing ? "is required." : ""));
+        return;
+      }
+
+      const row = {};
+      definition.fields.forEach(function (field) {
+        let value = data[field.name];
+        if (field.type === "number") {
+          value = value === "" || value === null || value === undefined ? null : Number(value);
+        } else if (field.type === "checkbox") {
+          value = Boolean(value);
+        } else if (typeof value === "string") {
+          value = value.trim();
+        }
+        row[field.name] = value;
+      });
+      if (gridName === "invoices") {
+        row.subProcessType_code = subtype;
+        if (!this._isPaymentRunInvoiceVatSesVisible(subtype)) {
+          row.vatAmount = null;
+          row.sesReference = "";
+        }
+      }
+      if (gridName === "travelExpenses") {
+        row.total = ["transport", "hotel", "meals", "entertainment", "laundry", "phone", "sundry", "miscellaneous"]
+          .reduce(function (sum, name) { return sum + (Number(row[name]) || 0); }, 0);
+      }
+      if (gridName === "directForeignTravelEntries") {
+        const days = Number(row.noOfDays) || 0;
+        const perDay = Number(row.perDayAllowanceUSD) || 0;
+        const exchange = Number(row.exchangeRate) || 0;
+        const totalUsd = perDay * days;
+        const foreign = (Number(row.airfare) || 0) + (Number(row.visaFee) || 0) + totalUsd;
+        row.totalInUSD = totalUsd;
+        row.totalInLKR = totalUsd * exchange;
+        row.totalCostForeignCurrency = foreign;
+        row.totalCostLKR = foreign * exchange;
+      }
+      const paymentRun = this.getView().getModel("paymentRun");
+      const rows = paymentRun.getProperty(`/details/${gridName}`) || [];
+      if (data._editIndex !== undefined && data._editIndex !== null && data._editIndex >= 0) {
+        rows[data._editIndex] = row;
+      } else {
+        rows.push(row);
+      }
+      paymentRun.setProperty(`/details/${gridName}`, rows);
+      if (gridName === "invoices") {
+        const amounts = rows.map(function (entry) { return Number(entry.amount); }).filter(Number.isFinite);
+        paymentRun.setProperty("/details/highestInvoiceValue", amounts.length ? Math.max.apply(null, amounts) : null);
+      }
+      this._paymentRunGridDialogs[gridName].close();
+    },
+
+    _onPaymentRunGridEdit: function (gridName, event) {
+      const context = event.getSource().getBindingContext("paymentRun");
+      const path = context && context.getPath();
+      this._openPaymentRunGridDialog(gridName, path ? Number(path.split("/").pop()) : -1);
+    },
+
+    _onPaymentRunGridDelete: function (gridName, event) {
+      const context = event.getSource().getBindingContext("paymentRun");
+      const path = context && context.getPath();
+      const index = path ? Number(path.split("/").pop()) : -1;
+      if (index < 0) {
+        return;
+      }
+      MessageBox.confirm("Delete this entry?", {
+        onClose: function (action) {
+          if (action === MessageBox.Action.OK) {
+            const model = this.getView().getModel("paymentRun");
+            const rows = model.getProperty(`/details/${gridName}`) || [];
+            rows.splice(index, 1);
+            model.setProperty(`/details/${gridName}`, rows);
+            if (gridName === "invoices") {
+              const amounts = rows.map(function (entry) { return Number(entry.amount); }).filter(Number.isFinite);
+              model.setProperty("/details/highestInvoiceValue", amounts.length ? Math.max.apply(null, amounts) : null);
+            }
+          }
+        }.bind(this)
+      });
+    },
+
+    _paymentRunGridPanel: function (gridName, definition) {
+      const table = new Table({
+        width: "100%",
+        fixedLayout: false,
+        noDataText: definition.noDataText,
+        items: {
+          path: `paymentRun>/details/${gridName}`,
+          templateShareable: false,
+          template: new ColumnListItem({
+            cells: definition.displayFields.map(function (fieldName) {
+              const cell = new Text({ wrapping: true }).bindText(`paymentRun>${fieldName}`);
+              if (gridName === "invoices" && (fieldName === "vatAmount" || fieldName === "sesReference")) {
+                cell.bindProperty("visible", {
+                  path: "paymentRun>/subProcessType_code",
+                  formatter: function (subtype) {
+                    return this._isPaymentRunInvoiceVatSesVisible(subtype);
+                  }.bind(this)
+                });
+              }
+              return cell;
+            }).concat([
+              new HBox({
+                justifyContent: "Center",
+                items: [
+                  new Button({ icon: "sap-icon://edit", type: "Transparent", tooltip: "Edit", press: this._onPaymentRunGridEdit.bind(this, gridName) }),
+                  new Button({ icon: "sap-icon://delete", type: "Transparent", tooltip: "Delete", press: this._onPaymentRunGridDelete.bind(this, gridName) })
+                ]
+              })
+            ])
+          })
+        }
+      });
+      definition.displayFields.forEach(function (fieldName) {
+        const field = definition.fields.find(function (entry) { return entry.name === fieldName; });
+        const column = new Column({ width: fieldName === "remarks" || fieldName === "description" ? "14rem" : "9rem", header: new Text({ text: field ? field.label : fieldName, wrapping: true }) });
+        if (gridName === "invoices" && (fieldName === "vatAmount" || fieldName === "sesReference")) {
+          column.bindProperty("visible", {
+            path: "paymentRun>/subProcessType_code",
+            formatter: function (subtype) {
+              return this._isPaymentRunInvoiceVatSesVisible(subtype);
+            }.bind(this)
+          });
+        }
+        table.addColumn(column);
+      });
+      table.addColumn(new Column({ width: "6rem", hAlign: "Center", header: new Text({ text: "Actions" }) }));
+      return new Panel({
+        expandable: false,
+        class: "sapUiSmallMarginTop",
+        headerToolbar: new Toolbar({
+          content: [
+            new MTitle({ text: definition.title, level: "H4" }),
+            new ToolbarSpacer(),
+            new Button({ text: definition.addText, icon: "sap-icon://add", type: "Emphasized", press: this._openPaymentRunGridDialog.bind(this, gridName, -1) })
+          ]
+        }),
+        content: [new ScrollContainer({ horizontal: true, vertical: false, width: "100%", content: [table] })]
+      });
+    },
+
+    _addPaymentRunField: function (form, definition) {
+      const catalog = this.getView().getModel("catalog");
+      const path = `paymentRun>/details/${definition.name}`;
+      let control;
+      if (definition.type === "readonly") {
+        control = new Input({ editable: false, width: "100%" }).bindValue(path);
+      } else if (definition.type === "textarea" || definition.type === "json") {
+        control = new TextArea({
+          rows: 4,
+          width: "100%",
+          placeholder: ""
+        }).bindValue(path);
+      } else if (definition.type === "date") {
+        control = new DatePicker({ valueFormat: "yyyy-MM-dd", displayFormat: "medium" }).bindValue(path);
+      } else if (definition.type === "checkbox") {
+        control = new CheckBox().bindProperty("selected", path);
+      } else if (definition.type === "combo") {
+        control = new ComboBox({
+          width: "100%",
+          showSecondaryValues: true,
+          filterSecondaryValues: true,
+          items: {
+            path: `catalog>/${definition.catalog}`,
+            templateShareable: true,
+            template: new ListItem({
+              key: `{catalog>${definition.key || "code"}}`,
+              text: `{catalog>${definition.text || "name"}}`,
+              additionalText: `{catalog>${definition.secondaryText || "code"}}`
+            })
+          },
+          selectionChange: function (event) {
+            const item = event.getParameter("selectedItem");
+            const row = item && item.getBindingContext("catalog")
+              ? item.getBindingContext("catalog").getObject()
+              : null;
+            if (row && definition.autoFills) {
+              Object.keys(definition.autoFills).forEach(function (target) {
+                this.getView().getModel("paymentRun").setProperty(
+                  `/details/${target}`,
+                  row[definition.autoFills[target]] || ""
+                );
+              }.bind(this));
+            }
+          }.bind(this)
+        }).bindProperty("selectedKey", path);
+      } else {
+        control = new Input({
+          width: "100%",
+          type: definition.type === "number" ? "Number" : "Text"
+        }).bindValue(path);
+      }
+      form.addContent(new Label({ text: definition.label, required: !!definition.required }));
+      form.addContent(control);
+      this._paymentRunFieldControls.push({ definition, control });
+    },
+
+    _renderPaymentRunDetails: function () {
+      const host = this.byId("paymentRunDetailsHost");
+      if (!host) {
+        return;
+      }
+      host.destroyItems();
+      this._paymentRunFieldControls = [];
+      this._paymentRunRequiredGrids = [];
+      const code = this.getView().getModel("paymentRun").getProperty("/subProcessType_code");
+      if (!code) {
+        return;
+      }
+      const form = new SimpleForm({
+        editable: true,
+        layout: "ResponsiveGridLayout",
+        labelSpanXL: 4,
+        labelSpanL: 4,
+        labelSpanM: 4,
+        columnsXL: 2,
+        columnsL: 2,
+        columnsM: 1,
+        adjustLabelSpan: false
+      });
+      form.setTitle(new FormTitle({ text: "Flowmate Process Details" }));
+      const grids = [];
+      FlowmateRequestFormDefinitions.getFields(code).forEach(function (definition) {
+        if (definition.type === "grid" && PAYMENT_RUN_GRIDS[definition.name]) {
+          const detailsPath = `/details/${definition.name}`;
+          if (!Array.isArray(this.getView().getModel("paymentRun").getProperty(detailsPath))) {
+            this.getView().getModel("paymentRun").setProperty(detailsPath, []);
+          }
+          if (definition.required) {
+            this._paymentRunRequiredGrids.push(definition);
+          }
+          grids.push(definition.name);
+          return;
+        }
+        this._addPaymentRunField(form, definition);
+      }.bind(this));
+      host.addItem(form);
+      grids.forEach(function (gridName) {
+        host.addItem(this._paymentRunGridPanel(gridName, PAYMENT_RUN_GRIDS[gridName]));
+      }.bind(this));
+    },
+
+    _renderPaymentRunDialogForm: function () {
+      const host = this.byId("paymentRunFormHost");
+      if (!host) {
+        return;
+      }
+      host.destroyItems();
+      const form = new SimpleForm({
+        editable: true,
+        layout: "ResponsiveGridLayout",
+        labelSpanXL: 4,
+        labelSpanL: 4,
+        labelSpanM: 4,
+        columnsXL: 2,
+        columnsL: 2,
+        columnsM: 1,
+        adjustLabelSpan: false
+      });
+      form.setTitle(new FormTitle({ text: "Request Overview" }));
+      const add = function (label, control, required) {
+        form.addContent(new Label({ text: label, required: !!required }));
+        form.addContent(control);
+      };
+      const processTypes = new ComboBox({
+        width: "100%",
+        showSecondaryValues: true,
+        items: {
+          path: "catalog>/flowmateProcessTypes",
+          templateShareable: true,
+          template: new ListItem({
+            key: "{catalog>code}",
+            text: "{catalog>name}",
+            additionalText: "{catalog>code}"
+          })
+        },
+        selectionChange: this.onPaymentRunProcessTypeChange.bind(this)
+      }).bindProperty("selectedKey", "paymentRun>/processType_code");
+      const subProcessTypes = new ComboBox({
+        width: "100%",
+        showSecondaryValues: true,
+        items: {
+          path: "catalog>/flowmateProcessSubTypesFiltered",
+          templateShareable: true,
+          template: new ListItem({
+            key: "{catalog>code}",
+            text: "{catalog>name}",
+            additionalText: "{catalog>code}"
+          })
+        },
+        selectionChange: this.onPaymentRunSubProcessTypeChange.bind(this)
+      }).bindProperty("selectedKey", "paymentRun>/subProcessType_code");
+      add("Process Type", processTypes, true);
+      add("Sub Process Type", subProcessTypes, true);
+      add("Request Title", this._paymentRunFormValue("title"), true);
+      add("Linked Request", this._paymentRunFormValue("predecessorDisplay", { editable: false }));
+      const priority = new ComboBox({
+        width: "100%",
+        items: {
+          path: "catalog>/flowmatePriorities",
+          templateShareable: true,
+          template: new ListItem({
+            key: "{catalog>code}",
+            text: "{catalog>name}",
+            additionalText: "{catalog>code}"
+          })
+        }
+      });
+      priority.bindProperty("selectedKey", "paymentRun>/priorityConfig_code");
+      add("Priority", priority);
+      add("Department", this._paymentRunFormValue("department"));
+      add("Amount", new Input({ type: "Number", width: "100%" }).bindValue("paymentRun>/amount"));
+      add("Approver Role", this._paymentRunFormValue("role", { editable: false }));
+      add("Description", new TextArea({ rows: 4, width: "100%" }).bindValue("paymentRun>/description"));
+      add("Requester", this._paymentRunFormValue("requesterName", { editable: false }));
+      const processorTeams = new ComboBox({
+        width: "100%",
+        showSecondaryValues: true,
+        items: {
+          path: "catalog>/flowmateTeams",
+          templateShareable: true,
+          template: new ListItem({
+            key: "{catalog>ID}",
+            text: "{catalog>name}",
+            additionalText: "{catalog>teamCode}"
+          })
+        },
+        selectionChange: function (event) {
+          const item = event.getParameter("selectedItem");
+          const row = item && item.getBindingContext("catalog")
+            ? item.getBindingContext("catalog").getObject()
+            : null;
+          if (row) {
+            const paymentRun = this.getView().getModel("paymentRun");
+            paymentRun.setProperty("/processorTeam_ID", row.ID);
+            paymentRun.setProperty("/processorTeamName", row.name);
+          }
+        }.bind(this)
+      });
+      processorTeams.bindProperty("selectedKey", "paymentRun>/processorTeam_ID");
+      add("Processor Team", processorTeams, true);
+      host.addItem(form);
+      this._renderPaymentRunDetails();
+    },
+
+    onPaymentRunProcessTypeChange: function (event) {
+      const selected = event.getParameter("selectedItem");
+      const model = this.getView().getModel("paymentRun");
+      const catalog = this.getView().getModel("catalog");
+      const code = selected ? selected.getKey() : "";
+      const all = catalog.getProperty("/flowmateProcessSubTypes") || [];
+      const filtered = all.filter(function (entry) {
+        return entry.processType_code === code;
+      });
+      catalog.setProperty("/flowmateProcessSubTypesFiltered", filtered);
+      model.setProperty("/processType_code", code);
+      model.setProperty("/processTypeName", selected ? selected.getText() : "");
+      model.setProperty("/subProcessType_code", "");
+      model.setProperty("/subProcessTypeName", "");
+      model.setProperty("/details", {});
+      this._renderPaymentRunDetails();
+    },
+
+    onPaymentRunSubProcessTypeChange: function (event) {
+      const selected = event.getParameter("selectedItem");
+      const model = this.getView().getModel("paymentRun");
+      const code = selected ? selected.getKey() : "";
+      model.setProperty("/subProcessType_code", code);
+      model.setProperty("/subProcessTypeName", selected ? selected.getText() : "");
+      // A subtype change must not carry composition rows from the previous
+      // subtype into the next Flowmate request.
+      model.setProperty("/details", {});
+      const row = selected && selected.getBindingContext("catalog")
+        ? selected.getBindingContext("catalog").getObject()
+        : null;
+      model.setProperty("/loaApprovalApplicable", Boolean(row && row.loaApprovalApplicable));
+      this._renderPaymentRunDetails();
+    },
+
+    onPaymentRunSelect: async function (event) {
+      const selected = event.getParameter("selected");
+      const formModel = this.getView().getModel("form");
+      formModel.setProperty("/details/paymentRun", selected);
+      if (!selected) {
+        formModel.setProperty("/details/paymentRunDetails", "");
+        this._paymentRunSaved = false;
+        this._paymentRunFiles = [];
+        this.getView().getModel("paymentRunFiles").setData({ items: [] });
+        return;
+      }
+      try {
+        await this._loadFlowmateRequestFormCatalog();
+        this.getView().getModel("paymentRun").setData(this._paymentRunContext());
+        const paymentRun = this.getView().getModel("paymentRun");
+        const catalog = this.getView().getModel("catalog");
+        const subtypes = catalog.getProperty("/flowmateProcessSubTypes") || [];
+        catalog.setProperty("/flowmateProcessSubTypesFiltered", subtypes.filter(function (entry) {
+          return entry.processType_code === paymentRun.getProperty("/processType_code");
+        }));
+        this._renderPaymentRunDialogForm();
+        this._paymentRunSaved = false;
+        this.byId("paymentRunDialog").open();
+      } catch (error) {
+        formModel.setProperty("/details/paymentRun", false);
+        this.showError(error);
+      }
+    },
+
+    onPaymentRunDialogSave: function () {
+      const data = this.getView().getModel("paymentRun").getData();
+      const required = ["processType_code", "subProcessType_code", "title", "processorTeam_ID"];
+      const missingOverview = required.find(function (name) {
+        return !String(data[name] === undefined || data[name] === null ? "" : data[name]).trim();
+      });
+      if (missingOverview) {
+        const labels = {
+          processType_code: "Process Type",
+          subProcessType_code: "Sub Process Type",
+          title: "Request Title",
+          processorTeam_ID: "Processor Team"
+        };
+        MessageBox.warning(`${labels[missingOverview]} is required.`);
+        return;
+      }
+      if (!this._paymentRunFiles.length) {
+        MessageBox.warning("Select at least one attachment for the Flowmate Payment Run request.");
+        return;
+      }
+      const missingDetail = (this._paymentRunFieldControls || []).find(function (entry) {
+        if (!entry.definition.required) {
+          return false;
+        }
+        const value = data.details && data.details[entry.definition.name];
+        return value === undefined || value === null || value === "";
+      });
+      const missingGrid = (this._paymentRunRequiredGrids || []).find(function (definition) {
+        const rows = data.details && data.details[definition.name];
+        return !Array.isArray(rows) || rows.length === 0;
+      });
+      if (missingGrid) {
+        MessageBox.warning(`${missingGrid.label} requires at least one entry.`);
+        return;
+      }
+      if (missingDetail) {
+        MessageBox.warning(`${missingDetail.definition.label} is required.`);
+        missingDetail.control.focus();
+        return;
+      }
+      const formModel = this.getView().getModel("form");
+      formModel.setProperty("/details/paymentRun", true);
+      formModel.setProperty("/details/paymentRunDetails", JSON.stringify(data));
+      this._paymentRunSaved = true;
+      this.byId("paymentRunDialog").close();
+    },
+
+    onPaymentRunDialogCancel: function () {
+      if (!this._paymentRunSaved) {
+        this.getView().getModel("form").setProperty("/details/paymentRun", false);
+        this.getView().getModel("form").setProperty("/details/paymentRunDetails", "");
+        this._paymentRunFiles = [];
+        this.getView().getModel("paymentRunFiles").setData({ items: [] });
+      }
+      this.byId("paymentRunDialog").close();
+    },
+
+    onPaymentRunAttachmentsSelected: function (event) {
+      const files = Array.from(event.getParameter("files") || []);
+      const maxBytes = 400 * 1024 * 1024;
+      const oversized = files.find(function (file) { return file.size > maxBytes; });
+      if (oversized) {
+        MessageBox.warning(`The attachment ${oversized.name} exceeds the 400 MB limit.`);
+        event.getSource().clear();
+        return;
+      }
+      this._paymentRunFiles.push(...files);
+      this.getView().getModel("paymentRunFiles").setData({
+        items: this._paymentRunFiles.map(function (file) {
+          return {
+            name: file.name,
+            sizeText: `${(file.size / 1024 / 1024).toFixed(2)} MB`
+          };
+        })
+      });
+      event.getSource().clear();
+    },
+
+    onRemovePaymentRunAttachment: function (event) {
+      const context = event.getParameter("listItem")?.getBindingContext("paymentRunFiles");
+      const path = context && context.getPath();
+      const index = path ? Number(path.split("/").pop()) : -1;
+      if (index < 0) {
+        return;
+      }
+      this._paymentRunFiles.splice(index, 1);
+      this.getView().getModel("paymentRunFiles").setProperty("/items", this._paymentRunFiles.map(function (file) {
+        return {
+          name: file.name,
+          sizeText: `${(file.size / 1024 / 1024).toFixed(2)} MB`
+        };
+      }));
     },
 
     // Renders both row tables for the current selection. The header table only gets
@@ -975,6 +1818,11 @@ sap.ui.define([
         MessageBox.warning("Request type, process variant and title are required.");
         return;
       }
+      if (form.requestTypeCode === "PURCHASE_ORDER" && form.details && form.details.paymentRun
+        && !form.details.paymentRunDetails) {
+        MessageBox.warning("Save the Payment Run details before submitting the purchase order.");
+        return;
+      }
       const missing = (this._fieldControls || []).find(function (entry) {
         if (!this._isFieldVisible(entry.definition)) {
           return false;
@@ -1077,14 +1925,31 @@ sap.ui.define([
         const uploads = (this._selectedFiles || []).map(function (file) {
           return { file: file, category: "SUPPORTING_DOCUMENT" };
         });
+        const paymentRunSelected = Boolean(form.details && form.details.paymentRun);
+        if (paymentRunSelected) {
+          (this._paymentRunFiles || []).forEach(function (file) {
+            uploads.push({ file: file, category: "PAYMENT_RUN" });
+          });
+        }
         Object.keys(this._dynamicFileUploads || {}).forEach(function (name) {
           uploads.push({
             file: this._dynamicFileUploads[name],
             category: name.replace(/([A-Z])/g, "_$1").toUpperCase()
           });
         }.bind(this));
+        let uploadResult = { failedCount: 0 };
         if (uploads.length) {
-          await this._uploadFiles(request.ID, uploads);
+          uploadResult = await this._uploadFiles(request.ID, uploads);
+        }
+        if (paymentRunSelected) {
+          if (uploadResult.failedCount) {
+            throw new Error("The Flowmate request was not created because one or more Payment Run attachments could not be uploaded.");
+          }
+          const flowmateRequest = await this.request("createFlowmatePaymentRun", {
+            method: "POST",
+            body: { requestId: request.ID }
+          });
+          this.showSuccess(`Flowmate request ${flowmateRequest.referenceNumber || ""} created with ${flowmateRequest.attachmentCount || 0} attachment(s)`);
         }
         this.navTo("requestDetail", {
           requestId: request.ID
@@ -1150,6 +2015,7 @@ ${reasons.join("\n")}`);
       } else {
         this.showSuccess("Supporting documents uploaded");
       }
+      return { failedCount: failed.length };
     },
 
     onCancel: function () {

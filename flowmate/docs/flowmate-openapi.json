@@ -43267,6 +43267,56 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/createRequestWithAttachments": {
+      "post": {
+        "summary": "Invokes action createRequestWithAttachments",
+        "tags": [
+          "Flowmate — Process Requests"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.ProcessRequests"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "attachments": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/createUserWithTeams": {
       "post": {
         "summary": "Invokes action createUserWithTeams",
@@ -58023,6 +58073,8 @@
                   "materialImported",
                   "sesRequired",
                   "paymentRequestRequired",
+                  "paymentRun",
+                  "paymentRunDetails",
                   "poHeaderText",
                   "campaignLocationCode",
                   "procurementDescription",
@@ -66231,6 +66283,10 @@
                   "sesRequired desc",
                   "paymentRequestRequired",
                   "paymentRequestRequired desc",
+                  "paymentRun",
+                  "paymentRun desc",
+                  "paymentRunDetails",
+                  "paymentRunDetails desc",
                   "poHeaderText",
                   "poHeaderText desc",
                   "campaignLocationCode",
@@ -66326,6 +66382,8 @@
                   "materialImported",
                   "sesRequired",
                   "paymentRequestRequired",
+                  "paymentRun",
+                  "paymentRunDetails",
                   "poHeaderText",
                   "campaignLocationCode",
                   "procurementDescription",
@@ -66501,6 +66559,8 @@
                   "materialImported",
                   "sesRequired",
                   "paymentRequestRequired",
+                  "paymentRun",
+                  "paymentRunDetails",
                   "poHeaderText",
                   "campaignLocationCode",
                   "procurementDescription",
@@ -67658,6 +67718,8 @@
                   "materialImported",
                   "sesRequired",
                   "paymentRequestRequired",
+                  "paymentRun",
+                  "paymentRunDetails",
                   "poHeaderText",
                   "campaignLocationCode",
                   "procurementDescription",
@@ -70057,6 +70119,8 @@
                   "materialImported",
                   "sesRequired",
                   "paymentRequestRequired",
+                  "paymentRun",
+                  "paymentRunDetails",
                   "poHeaderText",
                   "campaignLocationCode",
                   "procurementDescription",
@@ -74793,6 +74857,8 @@
                   "materialImported",
                   "sesRequired",
                   "paymentRequestRequired",
+                  "paymentRun",
+                  "paymentRunDetails",
                   "poHeaderText",
                   "campaignLocationCode",
                   "procurementDescription",
@@ -83340,6 +83406,54 @@
         "x-cap-service": "FlowmateCAService"
       }
     },
+    "/odata/v4/flowmate-ca/createFlowmatePaymentRun": {
+      "post": {
+        "summary": "Invokes action createFlowmatePaymentRun",
+        "tags": [
+          "Flowmate CA — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateCAService.return_FlowmateCAService_createFlowmatePaymentRun"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
     "/odata/v4/flowmate-ca/createRequest": {
       "post": {
         "summary": "Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and input.requesterUser_ID identifying an active shared user. No client-to-user environment mapping is required. Human users use their active signed-in identity. Workflow initialization runs during creation.",
@@ -83548,6 +83662,38 @@
                     }
                   ],
                   "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
+    "/odata/v4/flowmate-ca/getFlowmateRequestFormCatalog": {
+      "get": {
+        "summary": "Invokes function getFlowmateRequestFormCatalog",
+        "tags": [
+          "Flowmate CA — Service Operations"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
                 }
               }
             }
@@ -135500,6 +135646,15 @@
             "nullable": true,
             "default": false
           },
+          "paymentRun": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "paymentRunDetails": {
+            "type": "string",
+            "nullable": true
+          },
           "poHeaderText": {
             "type": "string",
             "nullable": true
@@ -135802,6 +135957,15 @@
             "nullable": true,
             "default": false
           },
+          "paymentRun": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "paymentRunDetails": {
+            "type": "string",
+            "nullable": true
+          },
           "poHeaderText": {
             "type": "string",
             "nullable": true
@@ -136079,6 +136243,15 @@
             "type": "boolean",
             "nullable": true,
             "default": false
+          },
+          "paymentRun": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "paymentRunDetails": {
+            "type": "string",
+            "nullable": true
           },
           "poHeaderText": {
             "type": "string",
@@ -141755,6 +141928,32 @@
           },
           "referenceNumbers": {
             "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateCAService.return_FlowmateCAService_createFlowmatePaymentRun": {
+        "title": "return_FlowmateCAService_createFlowmatePaymentRun",
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
+            "nullable": true
+          },
+          "referenceNumber": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "attachmentCount": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         }

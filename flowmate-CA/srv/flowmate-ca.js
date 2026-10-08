@@ -53,6 +53,49 @@ const CHANGE_ITEM_TYPES = {
   materialAdditions: "MATERIAL_ADDITION"
 };
 
+// CAP can expose LargeBinary values as a Node.js Readable stream (especially
+// with SQLite/HANA attachment storage).  Normalise every supported shape to a
+// Buffer before sending the attachment to Flowmate as base64.
+const readAttachmentContent = async (content) => {
+  if (content === null || content === undefined) {
+    return Buffer.alloc(0);
+  }
+  if (Buffer.isBuffer(content)) {
+    return content;
+  }
+  if (content instanceof Uint8Array) {
+    return Buffer.from(content);
+  }
+  if (content instanceof ArrayBuffer) {
+    return Buffer.from(content);
+  }
+  if (typeof content === "string") {
+    return Buffer.from(content);
+  }
+  if (typeof content[Symbol.asyncIterator] === "function") {
+    const chunks = [];
+    for await (const chunk of content) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
+  }
+  if (typeof content.getReader === "function") {
+    const reader = content.getReader();
+    const chunks = [];
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(Buffer.from(value));
+      }
+    } finally {
+      reader.releaseLock?.();
+    }
+    return Buffer.concat(chunks);
+  }
+  return Buffer.from(content);
+};
+
 module.exports = class FlowmateCAService extends cds.ApplicationService {
   async init() {
     this.db = cds.entities("flowmate.ca.db");
@@ -71,9 +114,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.before("READ", "MyTeamTasks", this._filterMyTeamTasks);
 
     this.on("getCurrentUser", this._getCurrentUser);
+    this.on("getFlowmateRequestFormCatalog", this._getFlowmateRequestFormCatalog);
     this.on("getDashboardCounts", this._getDashboardCounts);
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
+    this.on("createFlowmatePaymentRun", this._createFlowmatePaymentRun);
     this.on("createBulkRequests", this._createBulkRequests);
     this.on("submitRequest", this._submitRequest);
     this.on("addTask", this._addTask);
@@ -113,6 +158,191 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         checkedAt,
         message: `Connection failed: ${error.message}`.slice(0, 500)
       };
+    }
+  };
+
+  _getFlowmateRequestFormCatalog = async (req) => {
+    const catalogEntities = [
+      ["processTypes", "ProcessTypes"],
+      ["processSubTypes", "ProcessSubTypes"],
+      ["paymentCategories", "PaymentCategories"],
+      ["ftkEntities", "FtkEntities"],
+      ["currencies", "Currencies"],
+      ["categories", "Categories"],
+      ["paymentSubCategories", "PaymentSubCategories"],
+      ["paymentMethods", "PaymentMethod"],
+      ["typeOfPayments", "TypeOfPayment"],
+      ["requestDivisions", "RequestDivision"],
+      ["guaranteeTypes", "GuaranteeTypes"],
+      ["priorities", "Priorities"],
+      ["customers", "Customers"],
+      ["vendors", "Vendors"],
+      ["teams", "Teams"]
+    ];
+    try {
+      const result = {};
+      await Promise.all(catalogEntities.map(async ([key, entityName]) => {
+        const entity = this.flowmate.entities[entityName];
+        if (!entity) {
+          result[key] = [];
+          return;
+        }
+        const query = SELECT.from(entity);
+        if (entityName !== "Customers") {
+          query.where({ isActive: true });
+        } else {
+          query.where({ isActive: true });
+        }
+        result[key] = await this.flowmate.run(query);
+      }));
+      return JSON.stringify(result);
+    } catch (error) {
+      cds.log("peer-integration").warn("Flowmate request-form catalog could not be loaded", error.message);
+      return req.reject(502, "Flowmate request-form values are temporarily unavailable");
+    }
+  };
+
+  _createFlowmatePaymentRun = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req);
+    const requestId = req.data.requestId;
+    const request = await tx.run(
+      SELECT.one.from(this.db.CARequests).where({ ID: requestId })
+    );
+    if (!request) {
+      return req.reject(404, "Commerce Automation request was not found");
+    }
+    if (request.requestType_code !== "PURCHASE_ORDER") {
+      return req.reject(400, "Flowmate Payment Run integration is only available for purchase orders");
+    }
+    if (request.requester_ID !== user.ID && !req.user.is("CAAdmin")) {
+      return req.reject(403, "Only the request creator or an administrator can create the Flowmate Payment Run request");
+    }
+    if (String(request.externalStatus || "").startsWith("FLOWMATE_PAYMENT_RUN_CREATED") && request.externalObjectId) {
+      const [, existingReference] = String(request.externalStatus).split("|");
+      return {
+        created: true,
+        requestId: request.externalObjectId,
+        referenceNumber: existingReference || "already created",
+        attachmentCount: 0
+      };
+    }
+
+    const purchaseOrder = await tx.run(
+      SELECT.one.from(this.db.PurchaseOrderDetails).where({ request_ID: request.ID })
+    );
+    if (!purchaseOrder?.paymentRun) {
+      return req.reject(400, "Payment Run was not selected for this purchase order");
+    }
+
+    let paymentRunDetails;
+    try {
+      paymentRunDetails = typeof purchaseOrder.paymentRunDetails === "string"
+        ? JSON.parse(purchaseOrder.paymentRunDetails)
+        : purchaseOrder.paymentRunDetails;
+    } catch (_error) {
+      return req.reject(400, "Payment Run details contain invalid JSON");
+    }
+    if (!paymentRunDetails || typeof paymentRunDetails !== "object") {
+      return req.reject(400, "Payment Run details are missing");
+    }
+
+    const caAttachments = await tx.run(
+      SELECT.from(this.db.CAAttachments)
+        .columns("ID", "filename", "mimeType", "content")
+        .where({ request_ID: request.ID, category: "PAYMENT_RUN" })
+    );
+    if (!caAttachments.length) {
+      return req.reject(400, "Select at least one Payment Run attachment before creating the Flowmate request");
+    }
+
+    const dynamicDetails = paymentRunDetails.details && typeof paymentRunDetails.details === "object"
+      ? paymentRunDetails.details
+      : {};
+    const normalizedDetails = { ...dynamicDetails };
+    for (const field of [
+      "invoices",
+      "travelExpenses",
+      "directForeignTravelEntries",
+      "glBreakups",
+      "merchantEntityValues",
+      "settlementEntries"
+    ]) {
+      if (typeof normalizedDetails[field] !== "string") {
+        continue;
+      }
+      try {
+        normalizedDetails[field] = JSON.parse(normalizedDetails[field]);
+      } catch (_error) {
+        return req.reject(400, `Payment Run field ${field} contains invalid JSON`);
+      }
+      if (!Array.isArray(normalizedDetails[field])) {
+        return req.reject(400, `Payment Run field ${field} must contain a JSON array`);
+      }
+    }
+    const flowmateInput = {
+      processType_code: paymentRunDetails.processType_code,
+      subProcessType_code: paymentRunDetails.subProcessType_code,
+      title: String(paymentRunDetails.title || request.title || "").trim(),
+      description: paymentRunDetails.description || request.description || null,
+      requesterUser_ID: request.requester_ID,
+      processorTeam_ID: paymentRunDetails.processorTeam_ID || request.ownerTeam_ID || null,
+      processorTeamName: paymentRunDetails.processorTeamName || request.ownerTeamName || null,
+      department: paymentRunDetails.department || null,
+      amount: paymentRunDetails.amount === "" || paymentRunDetails.amount === null || paymentRunDetails.amount === undefined
+        ? null
+        : Number(paymentRunDetails.amount),
+      role: paymentRunDetails.role || null,
+      priorityConfig_code: paymentRunDetails.priorityConfig_code || "MEDIUM",
+      ...normalizedDetails
+    };
+    const encodedAttachments = await Promise.all(caAttachments.map(async (attachment) => ({
+      filename: attachment.filename,
+      mimeType: attachment.mimeType || "application/octet-stream",
+      contentBase64: (await readAttachmentContent(attachment.content)).toString("base64")
+    })));
+
+    if (!flowmateInput.processType_code || !flowmateInput.subProcessType_code || !flowmateInput.title) {
+      return req.reject(400, "Payment Run process type, subprocess type, and title are required");
+    }
+    if (!flowmateInput.processorTeam_ID) {
+      return req.reject(400, "Select a Flowmate processor team for the Payment Run request");
+    }
+    if (encodedAttachments.some((attachment) => !attachment.contentBase64)) {
+      return req.reject(400, "One or more Payment Run attachments have no content");
+    }
+
+    try {
+      const result = await this.flowmate.send({
+        event: "createRequestWithAttachments",
+        data: {
+          input: JSON.stringify(flowmateInput),
+          attachments: JSON.stringify(encodedAttachments)
+        }
+      });
+      await tx.run(UPDATE(this.db.CARequests).set({
+        externalObjectId: result?.ID || null,
+        externalStatus: `FLOWMATE_PAYMENT_RUN_CREATED|${result?.referenceNumber || ""}`
+      }).where({ ID: request.ID }));
+      await this._writeHistory(
+        tx,
+        request.ID,
+        request.currentStep || 0,
+        "FLOWMATE_PAYMENT_RUN_CREATED",
+        user,
+        request.status_code,
+        request.status_code,
+        result?.referenceNumber || "Flowmate Payment Run request created"
+      );
+      return {
+        created: true,
+        requestId: result?.ID,
+        referenceNumber: result?.referenceNumber,
+        attachmentCount: encodedAttachments.length
+      };
+    } catch (error) {
+      cds.log("peer-integration").error("Flowmate Payment Run creation failed", error);
+      return req.reject(502, `Flowmate request could not be created: ${error.message}`);
     }
   };
 
@@ -274,6 +504,30 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const requestId = cds.utils.uuid();
     const referenceNumber = this._referenceNumber(requestType.code);
     const details = this._parseDetails(req, input.details);
+    if (details.paymentRun && requestType.code !== "PURCHASE_ORDER") {
+      return req.reject(400, "Payment Run is only supported for purchase order requests");
+    }
+    if (details.paymentRun) {
+      if (!details.paymentRunDetails) {
+        return req.reject(400, "Payment Run details are required when Payment Run is selected");
+      }
+      let paymentRunDetails;
+      try {
+        paymentRunDetails = typeof details.paymentRunDetails === "string"
+          ? JSON.parse(details.paymentRunDetails)
+          : details.paymentRunDetails;
+      } catch (_error) {
+        return req.reject(400, "Payment Run details contain invalid JSON");
+      }
+      if (!paymentRunDetails || typeof paymentRunDetails !== "object") {
+        return req.reject(400, "Payment Run details must be a valid object");
+      }
+      for (const field of ["processTypeName", "subProcessTypeName", "title"]) {
+        if (!String(paymentRunDetails[field] || "").trim()) {
+          return req.reject(400, `Payment Run ${field} is required`);
+        }
+      }
+    }
     if (integration) assertTechnicalDetails(req, details);
     await this._assertNoDuplicateMaterialDescription(req, requestType.code, details);
 

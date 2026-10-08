@@ -590,6 +590,8 @@ entity PurchaseOrderDetails : cuid, managed {
   materialImported        : Boolean default false;
   sesRequired             : Boolean default false;
   paymentRequestRequired  : Boolean default false;
+  paymentRun              : Boolean default false;
+  paymentRunDetails       : LargeString;
   poHeaderText            : LargeString;
   campaignLocationCode    : String(100);
   procurementDescription  : LargeString;

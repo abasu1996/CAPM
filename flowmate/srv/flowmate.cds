@@ -321,6 +321,11 @@ service FlowmateService {
         teamIds: many UUID,
         isActive: Boolean
     ) returns Users;
+    @requires: 'RequestProvisioning'
+    action createRequestWithAttachments(
+        input       : LargeString,
+        attachments : LargeString
+    ) returns ProcessRequests;
     action approveTask(taskId: UUID, remarks: String) returns Boolean;
     action analyzeGuidedTaskCompletion(taskId: UUID) returns {
         requiresDecision   : Boolean;
