@@ -137,12 +137,19 @@ entity WorkingCalendarHolidays : cuid, managed {
 entity LoaApproval : cuid, managed {
     ruleCode             : String(50);
     description          : String(255);
+    // Optional scope. Empty means the rule is a global fallback for all sub process types.
+    subProcessType       : Association to ProcessSubTypes;
     minimumAmount        : Decimal(15, 2);
     maximumAmount        : Decimal(15, 2);
     minimumInclusive     : Boolean default true;
     maximumInclusive     : Boolean default true;
     approvalMode         : String(10) default 'SINGLE'; // SINGLE or ANY
     approverRoleCodes    : String(500);
+    // When true, every generated approval task must be approved. Otherwise the first decision wins.
+    requireAllApprovers  : Boolean default false;
+    // When true, approverUserIds is used instead of approverRoleCodes.
+    directUserAssignment : Boolean default false;
+    approverUserIds      : String(2000);
     conditionCode        : String(50);
     conditionDescription : String(1000);
     priority             : Integer default 0;
@@ -363,6 +370,10 @@ entity ProcessRequests : cuid, managed {
     loaStepNo : Integer;
     loaBeforeProcessing : Boolean;
     loaApprovalState : String(12);
+    loaRequiresAll : Boolean default false;
+    loaApproverSource : String(10);
+    loaApproverUserIds : String(2000);
+    loaApprovalRuleCode : String(50);
     status      : Association to ProcessStatus;
     priority    : String(20);
     currentStep : Integer;

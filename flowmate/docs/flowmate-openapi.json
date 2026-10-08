@@ -288,7 +288,13 @@
       "name": "Flowmate CA — My Team Tasks"
     },
     {
+      "name": "Flowmate CA — Outline Contract Change Items"
+    },
+    {
       "name": "Flowmate CA — Outline Contract Details"
+    },
+    {
+      "name": "Flowmate CA — Outline Contract Headers"
     },
     {
       "name": "Flowmate CA — Outline Contract Items"
@@ -3477,6 +3483,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -5725,6 +5735,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -6914,6 +6928,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -7148,6 +7166,8 @@
                   "ruleCode desc",
                   "description",
                   "description desc",
+                  "subProcessType_code",
+                  "subProcessType_code desc",
                   "minimumAmount",
                   "minimumAmount desc",
                   "maximumAmount",
@@ -7160,6 +7180,12 @@
                   "approvalMode desc",
                   "approverRoleCodes",
                   "approverRoleCodes desc",
+                  "requireAllApprovers",
+                  "requireAllApprovers desc",
+                  "directUserAssignment",
+                  "directUserAssignment desc",
+                  "approverUserIds",
+                  "approverUserIds desc",
                   "conditionCode",
                   "conditionCode desc",
                   "conditionDescription",
@@ -7198,12 +7224,16 @@
                   "modifiedBy",
                   "ruleCode",
                   "description",
+                  "subProcessType_code",
                   "minimumAmount",
                   "maximumAmount",
                   "minimumInclusive",
                   "maximumInclusive",
                   "approvalMode",
                   "approverRoleCodes",
+                  "requireAllApprovers",
+                  "directUserAssignment",
+                  "approverUserIds",
                   "conditionCode",
                   "conditionDescription",
                   "priority",
@@ -7228,6 +7258,7 @@
                 "type": "string",
                 "enum": [
                   "*",
+                  "subProcessType",
                   "operator",
                   "role"
                 ]
@@ -7338,12 +7369,16 @@
                   "modifiedBy",
                   "ruleCode",
                   "description",
+                  "subProcessType_code",
                   "minimumAmount",
                   "maximumAmount",
                   "minimumInclusive",
                   "maximumInclusive",
                   "approvalMode",
                   "approverRoleCodes",
+                  "requireAllApprovers",
+                  "directUserAssignment",
+                  "approverUserIds",
                   "conditionCode",
                   "conditionDescription",
                   "priority",
@@ -7368,6 +7403,7 @@
                 "type": "string",
                 "enum": [
                   "*",
+                  "subProcessType",
                   "operator",
                   "role"
                 ]
@@ -7563,6 +7599,92 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FlowmateService.Roles"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/LoaApproval({ID})/subProcessType": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves sub process type of a loa approval.",
+        "tags": [
+          "Flowmate — Loa Approval",
+          "Flowmate — Process Sub Types"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "descr",
+                  "code",
+                  "isActive",
+                  "processType_code",
+                  "workingCalendar_ID",
+                  "loaApprovalApplicable",
+                  "processOwner",
+                  "activityDescription",
+                  "sapTCode"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "processType",
+                  "workingCalendar",
+                  "texts",
+                  "localized"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved sub process type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateService.ProcessSubTypes"
                 }
               }
             }
@@ -8124,6 +8246,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -8680,6 +8806,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -9502,6 +9632,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -10324,6 +10458,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -14260,6 +14398,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -14907,6 +15049,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -16168,6 +16314,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -16753,6 +16903,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -17334,6 +17488,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -17768,6 +17926,14 @@
                   "loaBeforeProcessing desc",
                   "loaApprovalState",
                   "loaApprovalState desc",
+                  "loaRequiresAll",
+                  "loaRequiresAll desc",
+                  "loaApproverSource",
+                  "loaApproverSource desc",
+                  "loaApproverUserIds",
+                  "loaApproverUserIds desc",
+                  "loaApprovalRuleCode",
+                  "loaApprovalRuleCode desc",
                   "status_code",
                   "status_code desc",
                   "priority",
@@ -17983,6 +18149,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -18306,6 +18476,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -20951,6 +21125,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -22000,6 +22178,14 @@
                   "loaBeforeProcessing desc",
                   "loaApprovalState",
                   "loaApprovalState desc",
+                  "loaRequiresAll",
+                  "loaRequiresAll desc",
+                  "loaApproverSource",
+                  "loaApproverSource desc",
+                  "loaApproverUserIds",
+                  "loaApproverUserIds desc",
+                  "loaApprovalRuleCode",
+                  "loaApprovalRuleCode desc",
                   "status_code",
                   "status_code desc",
                   "priority",
@@ -22215,6 +22401,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -25990,6 +26180,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -27414,6 +27608,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -30983,6 +31181,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -31261,6 +31463,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -32010,7 +32216,9 @@
                   "email",
                   "email desc",
                   "isActive",
-                  "isActive desc"
+                  "isActive desc",
+                  "isPrimary",
+                  "isPrimary desc"
                 ]
               }
             }
@@ -32032,7 +32240,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -32158,7 +32367,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -32745,6 +32955,14 @@
                   "loaBeforeProcessing desc",
                   "loaApprovalState",
                   "loaApprovalState desc",
+                  "loaRequiresAll",
+                  "loaRequiresAll desc",
+                  "loaApproverSource",
+                  "loaApproverSource desc",
+                  "loaApproverUserIds",
+                  "loaApproverUserIds desc",
+                  "loaApprovalRuleCode",
+                  "loaApprovalRuleCode desc",
                   "status_code",
                   "status_code desc",
                   "priority",
@@ -32960,6 +33178,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -33249,6 +33471,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -35851,6 +36077,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -36900,6 +37130,14 @@
                   "loaBeforeProcessing desc",
                   "loaApprovalState",
                   "loaApprovalState desc",
+                  "loaRequiresAll",
+                  "loaRequiresAll desc",
+                  "loaApproverSource",
+                  "loaApproverSource desc",
+                  "loaApproverUserIds",
+                  "loaApproverUserIds desc",
+                  "loaApprovalRuleCode",
+                  "loaApprovalRuleCode desc",
                   "status_code",
                   "status_code desc",
                   "priority",
@@ -37115,6 +37353,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -38380,7 +38622,9 @@
                   "email",
                   "email desc",
                   "isActive",
-                  "isActive desc"
+                  "isActive desc",
+                  "isPrimary",
+                  "isPrimary desc"
                 ]
               }
             }
@@ -38402,7 +38646,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -38981,6 +39226,10 @@
                   "loaStepNo",
                   "loaBeforeProcessing",
                   "loaApprovalState",
+                  "loaRequiresAll",
+                  "loaApproverSource",
+                  "loaApproverUserIds",
+                  "loaApprovalRuleCode",
                   "status_code",
                   "priority",
                   "currentStep",
@@ -42597,6 +42846,61 @@
         "x-cap-service": "FlowmateService"
       }
     },
+    "/odata/v4/flowmate/changeRequestTeamAndRelease": {
+      "post": {
+        "summary": "Invokes action changeRequestTeamAndRelease",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "boolean",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef",
+                    "nullable": true
+                  },
+                  "teamId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
     "/odata/v4/flowmate/civilRR": {
       "get": {
         "summary": "Retrieves a list of civil RR.",
@@ -43396,6 +43700,58 @@
           },
           "4XX": {
             "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/getAribaBusinessPartners": {
+      "post": {
+        "summary": "Invokes action getAribaBusinessPartners",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of AribaBusinessPartnerPreview",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/FlowmateService.AribaBusinessPartnerPreview"
+                          }
+                        ],
+                        "nullable": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
           }
         },
         "x-flowmate-project": "flowmate",
@@ -54098,6 +54454,8 @@
                   "materialType desc",
                   "deliveryType",
                   "deliveryType desc",
+                  "poNumber",
+                  "poNumber desc",
                   "warehouse_code",
                   "warehouse_code desc",
                   "allocationOwner_ID",
@@ -54133,6 +54491,7 @@
                   "requestType",
                   "materialType",
                   "deliveryType",
+                  "poNumber",
                   "warehouse_code",
                   "allocationOwner_ID",
                   "remarks",
@@ -54270,6 +54629,7 @@
                   "requestType",
                   "materialType",
                   "deliveryType",
+                  "poNumber",
                   "warehouse_code",
                   "allocationOwner_ID",
                   "remarks",
@@ -55228,6 +55588,7 @@
                   "requestType",
                   "materialType",
                   "deliveryType",
+                  "poNumber",
                   "warehouse_code",
                   "allocationOwner_ID",
                   "remarks",
@@ -57004,6 +57365,7 @@
                   "requestType",
                   "materialType",
                   "deliveryType",
+                  "poNumber",
                   "warehouse_code",
                   "allocationOwner_ID",
                   "remarks",
@@ -57110,7 +57472,30 @@
                   "sapPenalties",
                   "sapTermsOfDelivery",
                   "sapGuarantees",
-                  "sapOtherCommercialTerms"
+                  "sapOtherCommercialTerms",
+                  "headerTaxCode",
+                  "headerServiceCode",
+                  "headerMaterialCode",
+                  "targetValue",
+                  "targetDate",
+                  "headerPaymentTerms",
+                  "contractRevoked",
+                  "scmAssignUser",
+                  "headerChangesAttachment",
+                  "headerComment",
+                  "amendmentContractNumber",
+                  "priceChange",
+                  "serviceAddition",
+                  "materialAddition",
+                  "ceilingValueChange",
+                  "ceilingValue",
+                  "othersChange",
+                  "otherDetails",
+                  "dateExtension",
+                  "extendedDate",
+                  "conditionChange",
+                  "conditionChangeDetails",
+                  "amendmentComments"
                 ]
               }
             }
@@ -57129,7 +57514,9 @@
                   "*",
                   "request",
                   "category",
-                  "items"
+                  "items",
+                  "headers",
+                  "changeItems"
                 ]
               }
             }
@@ -60408,6 +60795,432 @@
         "x-cap-service": "FlowmateCAService"
       }
     },
+    "/odata/v4/flowmate-ca/OutlineContractChangeItems": {
+      "get": {
+        "summary": "Retrieves a list of outline contract change items.",
+        "tags": [
+          "Flowmate CA — Outline Contract Change Items"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "details_ID",
+                  "details_ID desc",
+                  "changeType",
+                  "changeType desc",
+                  "itemNo",
+                  "itemNo desc",
+                  "code",
+                  "code desc",
+                  "price",
+                  "price desc",
+                  "quantity",
+                  "quantity desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "details_ID",
+                  "changeType",
+                  "itemNo",
+                  "code",
+                  "price",
+                  "quantity"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "details"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved outline contract change items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of OutlineContractChangeItems",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      },
+      "post": {
+        "summary": "Creates a single outline contract change item.",
+        "tags": [
+          "Flowmate CA — Outline Contract Change Items"
+        ],
+        "requestBody": {
+          "description": "New outline contract change item",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created outline contract change item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
+    "/odata/v4/flowmate-ca/OutlineContractChangeItems({ID})": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a single outline contract change item.",
+        "tags": [
+          "Flowmate CA — Outline Contract Change Items"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "details_ID",
+                  "changeType",
+                  "itemNo",
+                  "code",
+                  "price",
+                  "quantity"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "details"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved outline contract change item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      },
+      "patch": {
+        "summary": "Changes a single outline contract change item.",
+        "tags": [
+          "Flowmate CA — Outline Contract Change Items"
+        ],
+        "requestBody": {
+          "description": "New property values",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems-update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      },
+      "delete": {
+        "summary": "Deletes a single outline contract change item.",
+        "tags": [
+          "Flowmate CA — Outline Contract Change Items"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
+    "/odata/v4/flowmate-ca/OutlineContractChangeItems({ID})/details": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves details of a outline contract change item.",
+        "tags": [
+          "Flowmate CA — Outline Contract Change Items",
+          "Flowmate CA — Outline Contract Details"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "request_ID",
+                  "transactionType",
+                  "selectionMode",
+                  "contractNumber",
+                  "category_code",
+                  "approvalReference",
+                  "remarks",
+                  "approvalDocumentsAttachment",
+                  "otherSupportingDocumentsAttachment",
+                  "otherComments",
+                  "contractCount",
+                  "scmSpocUserId",
+                  "totalTargetValue",
+                  "sapVendorCode",
+                  "sapSourcingEventNo",
+                  "sapPoHeaderText",
+                  "sapPaymentTerms",
+                  "sapWarranty",
+                  "sapPenalties",
+                  "sapTermsOfDelivery",
+                  "sapGuarantees",
+                  "sapOtherCommercialTerms",
+                  "headerTaxCode",
+                  "headerServiceCode",
+                  "headerMaterialCode",
+                  "targetValue",
+                  "targetDate",
+                  "headerPaymentTerms",
+                  "contractRevoked",
+                  "scmAssignUser",
+                  "headerChangesAttachment",
+                  "headerComment",
+                  "amendmentContractNumber",
+                  "priceChange",
+                  "serviceAddition",
+                  "materialAddition",
+                  "ceilingValueChange",
+                  "ceilingValue",
+                  "othersChange",
+                  "otherDetails",
+                  "dateExtension",
+                  "extendedDate",
+                  "conditionChange",
+                  "conditionChangeDetails",
+                  "amendmentComments"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "request",
+                  "category",
+                  "items",
+                  "headers",
+                  "changeItems"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateCAService.OutlineContractDetails"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
     "/odata/v4/flowmate-ca/OutlineContractDetails": {
       "get": {
         "summary": "Retrieves a list of outline contract details.",
@@ -60499,7 +61312,53 @@
                   "sapGuarantees",
                   "sapGuarantees desc",
                   "sapOtherCommercialTerms",
-                  "sapOtherCommercialTerms desc"
+                  "sapOtherCommercialTerms desc",
+                  "headerTaxCode",
+                  "headerTaxCode desc",
+                  "headerServiceCode",
+                  "headerServiceCode desc",
+                  "headerMaterialCode",
+                  "headerMaterialCode desc",
+                  "targetValue",
+                  "targetValue desc",
+                  "targetDate",
+                  "targetDate desc",
+                  "headerPaymentTerms",
+                  "headerPaymentTerms desc",
+                  "contractRevoked",
+                  "contractRevoked desc",
+                  "scmAssignUser",
+                  "scmAssignUser desc",
+                  "headerChangesAttachment",
+                  "headerChangesAttachment desc",
+                  "headerComment",
+                  "headerComment desc",
+                  "amendmentContractNumber",
+                  "amendmentContractNumber desc",
+                  "priceChange",
+                  "priceChange desc",
+                  "serviceAddition",
+                  "serviceAddition desc",
+                  "materialAddition",
+                  "materialAddition desc",
+                  "ceilingValueChange",
+                  "ceilingValueChange desc",
+                  "ceilingValue",
+                  "ceilingValue desc",
+                  "othersChange",
+                  "othersChange desc",
+                  "otherDetails",
+                  "otherDetails desc",
+                  "dateExtension",
+                  "dateExtension desc",
+                  "extendedDate",
+                  "extendedDate desc",
+                  "conditionChange",
+                  "conditionChange desc",
+                  "conditionChangeDetails",
+                  "conditionChangeDetails desc",
+                  "amendmentComments",
+                  "amendmentComments desc"
                 ]
               }
             }
@@ -60541,7 +61400,30 @@
                   "sapPenalties",
                   "sapTermsOfDelivery",
                   "sapGuarantees",
-                  "sapOtherCommercialTerms"
+                  "sapOtherCommercialTerms",
+                  "headerTaxCode",
+                  "headerServiceCode",
+                  "headerMaterialCode",
+                  "targetValue",
+                  "targetDate",
+                  "headerPaymentTerms",
+                  "contractRevoked",
+                  "scmAssignUser",
+                  "headerChangesAttachment",
+                  "headerComment",
+                  "amendmentContractNumber",
+                  "priceChange",
+                  "serviceAddition",
+                  "materialAddition",
+                  "ceilingValueChange",
+                  "ceilingValue",
+                  "othersChange",
+                  "otherDetails",
+                  "dateExtension",
+                  "extendedDate",
+                  "conditionChange",
+                  "conditionChangeDetails",
+                  "amendmentComments"
                 ]
               }
             }
@@ -60560,7 +61442,9 @@
                   "*",
                   "request",
                   "category",
-                  "items"
+                  "items",
+                  "headers",
+                  "changeItems"
                 ]
               }
             }
@@ -60688,7 +61572,30 @@
                   "sapPenalties",
                   "sapTermsOfDelivery",
                   "sapGuarantees",
-                  "sapOtherCommercialTerms"
+                  "sapOtherCommercialTerms",
+                  "headerTaxCode",
+                  "headerServiceCode",
+                  "headerMaterialCode",
+                  "targetValue",
+                  "targetDate",
+                  "headerPaymentTerms",
+                  "contractRevoked",
+                  "scmAssignUser",
+                  "headerChangesAttachment",
+                  "headerComment",
+                  "amendmentContractNumber",
+                  "priceChange",
+                  "serviceAddition",
+                  "materialAddition",
+                  "ceilingValueChange",
+                  "ceilingValue",
+                  "othersChange",
+                  "otherDetails",
+                  "dateExtension",
+                  "extendedDate",
+                  "conditionChange",
+                  "conditionChangeDetails",
+                  "amendmentComments"
                 ]
               }
             }
@@ -60707,7 +61614,9 @@
                   "*",
                   "request",
                   "category",
-                  "items"
+                  "items",
+                  "headers",
+                  "changeItems"
                 ]
               }
             }
@@ -60836,6 +61745,397 @@
         "x-cap-service": "FlowmateCAService"
       }
     },
+    "/odata/v4/flowmate-ca/OutlineContractDetails({ID})/changeItems": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a list of change items of a outline contract detail.",
+        "tags": [
+          "Flowmate CA — Outline Contract Details",
+          "Flowmate CA — Outline Contract Change Items"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "details_ID",
+                  "details_ID desc",
+                  "changeType",
+                  "changeType desc",
+                  "itemNo",
+                  "itemNo desc",
+                  "code",
+                  "code desc",
+                  "price",
+                  "price desc",
+                  "quantity",
+                  "quantity desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "details_ID",
+                  "changeType",
+                  "itemNo",
+                  "code",
+                  "price",
+                  "quantity"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "details"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved change items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of OutlineContractChangeItems",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      },
+      "post": {
+        "summary": "Creates a single change item of a outline contract detail.",
+        "tags": [
+          "Flowmate CA — Outline Contract Details",
+          "Flowmate CA — Outline Contract Change Items"
+        ],
+        "requestBody": {
+          "description": "New change item",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created change item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
+    "/odata/v4/flowmate-ca/OutlineContractDetails({ID})/headers": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a list of headers of a outline contract detail.",
+        "tags": [
+          "Flowmate CA — Outline Contract Details",
+          "Flowmate CA — Outline Contract Headers"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "details_ID",
+                  "details_ID desc",
+                  "itemNo",
+                  "itemNo desc",
+                  "vendorCode",
+                  "vendorCode desc",
+                  "coupaSourcingEventNo",
+                  "coupaSourcingEventNo desc",
+                  "poHeaderText",
+                  "poHeaderText desc",
+                  "paymentTerms",
+                  "paymentTerms desc",
+                  "warranty",
+                  "warranty desc",
+                  "penalties",
+                  "penalties desc",
+                  "termsOfDelivery",
+                  "termsOfDelivery desc",
+                  "guarantees",
+                  "guarantees desc",
+                  "otherCommercialTerms",
+                  "otherCommercialTerms desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "details_ID",
+                  "itemNo",
+                  "vendorCode",
+                  "coupaSourcingEventNo",
+                  "poHeaderText",
+                  "paymentTerms",
+                  "warranty",
+                  "penalties",
+                  "termsOfDelivery",
+                  "guarantees",
+                  "otherCommercialTerms"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "details"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved headers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of OutlineContractHeaders",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      },
+      "post": {
+        "summary": "Creates a single header of a outline contract detail.",
+        "tags": [
+          "Flowmate CA — Outline Contract Details",
+          "Flowmate CA — Outline Contract Headers"
+        ],
+        "requestBody": {
+          "description": "New header",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
     "/odata/v4/flowmate-ca/OutlineContractDetails({ID})/items": {
       "parameters": [
         {
@@ -60902,6 +62202,8 @@
                   "details_ID desc",
                   "itemNo",
                   "itemNo desc",
+                  "contractCount",
+                  "contractCount desc",
                   "contractType",
                   "contractType desc",
                   "lineItem",
@@ -60926,6 +62228,8 @@
                   "incoterms desc",
                   "incotermsLocation",
                   "incotermsLocation desc",
+                  "totalTargetValue",
+                  "totalTargetValue desc",
                   "targetQuantity",
                   "targetQuantity desc",
                   "coupaSourcingEventNo",
@@ -60959,7 +62263,9 @@
                   "orderNumber",
                   "orderNumber desc",
                   "wbsElement",
-                  "wbsElement desc"
+                  "wbsElement desc",
+                  "scmSpocUserId",
+                  "scmSpocUserId desc"
                 ]
               }
             }
@@ -60982,6 +62288,7 @@
                   "modifiedBy",
                   "details_ID",
                   "itemNo",
+                  "contractCount",
                   "contractType",
                   "lineItem",
                   "itemCategory",
@@ -60994,6 +62301,7 @@
                   "validityEndDate",
                   "incoterms",
                   "incotermsLocation",
+                  "totalTargetValue",
                   "targetQuantity",
                   "coupaSourcingEventNo",
                   "serviceLine",
@@ -61010,7 +62318,8 @@
                   "accountAssignment",
                   "costCenter",
                   "orderNumber",
-                  "wbsElement"
+                  "wbsElement",
+                  "scmSpocUserId"
                 ]
               }
             }
@@ -61219,6 +62528,452 @@
         "x-cap-service": "FlowmateCAService"
       }
     },
+    "/odata/v4/flowmate-ca/OutlineContractHeaders": {
+      "get": {
+        "summary": "Retrieves a list of outline contract headers.",
+        "tags": [
+          "Flowmate CA — Outline Contract Headers"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "$filter",
+            "description": "Filter items by property values, see [Filtering](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter)",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "description": "Order items by property values, see [Sorting](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionorderby)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "ID desc",
+                  "createdAt",
+                  "createdAt desc",
+                  "createdBy",
+                  "createdBy desc",
+                  "modifiedAt",
+                  "modifiedAt desc",
+                  "modifiedBy",
+                  "modifiedBy desc",
+                  "details_ID",
+                  "details_ID desc",
+                  "itemNo",
+                  "itemNo desc",
+                  "vendorCode",
+                  "vendorCode desc",
+                  "coupaSourcingEventNo",
+                  "coupaSourcingEventNo desc",
+                  "poHeaderText",
+                  "poHeaderText desc",
+                  "paymentTerms",
+                  "paymentTerms desc",
+                  "warranty",
+                  "warranty desc",
+                  "penalties",
+                  "penalties desc",
+                  "termsOfDelivery",
+                  "termsOfDelivery desc",
+                  "guarantees",
+                  "guarantees desc",
+                  "otherCommercialTerms",
+                  "otherCommercialTerms desc"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "details_ID",
+                  "itemNo",
+                  "vendorCode",
+                  "coupaSourcingEventNo",
+                  "poHeaderText",
+                  "paymentTerms",
+                  "warranty",
+                  "penalties",
+                  "termsOfDelivery",
+                  "guarantees",
+                  "otherCommercialTerms"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "details"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved outline contract headers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Collection of OutlineContractHeaders",
+                  "properties": {
+                    "@count": {
+                      "$ref": "#/components/schemas/count"
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      },
+      "post": {
+        "summary": "Creates a single outline contract header.",
+        "tags": [
+          "Flowmate CA — Outline Contract Headers"
+        ],
+        "requestBody": {
+          "description": "New outline contract header",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders-create"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created outline contract header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
+    "/odata/v4/flowmate-ca/OutlineContractHeaders({ID})": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a single outline contract header.",
+        "tags": [
+          "Flowmate CA — Outline Contract Headers"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "details_ID",
+                  "itemNo",
+                  "vendorCode",
+                  "coupaSourcingEventNo",
+                  "poHeaderText",
+                  "paymentTerms",
+                  "warranty",
+                  "penalties",
+                  "termsOfDelivery",
+                  "guarantees",
+                  "otherCommercialTerms"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "details"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved outline contract header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      },
+      "patch": {
+        "summary": "Changes a single outline contract header.",
+        "tags": [
+          "Flowmate CA — Outline Contract Headers"
+        ],
+        "requestBody": {
+          "description": "New property values",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders-update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      },
+      "delete": {
+        "summary": "Deletes a single outline contract header.",
+        "tags": [
+          "Flowmate CA — Outline Contract Headers"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
+    "/odata/v4/flowmate-ca/OutlineContractHeaders({ID})/details": {
+      "parameters": [
+        {
+          "description": "key: ID",
+          "in": "path",
+          "name": "ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves details of a outline contract header.",
+        "tags": [
+          "Flowmate CA — Outline Contract Headers",
+          "Flowmate CA — Outline Contract Details"
+        ],
+        "parameters": [
+          {
+            "name": "$select",
+            "description": "Select properties to be returned, see [Select](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionselect)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ID",
+                  "createdAt",
+                  "createdBy",
+                  "modifiedAt",
+                  "modifiedBy",
+                  "request_ID",
+                  "transactionType",
+                  "selectionMode",
+                  "contractNumber",
+                  "category_code",
+                  "approvalReference",
+                  "remarks",
+                  "approvalDocumentsAttachment",
+                  "otherSupportingDocumentsAttachment",
+                  "otherComments",
+                  "contractCount",
+                  "scmSpocUserId",
+                  "totalTargetValue",
+                  "sapVendorCode",
+                  "sapSourcingEventNo",
+                  "sapPoHeaderText",
+                  "sapPaymentTerms",
+                  "sapWarranty",
+                  "sapPenalties",
+                  "sapTermsOfDelivery",
+                  "sapGuarantees",
+                  "sapOtherCommercialTerms",
+                  "headerTaxCode",
+                  "headerServiceCode",
+                  "headerMaterialCode",
+                  "targetValue",
+                  "targetDate",
+                  "headerPaymentTerms",
+                  "contractRevoked",
+                  "scmAssignUser",
+                  "headerChangesAttachment",
+                  "headerComment",
+                  "amendmentContractNumber",
+                  "priceChange",
+                  "serviceAddition",
+                  "materialAddition",
+                  "ceilingValueChange",
+                  "ceilingValue",
+                  "othersChange",
+                  "otherDetails",
+                  "dateExtension",
+                  "extendedDate",
+                  "conditionChange",
+                  "conditionChangeDetails",
+                  "amendmentComments"
+                ]
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "description": "The value of $expand query option is a comma-separated list of navigation property names, stream property names, or $value indicating the stream content of a media-entity. The corresponding related entities and stream values will be represented inline, see [Expand](http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionexpand)",
+            "in": "query",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "*",
+                  "request",
+                  "category",
+                  "items",
+                  "headers",
+                  "changeItems"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowmateCAService.OutlineContractDetails"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate-CA",
+        "x-cap-service": "FlowmateCAService"
+      }
+    },
     "/odata/v4/flowmate-ca/OutlineContractItems": {
       "get": {
         "summary": "Retrieves a list of outline contract items.",
@@ -61271,6 +63026,8 @@
                   "details_ID desc",
                   "itemNo",
                   "itemNo desc",
+                  "contractCount",
+                  "contractCount desc",
                   "contractType",
                   "contractType desc",
                   "lineItem",
@@ -61295,6 +63052,8 @@
                   "incoterms desc",
                   "incotermsLocation",
                   "incotermsLocation desc",
+                  "totalTargetValue",
+                  "totalTargetValue desc",
                   "targetQuantity",
                   "targetQuantity desc",
                   "coupaSourcingEventNo",
@@ -61328,7 +63087,9 @@
                   "orderNumber",
                   "orderNumber desc",
                   "wbsElement",
-                  "wbsElement desc"
+                  "wbsElement desc",
+                  "scmSpocUserId",
+                  "scmSpocUserId desc"
                 ]
               }
             }
@@ -61351,6 +63112,7 @@
                   "modifiedBy",
                   "details_ID",
                   "itemNo",
+                  "contractCount",
                   "contractType",
                   "lineItem",
                   "itemCategory",
@@ -61363,6 +63125,7 @@
                   "validityEndDate",
                   "incoterms",
                   "incotermsLocation",
+                  "totalTargetValue",
                   "targetQuantity",
                   "coupaSourcingEventNo",
                   "serviceLine",
@@ -61379,7 +63142,8 @@
                   "accountAssignment",
                   "costCenter",
                   "orderNumber",
-                  "wbsElement"
+                  "wbsElement",
+                  "scmSpocUserId"
                 ]
               }
             }
@@ -61505,6 +63269,7 @@
                   "modifiedBy",
                   "details_ID",
                   "itemNo",
+                  "contractCount",
                   "contractType",
                   "lineItem",
                   "itemCategory",
@@ -61517,6 +63282,7 @@
                   "validityEndDate",
                   "incoterms",
                   "incotermsLocation",
+                  "totalTargetValue",
                   "targetQuantity",
                   "coupaSourcingEventNo",
                   "serviceLine",
@@ -61533,7 +63299,8 @@
                   "accountAssignment",
                   "costCenter",
                   "orderNumber",
-                  "wbsElement"
+                  "wbsElement",
+                  "scmSpocUserId"
                 ]
               }
             }
@@ -61676,7 +63443,30 @@
                   "sapPenalties",
                   "sapTermsOfDelivery",
                   "sapGuarantees",
-                  "sapOtherCommercialTerms"
+                  "sapOtherCommercialTerms",
+                  "headerTaxCode",
+                  "headerServiceCode",
+                  "headerMaterialCode",
+                  "targetValue",
+                  "targetDate",
+                  "headerPaymentTerms",
+                  "contractRevoked",
+                  "scmAssignUser",
+                  "headerChangesAttachment",
+                  "headerComment",
+                  "amendmentContractNumber",
+                  "priceChange",
+                  "serviceAddition",
+                  "materialAddition",
+                  "ceilingValueChange",
+                  "ceilingValue",
+                  "othersChange",
+                  "otherDetails",
+                  "dateExtension",
+                  "extendedDate",
+                  "conditionChange",
+                  "conditionChangeDetails",
+                  "amendmentComments"
                 ]
               }
             }
@@ -61695,7 +63485,9 @@
                   "*",
                   "request",
                   "category",
-                  "items"
+                  "items",
+                  "headers",
+                  "changeItems"
                 ]
               }
             }
@@ -67607,6 +69399,7 @@
                   "requestType",
                   "materialType",
                   "deliveryType",
+                  "poNumber",
                   "warehouse_code",
                   "allocationOwner_ID",
                   "remarks",
@@ -67713,7 +69506,30 @@
                   "sapPenalties",
                   "sapTermsOfDelivery",
                   "sapGuarantees",
-                  "sapOtherCommercialTerms"
+                  "sapOtherCommercialTerms",
+                  "headerTaxCode",
+                  "headerServiceCode",
+                  "headerMaterialCode",
+                  "targetValue",
+                  "targetDate",
+                  "headerPaymentTerms",
+                  "contractRevoked",
+                  "scmAssignUser",
+                  "headerChangesAttachment",
+                  "headerComment",
+                  "amendmentContractNumber",
+                  "priceChange",
+                  "serviceAddition",
+                  "materialAddition",
+                  "ceilingValueChange",
+                  "ceilingValue",
+                  "othersChange",
+                  "otherDetails",
+                  "dateExtension",
+                  "extendedDate",
+                  "conditionChange",
+                  "conditionChangeDetails",
+                  "amendmentComments"
                 ]
               }
             }
@@ -67732,7 +69548,9 @@
                   "*",
                   "request",
                   "category",
-                  "items"
+                  "items",
+                  "headers",
+                  "changeItems"
                 ]
               }
             }
@@ -72317,6 +74135,7 @@
                   "requestType",
                   "materialType",
                   "deliveryType",
+                  "poNumber",
                   "warehouse_code",
                   "allocationOwner_ID",
                   "remarks",
@@ -72423,7 +74242,30 @@
                   "sapPenalties",
                   "sapTermsOfDelivery",
                   "sapGuarantees",
-                  "sapOtherCommercialTerms"
+                  "sapOtherCommercialTerms",
+                  "headerTaxCode",
+                  "headerServiceCode",
+                  "headerMaterialCode",
+                  "targetValue",
+                  "targetDate",
+                  "headerPaymentTerms",
+                  "contractRevoked",
+                  "scmAssignUser",
+                  "headerChangesAttachment",
+                  "headerComment",
+                  "amendmentContractNumber",
+                  "priceChange",
+                  "serviceAddition",
+                  "materialAddition",
+                  "ceilingValueChange",
+                  "ceilingValue",
+                  "othersChange",
+                  "otherDetails",
+                  "dateExtension",
+                  "extendedDate",
+                  "conditionChange",
+                  "conditionChangeDetails",
+                  "amendmentComments"
                 ]
               }
             }
@@ -72442,7 +74284,9 @@
                   "*",
                   "request",
                   "category",
-                  "items"
+                  "items",
+                  "headers",
+                  "changeItems"
                 ]
               }
             }
@@ -79128,7 +80972,9 @@
                   "email",
                   "email desc",
                   "isActive",
-                  "isActive desc"
+                  "isActive desc",
+                  "isPrimary",
+                  "isPrimary desc"
                 ]
               }
             }
@@ -79150,7 +80996,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -79276,7 +81123,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -90655,7 +92503,9 @@
                   "email",
                   "email desc",
                   "isActive",
-                  "isActive desc"
+                  "isActive desc",
+                  "isPrimary",
+                  "isPrimary desc"
                 ]
               }
             }
@@ -90677,7 +92527,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -90803,7 +92654,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -102590,7 +104442,9 @@
                   "email",
                   "email desc",
                   "isActive",
-                  "isActive desc"
+                  "isActive desc",
+                  "isPrimary",
+                  "isPrimary desc"
                 ]
               }
             }
@@ -102616,7 +104470,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -102746,7 +104601,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -103371,7 +105227,9 @@
                   "email",
                   "email desc",
                   "isActive",
-                  "isActive desc"
+                  "isActive desc",
+                  "isPrimary",
+                  "isPrimary desc"
                 ]
               }
             }
@@ -103397,7 +105255,8 @@
                   "user_ID",
                   "displayName",
                   "email",
-                  "isActive"
+                  "isActive",
+                  "isPrimary"
                 ]
               }
             }
@@ -105099,6 +106958,32 @@
   },
   "components": {
     "schemas": {
+      "FlowmateService.AribaBusinessPartnerPreview": {
+        "title": "AribaBusinessPartnerPreview",
+        "type": "object",
+        "properties": {
+          "BusinessPartner": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "BusinessPartnerCategory": {
+            "type": "string",
+            "maxLength": 2,
+            "nullable": true
+          },
+          "BusinessPartnerGrouping": {
+            "type": "string",
+            "maxLength": 4,
+            "nullable": true
+          },
+          "OrganizationBPName1": {
+            "type": "string",
+            "maxLength": 81,
+            "nullable": true
+          }
+        }
+      },
       "FlowmateService.AverageProcessingMetric": {
         "title": "AverageProcessingMetric",
         "type": "object",
@@ -107756,6 +109641,19 @@
             "maxLength": 255,
             "nullable": true
           },
+          "subProcessType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FlowmateService.ProcessSubTypes"
+              }
+            ],
+            "nullable": true
+          },
+          "subProcessType_code": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
           "minimumAmount": {
             "anyOf": [
               {
@@ -107811,6 +109709,21 @@
           "approverRoleCodes": {
             "type": "string",
             "maxLength": 500,
+            "nullable": true
+          },
+          "requireAllApprovers": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "directUserAssignment": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "approverUserIds": {
+            "type": "string",
+            "maxLength": 2000,
             "nullable": true
           },
           "conditionCode": {
@@ -107904,6 +109817,11 @@
             "maxLength": 255,
             "nullable": true
           },
+          "subProcessType_code": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
           "minimumAmount": {
             "anyOf": [
               {
@@ -107959,6 +109877,21 @@
           "approverRoleCodes": {
             "type": "string",
             "maxLength": 500,
+            "nullable": true
+          },
+          "requireAllApprovers": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "directUserAssignment": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "approverUserIds": {
+            "type": "string",
+            "maxLength": 2000,
             "nullable": true
           },
           "conditionCode": {
@@ -108031,6 +109964,11 @@
             "maxLength": 255,
             "nullable": true
           },
+          "subProcessType_code": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
           "minimumAmount": {
             "anyOf": [
               {
@@ -108086,6 +110024,21 @@
           "approverRoleCodes": {
             "type": "string",
             "maxLength": 500,
+            "nullable": true
+          },
+          "requireAllApprovers": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "directUserAssignment": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "approverUserIds": {
+            "type": "string",
+            "maxLength": 2000,
             "nullable": true
           },
           "conditionCode": {
@@ -112254,6 +114207,26 @@
             "maxLength": 12,
             "nullable": true
           },
+          "loaRequiresAll": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "loaApproverSource": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "loaApproverUserIds": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "loaApprovalRuleCode": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
           "status": {
             "allOf": [
               {
@@ -113883,6 +115856,26 @@
             "maxLength": 12,
             "nullable": true
           },
+          "loaRequiresAll": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "loaApproverSource": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "loaApproverUserIds": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "loaApprovalRuleCode": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
           "status_code": {
             "type": "string",
             "maxLength": 20,
@@ -115429,6 +117422,26 @@
           "loaApprovalState": {
             "type": "string",
             "maxLength": 12,
+            "nullable": true
+          },
+          "loaRequiresAll": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "loaApproverSource": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "loaApproverUserIds": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "loaApprovalRuleCode": {
+            "type": "string",
+            "maxLength": 50,
             "nullable": true
           },
           "status_code": {
@@ -119238,6 +121251,10 @@
           "isActive": {
             "type": "boolean",
             "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -119280,6 +121297,10 @@
           "isActive": {
             "type": "boolean",
             "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -119315,6 +121336,10 @@
             "nullable": true
           },
           "isActive": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isPrimary": {
             "type": "boolean",
             "nullable": true
           }
@@ -120765,6 +122790,26 @@
           "loaApprovalState": {
             "type": "string",
             "maxLength": 12,
+            "nullable": true
+          },
+          "loaRequiresAll": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "loaApproverSource": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "loaApproverUserIds": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "loaApprovalRuleCode": {
+            "type": "string",
+            "maxLength": 50,
             "nullable": true
           },
           "status": {
@@ -127903,6 +129948,11 @@
             "maxLength": 40,
             "nullable": true
           },
+          "poNumber": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
           "warehouse": {
             "allOf": [
               {
@@ -127994,6 +130044,11 @@
             "maxLength": 40,
             "nullable": true
           },
+          "poNumber": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
           "warehouse_code": {
             "type": "string",
             "maxLength": 40,
@@ -128059,6 +130114,11 @@
           "deliveryType": {
             "type": "string",
             "maxLength": 40,
+            "nullable": true
+          },
+          "poNumber": {
+            "type": "string",
+            "maxLength": 80,
             "nullable": true
           },
           "warehouse_code": {
@@ -130051,6 +132111,223 @@
           }
         }
       },
+      "FlowmateCAService.OutlineContractChangeItems": {
+        "title": "OutlineContractChangeItems",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "modifiedBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "details": {
+            "$ref": "#/components/schemas/FlowmateCAService.OutlineContractDetails"
+          },
+          "details_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "changeType": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 17,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.001,
+                "maximum": 999999999999.999,
+                "minimum": -999999999999.999
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 15,
+            "x-sap-scale": 3,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateCAService.OutlineContractChangeItems-create": {
+        "title": "OutlineContractChangeItems (for create)",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "details_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "changeType": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 17,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.001,
+                "maximum": 999999999999.999,
+                "minimum": -999999999999.999
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 15,
+            "x-sap-scale": 3,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateCAService.OutlineContractChangeItems-update": {
+        "title": "OutlineContractChangeItems (for update)",
+        "type": "object",
+        "properties": {
+          "details_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "changeType": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 17,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.001,
+                "maximum": 999999999999.999,
+                "minimum": -999999999999.999
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 15,
+            "x-sap-scale": 3,
+            "nullable": true
+          }
+        }
+      },
       "FlowmateCAService.OutlineContractDetails": {
         "title": "OutlineContractDetails",
         "type": "object",
@@ -130216,6 +132493,137 @@
           },
           "items@count": {
             "$ref": "#/components/schemas/count"
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders"
+            }
+          },
+          "headers@count": {
+            "$ref": "#/components/schemas/count"
+          },
+          "headerTaxCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "headerServiceCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "headerMaterialCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "targetValue": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "targetDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "headerPaymentTerms": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "contractRevoked": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "scmAssignUser": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "headerChangesAttachment": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "headerComment": {
+            "type": "string",
+            "nullable": true
+          },
+          "amendmentContractNumber": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "priceChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "serviceAddition": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "materialAddition": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "ceilingValueChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "ceilingValue": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "othersChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "otherDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateExtension": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "extendedDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "conditionChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "conditionChangeDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "amendmentComments": {
+            "type": "string",
+            "nullable": true
+          },
+          "changeItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems"
+            }
+          },
+          "changeItems@count": {
+            "$ref": "#/components/schemas/count"
           }
         }
       },
@@ -130346,6 +132754,131 @@
             "items": {
               "$ref": "#/components/schemas/FlowmateCAService.OutlineContractItems-create"
             }
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders-create"
+            }
+          },
+          "headerTaxCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "headerServiceCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "headerMaterialCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "targetValue": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "targetDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "headerPaymentTerms": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "contractRevoked": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "scmAssignUser": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "headerChangesAttachment": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "headerComment": {
+            "type": "string",
+            "nullable": true
+          },
+          "amendmentContractNumber": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "priceChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "serviceAddition": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "materialAddition": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "ceilingValueChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "ceilingValue": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "othersChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "otherDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateExtension": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "extendedDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "conditionChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "conditionChangeDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "amendmentComments": {
+            "type": "string",
+            "nullable": true
+          },
+          "changeItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems-create"
+            }
           }
         }
       },
@@ -130471,6 +133004,333 @@
             "items": {
               "$ref": "#/components/schemas/FlowmateCAService.OutlineContractItems-create"
             }
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateCAService.OutlineContractHeaders-create"
+            }
+          },
+          "headerTaxCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "headerServiceCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "headerMaterialCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "targetValue": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "targetDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "headerPaymentTerms": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "contractRevoked": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "scmAssignUser": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "headerChangesAttachment": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "headerComment": {
+            "type": "string",
+            "nullable": true
+          },
+          "amendmentContractNumber": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "priceChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "serviceAddition": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "materialAddition": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "ceilingValueChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "ceilingValue": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "othersChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "otherDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateExtension": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "extendedDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "conditionChange": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "conditionChangeDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "amendmentComments": {
+            "type": "string",
+            "nullable": true
+          },
+          "changeItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowmateCAService.OutlineContractChangeItems-create"
+            }
+          }
+        }
+      },
+      "FlowmateCAService.OutlineContractHeaders": {
+        "title": "OutlineContractHeaders",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-04-13T15:51:04.0000000Z",
+            "nullable": true
+          },
+          "modifiedBy": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "{i18n>UserID.Description}"
+          },
+          "details": {
+            "$ref": "#/components/schemas/FlowmateCAService.OutlineContractDetails"
+          },
+          "details_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "vendorCode": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "coupaSourcingEventNo": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "poHeaderText": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentTerms": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "warranty": {
+            "type": "string",
+            "nullable": true
+          },
+          "penalties": {
+            "type": "string",
+            "nullable": true
+          },
+          "termsOfDelivery": {
+            "type": "string",
+            "nullable": true
+          },
+          "guarantees": {
+            "type": "string",
+            "nullable": true
+          },
+          "otherCommercialTerms": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateCAService.OutlineContractHeaders-create": {
+        "title": "OutlineContractHeaders (for create)",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "details_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "vendorCode": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "coupaSourcingEventNo": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "poHeaderText": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentTerms": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "warranty": {
+            "type": "string",
+            "nullable": true
+          },
+          "penalties": {
+            "type": "string",
+            "nullable": true
+          },
+          "termsOfDelivery": {
+            "type": "string",
+            "nullable": true
+          },
+          "guarantees": {
+            "type": "string",
+            "nullable": true
+          },
+          "otherCommercialTerms": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateCAService.OutlineContractHeaders-update": {
+        "title": "OutlineContractHeaders (for update)",
+        "type": "object",
+        "properties": {
+          "details_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "vendorCode": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "coupaSourcingEventNo": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "poHeaderText": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentTerms": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "warranty": {
+            "type": "string",
+            "nullable": true
+          },
+          "penalties": {
+            "type": "string",
+            "nullable": true
+          },
+          "termsOfDelivery": {
+            "type": "string",
+            "nullable": true
+          },
+          "guarantees": {
+            "type": "string",
+            "nullable": true
+          },
+          "otherCommercialTerms": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -130520,6 +133380,11 @@
             "format": "int32",
             "nullable": true
           },
+          "contractCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "contractType": {
             "type": "string",
             "maxLength": 40,
@@ -130580,6 +133445,22 @@
           "incotermsLocation": {
             "type": "string",
             "maxLength": 120,
+            "nullable": true
+          },
+          "totalTargetValue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 17,
+            "x-sap-scale": 2,
             "nullable": true
           },
           "targetQuantity": {
@@ -130728,6 +133609,11 @@
           "wbsElement": {
             "type": "string",
             "maxLength": 80,
+            "nullable": true
+          },
+          "scmSpocUserId": {
+            "type": "string",
+            "maxLength": 255,
             "nullable": true
           }
         }
@@ -130751,228 +133637,7 @@
             "format": "int32",
             "nullable": true
           },
-          "contractType": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "lineItem": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "itemCategory": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "purchaseOrg": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "purchaseGroup": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "vendorId": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "companyCode": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "plant": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "validityStartDate": {
-            "type": "string",
-            "format": "date",
-            "example": "2017-04-13",
-            "nullable": true
-          },
-          "validityEndDate": {
-            "type": "string",
-            "format": "date",
-            "example": "2017-04-13",
-            "nullable": true
-          },
-          "incoterms": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "incotermsLocation": {
-            "type": "string",
-            "maxLength": 120,
-            "nullable": true
-          },
-          "targetQuantity": {
-            "anyOf": [
-              {
-                "type": "number",
-                "format": "decimal",
-                "multipleOf": 0.001,
-                "maximum": 999999999999.999,
-                "minimum": -999999999999.999
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "example": 0,
-            "x-sap-precision": 15,
-            "x-sap-scale": 3,
-            "nullable": true
-          },
-          "coupaSourcingEventNo": {
-            "type": "string",
-            "maxLength": 80,
-            "nullable": true
-          },
-          "serviceLine": {
-            "type": "string",
-            "maxLength": 80,
-            "nullable": true
-          },
-          "shortTextForServices": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "materialServiceCode": {
-            "type": "string",
-            "maxLength": 80,
-            "nullable": true
-          },
-          "quantity": {
-            "anyOf": [
-              {
-                "type": "number",
-                "format": "decimal",
-                "multipleOf": 0.001,
-                "maximum": 999999999999.999,
-                "minimum": -999999999999.999
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "example": 0,
-            "x-sap-precision": 15,
-            "x-sap-scale": 3,
-            "nullable": true
-          },
-          "grossPrice": {
-            "anyOf": [
-              {
-                "type": "number",
-                "format": "decimal",
-                "multipleOf": 0.01
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "example": 0,
-            "x-sap-precision": 17,
-            "x-sap-scale": 2,
-            "nullable": true
-          },
-          "priceUnit": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "materialSavingPct": {
-            "anyOf": [
-              {
-                "type": "number",
-                "format": "decimal",
-                "multipleOf": 0.01,
-                "maximum": 999.99,
-                "minimum": -999.99
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "example": 0,
-            "x-sap-precision": 5,
-            "x-sap-scale": 2,
-            "nullable": true
-          },
-          "serviceSavingPct": {
-            "anyOf": [
-              {
-                "type": "number",
-                "format": "decimal",
-                "multipleOf": 0.01,
-                "maximum": 999.99,
-                "minimum": -999.99
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "example": 0,
-            "x-sap-precision": 5,
-            "x-sap-scale": 2,
-            "nullable": true
-          },
-          "taxCode": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "paymentTerm": {
-            "type": "string",
-            "maxLength": 80,
-            "nullable": true
-          },
-          "accountAssignment": {
-            "type": "string",
-            "maxLength": 80,
-            "nullable": true
-          },
-          "costCenter": {
-            "type": "string",
-            "maxLength": 80,
-            "nullable": true
-          },
-          "orderNumber": {
-            "type": "string",
-            "maxLength": 80,
-            "nullable": true
-          },
-          "wbsElement": {
-            "type": "string",
-            "maxLength": 80,
-            "nullable": true
-          }
-        }
-      },
-      "FlowmateCAService.OutlineContractItems-update": {
-        "title": "OutlineContractItems (for update)",
-        "type": "object",
-        "properties": {
-          "details_ID": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234567-89ab-cdef-0123-456789abcdef"
-          },
-          "itemNo": {
+          "contractCount": {
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -131039,6 +133704,22 @@
             "maxLength": 120,
             "nullable": true
           },
+          "totalTargetValue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 17,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
           "targetQuantity": {
             "anyOf": [
               {
@@ -131185,6 +133866,263 @@
           "wbsElement": {
             "type": "string",
             "maxLength": 80,
+            "nullable": true
+          },
+          "scmSpocUserId": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          }
+        }
+      },
+      "FlowmateCAService.OutlineContractItems-update": {
+        "title": "OutlineContractItems (for update)",
+        "type": "object",
+        "properties": {
+          "details_ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contractCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contractType": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "lineItem": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "itemCategory": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "purchaseOrg": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "purchaseGroup": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "vendorId": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "companyCode": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "plant": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "validityStartDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "validityEndDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-04-13",
+            "nullable": true
+          },
+          "incoterms": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "incotermsLocation": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "totalTargetValue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 17,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "targetQuantity": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.001,
+                "maximum": 999999999999.999,
+                "minimum": -999999999999.999
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 15,
+            "x-sap-scale": 3,
+            "nullable": true
+          },
+          "coupaSourcingEventNo": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "serviceLine": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "shortTextForServices": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "materialServiceCode": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.001,
+                "maximum": 999999999999.999,
+                "minimum": -999999999999.999
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 15,
+            "x-sap-scale": 3,
+            "nullable": true
+          },
+          "grossPrice": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 17,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "priceUnit": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "materialSavingPct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 999.99,
+                "minimum": -999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 5,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "serviceSavingPct": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01,
+                "maximum": 999.99,
+                "minimum": -999.99
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 5,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "taxCode": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "paymentTerm": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "accountAssignment": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "costCenter": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "orderNumber": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "wbsElement": {
+            "type": "string",
+            "maxLength": 80,
+            "nullable": true
+          },
+          "scmSpocUserId": {
+            "type": "string",
+            "maxLength": 255,
             "nullable": true
           }
         }
@@ -138004,6 +140942,10 @@
           "isActive": {
             "type": "boolean",
             "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -138046,6 +140988,10 @@
           "isActive": {
             "type": "boolean",
             "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -138081,6 +141027,10 @@
             "nullable": true
           },
           "isActive": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isPrimary": {
             "type": "boolean",
             "nullable": true
           }
@@ -141620,6 +144570,10 @@
           "isActive": {
             "type": "boolean",
             "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -141662,6 +144616,10 @@
           "isActive": {
             "type": "boolean",
             "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -141697,6 +144655,10 @@
             "nullable": true
           },
           "isActive": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isPrimary": {
             "type": "boolean",
             "nullable": true
           }
@@ -145971,6 +148933,11 @@
             "type": "boolean",
             "nullable": true,
             "default": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
           }
         }
       },
@@ -146012,6 +148979,11 @@
             "type": "boolean",
             "nullable": true,
             "default": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
           }
         }
       },
@@ -146048,6 +149020,11 @@
             "type": "boolean",
             "nullable": true,
             "default": true
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
           }
         }
       },

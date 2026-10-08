@@ -3635,7 +3635,9 @@ sap.ui.define([
             let oWinner = null;
 
             aRules.forEach((oRule) => {
-                if (oRule.isActive === false || !this._matchesLoaCondition(oRule.conditionCode, sSubProcessTypeCode)) {
+                if (oRule.isActive === false
+                    || (oRule.subProcessType_code && oRule.subProcessType_code !== sSubProcessTypeCode)
+                    || !this._matchesLoaCondition(oRule.conditionCode, sSubProcessTypeCode)) {
                     return;
                 }
 
@@ -3666,20 +3668,34 @@ sap.ui.define([
         },
 
         async _showLoaApprovalPreview(fAmount, oRule) {
+            const bDirectUsers = Boolean(oRule.directUserAssignment);
             const aRoleCodes = String(oRule.approverRoleCodes || oRule.roleCode || "")
                 .split(";")
                 .map((sRoleCode) => sRoleCode.trim())
                 .filter(Boolean);
-            const aRoleFilters = aRoleCodes.map((sRoleCode) =>
-                new Filter("role_code", FilterOperator.EQ, sRoleCode)
-            );
             const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
 
-            if (aRoleFilters.length) {
-                aFilters.push(new Filter({ filters: aRoleFilters, and: false }));
+            if (bDirectUsers) {
+                const aUserIds = String(oRule.approverUserIds || "")
+                    .split(";")
+                    .map((sUserId) => sUserId.trim())
+                    .filter(Boolean);
+                if (aUserIds.length) {
+                    aFilters.push(new Filter({
+                        filters: aUserIds.map((sUserId) => new Filter("ID", FilterOperator.EQ, sUserId)),
+                        and: false
+                    }));
+                }
+            } else {
+                const aRoleFilters = aRoleCodes.map((sRoleCode) =>
+                    new Filter("role_code", FilterOperator.EQ, sRoleCode)
+                );
+                if (aRoleFilters.length) {
+                    aFilters.push(new Filter({ filters: aRoleFilters, and: false }));
+                }
             }
 
-            const aApprovers = aRoleCodes.length
+            const aApprovers = bDirectUsers || aRoleCodes.length
                 ? await this._readList("/Users", {
                     filters: [new Filter({ filters: aFilters, and: true })],
                     urlParameters: {
@@ -3694,10 +3710,12 @@ sap.ui.define([
                 ruleCode: oRule.ruleCode || "",
                 description: oRule.description || "",
                 approvalMode: oRule.approvalMode || "SINGLE",
-                approvalModeText: oRule.approvalMode === "ANY"
-                    ? this.getText("loaAnyApproverModeText")
-                    : this.getText("loaSingleApproverModeText"),
-                approverRoleCodes: aRoleCodes.join(", "),
+                approvalModeText: oRule.requireAllApprovers
+                    ? this.getText("loaAllApproversText")
+                    : this.getText("loaAnyApproverText"),
+                approverRoleCodes: bDirectUsers
+                    ? this.getText("loaDirectUsersLabel")
+                    : aRoleCodes.join(", "),
                 approvers: aApprovers
                     .map((oUser) => ({
                         ...oUser,
@@ -3727,10 +3745,11 @@ sap.ui.define([
         _loaRuleRank(oRule) {
             const iPriority = Number(oRule.priority || 0);
             const iStructured = oRule.ruleCode ? 1 : 0;
+            const iSubtypeSpecific = oRule.subProcessType_code ? 1 : 0;
             const fUpper = oRule.maximumAmount === null || oRule.maximumAmount === undefined
                 ? Number.MAX_SAFE_INTEGER
                 : Number(oRule.maximumAmount);
-            return iPriority * 1e18 + iStructured * 1e17 - fUpper;
+            return iSubtypeSpecific * 1e20 + iPriority * 1e18 + iStructured * 1e17 - fUpper;
         },
 
         _evaluateOperator(fAmount, sOperator, fThreshold) {

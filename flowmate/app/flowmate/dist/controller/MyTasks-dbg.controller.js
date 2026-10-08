@@ -10,8 +10,9 @@ sap.ui.define([
     "sap/ui/core/Item",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
     "sap/ui/model/json/JSONModel"
-], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, JSONModel) => {
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, Sorter, JSONModel) => {
     "use strict";
 
     return BaseController.extend("flowmate.controller.MyTasks", {
@@ -267,6 +268,69 @@ sap.ui.define([
         },
 
         async onApprove() {
+            const oContext = this.byId("taskObjectPage").getBindingContext();
+            const sTaskName = oContext?.getProperty("taskName");
+            const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
+            const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
+
+            if (sTaskName === "GFA Team Confirmation" && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
+                const sDebitGL = (this.byId("gfaDebitGLInput").getValue() || "").trim();
+
+                if (!sDebitGL) {
+                    MessageBox.warning(this.getText("debitGLRequiredMessage"));
+                    return;
+                }
+
+                if (!sRequestId) {
+                    MessageBox.error(this.getText("selectRequestMessage"));
+                    return;
+                }
+
+                this.showBusy();
+
+                try {
+                    await this.updateEntry(`/ProcessRequests(guid'${sRequestId}')`, {
+                        debitGL: sDebitGL
+                    });
+                } catch (oError) {
+                    this.hideBusy();
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("debitGLSaveErrorMessage")));
+                    return;
+                }
+
+                this.hideBusy();
+            }
+            if (sTaskName === "IV Confirmation and Document Archiving" && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
+                const sVoucherNumber = (this.byId("taskIvVoucherNumberInput").getValue() || "").trim();
+                const sConfirmationValue = (this.byId("taskIvConfirmationValueInput").getValue() || "").trim();
+                const sBankStatus = (this.byId("taskIvBankStatusInput").getValue() || "").trim();
+
+                if (!sVoucherNumber || !sConfirmationValue || !sBankStatus) {
+                    MessageBox.warning(this.getText("ivConfirmationFieldsRequiredMessage"));
+                    return;
+                }
+
+                if (!sRequestId) {
+                    MessageBox.error(this.getText("selectRequestMessage"));
+                    return;
+                }
+
+                this.showBusy();
+
+                try {
+                    await this.updateEntry(`/ProcessRequests(guid'${sRequestId}')`, {
+                        voucherNumber: sVoucherNumber,
+                        ivConfirmationValue: sConfirmationValue,
+                        bankStatus: sBankStatus
+                    });
+                } catch (oError) {
+                    this.hideBusy();
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("ivConfirmationSaveErrorMessage")));
+                    return;
+                }
+
+                this.hideBusy();
+            }
             await this._completeTask("approveTask", "taskApprovedMessage");
         },
 
@@ -286,6 +350,11 @@ sap.ui.define([
 
             if (!sTaskId) {
                 MessageToast.show(this.getText("selectTaskMessage"));
+                return;
+            }
+
+            if (this._isTruthy(oContext.getProperty("isMandatory"))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
                 return;
             }
 
@@ -316,10 +385,16 @@ sap.ui.define([
 
         async onDeleteSelectedTasks() {
             const oTable = this.byId("tasksTable");
-            const aTaskIds = oTable.getSelectedContexts().map((oContext) => oContext.getProperty("ID"));
+            const aSelectedContexts = oTable.getSelectedContexts();
+            const aTaskIds = aSelectedContexts.map((oContext) => oContext.getProperty("ID"));
 
             if (!aTaskIds.length) {
                 MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+
+            if (aSelectedContexts.some((oContext) => this._isTruthy(oContext.getProperty("isMandatory")))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
                 return;
             }
 
@@ -397,6 +472,9 @@ sap.ui.define([
         },
 
         _taskCollectionPath() {
+            if (this._bApprovalMode) {
+                return "/MyPendingApprovalTasks";
+            }
             return this._bTeamMode ? "/MyTeamTasks" : "/MyAssignedTasks";
         },
 
@@ -422,6 +500,7 @@ sap.ui.define([
                         new Filter("status_code", FilterOperator.EQ, "OPEN")
                     ]
                     : [new Filter("isLoaApproval", FilterOperator.EQ, false)],
+                sorter: new Sorter("referenceNumber", true),
                 parameters: {
                     expand: "request"
                 },
@@ -452,6 +531,14 @@ sap.ui.define([
                     and: false
                 })
             ]);
+        },
+
+        _isTruthy(vValue) {
+            if (typeof vValue === "string") {
+                return vValue.toLowerCase() === "true" || vValue === "1";
+            }
+
+            return Boolean(vValue);
         },
 
         _confirmDelete(sMessageKey, aArguments) {
@@ -494,7 +581,7 @@ sap.ui.define([
 
                 await this.callAction(sAction, oPayload);
                 MessageToast.show(this.getText(sSuccessTextKey));
-                this.byId("taskRemarksTextArea").setValue("");
+                // this.byId("taskRemarksTextArea").setValue("");
                 this.byId("tasksTable").getBinding("items").refresh();
                 this.byId("taskObjectPage").getElementBinding().refresh();
             } catch (oError) {

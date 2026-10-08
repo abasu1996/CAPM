@@ -415,6 +415,35 @@ sap.ui.define([
             MessageToast.show(this.getText("teamMembersRemovedFromDraftMessage", [aSelectedIndexes.length]));
         },
 
+        onPrimaryTeamMemberSelect(oEvent) {
+            if (!oEvent.getParameter("selected")) {
+                return;
+            }
+
+            const oSource = oEvent.getSource();
+            const oContext = oSource.getBindingContext("teamMembers");
+            const oMember = oContext?.getObject();
+            const oExistingPrimary = this._aTeamMembers?.find((oCandidate) =>
+                oCandidate.user_ID === oMember?.user_ID
+                && oCandidate.ID !== oMember?.ID
+                && oCandidate.isActive !== false
+                && oCandidate.isPrimary === true
+            );
+
+            if (!oExistingPrimary) {
+                return;
+            }
+
+            const oExistingTeam = this._aTeams?.find((oTeam) => oTeam.ID === oExistingPrimary.team_ID);
+            const sTeamName = oExistingTeam?.name || oExistingTeam?.teamCode || oExistingPrimary.team_ID;
+            oSource.setSelected(false);
+            oContext.getModel().setProperty(`${oContext.getPath()}/isPrimary`, false);
+            MessageBox.error(this.getText("primaryTeamConflictMessage", [
+                oMember.displayName || oMember.email,
+                sTeamName
+            ]));
+        },
+
         async onSaveTeamMembers() {
             const oModel = this.getView().getModel("teamMembers");
             const sTeamId = oModel.getProperty("/teamId");
@@ -428,6 +457,10 @@ sap.ui.define([
             const aMembersToDelete = aOriginalMembers.filter((oMember) =>
                 oMember.ID && !mCurrentByUserId.has(oMember.user_ID)
             );
+            const aMembersToUpdate = aCurrentMembers.filter((oMember) => {
+                const oOriginal = mOriginalByUserId.get(oMember.user_ID);
+                return oOriginal?.ID && Boolean(oOriginal.isPrimary) !== Boolean(oMember.isPrimary);
+            });
 
             if (!sTeamId) {
                 return;
@@ -439,8 +472,13 @@ sap.ui.define([
                 await Promise.all([
                     ...aMembersToCreate.map((oMember) => this.createEntry("/TeamMembers", {
                         team_ID: sTeamId,
-                        user_ID: oMember.user_ID
+                        user_ID: oMember.user_ID,
+                        isPrimary: Boolean(oMember.isPrimary)
                     })),
+                    ...aMembersToUpdate.map((oMember) => this.updateEntry(
+                        `/TeamMembers(guid'${oMember.ID}')`,
+                        { isPrimary: Boolean(oMember.isPrimary) }
+                    )),
                     ...aMembersToDelete.map((oMember) => this.removeEntry(`/TeamMembers(guid'${oMember.ID}')`))
                 ]);
                 MessageToast.show(this.getText("teamMembersSavedMessage"));
@@ -628,7 +666,8 @@ sap.ui.define([
                 user_ID: oUser.user_ID,
                 displayName: oUser.displayName,
                 email: oUser.email,
-                isActive: oUser.isActive !== false
+                isActive: oUser.isActive !== false,
+                isPrimary: false
             });
             oModel.setProperty("/members", aMembers);
             return true;

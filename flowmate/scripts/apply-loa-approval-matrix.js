@@ -7,7 +7,9 @@ const cds = require("@sap/cds");
 const MATRIX_PATH = path.resolve(__dirname, "../config/loa-approval-matrix.csv");
 const ENTITY = "flowmate.db.LoaApproval";
 const NUMBERS = new Set(["minimumAmount", "maximumAmount", "priority", "amount"]);
-const BOOLEANS = new Set(["minimumInclusive", "maximumInclusive", "isActive"]);
+const BOOLEANS = new Set([
+  "minimumInclusive", "maximumInclusive", "requireAllApprovers", "directUserAssignment", "isActive"
+]);
 
 function normalize(row) {
   return Object.fromEntries(Object.entries(row).map(([key, value]) => {

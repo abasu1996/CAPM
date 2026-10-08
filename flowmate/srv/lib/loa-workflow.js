@@ -1,6 +1,9 @@
 const cds = require("@sap/cds");
 const { SELECT, UPDATE } = cds.ql;
-const INTERNAL_FIELDS = ["loaWorkflowMode", "loaStepNo", "loaBeforeProcessing", "loaApprovalState"];
+const INTERNAL_FIELDS = [
+  "loaWorkflowMode", "loaStepNo", "loaBeforeProcessing", "loaApprovalState",
+  "loaRequiresAll", "loaApproverSource", "loaApproverUserIds", "loaApprovalRuleCode"
+];
 
 module.exports = (amountSources) => ({
   async _validateLoaInvoiceWrite(req) {

@@ -2,10 +2,12 @@ sap.ui.define([
     "flowmate/controller/BaseController",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
+    "sap/m/SelectDialog",
+    "sap/m/StandardListItem",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/json/JSONModel"
-], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
+], (BaseController, MessageBox, MessageToast, SelectDialog, StandardListItem, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     return BaseController.extend("flowmate.controller.RequestDetail", {
@@ -17,11 +19,25 @@ sap.ui.define([
                 processorUser_ID: "",
                 processorName: ""
             }), "processorEdit");
+            this.getView().setModel(new JSONModel({
+                currentUserId: "",
+                canModifyRequest: false
+            }), "requestAccess");
             this.getRouter().getRoute("RouteRequestDetail").attachPatternMatched(this.onRouteMatched, this);
         },
 
-        onRouteMatched(oEvent) {
+        async onRouteMatched(oEvent) {
             const sRequestId = decodeURIComponent(oEvent.getParameter("arguments").requestId);
+
+            try {
+                const oResponse = await this.callAction("getCurrentUserDetails");
+                this.getView().getModel("requestAccess").setProperty(
+                    "/currentUserId",
+                    (oResponse.value || oResponse).ID || ""
+                );
+            } catch (oError) {
+                this.getView().getModel("requestAccess").setProperty("/currentUserId", "");
+            }
 
             this.setTwoColumnLayout();
             this.getView().bindElement({
@@ -33,6 +49,17 @@ sap.ui.define([
                     dataRequested: this.onDataRequested.bind(this),
                     dataReceived: () => {
                         this.onDataReceived();
+                        const oRequest = this.getView().getBindingContext()?.getObject();
+                        const sCurrentUserId = this.getView().getModel("requestAccess").getProperty("/currentUserId");
+                        this.getView().getModel("requestAccess").setProperty(
+                            "/canModifyRequest",
+                            Boolean(
+                                oRequest?.reservedBy
+                                && oRequest?.processorUser_ID
+                                && oRequest.processorUser_ID === sCurrentUserId
+                                && !["COMPLETED", "REJECTED", "PENDING_APPROVAL"].includes(oRequest?.status_code)
+                            )
+                        );
                         this.getView().getModel("statusEdit").setProperty(
                             "/requestStatus",
                             this.getView().getBindingContext()?.getProperty("status_code") || ""
@@ -52,6 +79,75 @@ sap.ui.define([
 
             if (oBinding) {
                 oBinding.refresh(true);
+            }
+        },
+
+        onChangeRequestTeamAndRelease() {
+            if (!this._oChangeRequestTeamDialog) {
+                this._oChangeRequestTeamDialog = new SelectDialog({
+                    title: this.getText("changeRequestTeamDialogTitle"),
+                    noDataText: this.getText("noProcessorTeamsMessage"),
+                    search: (oEvent) => this._filterProcessorTeams(oEvent.getSource(), oEvent.getParameter("value")),
+                    liveChange: (oEvent) => this._filterProcessorTeams(oEvent.getSource(), oEvent.getParameter("value")),
+                    confirm: (oEvent) => this._confirmProcessorTeamChange(oEvent.getParameter("selectedItem"))
+                });
+                this._oChangeRequestTeamDialog.bindAggregation("items", {
+                    path: "/Teams",
+                    filters: [new Filter("isActive", FilterOperator.EQ, true)],
+                    template: new StandardListItem({ title: "{name}", description: "{teamCode}" })
+                });
+                this.getView().addDependent(this._oChangeRequestTeamDialog);
+            }
+            this._oChangeRequestTeamDialog.open();
+        },
+
+        _filterProcessorTeams(oDialog, sValue) {
+            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+            const sQuery = (sValue || "").trim();
+            if (sQuery) {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("name", FilterOperator.Contains, sQuery),
+                        new Filter("teamCode", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                }));
+            }
+            oDialog.getBinding("items")?.filter(aFilters);
+        },
+
+        _confirmProcessorTeamChange(oTeamItem) {
+            const oRequest = this.getView().getBindingContext()?.getObject();
+            const oTeamContext = oTeamItem?.getBindingContext();
+            const sTeamId = oTeamContext?.getProperty("ID");
+            const sTeamName = oTeamContext?.getProperty("name") || oTeamContext?.getProperty("teamCode");
+            if (!oRequest || !sTeamId) return;
+            if (sTeamId === oRequest.processorTeam_ID) {
+                MessageToast.show(this.getText("selectDifferentTeamMessage"));
+                return;
+            }
+
+            MessageBox.confirm(this.getText("confirmRequestTeamReleaseMessage", [sTeamName]), {
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.OK,
+                onClose: (sAction) => {
+                    if (sAction === MessageBox.Action.OK) this._releaseRequestToTeam(sTeamId, sTeamName);
+                }
+            });
+        },
+
+        async _releaseRequestToTeam(sTeamId, sTeamName) {
+            const sRequestId = this.getView().getBindingContext()?.getProperty("ID");
+            if (!sRequestId) return;
+            this.showBusy();
+            try {
+                await this.callAction("changeRequestTeamAndRelease", { requestId: sRequestId, teamId: sTeamId });
+                MessageToast.show(this.getText("requestReleasedToTeamMessage", [sTeamName]));
+                this.getView().getElementBinding()?.refresh(true);
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("requestTeamReleaseErrorMessage")));
+            } finally {
+                this.hideBusy();
             }
         },
 
@@ -328,6 +424,11 @@ sap.ui.define([
                 return;
             }
 
+            if (this._isTruthy(oContext.getProperty("isMandatory"))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
+                return;
+            }
+
             const bConfirmed = await this._confirmDelete("deleteTaskConfirmMessage");
 
             if (!bConfirmed) {
@@ -349,10 +450,16 @@ sap.ui.define([
 
         async onDeleteSelectedTasks() {
             const oTable = this.byId("requestDetailTasksTable");
-            const aTaskIds = oTable.getSelectedContexts().map((oContext) => oContext.getProperty("ID"));
+            const aSelectedContexts = oTable.getSelectedContexts();
+            const aTaskIds = aSelectedContexts.map((oContext) => oContext.getProperty("ID"));
 
             if (!aTaskIds.length) {
                 MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+
+            if (aSelectedContexts.some((oContext) => this._isTruthy(oContext.getProperty("isMandatory")))) {
+                MessageBox.warning(this.getText("mandatoryTaskDeleteBlockedMessage"));
                 return;
             }
 

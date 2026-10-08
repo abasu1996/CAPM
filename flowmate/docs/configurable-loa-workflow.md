@@ -14,6 +14,11 @@ unchanged. Approver identities and roles still come from Flowmate Common.
    roles and active membership of the request's processor team. The matrix, not
    the step's team/role fields, determines the approver roles. Configured gates
    select only approvers who satisfy the existing team access policy.
+   Rules may optionally target a specific process subtype; an exact subtype rule
+   takes precedence over a global rule. Choose either role-based approvers or
+   explicitly selected direct users. A rule can also require every generated
+   approver task to approve before the workflow continues; otherwise the first
+   decision wins.
 5. Test with a new request after deploying the schema and service changes together.
 
 Only one explicit approval gate is supported per subtype. A subtype cannot have
@@ -57,7 +62,9 @@ does not advance the guided step: the processor must use **Complete Step**.
   team when assigned to an individual so later approval can still use team access.
 - Existing first-decision-wins behavior is unchanged: the deciding approval task
   is approved/rejected; remaining open approval tasks are cancelled as superseded.
-  This is not a new unanimous or multi-level approval engine.
+  This remains the default. Rules marked as requiring all approvers use a
+  multi-level decision: the request stays Pending Approval until every open
+  approval task is approved; one rejection still terminates the request.
 - A pending request is read-only for ordinary request/task operations. Decisions
   go through `approveLoaRequest` / `rejectLoaRequest` (the existing task actions also
   delegate LoA decisions to the same handler).

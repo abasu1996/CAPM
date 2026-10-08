@@ -147,6 +147,70 @@ sap.ui.define([
         },
 
         async onApprove() {
+            const oContext = this.getView().getBindingContext();
+            const sTaskName = oContext?.getProperty("taskName");
+            const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
+            const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
+
+            if (sTaskName === "GFA Team Confirmation" && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
+                const sDebitGL = (this.byId("gfaDebitGL").getValue() || "").trim();
+
+                if (!sDebitGL) {
+                    MessageBox.warning(this.getText("debitGLRequiredMessage"));
+                    return;
+                }
+
+                if (!sRequestId) {
+                    MessageBox.error(this.getText("selectRequestMessage"));
+                    return;
+                }
+
+                this.showBusy();
+
+                try {
+                    await this.updateEntry(`/ProcessRequests(guid'${sRequestId}')`, {
+                        debitGL: sDebitGL
+                    });
+                } catch (oError) {
+                    this.hideBusy();
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("debitGLSaveErrorMessage")));
+                    return;
+                }
+
+                this.hideBusy();
+            }
+            if (sTaskName === "IV Confirmation and Document Archiving" && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
+                const sVoucherNumber = (this.byId("ivVoucherNumberInput").getValue() || "").trim();
+                const sConfirmationValue = (this.byId("ivConfirmationValueInput").getValue() || "").trim();
+                const sBankStatus = (this.byId("ivBankStatusInput").getValue() || "").trim();
+
+                if (!sVoucherNumber || !sConfirmationValue || !sBankStatus) {
+                    MessageBox.warning(this.getText("ivConfirmationFieldsRequiredMessage"));
+                    return;
+                }
+
+                if (!sRequestId) {
+                    MessageBox.error(this.getText("selectRequestMessage"));
+                    return;
+                }
+
+                this.showBusy();
+
+                try {
+                    await this.updateEntry(`/ProcessRequests(guid'${sRequestId}')`, {
+                        voucherNumber: sVoucherNumber,
+                        ivConfirmationValue: sConfirmationValue,
+                        bankStatus: sBankStatus
+                    });
+                } catch (oError) {
+                    this.hideBusy();
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("ivConfirmationSaveErrorMessage")));
+                    return;
+                }
+
+                this.hideBusy();
+            }
+
             await this._completeTask("approveTask", "taskApprovedMessage");
         },
 

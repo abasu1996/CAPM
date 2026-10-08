@@ -835,34 +835,83 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       if (req.event !== "DELETE") {
-        const bStructuredRule = Boolean(String(req.data.ruleCode || "").trim());
-        const aRoleCodes = String(req.data.approverRoleCodes || req.data.roleCode || "")
+        const sRuleId = req.data.ID || req.params?.at(-1)?.ID;
+        const oExistingRule = req.event === "UPDATE" && sRuleId
+          ? await cds.tx(req).run(SELECT.one.from(LoaApproval).where({ ID: sRuleId }))
+          : null;
+        const valueOf = (sField) => Object.prototype.hasOwnProperty.call(req.data, sField)
+          ? req.data[sField]
+          : oExistingRule?.[sField];
+        const bStructuredRule = Boolean(String(valueOf("ruleCode") || "").trim());
+        const bDirectUsers = this._booleanValue(valueOf("directUserAssignment"));
+        const sSubProcessTypeCode = String(valueOf("subProcessType_code") || "").trim();
+        const aRoleCodes = String(valueOf("approverRoleCodes") || valueOf("roleCode") || "")
           .split(";")
           .map((roleCode) => roleCode.trim())
           .filter(Boolean);
+        const aApproverUserIds = [...new Set(String(valueOf("approverUserIds") || "")
+          .split(";")
+          .map((userId) => userId.trim())
+          .filter(Boolean))];
 
-        if (!aRoleCodes.length || (!bStructuredRule && (
-          req.data.amount === null
-          || req.data.amount === undefined
-          || !req.data.operator_code
+        if ((!bDirectUsers && !aRoleCodes.length) || (bDirectUsers && !aApproverUserIds.length)
+          || (!bStructuredRule && (
+          valueOf("amount") === null
+          || valueOf("amount") === undefined
+          || !valueOf("operator_code")
         ))) {
-          return req.reject(400, "Rule code, amount range, and approver role(s) are required");
+          return req.reject(400, bDirectUsers
+            ? "Rule code, amount range, and at least one direct approver are required"
+            : "Rule code, amount range, and approver role(s) are required");
         }
 
-        if (req.data.minimumAmount !== null && req.data.minimumAmount !== undefined
-          && req.data.maximumAmount !== null && req.data.maximumAmount !== undefined
-          && Number(req.data.minimumAmount) > Number(req.data.maximumAmount)) {
+        if (valueOf("minimumAmount") !== null && valueOf("minimumAmount") !== undefined
+          && valueOf("maximumAmount") !== null && valueOf("maximumAmount") !== undefined
+          && Number(valueOf("minimumAmount")) > Number(valueOf("maximumAmount"))) {
           return req.reject(400, "Minimum amount cannot be greater than maximum amount");
         }
 
-        const aExistingRoles = await this.master.run(
-          SELECT.from(Roles).columns("code").where({ code: { in: aRoleCodes } })
-        );
-        const oExistingRoleCodes = new Set(aExistingRoles.map((role) => role.code));
-        const aMissingRoles = aRoleCodes.filter((roleCode) => !oExistingRoleCodes.has(roleCode));
+        if (sSubProcessTypeCode) {
+          const oSubtype = await cds.tx(req).run(
+            SELECT.one.from(ProcessSubTypes).columns("code", "isActive").where({ code: sSubProcessTypeCode })
+          );
+          if (!oSubtype) {
+            return req.reject(400, `Process subtype not found: ${sSubProcessTypeCode}`);
+          }
+          if (oSubtype.isActive === false) {
+            return req.reject(400, "An LoA rule can only target an active process subtype");
+          }
+        }
 
-        if (aMissingRoles.length) {
-          return req.reject(400, `Approver role(s) not found: ${aMissingRoles.join(", ")}`);
+        if (bDirectUsers) {
+          if (aRoleCodes.length) {
+            return req.reject(400, "Clear approver role codes when direct user assignment is enabled");
+          }
+          const aUsers = await this.master.run(
+            SELECT.from(Users).columns("ID").where({ ID: { in: aApproverUserIds }, isActive: true })
+          );
+          const oActiveUserIds = new Set(aUsers.map((user) => String(user.ID)));
+          const aMissingUsers = aApproverUserIds.filter((userId) => !oActiveUserIds.has(String(userId)));
+          if (aMissingUsers.length) {
+            return req.reject(400, `Direct approver user(s) not found or inactive: ${aMissingUsers.join(", ")}`);
+          }
+        } else {
+          if (aApproverUserIds.length) {
+            return req.reject(400, "Clear direct users when approver role assignment is enabled");
+          }
+          const sApprovalMode = String(valueOf("approvalMode") || "SINGLE").toUpperCase();
+          if (sApprovalMode === "SINGLE" && aRoleCodes.length > 1) {
+            return req.reject(400, "Single approver role mode accepts only one role; use Any Listed Approver Role for alternatives");
+          }
+          const aExistingRoles = await this.master.run(
+            SELECT.from(Roles).columns("code").where({ code: { in: aRoleCodes } })
+          );
+          const oExistingRoleCodes = new Set(aExistingRoles.map((role) => role.code));
+          const aMissingRoles = aRoleCodes.filter((roleCode) => !oExistingRoleCodes.has(roleCode));
+
+          if (aMissingRoles.length) {
+            return req.reject(400, `Approver role(s) not found: ${aMissingRoles.join(", ")}`);
+          }
         }
       }
     });
@@ -1244,6 +1293,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (!oSubProcessType?.loaApprovalApplicable) {
         req.data.amount = null;
         req.data.role = null;
+        req.data.loaRequiresAll = false;
+        req.data.loaApproverSource = null;
+        req.data.loaApproverUserIds = null;
+        req.data.loaApprovalRuleCode = null;
         return;
       }
 
@@ -1294,18 +1347,25 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "Amount is required when LoA approval is applicable");
       }
 
-      const sRoleCode = await this._resolveLoaRole(req, LoaApproval, fAmount, {
+      const oLoaRule = await this._resolveLoaRule(req, LoaApproval, fAmount, {
         ...oExisting,
         ...req.data,
         subProcessType_code: sSubProcessTypeCode
       });
 
-      if (!sRoleCode) {
+      if (!oLoaRule) {
         return req.reject(400, `No LoA approval rule is configured for amount ${fAmount}`);
       }
 
+      const bDirectUsers = this._booleanValue(oLoaRule.directUserAssignment);
       req.data.amount = fAmount;
-      req.data.role = sRoleCode;
+      req.data.role = bDirectUsers
+        ? "DIRECT_USER"
+        : (oLoaRule.approverRoleCodes || oLoaRule.roleCode || "");
+      req.data.loaRequiresAll = this._booleanValue(oLoaRule.requireAllApprovers);
+      req.data.loaApproverSource = bDirectUsers ? "USER" : "ROLE";
+      req.data.loaApproverUserIds = bDirectUsers ? oLoaRule.approverUserIds : null;
+      req.data.loaApprovalRuleCode = oLoaRule.ruleCode || null;
       if (req.event === "CREATE" && req.data.loaBeforeProcessing) {
         req.data.status_code = PROCESS_STATUS.PENDING_APPROVAL;
         req.data.currentStep = req.data.loaStepNo || 0;
@@ -4690,12 +4750,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const oReservationUser = await this._currentReservationUser(req, Users);
     const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
     if (!aTeamIds.length) {
-      req.query.where(this._alwaysFalsePredicate());
+      const qDirectRequests = SELECT.from(this.entities.ProcessRequests)
+        .columns("ID")
+        .where({ loaApproverSource: "USER" });
+      req.query.where([
+        { ref: ["request_ID"] }, "in", qDirectRequests
+      ]);
       return;
     }
     const qTeamRequests = SELECT.from(this.entities.ProcessRequests)
       .columns("ID")
-      .where({ processorTeam_ID: { in: aTeamIds } });
+      .where([
+        { ref: ["processorTeam_ID"] }, "in", { list: aTeamIds.map((sTeamId) => ({ val: sTeamId })) },
+        "or", { ref: ["loaApproverSource"] }, "=", { val: "USER" }
+      ]);
     req.query.where({ request_ID: { in: qTeamRequests } });
   }
 
@@ -5454,18 +5522,21 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return aSteps;
   }
 
-  async _resolveLoaRole(req, LoaApproval, amount, request = {}) {
+  async _resolveLoaRule(req, LoaApproval, amount, request = {}) {
     const aRules = await cds.tx(req).run(
       SELECT.from(LoaApproval).columns(
         "ruleCode", "minimumAmount", "maximumAmount", "minimumInclusive", "maximumInclusive",
-        "approvalMode", "approverRoleCodes", "conditionCode", "priority", "isActive",
+        "approvalMode", "approverRoleCodes", "requireAllApprovers", "directUserAssignment", "approverUserIds",
+        "subProcessType_code", "conditionCode", "priority", "isActive",
         "amount", "operator_code", "roleCode"
       )
     );
     let oWinner = null;
 
     for (const oRule of aRules) {
-      if (oRule.isActive === false || !this._matchesLoaCondition(oRule.conditionCode, request)) {
+      if (oRule.isActive === false
+        || (oRule.subProcessType_code && oRule.subProcessType_code !== request.subProcessType_code)
+        || !this._matchesLoaCondition(oRule.conditionCode, request)) {
         continue;
       }
 
@@ -5492,7 +5563,17 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     }
 
-    return oWinner?.approverRoleCodes || oWinner?.roleCode || "";
+    return oWinner;
+  }
+
+  async _resolveLoaRole(req, LoaApproval, amount, request = {}) {
+    const oWinner = await this._resolveLoaRule(req, LoaApproval, amount, request);
+    if (!oWinner) {
+      return "";
+    }
+    return oWinner.directUserAssignment
+      ? "DIRECT_USER"
+      : (oWinner.approverRoleCodes || oWinner.roleCode || "");
   }
 
   _matchesLoaCondition(conditionCode, request) {
@@ -5511,10 +5592,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   _loaRuleRank(rule) {
     const priority = Number(rule.priority || 0);
     const structured = rule.ruleCode ? 1 : 0;
+    const subtypeSpecific = rule.subProcessType_code ? 1 : 0;
     const upper = rule.maximumAmount === null || rule.maximumAmount === undefined
       ? Number.MAX_SAFE_INTEGER
       : Number(rule.maximumAmount);
-    return priority * 1e18 + structured * 1e17 - upper;
+    return subtypeSpecific * 1e20 + priority * 1e18 + structured * 1e17 - upper;
+  }
+
+  _booleanValue(value) {
+    return value === true || value === 1 || String(value || "").trim().toLowerCase() === "true";
   }
 
   _evaluateLoaOperator(amount, operator, threshold) {
@@ -5836,25 +5922,49 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const existing = await cds.tx(req).run(SELECT.one.from(this.entities.ProcessTasks).columns("ID")
       .where({ request_ID: request.ID, isLoaApproval: true, status_code: TASK_STATUS.OPEN }));
     if (existing) return;
+    const bDirectUsers = request.loaApproverSource === "USER";
     const aRoleCodes = [...new Set(String(request.role || "")
       .split(";")
       .map((value) => value.trim())
       .filter(Boolean))];
+    const aDirectUserIds = [...new Set(String(request.loaApproverUserIds || "")
+      .split(";")
+      .map((value) => value.trim())
+      .filter(Boolean))];
 
-    if (!aRoleCodes.length) {
-      return req.reject(400, "The matching LoA rule does not contain an approver role");
+    if ((!bDirectUsers && !aRoleCodes.length) || (bDirectUsers && !aDirectUserIds.length)) {
+      return req.reject(400, bDirectUsers
+        ? "The matching LoA rule does not contain a direct approver"
+        : "The matching LoA rule does not contain an approver role");
     }
 
-    let aApprovers = await this.master.run(
-      SELECT.from(Users)
-        .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
-        .where({ isActive: true, role_code: { in: aRoleCodes } })
-    );
+    let aApprovers;
+    if (bDirectUsers) {
+      aApprovers = await this.master.run(
+        SELECT.from(Users)
+          .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
+          .where({ isActive: true, ID: { in: aDirectUserIds } })
+      );
+      const oApproversById = new Map(aApprovers.map((approver) => [String(approver.ID), approver]));
+      const aMissingUsers = aDirectUserIds.filter((userId) => !oApproversById.has(String(userId)));
+      if (aMissingUsers.length) {
+        return req.reject(409, `Direct approver user(s) are no longer active: ${aMissingUsers.join(", ")}`);
+      }
+      aApprovers = aDirectUserIds.map((userId) => oApproversById.get(String(userId)));
+    } else {
+      aApprovers = await this.master.run(
+        SELECT.from(Users)
+          .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
+          .where({ isActive: true, role_code: { in: aRoleCodes } })
+      );
+    }
 
     if (!aApprovers.length) {
-      return req.reject(409, `No active user is assigned to the required LoA role(s): ${aRoleCodes.join(", ")}`);
+      return req.reject(409, bDirectUsers
+        ? "No active direct LoA approver is maintained"
+        : `No active user is assigned to the required LoA role(s): ${aRoleCodes.join(", ")}`);
     }
-    if (request.loaWorkflowMode === "GUIDED") {
+    if (request.loaWorkflowMode === "GUIDED" && !bDirectUsers) {
       const memberships = await Promise.all(aApprovers.map((user) => this._activeTeamIdsForUser(user.ID)));
       aApprovers = aApprovers.filter((user, index) => memberships[index].includes(request.processorTeam_ID));
       if (!aApprovers.length) {
@@ -5878,7 +5988,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         stepNo: request.loaWorkflowMode === "GUIDED" ? request.loaStepNo : 0,
         taskName: "LoA Approval",
         assignedTo: sDisplayName,
-        role: approver.role_code,
+        role: bDirectUsers ? "DIRECT_USER" : approver.role_code,
         isMandatory: true,
         isTeamTask: false,
         isLoaApproval: true,
@@ -5895,7 +6005,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       actor: req.user?.id,
       oldStatus: previousStatus,
       newStatus: PROCESS_STATUS.PENDING_APPROVAL,
-      remarks: `Approval requested from ${aApprovers.length} eligible user(s) for role(s) ${aRoleCodes.join(", ")}`
+      remarks: bDirectUsers
+        ? `Approval requested from ${aApprovers.length} selected direct user(s)`
+        : `Approval requested from ${aApprovers.length} eligible user(s) for role(s) ${aRoleCodes.join(", ")}`
     });
   }
 
@@ -5913,8 +6025,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
     if (!this._isAdministrator(req)) {
       const oReservationUser = await this._currentReservationUser(req, Users);
-      const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID);
-      if (!request.processorTeam_ID || !aTeamIds.includes(request.processorTeam_ID)) {
+      const bDirectApprover = request.loaApproverSource === "USER";
+      const aTeamIds = bDirectApprover ? [] : await this._activeTeamIdsForUser(oReservationUser.user.ID);
+      if (!bDirectApprover && (!request.processorTeam_ID || !aTeamIds.includes(request.processorTeam_ID))) {
         return req.reject(403, "Only an active member of the request's processor team can decide this LoA approval");
       }
     }
@@ -5923,14 +6036,34 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
 
     const bApproved = decision === "APPROVED";
-    await cds.tx(req).run([
-      UPDATE(this.entities.ProcessTasks, task.ID).set({
-        status_code: bApproved ? TASK_STATUS.APPROVED : TASK_STATUS.REJECTED,
-        decision,
-        remarks,
-        completedAt: this._now()
-      }),
-      UPDATE(this.entities.ProcessTasks).set({
+    const tx = cds.tx(req);
+    await tx.run(UPDATE(this.entities.ProcessTasks, task.ID).set({
+      status_code: bApproved ? TASK_STATUS.APPROVED : TASK_STATUS.REJECTED,
+      decision,
+      remarks,
+      completedAt: this._now()
+    }));
+
+    // A multi-level rule keeps the request pending until every generated approval task
+    // has approved. Rejection still terminates the approval immediately.
+    const bRequiresAll = this._booleanValue(request.loaRequiresAll);
+    if (bApproved && bRequiresAll) {
+      const aPendingApprovals = await tx.run(SELECT.from(this.entities.ProcessTasks).columns("ID")
+        .where({ request_ID: task.request_ID, isLoaApproval: true, status_code: TASK_STATUS.OPEN }));
+      if (aPendingApprovals.length) {
+        await this._writeHistory(req, {
+          requestId: task.request_ID,
+          stepNo: request.loaWorkflowMode === "GUIDED" ? request.loaStepNo : 0,
+          action: "LOA_APPROVAL_PARTIALLY_APPROVED",
+          actor: req.user?.id,
+          oldStatus: PROCESS_STATUS.PENDING_APPROVAL,
+          newStatus: PROCESS_STATUS.PENDING_APPROVAL,
+          remarks: `${aPendingApprovals.length} approval(s) still required`
+        });
+        return true;
+      }
+    } else if (!bApproved || !bRequiresAll) {
+      await tx.run(UPDATE(this.entities.ProcessTasks).set({
         status_code: TASK_STATUS.CANCELLED,
         decision: "SUPERSEDED",
         completedAt: this._now()
@@ -5939,13 +6072,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         isLoaApproval: true,
         status_code: TASK_STATUS.OPEN,
         ID: { "!=": task.ID }
-      }),
-      UPDATE(this.entities.ProcessRequests, task.request_ID).set({
-        status_code: bApproved ? PROCESS_STATUS.DRAFT : PROCESS_STATUS.REJECTED,
-        loaApprovalState: bApproved ? "APPROVED" : "REJECTED",
-        completedAt: bApproved ? null : this._now()
-      })
-    ]);
+      }));
+    }
+
+    await tx.run(UPDATE(this.entities.ProcessRequests, task.request_ID).set({
+      status_code: bApproved ? PROCESS_STATUS.DRAFT : PROCESS_STATUS.REJECTED,
+      loaApprovalState: bApproved ? "APPROVED" : "REJECTED",
+      completedAt: bApproved ? null : this._now()
+    }));
 
     const oReservationUser = await this._currentReservationUser(req, Users);
     const oApprover = oReservationUser.user;

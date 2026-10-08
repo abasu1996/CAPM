@@ -33,7 +33,8 @@ function fixture(t, { upfront = false, last = false, legacy = false } = {}) {
     ProcessRequests: [request], ProcessStepConfig: steps, Invoices: [],
     ProcessSubTypes: [{ code: "TEST", loaApprovalApplicable: true }],
     ProcessTasks: upfront ? [] : [{ ID: "validation", request_ID: "r1", stepNo: 1, status_code: "APPROVED", isMandatory: true }],
-    Users: [1, 2].map((n) => ({ ID: `approver${n}`, displayName: `Approver ${n}`, email: `approver${n}@example.com`, isActive: true, role_code: "MANAGER" }))
+    Users: [1, 2].map((n) => ({ ID: `approver${n}`, displayName: `Approver ${n}`, email: `approver${n}@example.com`, isActive: true, role_code: "MANAGER" })),
+    LoaApproval: []
   };
   const queries = [], history = [], notifications = [];
   const value = (term, row) => term?.ref ? row[term.ref.at(-1)] : term?.list ? term.list.map((entry) => value(entry, row)) : term?.val;
@@ -158,6 +159,34 @@ test("rejection stops the workflow without generating the next processing task",
   assert.equal(request.status_code, "REJECTED");
   assert.equal(request.loaApprovalState, "REJECTED");
   assert.equal(rows.ProcessTasks.some((task) => task.stepNo === 3), false);
+});
+
+test("multi-level LoA keeps the request pending until every approver approves", async (t) => {
+  const f = fixture(t);
+  const { service: s, req, request, rows, steps } = f;
+  request.loaRequiresAll = true;
+  await s._startConfiguredLoa(req, "r1", steps[1]);
+  const approvals = rows.ProcessTasks.filter((task) => task.isLoaApproval);
+  await s._decideLoaApproval(req, approvals[0], "APPROVED", "First approval");
+  assert.equal(request.status_code, "PENDING_APPROVAL");
+  assert.equal(request.loaApprovalState, "PENDING");
+  assert.equal(approvals[1].status_code, "OPEN");
+  await s._decideLoaApproval(req, approvals[1], "APPROVED", "Final approval");
+  assert.equal(request.status_code, "IN_PROGRESS");
+  assert.equal(request.loaApprovalState, "APPROVED");
+  assert.equal(approvals.every((task) => task.status_code === "APPROVED"), true);
+});
+
+test("direct-user LoA creates approval tasks for selected users without role matching", async (t) => {
+  const f = fixture(t);
+  const { service: s, req, request, rows } = f;
+  request.loaApproverSource = "USER";
+  request.loaApproverUserIds = "approver2";
+  request.role = "DIRECT_USER";
+  await s._createLoaApprovalTasks(req, request);
+  const task = rows.ProcessTasks.find((entry) => entry.isLoaApproval);
+  assert.equal(task.assignedUser_ID, "approver2");
+  assert.equal(task.role, "DIRECT_USER");
 });
 
 test("a final LoA step completes the request after approval", async (t) => {

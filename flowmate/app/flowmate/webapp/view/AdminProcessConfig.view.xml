@@ -368,10 +368,13 @@
                                 <columns>
                                     <Column><Text text="{i18n>loaRuleCodeLabel}" /></Column>
                                     <Column><Text text="{i18n>loaDescriptionLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaProcessSubtypeLabel}" /></Column>
                                     <Column><Text text="{i18n>loaMinimumAmountLabel}" /></Column>
                                     <Column><Text text="{i18n>loaMaximumAmountLabel}" /></Column>
                                     <Column><Text text="{i18n>loaApprovalModeLabel}" /></Column>
                                     <Column><Text text="{i18n>loaApproverRolesLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaDirectUsersLabel}" /></Column>
+                                    <Column><Text text="{i18n>loaApprovalRequirementLabel}" /></Column>
                                     <Column><Text text="{i18n>activeLabel}" /></Column>
                                     <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
@@ -380,10 +383,15 @@
                                         <cells>
                                             <Text text="{ruleCode}" />
                                             <Text text="{description}" wrapping="true" />
+                                            <Text text="{= ${subProcessType_code} || ${i18n>loaAllSubProcessesText} }" wrapping="true" />
                                             <ObjectNumber number="{minimumAmount}" />
                                             <ObjectNumber number="{maximumAmount}" />
                                             <Text text="{approvalMode}" />
                                             <Text text="{approverRoleCodes}" wrapping="true" />
+                                            <Text text="{approverUserIds}" wrapping="true" />
+                                            <ObjectStatus
+                                                text="{= ${requireAllApprovers} ? ${i18n>loaAllApproversText} : ${i18n>loaAnyApproverText} }"
+                                                state="{= ${requireAllApprovers} ? 'Warning' : 'Information' }" />
                                             <ObjectStatus text="{= ${isActive} ? ${i18n>activeStatusText} : ${i18n>inactiveStatusText} }" state="{= ${isActive} ? 'Success' : 'None' }" />
                                             <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editLoaApprovalButton}" press=".onEditLoaApproval" />
                                         </cells>
@@ -848,6 +856,10 @@
                     <Input value="{loaApprovalEdit>/ruleCode}" enabled="{= !${loaApprovalEdit>/isEdit} }" required="true" />
                     <Label text="{i18n>loaDescriptionLabel}" />
                     <Input value="{loaApprovalEdit>/description}" />
+                    <Label text="{i18n>loaProcessSubtypeLabel}" />
+                    <Select selectedKey="{loaApprovalEdit>/subProcessType_code}" items="{path: '/ProcessSubTypes', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}" forceSelection="false">
+                        <core:Item key="{code}" text="{name}" additionalText="{code}" />
+                    </Select>
                     <Label text="{i18n>loaMinimumAmountLabel}" />
                     <Input value="{loaApprovalEdit>/minimumAmount}" type="Number" />
                     <Label text="{i18n>loaMinimumInclusiveLabel}" />
@@ -857,12 +869,33 @@
                     <Label text="{i18n>loaMaximumInclusiveLabel}" />
                     <CheckBox selected="{loaApprovalEdit>/maximumInclusive}" />
                     <Label text="{i18n>loaApprovalModeLabel}" required="true" />
-                    <Select selectedKey="{loaApprovalEdit>/approvalMode}" required="true">
+                    <Select selectedKey="{loaApprovalEdit>/approvalMode}" enabled="{= !${loaApprovalEdit>/directUserAssignment} }" required="true">
                         <core:Item key="SINGLE" text="{i18n>loaApprovalModeSingle}" />
                         <core:Item key="ANY" text="{i18n>loaApprovalModeAny}" />
                     </Select>
-                    <Label text="{i18n>loaApproverRolesLabel}" required="true" />
-                    <Input value="{loaApprovalEdit>/approverRoleCodes}" placeholder="{i18n>loaApproverRolesPlaceholder}" required="true" />
+                    <Label text="{i18n>loaRequireAllApproversLabel}" />
+                    <CheckBox selected="{loaApprovalEdit>/requireAllApprovers}" text="{i18n>loaRequireAllApproversText}" />
+                    <Label text="{i18n>loaDirectUserAssignmentLabel}" />
+                    <CheckBox selected="{loaApprovalEdit>/directUserAssignment}" text="{i18n>loaDirectUserAssignmentText}" select=".onLoaDirectUserAssignmentSelect" />
+                    <Label text="{i18n>loaApproverRolesLabel}" required="{= !${loaApprovalEdit>/directUserAssignment} }" />
+                    <Input
+                        value="{loaApprovalEdit>/approverRoleCodes}"
+                        enabled="{= !${loaApprovalEdit>/directUserAssignment} }"
+                        placeholder="{i18n>loaApproverRolesPlaceholder}"
+                        required="{= !${loaApprovalEdit>/directUserAssignment} }" />
+                    <Label text="{i18n>loaDirectUsersLabel}" required="{loaApprovalEdit>/directUserAssignment}" />
+                    <MultiInput
+                        enabled="{loaApprovalEdit>/directUserAssignment}"
+                        showValueHelp="true"
+                        valueHelpOnly="true"
+                        valueHelpRequest=".onLoaDirectUsersValueHelpRequest"
+                        tokenUpdate=".onLoaDirectUserTokenUpdate"
+                        placeholder="{i18n>loaDirectUsersPlaceholder}"
+                        tokens="{loaApprovalEdit>/directUsers}">
+                        <tokens>
+                            <Token key="{ID}" text="{displayName}" />
+                        </tokens>
+                    </MultiInput>
                     <Label text="{i18n>loaConditionCodeLabel}" />
                     <Input value="{loaApprovalEdit>/conditionCode}" />
                     <Label text="{i18n>loaConditionDescriptionLabel}" />
@@ -1149,6 +1182,36 @@
                 <cells>
                     <Text text="{teamCode}" />
                     <Text text="{name}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+        <TableSelectDialog
+            id="loaDirectUsersValueHelpDialog"
+            title="{i18n>loaDirectUsersValueHelpTitle}"
+            noDataText="{i18n>loaNoDirectUsersText}"
+            rememberSelections="true"
+            multiSelect="true"
+            search=".onLoaDirectUsersValueHelpSearch"
+            confirm=".onLoaDirectUsersValueHelpConfirm"
+            cancel=".onLoaDirectUsersValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+                <Column><Text text="{i18n>approverRoleLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
+                    <Text text="{role_code}" />
                 </cells>
             </ColumnListItem>
         </TableSelectDialog>

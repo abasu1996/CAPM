@@ -16,7 +16,9 @@ sap.ui.define([
                 tasksCount: 0,
                 tasksState: "Loading",
                 teamTasksCount: 0,
-                teamTasksState: "Loading"
+                teamTasksState: "Loading",
+                internalTeamCount: 0,
+                internalTeamState: "Loading"
             }), "dashboard");
             this.getRouter().getRoute("RouteDashboard").attachPatternMatched(this.onRouteMatched, this);
         },

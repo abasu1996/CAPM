@@ -7,7 +7,7 @@ sap.ui.define([
     "sap/m/MessageToast"
 ], (BaseController, Filter, FilterOperator, JSONModel, MessageBox, MessageToast) => {
     "use strict";
-
+//Code list for the different configuration entities with their corresponding table IDs and title keys for display purposes.
     const CODE_LISTS = {
         ProcessTypes: { tableId: "processTypesTable", titleKey: "processTypesConfigTitle" },
         PaymentCategories: { tableId: "paymentCategoriesTable", titleKey: "paymentCategoriesConfigTitle" },
@@ -112,14 +112,16 @@ sap.ui.define([
             ]);
         },
 
-        onSearchLoa(oEvent) {
-            this._filterTable(oEvent, "loaApprovalTable", [
-                "ruleCode",
-                "description",
-                "approverRoleCodes",
-                "conditionCode",
-                "conditionDescription",
-                "remarks"
+    onSearchLoa(oEvent) {
+        this._filterTable(oEvent, "loaApprovalTable", [
+            "ruleCode",
+            "description",
+            "subProcessType_code",
+            "approverRoleCodes",
+            "approverUserIds",
+            "conditionCode",
+            "conditionDescription",
+            "remarks"
             ]);
         },
 
@@ -330,6 +332,11 @@ sap.ui.define([
 
             this.getView().getModel("loaApprovalEdit").setData({
                 ...oEntry,
+                directUsers: String(oEntry.approverUserIds || "")
+                    .split(";")
+                    .map((sUserId) => sUserId.trim())
+                    .filter(Boolean)
+                    .map((sUserId) => ({ ID: sUserId, displayName: sUserId })),
                 isEdit: true,
                 dialogTitle: this.getText("editLoaApprovalButton")
             });
@@ -340,17 +347,89 @@ sap.ui.define([
             this.byId("loaApprovalDialog").close();
         },
 
+        onLoaDirectUserAssignmentSelect(oEvent) {
+            const bSelected = oEvent.getParameter("selected");
+            const oModel = this.getView().getModel("loaApprovalEdit");
+            oModel.setProperty("/directUserAssignment", bSelected);
+        },
+
+        onLoaDirectUsersValueHelpRequest() {
+            this.byId("loaDirectUsersValueHelpDialog").open();
+        },
+
+        onLoaDirectUsersValueHelpSearch(oEvent) {
+            const sQuery = oEvent.getParameter("value") || "";
+            const oBinding = oEvent.getSource().getBinding("items");
+            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+            if (sQuery.trim()) {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("displayName", FilterOperator.Contains, sQuery),
+                        new Filter("email", FilterOperator.Contains, sQuery),
+                        new Filter("userPrincipalName", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                }));
+            }
+            oBinding.filter(aFilters);
+        },
+
+        onLoaDirectUsersValueHelpConfirm(oEvent) {
+            const aSelectedItems = oEvent.getParameter("selectedItems") || [];
+            const oModel = this.getView().getModel("loaApprovalEdit");
+            const aExisting = oModel.getProperty("/directUsers") || [];
+            const oById = new Map(aExisting.filter((oUser) => oUser?.ID).map((oUser) => [String(oUser.ID), oUser]));
+
+            aSelectedItems.forEach((oItem) => {
+                const oContext = oItem.getBindingContext();
+                if (!oContext) return;
+                const oUser = oContext.getObject();
+                oById.set(String(oUser.ID), {
+                    ID: oUser.ID,
+                    displayName: oUser.displayName || oUser.email || oUser.ID,
+                    email: oUser.email
+                });
+            });
+
+            const aUsers = [...oById.values()];
+            oModel.setProperty("/directUsers", aUsers);
+            oModel.setProperty("/approverUserIds", aUsers.map((oUser) => oUser.ID).join(";"));
+            this.onLoaDirectUsersValueHelpClose(oEvent);
+        },
+
+        onLoaDirectUserTokenUpdate(oEvent) {
+            if (oEvent.getParameter("type") !== "removed") return;
+            const aRemovedKeys = (oEvent.getParameter("removedTokens") || [])
+                .map((oToken) => String(oToken.getKey() || ""));
+            const oModel = this.getView().getModel("loaApprovalEdit");
+            const aUsers = (oModel.getProperty("/directUsers") || [])
+                .filter((oUser) => !aRemovedKeys.includes(String(oUser.ID)));
+            oModel.setProperty("/directUsers", aUsers);
+            oModel.setProperty("/approverUserIds", aUsers.map((oUser) => oUser.ID).join(";"));
+        },
+
+        onLoaDirectUsersValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
+        },
+
         async onSaveLoaApproval() {
             const oEntry = this.getView().getModel("loaApprovalEdit").getData();
             const sRuleCode = String(oEntry.ruleCode || "").trim();
             const sApproverRoleCodes = String(oEntry.approverRoleCodes || "").trim();
+            const aDirectUsers = (oEntry.directUsers || []).filter((oUser) => oUser?.ID);
+            const sApproverUserIds = [...new Set(aDirectUsers.map((oUser) => String(oUser.ID).trim()).filter(Boolean))].join(";");
+            const bDirectUsers = Boolean(oEntry.directUserAssignment);
             const fMinimumAmount = this._optionalNumber(oEntry.minimumAmount);
             const fMaximumAmount = this._optionalNumber(oEntry.maximumAmount);
 
-            if (!sRuleCode || !sApproverRoleCodes
-                || (fMinimumAmount !== null && !Number.isFinite(fMinimumAmount))
-                || (fMaximumAmount !== null && !Number.isFinite(fMaximumAmount))
-                || (fMinimumAmount !== null && fMaximumAmount !== null && fMinimumAmount > fMaximumAmount)) {
+        if (!sRuleCode || (bDirectUsers ? !sApproverUserIds : !sApproverRoleCodes)
+            || (!bDirectUsers && String(oEntry.approvalMode || "SINGLE").toUpperCase() === "SINGLE"
+                && sApproverRoleCodes.split(";").map((sRole) => sRole.trim()).filter(Boolean).length > 1)
+            || (fMinimumAmount !== null && !Number.isFinite(fMinimumAmount))
+            || (fMaximumAmount !== null && !Number.isFinite(fMaximumAmount))
+            || (fMinimumAmount !== null && fMaximumAmount !== null && fMinimumAmount > fMaximumAmount)) {
                 MessageBox.warning(this.getText("loaApprovalRequiredMessage"));
                 return;
             }
@@ -362,12 +441,16 @@ sap.ui.define([
                 payload: {
                     ruleCode: sRuleCode,
                     description: String(oEntry.description || "").trim(),
+                    subProcessType_code: oEntry.subProcessType_code || null,
                     minimumAmount: fMinimumAmount,
                     maximumAmount: fMaximumAmount,
                     minimumInclusive: oEntry.minimumInclusive !== false,
                     maximumInclusive: oEntry.maximumInclusive !== false,
                     approvalMode: oEntry.approvalMode || "SINGLE",
-                    approverRoleCodes: sApproverRoleCodes,
+                    approverRoleCodes: bDirectUsers ? null : sApproverRoleCodes,
+                    requireAllApprovers: Boolean(oEntry.requireAllApprovers),
+                    directUserAssignment: bDirectUsers,
+                    approverUserIds: bDirectUsers ? sApproverUserIds : null,
                     conditionCode: String(oEntry.conditionCode || "").trim() || null,
                     conditionDescription: String(oEntry.conditionDescription || "").trim() || null,
                     priority: Number(oEntry.priority || 0),
@@ -657,6 +740,9 @@ sap.ui.define([
 
             this.getView().getModel("stepEdit").setData({
                 ...oEntry,
+                stepType: oEntry.stepType || "PROCESSING",
+                isActiveDemandTask: Boolean(oEntry.isActiveDemandTask),
+                isVendorNotification: Boolean(oEntry.isVendorNotification),
                 isEdit: true,
                 dialogTitle: this.getText("editProcessStepButton")
             });
@@ -665,6 +751,18 @@ sap.ui.define([
 
         onCloseProcessStepDialog() {
             this.byId("processStepDialog").close();
+            this._reconcileDataRequestBusyState();
+        },
+
+        onStepTypeChange() {
+            const oModel = this.getView().getModel("stepEdit");
+            if (oModel.getProperty("/stepType") === "LOA") {
+                oModel.setProperty("/processorTeam_ID", null);
+                oModel.setProperty("/processorTeamName", null);
+                oModel.setProperty("/role", null);
+                oModel.setProperty("/isVendorNotification", false);
+                oModel.setProperty("/isActiveDemandTask", false);
+            }
         },
 
         async onSaveProcessStep() {
@@ -674,16 +772,19 @@ sap.ui.define([
                 MessageBox.warning(this.getText("processStepRequiredMessage"));
                 return;
             }
-
+            const bRequesterNotification = Boolean(oEntry.isVendorNotification);
             const oPayload = {
                 subProcessType_code: oEntry.subProcessType_code,
                 stepNo: Number(oEntry.stepNo),
                 stepName: oEntry.stepName,
+                stepType: oEntry.stepType || "PROCESSING",
                 activityDescription: oEntry.activityDescription,
-                processorTeam_ID: oEntry.processorTeam_ID || null,
-                processorTeamName: oEntry.processorTeamName || null,
+                processorTeam_ID: bRequesterNotification ? null : (oEntry.processorTeam_ID || null),
+                processorTeamName: bRequesterNotification ? null : (oEntry.processorTeamName || null),
                 role: oEntry.role,
-                slaDays: this._optionalNumber(oEntry.slaDays)
+                slaDays: this._optionalNumber(oEntry.slaDays),
+                isActiveDemandTask: Boolean(oEntry.isActiveDemandTask),
+                isVendorNotification: bRequesterNotification
             };
 
             this.showBusy();
@@ -798,7 +899,16 @@ sap.ui.define([
             oModel.setProperty("/processorTeam_ID", "");
             oModel.setProperty("/processorTeamName", "");
         },
+         onStepVendorNotificationSelect(oEvent) {
+            if (!oEvent.getParameter("selected")) {
+                return;
+            }
 
+            const oModel = this.getView().getModel("stepEdit");
+
+            oModel.setProperty("/processorTeam_ID", "");
+            oModel.setProperty("/processorTeamName", "");
+        },
         onAddSubType() {
             const oEntry = this._emptySubType();
 
@@ -886,11 +996,14 @@ sap.ui.define([
                 subProcessType_code: "",
                 stepNo: "",
                 stepName: "",
+                stepType: "PROCESSING",
                 activityDescription: "",
                 processorTeam_ID: "",
                 processorTeamName: "",
                 role: "",
-                slaDays: ""
+                slaDays: "",
+                isActiveDemandTask: false,
+                isVendorNotification: false
             };
         },
 
@@ -1003,12 +1116,17 @@ sap.ui.define([
                 ID: "",
                 ruleCode: "",
                 description: "",
+                subProcessType_code: "",
                 minimumAmount: "",
                 maximumAmount: "",
                 minimumInclusive: true,
                 maximumInclusive: true,
                 approvalMode: "SINGLE",
                 approverRoleCodes: "",
+                requireAllApprovers: false,
+                directUserAssignment: false,
+                approverUserIds: "",
+                directUsers: [],
                 conditionCode: "",
                 conditionDescription: "",
                 priority: 0,
