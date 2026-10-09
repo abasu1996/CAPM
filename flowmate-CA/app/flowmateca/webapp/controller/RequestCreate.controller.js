@@ -960,7 +960,13 @@ sap.ui.define([
           contentWidth: "48rem",
           stretchOnPhone: true,
           content: [form],
-          beginButton: new Button({ text: "Save", type: "Emphasized", press: this._savePaymentRunGridRow.bind(this, gridName) }),
+          beginButton: new Button({
+            text: "Save",
+            type: "Emphasized",
+            press: function () {
+              this._savePaymentRunGridRow(gridName, dialog);
+            }.bind(this)
+          }),
           endButton: new Button({ text: "Cancel", press: function () { dialog.close(); } })
         });
         this.getView().addDependent(dialog);
@@ -976,7 +982,7 @@ sap.ui.define([
       return value === undefined || value === null || String(value).trim() === "";
     },
 
-    _savePaymentRunGridRow: function (gridName) {
+    _savePaymentRunGridRow: function (gridName, dialog) {
       const definition = PAYMENT_RUN_GRIDS[gridName];
       const model = this.getView().getModel("paymentRunGridEdit");
       const data = model.getData();
@@ -1035,18 +1041,21 @@ sap.ui.define([
         row.totalCostLKR = foreign * exchange;
       }
       const paymentRun = this.getView().getModel("paymentRun");
-      const rows = paymentRun.getProperty(`/details/${gridName}`) || [];
+      // Do not mutate the bound array before publishing the saved row.
+      const rows = (paymentRun.getProperty(`/details/${gridName}`) || []).slice();
       if (data._editIndex !== undefined && data._editIndex !== null && data._editIndex >= 0) {
         rows[data._editIndex] = row;
       } else {
         rows.push(row);
       }
-      paymentRun.setProperty(`/details/${gridName}`, rows);
+      // Refresh table bindings on the next turn so nested-dialog closure is not
+      // interrupted by synchronous table rendering or focus handling.
+      paymentRun.setProperty(`/details/${gridName}`, rows, null, true);
       if (gridName === "invoices") {
         const amounts = rows.map(function (entry) { return Number(entry.amount); }).filter(Number.isFinite);
-        paymentRun.setProperty("/details/highestInvoiceValue", amounts.length ? Math.max.apply(null, amounts) : null);
+        paymentRun.setProperty("/details/highestInvoiceValue", amounts.length ? Math.max.apply(null, amounts) : null, null, true);
       }
-      this._paymentRunGridDialogs[gridName].close();
+      (dialog || this._paymentRunGridDialogs[gridName]).close();
     },
 
     _onPaymentRunGridEdit: function (gridName, event) {
