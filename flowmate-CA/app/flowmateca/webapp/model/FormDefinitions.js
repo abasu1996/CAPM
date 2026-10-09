@@ -927,6 +927,12 @@ sap.ui.define([], function () {
     PURCHASE_ORDER: [
       column("materialOrService", "Service Code / Material Code"),
       column("wbsElement", "WBS Element / Cost Center / Budget Code", "combo", { entity: "Wbs", key: "wbsElement", text: "wbsElement" }),
+      column("costCenter", "Cost Center", "combo", {
+        entity: "CostCenter", key: "costCenterCode", text: "costCenterName", secondaryText: "costCenterCode"
+      }),
+      column("budgetCode", "Budget Code", "combo", {
+        entity: "BudgetCode", key: "budgetCode", text: "budgetCodeDescription", secondaryText: "budgetCode"
+      }),
       column("quantity", "Quantity", "number"),
       column("unitPrice", "Unit Price", "number"),
       column("currency", "Currency", "combo", { entity: "Currencies" }),

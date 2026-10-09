@@ -120,7 +120,10 @@ sap.ui.define([
           return;
         }
         try {
-          const row = await this.request(`${definition.entity}(${value})`);
+          const path = `${definition.entity}(${value})`;
+          const row = await this.request(path).catch(function () {
+            return this.requestMaster(path);
+          }.bind(this));
           const label = row && row[definition.text || "name"];
           if (label) {
             model.setProperty(`/detailFields/${index}/value`, String(label));

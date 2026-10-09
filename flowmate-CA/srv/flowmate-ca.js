@@ -42,7 +42,8 @@ const ITEMS_ENTITY_BY_REQUEST_TYPE = {
 
 // Second row table carried in details.headers (Outline Contract - New Contract).
 const HEADERS_ENTITY_BY_REQUEST_TYPE = {
-  OUTLINE_CONTRACT: "OutlineContractHeaders"
+  OUTLINE_CONTRACT: "OutlineContractHeaders",
+  SERVICE_ENTRY_SHEET: "ServiceEntrySheetHeaders"
 };
 
 // Contract Modification change tables: details.<key> rows are stored in

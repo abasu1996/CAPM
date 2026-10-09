@@ -134,6 +134,7 @@ entity Divisions : cuid, managed {
 entity ApplicableTaxes : cuid, managed {
   taxCode : String(40) not null;
   taxDescription : String(180) not null;
+  taxRate : Decimal(7,3) default 0;
   isActive     : Boolean default true;
 }
 
@@ -299,5 +300,11 @@ entity ExtensionMaterialGroup : cuid, managed {
 entity ContractType : cuid, managed {
   contractTypeCode : String(40) not null;
   contractTypeDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+entity BudgetCode : cuid, managed {
+  budgetCode : String(40) not null;
+  budgetCodeDescription : String(180) not null;
   isActive : Boolean default true;
 }

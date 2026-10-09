@@ -620,6 +620,19 @@ entity PurchaseOrderDetails : cuid, managed {
   vendorCode              : String(40);
   poValueWithTaxes        : Decimal(17,2);
   procurementValue        : Decimal(17,2);
+  // Optional procurement/accounting attributes used by the newer PO form.
+  procurementType         : String(20);
+  centralizedProcurementId: String(80);
+  psrId                   : String(20);
+  wbsApplicable           : Boolean default false;
+  costCenterApplicable    : Boolean default false;
+  costCenter              : String(80);
+  budgetCodeApplicable    : Boolean default false;
+  budgetCode              : String(40);
+  applicableTax           : String(40);
+  clearanceCharge         : Decimal(17,2);
+  sesDraft                : LargeString;
+  purchaseOrderNumber     : String(80);
   items                   : Composition of many PurchaseOrderItems
                               on items.details = $self;
 }
@@ -644,6 +657,8 @@ entity PurchaseOrderItems : cuid, managed {
   itemCategory     : String(40);
   accountAssignment: String(80);
   materialGroup    : String(40);
+  costCenter       : String(80);
+  budgetCode       : String(40);
 }
 
 entity ServiceEntrySheetDetails : cuid, managed {
@@ -675,6 +690,25 @@ entity ServiceEntrySheetDetails : cuid, managed {
   comment          : LargeString;
   items            : Composition of many ServiceEntrySheetItems
                        on items.details = $self;
+  headers          : Composition of many ServiceEntrySheetHeaders
+                       on headers.details = $self;
+}
+
+// One row per SES header entry, captured in the Header Creation table (Multiple Line).
+entity ServiceEntrySheetHeaders : cuid, managed {
+  details               : Association to ServiceEntrySheetDetails not null;
+  itemNo                : Integer;
+  sourceMode             : String(40);
+  purchaseOrderNo       : String(80);
+  existingSesNo         : String(80);
+  foreignCurrency       : Boolean default false;
+  totalValue            : Decimal(17,2);
+  paymentRequestRequired: Boolean default false;
+  remarks               : LargeString;
+  sesPaymentOption      : String(40);
+  sesRecipientEmail     : String(255);
+  specialPersonArea     : String(80);
+  comment               : LargeString;
 }
 
 entity ServiceEntrySheetItems : cuid, managed {

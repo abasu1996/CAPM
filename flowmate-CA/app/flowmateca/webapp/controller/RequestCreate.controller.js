@@ -71,7 +71,8 @@ sap.ui.define([
     "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
     "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments",
-    "ContractType", "PurchasingOrganizations", "CompanyCodes", "Incoterms", "CostCenter", "ApplicableTaxes"
+    "ContractType", "PurchasingOrganizations", "CompanyCodes", "Incoterms", "CostCenter", "ApplicableTaxes",
+    "BudgetCode"
   ]);
 
   // Editable row tables on the create page. "items" is the line-item table every multi-line

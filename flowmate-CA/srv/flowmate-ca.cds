@@ -112,6 +112,7 @@ service FlowmateCAService {
   entity PurchaseOrderItems as projection on db.PurchaseOrderItems;
   entity ServiceEntrySheetDetails as projection on db.ServiceEntrySheetDetails;
   entity ServiceEntrySheetItems as projection on db.ServiceEntrySheetItems;
+  entity ServiceEntrySheetHeaders as projection on db.ServiceEntrySheetHeaders;
 
   function getDashboardCounts() returns DashboardCounts;
   function getCurrentUser() returns CurrentUser;
@@ -259,4 +260,5 @@ service CAMasterDataService {
    entity Projects as projection on common.Projects;
    entity ExtensionMaterialGroup as projection on common.ExtensionMaterialGroup;
    entity ContractType as projection on common.ContractType;
+   entity BudgetCode as projection on common.BudgetCode;
 }

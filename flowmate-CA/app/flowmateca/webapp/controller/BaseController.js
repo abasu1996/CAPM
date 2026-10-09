@@ -241,7 +241,9 @@ sap.ui.define([
           // Outline contracts also carry header rows and Contract Modification change rows.
           return navigation === DETAIL_NAVIGATION.OUTLINE_CONTRACT
             ? `${navigation}($expand=items,headers,changeItems)`
-            : `${navigation}($expand=items)`;
+            : navigation === DETAIL_NAVIGATION.SERVICE_ENTRY_SHEET
+              ? `${navigation}($expand=items,headers)`
+              : `${navigation}($expand=items)`;
         })
         .join(",");
     },

@@ -130,6 +130,7 @@ service CommonMasterDataService {
     key ID       : UUID;
         taxCode   : String(40);
         taxDescription : String(180);
+        taxRate : Decimal(7,3);
         isActive : Boolean;
   }
   @cds.persistence.skip
@@ -333,6 +334,14 @@ service CommonMasterDataService {
     key ID : UUID;
     contractTypeCode : String(40) not null;
     contractTypeDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity BudgetCode {
+    key ID : UUID;
+    budgetCode : String(40) not null;
+    budgetCodeDescription : String(180) not null;
     isActive : Boolean default true;
   }
 }

@@ -277,6 +277,12 @@ entity Customers as projection on db.Customers;
   entity ContractType as projection on db.ContractType;
 
   @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity BudgetCode as projection on db.BudgetCode;
+
+  @restrict: [
     { grant: '*', to: ['MasterDataAdmin', 'UserProvisioning'] }
   ]
   action createUserWithTeams(

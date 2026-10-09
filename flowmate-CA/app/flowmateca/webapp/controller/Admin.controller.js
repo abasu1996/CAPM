@@ -51,6 +51,7 @@ sap.ui.define([
         incoterms: [],
         contractTypes: [],
         costCenters: [],
+        budgetCodes: [],
       }), "admin");
       this.getView().setModel(new JSONModel({}), "newItem");
       this.getRouter().getRoute("admin").attachPatternMatched(this.onRefresh, this);
@@ -66,7 +67,7 @@ sap.ui.define([
           procurementCategories, itemCategories, accountAssignments, serviceCategories,
           unitsOfMeasure, entities, projects, matGroups, extensionMaterialGroups, profitCenters,
           mrpTypes, availabilityChecks, serialNumberProfiles, distributionChannels, arReferences,
-          contractTypes] = await Promise.all([
+          contractTypes, budgetCodes] = await Promise.all([
           this.requestMaster("WorkflowStepConfigs?$expand=requestType,requestVariant&$orderby=requestType_code,requestVariant_code,stepNo"),
           this.requestMaster("RequestTypes?$orderby=sortOrder"),
           this.requestMaster("RequestVariants?$expand=requestType&$orderby=requestType_code,sortOrder"),
@@ -108,7 +109,8 @@ sap.ui.define([
           this.requestMaster("SerialNumberProfile?$orderby=serialNumberProfileCode"),
           this.requestMaster("DistributionChannel?$orderby=distributionChannelCode"),
           this.requestMaster("ArReferences?$orderby=arReferenceCode"),
-          this.requestMaster("ContractType?$orderby=contractTypeCode")
+          this.requestMaster("ContractType?$orderby=contractTypeCode"),
+          this.requestMaster("BudgetCode?$orderby=budgetCode")
         ]);
         const model = this.getView().getModel("admin");
         model.setProperty("/steps", steps.value || []);
@@ -153,6 +155,7 @@ sap.ui.define([
         model.setProperty("/distributionChannels", distributionChannels.value || []);
         model.setProperty("/arReferences", arReferences.value || []);
         model.setProperty("/contractTypes", contractTypes.value || []);
+        model.setProperty("/budgetCodes", budgetCodes.value || []);
         model.setProperty("/teamTree", this._teamTree(teams.value || [], teamMembers.value || []));
       } catch (error) {
         this.showError(error);
@@ -365,6 +368,9 @@ onAddContractType: function () {
 onAddCostCenter: function () {
     this._openAddDialog("costCenter", "Add Cost Center");
 },
+onAddBudgetCode: function () {
+    this._openAddDialog("budgetCode", "Add Budget Code");
+},
 
     _openAddDialog: function (type, title) {
       this.getView().getModel("newItem").setData({
@@ -410,6 +416,7 @@ onAddCostCenter: function () {
         isIncoterm: type === "incoterm",
         isContractType: type === "contractType",
         isCostCenter: type === "costCenter",
+        isBudgetCode: type === "budgetCode",
         requestTypeCode: "",
         requestVariantCode: "",
         variants: [],
@@ -461,6 +468,9 @@ onAddCostCenter: function () {
         arReferenceDescription: "",
         contractTypeCode: "",
         contractTypeDescription: "",
+        budgetCode: "",
+        budgetCodeDescription: "",
+        taxRate: "",
 
       });
       this.byId("addConfigDialog").open();
@@ -769,6 +779,7 @@ else if (item.type === "purchasingOrganization") {
             body: {
               taxCode: item.taxCode,
               taxDescription: item.taxDescription,
+              taxRate: Number(item.taxRate) || 0,
               isActive: true
             }
           });
@@ -1266,6 +1277,20 @@ else if (item.type === "mrpType") {
         body: {
             costCenterCode: code,
             costCenterName: name,
+            isActive: true
+        }
+    });
+} else if (item.type === "budgetCode") {
+    const code = item.budgetCode?.trim();
+    const description = item.budgetCodeDescription?.trim();
+    if (!code || !description) {
+        throw new Error("Budget Code and Budget Code Description are required.");
+    }
+    await this.requestMaster("BudgetCode", {
+        method: "POST",
+        body: {
+            budgetCode: code,
+            budgetCodeDescription: description,
             isActive: true
         }
     });
@@ -1875,6 +1900,7 @@ onSaveApplicableTax: function (event) {
       return this._patch("ApplicableTaxes", row.ID, {
         taxCode: row.taxCode,
         taxDescription: row.taxDescription,
+        taxRate: Number(row.taxRate) || 0,
         isActive: row.isActive
       });
     },
@@ -3533,6 +3559,34 @@ onDeleteCostCenter: async function (oEvent) {
             error.message || "Failed to delete Cost Center."
         );
 
+    }
+},
+
+onSaveBudgetCode: async function (oEvent) {
+    const item = oEvent.getSource().getBindingContext("admin").getObject();
+    try {
+        await this.requestMaster(`BudgetCode(${item.ID})`, {
+            method: "PATCH",
+            body: {
+                budgetCodeDescription: item.budgetCodeDescription,
+                isActive: item.isActive
+            }
+        });
+        this.showSuccess("Budget Code updated successfully.");
+        await this.onRefresh();
+    } catch (error) {
+        this.showError(error);
+    }
+},
+
+onDeleteBudgetCode: async function (oEvent) {
+    const item = oEvent.getSource().getBindingContext("admin").getObject();
+    try {
+        await this.requestMaster(`BudgetCode(${item.ID})`, { method: "DELETE" });
+        this.showSuccess("Budget Code deleted successfully.");
+        await this.onRefresh();
+    } catch (error) {
+        this.showError(error);
     }
 },
 

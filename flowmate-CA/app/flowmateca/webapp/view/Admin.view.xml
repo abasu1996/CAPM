@@ -1192,6 +1192,10 @@
                 <Text text="Tax Description"/>
             </Column>
 
+            <Column width="8rem">
+                <Text text="Tax Rate (%)"/>
+            </Column>
+
             <Column width="7rem">
                 <Text text="Active"/>
             </Column>
@@ -1208,6 +1212,8 @@
                     <Text text="{admin>taxCode}"/>
 
                     <Input value="{admin>taxDescription}"/>
+
+                    <Input value="{admin>taxRate}" type="Number"/>
 
                     <Switch
                         state="{admin>isActive}"
@@ -1234,6 +1240,35 @@
     </Table>
 </IconTabFilter>
 
+
+<IconTabFilter key="budgetCodes" text="Budget Codes" icon="sap-icon://wallet">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Budget Code Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add Budget Code" icon="sap-icon://add" type="Emphasized" press=".onAddBudgetCode"/>
+    </Toolbar>
+    <Table items="{admin>/budgetCodes}" growing="true" class="caAdminTable">
+        <columns>
+            <Column width="12rem"><Text text="Budget Code"/></Column>
+            <Column><Text text="Budget Code Description"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Text text="{admin>budgetCode}"/>
+                    <Input value="{admin>budgetCodeDescription}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveBudgetCode"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeleteBudgetCode"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
 
 <IconTabFilter key="plant" text="Plants" icon="sap-icon://factory">
     <Toolbar class="caSectionToolbar">
@@ -3095,6 +3130,8 @@
             <Input value="{newItem>/taxCode}"  placeholder="Enter Tax Code"/>
             <Label text="Tax Description" required="true" class="sapUiSmallMarginTop"/>
             <Input value="{newItem>/taxDescription}" placeholder="Enter Tax Description"/>
+            <Label text="Tax Rate (%)" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/taxRate}" type="Number" placeholder="Enter effective tax rate"/>
             </VBox>
 
             <VBox visible="{newItem>/isPlant}">
@@ -3450,6 +3487,13 @@
         value="{newItem>/costCenterName}"
         placeholder="Enter Cost Center Name"/>
 
+</VBox>
+
+<VBox visible="{newItem>/isBudgetCode}">
+    <Label text="Budget Code" required="true"/>
+    <Input value="{newItem>/budgetCode}" placeholder="Enter Budget Code"/>
+    <Label text="Budget Code Description" required="true" class="sapUiSmallMarginTop"/>
+    <Input value="{newItem>/budgetCodeDescription}" placeholder="Enter Budget Code Description"/>
 </VBox>
 
 

@@ -48,6 +48,8 @@ sap.ui.define([
         task.detailItemsTitle = task.hasDetailHeaders ? "Contract Creation Details" : "Line Items";
 
         this.getView().getModel("task").setData(task);
+        // UUID-backed fields are stored as IDs; resolve their maintained labels for task users.
+        this._resolveIdLabelsForTask(request, details);
         this.renderDetailItemsTable(
           this.byId("taskItemsTable"),
           request,
@@ -64,6 +66,33 @@ sap.ui.define([
       } finally {
         this.setBusy(false);
       }
+    },
+
+    _resolveIdLabelsForTask: async function (request, details) {
+      const model = this.getView().getModel("task");
+      const definitions = FormDefinitions.getHeaderFields(
+        request.requestType?.code,
+        request.requestVariant?.code,
+        details.materialCategory
+      );
+      await Promise.all(definitions.map(async function (definition, index) {
+        const value = details[definition.name];
+        if (definition.key !== "ID" || !definition.entity || !value) {
+          return;
+        }
+        const path = `${definition.entity}(${value})`;
+        try {
+          const row = await this.request(path).catch(function () {
+            return this.requestMaster(path);
+          }.bind(this));
+          const label = row && row[definition.text || "name"];
+          if (label) {
+            model.setProperty(`/detailFields/${index}/value`, String(label));
+          }
+        } catch (error) {
+          // Keep the stored ID visible when a catalog lookup is unavailable.
+        }
+      }.bind(this)));
     },
 
     onClaim: async function () {
