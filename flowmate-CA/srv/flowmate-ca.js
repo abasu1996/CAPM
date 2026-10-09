@@ -119,6 +119,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
     this.on("createFlowmatePaymentRun", this._createFlowmatePaymentRun);
+    this.on("createFlowmateServiceEntrySheet", this._createFlowmateServiceEntrySheet);
     this.on("createBulkRequests", this._createBulkRequests);
     this.on("submitRequest", this._submitRequest);
     this.on("addTask", this._addTask);
@@ -217,6 +218,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     if (request.requester_ID !== user.ID && !req.user.is("CAAdmin")) {
       return req.reject(403, "Only the request creator or an administrator can create the Flowmate Payment Run request");
+    }
+    if (request.status_code !== REQUEST_STATUS.COMPLETED) {
+      return req.reject(409, "The Flowmate Payment Run request can only be created after the purchase order flow is successfully completed");
     }
     if (String(request.externalStatus || "").startsWith("FLOWMATE_PAYMENT_RUN_CREATED") && request.externalObjectId) {
       const [, existingReference] = String(request.externalStatus).split("|");
@@ -344,6 +348,190 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       cds.log("peer-integration").error("Flowmate Payment Run creation failed", error);
       return req.reject(502, `Flowmate request could not be created: ${error.message}`);
     }
+  };
+
+  _createFlowmateServiceEntrySheet = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req);
+    const requestId = req.data.requestId;
+    const request = await tx.run(
+      SELECT.one.from(this.db.CARequests).where({ ID: requestId })
+    );
+    if (!request) {
+      return req.reject(404, "Commerce Automation request was not found");
+    }
+    if (request.requestType_code !== "SERVICE_ENTRY_SHEET") {
+      return req.reject(400, "Flowmate Service Entry Sheet integration is only available for service entry sheet requests");
+    }
+    if (request.requester_ID !== user.ID && !req.user.is("CAAdmin")) {
+      return req.reject(403, "Only the request creator or an administrator can create the Flowmate Service Entry Sheet request");
+    }
+    if (request.status_code !== REQUEST_STATUS.COMPLETED) {
+      return req.reject(409, "The Flowmate Service Entry Sheet request can only be created after the service entry sheet flow is successfully completed");
+    }
+    if (String(request.externalStatus || "").startsWith("FLOWMATE_SES_CREATED") && request.externalObjectId) {
+      const [, existingReference] = String(request.externalStatus).split("|");
+      return {
+        created: true,
+        requestId: request.externalObjectId,
+        referenceNumber: existingReference || "already created",
+        attachmentCount: 0
+      };
+    }
+
+    const serviceEntrySheet = await tx.run(
+      SELECT.one.from(this.db.ServiceEntrySheetDetails).where({ request_ID: request.ID })
+    );
+    if (!serviceEntrySheet?.flowmateSesRequest) {
+      return req.reject(400, "Create Flowmate Service Entry Sheet Request was not selected");
+    }
+
+    let flowmateSesDetails;
+    try {
+      flowmateSesDetails = typeof serviceEntrySheet.flowmateSesRequestDetails === "string"
+        ? JSON.parse(serviceEntrySheet.flowmateSesRequestDetails)
+        : serviceEntrySheet.flowmateSesRequestDetails;
+    } catch (_error) {
+      return req.reject(400, "Flowmate Service Entry Sheet details contain invalid JSON");
+    }
+    if (!flowmateSesDetails || typeof flowmateSesDetails !== "object") {
+      return req.reject(400, "Flowmate Service Entry Sheet details are missing");
+    }
+
+    const caAttachments = await tx.run(
+      SELECT.from(this.db.CAAttachments)
+        .columns("ID", "filename", "mimeType", "content")
+        .where({ request_ID: request.ID, category: "FLOWMATE_SES" })
+    );
+    if (!caAttachments.length) {
+      return req.reject(400, "Select at least one Service Entry Sheet attachment before creating the Flowmate request");
+    }
+
+    const dynamicDetails = flowmateSesDetails.details && typeof flowmateSesDetails.details === "object"
+      ? flowmateSesDetails.details
+      : {};
+    const normalizedDetails = { ...dynamicDetails };
+    for (const field of [
+      "invoices",
+      "travelExpenses",
+      "directForeignTravelEntries",
+      "glBreakups",
+      "merchantEntityValues",
+      "settlementEntries"
+    ]) {
+      if (typeof normalizedDetails[field] !== "string") {
+        continue;
+      }
+      try {
+        normalizedDetails[field] = JSON.parse(normalizedDetails[field]);
+      } catch (_error) {
+        return req.reject(400, `Service Entry Sheet field ${field} contains invalid JSON`);
+      }
+      if (!Array.isArray(normalizedDetails[field])) {
+        return req.reject(400, `Service Entry Sheet field ${field} must contain a JSON array`);
+      }
+    }
+
+    const flowmateInput = {
+      processType_code: flowmateSesDetails.processType_code,
+      subProcessType_code: flowmateSesDetails.subProcessType_code,
+      title: String(flowmateSesDetails.title || request.title || "").trim(),
+      description: flowmateSesDetails.description || request.description || null,
+      requesterUser_ID: request.requester_ID,
+      processorTeam_ID: flowmateSesDetails.processorTeam_ID || request.ownerTeam_ID || null,
+      processorTeamName: flowmateSesDetails.processorTeamName || request.ownerTeamName || null,
+      department: flowmateSesDetails.department || null,
+      amount: flowmateSesDetails.amount === "" || flowmateSesDetails.amount === null || flowmateSesDetails.amount === undefined
+        ? null
+        : Number(flowmateSesDetails.amount),
+      role: flowmateSesDetails.role || "Service Entry Sheet",
+      priorityConfig_code: flowmateSesDetails.priorityConfig_code || "MEDIUM",
+      ...normalizedDetails
+    };
+    const encodedAttachments = await Promise.all(caAttachments.map(async (attachment) => ({
+      filename: attachment.filename,
+      mimeType: attachment.mimeType || "application/octet-stream",
+      contentBase64: (await readAttachmentContent(attachment.content)).toString("base64")
+    })));
+
+    if (!flowmateInput.processType_code || !flowmateInput.subProcessType_code || !flowmateInput.title) {
+      return req.reject(400, "Service Entry Sheet process type, subprocess type, and title are required");
+    }
+    if (!flowmateInput.processorTeam_ID) {
+      return req.reject(400, "Select a Flowmate processor team for the Service Entry Sheet request");
+    }
+    if (encodedAttachments.some((attachment) => !attachment.contentBase64)) {
+      return req.reject(400, "One or more Service Entry Sheet attachments have no content");
+    }
+
+    try {
+      const result = await this.flowmate.send({
+        event: "createRequestWithAttachments",
+        data: {
+          input: JSON.stringify(flowmateInput),
+          attachments: JSON.stringify(encodedAttachments)
+        }
+      });
+      await tx.run(UPDATE(this.db.CARequests).set({
+        externalObjectId: result?.ID || null,
+        externalStatus: `FLOWMATE_SES_CREATED|${result?.referenceNumber || ""}`
+      }).where({ ID: request.ID }));
+      await this._writeHistory(
+        tx,
+        request.ID,
+        request.currentStep || 0,
+        "FLOWMATE_SES_CREATED",
+        user,
+        request.status_code,
+        request.status_code,
+        result?.referenceNumber || "Flowmate Service Entry Sheet request created"
+      );
+      return {
+        created: true,
+        requestId: result?.ID,
+        referenceNumber: result?.referenceNumber,
+        attachmentCount: encodedAttachments.length
+      };
+    } catch (error) {
+      cds.log("peer-integration").error("Flowmate Service Entry Sheet creation failed", error);
+      return req.reject(502, `Flowmate request could not be created: ${error.message}`);
+    }
+  };
+
+  /**
+   * CA keeps the Flowmate integration payload and attachments on the request
+   * while the CA workflow is running. The linked Flowmate request is created
+   * only after the CA request reaches COMPLETED. Keeping this trigger on the
+   * server prevents a rejected or partially processed CA request from creating
+   * a Flowmate task queue entry.
+   */
+  _triggerFlowmateIntegrationIfRequired = async (req, requestId) => {
+    const request = await cds.tx(req).run(
+      SELECT.one.from(this.db.CARequests).where({ ID: requestId })
+    );
+    if (!request || request.status_code !== REQUEST_STATUS.COMPLETED || request.externalObjectId) {
+      return null;
+    }
+
+    let handler;
+    let event;
+    if (request.requestType_code === "PURCHASE_ORDER") {
+      handler = this._createFlowmatePaymentRun;
+      event = "createFlowmatePaymentRun";
+    } else if (request.requestType_code === "SERVICE_ENTRY_SHEET") {
+      handler = this._createFlowmateServiceEntrySheet;
+      event = "createFlowmateServiceEntrySheet";
+    } else {
+      return null;
+    }
+
+    // Use the same authenticated user and transaction context, but pass only
+    // the action payload expected by the integration handler.
+    const integrationReq = Object.create(req);
+    integrationReq.event = event;
+    integrationReq.data = { requestId };
+    integrationReq.reject = (status, message) => req.reject(status, message);
+    return handler.call(this, integrationReq);
   };
 
   _filterMyRequests = async (req) => {
@@ -525,6 +713,30 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       for (const field of ["processTypeName", "subProcessTypeName", "title"]) {
         if (!String(paymentRunDetails[field] || "").trim()) {
           return req.reject(400, `Payment Run ${field} is required`);
+        }
+      }
+    }
+    if (details.flowmateSesRequest && requestType.code !== "SERVICE_ENTRY_SHEET") {
+      return req.reject(400, "Flowmate Service Entry Sheet integration is only supported for service entry sheet requests");
+    }
+    if (details.flowmateSesRequest) {
+      if (!details.flowmateSesRequestDetails) {
+        return req.reject(400, "Flowmate Service Entry Sheet details are required when the integration is selected");
+      }
+      let flowmateSesDetails;
+      try {
+        flowmateSesDetails = typeof details.flowmateSesRequestDetails === "string"
+          ? JSON.parse(details.flowmateSesRequestDetails)
+          : details.flowmateSesRequestDetails;
+      } catch (_error) {
+        return req.reject(400, "Flowmate Service Entry Sheet details contain invalid JSON");
+      }
+      if (!flowmateSesDetails || typeof flowmateSesDetails !== "object") {
+        return req.reject(400, "Flowmate Service Entry Sheet details must be a valid object");
+      }
+      for (const field of ["processTypeName", "subProcessTypeName", "title"]) {
+        if (!String(flowmateSesDetails[field] || "").trim()) {
+          return req.reject(400, `Flowmate Service Entry Sheet ${field} is required`);
         }
       }
     }
@@ -933,6 +1145,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         completedAt: new Date().toISOString()
       }).where({ ID: request.ID }));
       await this._writeHistory(tx, request.ID, step.stepNo, "REQUEST_COMPLETED", user, request.status_code, REQUEST_STATUS.COMPLETED, req.data.remarks);
+      await this._triggerFlowmateIntegrationIfRequired(req, request.ID);
       return true;
     }
 

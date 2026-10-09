@@ -211,6 +211,7 @@ sap.ui.define([
       this.getView().setModel(new JSONModel(this._emptyPaymentRunForm()), "paymentRun");
       this.getView().setModel(new JSONModel({}), "paymentRunGridEdit");
       this._paymentRunGridDialogs = {};
+      this._flowmateIntegrationMode = "paymentRun";
       this.getRouter().getRoute("requestCreate").attachPatternMatched(this._onRouteMatched, this);
     },
 
@@ -232,6 +233,13 @@ sap.ui.define([
         requesterName: "",
         processorTeamName: "",
         processorTeam_ID: "",
+        dialogTitle: "Payment Run - Flowmate Request Details",
+        dialogInfo: "Complete the Payment Run request details using the same fields as the Flowmate Create Request form. Values are prefilled from this purchase order.",
+        attachmentSectionTitle: "Payment Run Attachments",
+        selectAttachmentText: "Select Payment Run Files",
+        noAttachmentsText: "No Payment Run attachments selected",
+        attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 400 MB.",
+        saveText: "Save Payment Run",
         details: {}
       };
     },
@@ -263,6 +271,7 @@ sap.ui.define([
       this.getView().getModel("form").setData(this._emptyForm());
       this.getView().getModel("files").setData({ items: [] });
       this.getView().getModel("paymentRun").setData(this._emptyPaymentRunForm());
+      this._flowmateIntegrationMode = "paymentRun";
       this._paymentRunSaved = false;
       this._selectedFiles = [];
       this._paymentRunFiles = [];
@@ -783,15 +792,51 @@ sap.ui.define([
       return this._flowmateRequestFormCatalog;
     },
 
+    _flowmateIntegrationConfig: function () {
+      if (this._flowmateIntegrationMode === "serviceEntrySheet") {
+        return {
+          flag: "flowmateSesRequest",
+          detailsField: "flowmateSesRequestDetails",
+          role: "Service Entry Sheet",
+          dialogTitle: "Service Entry Sheet - Flowmate Request Details",
+          dialogInfo: "Complete the Service Entry Sheet request details using the same fields as the Flowmate Create Request form. Values are prefilled from this service entry sheet.",
+          attachmentSectionTitle: "Service Entry Sheet Attachments",
+          selectAttachmentText: "Select Service Entry Sheet Files",
+          noAttachmentsText: "No Service Entry Sheet attachments selected",
+          attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 400 MB.",
+          saveText: "Save Service Entry Sheet",
+          attachmentCategory: "FLOWMATE_SES",
+          action: "createFlowmateServiceEntrySheet",
+          warning: "Select at least one attachment for the Flowmate Service Entry Sheet request."
+        };
+      }
+      return {
+        flag: "paymentRun",
+        detailsField: "paymentRunDetails",
+        role: "Payment Run",
+        dialogTitle: "Payment Run - Flowmate Request Details",
+        dialogInfo: "Complete the Payment Run request details using the same fields as the Flowmate Create Request form. Values are prefilled from this purchase order.",
+        attachmentSectionTitle: "Payment Run Attachments",
+        selectAttachmentText: "Select Payment Run Files",
+        noAttachmentsText: "No Payment Run attachments selected",
+        attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 400 MB.",
+        saveText: "Save Payment Run",
+        attachmentCategory: "PAYMENT_RUN",
+        action: "createFlowmatePaymentRun",
+        warning: "Select at least one attachment for the Flowmate Payment Run request."
+      };
+    },
+
     _paymentRunContext: function () {
       const form = this.getView().getModel("form").getData();
       const details = form.details || {};
+      const config = this._flowmateIntegrationConfig();
       let saved = {};
-      if (details.paymentRunDetails) {
+      if (details[config.detailsField]) {
         try {
-          saved = typeof details.paymentRunDetails === "string"
-            ? JSON.parse(details.paymentRunDetails)
-            : details.paymentRunDetails;
+          saved = typeof details[config.detailsField] === "string"
+            ? JSON.parse(details[config.detailsField])
+            : details[config.detailsField];
         } catch (_error) {
           saved = {};
         }
@@ -805,11 +850,18 @@ sap.ui.define([
             ? null
             : details.poValueWithTaxes)
           : details.totalValue,
-        role: "Payment Run",
+        role: config.role,
         description: form.description || details.procurementDescription || "",
         requesterName: form.requesterName || "",
         processorTeamName: form.processorTeamName || "",
-        processorTeam_ID: form.processorTeamCode || ""
+        processorTeam_ID: form.processorTeamCode || "",
+        dialogTitle: config.dialogTitle,
+        dialogInfo: config.dialogInfo,
+        attachmentSectionTitle: config.attachmentSectionTitle,
+        selectAttachmentText: config.selectAttachmentText,
+        noAttachmentsText: config.noAttachmentsText,
+        attachmentInfo: config.attachmentInfo,
+        saveText: config.saveText
       }, saved);
     },
 
@@ -1335,12 +1387,13 @@ sap.ui.define([
       this._renderPaymentRunDetails();
     },
 
-    onPaymentRunSelect: async function (event) {
-      const selected = event.getParameter("selected");
+    _openFlowmateIntegrationDialog: async function (mode, selected) {
+      this._flowmateIntegrationMode = mode;
+      const config = this._flowmateIntegrationConfig();
       const formModel = this.getView().getModel("form");
-      formModel.setProperty("/details/paymentRun", selected);
+      formModel.setProperty(`/details/${config.flag}`, selected);
       if (!selected) {
-        formModel.setProperty("/details/paymentRunDetails", "");
+        formModel.setProperty(`/details/${config.detailsField}`, "");
         this._paymentRunSaved = false;
         this._paymentRunFiles = [];
         this.getView().getModel("paymentRunFiles").setData({ items: [] });
@@ -1359,12 +1412,21 @@ sap.ui.define([
         this._paymentRunSaved = false;
         this.byId("paymentRunDialog").open();
       } catch (error) {
-        formModel.setProperty("/details/paymentRun", false);
+        formModel.setProperty(`/details/${config.flag}`, false);
         this.showError(error);
       }
     },
 
+    onPaymentRunSelect: async function (event) {
+      return this._openFlowmateIntegrationDialog("paymentRun", event.getParameter("selected"));
+    },
+
+    onFlowmateServiceEntrySheetSelect: async function (event) {
+      return this._openFlowmateIntegrationDialog("serviceEntrySheet", event.getParameter("selected"));
+    },
+
     onPaymentRunDialogSave: function () {
+      const config = this._flowmateIntegrationConfig();
       const data = this.getView().getModel("paymentRun").getData();
       const required = ["processType_code", "subProcessType_code", "title", "processorTeam_ID"];
       const missingOverview = required.find(function (name) {
@@ -1381,7 +1443,7 @@ sap.ui.define([
         return;
       }
       if (!this._paymentRunFiles.length) {
-        MessageBox.warning("Select at least one attachment for the Flowmate Payment Run request.");
+        MessageBox.warning(config.warning);
         return;
       }
       const missingDetail = (this._paymentRunFieldControls || []).find(function (entry) {
@@ -1405,16 +1467,17 @@ sap.ui.define([
         return;
       }
       const formModel = this.getView().getModel("form");
-      formModel.setProperty("/details/paymentRun", true);
-      formModel.setProperty("/details/paymentRunDetails", JSON.stringify(data));
+      formModel.setProperty(`/details/${config.flag}`, true);
+      formModel.setProperty(`/details/${config.detailsField}`, JSON.stringify(data));
       this._paymentRunSaved = true;
       this.byId("paymentRunDialog").close();
     },
 
     onPaymentRunDialogCancel: function () {
+      const config = this._flowmateIntegrationConfig();
       if (!this._paymentRunSaved) {
-        this.getView().getModel("form").setProperty("/details/paymentRun", false);
-        this.getView().getModel("form").setProperty("/details/paymentRunDetails", "");
+        this.getView().getModel("form").setProperty(`/details/${config.flag}`, false);
+        this.getView().getModel("form").setProperty(`/details/${config.detailsField}`, "");
         this._paymentRunFiles = [];
         this.getView().getModel("paymentRunFiles").setData({ items: [] });
       }
@@ -1818,9 +1881,14 @@ sap.ui.define([
         MessageBox.warning("Request type, process variant and title are required.");
         return;
       }
-      if (form.requestTypeCode === "PURCHASE_ORDER" && form.details && form.details.paymentRun
-        && !form.details.paymentRunDetails) {
+      const paymentRunSelected = Boolean(form.details && form.details.paymentRun);
+      const serviceEntrySheetSelected = Boolean(form.details && form.details.flowmateSesRequest);
+      if (paymentRunSelected && !form.details.paymentRunDetails) {
         MessageBox.warning("Save the Payment Run details before submitting the purchase order.");
+        return;
+      }
+      if (serviceEntrySheetSelected && !form.details.flowmateSesRequestDetails) {
+        MessageBox.warning("Save the Flowmate Service Entry Sheet details before submitting the service entry sheet.");
         return;
       }
       const missing = (this._fieldControls || []).find(function (entry) {
@@ -1925,10 +1993,14 @@ sap.ui.define([
         const uploads = (this._selectedFiles || []).map(function (file) {
           return { file: file, category: "SUPPORTING_DOCUMENT" };
         });
-        const paymentRunSelected = Boolean(form.details && form.details.paymentRun);
         if (paymentRunSelected) {
           (this._paymentRunFiles || []).forEach(function (file) {
             uploads.push({ file: file, category: "PAYMENT_RUN" });
+          });
+        }
+        if (serviceEntrySheetSelected) {
+          (this._paymentRunFiles || []).forEach(function (file) {
+            uploads.push({ file: file, category: "FLOWMATE_SES" });
           });
         }
         Object.keys(this._dynamicFileUploads || {}).forEach(function (name) {
@@ -1941,15 +2013,8 @@ sap.ui.define([
         if (uploads.length) {
           uploadResult = await this._uploadFiles(request.ID, uploads);
         }
-        if (paymentRunSelected) {
-          if (uploadResult.failedCount) {
-            throw new Error("The Flowmate request was not created because one or more Payment Run attachments could not be uploaded.");
-          }
-          const flowmateRequest = await this.request("createFlowmatePaymentRun", {
-            method: "POST",
-            body: { requestId: request.ID }
-          });
-          this.showSuccess(`Flowmate request ${flowmateRequest.referenceNumber || ""} created with ${flowmateRequest.attachmentCount || 0} attachment(s)`);
+        if ((paymentRunSelected || serviceEntrySheetSelected) && uploadResult.failedCount) {
+          throw new Error(`The CA request could not be completed because one or more ${paymentRunSelected ? "Payment Run" : "Service Entry Sheet"} attachments could not be uploaded.`);
         }
         this.navTo("requestDetail", {
           requestId: request.ID

@@ -813,6 +813,7 @@ sap.ui.define([], function () {
     }),
     field("totalValue", "SES Value", "number", { required: true }),
     field("paymentRequestRequired", "Create Payment Successor", "checkbox"),
+    field("flowmateSesRequest", "Create Flowmate Service Entry Sheet Request", "checkbox", { onSelect: "onFlowmateServiceEntrySheetSelect" }),
     field("remarks", "Remarks", "textarea"),
     field("sesPaymentOption", "SES / Payment Option", "select", {
       required: true,

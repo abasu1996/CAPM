@@ -657,6 +657,11 @@ entity ServiceEntrySheetDetails : cuid, managed {
   currency         : Association to common.Currencies;
   totalValue       : Decimal(17,2);
   paymentRequestRequired: Boolean default false;
+  // When selected, the CA request opens the same dynamic Flowmate request
+  // form used by Payment Run and creates a linked Flowmate request after CA
+  // attachments are uploaded.
+  flowmateSesRequest : Boolean default false;
+  flowmateSesRequestDetails : LargeString;
   remarks          : LargeString;
   sesPaymentOption : String(40);
   sesRecipientEmail: String(255);

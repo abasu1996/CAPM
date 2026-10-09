@@ -205,19 +205,19 @@
     <dependents>
       <Dialog
         id="paymentRunDialog"
-        title="Payment Run - Flowmate Request Details"
+        title="{paymentRun>/dialogTitle}"
         contentWidth="58rem"
         stretchOnPhone="true">
         <content>
           <VBox class="sapUiMediumMargin">
             <MessageStrip
-              text="Complete the Payment Run request details using the same fields as the Flowmate Create Request form. Values are prefilled from this purchase order."
+              text="{paymentRun>/dialogInfo}"
               type="Information"
               showIcon="true"
               class="sapUiSmallMarginBottom"/>
             <VBox id="paymentRunFormHost"/>
             <VBox id="paymentRunDetailsHost" class="sapUiSmallMarginTop"/>
-            <Panel headerText="Payment Run Attachments" expandable="false" class="sapUiSmallMarginTop">
+            <Panel headerText="{paymentRun>/attachmentSectionTitle}" expandable="false" class="sapUiSmallMarginTop">
               <content>
                 <VBox>
                   <unified:FileUploader
@@ -225,13 +225,13 @@
                     multiple="true"
                     uploadOnChange="false"
                     change=".onPaymentRunAttachmentsSelected"
-                    buttonText="Select Payment Run Files"
+                    buttonText="{paymentRun>/selectAttachmentText}"
                     icon="sap-icon://attachment"/>
                   <List
                     items="{paymentRunFiles>/items}"
                     mode="Delete"
                     delete=".onRemovePaymentRunAttachment"
-                    noDataText="No Payment Run attachments selected"
+                    noDataText="{paymentRun>/noAttachmentsText}"
                     class="sapUiSmallMarginTop">
                     <StandardListItem
                       title="{paymentRunFiles>name}"
@@ -239,7 +239,7 @@
                       icon="sap-icon://document"/>
                   </List>
                   <MessageStrip
-                    text="These files are copied to the Flowmate request after the purchase order is created. The maximum size per file is 400 MB."
+                    text="{paymentRun>/attachmentInfo}"
                     type="Information"
                     showIcon="true"
                     class="sapUiSmallMarginTop"/>
@@ -249,7 +249,7 @@
           </VBox>
         </content>
         <beginButton>
-          <Button text="Save Payment Run" type="Emphasized" press=".onPaymentRunDialogSave"/>
+          <Button text="{paymentRun>/saveText}" type="Emphasized" press=".onPaymentRunDialogSave"/>
         </beginButton>
         <endButton>
           <Button text="Cancel" press=".onPaymentRunDialogCancel"/>
