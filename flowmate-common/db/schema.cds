@@ -134,7 +134,7 @@ entity Divisions : cuid, managed {
 entity ApplicableTaxes : cuid, managed {
   taxCode : String(40) not null;
   taxDescription : String(180) not null;
-  taxRate : Decimal(7,3) default 0;
+  taxRate : Decimal(7,3) default 0; // effective %, used to calculate PO value with taxes
   isActive     : Boolean default true;
 }
 

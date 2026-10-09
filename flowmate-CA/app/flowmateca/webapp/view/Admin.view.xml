@@ -1192,8 +1192,8 @@
                 <Text text="Tax Description"/>
             </Column>
 
-            <Column width="8rem">
-                <Text text="Tax Rate (%)"/>
+            <Column width="9rem">
+                <Text text="Tax Rate %"/>
             </Column>
 
             <Column width="7rem">
@@ -2954,6 +2954,35 @@
 
 </IconTabFilter>
 
+<IconTabFilter key="budgetCodes" text="Budget Codes" icon="sap-icon://wallet">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Budget Code Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add Budget Code" icon="sap-icon://add" type="Emphasized" press=".onAddBudgetCode"/>
+    </Toolbar>
+    <Table items="{admin>/budgetCodes}" growing="true" class="caAdminTable">
+        <columns>
+            <Column width="12rem"><Text text="Budget Code"/></Column>
+            <Column><Text text="Budget Code Description"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Text text="{admin>budgetCode}"/>
+                    <Input value="{admin>budgetCodeDescription}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveBudgetCode"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeleteBudgetCode"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
 
 
 
@@ -3130,8 +3159,8 @@
             <Input value="{newItem>/taxCode}"  placeholder="Enter Tax Code"/>
             <Label text="Tax Description" required="true" class="sapUiSmallMarginTop"/>
             <Input value="{newItem>/taxDescription}" placeholder="Enter Tax Description"/>
-            <Label text="Tax Rate (%)" class="sapUiSmallMarginTop"/>
-            <Input value="{newItem>/taxRate}" type="Number" placeholder="Enter effective tax rate"/>
+            <Label text="Tax Rate %" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/taxRate}" type="Number" placeholder="Effective rate, e.g. 18"/>
             </VBox>
 
             <VBox visible="{newItem>/isPlant}">

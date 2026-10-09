@@ -1281,11 +1281,16 @@ else if (item.type === "mrpType") {
         }
     });
 } else if (item.type === "budgetCode") {
+
     const code = item.budgetCode?.trim();
     const description = item.budgetCodeDescription?.trim();
+
     if (!code || !description) {
-        throw new Error("Budget Code and Budget Code Description are required.");
+        throw new Error(
+            "Budget Code and Budget Code Description are required."
+        );
     }
+
     await this.requestMaster("BudgetCode", {
         method: "POST",
         body: {
@@ -3496,6 +3501,43 @@ onDeleteContractType: async function (oEvent) {
 
                 }
 
+            }.bind(this)
+        }
+    );
+},
+onSaveBudgetCode: async function (oEvent) {
+    const item = oEvent.getSource().getBindingContext("admin").getObject();
+    try {
+        await this.requestMaster(`BudgetCode(${item.ID})`, {
+            method: "PATCH",
+            body: {
+                budgetCodeDescription: item.budgetCodeDescription,
+                isActive: item.isActive
+            }
+        });
+        sap.m.MessageToast.show("Budget Code updated successfully.");
+        await this.onRefresh();
+    } catch (error) {
+        this.showError(error);
+    }
+},
+onDeleteBudgetCode: async function (oEvent) {
+    const item = oEvent.getSource().getBindingContext("admin").getObject();
+    MessageBox.confirm(
+        `Are you sure you want to delete Budget Code "${item.budgetCode}"?`,
+        {
+            title: "Delete Budget Code",
+            onClose: async function (action) {
+                if (action !== MessageBox.Action.OK) {
+                    return;
+                }
+                try {
+                    await this.requestMaster(`BudgetCode(${item.ID})`, { method: "DELETE" });
+                    MessageBox.success("Budget Code deleted successfully.");
+                    await this.onRefresh();
+                } catch (error) {
+                    this.showError(error);
+                }
             }.bind(this)
         }
     );

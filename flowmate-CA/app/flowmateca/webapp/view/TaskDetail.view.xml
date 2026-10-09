@@ -3,6 +3,7 @@
   xmlns:mvc="sap.ui.core.mvc"
   xmlns:core="sap.ui.core"
   xmlns:form="sap.ui.layout.form"
+  xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
   xmlns="sap.m">
   <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{task>/taskName}">
     <headerContent>
@@ -24,7 +25,7 @@
         icon="sap-icon://decline"
         type="Reject"
         press=".onReject"
-        visible="{task>/canProcess}"/>
+        visible="{= ${task>/canProcess} &amp;&amp; !${task>/isRequesterStep} }"/>
       <Button
         text="{i18n>sendBack}"
         icon="sap-icon://undo"
@@ -99,27 +100,43 @@
               </form:SimpleForm>
             </content>
           </Panel>
-          <Panel headerText="Process-Specific Details" class="caFormSection" visible="{= ${task>/hasDetailFields} }">
+          <Panel headerText="Process-Specific Details" class="caFormSection" visible="{= ${task>/isRequesterStep} ? ${task>/hasEditableFields} : ${task>/hasDetailFields} }">
             <content>
-              <FlexBox items="{task>/detailFields}" wrap="Wrap" renderType="Div" class="caDetailFieldGrid">
+              <FlexBox visible="{= !${task>/isRequesterStep} }" items="{task>/detailFields}" wrap="Wrap" renderType="Div" class="caDetailFieldGrid">
                 <VBox class="caDetailField">
                   <Label text="{task>label}"/>
                   <Text text="{task>value}" wrapping="true"/>
                 </VBox>
               </FlexBox>
+              <VBox id="taskDetailFormHost" visible="{= ${task>/isRequesterStep} }"/>
             </content>
           </Panel>
 
-          <Panel headerText="Header Creation" class="caFormSection caItemsSection" visible="{= ${task>/hasDetailHeaders} }">
+          <Panel headerText="Header Creation" class="caFormSection caItemsSection" visible="{= !${task>/isRequesterStep} &amp;&amp; ${task>/hasDetailHeaders} }">
             <content>
               <ScrollContainer horizontal="true" vertical="false" width="100%">
                 <Table id="taskHeadersTable" fixedLayout="true" class="caWorklistTable"/>
               </ScrollContainer>
             </content>
           </Panel>
-          <VBox id="taskChangeTablesHost"/>
-          <Panel headerText="{task>/detailItemsTitle}" class="caFormSection caItemsSection" visible="{= ${task>/hasDetailItems} }">
+          <Panel headerText="Header Creation" class="caFormSection caItemsSection" visible="{= ${task>/isRequesterStep} &amp;&amp; ${task>/hasEditableHeaders} }">
             <content>
+              <Toolbar>
+                <ToolbarSpacer/>
+                <Button text="Add Row" icon="sap-icon://add" press=".onAddTaskItemRow" app:grid="headers"/>
+              </Toolbar>
+              <ScrollContainer horizontal="true" vertical="false" width="100%">
+                <Table id="taskHeadersEditTable" fixedLayout="true" class="caWorklistTable"/>
+              </ScrollContainer>
+            </content>
+          </Panel>
+          <VBox id="taskChangeTablesHost" visible="{= !${task>/isRequesterStep} }"/>
+          <Panel headerText="{task>/detailItemsTitle}" class="caFormSection caItemsSection" visible="{= ${task>/isRequesterStep} ? ${task>/hasEditableItems} : ${task>/hasDetailItems} }">
+            <content>
+              <Toolbar visible="{= ${task>/isRequesterStep} }">
+                <ToolbarSpacer/>
+                <Button text="Add Row" icon="sap-icon://add" press=".onAddTaskItemRow" app:grid="items"/>
+              </Toolbar>
               <ScrollContainer horizontal="true" vertical="false" width="100%">
                 <Table id="taskItemsTable" fixedLayout="true" class="caWorklistTable"/>
               </ScrollContainer>
@@ -133,6 +150,10 @@
       <Dialog id="decisionDialog" title="{decision>/title}" contentWidth="34rem">
         <content>
           <VBox class="sapUiSmallMargin">
+            <!-- Last step of a PO with "Create SES Successor": the PO number goes to the SES. -->
+            <Label text="Purchase Order Number" required="true" visible="{= ${decision>/needsPoNumber} === true }"/>
+            <Input value="{decision>/purchaseOrderNo}" placeholder="Enter the created Purchase Order number"
+              visible="{= ${decision>/needsPoNumber} === true }" class="sapUiSmallMarginBottom"/>
             <Label text="Remarks"/>
             <TextArea value="{decision>/remarks}" rows="4" width="100%"/>
           </VBox>

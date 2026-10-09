@@ -146,6 +146,7 @@ service FlowmateCAService {
   action createBulkRequests(input: BulkRequestInput) returns {
     created          : Integer;
     referenceNumbers : LargeString;
+    requestIds       : LargeString; // JSON array of created request IDs, in row order
   };
   action submitRequest(requestId: UUID) returns Boolean;
   action addTask(
@@ -160,10 +161,12 @@ service FlowmateCAService {
     dueDate: Date
   ) returns Tasks;
   action claimTeamTask(taskId: UUID) returns Boolean;
-  action approveTask(taskId: UUID, remarks: LargeString) returns Boolean;
+  // purchaseOrderNo is required only on the last step of a PO that has "Create SES Successor".
+  action approveTask(taskId: UUID, remarks: LargeString, purchaseOrderNo: String(80)) returns Boolean;
   action rejectTask(taskId: UUID, remarks: LargeString) returns Boolean;
   action sendBackTask(taskId: UUID, targetStepNo: Integer, remarks: LargeString) returns Boolean;
   action completeStep(requestId: UUID, stepNo: Integer, remarks: LargeString) returns Boolean;
+  action saveRequesterDetails(requestId: UUID, details: LargeString) returns Boolean;
   action addComment(requestId: UUID, comment: LargeString) returns Comments;
   action createSuccessorRequest(requestId: UUID, requestTypeCode: String(40), title: String(255)) returns Requests;
   action sendToS4(requestId: UUID) returns {

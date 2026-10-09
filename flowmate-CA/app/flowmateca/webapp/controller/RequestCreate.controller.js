@@ -196,8 +196,33 @@ sap.ui.define([
   };
 
   return BaseController.extend("flowmateca.controller.RequestCreate", {
+    _conditionalGrids: function () {
+      return GRIDS;
+    },
+
     onInit: function () {
-      this.getView().setModel(new JSONModel(this._emptyForm()), "form");
+      const formModel = new JSONModel(this._emptyForm());
+      // PO Value (With Taxes) follows the PO value and the chosen tax; propertyChange fires for
+      // every value the user edits through a two-way binding.
+      formModel.attachPropertyChange(function (event) {
+        // Table cells bind relatively, so resolve against their row context for the full path.
+        const context = event.getParameter("context");
+        const relative = event.getParameter("path") || "";
+        const path = context && relative.charAt(0) !== "/" ? `${context.getPath()}/${relative}` : relative;
+        const recalc = path.match(/^(\/details(?:\/bulkRows\/\d+)?)\/(totalValue|applicableTax|taxApplicable)$/);
+        if (recalc) {
+          this._recalculatePoValueWithTaxes(recalc[1]);
+        }
+        // "Create SES Successor": ticking opens the SES pop-up, unticking drops the captured SES.
+        if (path === "/details/sesRequired") {
+          if (event.getParameter("value")) {
+            this._openSesDialog();
+          } else {
+            this._discardSesDraft();
+          }
+        }
+      }, this);
+      this.getView().setModel(formModel, "form");
       this.getView().setModel(new JSONModel({
         requestTypes: [],
         variants: [],
@@ -261,11 +286,20 @@ sap.ui.define([
 
         bulkUpload: "SINGLE_LINE",
         hasHeaderTable: false,
+        offersLineModeChoice: true,
+        showsItemsTable: false,
         processorTeamCode: "",
         processorTeamName: "",
         detailSectionTitle: "Process Details",
-        details: {}
+        details: {},
+        sesDraft: this._emptySesDraft()
       };
+    },
+
+    // SES captured from a PO's "Create SES Successor" pop-up; kept apart from /details because
+    // several SES field names (division, remarks, totalValue, ...) also exist on the PO.
+    _emptySesDraft: function () {
+      return { details: {}, items: [], files: [], saved: false };
     },
 
     _onRouteMatched: async function (event) {
@@ -277,6 +311,8 @@ sap.ui.define([
       this._selectedFiles = [];
       this._paymentRunFiles = [];
       this._dynamicFileUploads = {};
+      this._sesFiles = [];
+      this._sesFileUploads = {};
       await Promise.all([
         this._loadCatalog(),
         this._loadCurrentUser()
@@ -389,6 +425,7 @@ sap.ui.define([
       this.getView().getModel("form").setProperty("/materialCategoryCode", "");
       this.getView().getModel("form").setProperty("/requestVariantCode", "");
       this.getView().getModel("form").setProperty("/details", {});
+      this._discardSesDraft();
       this._filterVariants(typeCode);
       this._renderDynamicForm();
       this._renderItemsTable();
@@ -411,21 +448,6 @@ sap.ui.define([
       return Array.from(groups.values());
     },
 
-    _firstMissingItemCell: function (items, columns) {
-      for (let index = 0; index < items.length; index++) {
-        const missing = (columns || this._itemColumns || []).find(function (col) {
-          if (!col.required) {
-            return false;
-          }
-          const value = items[index][col.name];
-          return value === undefined || value === null || String(value).trim() === "";
-        });
-        if (missing) {
-          return `Row ${index + 1}: ${missing.label} is required.`;
-        }
-      }
-      return null;
-    },
 
     _submitBulk: async function (form) {
       const items = (form.details && form.details.items) || [];
@@ -496,6 +518,7 @@ sap.ui.define([
 
     onRequestVariantChange: async function () {
       this.getView().getModel("form").setProperty("/details", {});
+      this._discardSesDraft();
       await this._renderDynamicForm();
       this._renderItemsTable();
     },
@@ -518,11 +541,15 @@ sap.ui.define([
       // Header-table variants have no Single/Multiple choice: their form keeps every field.
       const multipleItems = !FormDefinitions.hasHeaderTable(variantCode)
         && (formModel.getProperty("/bulkUpload") === "MULTIPLE_LINE" || typeCode === "MATERIAL_RESERVATION");
-      const fields = !variantCode
-        ? []
-        : (multipleItems
+      let fields = [];
+      if (variantCode && this._isPoBulk()) {
+        // Bulk Request = Multiple: the PO details go into the table; only the shared section stays.
+        fields = FormDefinitions.getBulkSharedFields(typeCode);
+      } else if (variantCode) {
+        fields = multipleItems
           ? FormDefinitions.getHeaderFields(typeCode, variantCode, categoryCode)
-          : FormDefinitions.getFields(variantCode, categoryCode, formModel.getProperty("/bulkUpload")));
+          : FormDefinitions.getFields(variantCode, categoryCode, formModel.getProperty("/bulkUpload"));
+      }
       const type = (this.getView().getModel("catalog").getProperty("/requestTypes") || [])
         .find(function (entry) {
           return entry.code === typeCode;
@@ -583,199 +610,160 @@ sap.ui.define([
       this._applyConditionalVisibility();
     },
 
-    _loadFieldCatalogs: async function (fields) {
-      const entities = new Map();
-      fields.forEach(function (definition) {
-        if (definition.entity && !entities.has(definition.entity)) {
-          entities.set(definition.entity, definition.key || "code");
-        }
-      });
-      const catalog = this.getView().getModel("catalog");
-      // A failed pick list must degrade only its own field, not abort the render.
-      await Promise.all(Array.from(entities).map(async function (entry) {
-        const entity = entry[0];
-        const keyField = entry[1];
-        if (catalog.getProperty(`/${entity}`)) {
-          return;
-        }
-        const fromMaster = MASTER_PICK_LISTS.has(entity);
-        let orderBy = `&$orderby=${keyField}`;
-        if (entity === "Users" || entity === "Vendors") {
-          orderBy = "";
-        } else if (!fromMaster) {
-          orderBy = "&$orderby=sortOrder";
-        }
-        const path = `${entity}?$filter=isActive eq true${orderBy}`;
-        try {
-          const result = fromMaster ? await this.requestMaster(path) : await this.request(path);
-          catalog.setProperty(`/${entity}`, result.value || []);
-        } catch (error) {
-          Log.error(`Could not load the ${entity} list`, error);
-          catalog.setProperty(`/${entity}`, []);
-        }
-      }.bind(this)));
-    },
 
-    // autoFills may be one rule or several. Prefer the selected catalog row when
-    // keys are not unique (for example, more than one project can share a category).
-    _applyAutoFill: function (definition, selectedKey, basePath, selectedRow) {
-      if (!definition.autoFills || !definition.entity) {
+
+
+
+
+    // PO Value (With Taxes) = PO Value (Without Taxes) x (1 + rate / 100), the rate taken from
+    // the selected Admin tax. Without an applicable tax it equals the PO value.
+    // basePath is "/details" for the single form, or "/details/bulkRows/<n>" for a row of the
+    // Bulk Request table. In the table Applicable Tax is a plain optional column, so a chosen tax
+    // applies without the Tax Applicable tick.
+    _recalculatePoValueWithTaxes: function (basePath) {
+      const formModel = this.getView().getModel("form");
+      if (formModel.getProperty("/requestTypeCode") !== "PURCHASE_ORDER") {
         return;
       }
-      let match = selectedRow;
-      if (!match && selectedKey) {
-        const rows = this.getView().getModel("catalog")
-          .getProperty(`/${definition.entity}`) || [];
-        const keyProperty = definition.key || "code";
-        match = rows.find(function (row) {
-          return String(row[keyProperty]) === String(selectedKey);
-        });
+      const base = basePath || "/details";
+      const details = formModel.getProperty(base) || {};
+      const value = parseFloat(details.totalValue);
+      if (isNaN(value)) {
+        formModel.setProperty(`${base}/poValueWithTaxes`, "");
+        return;
       }
-      const formModel = this.getView().getModel("form");
-      [].concat(definition.autoFills).forEach(function (rule) {
-        const target = basePath ? `${basePath}/${rule.field}` : `/details/${rule.field}`;
-        formModel.setProperty(target, match ? (match[rule.from] || "") : "");
+      const taxOn = base === "/details" ? details.taxApplicable : true;
+      let rate = 0;
+      if (taxOn && details.applicableTax) {
+        const tax = (this.getView().getModel("catalog").getProperty("/ApplicableTaxes") || [])
+          .find(function (row) { return row.taxCode === details.applicableTax; });
+        rate = Number(tax && tax.taxRate) || 0;
+      }
+      formModel.setProperty(`${base}/poValueWithTaxes`, (Math.round(value * (1 + rate / 100) * 100) / 100).toFixed(2));
+    },
+
+    // ---- "Create SES Successor" pop-up (Purchase Order) ----------------------------------------
+    // The SES is captured here and stored with the PO; the server creates the SES request when
+    // the PO workflow completes. The fields are the Single SES New request form; the Purchase
+    // Order Number is left out because it is filled from the PO's last approval.
+    _sesDialogFields: function () {
+      return FormDefinitions.getFields("SES_NEW", undefined, "SINGLE_LINE").filter(function (definition) {
+        return definition.source !== "request" && definition.name !== "purchaseOrderNo";
       });
     },
 
-    // Spec-driven conditional fields: a definition may carry
-    // visibleWhen: { field: "<driver>", equals: "<value>" }.
-    _isFieldVisible: function (definition) {
-      const rule = definition.visibleWhen;
-      if (!rule) {
-        return true;
-      }
-      const form = this.getView().getModel("form").getData();
-      const source = definition.source === "request" ? form : (form.details || {});
-      return source[rule.field] === rule.equals;
-    },
-
-    _applyConditionalVisibility: function () {
+    _openSesDialog: async function () {
+      const dialog = this.byId("sesSuccessorDialog");
       const formModel = this.getView().getModel("form");
-      (this._fieldControls || []).forEach(function (entry) {
-        if (!entry.definition.visibleWhen) {
-          return;
+      if (!dialog || formModel.getProperty("/requestTypeCode") !== "PURCHASE_ORDER") {
+        return;
+      }
+      const fields = this._sesDialogFields();
+      const columns = FormDefinitions.getItemColumns("SERVICE_ENTRY_SHEET", "SES_NEW");
+      await this._loadFieldCatalogs(fields.concat(columns));
+
+      const formHost = this.byId("sesFormHost");
+      formHost.destroyItems();
+      this._sesControls = [];
+      const simpleForm = new SimpleForm({
+        editable: true,
+        layout: "ColumnLayout",
+        columnsXL: 3,
+        columnsL: 3,
+        columnsM: 2,
+        labelSpanXL: 12,
+        labelSpanL: 12,
+        labelSpanM: 12
+      });
+      fields.forEach(function (definition) {
+        const control = this._createFieldControl(definition, `form>/sesDraft/details/${definition.name}`, this._sesFileUploads);
+        const chosenFile = definition.type === "file" && formModel.getProperty(`/sesDraft/details/${definition.name}`);
+        if (chosenFile) {
+          control.setValue(chosenFile);
         }
-        const visible = this._isFieldVisible(entry.definition);
-        entry.control.setVisible(visible);
-        if (entry.label) {
-          entry.label.setVisible(visible);
-        }
-        // A hidden field must not carry a stale value into the payload.
-        if (!visible) {
-          const path = entry.definition.source === "request"
-            ? `/${entry.definition.name}`
-            : `/details/${entry.definition.name}`;
-          if (formModel.getProperty(path) !== undefined && formModel.getProperty(path) !== "") {
-            formModel.setProperty(path, "");
-          }
-        }
+        simpleForm.addContent(new Label({ text: definition.label, required: definition.required }));
+        simpleForm.addContent(control);
+        this._sesControls.push({ definition, control });
       }.bind(this));
+      formHost.addItem(simpleForm);
 
-      const details = formModel.getProperty("/details") || {};
-      Object.keys(GRIDS).forEach(function (gridKey) {
-        const grid = GRIDS[gridKey];
-        if (grid.panel && grid.driver) {
-          grid.panel.setVisible(details[grid.driver] === "YES");
-        }
-      });
+      const itemsHost = this.byId("sesItemsHost");
+      itemsHost.destroyItems();
+      GRIDS.sesItems = { tableId: "sesItemsTable", path: "/sesDraft/items", columns, title: "SES Line Items" };
+      GRIDS.sesItems.panel = this._buildGridPanel("sesItems");
+      GRIDS.sesItems.panel.setVisible(true);
+      itemsHost.addItem(GRIDS.sesItems.panel);
+      this._renderGrid("sesItems");
+      dialog.open();
     },
 
-    _createFieldControl: function (definition, explicitPath) {
-      const dataPath = definition.source === "request"
-        ? `/${definition.name}`
-        : `/details/${definition.name}`;
-      const path = explicitPath || `form>${dataPath}`;
-      let control;
-      if (definition.type === "readonly") {
-        control = new Input({
-          editable: false,
-          placeholder: definition.placeholder || ""
-        }).bindValue(path);
-      } else if (definition.type === "textarea") {
-        control = new TextArea({
-          rows: 3,
-          width: "100%",
-          placeholder: definition.placeholder || ""
-        }).bindValue(path);
-      } else if (definition.type === "date") {
-        control = new DatePicker({
-          valueFormat: "yyyy-MM-dd",
-          displayFormat: "medium"
-        }).bindValue(path);
-      } else if (definition.type === "checkbox") {
-        control = new CheckBox({
-          select: function (event) {
-            this._applyConditionalVisibility();
-            if (definition.onSelect && typeof this[definition.onSelect] === "function") {
-              this[definition.onSelect](event);
-            }
-          }.bind(this)
-        }).bindProperty("selected", path);
-      } else if (definition.type === "select") {
-        control = new ComboBox({
-          width: "100%",
-          editable: !definition.readOnly,
-          placeholder: definition.placeholder || ""
-          ,selectionChange: this._applyConditionalVisibility.bind(this)
-        }).bindProperty("selectedKey", path);
-        (definition.options || []).forEach(function (option) {
-          control.addItem(new Item({
-            key: option.key,
-            text: option.text
-          }));
-        });
-      } else if (definition.type === "file") {
-        const formModel = this.getView().getModel("form");
-        control = new FileUploader({
-          width: "100%",
-          buttonText: definition.placeholder || `Select ${definition.label}`,
-          change: function (event) {
-            const files = event.getParameter("files");
-            const file = files && files.length ? files[0] : null;
-            formModel.setProperty(dataPath, file ? file.name : "");
-            if (file) {
-              this._dynamicFileUploads[definition.name] = file;
-            } else {
-              delete this._dynamicFileUploads[definition.name];
-            }
-          }.bind(this)
-        });
-      } else if (definition.type === "combo") {
-        const key = definition.key || "code";
-        const text = definition.text || "name";
-        const secondaryText = definition.secondaryText || "code";
-        control = new ComboBox({
-          width: "100%",
-          showSecondaryValues: true,
-          filterSecondaryValues: true,
-          placeholder: definition.placeholder || `Search ${definition.label}`,
-          selectionChange: function (event) {
-            const item = event.getParameter("selectedItem");
-            const context = event.getSource().getBindingContext("form");
-            const rowContext = item ? item.getBindingContext("catalog") : null;
-            this._applyAutoFill(definition, item ? item.getKey() : "", context ? context.getPath() : null,
-              rowContext ? rowContext.getObject() : null);
-            this._applyConditionalVisibility();
-          }.bind(this)
-        }).bindProperty("selectedKey", path);
-        control.bindItems({
-          path: `catalog>/${definition.entity}`,
-          templateShareable: true,
-          template: new ListItem({
-            key: `{catalog>${key}}`,
-            text: `{catalog>${text}}`,
-            additionalText: `{catalog>${secondaryText}}`
-          })
-        });
-      } else {
-        control = new Input({
-          type: definition.type === "number" ? "Number" : "Text",
-          maxLength: definition.maxLength || 0,
-          placeholder: definition.placeholder || ""
-        }).bindValue(path);
+    onEditSesDraft: function () {
+      this._openSesDialog();
+    },
+
+    onSesFilesSelected: function (event) {
+      this._sesFiles = Array.from(event.getParameter("files") || []);
+      this.getView().getModel("form").setProperty("/sesDraft/files", this._sesFiles.map(function (file) {
+        return { name: file.name, sizeText: `${(file.size / 1024 / 1024).toFixed(2)} MB` };
+      }));
+    },
+
+    onSaveSesDraft: function () {
+      const formModel = this.getView().getModel("form");
+      const draft = formModel.getProperty("/sesDraft");
+      const missing = (this._sesControls || []).find(function (entry) {
+        const value = draft.details[entry.definition.name];
+        return entry.definition.required && (value === undefined || value === null || value === "");
+      });
+      if (missing) {
+        MessageBox.warning(`${missing.definition.label} is required.`);
+        missing.control.focus();
+        return;
       }
-      return control;
+      if (!(draft.items || []).length) {
+        MessageBox.warning("Add at least one SES line item.");
+        return;
+      }
+      const missingCell = this._firstMissingItemCell(draft.items, GRIDS.sesItems.columns);
+      if (missingCell) {
+        MessageBox.warning(`SES Line Items - ${missingCell}`);
+        return;
+      }
+      formModel.setProperty("/sesDraft/saved", true);
+      this.byId("sesSuccessorDialog").close();
+    },
+
+    onCancelSesDraft: function () {
+      this.byId("sesSuccessorDialog").close();
+    },
+
+    // Closing without ever saving (Cancel or Escape) means no SES successor: untick the box.
+    onSesDialogAfterClose: function () {
+      const formModel = this.getView().getModel("form");
+      if (!formModel.getProperty("/sesDraft/saved")) {
+        formModel.setProperty("/details/sesRequired", false);
+        this._discardSesDraft();
+      }
+    },
+
+    _discardSesDraft: function () {
+      this.getView().getModel("form").setProperty("/sesDraft", this._emptySesDraft());
+      this._sesFiles = [];
+      this._sesFileUploads = {};
+    },
+
+    // The captured SES as stored on the PO (blank values sent as null).
+    _sesDraftPayload: function (draft) {
+      const blankToNull = function (row) {
+        const clean = {};
+        Object.keys(row || {}).forEach(function (key) {
+          clean[key] = row[key] === "" ? null : row[key];
+        });
+        return clean;
+      };
+      return JSON.stringify(Object.assign(blankToNull(draft.details), {
+        items: (draft.items || []).map(blankToNull)
+      }));
     },
 
     _loadFlowmateRequestFormCatalog: async function () {
@@ -1529,12 +1517,60 @@ sap.ui.define([
       const typeCode = formModel.getProperty("/requestTypeCode");
       const variantCode = formModel.getProperty("/requestVariantCode");
       const categoryCode = formModel.getProperty("/materialCategoryCode");
-      formModel.setProperty("/hasHeaderTable", FormDefinitions.hasHeaderTable(variantCode));
-      this._itemColumns = FormDefinitions.getItemColumns(typeCode, variantCode, categoryCode);
+      const lineMode = formModel.getProperty("/bulkUpload");
+      // Bulk Request = Multiple for a PO: line items carry the Row # of their PO.
+      const poBulk = !!variantCode && this._isPoBulk();
+      this._itemColumns = poBulk
+        ? FormDefinitions.getBulkItemColumns(typeCode, variantCode)
+        : FormDefinitions.getItemColumns(typeCode, variantCode, categoryCode);
       this._headerColumns = FormDefinitions.getHeaderTableColumns(variantCode);
+      // SES shows its header table only in Multiple Line mode but keeps the Single/Multiple
+      // choice, so panel visibility and the choice itself are two separate flags.
+      formModel.setProperty("/hasHeaderTable", FormDefinitions.showsHeaderTable(variantCode, lineMode));
+      formModel.setProperty("/offersLineModeChoice", typeCode !== "MATERIAL_RESERVATION"
+        && FormDefinitions.offersLineModeChoice(variantCode));
+      formModel.setProperty("/showsItemsTable", this._itemColumns.length > 0
+        && (FormDefinitions.hasHeaderTable(variantCode)
+          || lineMode === "MULTIPLE_LINE"
+          || typeCode === "MATERIAL_RESERVATION"
+          || FormDefinitions.alwaysHasItems(typeCode)));
+      // "Contract Creation Details" is an Outline Contract title; every other type calls the
+      // second table its line items, header table or not.
+      formModel.setProperty("/itemsTableTitle", this.getView().getModel("i18n").getResourceBundle()
+        .getText(typeCode === "OUTLINE_CONTRACT" ? "contractItemsTableTitle" : "itemsTableTitle"));
       this._renderGrid("items");
       this._renderGrid("headers");
       this._renderConditionalGrids(typeCode, variantCode);
+      this._renderBulkRowsGrid(poBulk ? typeCode : null);
+    },
+
+    // Bulk Request = Multiple for a Purchase Order: each row of the details table becomes its own PO.
+    _isPoBulk: function () {
+      const formModel = this.getView().getModel("form");
+      return formModel.getProperty("/requestTypeCode") === "PURCHASE_ORDER"
+        && formModel.getProperty("/bulkUpload") === "MULTIPLE_LINE";
+    },
+
+    _renderBulkRowsGrid: function (typeCode) {
+      const host = this.byId("bulkRowsHost");
+      if (!host) {
+        return;
+      }
+      host.destroyItems();
+      delete GRIDS.bulkRows;
+      if (!typeCode) {
+        return;
+      }
+      GRIDS.bulkRows = {
+        tableId: "bulkRowsTable",
+        path: "/details/bulkRows",
+        columns: FormDefinitions.getBulkTableColumns(typeCode),
+        title: "Purchase Order Details"
+      };
+      GRIDS.bulkRows.panel = this._buildGridPanel("bulkRows");
+      GRIDS.bulkRows.panel.setVisible(true);
+      host.addItem(GRIDS.bulkRows.panel);
+      this._renderGrid("bulkRows");
     },
 
     // Builds one panel per conditional grid of the variant (Single Line Items only) inside
@@ -1699,12 +1735,6 @@ sap.ui.define([
       });
     },
 
-    _renumberItems: function (items) {
-      items.forEach(function (row, index) {
-        row.itemNo = index + 1;
-      });
-      return items;
-    },
 
     onAddItemRow: function (event) {
       const gridKey = this._gridOf(event && event.getSource());
@@ -1751,7 +1781,7 @@ sap.ui.define([
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${typeCode || "items"}${gridKey === "headers" ? "_headers" : ""}_template.csv`;
+      link.download = `${typeCode || "items"}${gridKey === "items" ? "" : "_" + gridKey}_template.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1878,6 +1908,9 @@ sap.ui.define([
         }
         return this._submitBulk(form);
       }
+      if (this._isPoBulk()) {
+        return this._submitPoBulk(form);
+      }
       if (!form.requestTypeCode || !form.requestVariantCode || !form.title.trim() || !form.processorTeamCode)  {
         MessageBox.warning("Request type, process variant and title are required.");
         return;
@@ -1910,35 +1943,33 @@ sap.ui.define([
         return;
       }
 
+      // Each visible row table needs at least one complete row. Which tables are shown is
+      // already decided in _renderItemsTable, so the same flags drive the validation.
       const itemRows = (form.details && form.details.items) || [];
+      const headerRows = (form.details && form.details.headers) || [];
+      const bundle = this.getView().getModel("i18n").getResourceBundle();
+      const headersTitle = bundle.getText("headersTableTitle");
+      const itemsTitle = form.itemsTableTitle || bundle.getText("itemsTableTitle");
+
       if (form.hasHeaderTable) {
-        const headerRows = (form.details && form.details.headers) || [];
         if (!headerRows.length) {
-          MessageBox.warning("Add at least one row to the Header Creation table.");
-          return;
-        }
-        if (!itemRows.length) {
-          MessageBox.warning("Add at least one row to the Contract Creation Details table.");
+          MessageBox.warning(`Add at least one row to the ${headersTitle} table.`);
           return;
         }
         const missingHeader = this._firstMissingItemCell(headerRows, this._headerColumns);
         if (missingHeader) {
-          MessageBox.warning(`Header Creation - ${missingHeader}`);
+          MessageBox.warning(`${headersTitle} - ${missingHeader}`);
+          return;
+        }
+      }
+      if (form.showsItemsTable) {
+        if (!itemRows.length) {
+          MessageBox.warning(`Add at least one row to the ${itemsTitle} table.`);
           return;
         }
         const missingItem = this._firstMissingItemCell(itemRows);
         if (missingItem) {
-          MessageBox.warning(`Contract Creation Details - ${missingItem}`);
-          return;
-        }
-      } else if (form.bulkUpload === "MULTIPLE_LINE") {
-        if (!itemRows.length) {
-          MessageBox.warning("Add at least one line item, or switch back to Single Line Items.");
-          return;
-        }
-        const missingCell = this._firstMissingItemCell(itemRows);
-        if (missingCell) {
-          MessageBox.warning(missingCell);
+          MessageBox.warning(`${itemsTitle} - ${missingItem}`);
           return;
         }
       }
@@ -1964,6 +1995,16 @@ sap.ui.define([
           MessageBox.warning(`${grid.title} - ${missingRow}`);
           return;
         }
+      }
+
+      // "Create SES Successor": the captured SES travels with the PO as JSON.
+      const withSesSuccessor = form.requestTypeCode === "PURCHASE_ORDER" && submittedDetails.sesRequired === true;
+      if (withSesSuccessor) {
+        if (!form.sesDraft || !form.sesDraft.saved) {
+          MessageBox.warning("Fill in the SES successor details, or untick Create SES Successor.");
+          return;
+        }
+        submittedDetails.sesDraft = this._sesDraftPayload(form.sesDraft);
       }
 
       this.setBusy(true);
@@ -2010,6 +2051,19 @@ sap.ui.define([
             category: name.replace(/([A-Z])/g, "_$1").toUpperCase()
           });
         }.bind(this));
+        // SES successor files are parked on the PO with an SES_ prefix; the server moves them to
+        // the SES request when it is created.
+        if (withSesSuccessor) {
+          (this._sesFiles || []).forEach(function (file) {
+            uploads.push({ file: file, category: "SES_SUPPORTING_DOCUMENT" });
+          });
+          Object.keys(this._sesFileUploads || {}).forEach(function (name) {
+            uploads.push({
+              file: this._sesFileUploads[name],
+              category: "SES_" + name.replace(/([A-Z])/g, "_$1").toUpperCase()
+            });
+          }.bind(this));
+        }
         let uploadResult = { failedCount: 0 };
         if (uploads.length) {
           uploadResult = await this._uploadFiles(request.ID, uploads);
@@ -2020,6 +2074,121 @@ sap.ui.define([
         this.navTo("requestDetail", {
           requestId: request.ID
         }, true);
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        this.setBusy(false);
+      }
+    },
+
+    // Bulk Request = Multiple for a Purchase Order: one PO request per row of the details table.
+    // Line items join their row through Row #; the shared attachments and Remarks go to every PO.
+    _submitPoBulk: async function (form) {
+      if (!form.requestVariantCode || !String(form.title || "").trim() || !form.processorTeamCode) {
+        MessageBox.warning("Request type, process variant, title and processor team are required.");
+        return;
+      }
+      const missingShared = (this._fieldControls || []).find(function (entry) {
+        const value = form.details[entry.definition.name];
+        return entry.definition.required && (value === undefined || value === null || value === "");
+      });
+      if (missingShared) {
+        MessageBox.warning(`${missingShared.definition.label} is required.`);
+        missingShared.control.focus();
+        return;
+      }
+      const rows = form.details.bulkRows || [];
+      const items = form.details.items || [];
+      if (!rows.length) {
+        MessageBox.warning("Add at least one row to the Purchase Order Details table.");
+        return;
+      }
+      const missingRow = this._firstMissingItemCell(rows, GRIDS.bulkRows.columns);
+      if (missingRow) {
+        MessageBox.warning(`Purchase Order Details - ${missingRow}`);
+        return;
+      }
+      if (!items.length) {
+        MessageBox.warning("Add at least one line item.");
+        return;
+      }
+      const missingItem = this._firstMissingItemCell(items);
+      if (missingItem) {
+        MessageBox.warning(`Line Items - ${missingItem}`);
+        return;
+      }
+      const strayItem = items.findIndex(function (item) {
+        const rowNo = Number(item.poRow);
+        return !Number.isInteger(rowNo) || rowNo < 1 || rowNo > rows.length;
+      });
+      if (strayItem >= 0) {
+        MessageBox.warning(`Line Items - Row ${strayItem + 1}: Row # must be between 1 and ${rows.length}.`);
+        return;
+      }
+      const rowWithoutItems = rows.findIndex(function (_row, index) {
+        return !items.some(function (item) { return Number(item.poRow) === index + 1; });
+      });
+      if (rowWithoutItems >= 0) {
+        MessageBox.warning(`Purchase Order Details - Row ${rowWithoutItems + 1} has no line items.`);
+        return;
+      }
+
+      const blankToNull = function (source, skip) {
+        const clean = {};
+        Object.keys(source || {}).forEach(function (key) {
+          if (skip.indexOf(key) < 0) {
+            clean[key] = source[key] === "" ? null : source[key];
+          }
+        });
+        return clean;
+      };
+      const shared = {};
+      (this._fieldControls || []).forEach(function (entry) {
+        const value = form.details[entry.definition.name];
+        shared[entry.definition.name] = value === "" || value === undefined ? null : value;
+      });
+      const title = form.title.trim();
+      const payloadRows = rows.map(function (row, index) {
+        return Object.assign(blankToNull(row, ["itemNo"]), shared, {
+          title: `${title} - Row ${index + 1}`,
+          dueDate: form.dueDate || null,
+          items: items
+            .filter(function (item) { return Number(item.poRow) === index + 1; })
+            .map(function (item, itemIndex) {
+              return Object.assign(blankToNull(item, ["poRow"]), { itemNo: itemIndex + 1 });
+            })
+        });
+      });
+
+      this.setBusy(true);
+      try {
+        const result = await this.request("createBulkRequests", {
+          method: "POST",
+          body: {
+            input: {
+              requestTypeCode: form.requestTypeCode,
+              requestVariantCode: form.requestVariantCode,
+              processorTeamCode: form.processorTeamCode,
+              rows: JSON.stringify(payloadRows)
+            }
+          }
+        });
+        const uploads = (this._selectedFiles || []).map(function (file) {
+          return { file: file, category: "SUPPORTING_DOCUMENT" };
+        });
+        Object.keys(this._dynamicFileUploads || {}).forEach(function (name) {
+          uploads.push({
+            file: this._dynamicFileUploads[name],
+            category: name.replace(/([A-Z])/g, "_$1").toUpperCase()
+          });
+        }.bind(this));
+        if (uploads.length) {
+          for (const requestId of JSON.parse(result.requestIds || "[]")) {
+            await this._uploadFiles(requestId, uploads);
+          }
+        }
+        this.showSuccess(`${result.created} Purchase Order request(s) created: ${JSON.parse(result.referenceNumbers || "[]").join(", ")}`);
+        this.navTo("requests");
       } catch (error) {
         this.showError(error);
       } finally {

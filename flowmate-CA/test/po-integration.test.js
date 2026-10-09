@@ -156,8 +156,11 @@ test("PO creation uses the payload requester, initializes workflow and records t
   assert.equal(created.status_code, "SUBMITTED");
   assert.equal(tables.PurchaseOrderDetails[0].request_ID, created.ID);
   assert.equal(tables.PurchaseOrderItems[0].details_ID, tables.PurchaseOrderDetails[0].ID);
-  assert.equal(tables.CATasks.length, 2);
-  assert.equal(tables.CATasks[1].status_code, "OPEN");
+  // The imported requester-review workflow opens step 1 instead of auto-completing it.
+  assert.equal(tables.CATasks.length, 1);
+  assert.equal(tables.CATasks[0].stepNo, 1);
+  assert.equal(tables.CATasks[0].status_code, "OPEN");
+  assert.equal(created.currentStep, 1);
   const history = tables.CAHistory.find((entry) => entry.action === "REQUEST_CREATED");
   assert.equal(history.actorEmail, REQUESTER.email);
   assert.deepEqual(JSON.parse(history.remarks), {

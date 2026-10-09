@@ -620,10 +620,11 @@ entity PurchaseOrderDetails : cuid, managed {
   vendorCode              : String(40);
   poValueWithTaxes        : Decimal(17,2);
   procurementValue        : Decimal(17,2);
-  // Optional procurement/accounting attributes used by the newer PO form.
+  // Procurement type: Centralized carries a free-text ID, Decentralized a PSR reference.
   procurementType         : String(20);
   centralizedProcurementId: String(80);
   psrId                   : String(20);
+  // Account assignment: each flag opens its own code.
   wbsApplicable           : Boolean default false;
   costCenterApplicable    : Boolean default false;
   costCenter              : String(80);
@@ -631,7 +632,10 @@ entity PurchaseOrderDetails : cuid, managed {
   budgetCode              : String(40);
   applicableTax           : String(40);
   clearanceCharge         : Decimal(17,2);
+  // "Create SES Successor": the SES captured at PO creation (JSON of SES details + items),
+  // turned into a real SES request when the PO workflow completes.
   sesDraft                : LargeString;
+  // Entered by the approver of the last PO step; copied into the SES successor.
   purchaseOrderNumber     : String(80);
   items                   : Composition of many PurchaseOrderItems
                               on items.details = $self;
@@ -698,7 +702,7 @@ entity ServiceEntrySheetDetails : cuid, managed {
 entity ServiceEntrySheetHeaders : cuid, managed {
   details               : Association to ServiceEntrySheetDetails not null;
   itemNo                : Integer;
-  sourceMode             : String(40);
+  sourceMode            : String(40);
   purchaseOrderNo       : String(80);
   existingSesNo         : String(80);
   foreignCurrency       : Boolean default false;

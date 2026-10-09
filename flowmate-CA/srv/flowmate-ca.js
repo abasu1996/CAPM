@@ -129,6 +129,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("rejectTask", this._rejectTask);
     this.on("sendBackTask", this._sendBackTask);
     this.on("completeStep", this._completeStep);
+    this.on("saveRequesterDetails", this._saveRequesterDetails);
     this.on("addComment", this._addComment);
     this.on("createSuccessorRequest", this._createSuccessorRequest);
     this.on("sendToS4", this._sendToS4);
@@ -579,7 +580,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const isAdmin = req.user.is("CAAdmin");
     const requestedBy = { requester_ID: user.ID };
     const assignedToMe = { assignedUser_ID: user.ID };
-    const openStatus = { status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] } };
+    // Only OPEN tasks are waiting on someone. A SENT_BACK task belongs to a step that
+    // has been rolled back and is reopened when that step comes around again.
+    const openStatus = { status_code: TASK_STATUS.OPEN };
     const teamIds = isAdmin ? [] : await this._teamIdsOf(user);
 
     const [
@@ -765,7 +768,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }));
 
     await this._insertDetails(tx, requestType.code, requestId, details);
-    await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, user, details);
+    await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, details);
     const creationRemarks = integration ? JSON.stringify({
       source: "TECHNICAL_API",
       clientId: integration.clientId,
@@ -823,6 +826,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
 
     const referenceNumbers = [];
+    const requestIds = [];
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index] || {};
       const { title, priorityCode, dueDate, requestVariantCode, ...details } = row;
@@ -851,6 +855,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           SELECT.one.from(this.db.CARequests).columns("referenceNumber").where({ ID: requestId })
         );
         referenceNumbers.push(created.referenceNumber);
+        requestIds.push(requestId);
       } catch (error) {
         return req.reject(400, `Row ${index + 1}: ${error.message}`);
       }
@@ -858,7 +863,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     return {
       created: referenceNumbers.length,
-      referenceNumbers: JSON.stringify(referenceNumbers)
+      referenceNumbers: JSON.stringify(referenceNumbers),
+      requestIds: JSON.stringify(requestIds)
     };
   };
 
@@ -878,8 +884,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       tx,
       request.ID,
       request.requestType_code,
-      request.requestVariant_code,
-      user
+      request.requestVariant_code
     );
     await this._writeHistory(tx, request.ID, 0, "REQUEST_SUBMITTED", user, REQUEST_STATUS.DRAFT, REQUEST_STATUS.SUBMITTED);
     return true;
@@ -990,6 +995,18 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(409, "Only open tasks can be approved");
     }
 
+    // The last step of a PO with "Create SES Successor" captures the PO number for the SES.
+    const poDetails = await this._poDetailsNeedingNumber(tx, task);
+    if (poDetails) {
+      const purchaseOrderNo = String(req.data.purchaseOrderNo || "").trim();
+      if (!purchaseOrderNo) {
+        return req.reject(400, "Enter the Purchase Order number to approve this task");
+      }
+      await tx.run(UPDATE(this.db.PurchaseOrderDetails)
+        .set({ purchaseOrderNumber: purchaseOrderNo })
+        .where({ ID: poDetails.ID }));
+    }
+
     await tx.run(UPDATE(this.db.CATasks).set({
       status_code: TASK_STATUS.APPROVED,
       decision: "APPROVED",
@@ -1052,6 +1069,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(404, "Task not found");
     }
     await this._assertTaskAccess(req, task, user);
+    if (task.status_code !== TASK_STATUS.OPEN) {
+      return req.reject(409, "Only open tasks can be sent back");
+    }
     if (!req.data.targetStepNo || req.data.targetStepNo >= task.stepNo) {
       return req.reject(400, "Select an earlier workflow step");
     }
@@ -1089,6 +1109,38 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }).where({ ID: task.request_ID }));
     await this._createConfiguredTaskIfMissing(tx, task.request_ID, targetStep);
     await this._writeHistory(tx, task.request_ID, targetStep.stepNo, "TASK_SENT_BACK", user, task.status_code, TASK_STATUS.SENT_BACK, req.data.remarks);
+    return true;
+  };
+
+  // Step 1 is the requester's own. They edit the business content here - on creation
+  // and again after a send-back - then push the request to the next step.
+  // Saves the requester's corrections on their own step. The step itself is closed by
+  // approving its task and completing the step, exactly as every other step is.
+  _saveRequesterDetails = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req, tx);
+    const request = await SELECT.one.from(this.db.CARequests).where({ ID: req.data.requestId });
+
+    if (!request) {
+      return req.reject(404, "Request not found");
+    }
+    this._assertMutableRequest(req, request);
+    if (request.owner_ID !== user.ID) {
+      return req.reject(403, "Only the requester can edit their own request");
+    }
+
+    const step = await SELECT.one.from(this.db.RequestStepInstances)
+      .where({ request_ID: request.ID, stepNo: 1 });
+    if (!step) {
+      return req.reject(404, "Workflow step not found");
+    }
+    if (step.status !== "OPEN") {
+      return req.reject(409, "The request is no longer waiting on the requester");
+    }
+
+    const details = this._parseDetails(req, req.data.details);
+    await this._assertNoDuplicateMaterialDescription(req, request.requestType_code, details, request.ID);
+    await this._updateDetails(tx, request.requestType_code, request.ID, details);
     return true;
   };
 
@@ -1134,18 +1186,29 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
 
+    return this._advanceFromStep(tx, request, step, steps, user, req.data.remarks, req);
+  };
+
+  // Shared by completeStep and the requester-step submit: close the given step and
+  // open the next one that is not already complete. Kept in one place so the
+  // send-back replay order cannot drift between the two callers.
+  async _advanceFromStep(tx, request, step, steps, user, remarks, req) {
+    const lastStepNo = Math.max(...steps.map((entry) => entry.stepNo));
+    const now = new Date().toISOString();
+
     await tx.run(UPDATE(this.db.RequestStepInstances).set({
       status: "COMPLETED",
-      completedAt: new Date().toISOString()
+      completedAt: now
     }).where({ ID: step.ID }));
 
     if (step.stepNo === lastStepNo) {
       await tx.run(UPDATE(this.db.CARequests).set({
         currentStep: step.stepNo,
         status_code: REQUEST_STATUS.COMPLETED,
-        completedAt: new Date().toISOString()
+        completedAt: now
       }).where({ ID: request.ID }));
-      await this._writeHistory(tx, request.ID, step.stepNo, "REQUEST_COMPLETED", user, request.status_code, REQUEST_STATUS.COMPLETED, req.data.remarks);
+      await this._writeHistory(tx, request.ID, step.stepNo, "REQUEST_COMPLETED", user, request.status_code, REQUEST_STATUS.COMPLETED, remarks);
+      await this._createSesSuccessor(tx, request, user);
       await this._triggerFlowmateIntegrationIfRequired(req, request.ID);
       return true;
     }
@@ -1154,7 +1217,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (nextStep) {
       await tx.run(UPDATE(this.db.RequestStepInstances).set({
         status: "OPEN",
-        startedAt: new Date().toISOString()
+        startedAt: now
       }).where({ ID: nextStep.ID }));
       await tx.run(UPDATE(this.db.CARequests).set({
         currentStep: nextStep.stepNo,
@@ -1163,9 +1226,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       await this._createConfiguredTaskIfMissing(tx, request.ID, nextStep);
     }
 
-    await this._writeHistory(tx, request.ID, step.stepNo, "STEP_COMPLETED", user, step.status, "COMPLETED", req.data.remarks);
+    await this._writeHistory(tx, request.ID, step.stepNo, "STEP_COMPLETED", user, step.status, "COMPLETED", remarks);
     return true;
-  };
+  }
 
   _addComment = async (req) => {
     const tx = cds.tx(req);
@@ -1211,7 +1274,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     };
   };
 
-  async _initializeWorkflow(tx, requestId, requestTypeCode, requestVariantCode, user, details) {
+  async _initializeWorkflow(tx, requestId, requestTypeCode, requestVariantCode, details) {
     const configs = await SELECT.from(this.db.WorkflowStepConfigs)
       .where({ requestType_code: requestTypeCode, isActive: true })
       .orderBy("stepNo");
@@ -1235,66 +1298,21 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       activityDescription: config.activityDescription,
       processorTeam_ID: config.processorTeam_ID,
       processorTeamName: teamsById.get(config.processorTeam_ID)?.name || null,
-      status: index === 0 ? "COMPLETED" : (index === 1 ? "OPEN" : "PENDING"),
-      startedAt: index <= 1 ? submittedAt : null,
-      completedAt: index === 0 ? submittedAt : null
+      status: index === 0 ? "OPEN" : "PENDING",
+      startedAt: index === 0 ? submittedAt : null,
+      completedAt: null
     }));
     await tx.run(INSERT.into(this.db.RequestStepInstances).entries(stepEntries));
 
+    // Step 1 belongs to the requester. It opens with the request rather than being
+    // auto-completed, so they can review or correct the details before the request
+    // moves on - the same path a send-back to step 1 uses. The task is built by the
+    // shared builder, so it is claimed and approved exactly like any other step.
     const requesterStep = stepEntries[0];
-    const requesterConfig = selectedConfigs[0];
-    await tx.run(INSERT.into(this.db.CATasks).entries({
-      ID: cds.utils.uuid(),
-      referenceNumber: this._taskReferenceNumber(requestId),
-      request_ID: requestId,
-      stepInstance_ID: requesterStep.ID,
-      stepNo: requesterStep.stepNo,
-      taskName: requesterConfig.taskName || requesterConfig.stepName,
-      description: requesterConfig.activityDescription,
-      assignedTeam_ID: requesterConfig.processorTeam_ID,
-      assignedTeamName: teamsById.get(requesterConfig.processorTeam_ID)?.name || null,
-      assignedUser_ID: user.ID,
-      assignedName: user.displayName,
-      assignedEmail: user.email,
-      status_code: TASK_STATUS.APPROVED,
-      decision: "APPROVED",
-      isMandatory: requesterConfig.isMandatory,
-      isApproval: requesterConfig.isApproval,
-      completedAt: submittedAt,
-      dueDate: this._addDays(requesterConfig.slaDays || 2)
-    }));
-    await this._writeHistory(tx, requestId, requesterStep.stepNo, "STEP_COMPLETED", user, "OPEN", "COMPLETED", null);
+    await this._createConfiguredTaskIfMissing(tx, requestId, requesterStep);
 
-    const activeStep = stepEntries[1];
-    if (!activeStep) {
-      await tx.run(UPDATE(this.db.CARequests).set({
-        currentStep: requesterStep.stepNo,
-        status_code: REQUEST_STATUS.COMPLETED,
-        submittedAt,
-        completedAt: submittedAt
-      }).where({ ID: requestId }));
-      return;
-    }
-
-    const activeConfig = selectedConfigs[1];
-    await tx.run(INSERT.into(this.db.CATasks).entries({
-      ID: cds.utils.uuid(),
-      referenceNumber: this._taskReferenceNumber(requestId),
-      request_ID: requestId,
-      stepInstance_ID: activeStep.ID,
-      stepNo: activeStep.stepNo,
-      taskName: activeConfig.taskName || activeConfig.stepName,
-      description: activeConfig.activityDescription,
-      assignedTeam_ID: activeConfig.processorTeam_ID,
-      assignedTeamName: teamsById.get(activeConfig.processorTeam_ID)?.name || null,
-      ...await this._approverAssignment(activeConfig, conditionSource),
-      status_code: TASK_STATUS.OPEN,
-      isMandatory: activeConfig.isMandatory,
-      isApproval: activeConfig.isApproval,
-      dueDate: this._addDays(activeConfig.slaDays || 2)
-    }));
     await tx.run(UPDATE(this.db.CARequests).set({
-      currentStep: activeStep.stepNo,
+      currentStep: requesterStep.stepNo,
       status_code: REQUEST_STATUS.SUBMITTED,
       submittedAt
     }).where({ ID: requestId }));
@@ -1327,6 +1345,99 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       assignedName: approver.displayName,
       assignedEmail: approver.email
     };
+  }
+
+  // The PO details row when this task is the last step of a PO that has "Create SES Successor";
+  // otherwise null.
+  async _poDetailsNeedingNumber(tx, task) {
+    const request = await tx.run(SELECT.one.from(this.db.CARequests)
+      .columns("ID", "requestType_code")
+      .where({ ID: task.request_ID }));
+    if (request?.requestType_code !== "PURCHASE_ORDER") {
+      return null;
+    }
+    const details = await tx.run(SELECT.one.from(this.db.PurchaseOrderDetails)
+      .columns("ID", "sesRequired")
+      .where({ request_ID: request.ID }));
+    if (!details?.sesRequired) {
+      return null;
+    }
+    const steps = await tx.run(SELECT.from(this.db.RequestStepInstances)
+      .columns("stepNo")
+      .where({ request_ID: request.ID }));
+    const lastStepNo = Math.max(...steps.map((step) => step.stepNo));
+    return task.stepNo === lastStepNo ? details : null;
+  }
+
+  // Runs when a request completes. For a PO with "Create SES Successor", turns the SES captured at
+  // PO creation into a real SES_NEW request: linked as successor, carrying the PO number entered
+  // on the last approval, owned by the PO requester, with the SES_* attachments moved across.
+  // It runs inside step completion (_advanceFromStep), which has no HTTP request, so request-level
+  // checks reached through _parseDetails / _insertOneRequest throw instead of calling req.reject.
+  async _createSesSuccessor(tx, poRequest, user) {
+    if (poRequest.requestType_code !== "PURCHASE_ORDER") {
+      return;
+    }
+    const req = {
+      reject: (code, message) => {
+        throw Object.assign(new Error(`SES successor: ${message}`), { code });
+      }
+    };
+    const poDetails = await tx.run(SELECT.one.from(this.db.PurchaseOrderDetails)
+      .where({ request_ID: poRequest.ID }));
+    if (!poDetails?.sesRequired || !poDetails.sesDraft) {
+      return;
+    }
+    const existing = await tx.run(SELECT.one.from(this.db.CARequests)
+      .columns("ID")
+      .where({ predecessor_ID: poRequest.ID, requestType_code: "SERVICE_ENTRY_SHEET" }));
+    if (existing) {
+      return;
+    }
+
+    const draft = this._parseDetails(req, poDetails.sesDraft);
+    const poNumber = poDetails.purchaseOrderNumber || null;
+    const details = {
+      ...draft,
+      sourceMode: "PO_SUCCESSOR",
+      purchaseOrderNo: poNumber,
+      items: (draft.items || []).map((item) => ({ ...item, poNumber: item.poNumber || poNumber }))
+    };
+
+    const [requestType, requestVariant, requester, processorTeam] = await Promise.all([
+      tx.run(SELECT.one.from(this.db.RequestTypes).where({ code: "SERVICE_ENTRY_SHEET" })),
+      tx.run(SELECT.one.from(this.db.RequestVariants).where({ code: "SES_NEW" })),
+      this.master.run(SELECT.one.from(this.masterEntities.Users).where({ ID: poRequest.requester_ID })),
+      poRequest.ownerTeam_ID
+        ? this.master.run(SELECT.one.from(this.masterEntities.Teams).where({ ID: poRequest.ownerTeam_ID }))
+        : null
+    ]);
+    const sesId = await this._insertOneRequest(req, tx, requester || user, {
+      requestType,
+      requestVariant,
+      processorTeam,
+      input: {
+        title: `SES for ${poRequest.referenceNumber}`,
+        description: `Created automatically from ${poRequest.referenceNumber}`,
+        priorityCode: poRequest.priority_code,
+        predecessorId: poRequest.ID,
+        details
+      }
+    });
+
+    const sesAttachments = (await tx.run(SELECT.from(this.db.CAAttachments)
+      .columns("ID", "category")
+      .where({ request_ID: poRequest.ID })))
+      .filter((attachment) => String(attachment.category || "").startsWith("SES_"));
+    for (const attachment of sesAttachments) {
+      await tx.run(UPDATE(this.db.CAAttachments)
+        .set({ request_ID: sesId, category: attachment.category.slice(4) })
+        .where({ ID: attachment.ID }));
+    }
+
+    const ses = await tx.run(SELECT.one.from(this.db.CARequests).columns("referenceNumber").where({ ID: sesId }));
+    await this._writeHistory(tx, poRequest.ID, poRequest.currentStep, "SES_SUCCESSOR_CREATED", user,
+      null, null, `SES successor ${ses?.referenceNumber || sesId} created`);
   }
 
   _isStepApplicable(config, details) {
@@ -1372,37 +1483,27 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (existing.some((task) => task.status_code === TASK_STATUS.OPEN)) {
       return;
     }
+    const config = step.config_ID
+      ? await SELECT.one.from(this.db.WorkflowStepConfigs).where({ ID: step.config_ID })
+      : null;
+    // Resolved before the re-open branch too: the requester may have named a different
+    // approver while the step was rolled back, so a reopened task must not keep the old one.
+    const approver = await this._resolveStepAssignment(tx, requestId, config);
+
     if (existing.length) {
       await tx.run(UPDATE(this.db.CATasks).set({
         status_code: TASK_STATUS.OPEN,
         decision: null,
-        completedAt: null
+        completedAt: null,
+        ...approver
       }).where({ ID: { in: existing.map((task) => task.ID) } }));
       return;
     }
 
-    const config = step.config_ID
-      ? await SELECT.one.from(this.db.WorkflowStepConfigs).where({ ID: step.config_ID })
-      : null;
     const teamId = config?.processorTeam_ID || step.processorTeam_ID;
     const team = teamId
       ? await this.master.run(SELECT.one.from(this.masterEntities.Teams).where({ ID: teamId }))
       : null;
-    let approver = {};
-    if (["APPROVER", "SCM"].includes(config?.roleCode)) {
-      const request = await tx.run(SELECT.one.from(this.db.CARequests)
-        .columns("requestType_code")
-        .where({ ID: requestId }));
-      const details = await this._loadDetails(tx, request?.requestType_code, requestId);
-      // New Contract keeps the SCM SPOC on its line items, which _loadDetails does not read.
-      const itemsEntityName = ITEMS_ENTITY_BY_REQUEST_TYPE[request?.requestType_code];
-      if (details && itemsEntityName) {
-        details.items = await tx.run(SELECT.from(this.db[itemsEntityName])
-          .where({ details_ID: details.ID })
-          .orderBy("itemNo"));
-      }
-      approver = await this._approverAssignment(config, details);
-    }
     await tx.run(INSERT.into(this.db.CATasks).entries({
       ID: cds.utils.uuid(),
       referenceNumber: this._taskReferenceNumber(requestId),
@@ -1420,7 +1521,27 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       dueDate: this._addDays(config?.slaDays || 2)
     }));
   }
-  async _assertNoDuplicateMaterialDescription(req, requestTypeCode, details) {
+  // An APPROVER or SCM step goes to the user named on the form; every other step stays in
+  // its processor team's queue.
+  async _resolveStepAssignment(tx, requestId, config) {
+    if (!["APPROVER", "SCM"].includes(config?.roleCode)) {
+      return {};
+    }
+    const request = await tx.run(SELECT.one.from(this.db.CARequests).columns("requestType_code").where({ ID: requestId }));
+    const details = await this._loadDetails(tx, request?.requestType_code, requestId);
+    // New Contract keeps the SCM SPOC on its line items, which _loadDetails does not read.
+    const itemsEntityName = ITEMS_ENTITY_BY_REQUEST_TYPE[request?.requestType_code];
+    if (details && itemsEntityName) {
+      details.items = await tx.run(SELECT.from(this.db[itemsEntityName])
+        .where({ details_ID: details.ID })
+        .orderBy("itemNo"));
+    }
+    return this._approverAssignment(config, details);
+  }
+
+  // excludeRequestId lets a requester re-submit their own request without the
+  // description colliding with the copy already stored against it.
+  async _assertNoDuplicateMaterialDescription(req, requestTypeCode, details, excludeRequestId) {
     if (requestTypeCode !== "MATERIAL_CODE") {
       return;
     }
@@ -1431,13 +1552,48 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const existing = await SELECT.one.from(this.db.MaterialCodeDetails)
       .columns("request_ID")
       .where({ description });
-    if (!existing) {
+    if (!existing || (excludeRequestId && existing.request_ID === excludeRequestId)) {
       return;
     }
     const owner = await SELECT.one.from(this.db.CARequests)
       .columns("referenceNumber")
       .where({ ID: existing.request_ID });
     return req.reject(400, `Material description "${description}" already exists on request ${owner?.referenceNumber || "another request"}`);
+  }
+
+  // Rewrites an existing detail row and replaces its line items, so itemNo stays
+  // contiguous no matter how the requester added or removed rows.
+  async _updateDetails(tx, requestTypeCode, requestId, details) {
+    const entityName = DETAIL_ENTITY_BY_REQUEST_TYPE[requestTypeCode];
+    if (!entityName) {
+      return;
+    }
+    const { items, headers, ...headerFields } = details;
+    const existing = await tx.run(SELECT.one.from(this.db[entityName]).where({ request_ID: requestId }));
+    if (!existing) {
+      return this._insertDetails(tx, requestTypeCode, requestId, details);
+    }
+    await tx.run(UPDATE(this.db[entityName]).set(headerFields).where({ ID: existing.ID }));
+
+    await this._replaceDetailRows(tx, ITEMS_ENTITY_BY_REQUEST_TYPE[requestTypeCode], existing.ID, items);
+    await this._replaceDetailRows(tx, HEADERS_ENTITY_BY_REQUEST_TYPE[requestTypeCode], existing.ID, headers);
+  }
+
+  // Replaces a detail row's child collection, renumbering itemNo so it stays contiguous no
+  // matter how the requester added or removed rows.
+  async _replaceDetailRows(tx, entityName, detailsId, rows) {
+    if (!entityName || !Array.isArray(rows)) {
+      return;
+    }
+    await tx.run(DELETE.from(this.db[entityName]).where({ details_ID: detailsId }));
+    if (rows.length) {
+      await tx.run(INSERT.into(this.db[entityName]).entries(rows.map((row, index) => ({
+        ID: cds.utils.uuid(),
+        details_ID: detailsId,
+        ...row,
+        itemNo: index + 1
+      }))));
+    }
   }
 
   async _insertDetails(tx, requestTypeCode, requestId, details) {

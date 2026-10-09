@@ -45,7 +45,7 @@ sap.ui.define([
           "materialReservation($expand=items)",
           "outlineContract($expand=items,headers,changeItems)",
           "purchaseOrder($expand=items)",
-          "serviceEntrySheet($expand=items)"
+          "serviceEntrySheet($expand=items,headers)"
         ].join(",");
         const request = await this.request(`Requests(${this._requestId})?$expand=${expand}`);
         this._prepareDetail(request);
@@ -91,12 +91,24 @@ sap.ui.define([
       request.processStatusText = request.status?.code === "COMPLETED"
         ? "Workflow completed"
         : `Step ${request.currentStep} of ${request.stepInstances.length}`;
+      // The editable form lives on the task, not here, so a request waiting on the person
+      // looking at it needs a way through - otherwise a send-back looks like a dead end.
+      const myTask = currentTasks.find(function (task) {
+        return task.status?.code === "OPEN"
+          && (task.assignedUser_ID === currentUser.ID || (!task.assignedUser_ID && isOwner));
+      });
+      request.myOpenTaskId = myTask ? myTask.ID : null;
+      request.myOpenTaskName = myTask ? (myTask.taskName || "Open My Task") : "";
       request.detailFields = this._detailFields(request);
       request.detailItems = (request[this.detailNavigationFor(request.requestType?.code)] || {}).items || [];
       request.hasDetailItems = request.detailItems.length > 0;
       request.detailHeaders = this.sortedDetailHeaders(request[this.detailNavigationFor(request.requestType?.code)]);
       request.hasDetailHeaders = request.detailHeaders.length > 0;
-      request.detailItemsTitle = request.hasDetailHeaders ? "Contract Creation Details" : "Line Items";
+      // "Contract Creation Details" is an Outline Contract title; other types with a header
+      // table still call their second table line items.
+      request.detailItemsTitle = request.hasDetailHeaders && request.requestType?.code === "OUTLINE_CONTRACT"
+        ? "Contract Creation Details"
+        : "Line Items";
     },
 
     _detailFields: function (request) {
@@ -104,34 +116,11 @@ sap.ui.define([
       return this.buildDetailFields(request, details);
     },
 
-    // Fields backed by UUIDs are stored as IDs; display the corresponding maintained label.
-    // If a lookup fails, retain the ID already rendered by _detailFields.
-    _resolveIdLabels: async function (request) {
+    // Combos keyed by a UUID (approver, LOA approver, vendor) store the ID; swap it for the
+    // display text of that row. A failed lookup leaves the stored value in place.
+    _resolveIdLabels: function (request) {
       const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
-      const definitions = FormDefinitions.getHeaderFields(
-        request.requestType?.code,
-        request.requestVariant?.code,
-        details.materialCategory
-      );
-      const model = this.getView().getModel("detail");
-      await Promise.all(definitions.map(async function (definition, index) {
-        const value = details[definition.name];
-        if (definition.key !== "ID" || !definition.entity || !value) {
-          return;
-        }
-        try {
-          const path = `${definition.entity}(${value})`;
-          const row = await this.request(path).catch(function () {
-            return this.requestMaster(path);
-          }.bind(this));
-          const label = row && row[definition.text || "name"];
-          if (label) {
-            model.setProperty(`/detailFields/${index}/value`, String(label));
-          }
-        } catch (error) {
-          Log.warning(`Could not resolve ${definition.name} ${value}`, error);
-        }
-      }.bind(this)));
+      return this.resolveIdLabels(request, details, "detail", "/detailFields");
     },
 
     _renderDetailItems: function (typeCode) {
@@ -256,6 +245,13 @@ sap.ui.define([
 
     onCloseAddTaskDialog: function () {
       this.byId("addTaskDialog").close();
+    },
+
+    onOpenMyTask: function () {
+      const taskId = this.getView().getModel("detail").getProperty("/myOpenTaskId");
+      if (taskId) {
+        this.navTo("taskDetail", { taskId });
+      }
     },
 
     onTaskPress: function (event) {

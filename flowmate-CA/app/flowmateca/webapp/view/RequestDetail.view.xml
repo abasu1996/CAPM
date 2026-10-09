@@ -57,6 +57,12 @@
               <ObjectStatus text="{detail>/processStatusText}" state="Information"/>
               <ToolbarSpacer/>
               <Button
+                text="{detail>/myOpenTaskName}"
+                icon="sap-icon://edit"
+                type="Emphasized"
+                visible="{= !!${detail>/myOpenTaskId} }"
+                press=".onOpenMyTask"/>
+              <Button
                 text="{i18n>completeStep}"
                 icon="sap-icon://complete"
                 type="Emphasized"

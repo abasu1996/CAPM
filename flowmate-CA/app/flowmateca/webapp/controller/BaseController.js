@@ -7,12 +7,20 @@ sap.ui.define([
   "sap/m/ColumnListItem",
   "sap/m/Text",
   "flowmateca/model/FormDefinitions",
+  "sap/m/Input",
+  "sap/m/TextArea",
+  "sap/m/DatePicker",
+  "sap/m/CheckBox",
+  "sap/m/ComboBox",
+  "sap/ui/core/Item",
+  "sap/ui/core/ListItem",
+  "sap/ui/unified/FileUploader",
+  "sap/base/Log",
   "flowmateca/model/serviceUrl",
   "sap/m/Table",
   "sap/m/Panel",
   "sap/m/ScrollContainer"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, serviceUrl,
-  Table, Panel, ScrollContainer) {
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer) {
   "use strict";
 
   // A request carries exactly one detail child, named per request type. Shared so the
@@ -30,6 +38,18 @@ sap.ui.define([
 
   const MAIN_SERVICE_URL = "odata/v4/flowmate-ca/";
   const MASTER_SERVICE_URL = "odata/v4/flowmate-ca-master/";
+
+  // Pick lists maintained by admins in flowmate-common; served by CAMasterDataService,
+  // not FlowmateCAService, and they carry no sortOrder column.
+  const MASTER_PICK_LISTS = new Set([
+    "Plant", "Sites", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
+    "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
+    "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
+    "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
+    "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments",
+    "ContractType", "PurchasingOrganizations", "CompanyCodes", "Incoterms", "CostCenter", "ApplicableTaxes",
+    "BudgetCode"
+  ]);
   const STATUS_MESSAGES = {
     400: "Some of the information provided is invalid. Please review it and try again.",
     401: "Your session has expired or you are not signed in. Please sign in again.",
@@ -239,11 +259,15 @@ sap.ui.define([
       return Object.values(DETAIL_NAVIGATION)
         .map(function (navigation) {
           // Outline contracts also carry header rows and Contract Modification change rows.
-          return navigation === DETAIL_NAVIGATION.OUTLINE_CONTRACT
-            ? `${navigation}($expand=items,headers,changeItems)`
-            : navigation === DETAIL_NAVIGATION.SERVICE_ENTRY_SHEET
-              ? `${navigation}($expand=items,headers)`
-              : `${navigation}($expand=items)`;
+          if (navigation === DETAIL_NAVIGATION.OUTLINE_CONTRACT) {
+            return `${navigation}($expand=items,headers,changeItems)`;
+          }
+          // Service entry sheets capture header rows when Multiple Line is chosen, and their
+          // presence is what distinguishes the two line modes once the request is stored.
+          if (navigation === DETAIL_NAVIGATION.SERVICE_ENTRY_SHEET) {
+            return `${navigation}($expand=items,headers)`;
+          }
+          return `${navigation}($expand=items)`;
         })
         .join(",");
     },
@@ -322,15 +346,46 @@ sap.ui.define([
 
     // Header-level fields only. The item-level ones belong to the line items table,
     // and on a bulk request they are empty here, which rendered as "Not provided".
+    // A request created in Single Line Item mode keeps its line values on the detail
+    // header row instead of in item rows, which is how the create page submitted them.
+    // The catalogue classifies those fields as item columns, so they have to be read
+    // back as header fields or they are invisible everywhere the request is shown.
+    isSingleLineDetail: function (request, details) {
+      const variantCode = request.requestVariant?.code;
+      if (request.requestType?.code === "MATERIAL_RESERVATION") {
+        return false;
+      }
+      // A variant whose header table only appears in Multiple Line mode records that choice
+      // in the data: header rows exist only when Multiple Line was used.
+      if (FormDefinitions.headerTableIsLineModeDependent(variantCode)) {
+        return !(details.headers || []).length;
+      }
+      if (FormDefinitions.hasHeaderTable(variantCode)) {
+        return false;
+      }
+      if ((details.items || []).length) {
+        return false;
+      }
+      return FormDefinitions.getItemColumns(request.requestType?.code, variantCode, details.materialCategory)
+        .some(function (column) {
+          const value = details[column.name];
+          return value !== null && value !== undefined && value !== "";
+        });
+    },
+
+    detailFieldDefinitions: function (request, details) {
+      const variantCode = request.requestVariant?.code;
+      return this.isSingleLineDetail(request, details)
+        ? FormDefinitions.getFields(variantCode, details.materialCategory, "SINGLE_LINE")
+        : FormDefinitions.getHeaderFields(request.requestType?.code, variantCode, details.materialCategory);
+    },
+
     buildDetailFields: function (request, details) {
-      // The Single/Multiple choice is not stored; SCM Assign User is mandatory only on the
-      // Single Line form (Contract Modification), so its presence selects that field set.
-      const definitions = FormDefinitions.getHeaderFields(
-        request.requestType?.code,
-        request.requestVariant?.code,
-        details.materialCategory,
-        details.scmAssignUser ? "SINGLE_LINE" : undefined
-      );
+      // The Single/Multiple choice is not stored, so it is inferred from the stored data:
+      // a single-line request keeps its line values on the detail row and has no item rows.
+      // That covers Contract Modification, whose Single Line form carries SCM Assign User,
+      // as well as every other variant offering the choice.
+      const definitions = this.detailFieldDefinitions(request, details);
       return definitions.map(function (definition) {
         let value = definition.source === "request"
           ? (definition.name === "requestDateTime" ? request.createdAt : request[definition.name])
@@ -349,6 +404,34 @@ sap.ui.define([
           value: value === null || value === undefined || value === "" ? "Not provided" : String(value)
         };
       });
+    },
+
+    // Combos keyed by a UUID (users, vendor, purchasing organization) store the ID; swap it for
+    // the display text of that row. Walks the same definitions as buildDetailFields, so the
+    // index is the rendered row. A failed lookup leaves the stored value in place.
+    resolveIdLabels: async function (request, details, modelName, fieldsPath) {
+      const model = this.getView().getModel(modelName);
+      const definitions = this.detailFieldDefinitions(request, details);
+      await Promise.all(definitions.map(async function (definition, index) {
+        const value = details[definition.name];
+        if (definition.key !== "ID" || !definition.entity || !value) {
+          return;
+        }
+        // Users and Vendors are served by the main service; other pick lists (for example
+        // PurchasingOrganizations) only by the master-data service.
+        const path = `${definition.entity}(${value})`;
+        try {
+          const row = await this.request(path).catch(function () {
+            return this.requestMaster(path);
+          }.bind(this));
+          const label = row && row[definition.text || "name"];
+          if (label) {
+            model.setProperty(`${fieldsPath}/${index}/value`, String(label));
+          }
+        } catch (error) {
+          // Leave the stored value visible.
+        }
+      }.bind(this)));
     },
 
     renderDetailItemsTable: function (table, request, details, modelName, itemsPath) {
@@ -385,6 +468,232 @@ sap.ui.define([
           }))
         })
       });
-    }
+    },
+
+    // --- dynamic form + editable grid builders -------------------------------
+    // Shared by the create page and the requester's step-1 task, which edits the
+    // same fields and line items. One implementation so required-cell validation,
+    // per-row auto-fill and conditional visibility cannot drift apart.
+
+    _loadFieldCatalogs: async function (fields) {
+      const entities = new Map();
+      fields.forEach(function (definition) {
+        if (definition.entity && !entities.has(definition.entity)) {
+          entities.set(definition.entity, definition.key || "code");
+        }
+      });
+      const catalog = this.getView().getModel("catalog");
+      // A failed pick list must degrade only its own field, not abort the render.
+      await Promise.all(Array.from(entities).map(async function (entry) {
+        const entity = entry[0];
+        const keyField = entry[1];
+        if (catalog.getProperty(`/${entity}`)) {
+          return;
+        }
+        const fromMaster = MASTER_PICK_LISTS.has(entity);
+        let orderBy = `&$orderby=${keyField}`;
+        if (entity === "Users" || entity === "Vendors") {
+          orderBy = "";
+        } else if (!fromMaster) {
+          orderBy = "&$orderby=sortOrder";
+        }
+        const path = `${entity}?$filter=isActive eq true${orderBy}`;
+        try {
+          const result = fromMaster ? await this.requestMaster(path) : await this.request(path);
+          catalog.setProperty(`/${entity}`, result.value || []);
+        } catch (error) {
+          Log.error(`Could not load the ${entity} list`, error);
+          catalog.setProperty(`/${entity}`, []);
+        }
+      }.bind(this)));
+    },
+    _applyAutoFill: function (definition, selectedKey, basePath, selectedRow) {
+      if (!definition.autoFills || !definition.entity) {
+        return;
+      }
+      let match = selectedRow;
+      if (!match && selectedKey) {
+        const rows = this.getView().getModel("catalog")
+          .getProperty(`/${definition.entity}`) || [];
+        const keyProperty = definition.key || "code";
+        match = rows.find(function (row) {
+          return String(row[keyProperty]) === String(selectedKey);
+        });
+      }
+      const formModel = this.getView().getModel("form");
+      [].concat(definition.autoFills).forEach(function (rule) {
+        const target = basePath ? `${basePath}/${rule.field}` : `/details/${rule.field}`;
+        formModel.setProperty(target, match ? (match[rule.from] || "") : "");
+      });
+    },
+    // Subclasses that own show/hide grids override this; the default has none.
+    _conditionalGrids: function () {
+      return {};
+    },
+
+    // Spec-driven conditional fields: a definition may carry
+    // visibleWhen: { field: "<driver>", equals: "<value>" }.
+    _isFieldVisible: function (definition) {
+      const rule = definition.visibleWhen;
+      if (!rule) {
+        return true;
+      }
+      const form = this.getView().getModel("form").getData();
+      const source = definition.source === "request" ? form : (form.details || {});
+      return source[rule.field] === rule.equals;
+    },
+
+    _applyConditionalVisibility: function () {
+      const formModel = this.getView().getModel("form");
+      (this._fieldControls || []).forEach(function (entry) {
+        if (!entry.definition.visibleWhen) {
+          return;
+        }
+        const visible = this._isFieldVisible(entry.definition);
+        entry.control.setVisible(visible);
+        if (entry.label) {
+          entry.label.setVisible(visible);
+        }
+        // A hidden field must not carry a stale value into the payload.
+        if (!visible) {
+          const path = entry.definition.source === "request"
+            ? `/${entry.definition.name}`
+            : `/details/${entry.definition.name}`;
+          if (formModel.getProperty(path) !== undefined && formModel.getProperty(path) !== "") {
+            formModel.setProperty(path, "");
+          }
+        }
+      }.bind(this));
+
+      const details = formModel.getProperty("/details") || {};
+      const grids = this._conditionalGrids();
+      Object.keys(grids).forEach(function (gridKey) {
+        const grid = grids[gridKey];
+        if (grid.panel && grid.driver) {
+          grid.panel.setVisible(details[grid.driver] === "YES");
+        }
+      }.bind(this));
+    },
+    _createFieldControl: function (definition, explicitPath, fileStore) {
+      const dataPath = definition.source === "request"
+        ? `/${definition.name}`
+        : `/details/${definition.name}`;
+      const path = explicitPath || `form>${dataPath}`;
+      let control;
+      if (definition.type === "readonly") {
+        control = new Input({
+          editable: false,
+          placeholder: definition.placeholder || ""
+        }).bindValue(path);
+      } else if (definition.type === "textarea") {
+        control = new TextArea({
+          rows: 3,
+          width: "100%",
+          placeholder: definition.placeholder || ""
+        }).bindValue(path);
+      } else if (definition.type === "date") {
+        control = new DatePicker({
+          valueFormat: "yyyy-MM-dd",
+          displayFormat: "medium"
+        }).bindValue(path);
+      } else if (definition.type === "checkbox") {
+        control = new CheckBox({
+          select: function (event) {
+            this._applyConditionalVisibility();
+            if (definition.onSelect && typeof this[definition.onSelect] === "function") {
+              this[definition.onSelect](event);
+            }
+          }.bind(this)
+        }).bindProperty("selected", path);
+      } else if (definition.type === "select") {
+        control = new ComboBox({
+          width: "100%",
+          editable: !definition.readOnly,
+          placeholder: definition.placeholder || ""
+          ,selectionChange: this._applyConditionalVisibility.bind(this)
+        }).bindProperty("selectedKey", path);
+        (definition.options || []).forEach(function (option) {
+          control.addItem(new Item({
+            key: option.key,
+            text: option.text
+          }));
+        });
+      } else if (definition.type === "file") {
+        // With an explicit path (e.g. the SES successor pop-up) the file name goes there and the
+        // File into the given store; otherwise into /details and the main upload map.
+        const formModel = this.getView().getModel("form");
+        const namePath = explicitPath ? explicitPath.slice(explicitPath.indexOf(">") + 1) : dataPath;
+        control = new FileUploader({
+          width: "100%",
+          buttonText: definition.placeholder || `Select ${definition.label}`,
+          change: function (event) {
+            const store = fileStore || this._dynamicFileUploads;
+            const files = event.getParameter("files");
+            const file = files && files.length ? files[0] : null;
+            formModel.setProperty(namePath, file ? file.name : "");
+            if (file) {
+              store[definition.name] = file;
+            } else {
+              delete store[definition.name];
+            }
+          }.bind(this)
+        });
+      } else if (definition.type === "combo") {
+        const key = definition.key || "code";
+        const text = definition.text || "name";
+        const secondaryText = definition.secondaryText || "code";
+        control = new ComboBox({
+          width: "100%",
+          showSecondaryValues: true,
+          filterSecondaryValues: true,
+          placeholder: definition.placeholder || `Search ${definition.label}`,
+          selectionChange: function (event) {
+            const item = event.getParameter("selectedItem");
+            const context = event.getSource().getBindingContext("form");
+            const rowContext = item ? item.getBindingContext("catalog") : null;
+            this._applyAutoFill(definition, item ? item.getKey() : "", context ? context.getPath() : null,
+              rowContext ? rowContext.getObject() : null);
+            this._applyConditionalVisibility();
+          }.bind(this)
+        }).bindProperty("selectedKey", path);
+        control.bindItems({
+          path: `catalog>/${definition.entity}`,
+          templateShareable: true,
+          template: new ListItem({
+            key: `{catalog>${key}}`,
+            text: `{catalog>${text}}`,
+            additionalText: `{catalog>${secondaryText}}`
+          })
+        });
+      } else {
+        control = new Input({
+          type: definition.type === "number" ? "Number" : "Text",
+          maxLength: definition.maxLength || 0,
+          placeholder: definition.placeholder || ""
+        }).bindValue(path);
+      }
+      return control;
+    },
+    _renumberItems: function (items) {
+      items.forEach(function (row, index) {
+        row.itemNo = index + 1;
+      });
+      return items;
+    },
+    _firstMissingItemCell: function (items, columns) {
+      for (let index = 0; index < items.length; index++) {
+        const missing = (columns || this._itemColumns || []).find(function (col) {
+          if (!col.required) {
+            return false;
+          }
+          const value = items[index][col.name];
+          return value === undefined || value === null || String(value).trim() === "";
+        });
+        if (missing) {
+          return `Row ${index + 1}: ${missing.label} is required.`;
+        }
+      }
+      return null;
+    },
   });
 });

@@ -675,49 +675,68 @@ sap.ui.define([], function () {
     field("requesterEmail", "Requester Email", "readonly", { source: "request" }),
     field("requestDateTime", "Request Date & Time", "readonly", { source: "request" })
   ];
+  // Dummy PSR references for Decentralized procurement until a PSR source is connected.
+  const PSR_IDS = ["PSR-000001", "PSR-000002", "PSR-000003", "PSR-000004", "PSR-000005"]
+    .map(function (key) { return { key, text: key }; });
+
   const poFields = [
-    field("selectionMode", "Selection", "select", {
-      required: true,
-      options: [
-        { key: "SINGLE", text: "Single" },
-        { key: "MULTIPLE", text: "Multiple" }
-      ]
-    }),
     field("purchaseOrderType_code", "PO Type", "combo", {
       required: true,
       entity: "PurchaseOrderTypes"
     }),
     field("contractBased", "Contract Based PO", "checkbox"),
-    field("contractNumber", "Contract Number", "input"),
+    field("systemContractId", "System Contract / Outline Agreement ID", "input", {
+      required: true,
+      visibleWhen: { field: "contractBased", equals: true }
+    }),
+    field("procurementType", "Procurement Type", "select", {
+      required: true,
+      options: [
+        { key: "CENTRALIZED", text: "Centralized Procurement" },
+        { key: "DECENTRALIZED", text: "Decentralized Procurement" }
+      ]
+    }),
+    field("centralizedProcurementId", "Centralized Procurement ID", "input", {
+      required: true,
+      visibleWhen: { field: "procurementType", equals: "CENTRALIZED" }
+    }),
+    field("psrId", "PSR ID", "select", {
+      required: true,
+      options: PSR_IDS,
+      visibleWhen: { field: "procurementType", equals: "DECENTRALIZED" }
+    }),
     field("procurementCategory_code", "Procurement Category", "combo", {
       required: true,
       entity: "ProcurementCategories"
     }),
     field("division", "Division", "combo", { entity: "Divisions", key: "divisionCode", text: "divisionName" }),
-    field("delegatedUser_ID", "Delegation User", "combo", {
-      entity: "Users",
-      key: "ID",
-      text: "displayName",
-      secondaryText: "email"
-    }),
     field("specialPersonArea", "Special Person Area", "select", {
       options: ["FTK", "ENGINEERING", "IT", "DBS", "MARKETING", "FOC", "DNS"].map(function (key) {
         return { key, text: key };
       })
     }),
     field("arNumber", "AR Number", "input"),
-    field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
+    // WBS Element, Cost Center, Budget Code and Campaign / Location Code are captured per line
+    // item (itemColumns.PURCHASE_ORDER). Tax stays here because it drives PO Value (With Taxes).
     field("documentType", "Document Type", "combo", { entity: "DocumentTypes", key: "documentTypeCode", text: "documentTypeDescription" }),
     field("taxApplicable", "Tax Applicable", "checkbox"),
+    field("applicableTax", "Applicable Tax", "combo", {
+      required: true,
+      entity: "ApplicableTaxes", key: "taxCode", text: "taxDescription", secondaryText: "taxCode",
+      visibleWhen: { field: "taxApplicable", equals: true }
+    }),
     field("clearanceChargeApplicable", "Clearance Charge Applicable", "checkbox"),
+    field("clearanceCharge", "Clearance Charge", "number", {
+      required: true,
+      visibleWhen: { field: "clearanceChargeApplicable", equals: true }
+    }),
     field("materialImported", "Material Imported", "checkbox"),
     field("sesRequired", "Create SES Successor", "checkbox"),
     field("paymentRequestRequired", "Create Payment Successor", "checkbox"),
     field("paymentRun", "Payment Run", "checkbox", { onSelect: "onPaymentRunSelect" }),
-    field("poHeaderText", "PO Header Text", "textarea"),
+    field("poHeaderText", "PO Header Text", "textarea", { required: true }),
     field("WorkHUBID", "WorkHub ID", "input"),
     field("WorkHubAppID", "WorkHub Application ID", "input"),
-    field("campaignLocationCode", "Campaign / Location Code", "combo", { entity: "Sites", key: "siteId", text: "siteName" }),
     field("procurementDescription", "Procurement Description", "textarea", {
       required: true
     }),
@@ -732,22 +751,24 @@ sap.ui.define([], function () {
       required: true,
       placeholder: "Filled from the selected Vendor Name"
     }),
-    field("purchasingOrganization_code", "Purchasing Organization", "combo", {
-      entity: "PurchasingOrganizations",
-      autoFills: { field: "companyCode", from: "description" }
-    }),
-    field("companyCode", "Company Code", "readonly", {
-      placeholder: "Filled from the Purchasing Organization"
-    }),
-    field("purchasingGroup", "Purchasing Group", "combo", { entity: "PurchasingGroups", key: "purchasingGroupCode", text: "purchasingGroupName" }),
-    field("siteId", "Site ID", "combo", { entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName" }),
-    field("currency_code", "Currency", "combo", {
+    field("purchasingOrganization_ID", "Purchasing Organization", "combo", {
       required: true,
-      entity: "Currencies"
+      entity: "PurchasingOrganizations", key: "ID",
+      text: "purchasingOrganizationName", secondaryText: "purchasingOrganizationCode"
     }),
-    plant,
+    field("companyCode", "Company Code", "combo", {
+      required: true,
+      entity: "CompanyCodes", key: "companyCode", text: "companyName", secondaryText: "companyCode"
+    }),
+    field("purchasingGroup", "Purchasing Group", "combo", {
+      required: true,
+      entity: "PurchasingGroups", key: "purchasingGroupCode", text: "purchasingGroupName", secondaryText: "purchasingGroupCode"
+    }),
+    // Site ID, Plant and Currency are captured per line item (itemColumns.PURCHASE_ORDER).
     field("totalValue", "PO Value (Without Taxes)", "number", { required: true }),
-    field("poValueWithTaxes", "PO Value (With Taxes)", "readonly", { placeholder: "Calculated from the PO value and tax code" }),
+    field("poValueWithTaxes", "PO Value (With Taxes)", "readonly", {
+      placeholder: "Calculated from the PO value and the applicable tax"
+    }),
     field("procurementValue", "Procurement Value", "number"),
     field("paymentTerms_code", "Payment Terms", "combo", {
       entity: "PaymentTerms"
@@ -766,10 +787,6 @@ sap.ui.define([], function () {
       required: true
     }),
     field("summary", "Summary", "textarea"),
-    field("psrRefNo", "PSR Ref No", "input", { required: true }),
-    field("systemContractId", "System Contract / Outline Agreement ID", "input", {
-      required: true
-    }),
     field("divisionalUser_ID", "Divisional User", "combo", {
       required: true,
       entity: "Users",
@@ -790,13 +807,6 @@ sap.ui.define([], function () {
   definitions.PO_OPEX = poFields;
 
   const sesFields = [
-    field("sourceMode", "Creation Source", "select", {
-      required: true,
-      options: [
-        { key: "MANUAL", text: "Manual Request" },
-        { key: "PO_SUCCESSOR", text: "From Purchase Order" }
-      ]
-    }),
     field("purchaseOrderNo", "Purchase Order Number", "input", { required: true }),
     field("existingSesNo", "Existing SES Number", "input"),
     field("loaApprover_ID", "LOA Approver", "combo", {
@@ -806,13 +816,7 @@ sap.ui.define([], function () {
       text: "displayName",
       secondaryText: "email"
     }),
-    field("foreignCurrency", "Foreign Currency PO", "checkbox"),
-    field("currency_code", "Currency", "combo", {
-      required: true,
-      entity: "Currencies"
-    }),
-    field("totalValue", "SES Value", "number", { required: true }),
-    field("paymentRequestRequired", "Create Payment Successor", "checkbox"),
+    field("paymentRequestRequired", "Available Invoices", "checkbox"),
     field("flowmateSesRequest", "Create Flowmate Service Entry Sheet Request", "checkbox", { onSelect: "onFlowmateServiceEntrySheetSelect" }),
     field("remarks", "Remarks", "textarea"),
     field("sesPaymentOption", "SES / Payment Option", "select", {
@@ -847,14 +851,34 @@ sap.ui.define([], function () {
       secondaryText: "email"
     }),
     field("taxInvoiceAttachment", "Tax Invoice Attachment", "file", { required: true }),
-    field("additionalAttachment", "Additional Attachment", "file", { required: true }),
-    field("comment", "Comment", "textarea", { required: true })
+    field("additionalAttachment", "Additional Attachment", "file"),
+    field("comment", "Comment", "textarea")
   ];
   sesFields.push(...requesterFields);
-  definitions.SES_NEW = sesFields;
-  // LOA approval applies to new SES only; a modification is approved by the divisional head
-  // (spec 5.1 #8), so the LOA approver is not collected on SES_MOD.
-  definitions.SES_MOD = sesFields.filter(function (f) { return f.name !== "loaApprover_ID"; });
+  // These stay on the form in both line modes: the LOA approver routes the approval task from
+  // the detail row, the division describes the whole request, an attachment cannot live in a
+  // table row, and the requester fields are request metadata. Everything else is captured per
+  // row in the Header Creation table when Multiple Line is chosen.
+  const sesFormFieldNames = new Set([
+    "loaApprover_ID", "division", "divisionalUser_ID", "approvalDivisionalHead_ID",
+    "invoiceBoqAttachment", "taxInvoiceAttachment", "additionalAttachment",
+    "requesterName", "requesterEmail", "requestDateTime"
+  ]);
+  // Only a modification quotes an existing SES number; a new one has none yet.
+  const sesVariantFields = {
+    SES_NEW: sesFields.filter(function (f) { return f.name !== "existingSesNo"; }),
+    SES_MOD: sesFields
+  };
+  // Single Line keeps every field on the form; Multiple Line moves the row fields into the
+  // header table. LOA approval applies to both variants, so both collect the LOA approver.
+  const sesHeaderRowFields = {};
+  Object.keys(sesVariantFields).forEach(function (variant) {
+    definitions[variant + "_SINGLE"] = sesVariantFields[variant];
+    definitions[variant] = sesVariantFields[variant]
+      .filter(function (f) { return sesFormFieldNames.has(f.name); });
+    sesHeaderRowFields[variant] = sesVariantFields[variant]
+      .filter(function (f) { return !sesFormFieldNames.has(f.name); });
+  });
 
   const column = (name, label, type, extra) => Object.assign({ name, label, type: type || "input" }, extra || {});
 
@@ -924,32 +948,44 @@ sap.ui.define([], function () {
   };
 
   const itemColumns = {
+    // Shown for Single and Multiple Line Items alike (see alwaysHasItems).
     PURCHASE_ORDER: [
-      column("materialOrService", "Service Code / Material Code"),
-      column("wbsElement", "WBS Element / Cost Center / Budget Code", "combo", { entity: "Wbs", key: "wbsElement", text: "wbsElement" }),
+      column("materialOrService", "Service Code / Material Code", "input", { required: true }),
+      column("wbsElement", "WBS Element", "combo", {
+        required: true, entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "wbsCode"
+      }),
       column("costCenter", "Cost Center", "combo", {
-        entity: "CostCenter", key: "costCenterCode", text: "costCenterName", secondaryText: "costCenterCode"
+        required: true, entity: "CostCenter", key: "costCenterCode", text: "costCenterName", secondaryText: "costCenterCode"
       }),
       column("budgetCode", "Budget Code", "combo", {
-        entity: "BudgetCode", key: "budgetCode", text: "budgetCodeDescription", secondaryText: "budgetCode"
+        required: true, entity: "BudgetCode", key: "budgetCode", text: "budgetCodeDescription", secondaryText: "budgetCode"
       }),
-      column("quantity", "Quantity", "number"),
-      column("unitPrice", "Unit Price", "number"),
-      column("currency", "Currency", "combo", { entity: "Currencies" }),
-      column("taxCode", "Applicable Taxes", "combo", { entity: "TaxCodes" }),
-      column("contractNo", "Contract No"),
-      column("campaignLocationCode", "Campaign / Location Code"),
-      column("siteId", "Site ID", "combo", { entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName" }),
-      column("plant", "Plant", "combo", { entity: "Plant", key: "plantCode", text: "plantName" }),
-      column("itemCategory", "Item Category", "combo", { entity: "ItemCategories" }),
-      column("accountAssignment", "Account Assignment", "combo", { entity: "AccountAssignments" }),
-      column("materialGroup", "Material Group", "combo", { entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription" })
+      column("quantity", "Quantity", "number", { required: true }),
+      column("unitPrice", "Unit Price", "number", { required: true }),
+      column("currency", "Currency", "combo", { required: true, entity: "Currencies" }),
+      column("taxCode", "Applicable Taxes", "combo", {
+        required: true, entity: "ApplicableTaxes", key: "taxCode", text: "taxDescription", secondaryText: "taxCode"
+      }),
+      column("campaignLocationCode", "Campaign / Location Code", "combo", {
+        entity: "Sites", key: "siteId", text: "siteName", secondaryText: "siteId"
+      }),
+      column("siteId", "Site ID Available", "combo", { entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName" }),
+      column("plant", "Plant", "combo", { required: true, entity: "Plant", key: "plantCode", text: "plantName" }),
+      column("itemCategory", "Item Category", "combo", { required: true, entity: "ItemCategories" }),
+      column("accountAssignment", "Account Assignment", "combo", { required: true, entity: "AccountAssignments" }),
+      column("materialGroup", "Material Group", "combo", {
+        required: true, entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription", secondaryText: "matGroupCode"
+      })
     ],
+    // Shown for Single and Multiple Line Items alike (see alwaysHasItems).
     SERVICE_ENTRY_SHEET: [
+      column("itemNo", "ID", "readonly"),
+      // PO Number stays optional: an SES captured as a PO successor only gets its PO number on the
+      // PO's last approval.
       column("poNumber", "PO Number"),
-      column("poLineItemNo", "PO Line Item No"),
-      column("quantity", "Quantity", "number"),
-      column("value", "SES Amount", "number")
+      column("poLineItemNo", "PO Line Item Number"),
+      column("value", "SES Amount", "number", { required: true }),
+      column("quantity", "Quantity", "number")
     ],
     MATERIAL_RESERVATION: [
       column("itemNo", "ID", "readonly"),
@@ -1067,6 +1103,17 @@ sap.ui.define([], function () {
     ]
   };
 
+  // Service Entry Sheet captures the same fields per row, so its header columns are derived
+  // from the field definitions rather than restated.
+  Object.keys(sesHeaderRowFields).forEach(function (variant) {
+    headerTableColumns[variant] = [column("itemNo", "ID", "readonly")]
+      .concat(sesHeaderRowFields[variant].map(fieldToColumn));
+  });
+
+  // CONTRACT_NEW has no Single/Multiple choice and always shows both tables. SES keeps the
+  // choice: its header table replaces those form fields only in Multiple Line mode.
+  const headerTableOnlyWhenMultiple = new Set(["SES_NEW", "SES_MOD"]);
+
   Object.assign(definitions, materialDefinitions);
 
   const variantsByRequestType = {
@@ -1163,6 +1210,64 @@ sap.ui.define([], function () {
     // the Single/Multiple line choice.
     hasHeaderTable: function (variantCode) {
       return !!headerTableColumns[variantCode];
+    },
+    // Whether the header table is actually shown for the chosen line mode, and whether the
+    // variant still offers the Single/Multiple choice at all.
+    showsHeaderTable: function (variantCode, lineMode) {
+      if (!headerTableColumns[variantCode]) {
+        return false;
+      }
+      return headerTableOnlyWhenMultiple.has(variantCode) ? lineMode === "MULTIPLE_LINE" : true;
+    },
+    offersLineModeChoice: function (variantCode) {
+      return !headerTableColumns[variantCode] || headerTableOnlyWhenMultiple.has(variantCode);
+    },
+    headerTableIsLineModeDependent: function (variantCode) {
+      return headerTableOnlyWhenMultiple.has(variantCode);
+    },
+    // ---- Bulk Request = Multiple (Purchase Order): one PO per row of a details table ----
+    // Columns of the details table: every PO field except the successor checkboxes, the files and
+    // Remarks (those sit in a shared section). Fields that a checkbox or choice normally opens
+    // become plain optional columns, since a table cell cannot appear and disappear per row.
+    getBulkTableColumns: function (requestTypeCode) {
+      if (requestTypeCode !== "PURCHASE_ORDER") {
+        return [];
+      }
+      const excluded = ["sesRequired", "paymentRequestRequired", "remarks"];
+      return [column("itemNo", "Row #", "readonly")].concat(poFields
+        .filter(function (definition) {
+          return definition.source !== "request" && definition.type !== "file"
+            && excluded.indexOf(definition.name) < 0;
+        })
+        .map(function (definition) {
+          const col = fieldToColumn(definition);
+          if (definition.visibleWhen) {
+            col.required = false;
+          }
+          return col;
+        }));
+    },
+    // The shared "Attachments & Comments" section, applied to every PO created from the table.
+    getBulkSharedFields: function (requestTypeCode) {
+      if (requestTypeCode !== "PURCHASE_ORDER") {
+        return [];
+      }
+      return poFields
+        .filter(function (definition) {
+          return definition.type === "file" || definition.name === "remarks";
+        })
+        .map(function (definition) {
+          return Object.assign({}, definition, { section: "Attachments & Comments" });
+        });
+    },
+    // Line items in bulk mode carry the Row # of the details row (PO) they belong to.
+    getBulkItemColumns: function (requestTypeCode, variantCode) {
+      return [column("poRow", "Row #", "number", { required: true })]
+        .concat(this.getItemColumns(requestTypeCode, variantCode));
+    },
+    // Request types whose line-items table shows for Single as well as Multiple Line Items.
+    alwaysHasItems: function (requestTypeCode) {
+      return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";
     },
     getHeaderTableColumns: function (variantCode) {
       return headerTableColumns[variantCode] || [];
