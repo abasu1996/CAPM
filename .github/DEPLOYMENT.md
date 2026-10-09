@@ -17,6 +17,28 @@ The technical user needs enough Cloud Foundry space permissions to read service
 instances, create/read the `github-actions-backup` HDI service keys, deploy MTAs,
 and inspect applications. Do not use a personal SSO password.
 
+The MTA descriptors provision and bind SAP Application Autoscaler instances for
+the runtime and approuter modules. The initial floor is two instances per
+runtime module and two approuter instances. Autoscaler policies can add up to
+eight runtime instances or six approuter instances when CPU, memory utilisation
+or response time thresholds are exceeded. These are load-test starting values;
+they are not a capacity guarantee for 20,000 concurrent users.
+
+The deployment workflow checks that the `autoscaler` service exposes the
+`standard` plan before building or changing anything. To inspect a deployed
+policy interactively, install the Cloud Foundry Application Autoscaler plugin
+and run, for example:
+
+```bash
+cf autoscaling-policy flowmate-srv
+cf autoscaling-policy flowmate-ca-srv
+cf autoscaling-policy flowmate-common-srv
+```
+
+Tune thresholds and maximums only after reviewing load-test results and HANA
+connection usage. Scaling the Node.js services does not automatically increase
+HANA capacity or connection limits.
+
 For additional production control, enable required reviewers on the `qas`
 GitHub Environment. This pauses the job before any BTP authentication or change.
 

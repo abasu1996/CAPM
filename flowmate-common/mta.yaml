@@ -17,7 +17,7 @@ modules:
     type: nodejs
     path: gen/srv
     parameters:
-      instances: 1
+      instances: 2
       buildpack: nodejs_buildpack
       memory: 256M
       host: flowmate-common-srv-${space}
@@ -30,6 +30,36 @@ modules:
     requires:
       - name: flowmate-common-auth
       - name: flowmate-common-db
+      - name: flowmate-common-srv-autoscaler
+        parameters:
+          config:
+            instance_min_count: 2
+            instance_max_count: 8
+            scaling_rules:
+              - metric_type: cpu
+                threshold: 70
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: memoryutil
+                threshold: 75
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: responsetime
+                threshold: 2500
+                operator: ">"
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: cpu
+                threshold: 30
+                operator: "<"
+                adjustment: "-1"
+                breach_duration_secs: 300
+                cool_down_secs: 300
 
   - name: flowmate-common-db-deployer
     type: hdb
@@ -57,3 +87,9 @@ resources:
       service-name: flowmate-common-db
       service: hana
       service-plan: hdi-shared
+  - name: flowmate-common-srv-autoscaler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-plan: standard
+      service-name: flowmate-common-srv-autoscaler

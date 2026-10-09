@@ -19,7 +19,7 @@ modules:
     type: nodejs
     path: gen/srv
     parameters:
-      instances: 1
+      instances: 2
       buildpack: nodejs_buildpack
       memory: 512M
     build-parameters:
@@ -32,6 +32,36 @@ modules:
       - name: flowmate-ca-auth
       - name: flowmate-ca-db
       - name: flowmate-ca-destination
+      - name: flowmate-ca-srv-autoscaler
+        parameters:
+          config:
+            instance_min_count: 2
+            instance_max_count: 8
+            scaling_rules:
+              - metric_type: cpu
+                threshold: 70
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: memoryutil
+                threshold: 75
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: responsetime
+                threshold: 2500
+                operator: ">"
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: cpu
+                threshold: 30
+                operator: "<"
+                adjustment: "-1"
+                breach_duration_secs: 300
+                cool_down_secs: 300
 
   - name: flowmate-ca-db-deployer
     type: hdb
@@ -71,7 +101,7 @@ modules:
     type: nodejs
     path: gen/router
     parameters:
-      instances: 1
+      instances: 2
       buildpack: nodejs_buildpack
       memory: 256M
       disk-quota: 512M
@@ -96,6 +126,36 @@ modules:
           url: ~{srv-url}
           forwardAuthToken: true
           timeout: 600000
+      - name: flowmate-ca-approuter-autoscaler
+        parameters:
+          config:
+            instance_min_count: 2
+            instance_max_count: 6
+            scaling_rules:
+              - metric_type: cpu
+                threshold: 70
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: memoryutil
+                threshold: 75
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: responsetime
+                threshold: 2500
+                operator: ">"
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: cpu
+                threshold: 30
+                operator: "<"
+                adjustment: "-1"
+                breach_duration_secs: 300
+                cool_down_secs: 300
 
   - name: flowmate-ca-destination-content
     type: com.sap.application.content
@@ -202,3 +262,15 @@ resources:
     type: org.cloudfoundry.existing-service
     parameters:
       service-name: flowmate-api-auth
+  - name: flowmate-ca-srv-autoscaler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-plan: standard
+      service-name: flowmate-ca-srv-autoscaler
+  - name: flowmate-ca-approuter-autoscaler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-plan: standard
+      service-name: flowmate-ca-approuter-autoscaler

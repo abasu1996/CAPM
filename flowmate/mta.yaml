@@ -47,7 +47,7 @@ modules:
     type: nodejs
     path: gen/router
     parameters:
-      instances: 1
+      instances: 2
       buildpack: nodejs_buildpack
       memory: 256M
       disk-quota: 512M
@@ -72,12 +72,42 @@ modules:
           url: ~{srv-url}
           forwardAuthToken: true
           timeout: 600000
+      - name: flowmate-approuter-autoscaler
+        parameters:
+          config:
+            instance_min_count: 2
+            instance_max_count: 6
+            scaling_rules:
+              - metric_type: cpu
+                threshold: 70
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: memoryutil
+                threshold: 75
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: responsetime
+                threshold: 2500
+                operator: ">"
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: cpu
+                threshold: 30
+                operator: "<"
+                adjustment: "-1"
+                breach_duration_secs: 300
+                cool_down_secs: 300
 
   - name: flowmate-srv
     type: nodejs
     path: gen/srv
     parameters:
-      instances: 1
+      instances: 2
       buildpack: nodejs_buildpack
     properties:
       FLOWMATE_APP_URL: https://dialog-axiata-plc-arize-qas-9339ozek-org-a-qas-org-b-te3bf718a2.cfapps.ap11.hana.ondemand.com
@@ -93,6 +123,36 @@ modules:
       - name: flowmate-destination
       - name: flowmate-connectivity
       - name: dialog-job
+      - name: flowmate-srv-autoscaler
+        parameters:
+          config:
+            instance_min_count: 2
+            instance_max_count: 8
+            scaling_rules:
+              - metric_type: cpu
+                threshold: 70
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: memoryutil
+                threshold: 75
+                operator: ">="
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: responsetime
+                threshold: 2500
+                operator: ">"
+                adjustment: "+1"
+                breach_duration_secs: 120
+                cool_down_secs: 180
+              - metric_type: cpu
+                threshold: 30
+                operator: "<"
+                adjustment: "-1"
+                breach_duration_secs: 300
+                cool_down_secs: 300
 
   - name: flowmate-db-deployer
     type: hdb
@@ -214,6 +274,18 @@ resources:
     type: org.cloudfoundry.existing-service
     parameters:
       service-name: flowmate-common-auth
+  - name: flowmate-srv-autoscaler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-plan: standard
+      service-name: flowmate-srv-autoscaler
+  - name: flowmate-approuter-autoscaler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: autoscaler
+      service-plan: standard
+      service-name: flowmate-approuter-autoscaler
   - name: dialog-job
     type: org.cloudfoundry.existing-service
     parameters:

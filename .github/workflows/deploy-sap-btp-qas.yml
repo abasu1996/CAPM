@@ -74,6 +74,10 @@ jobs:
           cf service flowmate-common-db
           cf service flowmate-db
           cf service flowmate-ca-db
+          if ! cf marketplace -e autoscaler | awk 'NR > 2 && $1 == "standard" { found = 1 } END { exit(found ? 0 : 1) }'; then
+            echo "The QAS space does not expose the Application Autoscaler standard plan." >&2
+            exit 1
+          fi
 
       - name: Install project dependencies
         shell: bash
