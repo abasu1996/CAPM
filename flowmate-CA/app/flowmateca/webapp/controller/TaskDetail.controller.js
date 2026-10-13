@@ -11,6 +11,15 @@ sap.ui.define([
 ], function (BaseController, FormDefinitions, JSONModel, MessageBox, SimpleForm, Label, Column, ColumnListItem, Button) {
   "use strict";
 
+  const MATERIAL_TASK_FIELDS = {
+    "Provide G/L account": { name: "glAccount", label: "GL Account", type: "input" },
+    "Provide valuation class": {
+      name: "valuationClass_code", label: "Valuation Class", type: "combo",
+      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
+    },
+    "Validate material in S/4": { name: "materialCode", label: "Material Code", type: "input" }
+  };
+
   return BaseController.extend("flowmateca.controller.TaskDetail", {
     onInit: function () {
       this.getView().setModel(new JSONModel({}), "task");
@@ -34,7 +43,7 @@ sap.ui.define([
           "status",
           "requestType",
           "requestVariant",
-          "stepInstances($select=stepNo)",
+          "stepInstances($select=stepNo,stepName)",
           this.detailExpandClause()
         ].join(",");
         const task = await this.request(
@@ -70,10 +79,107 @@ sap.ui.define([
         task.needsPoNumber = request.requestType?.code === "PURCHASE_ORDER"
           && details.sesRequired === true
           && task.stepNo === lastStepNo;
+        const currentStep = (request.stepInstances || []).find(function (step) {
+          return step.stepNo === task.stepNo;
+        });
+        task.needsGlAccount = request.requestType?.code === "SERVICE_CODE"
+          && this.isSingleLineDetail(request, details)
+          && /g\s*\/?\s*l\s+account\s+enrichment/i.test(currentStep?.stepName || "");
+        task.needsValuationClass = request.requestType?.code === "SERVICE_CODE"
+          && this.isSingleLineDetail(request, details)
+          && /valuation\s+class/i.test(currentStep?.stepName || "");
+        task.needsServiceCode = request.requestType?.code === "SERVICE_CODE"
+          && this.isSingleLineDetail(request, details)
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
+        task.needsEquipmentCode = request.requestType?.code === "EQUIPMENT_CODE"
+          && !(details.items || []).length
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
+        // Multiple line items: the same steps ask for the value per line, in a table that shows
+        // each line's service description.
+        task.lineEntry = null;
+        task.lineEntryRows = [];
+        if (request.requestType?.code === "SERVICE_CODE" && (details.items || []).length) {
+          const stepName = currentStep?.stepName || "";
+          const target = /g\s*\/?\s*l\s+account\s+enrichment/i.test(stepName)
+            ? { field: "glAccount", label: "G/L Account", maxLength: 80 }
+            : (/valuation\s+class/i.test(stepName)
+              ? { field: "valuationClass_code", label: "Valuation Class", maxLength: 40 }
+              : (/s\s*\/?\s*4\s+data\s+validation/i.test(stepName)
+                ? { field: "serviceCode", label: "Service Code", maxLength: 80 }
+                : null));
+          if (target) {
+            target.info1Label = "Service Description";
+            task.lineEntry = target;
+            task.lineEntryRows = details.items.slice()
+              .sort(function (left, right) { return left.itemNo - right.itemNo; })
+              .map(function (item) {
+                return {
+                  itemId: item.ID,
+                  itemNo: item.itemNo,
+                  info1: item.serviceDescription || "",
+                  value: item[target.field] || ""
+                };
+              });
+          }
+        }
+        // Equipment Code with multiple line items: S/4 Data Validation records the Equipment
+        // Code per line, next to that line's Site ID and Site Name.
+        if (request.requestType?.code === "EQUIPMENT_CODE" && (details.items || []).length
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "")) {
+          task.lineEntry = {
+            field: "equipmentCode", label: "Equipment Code", maxLength: 80,
+            info1Label: "Site ID", info2Label: "Site Name"
+          };
+          task.lineEntryRows = details.items.slice()
+            .sort(function (left, right) { return left.itemNo - right.itemNo; })
+            .map(function (item) {
+              return {
+                itemId: item.ID,
+                itemNo: item.itemNo,
+                info1: item.siteId || "",
+                info2: item.siteName || "",
+                value: item.equipmentCode || ""
+              };
+            });
+        }
+        // Project Code at S/4 Data Validation: the created Project Code (New / Modification), or the
+        // Function Location / Activity per the Object Type. One field, or one value per line.
+        task.needsProjectValue = false;
+        const projectTarget = request.requestType?.code === "PROJECT_CODE"
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "")
+          ? this._projectValueTarget(request.requestVariant?.code, details.transactionType)
+          : null;
+        if (projectTarget && !(details.items || []).length) {
+          task.needsProjectValue = true;
+          task.projectValueLabel = projectTarget.label;
+        } else if (projectTarget) {
+          // Each row shows what identifies the line: Project Name / Description (New / Modification),
+          // Site ID / Name (Function Location) or Project Code / Remarks (Activity).
+          const info = request.requestVariant?.code === "PROJECT_NEW_MOD"
+            ? { info1Label: "Project Name", info2Label: "Project Description", info1: "projectName", info2: "projectDescription" }
+            : (details.transactionType === "FUNCTION_LOCATION"
+              ? { info1Label: "Site ID", info2Label: "Site Name", info1: "siteId", info2: "siteName" }
+              : { info1Label: "Project Code", info2Label: "Remarks", info1: "projectId", info2: "remarks" });
+          task.lineEntry = Object.assign(projectTarget, { info1Label: info.info1Label, info2Label: info.info2Label });
+          task.lineEntryRows = details.items.slice()
+            .sort(function (left, right) { return left.itemNo - right.itemNo; })
+            .map(function (item) {
+              return {
+                itemId: item.ID,
+                itemNo: item.itemNo,
+                info1: item[info.info1] || "",
+                info2: item[info.info2] || "",
+                value: item[projectTarget.field] || ""
+              };
+            });
+        }
 
         // Step 1 is the requester's own: they correct the details here and send the
         // request on, rather than approving it.
         task.isRequesterStep = task.stepNo === 1 && task.canProcess;
+        task.materialEditStep = task.canProcess && request.requestType?.code === "MATERIAL_CODE"
+          && ["MAT_NEW", "MAT_NEW_REF"].includes(request.requestVariant?.code)
+          && Boolean(MATERIAL_TASK_FIELDS[task.taskName]);
         this.getView().getModel("task").setData(task);
         // User/vendor fields are stored as IDs; show their names.
         this.resolveIdLabels(request, details, "task", "/detailFields");
@@ -81,6 +187,11 @@ sap.ui.define([
         if (task.isRequesterStep) {
           await this._renderEditableStep(request, details);
         } else {
+          if (task.materialEditStep) {
+            await this._renderMaterialEditStep(details, task.taskName);
+          } else {
+            this.byId("taskDetailFormHost")?.destroyItems();
+          }
           this.renderDetailItemsTable(
             this.byId("taskItemsTable"),
             request,
@@ -132,7 +243,7 @@ sap.ui.define([
       // is the same rule the create page applies.
       const singleLine = this.isSingleLineDetail(request, details);
       this._headerFields = this.detailFieldDefinitions(request, details)
-        .filter(function (field) { return field.type !== "file" && field.source !== "request"; });
+        .filter(function (field) { return field.type !== "file" && field.source !== "request" && !field.stepOnly; });
       this._itemColumns = (!singleLine || FormDefinitions.hasHeaderTable(variantCode))
         ? FormDefinitions.getItemColumns(typeCode, variantCode, categoryCode)
           .filter(function (col) { return col.name !== "itemNo"; })
@@ -154,6 +265,28 @@ sap.ui.define([
       this._applyConditionalVisibility();
     },
 
+    _renderMaterialEditStep: async function (details, taskName) {
+      const stepField = MATERIAL_TASK_FIELDS[taskName];
+      if (!stepField) {
+        return;
+      }
+      this._materialTaskField = stepField;
+      this.getView().getModel("form").setData({ details: Object.assign({}, details) });
+      await this._loadFieldCatalogs([stepField]);
+      const host = this.byId("taskDetailFormHost");
+      host.destroyItems();
+      const form = new SimpleForm({
+        editable: true,
+        layout: "ColumnLayout",
+        columnsXL: 2,
+        columnsL: 2,
+        columnsM: 1
+      });
+      form.addContent(new Label({ text: stepField.label }));
+      form.addContent(this._createFieldControl(stepField, "form>/details/" + stepField.name));
+      host.addItem(form);
+    },
+
     _renderEditableFields: function () {
       const host = this.byId("taskDetailFormHost");
       if (!host) {
@@ -169,7 +302,7 @@ sap.ui.define([
         columnsM: 2
       });
       this._headerFields.forEach(function (definition) {
-        const label = new Label({ text: definition.label, required: !!definition.required });
+        const label = new Label({ text: definition.label, required: !!this._isFieldRequired(definition) });
         const control = this._createFieldControl(definition);
         form.addContent(label);
         form.addContent(control);
@@ -200,10 +333,11 @@ sap.ui.define([
       host.unbindItems();
       grid.columns.forEach(function (col) {
         host.addColumn(new Column({
-          header: new Label({ text: col.label, required: !!col.required, wrapping: true }),
-          width: col.type === "date" ? "11rem" : "13rem"
+          header: new Label({ text: col.label, required: !!this._isFieldRequired(col), wrapping: true }),
+          width: col.type === "date" ? "11rem" : "13rem",
+          visible: this._columnVisibleBinding(col)
         }));
-      });
+      }.bind(this));
       host.addColumn(new Column({ hAlign: "End", width: "3rem" }));
       host.bindItems({
         path: "form>" + grid.path,
@@ -248,7 +382,7 @@ sap.ui.define([
       const details = this.getView().getModel("form").getProperty("/details") || {};
 
       const missingField = (this._headerFields || []).find(function (definition) {
-        if (!definition.required || !this._isFieldVisible(definition)) {
+        if (!this._isFieldRequired(definition) || !this._isFieldVisible(definition)) {
           return false;
         }
         const value = details[definition.name];
@@ -297,13 +431,42 @@ sap.ui.define([
       }
     },
 
+    // Mirrors _projectValueTarget in srv/flowmate-ca.js.
+    _projectValueTarget: function (variantCode, transactionType) {
+      if (variantCode === "PROJECT_NEW_MOD") {
+        return { field: "projectCode", label: "Project Code", maxLength: 80 };
+      }
+      if (variantCode === "PROJECT_FL_ACTIVITY" && transactionType === "FUNCTION_LOCATION") {
+        return { field: "functionLocation", label: "Function Location", maxLength: 80 };
+      }
+      if (variantCode === "PROJECT_FL_ACTIVITY" && transactionType === "ACTIVITY") {
+        return { field: "activityNumber", label: "Activity", maxLength: 80 };
+      }
+      return null;
+    },
+
     onApprove: function () {
       this.getView().getModel("decision").setData({
         title: "Approve Task",
         action: "approve",
         remarks: "",
         needsPoNumber: !!this.getView().getModel("task").getProperty("/needsPoNumber"),
-        purchaseOrderNo: ""
+        purchaseOrderNo: "",
+        needsGlAccount: !!this.getView().getModel("task").getProperty("/needsGlAccount"),
+        glAccount: "",
+        needsValuationClass: !!this.getView().getModel("task").getProperty("/needsValuationClass"),
+        valuationClass: "",
+        needsServiceCode: !!this.getView().getModel("task").getProperty("/needsServiceCode"),
+        serviceCode: "",
+        needsEquipmentCode: !!this.getView().getModel("task").getProperty("/needsEquipmentCode"),
+        equipmentCode: "",
+        needsProjectValue: !!this.getView().getModel("task").getProperty("/needsProjectValue"),
+        projectValueLabel: this.getView().getModel("task").getProperty("/projectValueLabel") || "",
+        projectValue: "",
+        lineEntry: this.getView().getModel("task").getProperty("/lineEntry"),
+        lineEntryRows: (this.getView().getModel("task").getProperty("/lineEntryRows") || []).map(function (row) {
+          return Object.assign({}, row);
+        })
       });
       this.byId("decisionDialog").open();
     },
@@ -329,9 +492,65 @@ sap.ui.define([
         MessageBox.warning("Enter the Purchase Order number to approve this task.");
         return;
       }
+      const glAccount = String(decision.glAccount || "").trim();
+      if (!rejecting && decision.needsGlAccount && !glAccount) {
+        MessageBox.warning("Enter the GL Account to approve this task.");
+        return;
+      }
+      const valuationClass = String(decision.valuationClass || "").trim();
+      if (!rejecting && decision.needsValuationClass && !valuationClass) {
+        MessageBox.warning("Enter the Valuation Class to approve this task.");
+        return;
+      }
+      const serviceCode = String(decision.serviceCode || "").trim();
+      if (!rejecting && decision.needsServiceCode && !serviceCode) {
+        MessageBox.warning("Enter the Service Code to approve this task.");
+        return;
+      }
+      const equipmentCode = String(decision.equipmentCode || "").trim();
+      if (!rejecting && decision.needsEquipmentCode && !equipmentCode) {
+        MessageBox.warning("Enter the Equipment Code to approve this task.");
+        return;
+      }
+      const projectValue = String(decision.projectValue || "").trim();
+      if (!rejecting && decision.needsProjectValue && !projectValue) {
+        MessageBox.warning(`Enter the ${decision.projectValueLabel} to approve this task.`);
+        return;
+      }
       const body = { taskId: this._taskId, remarks: decision.remarks };
       if (!rejecting && decision.needsPoNumber) {
         body.purchaseOrderNo = purchaseOrderNo;
+      }
+      if (!rejecting && decision.needsGlAccount) {
+        body.glAccount = glAccount;
+      }
+      if (!rejecting && decision.needsValuationClass) {
+        body.valuationClass = valuationClass;
+      }
+      if (!rejecting && decision.needsServiceCode) {
+        body.serviceCode = serviceCode;
+      }
+      if (!rejecting && decision.needsEquipmentCode) {
+        body.equipmentCode = equipmentCode;
+      }
+      if (!rejecting && decision.needsProjectValue) {
+        body.projectValue = projectValue;
+      }
+      if (!rejecting && decision.lineEntry) {
+        const rows = decision.lineEntryRows || [];
+        const missing = rows.find(function (row) { return !String(row.value || "").trim(); });
+        if (missing) {
+          MessageBox.warning(`Row ${missing.itemNo}: enter the ${decision.lineEntry.label}.`);
+          return;
+        }
+        body.lineValues = JSON.stringify(rows.map(function (row) {
+          return { itemId: row.itemId, value: String(row.value).trim() };
+        }));
+      }
+      if (!rejecting && this.getView().getModel("task").getProperty("/materialEditStep")) {
+        const fieldName = this._materialTaskField.name;
+        const details = this.getView().getModel("form").getProperty("/details") || {};
+        body.materialDetails = JSON.stringify({ [fieldName]: details[fieldName] || "" });
       }
       this.setBusy(true);
       try {

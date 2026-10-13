@@ -229,7 +229,7 @@
                                                 text="{referenceNumber}"
                                                 press=".onRequestReferencePress" />
                                             <ObjectIdentifier
-                                                title="{title}"
+                                                title="{= ${title} || ${referenceNumber} }"
                                                 text="{requester}" />
                                             <Text text="{processor}" />
                                             <ObjectStatus
@@ -296,10 +296,12 @@
                 <uxap:headerTitle>
                     <uxap:ObjectPageDynamicHeaderTitle>
                         <uxap:expandedHeading>
-                            <Title text="{title}" />
+                            <!-- <Title text="{title}" /> -->
+                             <Title text="{= ${title} || ${referenceNumber} }" />
                         </uxap:expandedHeading>
                         <uxap:snappedHeading>
-                            <Title text="{title}" />
+                            <!-- <Title text="{title}" /> -->
+                             <Title text="{= ${title} || ${referenceNumber} }" />
                         </uxap:snappedHeading>
                         <uxap:actions>
                             <Button
@@ -423,14 +425,14 @@
                                     state="{path: 'status_code', formatter: '.formatStatusState'}"
                                     inverted="true" />
                             </VBox>
-                            <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
+                            <!-- <VBox class="flowmateHeaderCell flowmateHeaderBadgeGroup">
                                 <Label text="{i18n>priorityLabel}" />
                                 <ObjectStatus
                                     class="flowmateSemanticStatus"
                                     text="{priority}"
                                     state="{path: 'priority', formatter: '.formatPriorityState'}"
                                     inverted="true" />
-                            </VBox>
+                            </VBox> -->
                         </HBox>
                         <HBox
                             class="flowmateHeaderRow flowmateHeaderActionRow"
@@ -478,6 +480,25 @@
                                         press=".onSaveRequestTeam" />
                                 </HBox>
                             </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                            <Label text="{i18n>priorityLabel}" />
+                            <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
+                                <ComboBox
+                                    width="100%"
+                                    selectedKey="{processorEdit>/requestPriority_code}"
+                                    placeholder="{i18n>selectPriorityPlaceholder}"
+                                    enabled="{requestEdit>/editable}"
+                                    items="{path: '/Priorities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
+                                    <core:Item key="{code}" text="{name}" />
+                                </ComboBox>
+                                <Button
+                                    class="sapUiTinyMarginBegin"
+                                    icon="sap-icon://save"
+                                    enabled="{requestEdit>/editable}"
+                                    tooltip="{i18n>savePriorityButton}"
+                                    press=".onSaveRequestPriority" />
+                            </HBox>
+                        </VBox>
                         </HBox>
                         <VBox
                             class="flowmateProcessGuide"
@@ -812,7 +833,10 @@
                                     <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
                                     <Label text="{i18n>paymentSubCategoryLabel}" /><Text text="{paymentSubCategory/name}" />
                                     <Label text="{i18n>userDivisionRepresentativeNameLabel}" /><Text text="{userDivisionRepresentativeName}" />
-                                    <Label text="{i18n>remainingBalanceAfterAdvanceSettlementLabel}" /><Text text="{remainingBalanceAfterAdvanceSettlement}" />
+                                    <Label text="{i18n>remainingBalanceAfterAdvanceSettlementLabel}"
+                                    visible="{= ${subProcessType_code} === 'PO_BEFORE_INVOICE_ADV_STLMT' || ${subProcessType_code} === 'PO_AFTER_INVOICE_ADV_STLMT' }" />
+                                    <Text text="{remainingBalanceAfterAdvanceSettlement}"
+                                    visible="{= ${subProcessType_code} === 'PO_BEFORE_INVOICE_ADV_STLMT' || ${subProcessType_code} === 'PO_AFTER_INVOICE_ADV_STLMT' }"/>
                                     <Label text="{i18n>highestInvoiceValueLabel}" /><Text text="{highestInvoiceValue}" />
                                     <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
                                 </form:SimpleForm>
@@ -2792,7 +2816,8 @@
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
                                     <VBox class="flowmateDetailBlock">
-                                        <ObjectIdentifier title="{request/title}" />
+                                        <!-- <ObjectIdentifier title="{request/title}" /> -->
+                                        <ObjectIdentifier title="{= ${request/title} || ${request/referenceNumber} }" />
                                         <Link
                                             text="{request/referenceNumber}"
                                             press=".onRelatedRequestPress" />

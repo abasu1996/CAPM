@@ -308,3 +308,39 @@ entity BudgetCode : cuid, managed {
   budgetCodeDescription : String(180) not null;
   isActive : Boolean default true;
 }
+
+// Project Code Creation (PCC) masters, maintained in the CA Admin console.
+entity ArPcc : cuid, managed {
+  srNo           : String(10);
+  portfolio      : String(120);
+  ar             : String(40) not null;
+  division       : String(120);
+  lastFourDigits : String(10);
+  year           : String(10);
+  highLevelPc    : String(40);
+  isActive       : Boolean default true;
+}
+
+entity VendorsPcc : cuid, managed {
+  srNo         : String(10);
+  vendor       : String(120) not null;
+  vendorLetter : String(5);
+  isActive     : Boolean default true;
+}
+
+entity DivisionsPcc : cuid, managed {
+  srNo           : String(10);
+  division       : String(120) not null;
+  divisionLetter : String(5);
+  isActive       : Boolean default true;
+}
+
+entity ScopePcc : cuid, managed {
+  scope    : String(20) not null;
+  isActive : Boolean default true;
+}
+
+entity ProjectTypePcc : cuid, managed {
+  projectType : String(20) not null;
+  isActive    : Boolean default true;
+}

@@ -344,4 +344,50 @@ service CommonMasterDataService {
     budgetCodeDescription : String(180) not null;
     isActive : Boolean default true;
   }
+
+  // Project Code Creation (PCC) masters.
+  @cds.persistence.skip
+  entity ArPcc {
+    key ID : UUID;
+    srNo           : String(10);
+    portfolio      : String(120);
+    ar             : String(40) not null;
+    division       : String(120);
+    lastFourDigits : String(10);
+    year           : String(10);
+    highLevelPc    : String(40);
+    isActive       : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity VendorsPcc {
+    key ID : UUID;
+    srNo         : String(10);
+    vendor       : String(120) not null;
+    vendorLetter : String(5);
+    isActive     : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity DivisionsPcc {
+    key ID : UUID;
+    srNo           : String(10);
+    division       : String(120) not null;
+    divisionLetter : String(5);
+    isActive       : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity ScopePcc {
+    key ID : UUID;
+    scope    : String(20) not null;
+    isActive : Boolean default true;
+  }
+
+  @cds.persistence.skip
+  entity ProjectTypePcc {
+    key ID : UUID;
+    projectType : String(20) not null;
+    isActive    : Boolean default true;
+  }
 }

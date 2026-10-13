@@ -172,6 +172,11 @@ sap.ui.define([
         ],
         optional: ["remarks"]
     };
+    const PO_ADV_SETTLEMENT_100_FIELDS = {
+        required: PO_ADV_SETTLEMENT_FIELDS.required
+            .filter((sField) => sField !== "remainingBalanceAfterAdvanceSettlement"),
+        optional: ["remarks"]
+    };
     // Define the required and optional fields for each sub-process type. This will be used to validate the form before submission.
     const SUBTYPE_FIELDS = {
         FTK_FACTORING_PO_VALIDATION: {
@@ -211,9 +216,9 @@ sap.ui.define([
         PO_BEFORE_INVOICE_ADVANCE: PO_ADVANCE_FIELDS,
         PO_AFTER_INVOICE_ADVANCE: PO_ADVANCE_FIELDS,
         PO_BEFORE_INVOICE_ADV_STLMT: PO_ADV_SETTLEMENT_FIELDS,
-        "PO_BEFORE_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_FIELDS,
+        "PO_BEFORE_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_100_FIELDS,
         PO_AFTER_INVOICE_ADV_STLMT: PO_ADV_SETTLEMENT_FIELDS,
-        "PO_AFTER_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_FIELDS,
+        "PO_AFTER_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_100_FIELDS,
         NON_PO_DIRECT_OFN_AUTHORITY: NON_PO_OFN_FIELDS,
         NON_PO_ADV_SETTLE_OFN_OTHER: NON_PO_OFN_FIELDS,
         NON_PO_DIRECT_FOREIGN_TRAVEL: {
@@ -560,6 +565,7 @@ sap.ui.define([
                 isPoBasedNonAdvance: false,
                 isPoAdvance: false,
                 isPoAdvSettlement: false,
+                isPoAdvPartialSettlement: false,
                 highestInvoiceValue: null,
                 amountPayable: null,
                 isOfnAuthority: false,
@@ -810,7 +816,11 @@ sap.ui.define([
         async onCreate() {
             const oPayload = this.getView().getModel("create").getData();
 
-            if (!oPayload.title || !oPayload.processType_code) {
+            // if (!oPayload.title || !oPayload.processType_code) {
+            //     MessageBox.warning(this.getText("createRequiredMessage"));
+            //     return;
+            // }
+            if (!oPayload.processType_code) {
                 MessageBox.warning(this.getText("createRequiredMessage"));
                 return;
             }
@@ -2645,6 +2655,12 @@ sap.ui.define([
                 "PO_AFTER_INVOICE_ADV_STLMT_100%"
             ].includes(sCode);
         },
+        _isPoAdvPartialSettlementSubtype(sCode) {
+            return [
+                "PO_BEFORE_INVOICE_ADV_STLMT",
+                "PO_AFTER_INVOICE_ADV_STLMT"
+            ].includes(sCode);
+        },
         _isPoAdvanceSubtype(sCode) {
             return [
                 "PO_BEFORE_INVOICE_ADVANCE",
@@ -3737,6 +3753,7 @@ sap.ui.define([
             }
             return sConditionCode === "NOTE_36" && [
                 "NON_PO_IMPORT_TRC",
+                "NON_PO_IMPORT_ICL",
                 "NON_PO_IMPORT_DGC_ADV",
                 "NON_PO_IMPORT_DGC_DIRECT"
             ].includes(sSubProcessTypeCode);
@@ -3784,6 +3801,7 @@ sap.ui.define([
             this._setPoBasedNonAdvanceMode(false, true);
             this._setPoAdvanceMode(false, true);
             this._setPoAdvSettlementMode(false, true);
+            oCreateModel.setProperty("/isPoAdvPartialSettlement", false);
             this._setOfnAuthorityMode(false, true);
             this._setNonPoDirectForeignTravelMode(false);
             this._setNonPoFuelMode(false, true);
@@ -4131,7 +4149,7 @@ sap.ui.define([
             });
         },
         
-        _applySubProcessTypeFlags(sCode) {
+    _applySubProcessTypeFlags(sCode) {
     const oCreateModel = this.getView().getModel("create");
     const bCodeChanged = this._sActiveSubProcessTypeCode !== sCode;
  
@@ -4142,6 +4160,7 @@ sap.ui.define([
     this._setPoBasedNonAdvanceMode(this._isPoBasedNonAdvanceSubtype(sCode), bCodeChanged);
     this._setPoAdvanceMode(this._isPoAdvanceSubtype(sCode), bCodeChanged);
     this._setPoAdvSettlementMode(this._isPoAdvSettlementSubtype(sCode), bCodeChanged);
+    oCreateModel.setProperty("/isPoAdvPartialSettlement", this._isPoAdvPartialSettlementSubtype(sCode));
     this._setOfnAuthorityMode(this._isOfnAuthoritySubtype(sCode), bCodeChanged);
     this._setNonPoDirectForeignTravelMode(this._isNonPoDirectForeignTravelSubtype(sCode));
     this._setNonPoFuelMode(this._isNonPoFuelSubtype(sCode), bCodeChanged);

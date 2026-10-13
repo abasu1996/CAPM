@@ -221,6 +221,10 @@ sap.ui.define([
             this._discardSesDraft();
           }
         }
+        if (/^\/details\/(division|vendorPcc|arReference|scope|projectTypePcc|siteId|siteName|requestedByArea)$/.test(path)
+          || /^\/details\/items\/\d+\/(siteId|siteName)$/.test(path)) {
+          this._scheduleProjectCodePreview();
+        }
       }, this);
       this.getView().setModel(formModel, "form");
       this.getView().setModel(new JSONModel({
@@ -550,6 +554,7 @@ sap.ui.define([
           ? FormDefinitions.getHeaderFields(typeCode, variantCode, categoryCode)
           : FormDefinitions.getFields(variantCode, categoryCode, formModel.getProperty("/bulkUpload"));
       }
+      fields = fields.filter(function (definition) { return !definition.stepOnly; });
       const type = (this.getView().getModel("catalog").getProperty("/requestTypes") || [])
         .find(function (entry) {
           return entry.code === typeCode;
@@ -614,6 +619,45 @@ sap.ui.define([
 
 
 
+
+    // Project Code (New / Modification), Single line: preview the Project ID / Category /
+    // Description the server will generate. Debounced, so the Site Name auto-fill and the Scope
+    // reset on a Requested By change land before the call. The server assigns the final number.
+    _scheduleProjectCodePreview: function () {
+      clearTimeout(this._projectCodePreviewTimer);
+      this._projectCodePreviewTimer = setTimeout(this._previewProjectCode.bind(this), 300);
+    },
+
+    _previewProjectCode: async function () {
+      const formModel = this.getView().getModel("form");
+      if (formModel.getProperty("/requestVariantCode") !== "PROJECT_NEW_MOD") {
+        return;
+      }
+      const multiple = formModel.getProperty("/bulkUpload") === "MULTIPLE_LINE";
+      const details = formModel.getProperty("/details") || {};
+      const input = {};
+      ["division", "vendorPcc", "arReference", "scope", "projectTypePcc", "siteId", "siteName"]
+        .forEach(function (name) { input[name] = details[name] || ""; });
+      const literal = `'${JSON.stringify(input).replace(/'/g, "''")}'`;
+      try {
+        const result = await this.request(`previewProjectCode(details=@d)?@d=${encodeURIComponent(literal)}`);
+        const generated = JSON.parse(result.value || "{}");
+        const projectId = generated.projectId || "";
+        formModel.setProperty("/details/projectId", projectId);
+        formModel.setProperty("/details/projectCategory", generated.projectCategory || "");
+        if (!multiple) {
+          formModel.setProperty("/details/projectDescription", generated.projectDescription || "");
+          return;
+        }
+        // Multiple Line Items: one Project ID for all lines, a description per line's site.
+        (formModel.getProperty("/details/items") || []).forEach(function (row, index) {
+          formModel.setProperty(`/details/items/${index}/projectDescription`,
+            row.siteId && row.siteName && projectId ? `${row.siteId}_${row.siteName}_${projectId}` : "");
+        });
+      } catch (error) {
+        // The preview is a convenience; the server still generates the values on submit.
+      }
+    },
 
     // PO Value (With Taxes) = PO Value (Without Taxes) x (1 + rate / 100), the rate taken from
     // the selected Admin tax. Without an applicable tax it equals the PO value.
@@ -1668,7 +1712,8 @@ sap.ui.define([
       }).addStyleClass("caFormSection");
     },
 
-    // Empty table cells are sent as null so number and date columns are not given "".
+    // Empty table cells are sent as null so number and date columns are not given "". Cells of a
+    // column that is hidden for this request (visibleWhen) are dropped the same way.
     _blankCellsToNull: function (details) {
       const result = {};
       Object.keys(GRIDS).forEach(function (gridKey) {
@@ -1676,14 +1721,17 @@ sap.ui.define([
         if (!Array.isArray(rows)) {
           return;
         }
+        const hidden = new Set(this._gridColumns(gridKey).filter(function (col) {
+          return !this._isColumnShown(col);
+        }.bind(this)).map(function (col) { return col.name; }));
         result[gridKey] = rows.map(function (row) {
           const clean = {};
           Object.keys(row).forEach(function (key) {
-            clean[key] = row[key] === "" ? null : row[key];
+            clean[key] = row[key] === "" || hidden.has(key) ? null : row[key];
           });
           return clean;
         });
-      });
+      }.bind(this));
       return result;
     },
 
@@ -1697,6 +1745,25 @@ sap.ui.define([
     // The grid a toolbar control acts on, from its data:grid custom data (default "items").
     _gridOf: function (control) {
       return (control && control.data("grid")) || "items";
+    },
+
+    // Header asterisks for columns that are only mandatory while another field has a value, so
+    // Plant gains or loses its marker as the modification type changes.
+    _refreshGridRequiredMarkers: function () {
+      Object.keys(GRIDS).forEach(function (gridKey) {
+        const host = this.byId(GRIDS[gridKey].tableId);
+        if (!host) {
+          return;
+        }
+        const columns = this._gridColumns(gridKey);
+        host.getColumns().forEach(function (column, index) {
+          const definition = columns[index];
+          const header = column.getHeader();
+          if (definition && definition.requiredWhen && header && header.setRequired) {
+            header.setRequired(!!this._isFieldRequired(definition));
+          }
+        }.bind(this));
+      }.bind(this));
     },
 
     _renderGrid: function (gridKey) {
@@ -1722,10 +1789,11 @@ sap.ui.define([
       this._loadFieldCatalogs(columns);
       columns.forEach(function (col) {
         host.addColumn(new Column({
-          header: new Label({ text: col.label, required: !!col.required, wrapping: true }),
-          width: col.type === "date" ? "11rem" : "13rem"
+          header: new Label({ text: col.label, required: !!this._isFieldRequired(col), wrapping: true }),
+          width: col.type === "date" ? "11rem" : "13rem",
+          visible: this._columnVisibleBinding(col)
         }));
-      });
+      }.bind(this));
       host.addColumn(new Column({ hAlign: "End", width: "3rem" }));
 
       host.bindItems({
@@ -1938,7 +2006,7 @@ sap.ui.define([
         if (!this._isFieldVisible(entry.definition)) {
           return false;
         }
-        if (!entry.definition.required) {
+        if (!this._isFieldRequired(entry.definition)) {
           return false;
         }
         const value = entry.definition.source === "request"
@@ -2034,7 +2102,10 @@ sap.ui.define([
                 submittedDetails,
                 this._blankCellsToNull(submittedDetails),
                 form.materialCategoryCode
-                  ? { materialCategory: form.materialCategoryCode, transactionType: form.requestVariantCode }
+                  ? {
+                    materialCategory: form.materialCategoryCode,
+                    transactionType: submittedDetails.transactionType || form.requestVariantCode
+                  }
                   : {}
               ))
             }

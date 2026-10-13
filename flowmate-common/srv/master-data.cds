@@ -283,6 +283,36 @@ entity Customers as projection on db.Customers;
   entity BudgetCode as projection on db.BudgetCode;
 
   @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity ArPcc as projection on db.ArPcc;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity VendorsPcc as projection on db.VendorsPcc;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity DivisionsPcc as projection on db.DivisionsPcc;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity ScopePcc as projection on db.ScopePcc;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity ProjectTypePcc as projection on db.ProjectTypePcc;
+
+  @restrict: [
     { grant: '*', to: ['MasterDataAdmin', 'UserProvisioning'] }
   ]
   action createUserWithTeams(

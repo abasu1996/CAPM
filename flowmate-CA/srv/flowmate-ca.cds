@@ -128,6 +128,9 @@ service FlowmateCAService {
 
   @description: 'Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and input.requesterUser_ID identifying an active shared user. No client-to-user environment mapping is required. Human users use their active signed-in identity. Workflow initialization runs during creation.'
   action createRequest(input: NewRequestInput) returns Requests;
+  // Project Code (New / Modification), Single line: the Project ID / Category / Description the
+  // server would generate for these details (JSON in, JSON out). Nothing is saved.
+  function previewProjectCode(details: LargeString) returns LargeString;
   function getFlowmateRequestFormCatalog() returns LargeString;
   @description: 'Creates the linked Flowmate Payment Run request after the purchase order request is successfully completed.'
   action createFlowmatePaymentRun(requestId: UUID) returns {
@@ -162,7 +165,21 @@ service FlowmateCAService {
   ) returns Tasks;
   action claimTeamTask(taskId: UUID) returns Boolean;
   // purchaseOrderNo is required only on the last step of a PO that has "Create SES Successor".
-  action approveTask(taskId: UUID, remarks: LargeString, purchaseOrderNo: String(80)) returns Boolean;
+  action approveTask(
+    taskId: UUID,
+    remarks: LargeString,
+    purchaseOrderNo: String(80),
+    glAccount: String(80),
+    valuationClass: String(40),
+    serviceCode: String(80),
+    equipmentCode: String(80),
+    // Project Code at S/4 Data Validation: the Project Code, or the Function Location / Activity.
+    projectValue: String(80),
+    // Service Code with multiple line items: JSON [{ itemId, value }], one per line item, for the
+    // G/L Account Enrichment, Valuation Class or S/4 Data Validation step.
+    lineValues: LargeString,
+    materialDetails: LargeString
+  ) returns Boolean;
   action rejectTask(taskId: UUID, remarks: LargeString) returns Boolean;
   action sendBackTask(taskId: UUID, targetStepNo: Integer, remarks: LargeString) returns Boolean;
   action completeStep(requestId: UUID, stepNo: Integer, remarks: LargeString) returns Boolean;
@@ -264,4 +281,9 @@ service CAMasterDataService {
    entity ExtensionMaterialGroup as projection on common.ExtensionMaterialGroup;
    entity ContractType as projection on common.ContractType;
    entity BudgetCode as projection on common.BudgetCode;
+   entity ArPcc as projection on common.ArPcc;
+   entity VendorsPcc as projection on common.VendorsPcc;
+   entity DivisionsPcc as projection on common.DivisionsPcc;
+   entity ScopePcc as projection on common.ScopePcc;
+   entity ProjectTypePcc as projection on common.ProjectTypePcc;
 }

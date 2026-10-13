@@ -331,6 +331,17 @@ test("a normal first processing step is not auto-approved for later LoA", async 
   assert.equal(rows.ProcessTasks[0].isLoaApproval, undefined);
 });
 
+test("caller can keep the requester step open for Pending UAC", async (t) => {
+  const { service: s, req, request, rows, steps } = fixture(t);
+  rows.ProcessTasks.length = 0;
+  steps[0].role = "Requester";
+  request.requesterUser_ID = "requester";
+  await s._ensureInitialGuidedTask(req, "r1", request, { updateRequest: true, autoCompleteSteps: 0 });
+  assert.equal(rows.ProcessTasks.length, 1);
+  assert.equal(rows.ProcessTasks[0].status_code, "OPEN");
+  assert.equal(rows.ProcessTasks[0].stepNo, 1);
+});
+
 test("submission auto-completion cannot overwrite a landing LoA status", async (t) => {
   const { service: s, req, request, rows, steps } = fixture(t);
   rows.ProcessTasks.length = 0;

@@ -5,6 +5,47 @@ sap.ui.define([
 ], function (BaseController, JSONModel, MessageBox) {
   "use strict";
 
+  // Project Code Creation (PCC) masters: one Admin tab each, all handled by the onAddPcc /
+  // onSavePcc / onDeletePcc handlers below. The tab's buttons carry app:pcc="<key>".
+  const PCC_MASTERS = [
+    {
+      key: "ar", entity: "ArPcc", title: "AR for PCC",
+      columns: [
+        { name: "srNo", label: "ID" },
+        { name: "portfolio", label: "Portfolio" },
+        { name: "ar", label: "AR" },
+        { name: "division", label: "Division" },
+        { name: "lastFourDigits", label: "Last Four Digits" },
+        { name: "year", label: "Year" },
+        { name: "highLevelPc", label: "High Level PC" }
+      ]
+    },
+    {
+      key: "vendors", entity: "VendorsPcc", title: "Vendors for PCC",
+      columns: [
+        { name: "srNo", label: "ID" },
+        { name: "vendor", label: "Vendor" },
+        { name: "vendorLetter", label: "Vendor Letter" }
+      ]
+    },
+    {
+      key: "divisions", entity: "DivisionsPcc", title: "Divisions for PCC",
+      columns: [
+        { name: "srNo", label: "ID" },
+        { name: "division", label: "Division" },
+        { name: "divisionLetter", label: "Division Letter" }
+      ]
+    },
+    {
+      key: "scope", entity: "ScopePcc", title: "Scope for PCC",
+      columns: [{ name: "scope", label: "Scope" }]
+    },
+    {
+      key: "projectType", entity: "ProjectTypePcc", title: "Project Type for PCC",
+      columns: [{ name: "projectType", label: "Project Type" }]
+    }
+  ];
+
   return BaseController.extend("flowmateca.controller.Admin", {
     onInit: function () {
       this.getView().setModel(new JSONModel({
@@ -52,8 +93,10 @@ sap.ui.define([
         contractTypes: [],
         costCenters: [],
         budgetCodes: [],
+        pcc: {}
       }), "admin");
       this.getView().setModel(new JSONModel({}), "newItem");
+      this.getView().setModel(new JSONModel({ members: [], availableUsers: [], selectedUserIds: [] }), "teamManage");
       this.getRouter().getRoute("admin").attachPatternMatched(this.onRefresh, this);
     },
 
@@ -156,6 +199,7 @@ sap.ui.define([
         model.setProperty("/arReferences", arReferences.value || []);
         model.setProperty("/contractTypes", contractTypes.value || []);
         model.setProperty("/budgetCodes", budgetCodes.value || []);
+        model.setProperty("/pcc", await this._loadPccMasters());
         model.setProperty("/teamTree", this._teamTree(teams.value || [], teamMembers.value || []));
       } catch (error) {
         this.showError(error);
@@ -197,6 +241,101 @@ sap.ui.define([
 
     onAddTeam: function () {
       this._openAddDialog("team", "Add Team");
+    },
+
+    // ---- Manage Team: add users to a team / remove them (TeamMembers in flowmate-common) ----
+    onManageTeam: function (event) {
+      this._managedTeamId = event.getSource().getBindingContext("admin").getObject().ID;
+      this._fillTeamManage();
+      this.byId("manageTeamDialog").open();
+    },
+
+    // Dialog data from what onRefresh already loaded: the team's members, and the active users
+    // who are not members yet.
+    _fillTeamManage: function () {
+      const admin = this.getView().getModel("admin");
+      const team = (admin.getProperty("/teams") || []).find(function (entry) {
+        return entry.ID === this._managedTeamId;
+      }.bind(this)) || {};
+      const members = (admin.getProperty("/teamMembers") || [])
+        .filter(function (membership) {
+          return membership.team_ID === team.ID;
+        })
+        .map(function (membership) {
+          return {
+            ID: membership.ID,
+            userId: membership.user_ID,
+            name: membership.user?.displayName || membership.displayName || "Unknown user",
+            email: membership.user?.email || membership.email || ""
+          };
+        })
+        .sort(function (left, right) {
+          return left.name.localeCompare(right.name);
+        });
+      const memberIds = new Set(members.map(function (member) { return member.userId; }));
+      const availableUsers = (admin.getProperty("/users") || []).filter(function (user) {
+        return user.isActive !== false && !memberIds.has(user.ID);
+      });
+      this.getView().getModel("teamManage").setData({
+        title: `Manage Team – ${team.name || ""} (${team.teamCode || ""})`,
+        teamName: team.name,
+        members,
+        availableUsers,
+        selectedUserIds: []
+      });
+    },
+
+    onAddTeamMembers: async function () {
+      const manage = this.getView().getModel("teamManage");
+      const userIds = manage.getProperty("/selectedUserIds") || [];
+      if (!userIds.length) {
+        MessageBox.warning("Select at least one user to add.");
+        return;
+      }
+      this.setBusy(true);
+      try {
+        for (const userId of userIds) {
+          await this.requestMaster("TeamMembers", {
+            method: "POST",
+            body: { team_ID: this._managedTeamId, user_ID: userId, isActive: true }
+          });
+        }
+        this.showSuccess(`${userIds.length} user(s) added to ${manage.getProperty("/teamName")}`);
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        await this.onRefresh();
+        this._fillTeamManage();
+        this.setBusy(false);
+      }
+    },
+
+    onRemoveTeamMember: function (event) {
+      const member = event.getSource().getBindingContext("teamManage").getObject();
+      const teamName = this.getView().getModel("teamManage").getProperty("/teamName");
+      MessageBox.confirm(`Remove ${member.name} from ${teamName}?`, {
+        title: "Remove Team Member",
+        onClose: async function (action) {
+          if (action !== MessageBox.Action.OK) {
+            return;
+          }
+          this.setBusy(true);
+          try {
+            await this.requestMaster(`TeamMembers(${member.ID})`, { method: "DELETE" });
+            this.showSuccess(`${member.name} removed from ${teamName}`);
+          } catch (error) {
+            this.showError(error);
+          } finally {
+            await this.onRefresh();
+            this._fillTeamManage();
+            this.setBusy(false);
+          }
+        }.bind(this)
+      });
+    },
+
+    onCloseManageTeam: function () {
+      this.byId("manageTeamDialog").close();
     },
 
     onAddVendor: function () {
@@ -371,6 +510,71 @@ onAddCostCenter: function () {
 onAddBudgetCode: function () {
     this._openAddDialog("budgetCode", "Add Budget Code");
 },
+
+    _pccMaster: function (source) {
+      const key = source.data("pcc");
+      return PCC_MASTERS.find(function (master) { return master.key === key; });
+    },
+
+    // Rows sorted by the user's ID column numerically where there is one ("2" before "10").
+    _loadPccMasters: async function () {
+      const pcc = {};
+      await Promise.all(PCC_MASTERS.map(async function (master) {
+        const result = await this.requestMaster(master.entity);
+        const sortBy = master.columns[0].name;
+        pcc[master.key] = (result.value || []).sort(function (left, right) {
+          return String(left[sortBy] || "").localeCompare(String(right[sortBy] || ""), undefined, { numeric: true });
+        });
+      }.bind(this)));
+      return pcc;
+    },
+
+    onAddPcc: function (oEvent) {
+      const master = this._pccMaster(oEvent.getSource());
+      this._openAddDialog("pcc", `Add ${master.title}`);
+      const model = this.getView().getModel("newItem");
+      model.setProperty("/isPcc", true);
+      model.setProperty("/pccKey", master.key);
+      model.setProperty("/pccFields", master.columns.map(function (column) {
+        return Object.assign({ value: "" }, column);
+      }));
+    },
+
+    onSavePcc: async function (oEvent) {
+      const master = this._pccMaster(oEvent.getSource());
+      const item = oEvent.getSource().getBindingContext("admin").getObject();
+      const body = { isActive: item.isActive };
+      master.columns.forEach(function (column) {
+        body[column.name] = String(item[column.name] ?? "").trim();
+      });
+      try {
+        await this.requestMaster(`${master.entity}(${item.ID})`, { method: "PATCH", body: body });
+        this.showSuccess(`${master.title} updated successfully.`);
+        await this.onRefresh();
+      } catch (error) {
+        this.showError(error);
+      }
+    },
+
+    onDeletePcc: function (oEvent) {
+      const master = this._pccMaster(oEvent.getSource());
+      const item = oEvent.getSource().getBindingContext("admin").getObject();
+      MessageBox.confirm(`Are you sure you want to delete "${item[master.columns[master.columns.length > 1 ? 1 : 0].name]}" from ${master.title}?`, {
+        title: `Delete from ${master.title}`,
+        onClose: async function (action) {
+          if (action !== MessageBox.Action.OK) {
+            return;
+          }
+          try {
+            await this.requestMaster(`${master.entity}(${item.ID})`, { method: "DELETE" });
+            this.showSuccess(`${master.title} entry deleted successfully.`);
+            await this.onRefresh();
+          } catch (error) {
+            this.showError(error);
+          }
+        }.bind(this)
+      });
+    },
 
     _openAddDialog: function (type, title) {
       this.getView().getModel("newItem").setData({
@@ -1299,6 +1503,17 @@ else if (item.type === "mrpType") {
             isActive: true
         }
     });
+} else if (item.type === "pcc") {
+    const master = PCC_MASTERS.find(function (entry) { return entry.key === item.pccKey; });
+    const body = { isActive: true };
+    (item.pccFields || []).forEach(function (field) {
+        body[field.name] = String(field.value || "").trim();
+    });
+    const missing = (item.pccFields || []).find(function (field) { return !body[field.name]; });
+    if (missing) {
+        throw new Error(`${missing.label} is required.`);
+    }
+    await this.requestMaster(master.entity, { method: "POST", body: body });
 }
 
 

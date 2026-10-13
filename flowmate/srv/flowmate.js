@@ -25,7 +25,16 @@ const TASK_STATUS = {
   SENT_BACK: "SENT_BACK",
   CANCELLED: "CANCELLED"
 };
-
+const ADV_SETTLEMENT_SUBTYPES = new Set([
+  "PO_BEFORE_INVOICE_ADV_STLMT",
+  "PO_BEFORE_INVOICE_ADV_STLMT_100%",
+  "PO_AFTER_INVOICE_ADV_STLMT",
+  "PO_AFTER_INVOICE_ADV_STLMT_100%"
+]);
+const ADVANCE_PAYMENT_SUBTYPES = new Set([
+  "PO_BEFORE_INVOICE_ADVANCE",
+  "PO_AFTER_INVOICE_ADVANCE"
+]);
 // const FTK_FACTORING_SUBTYPES = new Set([
 //   "FTK_FACTORING_PO_VALIDATION",
 //   "FTK_FACTORING_BASED_ON_UAC",
@@ -81,6 +90,11 @@ const PO_ADV_SETTLEMENT_FIELDS = {
     "remainingBalanceAfterAdvanceSettlement",
     "invoices"
   ],
+  optional: ["remarks"]
+};
+const PO_ADV_SETTLEMENT_100_FIELDS = {
+  required: PO_ADV_SETTLEMENT_FIELDS.required
+    .filter((sField) => sField !== "remainingBalanceAfterAdvanceSettlement"),
   optional: ["remarks"]
 };
 const NON_PO_OFN_FIELDS = {
@@ -230,9 +244,9 @@ const SUBTYPE_FIELDS = {
   PO_BEFORE_INVOICE_ADVANCE: PO_ADVANCE_FIELDS,
   PO_AFTER_INVOICE_ADVANCE: PO_ADVANCE_FIELDS,
   PO_BEFORE_INVOICE_ADV_STLMT: PO_ADV_SETTLEMENT_FIELDS,
-  "PO_BEFORE_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_FIELDS,
+  "PO_BEFORE_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_100_FIELDS,
   PO_AFTER_INVOICE_ADV_STLMT: PO_ADV_SETTLEMENT_FIELDS,
-  "PO_AFTER_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_FIELDS,
+  "PO_AFTER_INVOICE_ADV_STLMT_100%": PO_ADV_SETTLEMENT_100_FIELDS,
   NON_PO_DIRECT_OFN_AUTHORITY: NON_PO_OFN_FIELDS,
   NON_PO_ADV_SETTLE_OFN_OTHER: NON_PO_OFN_FIELDS,
   NON_PO_DIRECT_FOREIGN_TRAVEL: {
@@ -1571,9 +1585,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         : oExisting?.[sProperty];
       const sTitle = String(valueOf("title") || "").trim();
 
-      if (!sTitle) {
-        return req.reject(400, "Request title is required");
-      }
+      // if (!sTitle) {
+      //   return req.reject(400, "Request title is required");
+      // }
 
       if (Object.prototype.hasOwnProperty.call(req.data, "title")) {
         req.data.title = sTitle;
@@ -1795,6 +1809,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.before("UPDATE", ProcessRequests, async (req) => {
       if (Object.prototype.hasOwnProperty.call(req.data, "priorityConfig_code")) {
+      const oCurrentRequest = await this._getRequest(req, this._requestIdFromReq(req));
+      if (!oCurrentRequest) {
+        return req.reject(404, "Process request was not found");
+      }
+      await this._rejectIfRequestReservedByAnotherUser(req, oCurrentRequest, Users);
+
         const oPriority = await cds.tx(req).run(
           SELECT.one.from(Priorities)
             .columns("code", "name")
@@ -2642,6 +2662,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       await cds.tx(req).run(
         UPDATE(ProcessRequests, requestId).set({ status_code: statusCode })
       );
+      if (statusCode === PROCESS_STATUS.COMPLETED) {
+        await this._completePredecessorOnSettlement(req, request);
+      }
 
       await this._writeHistory(req, {
         requestId,
@@ -5633,6 +5656,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           completedAt: this._now()
         })
       );
+      await this._completePredecessorOnSettlement(req, request);
     }
 
     await this._writeHistory(req, {
@@ -5733,7 +5757,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (!conditionCode) return true;
 
     if (conditionCode === "NOTE_36") {
-      return ["NON_PO_IMPORT_TRC", "NON_PO_IMPORT_DGC_ADV", "NON_PO_IMPORT_DGC_DIRECT"]
+      return ["NON_PO_IMPORT_TRC", "NON_PO_IMPORT_ICL", "NON_PO_IMPORT_DGC_ADV", "NON_PO_IMPORT_DGC_DIRECT"]
         .includes(request.subProcessType_code);
     }
 
@@ -5805,6 +5829,58 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   _completionStepNo(steps, currentStep) {
     return steps[steps.length - 1]?.stepNo || currentStep.stepNo;
   }
+
+// When an advance-settlement request completes, complete its predecessor
+// (the advance payment request) as well.
+async _completePredecessorOnSettlement(req, request) {
+  if (!ADV_SETTLEMENT_SUBTYPES.has(request?.subProcessType_code) || !request.predecessor_ID) {
+    return;
+  }
+
+  const tx = cds.tx(req);
+  const oPredecessor = await tx.run(
+    SELECT.one.from(this.entities.ProcessRequests).where({ ID: request.predecessor_ID }).forUpdate()
+  );
+
+  if (!oPredecessor
+    || this._isLockedRequest(oPredecessor)
+    || oPredecessor.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+    return; // already closed, or still awaiting LoA approval
+  }
+  // Only an advance payment request to be closed by its settlement
+  if (!ADVANCE_PAYMENT_SUBTYPES.has(oPredecessor.subProcessType_code)) {
+    return;
+  }
+  // Close its open work so nothing stays in users' task lists
+  await tx.run(
+    UPDATE(this.entities.ProcessTasks).set({
+      status_code: TASK_STATUS.CANCELLED,
+      decision: "SUPERSEDED",
+      remarks: `Closed because settlement request ${request.referenceNumber || request.ID} was completed`,
+      completedAt: this._now()
+    }).where({
+      request_ID: oPredecessor.ID,
+      status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
+    })
+  );
+
+  await tx.run(
+    UPDATE(this.entities.ProcessRequests, oPredecessor.ID).set({
+      status_code: PROCESS_STATUS.COMPLETED,
+      completedAt: this._now()
+    })
+  );
+
+  await this._writeHistory(req, {
+    requestId: oPredecessor.ID,
+    stepNo: oPredecessor.currentStep || 0,
+    action: "COMPLETED_VIA_SETTLEMENT",
+    actor: req.user?.id,
+    oldStatus: oPredecessor.status_code,
+    newStatus: PROCESS_STATUS.COMPLETED,
+    remarks: `Completed automatically because settlement request ${request.referenceNumber || request.ID} was completed`
+  });
+}
 
   _getTaskProgressionError(task, request, currentStep) {
     const sTaskStatus = this._taskStatusCode(task);
@@ -6291,7 +6367,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return;
     }
 
-    if (request.processorTeam_ID) {
+    const bPendingUac = request.subProcessType_code === "FTK_FACTORING_PENDING_UAC";
+    if (bPendingUac && request.requesterUser_ID) {
+    const oRequester = await this._getUser(req, request.requesterUser_ID, Users);
+    if (oRequester) {
+      await this._reserveRequestFor(req, request, {
+        user: oRequester,
+        displayName: this._userDisplayName(oRequester),
+        email: this._userEmail(oRequester),
+        principal: oRequester.email
+      });
+    }
+  }
+
+    if (request.processorTeam_ID && !bPendingUac) {
       await this._notifyTeamAssignment(req, {
         assignmentType: "PROCESS",
         request,
@@ -6302,7 +6391,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     await this._ensureInitialGuidedTask(req, request.ID, request, {
       updateRequest: true,
-      autoCompleteSteps: 1,
+      autoCompleteSteps: bPendingUac ? 0 : 1,
       autoCompleteReason: "Request raised by requester"
     });
   }
@@ -6357,13 +6446,51 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     }
   }
 
+ async _reserveRequestFor(req, request, oReservationUser) {
+  const oCurrentUser = oReservationUser.user;
+
+  if (!this._isAdministrator(req)) {
+    const aTeamIds = await this._activeTeamIdsForUser(oCurrentUser?.ID);
+    if (!request.processorTeam_ID || !aTeamIds.includes(request.processorTeam_ID)) {
+      return req.reject(403, "Only an active member of the request's processor team can reserve this request");
+    }
+  }
+
+  const sReservedBy = oReservationUser.displayName;
+  const sProcessorEmail = oReservationUser.email || null;
+
+  await cds.tx(req).run(
+    UPDATE(this.entities.ProcessRequests, request.ID).set({
+      reservedByUser_ID: oCurrentUser?.ID || null,
+      reservedBy: sReservedBy,
+      reservedAt: this._now(),
+      processorUser_ID: oCurrentUser?.ID || null,
+      processor: sReservedBy,
+      processorEmail: sProcessorEmail
+    })
+  );
+
+  await this._writeHistory(req, {
+    requestId: request.ID,
+    stepNo: request.currentStep || 0,
+    action: "RESERVED",
+    actor: req.user?.id,
+    oldStatus: request.status_code,
+    newStatus: request.status_code,
+    remarks: `Request reserved by ${sReservedBy}`
+  });
+
+}
   async _ensureInitialGuidedTask(req, requestId, request, options = {}) {
     const oRequest = request?.processType_code ? request : await this._getRequest(req, requestId);
     const steps = await this._getSteps(req, oRequest?.subProcessType_code);
     const firstTaskStep = this._getInitialGuidedStep(steps);
 
-    const iAutoCompleteSteps = oRequest?.loaWorkflowMode === "GUIDED"
-      ? (this._isRequesterSubmissionStep(firstTaskStep) && !this._isLoaStep(firstTaskStep) ? 1 : 0)
+    const bGuided = oRequest?.loaWorkflowMode === "GUIDED";
+    const iAutoCompleteSteps = bGuided
+      ? (options.autoCompleteSteps === 0
+          ? 0   // caller opted out, e.g. Pending UAC
+          : (this._isRequesterSubmissionStep(firstTaskStep) && !this._isLoaStep(firstTaskStep) ? 1 : 0))
       : Number(options.autoCompleteSteps || 0);
     if (iAutoCompleteSteps > 0) {
       const vResult = await this._autoCompleteLeadingSteps(
@@ -6448,6 +6575,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           completedAt: this._now()
         })
       );
+      await this._completePredecessorOnSettlement(req, request);
       await this._writeHistory(req, {
         requestId,
         stepNo: oLastAutoStep.stepNo,
@@ -6724,6 +6852,17 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       };
     }
 
+     if (bRequesterStep && (request?.requesterUser_ID || sRequesterName)) {
+      return {
+        assignedUser_ID: request?.requesterUser_ID || null,
+        processorUser_ID: request?.requesterUser_ID || null,
+        processorTeam_ID: null,
+        processorTeamName: null,
+        assignedTo: sRequesterName || step?.role || null,
+        processor: sRequesterName,
+        processorEmail: null
+      };
+    }
     if (request?.processorTeam_ID) {
       return {
         assignedUser_ID: null,
@@ -6736,17 +6875,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       };
     }
 
-    if (bRequesterStep && (request?.requesterUser_ID || sRequesterName)) {
-      return {
-        assignedUser_ID: request?.requesterUser_ID || null,
-        processorUser_ID: request?.requesterUser_ID || null,
-        processorTeam_ID: null,
-        processorTeamName: null,
-        assignedTo: sRequesterName || step?.role || null,
-        processor: sRequesterName,
-        processorEmail: null
-      };
-    }
+    // if (bRequesterStep && (request?.requesterUser_ID || sRequesterName)) {
+    //   return {
+    //     assignedUser_ID: request?.requesterUser_ID || null,
+    //     // processorUser_ID: null,
+    //     processorUser_ID: request?.requesterUser_ID,
+    //     processorTeam_ID: null,
+    //     processorTeamName: null,
+    //     assignedTo: sRequesterName || step?.role || null,
+    //     // processor: null,
+    //     processor: sRequesterName,
+    //     processorEmail: null
+    //   };
+    // }
 
     if (request?.processorUser_ID || sProcessorName) {
       return {

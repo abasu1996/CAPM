@@ -48,7 +48,7 @@ sap.ui.define([
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
     "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments",
     "ContractType", "PurchasingOrganizations", "CompanyCodes", "Incoterms", "CostCenter", "ApplicableTaxes",
-    "BudgetCode"
+    "BudgetCode", "ArPcc", "VendorsPcc", "DivisionsPcc", "ScopePcc", "ProjectTypePcc"
   ]);
   const STATUS_MESSAGES = {
     400: "Some of the information provided is invalid. Please review it and try again.",
@@ -380,12 +380,26 @@ sap.ui.define([
         : FormDefinitions.getHeaderFields(request.requestType?.code, variantCode, details.materialCategory);
     },
 
+    // Read-only views leave out fields whose visibleWhen does not match this request (e.g. Project
+    // Code on a Function Location request). The editable requester form keeps them all, so
+    // changing the driver can still bring them back.
+    _shownDetailDefinitions: function (request, details) {
+      return this.detailFieldDefinitions(request, details).filter(function (definition) {
+        const rule = definition.visibleWhen;
+        if (!rule) {
+          return true;
+        }
+        const source = definition.source === "request" ? request : details;
+        return source[rule.field] === rule.equals;
+      });
+    },
+
     buildDetailFields: function (request, details) {
       // The Single/Multiple choice is not stored, so it is inferred from the stored data:
       // a single-line request keeps its line values on the detail row and has no item rows.
       // That covers Contract Modification, whose Single Line form carries SCM Assign User,
       // as well as every other variant offering the choice.
-      const definitions = this.detailFieldDefinitions(request, details);
+      const definitions = this._shownDetailDefinitions(request, details);
       return definitions.map(function (definition) {
         let value = definition.source === "request"
           ? (definition.name === "requestDateTime" ? request.createdAt : request[definition.name])
@@ -411,7 +425,7 @@ sap.ui.define([
     // index is the rendered row. A failed lookup leaves the stored value in place.
     resolveIdLabels: async function (request, details, modelName, fieldsPath) {
       const model = this.getView().getModel(modelName);
-      const definitions = this.detailFieldDefinitions(request, details);
+      const definitions = this._shownDetailDefinitions(request, details);
       await Promise.all(definitions.map(async function (definition, index) {
         const value = details[definition.name];
         if (definition.key !== "ID" || !definition.entity || !value) {
@@ -438,11 +452,14 @@ sap.ui.define([
       if (!table) {
         return;
       }
-      const columns = FormDefinitions.getItemColumns(
+      const columns = FormDefinitions.getItemDisplayColumns(
         request.requestType?.code,
         request.requestVariant?.code,
         details.materialCategory
-      );
+      ).filter(function (col) {
+        // A conditional column only shows when the request's own details match its rule.
+        return !col.visibleWhen || details[col.visibleWhen.field] === col.visibleWhen.equals;
+      });
       table.destroyColumns();
       table.unbindItems();
       if (!columns.length) {
@@ -543,9 +560,28 @@ sap.ui.define([
       return source[rule.field] === rule.equals;
     },
 
+    // A field is mandatory outright (required) or only while another field has a given value
+    // (requiredWhen), which is how Plant is mandatory for an extension but not for a change.
+    _isFieldRequired: function (definition) {
+      if (definition.required) {
+        return true;
+      }
+      const rule = definition.requiredWhen;
+      if (!rule) {
+        return false;
+      }
+      const form = this.getView().getModel("form").getData();
+      const source = definition.source === "request" ? form : (form.details || {});
+      return source[rule.field] === rule.equals;
+    },
+
     _applyConditionalVisibility: function () {
       const formModel = this.getView().getModel("form");
       (this._fieldControls || []).forEach(function (entry) {
+        // the asterisk follows the field it depends on
+        if (entry.definition.requiredWhen && entry.label) {
+          entry.label.setRequired(this._isFieldRequired(entry.definition));
+        }
         if (!entry.definition.visibleWhen) {
           return;
         }
@@ -573,7 +609,13 @@ sap.ui.define([
           grid.panel.setVisible(details[grid.driver] === "YES");
         }
       }.bind(this));
+
+      // row tables that carry a requiredWhen column keep their header asterisks in step
+      if (typeof this._refreshGridRequiredMarkers === "function") {
+        this._refreshGridRequiredMarkers();
+      }
     },
+
     _createFieldControl: function (definition, explicitPath, fileStore) {
       const dataPath = definition.source === "request"
         ? `/${definition.name}`
@@ -680,15 +722,28 @@ sap.ui.define([
       });
       return items;
     },
+    // Line-item columns may carry visibleWhen (a header field driving them), e.g. the Project Code
+    // site columns that only apply to Function Location requests.
+    _isColumnShown: function (col) {
+      return !col.visibleWhen || this._isFieldVisible(col);
+    },
+
+    _columnVisibleBinding: function (col) {
+      const rule = col.visibleWhen;
+      return rule
+        ? { path: `form>/details/${rule.field}`, formatter: function (value) { return value === rule.equals; } }
+        : true;
+    },
+
     _firstMissingItemCell: function (items, columns) {
       for (let index = 0; index < items.length; index++) {
         const missing = (columns || this._itemColumns || []).find(function (col) {
-          if (!col.required) {
+          if (!this._isFieldRequired(col) || !this._isColumnShown(col)) {
             return false;
           }
           const value = items[index][col.name];
           return value === undefined || value === null || String(value).trim() === "";
-        });
+        }.bind(this));
         if (missing) {
           return `Row ${index + 1}: ${missing.label} is required.`;
         }

@@ -196,6 +196,14 @@ entity MaterialCodeDetails : cuid, managed {
   request                : Association to CARequests not null;
   materialCategory       : String(40);
   transactionType        : String(40);
+  materialCode           : String(40);
+  glAccount              : String(40);
+  cepDE                  : Boolean default false;
+  materialStatus         : String(20);
+  divisionChanging       : String(255);
+  serialNumberChange     : String(255);
+  shippingLoadingData    : String(255);
+  infoRecord             : Boolean default false;
   referenceMaterialCode  : String(40);
   dmsUpdate              : Boolean default false;
   plant_code             : String(40);
@@ -308,6 +316,8 @@ entity ServiceCodeDetails : cuid, managed {
   unitOfMeasure      : Association to common.UnitsOfMeasure;
   serviceGroup_code   : String(40);
   valuationClass_code : String(40);
+  glAccount           : String(80);
+  serviceCode         : String(80);
   coupaCommodityCode : Association to CoupaCommodityCodes;
   supportingAttachment: String(255);
   remarks            : LargeString;
@@ -317,6 +327,10 @@ entity ServiceCodeDetails : cuid, managed {
 entity ServiceCodeItems : cuid, managed {
   details : Association to ServiceCodeDetails not null;
   itemNo  : Integer;
+  // Entered per line by the approvers (G/L Account Enrichment, Valuation Class and
+  // S/4 Data Validation steps) when the request has multiple line items.
+  glAccount          : String(80);
+  serviceCode        : String(80);
   transactionType    : String(40);
   referenceServiceCode: String(40);
   serviceCategory    : String(80);
@@ -343,6 +357,9 @@ entity EquipmentCodeDetails : cuid, managed {
   supportingAttachment: String(255);
   siteName         : String(180);
   materialDescription: String(180);
+  plant_code       : String(40);
+  existingFunctionalLocation : String(80);
+  equipmentCode    : String(80);
   items : Composition of many EquipmentCodeItems
             on items.details = $self;
 }
@@ -360,6 +377,9 @@ entity EquipmentCodeItems : cuid, managed {
   supportingAttachment: String(255);
   siteName         : String(180);
   materialDescription: String(180);
+  plant_code       : String(40);
+  existingFunctionalLocation : String(80);
+  equipmentCode    : String(80);
 }
 
 
@@ -374,6 +394,10 @@ entity ProjectCodeDetails : cuid, managed {
   vendor                  : Association to common.Vendors;
   scope                   : LargeString;
   entityCode              : String(60);
+  division                : String(40);
+  vendorPcc               : String(120);
+  projectTypePcc          : String(20);
+  projectCode             : String(80);
   projectType             : Association to ProjectTypes;
   arReference             : String(80);
   functionLocation        : String(80);
@@ -400,6 +424,10 @@ entity ProjectCodeItems : cuid, managed {
   vendor                  : Association to common.Vendors;
   scope                   : LargeString;
   entityCode              : String(60);
+  division                : String(40);
+  vendorPcc               : String(120);
+  projectTypePcc          : String(20);
+  projectCode             : String(80);
   projectType             : Association to ProjectTypes;
   arReference             : String(80);
   functionLocation        : String(80);

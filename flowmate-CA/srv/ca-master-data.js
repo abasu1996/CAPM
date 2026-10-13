@@ -41,7 +41,12 @@ const SHARED_ENTITIES = [
   "Projects",
   "ExtensionMaterialGroup",
   "ContractType",
-  "BudgetCode"
+  "BudgetCode",
+  "ArPcc",
+  "VendorsPcc",
+  "DivisionsPcc",
+  "ScopePcc",
+  "ProjectTypePcc"
 ];
 
 module.exports = class CAMasterDataService extends cds.ApplicationService {

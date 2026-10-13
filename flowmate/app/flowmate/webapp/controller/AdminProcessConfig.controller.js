@@ -1135,8 +1135,12 @@ sap.ui.define([
             };
         },
 
+        // _codeListPath(sEntitySet, sCode) {
+        //     return `/${sEntitySet}('${String(sCode).replace(/'/g, "''")}')`;
+        // },
         _codeListPath(sEntitySet, sCode) {
-            return `/${sEntitySet}('${String(sCode).replace(/'/g, "''")}')`;
+            const sKey = encodeURIComponent(String(sCode).replace(/'/g, "''"));
+            return `/${sEntitySet}('${sKey}')`;
         },
 
         _optionalNumber(vValue) {

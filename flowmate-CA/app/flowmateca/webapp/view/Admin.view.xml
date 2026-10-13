@@ -2,6 +2,7 @@
   controllerName="flowmateca.controller.Admin"
   xmlns:mvc="sap.ui.core.mvc"
   xmlns:core="sap.ui.core"
+  xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
   xmlns="sap.m">
   <Page class="caPage" title="{i18n>adminConfig}" showNavButton="true" navButtonPress=".onNavHome">
     <headerContent>
@@ -139,7 +140,7 @@
                   <Column><Text text="Team Name"/></Column>
                   <Column><Text text="{i18n>description}"/></Column>
                   <Column width="7rem"><Text text="Active"/></Column>
-                  <Column width="6rem"><Text text="Actions"/></Column>
+                  <Column width="9rem"><Text text="Actions"/></Column>
                 </columns>
                 <items>
                   <ColumnListItem>
@@ -149,6 +150,7 @@
                       <Input value="{admin>description}"/>
                       <Switch state="{admin>isActive}"/>
                       <HBox>
+                        <Button icon="sap-icon://group" type="Transparent" tooltip="Manage Team" press=".onManageTeam"/>
                         <Button icon="sap-icon://save" type="Transparent" press=".onSaveTeam"/>
                         <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteTeam"/>
                       </HBox>
@@ -1263,6 +1265,161 @@
                     <HBox>
                         <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveBudgetCode"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeleteBudgetCode"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="pcc-ar" text="AR for PCC" icon="sap-icon://money-bills">
+    <Toolbar class="caSectionToolbar">
+        <Title text="AR for PCC" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="ar"/>
+    </Toolbar>
+    <Table items="{admin>/pcc/ar}" growing="true" growingThreshold="50" class="caAdminTable">
+        <columns>
+            <Column width="5rem"><Text text="ID"/></Column>
+            <Column><Text text="Portfolio"/></Column>
+            <Column><Text text="AR"/></Column>
+            <Column><Text text="Division"/></Column>
+            <Column width="8rem"><Text text="Last Four Digits"/></Column>
+            <Column width="6rem"><Text text="Year"/></Column>
+            <Column><Text text="High Level PC"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input value="{admin>srNo}"/>
+                    <Input value="{admin>portfolio}"/>
+                    <Input value="{admin>ar}"/>
+                    <Input value="{admin>division}"/>
+                    <Input value="{admin>lastFourDigits}"/>
+                    <Input value="{admin>year}"/>
+                    <Input value="{admin>highLevelPc}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="ar"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="ar"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="pcc-vendors" text="Vendors for PCC" icon="sap-icon://supplier">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Vendors for PCC" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="vendors"/>
+    </Toolbar>
+    <Table items="{admin>/pcc/vendors}" growing="true" growingThreshold="50" class="caAdminTable">
+        <columns>
+            <Column width="5rem"><Text text="ID"/></Column>
+            <Column><Text text="Vendor"/></Column>
+            <Column width="10rem"><Text text="Vendor Letter"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input value="{admin>srNo}"/>
+                    <Input value="{admin>vendor}"/>
+                    <Input value="{admin>vendorLetter}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="vendors"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="vendors"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="pcc-divisions" text="Divisions for PCC" icon="sap-icon://org-chart">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Divisions for PCC" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="divisions"/>
+    </Toolbar>
+    <Table items="{admin>/pcc/divisions}" growing="true" growingThreshold="50" class="caAdminTable">
+        <columns>
+            <Column width="5rem"><Text text="ID"/></Column>
+            <Column><Text text="Division"/></Column>
+            <Column width="10rem"><Text text="Division Letter"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input value="{admin>srNo}"/>
+                    <Input value="{admin>division}"/>
+                    <Input value="{admin>divisionLetter}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="divisions"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="divisions"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="pcc-scope" text="Scope for PCC" icon="sap-icon://target-group">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Scope for PCC" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="scope"/>
+    </Toolbar>
+    <Table items="{admin>/pcc/scope}" growing="true" growingThreshold="50" class="caAdminTable">
+        <columns>
+            <Column><Text text="Scope"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input value="{admin>scope}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="scope"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="scope"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="pcc-projectType" text="Project Type for PCC" icon="sap-icon://product">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Project Type for PCC" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="projectType"/>
+    </Toolbar>
+    <Table items="{admin>/pcc/projectType}" growing="true" growingThreshold="50" class="caAdminTable">
+        <columns>
+            <Column><Text text="Project Type"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input value="{admin>projectType}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="projectType"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="projectType"/>
                     </HBox>
                 </cells>
             </ColumnListItem>
@@ -2997,6 +3154,45 @@
 
 
     <dependents>
+      <!-- Teams tab: add users to a team and remove them. -->
+      <Dialog id="manageTeamDialog" title="{teamManage>/title}" contentWidth="44rem" resizable="true" draggable="true">
+        <content>
+          <VBox class="sapUiSmallMargin">
+            <Title text="Add users" level="H5"/>
+            <HBox alignItems="Center" class="sapUiTinyMarginTop">
+              <MultiComboBox
+                width="28rem"
+                placeholder="Search users by name or email"
+                selectedKeys="{teamManage>/selectedUserIds}"
+                showSecondaryValues="true"
+                items="{path: 'teamManage>/availableUsers', templateShareable: false}">
+                <core:ListItem key="{teamManage>ID}" text="{teamManage>displayName}" additionalText="{teamManage>email}"/>
+              </MultiComboBox>
+              <Button text="Add to Team" icon="sap-icon://add-employee" type="Emphasized" press=".onAddTeamMembers" class="sapUiSmallMarginBegin"/>
+            </HBox>
+            <Title text="{= 'Team members (' + ${teamManage>/members}.length + ')' }" level="H5" class="sapUiMediumMarginTop"/>
+            <Table items="{path: 'teamManage>/members', templateShareable: false}" noDataText="No users in this team yet" class="sapUiSizeCompact">
+              <columns>
+                <Column><Text text="Name"/></Column>
+                <Column><Text text="Email"/></Column>
+                <Column width="4rem" hAlign="End"/>
+              </columns>
+              <items>
+                <ColumnListItem>
+                  <cells>
+                    <Text text="{teamManage>name}"/>
+                    <Text text="{teamManage>email}"/>
+                    <Button icon="sap-icon://delete" type="Transparent" tooltip="Remove from team" press=".onRemoveTeamMember"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
+          </VBox>
+        </content>
+        <endButton>
+          <Button text="Close" press=".onCloseManageTeam"/>
+        </endButton>
+      </Dialog>
       <Dialog id="addConfigDialog" title="{newItem>/title}" contentWidth="38rem">
         <content>
           <VBox class="sapUiSmallMargin">
@@ -3516,6 +3712,13 @@
         value="{newItem>/costCenterName}"
         placeholder="Enter Cost Center Name"/>
 
+</VBox>
+
+<VBox visible="{= ${newItem>/isPcc} === true }" items="{path: 'newItem>/pccFields', templateShareable: false}">
+    <VBox class="sapUiTinyMarginBottom">
+        <Label text="{newItem>label}" required="true"/>
+        <Input value="{newItem>value}" placeholder="{= 'Enter ' + ${newItem>label} }"/>
+    </VBox>
 </VBox>
 
 <VBox visible="{newItem>/isBudgetCode}">

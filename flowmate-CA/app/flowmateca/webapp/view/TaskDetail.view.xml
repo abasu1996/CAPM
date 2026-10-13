@@ -100,15 +100,15 @@
               </form:SimpleForm>
             </content>
           </Panel>
-          <Panel headerText="Process-Specific Details" class="caFormSection" visible="{= ${task>/isRequesterStep} ? ${task>/hasEditableFields} : ${task>/hasDetailFields} }">
+          <Panel headerText="Process-Specific Details" class="caFormSection" visible="{= ${task>/isRequesterStep} ? ${task>/hasEditableFields} : (${task>/materialEditStep} || ${task>/hasDetailFields}) }">
             <content>
-              <FlexBox visible="{= !${task>/isRequesterStep} }" items="{task>/detailFields}" wrap="Wrap" renderType="Div" class="caDetailFieldGrid">
+              <FlexBox visible="{= !${task>/isRequesterStep} &amp;&amp; !${task>/materialEditStep} }" items="{task>/detailFields}" wrap="Wrap" renderType="Div" class="caDetailFieldGrid">
                 <VBox class="caDetailField">
                   <Label text="{task>label}"/>
                   <Text text="{task>value}" wrapping="true"/>
                 </VBox>
               </FlexBox>
-              <VBox id="taskDetailFormHost" visible="{= ${task>/isRequesterStep} }"/>
+              <VBox id="taskDetailFormHost" visible="{= ${task>/isRequesterStep} || ${task>/materialEditStep} }"/>
             </content>
           </Panel>
 
@@ -147,13 +147,52 @@
     </content>
 
     <dependents>
-      <Dialog id="decisionDialog" title="{decision>/title}" contentWidth="34rem">
+      <Dialog id="decisionDialog" title="{decision>/title}" contentWidth="{= ${decision>/lineEntry} ? '52rem' : '34rem' }">
         <content>
           <VBox class="sapUiSmallMargin">
             <!-- Last step of a PO with "Create SES Successor": the PO number goes to the SES. -->
             <Label text="Purchase Order Number" required="true" visible="{= ${decision>/needsPoNumber} === true }"/>
             <Input value="{decision>/purchaseOrderNo}" placeholder="Enter the created Purchase Order number"
               visible="{= ${decision>/needsPoNumber} === true }" class="sapUiSmallMarginBottom"/>
+            <Label text="GL Account" required="true" visible="{= ${decision>/needsGlAccount} === true }"/>
+            <Input value="{decision>/glAccount}" placeholder="Enter the GL Account" maxLength="80"
+              visible="{= ${decision>/needsGlAccount} === true }" class="sapUiSmallMarginBottom"/>
+            <Label text="Valuation Class" required="true" visible="{= ${decision>/needsValuationClass} === true }"/>
+            <Input value="{decision>/valuationClass}" placeholder="Enter the Valuation Class" maxLength="40"
+              visible="{= ${decision>/needsValuationClass} === true }" class="sapUiSmallMarginBottom"/>
+            <Label text="Service Code" required="true" visible="{= ${decision>/needsServiceCode} === true }"/>
+            <Input value="{decision>/serviceCode}" placeholder="Enter the Service Code" maxLength="80"
+              visible="{= ${decision>/needsServiceCode} === true }" class="sapUiSmallMarginBottom"/>
+            <Label text="Equipment Code" required="true" visible="{= ${decision>/needsEquipmentCode} === true }"/>
+            <Input value="{decision>/equipmentCode}" placeholder="Enter the Equipment Code" maxLength="80"
+              visible="{= ${decision>/needsEquipmentCode} === true }" class="sapUiSmallMarginBottom"/>
+            <!-- Project Code: the Project Code, or the Function Location / Activity per Object Type. -->
+            <Label text="{decision>/projectValueLabel}" required="true" visible="{= ${decision>/needsProjectValue} === true }"/>
+            <Input value="{decision>/projectValue}" placeholder="{= 'Enter the ' + ${decision>/projectValueLabel} }" maxLength="80"
+              visible="{= ${decision>/needsProjectValue} === true }" class="sapUiSmallMarginBottom"/>
+            <!-- Multiple line items (Service Code, Equipment Code, Project Code): one value per line. -->
+            <Title text="{= ${decision>/lineEntry/label} + ' per line item' }" level="H5"
+              visible="{= !!${decision>/lineEntry} }"/>
+            <Table items="{path: 'decision>/lineEntryRows', templateShareable: false}"
+              visible="{= !!${decision>/lineEntry} }" class="sapUiSizeCompact sapUiSmallMarginBottom">
+              <columns>
+                <Column width="3rem"><Text text="#"/></Column>
+                <Column><Text text="{decision>/lineEntry/info1Label}"/></Column>
+                <Column visible="{= !!${decision>/lineEntry/info2Label} }"><Text text="{decision>/lineEntry/info2Label}"/></Column>
+                <Column><Label text="{decision>/lineEntry/label}" required="true"/></Column>
+              </columns>
+              <items>
+                <ColumnListItem>
+                  <cells>
+                    <Text text="{decision>itemNo}"/>
+                    <Text text="{decision>info1}"/>
+                    <Text text="{decision>info2}"/>
+                    <Input value="{decision>value}" maxLength="{decision>/lineEntry/maxLength}"
+                      placeholder="{= 'Enter the ' + ${decision>/lineEntry/label} }"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
             <Label text="Remarks"/>
             <TextArea value="{decision>/remarks}" rows="4" width="100%"/>
           </VBox>

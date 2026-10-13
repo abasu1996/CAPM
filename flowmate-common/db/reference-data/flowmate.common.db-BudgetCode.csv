@@ -1,0 +1,5 @@
+ID,budgetCode,budgetCodeDescription,isActive
+3f1c7a20-5b8e-4d6a-9c21-7e4b0a1d5f01,BC-1001,BC-1001 - Network Capex,true
+6a2d8b31-6c9f-4e7b-8d32-8f5c1b2e6a02,BC-1002,BC-1002 - IT Infrastructure,true
+9b3e9c42-7d0a-4f8c-9e43-9a6d2c3f7b03,BC-1003,BC-1003 - Marketing Opex,true
+c4f0ad53-8e1b-4a9d-8f54-ab7e3d4a8c04,BC-1004,BC-1004 - Facilities Maintenance,true

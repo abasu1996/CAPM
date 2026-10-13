@@ -119,6 +119,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getDashboardCounts", this._getDashboardCounts);
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
+    this.on("previewProjectCode", this._previewProjectCode);
     this.on("createFlowmatePaymentRun", this._createFlowmatePaymentRun);
     this.on("createFlowmateServiceEntrySheet", this._createFlowmateServiceEntrySheet);
     this.on("createBulkRequests", this._createBulkRequests);
@@ -518,9 +519,18 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     let handler;
     let event;
     if (request.requestType_code === "PURCHASE_ORDER") {
+      const purchaseOrder = await cds.tx(req).run(
+        SELECT.one.from(this.db.PurchaseOrderDetails).columns("paymentRun").where({ request_ID: request.ID })
+      );
+      // Payment Run not selected: nothing to hand over, the PO simply completes.
+      if (!purchaseOrder?.paymentRun) return null;
       handler = this._createFlowmatePaymentRun;
       event = "createFlowmatePaymentRun";
     } else if (request.requestType_code === "SERVICE_ENTRY_SHEET") {
+      const serviceEntrySheet = await cds.tx(req).run(
+        SELECT.one.from(this.db.ServiceEntrySheetDetails).columns("flowmateSesRequest").where({ request_ID: request.ID })
+      );
+      if (!serviceEntrySheet?.flowmateSesRequest) return null;
       handler = this._createFlowmateServiceEntrySheet;
       event = "createFlowmateServiceEntrySheet";
     } else {
@@ -746,6 +756,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     if (integration) assertTechnicalDetails(req, details);
     await this._assertNoDuplicateMaterialDescription(req, requestType.code, details);
+    await this._applyProjectCode(req, requestType.code, requestVariant?.code, details);
 
     await tx.run(INSERT.into(this.db.CARequests).entries({
       ID: requestId,
@@ -995,6 +1006,111 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(409, "Only open tasks can be approved");
     }
 
+    const step = await SELECT.one.from(this.db.RequestStepInstances).where({
+      request_ID: task.request_ID,
+      stepNo: task.stepNo
+    });
+    const request = await SELECT.one.from(this.db.CARequests).where({ ID: task.request_ID });
+    const glEnrichmentStep = /g\s*\/?\s*l\s+account\s+enrichment/i.test(step?.stepName || "");
+    const valuationClassStep = /valuation\s+class/i.test(step?.stepName || "");
+    const serviceCodeStep = /s\s*\/?\s*4\s+data\s+validation/i.test(step?.stepName || "");
+    if ((glEnrichmentStep || valuationClassStep || serviceCodeStep)
+      && request?.requestType_code === "SERVICE_CODE") {
+      const serviceDetails = await SELECT.one.from(this.db.ServiceCodeDetails)
+        .where({ request_ID: task.request_ID });
+      const hasItemRows = serviceDetails && await SELECT.one.from(this.db.ServiceCodeItems)
+        .where({ details_ID: serviceDetails.ID });
+      if (serviceDetails && !hasItemRows) {
+        const updates = {};
+        if (glEnrichmentStep) {
+          const glAccount = String(req.data.glAccount || "").trim();
+          if (!glAccount) {
+            return req.reject(400, "Enter the GL Account to approve this task");
+          }
+          if (glAccount.length > 80) {
+            return req.reject(400, "GL Account must be 80 characters or fewer");
+          }
+          updates.glAccount = glAccount;
+        }
+        if (valuationClassStep) {
+          const valuationClass = String(req.data.valuationClass || "").trim();
+          if (!valuationClass) {
+            return req.reject(400, "Enter the Valuation Class to approve this task");
+          }
+          if (valuationClass.length > 40) {
+            return req.reject(400, "Valuation Class must be 40 characters or fewer");
+          }
+          updates.valuationClass_code = valuationClass;
+        }
+        if (serviceCodeStep) {
+          const serviceCode = String(req.data.serviceCode || "").trim();
+          if (!serviceCode) {
+            return req.reject(400, "Enter the Service Code to approve this task");
+          }
+          if (serviceCode.length > 80) {
+            return req.reject(400, "Service Code must be 80 characters or fewer");
+          }
+          updates.serviceCode = serviceCode;
+        }
+        await tx.run(UPDATE(this.db.ServiceCodeDetails).set(updates).where({ ID: serviceDetails.ID }));
+      } else if (serviceDetails && hasItemRows) {
+        // Multiple line items: the approver enters the value per line (lineValues JSON).
+        const target = glEnrichmentStep
+          ? { column: "glAccount", label: "G/L Account", maxLength: 80 }
+          : (valuationClassStep
+            ? { column: "valuationClass_code", label: "Valuation Class", maxLength: 40 }
+            : { column: "serviceCode", label: "Service Code", maxLength: 80 });
+        const failure = await this._applyLineValues(tx, req, this.db.ServiceCodeItems, serviceDetails.ID, target);
+        if (failure) return failure;
+      }
+    }
+
+    // Equipment Code: the S/4 Data Validation approver records the created Equipment Code,
+    // once for a single line item or per line item.
+    if (serviceCodeStep && request?.requestType_code === "EQUIPMENT_CODE") {
+      const equipmentDetails = await SELECT.one.from(this.db.EquipmentCodeDetails)
+        .where({ request_ID: task.request_ID });
+      const hasItemRows = equipmentDetails && await SELECT.one.from(this.db.EquipmentCodeItems)
+        .where({ details_ID: equipmentDetails.ID });
+      if (equipmentDetails && !hasItemRows) {
+        const equipmentCode = String(req.data.equipmentCode || "").trim();
+        if (!equipmentCode) {
+          return req.reject(400, "Enter the Equipment Code to approve this task");
+        }
+        if (equipmentCode.length > 80) {
+          return req.reject(400, "Equipment Code must be 80 characters or fewer");
+        }
+        await tx.run(UPDATE(this.db.EquipmentCodeDetails).set({ equipmentCode }).where({ ID: equipmentDetails.ID }));
+      } else if (equipmentDetails && hasItemRows) {
+        const failure = await this._applyLineValues(tx, req, this.db.EquipmentCodeItems, equipmentDetails.ID,
+          { column: "equipmentCode", label: "Equipment Code", maxLength: 80 });
+        if (failure) return failure;
+      }
+    }
+
+    // Project Code: the S/4 Data Validation approver records the created Project Code (New /
+    // Modification), or the Function Location / Activity per the Object Type.
+    if (serviceCodeStep && request?.requestType_code === "PROJECT_CODE") {
+      const projectDetails = await SELECT.one.from(this.db.ProjectCodeDetails)
+        .where({ request_ID: task.request_ID });
+      const target = projectDetails && this._projectValueTarget(request.requestVariant_code, projectDetails.transactionType);
+      const hasItemRows = target && await SELECT.one.from(this.db.ProjectCodeItems)
+        .where({ details_ID: projectDetails.ID });
+      if (target && !hasItemRows) {
+        const value = String(req.data.projectValue || "").trim();
+        if (!value) {
+          return req.reject(400, `Enter the ${target.label} to approve this task`);
+        }
+        if (value.length > target.maxLength) {
+          return req.reject(400, `${target.label} must be ${target.maxLength} characters or fewer`);
+        }
+        await tx.run(UPDATE(this.db.ProjectCodeDetails).set({ [target.column]: value }).where({ ID: projectDetails.ID }));
+      } else if (target && hasItemRows) {
+        const failure = await this._applyLineValues(tx, req, this.db.ProjectCodeItems, projectDetails.ID, target);
+        if (failure) return failure;
+      }
+    }
+
     // The last step of a PO with "Create SES Successor" captures the PO number for the SES.
     const poDetails = await this._poDetailsNeedingNumber(tx, task);
     if (poDetails) {
@@ -1007,6 +1123,51 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         .where({ ID: poDetails.ID }));
     }
 
+    if (req.data.materialDetails) {
+      const request = await SELECT.one.from(this.db.CARequests)
+        .columns("requestType_code", "requestVariant_code")
+        .where({ ID: task.request_ID });
+      if (request?.requestType_code !== "MATERIAL_CODE") {
+        return req.reject(400, "Material details can only be saved on a Material Code task");
+      }
+      const editableByConfigStep = {
+        3: ["glAccount"],
+        4: ["valuationClass_code"],
+        5: ["materialCode"]
+      };
+      const stepInstance = task.stepInstance_ID
+        ? await SELECT.one.from(this.db.RequestStepInstances).columns("config_ID").where({ ID: task.stepInstance_ID })
+        : null;
+      const stepConfig = stepInstance?.config_ID
+        ? await SELECT.one.from(this.db.WorkflowStepConfigs).columns("stepNo").where({ ID: stepInstance.config_ID })
+        : null;
+      const allowedFields = ["MAT_NEW", "MAT_NEW_REF"].includes(request.requestVariant_code)
+        ? editableByConfigStep[stepConfig?.stepNo] || []
+        : [];
+      let materialDetails;
+      try {
+        materialDetails = JSON.parse(req.data.materialDetails);
+      } catch (_error) {
+        return req.reject(400, "Material task details contain invalid JSON");
+      }
+      const fieldNames = Object.keys(materialDetails || {});
+      if (!allowedFields.length || fieldNames.some((name) => !allowedFields.includes(name))) {
+        return req.reject(403, "You cannot update these material fields at this workflow step");
+      }
+      const detail = await SELECT.one.from(this.db.MaterialCodeDetails)
+        .where({ request_ID: task.request_ID });
+      if (!detail) {
+        return req.reject(404, "Material Code details not found");
+      }
+      const updates = {};
+      fieldNames.forEach((name) => {
+        updates[name] = materialDetails[name] === "" ? null : materialDetails[name];
+      });
+      if (fieldNames.length) {
+        await tx.run(UPDATE(this.db.MaterialCodeDetails).set(updates).where({ ID: detail.ID }));
+      }
+    }
+
     await tx.run(UPDATE(this.db.CATasks).set({
       status_code: TASK_STATUS.APPROVED,
       decision: "APPROVED",
@@ -1014,8 +1175,185 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       completedAt: new Date().toISOString()
     }).where({ ID: task.ID }));
     await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_APPROVED", user, task.status_code, TASK_STATUS.APPROVED, req.data.remarks);
+    await this._autoCompleteStepIfDone(req, tx, task, user);
     return true;
   };
+
+  // A step completes on its own once nothing is left to do in it: no task of the step is still
+  // open and every mandatory one is approved (the same rule completeStep applies). Only the
+  // request's current open step advances, and the last step also needs every other step done.
+  // It then takes the exact completeStep path, so next-step tasks, routing and the SES successor
+  // behave as before. completeStep stays available as a manual fallback.
+  _previewProjectCode = async (req) => {
+    let details;
+    try {
+      details = JSON.parse(req.data.details || "{}");
+    } catch (_error) {
+      return req.reject(400, "The details contain invalid JSON");
+    }
+    return JSON.stringify(await this._generateProjectCode(details || {}));
+  };
+
+  // Project Code (New / Modification), Single line. From the PCC masters:
+  //   Project ID          <Division letter>/<YY of the AR year>/<NNN>/<Vendor letter>, where NNN counts
+  //                       per Division letter + Vendor letter across all years;
+  //   Project Category    <High Level PC>/<Scope>/<Project Type> (no Scope for non-engineering);
+  //   Project Description <Site ID>_<Site Name>_<Project ID>.
+  // Parts whose inputs are not chosen yet stay empty. keepProjectId keeps an already assigned
+  // number while the Division and Vendor letters are unchanged (requester edits on step 1).
+  async _generateProjectCode(details, keepProjectId) {
+    const lookup = (entity, column, value) => (value
+      ? this.master.run(SELECT.one.from(this.masterEntities[entity]).where({ [column]: value }))
+      : null);
+    const [division, vendor, ar] = await Promise.all([
+      lookup("DivisionsPcc", "division", details.division),
+      lookup("VendorsPcc", "vendor", details.vendorPcc),
+      lookup("ArPcc", "ar", details.arReference)
+    ]);
+    const projectCategory = ar?.highLevelPc && details.projectTypePcc
+      ? [ar.highLevelPc, details.scope, details.projectTypePcc].filter(Boolean).join("/")
+      : "";
+
+    let projectId = "";
+    if (division?.divisionLetter && vendor?.vendorLetter && ar?.year) {
+      const prefix = `${division.divisionLetter}/`;
+      const suffix = `/${vendor.vendorLetter}`;
+      const yy = String(ar.year).slice(-2);
+      const kept = String(keepProjectId || "").split("/");
+      let number;
+      if (kept.length === 4 && keepProjectId.startsWith(prefix) && keepProjectId.endsWith(suffix)) {
+        number = kept[2];
+      } else {
+        const pattern = `${prefix}%${suffix}`;
+        const [headerIds, itemIds] = await Promise.all([
+          SELECT.from(this.db.ProjectCodeDetails).columns("projectId").where({ projectId: { like: pattern } }),
+          SELECT.from(this.db.ProjectCodeItems).columns("projectId").where({ projectId: { like: pattern } })
+        ]);
+        const highest = headerIds.concat(itemIds).reduce((max, row) => {
+          const value = Number.parseInt(String(row.projectId).split("/")[2], 10);
+          return Number.isFinite(value) && value > max ? value : max;
+        }, 0);
+        number = String(highest + 1).padStart(3, "0");
+      }
+      projectId = `${division.divisionLetter}/${yy}/${number}/${vendor.vendorLetter}`;
+    }
+
+    const projectDescription = details.siteId && details.siteName && projectId
+      ? `${details.siteId}_${details.siteName}_${projectId}`
+      : "";
+    return { projectId, projectCategory, projectDescription };
+  }
+
+  // Applies the generated values to Project Code (New / Modification) details; the server value
+  // always wins over the form's preview. Multiple Line Items share the request's Project ID and
+  // Category, and each line gets its own description from its own site.
+  async _applyProjectCode(req, requestTypeCode, variantCode, details, keepProjectId) {
+    if (requestTypeCode !== "PROJECT_CODE" || variantCode !== "PROJECT_NEW_MOD") {
+      return;
+    }
+    const generated = await this._generateProjectCode(details, keepProjectId);
+    if (!generated.projectId) {
+      return req.reject(400, "Select a Division, AR and Vendor from the PCC lists to generate the Project ID");
+    }
+    if (!generated.projectCategory) {
+      return req.reject(400, "Select an AR and Project Type from the PCC lists to generate the Project Category");
+    }
+    if (Array.isArray(details.items) && details.items.length) {
+      const { projectId, projectCategory } = generated;
+      Object.assign(details, { projectId, projectCategory, projectDescription: "" });
+      details.items.forEach((item) => {
+        Object.assign(item, {
+          projectId,
+          projectCategory,
+          projectDescription: item.siteId && item.siteName ? `${item.siteId}_${item.siteName}_${projectId}` : ""
+        });
+      });
+      return;
+    }
+    Object.assign(details, generated);
+  }
+
+  // What the Project Code S/4 Data Validation approver enters. Mirrored in TaskDetail.controller.js.
+  _projectValueTarget(variantCode, transactionType) {
+    if (variantCode === "PROJECT_NEW_MOD") {
+      return { column: "projectCode", label: "Project Code", maxLength: 80 };
+    }
+    if (variantCode === "PROJECT_FL_ACTIVITY") {
+      if (transactionType === "FUNCTION_LOCATION") {
+        return { column: "functionLocation", label: "Function Location", maxLength: 80 };
+      }
+      if (transactionType === "ACTIVITY") {
+        return { column: "activityNumber", label: "Activity", maxLength: 80 };
+      }
+    }
+    return null;
+  }
+
+  // Writes one approver-entered value per line item (lineValues JSON [{ itemId, value }]).
+  // Returns the rejection when a line is missing or too long, otherwise nothing.
+  async _applyLineValues(tx, req, itemsEntity, detailsId, target) {
+    let lineValues;
+    try {
+      lineValues = JSON.parse(req.data.lineValues || "[]");
+    } catch (_error) {
+      return req.reject(400, "The line values contain invalid JSON");
+    }
+    const valueByItem = new Map((Array.isArray(lineValues) ? lineValues : [])
+      .map((entry) => [entry?.itemId, String(entry?.value ?? "").trim()]));
+    const items = await SELECT.from(itemsEntity)
+      .columns("ID", "itemNo")
+      .where({ details_ID: detailsId })
+      .orderBy("itemNo");
+    for (const item of items) {
+      const value = valueByItem.get(item.ID) || "";
+      if (!value) {
+        return req.reject(400, `Row ${item.itemNo}: enter the ${target.label} to approve this task`);
+      }
+      if (value.length > target.maxLength) {
+        return req.reject(400, `Row ${item.itemNo}: ${target.label} must be ${target.maxLength} characters or fewer`);
+      }
+    }
+    for (const item of items) {
+      await tx.run(UPDATE(itemsEntity)
+        .set({ [target.column]: valueByItem.get(item.ID) })
+        .where({ ID: item.ID, details_ID: detailsId }));
+    }
+  }
+
+  async _autoCompleteStepIfDone(req, tx, task, user) {
+    const request = await tx.run(SELECT.one.from(this.db.CARequests).where({ ID: task.request_ID }));
+    if (!request || [REQUEST_STATUS.COMPLETED, REQUEST_STATUS.REJECTED].includes(request.status_code)) {
+      return;
+    }
+    const steps = await tx.run(SELECT.from(this.db.RequestStepInstances)
+      .where({ request_ID: request.ID })
+      .orderBy("stepNo"));
+    const step = steps.find((entry) => entry.stepNo === task.stepNo);
+    if (!step || step.status !== "OPEN") {
+      return;
+    }
+    const stepTasks = await tx.run(SELECT.from(this.db.CATasks).where({
+      request_ID: request.ID,
+      stepNo: step.stepNo
+    }));
+    const stillOpen = stepTasks.some((entry) => entry.status_code === TASK_STATUS.OPEN);
+    const mandatoryPending = stepTasks.some((entry) => entry.isMandatory && entry.status_code !== TASK_STATUS.APPROVED);
+    if (stillOpen || mandatoryPending) {
+      return;
+    }
+    const lastStepNo = Math.max(...steps.map((entry) => entry.stepNo));
+    if (step.stepNo === lastStepNo) {
+      const incompleteStep = steps.find((entry) => entry.stepNo !== step.stepNo && entry.status !== "COMPLETED");
+      const openTask = await tx.run(SELECT.one.from(this.db.CATasks).where({
+        request_ID: request.ID,
+        status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
+      }));
+      if (incompleteStep || openTask) {
+        return;
+      }
+    }
+    await this._advanceFromStep(tx, request, step, steps, user, req.data.remarks, req);
+  }
 
   _rejectTask = async (req) => {
     const tx = cds.tx(req);
@@ -1140,6 +1478,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     const details = this._parseDetails(req, req.data.details);
     await this._assertNoDuplicateMaterialDescription(req, request.requestType_code, details, request.ID);
+    if (request.requestType_code === "PROJECT_CODE") {
+      const stored = await SELECT.one.from(this.db.ProjectCodeDetails).columns("projectId").where({ request_ID: request.ID });
+      await this._applyProjectCode(req, request.requestType_code, request.requestVariant_code, details, stored?.projectId);
+    }
     await this._updateDetails(tx, request.requestType_code, request.ID, details);
     return true;
   };

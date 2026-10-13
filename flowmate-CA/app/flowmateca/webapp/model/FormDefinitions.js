@@ -114,14 +114,10 @@ sap.ui.define([], function () {
     field("serialNumberProfile", "Serial Number Profile", "combo", {
       entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription"
     }),
-    field("hsCode", "HS Code", "input", { required: true }),
-    field("valuationClass_code", "Valuation Class", "combo", {
-      required: true,
-      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
-    }),
+    field("hsCode", "HS Code", "input"),
     field("perUnitPrice", "Per Unit Price", "number"),
     field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
-      required: true
+      required: false
     })
   ];
 
@@ -157,7 +153,7 @@ sap.ui.define([], function () {
 
   const whenDms = { field: "dmsUpdate", equals: true };
   const dmsBlock = [
-    field("dmsSapMaterialCode", "SAP Material Code", "input", { required: true, visibleWhen: whenDms }),
+    field("dmsSapMaterialCode", "SAP Material Code", "input", { visibleWhen: whenDms }),
     field("itemName", "Item Name", "input", { required: true, visibleWhen: whenDms }),
     field("itemCategory", "Item Category", "input", { required: true, visibleWhen: whenDms }),
     field("unitsPerItem", "Units per Item", "number", { required: true, visibleWhen: whenDms }),
@@ -183,18 +179,144 @@ sap.ui.define([], function () {
     placeholder: "Existing SAP material code"
   });
 
+  const materialTaskFields = [
+    field("glAccount", "GL Account", "input", { stepOnly: 3 }),
+    field("valuationClass_code", "Valuation Class", "combo", {
+      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription", stepOnly: 4
+    }),
+    field("materialCode", "Material Code", "input", { stepOnly: 5 })
+  ];
+
+  const materialStatus = field("materialStatus", "Material Status (Block/Unblock)", "select", {
+    options: [{ key: "BLOCK", text: "Block" }, { key: "UNBLOCK", text: "Unblock" }]
+  });
+  const whenExtension = { field: "transactionType", equals: "EXTENSION" };
+  const whenChange = { field: "transactionType", equals: "CHANGE" };
+  const whenTradingChange = { field: "transactionType", equals: "CHANGE_DMS" };
+  const changeType = field("transactionType", "Modification Type", "select", {
+    required: true,
+    options: [{ key: "EXTENSION", text: "Extension" }, { key: "CHANGE", text: "Change" }]
+  });
+  const tradingChangeType = field("transactionType", "Modification Type", "select", {
+    required: true,
+    options: [
+      { key: "EXTENSION", text: "Extension" },
+      { key: "CHANGE_DMS", text: "Change With DMS Update" },
+      { key: "DMS_UPDATE_ONLY", text: "DMS Update only" }
+    ]
+  });
+  // An extension needs a plant to extend into; a change works on the material as it stands,
+  // so the plant is only mandatory for the extension.
+  const modificationPlant = Object.assign({}, plant, { required: false, requiredWhen: whenExtension });
+  const materialModificationFields = [
+    field("referenceMaterialCode", "Material Code", "input", { required: true }),
+    modificationPlant,
+    field("storageLocation", "Storage Location", "combo", {
+      entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName", visibleWhen: whenExtension
+    }),
+    field("serialNumberProfile", "Serial Number Profile", "combo", {
+      entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription", visibleWhen: whenChange
+    }),
+    field("description", "Material Description", "input", { maxLength: 40, visibleWhen: whenChange }),
+    Object.assign({}, materialStatus, { visibleWhen: whenChange })
+  ];
+  const tradingModificationFields = [
+    field("referenceMaterialCode", "Material Code", "input", { required: true }),
+    plant,
+    field("storageLocation", "Storage Location", "combo", {
+      entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName", visibleWhen: whenExtension
+    }),
+    field("distributionChannel", "Distribution Channel", "combo", {
+      entity: "DistributionChannel", key: "distributionChannelCode", text: "distributionChannelDescription", visibleWhen: whenExtension
+    }),
+    field("salesOrganization", "Sales Org", "combo", {
+      entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName", visibleWhen: whenExtension
+    }),
+    field("divisionChanging", "Division Changing", "input", { maxLength: 255, visibleWhen: whenTradingChange }),
+    field("description", "Material Description", "input", { maxLength: 40, visibleWhen: whenTradingChange }),
+    field("serialNumberChange", "Serial Number", "input", { maxLength: 255, visibleWhen: whenTradingChange }),
+    field("shippingLoadingData", "Shipping / Loading Data", "input", { maxLength: 255, visibleWhen: whenTradingChange }),
+    Object.assign({}, materialStatus, { visibleWhen: whenTradingChange }),
+    field("infoRecord", "Info Record", "checkbox", { visibleWhen: whenTradingChange }),
+    field("dmsUpdate", "DMS Update", "checkbox", { visibleWhen: whenTradingChange }),
+    field("dmsUpdate", "DMS Update", "checkbox", {
+      visibleWhen: { field: "transactionType", equals: "DMS_UPDATE_ONLY" }
+    }),
+    ...dmsBlock
+  ];
+
   const materialCategoryFields = {
     ENG_IT: matCore,
     ADMIN_CONS: matCore,
-    TRADING: matCore.concat(matTrading, [dmsToggle], dmsBlock)
+    TRADING: matCore.concat(matTrading, [dmsToggle], dmsBlock, [field("cepDE", "CEP (DE)", "checkbox")])
+  };
+
+  // Keep the original material fields on the reference and modification forms.
+  // The workbook relaxes those fields for these request types, so only fields
+  // explicitly required by the workbook stay mandatory. DMS fields retain their
+  // existing conditional requirements (with SAP Material Code optional).
+  const optionalMaterialFields = function (base) {
+    return base.map(function (definition) {
+      const copy = Object.assign({}, definition, { required: false });
+      if (dmsBlock.indexOf(definition) >= 0) {
+        copy.required = definition.required;
+      }
+      return copy;
+    });
+  };
+  const appendMissingFields = function (fields, additions) {
+    const names = new Set(fields.map(function (definition) { return definition.name; }));
+    additions.forEach(function (definition) {
+      if (!names.has(definition.name)) {
+        fields.push(definition);
+        names.add(definition.name);
+      }
+    });
+    return fields;
   };
 
   const materialDefinitions = {};
   Object.keys(materialCategoryFields).forEach(function (categoryCode) {
     const base = materialCategoryFields[categoryCode];
-    materialDefinitions[categoryCode + ":MAT_NEW"] = base;
-    materialDefinitions[categoryCode + ":MAT_EXISTING"] = [referenceMaterial].concat(base);
-    materialDefinitions[categoryCode + ":MAT_NEW_REF"] = [referenceMaterial].concat(base);
+    materialDefinitions[categoryCode + ":MAT_NEW"] = base.concat(materialTaskFields);
+    const referenceFields = [
+      field("referenceMaterialCode", categoryCode === "TRADING" ? "Material Code" : "Reference Material Code", "input", {
+        required: true, placeholder: "Existing SAP material code"
+      }),
+      plant,
+      field("description", "Material Description", "input", { required: true, maxLength: 40 }),
+      Object.assign({}, uom, { required: false })
+    ];
+    if (categoryCode === "TRADING") {
+      referenceFields.push(
+        field("distributionChannel", "Distribution Channel", "combo", {
+          required: true, entity: "DistributionChannel", key: "distributionChannelCode", text: "distributionChannelDescription"
+        }),
+        field("salesOrganization", "Sales Org", "combo", {
+          required: true, entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName"
+        }),
+        field("cepDE", "CEP (DE)", "checkbox")
+      );
+    }
+    // A trading material raised with reference has no DMS update, so neither the toggle nor the
+    // fields it reveals are offered. They come from base too, which appendMissingFields would
+    // otherwise add straight back.
+    const dmsNames = new Set([dmsToggle.name].concat(dmsBlock.map(function (definition) { return definition.name; })));
+    const referenceBase = categoryCode === "TRADING"
+      ? optionalMaterialFields(base).filter(function (definition) { return !dmsNames.has(definition.name); })
+      : optionalMaterialFields(base);
+    const modificationFields = categoryCode === "TRADING"
+      ? tradingModificationFields
+      : materialModificationFields;
+    const existingFields = [categoryCode === "TRADING" ? tradingChangeType : changeType]
+      .concat(modificationFields.slice(0, 2));
+    appendMissingFields(existingFields, optionalMaterialFields(base));
+    appendMissingFields(existingFields, modificationFields.slice(2));
+    materialDefinitions[categoryCode + ":MAT_EXISTING"] = existingFields;
+    materialDefinitions[categoryCode + ":MAT_NEW_REF"] = appendMissingFields(
+      referenceFields.concat(materialTaskFields),
+      referenceBase
+    );
   });
 
   const serviceNewBase = [
@@ -208,10 +330,6 @@ sap.ui.define([], function () {
     field("serviceGroup_code", "Service Group", "combo", {
       required: true,
       entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
-    }),
-    field("valuationClass_code", "Valuation Class", "combo", {
-      required: true,
-      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
     }),
     field("supportingAttachment", "Supporting Attachment", "file"),
     field("remarks", "Remarks", "textarea")
@@ -343,10 +461,11 @@ sap.ui.define([], function () {
         entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
         autoFills: { field: "siteName", from: "siteName" }
       }),
-      field("siteName", "Site Name", "readonly", {
+      field("siteName", "Site Name", "input", {
         required: true,
-        placeholder: "Filled from the selected Site ID"
+        placeholder: "Filled from the selected Site ID (editable)"
       }),
+      plant,
       field("materialCode", "Material Code", "combo", {
         required: true,
         entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription",
@@ -358,7 +477,7 @@ sap.ui.define([], function () {
       }),
       field("serialNumber", "Serial Number", "input", { required: true }),
       field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
-      field("commissionedDate", "Commissioned Date", "date"),
+      field("commissionedDate", "Commissioned Date", "date", { required: true }),
       field("remarks", "Remarks", "textarea"),
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
@@ -368,10 +487,11 @@ sap.ui.define([], function () {
         entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
         autoFills: { field: "siteName", from: "siteName" }
       }),
-      field("siteName", "Site Name", "readonly", {
+      field("siteName", "Site Name", "input", {
         required: true,
-        placeholder: "Filled from the selected Site ID"
+        placeholder: "Filled from the selected Site ID (editable)"
       }),
+      plant,
       field("materialCode", "Material Code", "combo", {
         required: true,
         entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription",
@@ -384,8 +504,15 @@ sap.ui.define([], function () {
       field("serialNumber", "Serial Number", "input", { required: true }),
       field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
       field("commissionedDate", "Commissioned Date", "date"),
+      field("existingFunctionalLocation", "Existing Functional Location", "input", {
+        maxLength: 80,
+        placeholder: "Enter the existing functional location"
+      }),
+      // One approver per request (Selected Approval is routed to it), so in Multiple Line mode it
+      // stays in the details form instead of becoming a line-item column.
       field("approver_ID", "Approver", "combo", {
         required: true,
+        headerOnly: true,
         entity: "Users",
         key: "ID",
         text: "displayName",
@@ -403,57 +530,46 @@ sap.ui.define([], function () {
         ]
       }),
       field("functionLocationRequired", "Function Location Required", "checkbox"),
-      field("functionLocation", "Function Location", "input", {
-        required: true,
-        maxLength: 80,
-        placeholder: "Enter the function location",
-        visibleWhen: { field: "functionLocationRequired", equals: true }
-      }),
       field("activityRequired", "Activity Required", "checkbox"),
-      field("activityNumber", "Activity", "input", {
-        required: true,
-        maxLength: 80,
-        placeholder: "Enter the activity",
-        visibleWhen: { field: "activityRequired", equals: true }
-      }),
       field("projectName", "Project Name", "input", { required: true }),
-      vendor,
+      // Vendor, Scope, Division, Project Type and AR come from the PCC masters (Admin console);
+      // the server builds Project ID / Category / Description from them (see previewProjectCode).
+      field("vendorPcc", "Vendor", "combo", {
+        required: true, entity: "VendorsPcc", key: "vendor", text: "vendor", secondaryText: "vendorLetter"
+      }),
       // Spec 8: Scope applies to engineering requests only.
       field("scope", "Scope", "combo", {
         required: true,
-        entity: "ProjectScopes",
+        entity: "ScopePcc", key: "scope", text: "scope", secondaryText: "scope",
         visibleWhen: { field: "requestedByArea", equals: "ENGINEERING" }
       }),
       field("entityCode", "Entity", "combo", { required: true, entity: "BusinessEntities" }),
-      field("projectType_code", "Project Type", "combo", {
-        required: true,
-        entity: "ProjectTypes"
+      field("division", "Division", "combo", {
+        required: true, entity: "DivisionsPcc", key: "division", text: "division", secondaryText: "divisionLetter"
       }),
-      field("arReference", "AR Reference", "combo", { entity: "ArReferences", key: "arReferenceCode", text: "arReferenceDescription" }),
+      field("projectTypePcc", "Project Type", "combo", {
+        required: true, entity: "ProjectTypePcc", key: "projectType", text: "projectType", secondaryText: "projectType"
+      }),
+      field("arReference", "AR", "combo", {
+        required: true, entity: "ArPcc", key: "ar", text: "ar", secondaryText: "highLevelPc"
+      }),
       field("siteId", "Site ID", "combo", {
         required: true,
         entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
         autoFills: { field: "siteName", from: "siteName" }
       }),
-      field("siteName", "Site Name", "readonly", {
+      field("siteName", "Site Name", "input", {
         required: true,
-        placeholder: "Filled from the selected Site ID"
+        placeholder: "Filled from the selected Site ID (editable)"
       }),
-      field("projectCategory", "Project Category", "combo", {
-        required: true,
-        entity: "Projects", key: "projectCategory", text: "projectCategory", secondaryText: "projectID",
-        autoFills: [
-          { field: "projectId", from: "projectID" },
-          { field: "projectDescription", from: "projectDescription" }
-        ]
+      field("projectCategory", "Project Category", "readonly", {
+        placeholder: "Generated: High Level PC / Scope / Project Type"
       }),
       field("projectId", "Project ID", "readonly", {
-        required: true,
-        placeholder: "Filled from the selected Project Category"
+        placeholder: "Generated: Division letter / Year / No. / Vendor letter"
       }),
       field("projectDescription", "Project Description", "readonly", {
-        required: true,
-        placeholder: "Filled from the selected Project Category"
+        placeholder: "Generated: Site ID_Site Name_Project ID"
       }),
       field("remarks", "Remarks", "textarea"),
       field("supportingAttachment", "Supporting Attachment", "file")
@@ -472,9 +588,9 @@ sap.ui.define([], function () {
         autoFills: { field: "siteName", from: "siteName" },
         visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" }
       }),
-      field("siteName", "Site Name", "readonly", {
+      field("siteName", "Site Name", "input", {
         required: true,
-        placeholder: "Filled from the selected Site ID",
+        placeholder: "Filled from the selected Site ID (editable)",
         visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" }
       }),
       field("projectId", "Project Code", "combo", {
@@ -883,12 +999,13 @@ sap.ui.define([], function () {
   const column = (name, label, type, extra) => Object.assign({ name, label, type: type || "input" }, extra || {});
 
   const COLUMN_KEYS = [
-    "name", "label", "type", "required", "entity", "key", "text", "secondaryText",
+    "name", "label", "type", "required", "requiredWhen", "entity", "key", "text", "secondaryText",
     "options", "maxLength", "autoFills", "placeholder"
   ];
 
   const isHeaderOnlyField = (field, drivers) =>
-    field.type === "file" || !!field.visibleWhen || field.source === "request" || drivers.has(field.name);
+    field.type === "file" || !!field.visibleWhen || field.source === "request" || !!field.headerOnly
+      || drivers.has(field.name);
 
   const fieldToColumn = (field) => {
     const col = {};
@@ -898,6 +1015,27 @@ sap.ui.define([], function () {
       }
     });
     return col;
+  };
+
+  // Variants whose Multiple Line table holds only these fields (with per-column overrides);
+  // every other field stays in the details form above the table.
+  const lineItemFields = {
+    PROJECT_NEW_MOD: {
+      projectName: {},
+      siteId: {},
+      siteName: {},
+      // Generated per row from the row's site and the request's shared Project ID.
+      projectDescription: { type: "readonly", required: false, placeholder: "Generated: Site ID_Site Name_Project ID" }
+    },
+    // Each line names its project, whatever the Object Type (Single shows it for Activity only).
+    PROJECT_FL_ACTIVITY: {
+      // Column-level visibleWhen: Project Code only for Activity requests, the site columns only
+      // for Function Location requests (as in Single).
+      projectId: { required: true, visibleWhen: { field: "transactionType", equals: "ACTIVITY" } },
+      siteId: { visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" } },
+      siteName: { visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" } },
+      remarks: {}
+    }
   };
 
   const visibilityDrivers = (fields) => {
@@ -991,7 +1129,8 @@ sap.ui.define([], function () {
       column("itemNo", "ID", "readonly"),
       column("siteId", "Site ID", "combo", {
         required: true,
-        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName"
+        entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
+        autoFills: { field: "siteName", from: "siteName" }
       }),
       column("siteName", "Site Name", "input"),
       column("sapCode", "SAP Code"),
@@ -1201,6 +1340,14 @@ sap.ui.define([], function () {
         return itemColumns[requestTypeCode];
       }
       const fields = this.getFields(variantCode, categoryCode);
+      const lineFields = lineItemFields[variantCode];
+      if (lineFields) {
+        return fields.filter(function (field) {
+          return !!lineFields[field.name];
+        }).map(function (field) {
+          return Object.assign(fieldToColumn(field), lineFields[field.name]);
+        });
+      }
       const drivers = visibilityDrivers(fields);
       return fields.filter(function (field) {
         return !isHeaderOnlyField(field, drivers);
@@ -1266,6 +1413,38 @@ sap.ui.define([], function () {
         .concat(this.getItemColumns(requestTypeCode, variantCode));
     },
     // Request types whose line-items table shows for Single as well as Multiple Line Items.
+    // Read-only line-item tables (Overview, task page): the item columns plus the values the
+    // approvers enter per line. Editing tables keep using getItemColumns.
+    getItemDisplayColumns: function (requestTypeCode, variantCode, categoryCode) {
+      const columns = this.getItemColumns(requestTypeCode, variantCode, categoryCode);
+      // The S/4 Data Validation approver records the Equipment Code per line.
+      if (requestTypeCode === "EQUIPMENT_CODE") {
+        return columns.concat([column("equipmentCode", "Equipment Code")]);
+      }
+      // ... and the Project Code, or the Function Location / Activity (per Object Type).
+      if (requestTypeCode === "PROJECT_CODE") {
+        return columns.concat(variantCode === "PROJECT_FL_ACTIVITY"
+          ? [
+            column("functionLocation", "Function Location", "input", {
+              visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" }
+            }),
+            column("activityNumber", "Activity", "input", {
+              visibleWhen: { field: "transactionType", equals: "ACTIVITY" }
+            })
+          ]
+          : [column("projectCode", "Project Code")]);
+      }
+      if (requestTypeCode !== "SERVICE_CODE") {
+        return columns;
+      }
+      const serviceCodeColumn = column("serviceCode", "Service Code");
+      // Only New Service Code has the G/L Account Enrichment and Valuation Class steps.
+      const approverColumns = variantCode === "SVC_NEW"
+        ? [column("glAccount", "G/L Account"), column("valuationClass_code", "Valuation Class"), serviceCodeColumn]
+        : [serviceCodeColumn];
+      const existing = new Set(columns.map(function (col) { return col.name; }));
+      return columns.concat(approverColumns.filter(function (col) { return !existing.has(col.name); }));
+    },
     alwaysHasItems: function (requestTypeCode) {
       return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";
     },
@@ -1281,6 +1460,12 @@ sap.ui.define([], function () {
       const fields = this.getFields(variantCode, categoryCode, lineMode);
       if (itemColumns[requestTypeCode]) {
         return fields;
+      }
+      const lineFields = lineItemFields[variantCode];
+      if (lineFields) {
+        return fields.filter(function (field) {
+          return !lineFields[field.name];
+        });
       }
       const drivers = visibilityDrivers(fields);
       return fields.filter(function (field) {

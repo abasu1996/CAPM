@@ -113,7 +113,36 @@ sap.ui.define([
 
     _detailFields: function (request) {
       const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
-      return this.buildDetailFields(request, details);
+      const fields = this.buildDetailFields(request, details);
+      if (request.requestType?.code === "SERVICE_CODE"
+        && details.glAccount) {
+        fields.push({ label: "GL Account", value: String(details.glAccount) });
+      }
+      if (request.requestType?.code === "SERVICE_CODE") {
+        [
+          ["valuationClass_code", "Valuation Class"],
+          ["serviceCode", "Service Code"]
+        ].forEach(function (entry) {
+          if (details[entry[0]]) {
+            fields.push({ label: entry[1], value: String(details[entry[0]]) });
+          }
+        });
+      }
+      if (request.requestType?.code === "EQUIPMENT_CODE" && details.equipmentCode) {
+        fields.push({ label: "Equipment Code", value: String(details.equipmentCode) });
+      }
+      if (request.requestType?.code === "PROJECT_CODE") {
+        [
+          ["projectCode", "Project Code"],
+          ["functionLocation", "Function Location"],
+          ["activityNumber", "Activity"]
+        ].forEach(function (entry) {
+          if (details[entry[0]]) {
+            fields.push({ label: entry[1], value: String(details[entry[0]]) });
+          }
+        });
+      }
+      return fields;
     },
 
     // Combos keyed by a UUID (approver, LOA approver, vendor) store the ID; swap it for the
@@ -128,7 +157,7 @@ sap.ui.define([
       const details = detail[this.detailNavigationFor(typeCode)] || {};
       const variantCode = detail.requestVariant && detail.requestVariant.code;
       this.renderReadOnlyRows("detailItemsTable", "detail>/detailItems",
-        FormDefinitions.getItemColumns(typeCode, variantCode, details.materialCategory));
+        FormDefinitions.getItemDisplayColumns(typeCode, variantCode, details.materialCategory));
       this.renderReadOnlyRows("detailHeadersTable", "detail>/detailHeaders",
         FormDefinitions.getHeaderTableColumns(variantCode));
       this.renderChangeTables("detailChangeTablesHost", "detail", variantCode, details.changeItems);
