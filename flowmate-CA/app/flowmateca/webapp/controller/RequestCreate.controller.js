@@ -236,6 +236,7 @@ sap.ui.define([
         myRequests: [],
         teams:[]
       }), "catalog");
+      this.getView().getModel("catalog").setSizeLimit(10000);
       this.getView().setModel(new JSONModel({ items: [] }), "files");
       this.getView().setModel(new JSONModel({ items: [] }), "paymentRunFiles");
       this.getView().setModel(new JSONModel(this._emptyPaymentRunForm()), "paymentRun");

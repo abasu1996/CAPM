@@ -36,7 +36,10 @@ sap.ui.define([], function () {
       defaultValue: "TELECOMMUNICATION",
       options: [{ key: "TELECOMMUNICATION", text: "Telecommunication" }]
     }),
-    field("materialType", "Material Type", "combo", { required: true, entity: "MaterialTypes" }),
+    field("materialType", "Material Type", "combo", {
+      required: true,
+      entity: "MaterialType", key: "materialTypeCode", text: "materialTypeDescription", secondaryText: "materialTypeCode"
+    }),
     field("referenceMaterialCode", "Reference Material Code", "input", {
       placeholder: "Optional existing SAP material code"
     }),
@@ -52,7 +55,8 @@ sap.ui.define([], function () {
       entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription"
     }),
     field("externalMaterialGroup_code", "External Material Group", "combo", {
-      entity: "ExternalMaterialGroups"
+      entity: "ExtensionMaterialGroup", key: "extensionMaterialGroupCode", text: "extensionMaterialGroupDescription",
+      secondaryText: "extensionMaterialGroupCode"
     }),
     field("profitCenter_code", "Profit Center", "combo", {
       required: true,
@@ -83,7 +87,10 @@ sap.ui.define([], function () {
       defaultValue: "TELECOMMUNICATION",
       options: [{ key: "TELECOMMUNICATION", text: "Telecommunication" }]
     }),
-    field("materialType", "Material Type", "combo", { required: true, entity: "MaterialTypes" }),
+    field("materialType", "Material Type", "combo", {
+      required: true,
+      entity: "MaterialType", key: "materialTypeCode", text: "materialTypeDescription", secondaryText: "materialTypeCode"
+    }),
     plant,
     field("description", "Material Description", "input", {
       required: true,
@@ -96,7 +103,8 @@ sap.ui.define([], function () {
       entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription"
     }),
     field("externalMaterialGroup_code", "External Material Group", "combo", {
-      entity: "ExternalMaterialGroups"
+      entity: "ExtensionMaterialGroup", key: "extensionMaterialGroupCode", text: "extensionMaterialGroupDescription",
+      secondaryText: "extensionMaterialGroupCode"
     }),
     field("profitCenter_code", "Profit Center", "combo", {
       required: true,
@@ -365,7 +373,8 @@ sap.ui.define([], function () {
         entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription"
       }),
       field("externalMaterialGroup_code", "External Material Group", "combo", {
-        entity: "ExternalMaterialGroups"
+        entity: "ExtensionMaterialGroup", key: "extensionMaterialGroupCode", text: "extensionMaterialGroupDescription",
+        secondaryText: "extensionMaterialGroupCode"
       }),
       field("division", "Division", "combo", { entity: "Divisions", key: "divisionCode", text: "divisionName" }),
       field("deliveringPlant_code", "Delivering Plant", "combo", {
@@ -567,7 +576,9 @@ sap.ui.define([], function () {
         entity: "ScopePcc", key: "scope", text: "scope", secondaryText: "scope",
         visibleWhen: { field: "requestedByArea", equals: "ENGINEERING" }
       }),
-      field("entityCode", "Entity", "combo", { required: true, entity: "BusinessEntities" }),
+      field("entityCode", "Entity", "combo", {
+        required: true, entity: "Entity", key: "code", text: "description", secondaryText: "code"
+      }),
       field("division", "Division", "combo", {
         required: true, entity: "DivisionsPcc", key: "division", text: "division", secondaryText: "divisionLetter"
       }),

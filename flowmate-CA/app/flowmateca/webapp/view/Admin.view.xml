@@ -1454,6 +1454,34 @@
         </items>
     </Table>
 </IconTabFilter>
+<IconTabFilter key="materialType" text="Material Type" icon="sap-icon://product">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Material Type" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="materialType"/>
+    </Toolbar>
+    <Table items="{admin>/pcc/materialType}" growing="true" growingThreshold="50" class="caAdminTable">
+        <columns>
+            <Column width="14rem"><Text text="Material Type Code"/></Column>
+            <Column><Text text="Description"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input value="{admin>materialTypeCode}"/>
+                    <Input value="{admin>materialTypeDescription}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="materialType"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="materialType"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
 
 <IconTabFilter key="plant" text="Plants" icon="sap-icon://factory">
     <Toolbar class="caSectionToolbar">

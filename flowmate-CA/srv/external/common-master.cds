@@ -353,6 +353,14 @@ service CommonMasterDataService {
     isActive                    : Boolean default true;
   }
 
+  @cds.persistence.skip
+  entity MaterialType {
+    key ID : UUID;
+    materialTypeCode        : String(40) not null;
+    materialTypeDescription : String(180);
+    isActive                : Boolean default true;
+  }
+
   // Project Code Creation (PCC) masters.
   @cds.persistence.skip
   entity ArPcc {

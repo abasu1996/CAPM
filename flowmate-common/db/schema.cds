@@ -316,6 +316,13 @@ entity ProductHierarchy : cuid, managed {
   isActive                    : Boolean default true;
 }
 
+// Material Code: Material Type pick list, maintained in the CA Admin console.
+entity MaterialType : cuid, managed {
+  materialTypeCode        : String(40) not null;
+  materialTypeDescription : String(180);
+  isActive                : Boolean default true;
+}
+
 // Project Code Creation (PCC) masters, maintained in the CA Admin console.
 entity ArPcc : cuid, managed {
   srNo           : String(10);

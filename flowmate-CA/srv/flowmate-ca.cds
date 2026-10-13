@@ -282,6 +282,7 @@ service CAMasterDataService {
    entity ContractType as projection on common.ContractType;
    entity BudgetCode as projection on common.BudgetCode;
    entity ProductHierarchy as projection on common.ProductHierarchy;
+   entity MaterialType as projection on common.MaterialType;
    entity ArPcc as projection on common.ArPcc;
    entity VendorsPcc as projection on common.VendorsPcc;
    entity DivisionsPcc as projection on common.DivisionsPcc;

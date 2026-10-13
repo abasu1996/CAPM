@@ -51,6 +51,13 @@ sap.ui.define([
         { name: "productHierarchyCode", label: "Product Hierarchy Code" },
         { name: "productHierarchyDescription", label: "Description" }
       ]
+    },
+    {
+      key: "materialType", entity: "MaterialType", title: "Material Type",
+      columns: [
+        { name: "materialTypeCode", label: "Material Type Code" },
+        { name: "materialTypeDescription", label: "Description" }
+      ]
     }
   ];
 
@@ -105,6 +112,8 @@ sap.ui.define([
       }), "admin");
       this.getView().setModel(new JSONModel({}), "newItem");
       this.getView().setModel(new JSONModel({ members: [], availableUsers: [], selectedUserIds: [] }), "teamManage");
+      // A JSONModel renders only its first 100 list entries by default; there are more teams than that.
+      this.getView().getModel("admin").setSizeLimit(10000);
       this.getRouter().getRoute("admin").attachPatternMatched(this.onRefresh, this);
     },
 

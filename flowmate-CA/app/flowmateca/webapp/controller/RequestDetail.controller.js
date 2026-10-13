@@ -13,6 +13,7 @@ sap.ui.define([
       this.getView().setModel(new JSONModel({}), "step");
       this.getView().setModel(new JSONModel({}), "taskForm");
       this.getView().setModel(new JSONModel({}), "catalog");
+      this.getView().getModel("catalog").setSizeLimit(10000);
       this.getRouter().getRoute("requestDetail").attachPatternMatched(this._onRouteMatched, this);
     },
 

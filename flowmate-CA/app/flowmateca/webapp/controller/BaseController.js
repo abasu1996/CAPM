@@ -48,7 +48,8 @@ sap.ui.define([
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
     "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments",
     "ContractType", "PurchasingOrganizations", "CompanyCodes", "Incoterms", "CostCenter", "ApplicableTaxes",
-    "BudgetCode", "ProductHierarchy", "ArPcc", "VendorsPcc", "DivisionsPcc", "ScopePcc", "ProjectTypePcc"
+    "BudgetCode", "ProductHierarchy", "MaterialType", "Entity", "ExtensionMaterialGroup",
+    "ArPcc", "VendorsPcc", "DivisionsPcc", "ScopePcc", "ProjectTypePcc"
   ]);
   const STATUS_MESSAGES = {
     400: "Some of the information provided is invalid. Please review it and try again.",
