@@ -172,12 +172,12 @@
                             </Input>
                             <Label
                                 text="{i18n>requestTitleLabel}"
-                                required="true"
+                                required="false"
                             />
                             <Input
                                 value="{create>/title}"
                                 maxLength="255"
-                                required="true"
+                                required="false"
                             />
                             <Label text="{i18n>linkedRequestLabel}" />
                             <HBox
@@ -213,12 +213,13 @@
                                     press=".onClearPredecessorRequest"
                                 />
                             </HBox>
-                            <Label text="{i18n>priorityLabel}" />
+                            <Label text="{i18n>priorityLabel}"
+                            visible="false"/>
                             <ComboBox
                                 selectedKey="{create>/priorityConfig_code}"
                                 placeholder="{i18n>selectPriorityPlaceholder}"
                                 items="{path: '/Priorities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
-                            >
+                                visible="false">
                                 <core:ListItem
                                     key="{code}"
                                     text="{name}"
@@ -1398,12 +1399,14 @@
 
                             <Label
                                 text="{i18n>remainingBalanceAfterAdvanceSettlementLabel}"
-                                required="{create>/isPoAdvSettlement}"
+                                required="{create>/isPoAdvPartialSettlement}"
+                                visible="{create>/isPoAdvPartialSettlement}"
                             />
                             <Input
                                 value="{create>/remainingBalanceAfterAdvanceSettlement}"
                                 type="Number"
-                                required="{create>/isPoAdvSettlement}"
+                                required="{create>/isPoAdvPartialSettlement}"
+                                visible="{create>/isPoAdvPartialSettlement}"
                             />
 
                             <Label text="{i18n>highestInvoiceValueLabel}" />

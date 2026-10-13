@@ -10,10 +10,11 @@ sap.ui.define([
     "sap/m/StandardListItem",
     "sap/m/Text",
     "sap/ui/core/Item",
+    "sap/ui/model/Sorter",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/json/JSONModel"
-], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, SelectDialog, StandardListItem, Text, Item, Filter, FilterOperator, JSONModel) => {
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, SelectDialog, StandardListItem, Text, Item, Sorter, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
@@ -49,7 +50,8 @@ sap.ui.define([
                 taskProcessorUser_ID: "",
                 taskProcessorName: "",
                 taskTeam_ID: "",
-                taskTeamName: ""
+                taskTeamName: "",
+                requestPriority_code: ""
             }), "processorEdit");
             this.getView().setModel(new JSONModel({
                 midFullScreen: false,
@@ -967,6 +969,29 @@ sap.ui.define([
                 this._refreshHistorySection();
             } catch (oError) {
                 MessageBox.error(this.getErrorMessage(oError, this.getText("teamUpdateErrorMessage")));
+            } finally {
+                this.hideBusy();
+            }
+        },
+        async onSaveRequestPriority() {
+            const sPriorityCode = this.getView().getModel("processorEdit").getProperty("/requestPriority_code");
+
+            if (!this._sSelectedRequestId || !sPriorityCode) {
+                MessageToast.show(this.getText("selectPriorityMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.updateEntry(`/ProcessRequests(guid'${this._sSelectedRequestId}')`, {
+                    priorityConfig_code: sPriorityCode
+                });
+                MessageToast.show(this.getText("requestPriorityUpdatedMessage"));
+                this._refreshRequestHeader();
+                this.byId("requestsTable").getBinding("items")?.refresh();
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("priorityUpdateErrorMessage")));
             } finally {
                 this.hideBusy();
             }
@@ -2476,6 +2501,10 @@ async onBudgetCheckConfirm() {
                             "/requestTeamName",
                             oRequest?.processorTeamName || ""
                         );
+                        this.getView().getModel("processorEdit").setProperty(
+                            "/requestPriority_code",
+                            oRequest?.priorityConfig_code || ""
+                        );
                         this._updateDemandTaskVisibility(oRequest);
                     }
                 }
@@ -2504,7 +2533,13 @@ async onBudgetCheckConfirm() {
             });
             this._bindRequestSectionTable("requestPartiesTable", "/ProcessInvolvedParties", sRequestId);
             this._bindRequestSectionTable("requestAttachmentsTable", "/ProcessAttachments", sRequestId);
-            this._bindRequestSectionTable("requestHistoryTable", "/ProcessHistory", sRequestId);
+            this._bindRequestSectionTable("requestHistoryTable", "/ProcessHistory", sRequestId,
+                 {
+                sorter: [
+                    new Sorter("createdAt", false),
+                    new Sorter("referenceNumber", false)
+                ]
+        });
             // this._bindRequestSectionTable("requestEmailsTable", "/RequestEmails", sRequestId,{
             //     parameters:{
             //         expand: "attachments"
@@ -2749,6 +2784,7 @@ async onBudgetCheckConfirm() {
 
                 MessageToast.show(this.getText("guidedStepCompletedMessage"));
                 this._refreshAfterTaskChange();
+                this.byId("requestsTable").getBinding("items")?.refresh();
             } catch (oError) {
                 MessageBox.error(this.getErrorMessage(oError, this.getText("guidedStepCompleteErrorMessage")));
             } finally {
