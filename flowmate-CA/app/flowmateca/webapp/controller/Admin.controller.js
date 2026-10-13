@@ -5,8 +5,9 @@ sap.ui.define([
 ], function (BaseController, JSONModel, MessageBox) {
   "use strict";
 
-  // Project Code Creation (PCC) masters: one Admin tab each, all handled by the onAddPcc /
-  // onSavePcc / onDeletePcc handlers below. The tab's buttons carry app:pcc="<key>".
+  // Simple masters with one Admin tab each (the Project Code Creation (PCC) tables and Product
+  // Hierarchy), all handled by the onAddPcc / onSavePcc / onDeletePcc handlers below. The tab's
+  // buttons carry app:pcc="<key>".
   const PCC_MASTERS = [
     {
       key: "ar", entity: "ArPcc", title: "AR for PCC",
@@ -43,6 +44,13 @@ sap.ui.define([
     {
       key: "projectType", entity: "ProjectTypePcc", title: "Project Type for PCC",
       columns: [{ name: "projectType", label: "Project Type" }]
+    },
+    {
+      key: "productHierarchy", entity: "ProductHierarchy", title: "Product Hierarchy",
+      columns: [
+        { name: "productHierarchyCode", label: "Product Hierarchy Code" },
+        { name: "productHierarchyDescription", label: "Description" }
+      ]
     }
   ];
 

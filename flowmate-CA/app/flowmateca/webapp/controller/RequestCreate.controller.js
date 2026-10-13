@@ -309,7 +309,15 @@ sap.ui.define([
     _onRouteMatched: async function (event) {
       this.getView().getModel("form").setData(this._emptyForm());
       this.getView().getModel("files").setData({ items: [] });
+      this.getView().getModel("paymentRunFiles").setData({ items: [] });
       this.getView().getModel("paymentRun").setData(this._emptyPaymentRunForm());
+      // The view is cached between visits, so the uploaders still show the last file names.
+      ["attachmentUploader", "paymentRunAttachmentUploader", "sesAttachmentUploader"].forEach(function (id) {
+        const uploader = this.byId(id);
+        if (uploader) {
+          uploader.clear();
+        }
+      }.bind(this));
       this._flowmateIntegrationMode = "paymentRun";
       this._paymentRunSaved = false;
       this._selectedFiles = [];
@@ -554,7 +562,6 @@ sap.ui.define([
           ? FormDefinitions.getHeaderFields(typeCode, variantCode, categoryCode)
           : FormDefinitions.getFields(variantCode, categoryCode, formModel.getProperty("/bulkUpload"));
       }
-      fields = fields.filter(function (definition) { return !definition.stepOnly; });
       const type = (this.getView().getModel("catalog").getProperty("/requestTypes") || [])
         .find(function (entry) {
           return entry.code === typeCode;
@@ -1989,7 +1996,7 @@ sap.ui.define([
         return this._submitPoBulk(form);
       }
       if (!form.requestTypeCode || !form.requestVariantCode || !form.title.trim() || !form.processorTeamCode)  {
-        MessageBox.warning("Request type, process variant and title are required.");
+        MessageBox.warning("Request type, process variant, title and processor team are required.");
         return;
       }
       const paymentRunSelected = Boolean(form.details && form.details.paymentRun);

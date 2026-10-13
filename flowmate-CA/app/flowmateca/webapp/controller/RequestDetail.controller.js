@@ -12,7 +12,6 @@ sap.ui.define([
       this.getView().setModel(new JSONModel({}), "detail");
       this.getView().setModel(new JSONModel({}), "step");
       this.getView().setModel(new JSONModel({}), "taskForm");
-      this.getView().setModel(new JSONModel({}), "successor");
       this.getView().setModel(new JSONModel({}), "catalog");
       this.getRouter().getRoute("requestDetail").attachPatternMatched(this._onRouteMatched, this);
     },
@@ -122,6 +121,18 @@ sap.ui.define([
         [
           ["valuationClass_code", "Valuation Class"],
           ["serviceCode", "Service Code"]
+        ].forEach(function (entry) {
+          if (details[entry[0]]) {
+            fields.push({ label: entry[1], value: String(details[entry[0]]) });
+          }
+        });
+      }
+      // Material Code: the approvers' G/L Account and Material Code (Valuation Class is already a
+      // form field, so it shows the approver's value there).
+      if (request.requestType?.code === "MATERIAL_CODE") {
+        [
+          ["glAccount", "GL Account"],
+          ["materialCode", "Material Code"]
         ].forEach(function (entry) {
           if (details[entry[0]]) {
             fields.push({ label: entry[1], value: String(details[entry[0]]) });
@@ -383,58 +394,36 @@ sap.ui.define([
       });
     },
 
-    onOpenSuccessorDialog: async function () {
-      await this._loadTaskCatalog();
-      const request = this.getView().getModel("detail").getData();
-      this.getView().getModel("successor").setData({
-        requestTypeCode: request.requestType.code === "PURCHASE_ORDER" ? "SERVICE_ENTRY_SHEET" : "",
-        title: `Follow-up for ${request.referenceNumber}`
-      });
-      this.byId("successorDialog").open();
-    },
-
-    onCreateSuccessor: async function () {
-      const form = this.getView().getModel("successor").getData();
-      if (!form.requestTypeCode || !form.title.trim()) {
-        MessageBox.warning("Request type and title are required.");
-        return;
-      }
-      try {
-        const successor = await this.request("createSuccessorRequest", {
-          method: "POST",
-          body: {
-            requestId: this._requestId,
-            requestTypeCode: form.requestTypeCode,
-            title: form.title
-          }
-        });
-        this.byId("successorDialog").close();
-        this.navTo("requestDetail", {
-          requestId: successor.ID
-        });
-      } catch (error) {
-        this.showError(error);
-      }
-    },
-
-    onCloseSuccessorDialog: function () {
-      this.byId("successorDialog").close();
-    },
-
     stepIcon: function (status) {
       return {
         COMPLETED: "sap-icon://accept",
         OPEN: "sap-icon://process",
-        PENDING: "sap-icon://circle-task"
+        PENDING: "sap-icon://circle-task",
+        REJECTED: "sap-icon://decline",
+        SENT_BACK: "sap-icon://undo"
       }[status] || "sap-icon://circle-task";
     },
 
     stepButtonType: function (status) {
-      return status === "OPEN" ? "Emphasized" : status === "COMPLETED" ? "Accept" : "Default";
+      return {
+        OPEN: "Emphasized",
+        COMPLETED: "Accept",
+        REJECTED: "Reject",
+        SENT_BACK: "Attention"
+      }[status] || "Default";
     },
 
     stepState: function (status) {
-      return status === "COMPLETED" ? "Success" : status === "OPEN" ? "Information" : "None";
+      return {
+        COMPLETED: "Success",
+        OPEN: "Information",
+        REJECTED: "Error",
+        SENT_BACK: "Warning"
+      }[status] || "None";
+    },
+
+    stepStatusText: function (status) {
+      return String(status || "").replace(/_/g, " ");
     },
 
     onClose: function () {

@@ -153,14 +153,19 @@ test("PO creation uses the payload requester, initializes workflow and records t
   assert.equal(created.requester_ID, USER_ID);
   assert.equal(created.owner_ID, USER_ID);
   assert.equal(created.requesterName, REQUESTER.displayName);
-  assert.equal(created.status_code, "SUBMITTED");
+  assert.equal(created.status_code, "IN_PROGRESS");
   assert.equal(tables.PurchaseOrderDetails[0].request_ID, created.ID);
   assert.equal(tables.PurchaseOrderItems[0].details_ID, tables.PurchaseOrderDetails[0].ID);
-  // The imported requester-review workflow opens step 1 instead of auto-completing it.
-  assert.equal(tables.CATasks.length, 1);
+  // Step 1 (the requester's) is auto-completed on submission and step 2 opens.
+  assert.equal(tables.CATasks.length, 2);
   assert.equal(tables.CATasks[0].stepNo, 1);
-  assert.equal(tables.CATasks[0].status_code, "OPEN");
-  assert.equal(created.currentStep, 1);
+  assert.equal(tables.CATasks[0].status_code, "APPROVED");
+  assert.equal(tables.CATasks[0].assignedUser_ID, USER_ID);
+  assert.equal(tables.CATasks[1].stepNo, 2);
+  assert.equal(tables.CATasks[1].status_code, "OPEN");
+  assert.equal(tables.RequestStepInstances[0].status, "COMPLETED");
+  assert.equal(tables.RequestStepInstances[1].status, "OPEN");
+  assert.equal(created.currentStep, 2);
   const history = tables.CAHistory.find((entry) => entry.action === "REQUEST_CREATED");
   assert.equal(history.actorEmail, REQUESTER.email);
   assert.deepEqual(JSON.parse(history.remarks), {
@@ -222,4 +227,64 @@ test("missing requester fails creation before any database insert", async (t) =>
   const { service, tables } = serviceHarness(t);
   await assert.rejects(service._createRequest(request({ input: { requesterUser_ID: undefined } })), { status: 400 });
   assert.equal(tables.CARequests.length, 0);
+});
+
+// Existing variants change a code that already exists in S/4, so S/4 Data Validation records
+// nothing: approving without a code must succeed. New variants still require it.
+function approveHarness(t, variantCode) {
+  const previousDb = cds.db;
+  t.after(() => {
+    cds.db = previousDb;
+  });
+  const tables = {
+    CATasks: [{ ID: "task1", request_ID: "req1", stepNo: 2, status_code: "OPEN", assignedUser_ID: USER_ID }],
+    RequestStepInstances: [{ ID: "step2", request_ID: "req1", stepNo: 2, stepName: "S/4 Data Validation", status: "OPEN" }],
+    CARequests: [{ ID: "req1", requestType_code: "SERVICE_CODE", requestVariant_code: variantCode }],
+    ServiceCodeDetails: [{ ID: "det1", request_ID: "req1" }],
+    ServiceCodeItems: []
+  };
+  const whereMatches = (row, where = []) => {
+    for (let i = 0; i < where.length; i += 4) {
+      if (row[where[i].ref[0]] !== where[i + 2].val) return false;
+    }
+    return true;
+  };
+  const writes = [];
+  cds.db = {
+    tx() { return this; },
+    async run(query) {
+      if (query.UPDATE) {
+        const { entity, data, where } = query.UPDATE;
+        writes.push(entity.ref[0]);
+        for (const row of tables[entity.ref[0]].filter((row) => whereMatches(row, where))) Object.assign(row, data);
+        return 1;
+      }
+      const { from, one, where } = query.SELECT;
+      const rows = tables[from.ref[0]].filter((row) => whereMatches(row, where));
+      return one ? rows[0] : rows;
+    }
+  };
+  const service = new FlowmateCAService("FlowmateCAService");
+  service.db = Object.fromEntries(Object.keys(tables).map((name) => [name, name]));
+  Object.assign(service, {
+    _ensureCurrentUser: async () => REQUESTER,
+    _assertTaskAccess: async () => {},
+    _poDetailsNeedingNumber: async () => null,
+    _writeHistory: async () => {},
+    _autoCompleteStepIfDone: async () => {}
+  });
+  const req = { data: { taskId: "task1", remarks: "ok" }, reject(status, message) { throw Object.assign(new Error(message), { status }); } };
+  return { service, tables, writes, req };
+}
+
+test("Existing Service Code approves S/4 Data Validation without a Service Code", async (t) => {
+  const { service, tables, writes, req } = approveHarness(t, "SVC_EXISTING");
+  assert.equal(await service._approveTask(req), true);
+  assert.equal(tables.CATasks[0].status_code, "APPROVED");
+  assert.ok(!writes.includes("ServiceCodeDetails"));
+});
+
+test("New Service Code still requires the Service Code at S/4 Data Validation", async (t) => {
+  const { service, req } = approveHarness(t, "SVC_NEW");
+  await assert.rejects(service._approveTask(req), { status: 400, message: "Enter the Service Code to approve this task" });
 });

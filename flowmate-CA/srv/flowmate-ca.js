@@ -1,4 +1,5 @@
 const cds = require("@sap/cds");
+const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails } = require("./lib/po-integration");
 const { SELECT, INSERT, UPDATE } = cds.ql;
 
@@ -779,7 +780,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }));
 
     await this._insertDetails(tx, requestType.code, requestId, details);
-    await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, details);
+    await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, details, user, req);
     const creationRemarks = integration ? JSON.stringify({
       source: "TECHNICAL_API",
       clientId: integration.clientId,
@@ -895,7 +896,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       tx,
       request.ID,
       request.requestType_code,
-      request.requestVariant_code
+      request.requestVariant_code,
+      undefined,
+      user,
+      req
     );
     await this._writeHistory(tx, request.ID, 0, "REQUEST_SUBMITTED", user, REQUEST_STATUS.DRAFT, REQUEST_STATUS.SUBMITTED);
     return true;
@@ -948,6 +952,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     };
 
     await tx.run(INSERT.into(this.db.CATasks).entries(task));
+    await this._notifyTaskAssignment(tx, task);
     await tx.run(UPDATE(this.db.RequestStepInstances).set({
       status: "OPEN",
       completedAt: null,
@@ -984,11 +989,18 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(403, "You are not a member of the assigned team");
     }
 
-    await tx.run(UPDATE(this.db.CATasks).set({
+    const iClaimed = await tx.run(UPDATE(this.db.CATasks).set({
       assignedUser_ID: user.ID,
       assignedName: user.displayName,
       assignedEmail: user.email
-    }).where({ ID: task.ID, assignedUser_ID: null }));
+    }).where({
+      ID: task.ID,
+      assignedUser_ID: null,
+      status_code: TASK_STATUS.OPEN
+    }));
+    if (!iClaimed) {
+      return req.reject(409, "This task was just assigned to another team member");
+    }
     await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_CLAIMED", user, null, TASK_STATUS.OPEN, task.taskName);
     return true;
   };
@@ -1014,11 +1026,25 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const glEnrichmentStep = /g\s*\/?\s*l\s+account\s+enrichment/i.test(step?.stepName || "");
     const valuationClassStep = /valuation\s+class/i.test(step?.stepName || "");
     const serviceCodeStep = /s\s*\/?\s*4\s+data\s+validation/i.test(step?.stepName || "");
-    if ((glEnrichmentStep || valuationClassStep || serviceCodeStep)
-      && request?.requestType_code === "SERVICE_CODE") {
-      const serviceDetails = await SELECT.one.from(this.db.ServiceCodeDetails)
+    // Existing variants change a code that already exists in S/4, so none of these steps
+    // records a value for them. Mirrored in TaskDetail.controller.js.
+    const existingVariant = /_EXISTING$/.test(request?.requestVariant_code || "");
+    // Service Code and Material Code: the G/L Account Enrichment, Valuation Class and S/4 Data
+    // Validation approvers record their value, once (single line) or per line item.
+    const enrichment = {
+      SERVICE_CODE: {
+        details: "ServiceCodeDetails", items: "ServiceCodeItems",
+        s4: { column: "serviceCode", param: "serviceCode", label: "Service Code", maxLength: 80 }
+      },
+      MATERIAL_CODE: {
+        details: "MaterialCodeDetails", items: "MaterialCodeItems",
+        s4: { column: "materialCode", param: "materialCode", label: "Material Code", maxLength: 40 }
+      }
+    }[request?.requestType_code];
+    if ((glEnrichmentStep || valuationClassStep || serviceCodeStep) && enrichment && !existingVariant) {
+      const serviceDetails = await SELECT.one.from(this.db[enrichment.details])
         .where({ request_ID: task.request_ID });
-      const hasItemRows = serviceDetails && await SELECT.one.from(this.db.ServiceCodeItems)
+      const hasItemRows = serviceDetails && await SELECT.one.from(this.db[enrichment.items])
         .where({ details_ID: serviceDetails.ID });
       if (serviceDetails && !hasItemRows) {
         const updates = {};
@@ -1043,31 +1069,32 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           updates.valuationClass_code = valuationClass;
         }
         if (serviceCodeStep) {
-          const serviceCode = String(req.data.serviceCode || "").trim();
-          if (!serviceCode) {
-            return req.reject(400, "Enter the Service Code to approve this task");
+          const { s4 } = enrichment;
+          const code = String(req.data[s4.param] || "").trim();
+          if (!code) {
+            return req.reject(400, `Enter the ${s4.label} to approve this task`);
           }
-          if (serviceCode.length > 80) {
-            return req.reject(400, "Service Code must be 80 characters or fewer");
+          if (code.length > s4.maxLength) {
+            return req.reject(400, `${s4.label} must be ${s4.maxLength} characters or fewer`);
           }
-          updates.serviceCode = serviceCode;
+          updates[s4.column] = code;
         }
-        await tx.run(UPDATE(this.db.ServiceCodeDetails).set(updates).where({ ID: serviceDetails.ID }));
+        await tx.run(UPDATE(this.db[enrichment.details]).set(updates).where({ ID: serviceDetails.ID }));
       } else if (serviceDetails && hasItemRows) {
         // Multiple line items: the approver enters the value per line (lineValues JSON).
         const target = glEnrichmentStep
           ? { column: "glAccount", label: "G/L Account", maxLength: 80 }
           : (valuationClassStep
             ? { column: "valuationClass_code", label: "Valuation Class", maxLength: 40 }
-            : { column: "serviceCode", label: "Service Code", maxLength: 80 });
-        const failure = await this._applyLineValues(tx, req, this.db.ServiceCodeItems, serviceDetails.ID, target);
+            : enrichment.s4);
+        const failure = await this._applyLineValues(tx, req, this.db[enrichment.items], serviceDetails.ID, target);
         if (failure) return failure;
       }
     }
 
     // Equipment Code: the S/4 Data Validation approver records the created Equipment Code,
     // once for a single line item or per line item.
-    if (serviceCodeStep && request?.requestType_code === "EQUIPMENT_CODE") {
+    if (serviceCodeStep && request?.requestType_code === "EQUIPMENT_CODE" && !existingVariant) {
       const equipmentDetails = await SELECT.one.from(this.db.EquipmentCodeDetails)
         .where({ request_ID: task.request_ID });
       const hasItemRows = equipmentDetails && await SELECT.one.from(this.db.EquipmentCodeItems)
@@ -1123,56 +1150,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         .where({ ID: poDetails.ID }));
     }
 
-    if (req.data.materialDetails) {
-      const request = await SELECT.one.from(this.db.CARequests)
-        .columns("requestType_code", "requestVariant_code")
-        .where({ ID: task.request_ID });
-      if (request?.requestType_code !== "MATERIAL_CODE") {
-        return req.reject(400, "Material details can only be saved on a Material Code task");
-      }
-      const editableByConfigStep = {
-        3: ["glAccount"],
-        4: ["valuationClass_code"],
-        5: ["materialCode"]
-      };
-      const stepInstance = task.stepInstance_ID
-        ? await SELECT.one.from(this.db.RequestStepInstances).columns("config_ID").where({ ID: task.stepInstance_ID })
-        : null;
-      const stepConfig = stepInstance?.config_ID
-        ? await SELECT.one.from(this.db.WorkflowStepConfigs).columns("stepNo").where({ ID: stepInstance.config_ID })
-        : null;
-      const allowedFields = ["MAT_NEW", "MAT_NEW_REF"].includes(request.requestVariant_code)
-        ? editableByConfigStep[stepConfig?.stepNo] || []
-        : [];
-      let materialDetails;
-      try {
-        materialDetails = JSON.parse(req.data.materialDetails);
-      } catch (_error) {
-        return req.reject(400, "Material task details contain invalid JSON");
-      }
-      const fieldNames = Object.keys(materialDetails || {});
-      if (!allowedFields.length || fieldNames.some((name) => !allowedFields.includes(name))) {
-        return req.reject(403, "You cannot update these material fields at this workflow step");
-      }
-      const detail = await SELECT.one.from(this.db.MaterialCodeDetails)
-        .where({ request_ID: task.request_ID });
-      if (!detail) {
-        return req.reject(404, "Material Code details not found");
-      }
-      const updates = {};
-      fieldNames.forEach((name) => {
-        updates[name] = materialDetails[name] === "" ? null : materialDetails[name];
-      });
-      if (fieldNames.length) {
-        await tx.run(UPDATE(this.db.MaterialCodeDetails).set(updates).where({ ID: detail.ID }));
-      }
-    }
-
     await tx.run(UPDATE(this.db.CATasks).set({
       status_code: TASK_STATUS.APPROVED,
       decision: "APPROVED",
       remarks: req.data.remarks,
-      completedAt: new Date().toISOString()
+      completedAt: new Date().toISOString(),
+      ...this._handlerStamp(task, user)
     }).where({ ID: task.ID }));
     await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_APPROVED", user, task.status_code, TASK_STATUS.APPROVED, req.data.remarks);
     await this._autoCompleteStepIfDone(req, tx, task, user);
@@ -1395,6 +1378,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       completedAt: rejectedAt
     }).where({ ID: task.request_ID }));
     await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_REJECTED", user, task.status_code, TASK_STATUS.REJECTED, req.data.remarks);
+    await this._notifyRequestOutcome(tx, task.request_ID, "Rejected");
     return true;
   };
 
@@ -1426,7 +1410,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: TASK_STATUS.SENT_BACK,
       decision: "SENT_BACK",
       remarks: req.data.remarks,
-      completedAt: null
+      completedAt: null,
+      ...this._handlerStamp(task, user)
     }).where({ ID: task.ID }));
     await tx.run(UPDATE(this.db.RequestStepInstances).set({
       status: "OPEN",
@@ -1440,6 +1425,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       startedAt: null,
       completedAt: null
     }).where({ request_ID: task.request_ID, stepNo: { ">": targetStep.stepNo } }));
+    // The step that sent the request back is flagged so the guided process shows where it
+    // came from; it reopens as OPEN when the flow reaches it again.
+    await tx.run(UPDATE(this.db.RequestStepInstances).set({
+      status: "SENT_BACK"
+    }).where({ request_ID: task.request_ID, stepNo: task.stepNo }));
     await tx.run(UPDATE(this.db.CARequests).set({
       currentStep: targetStep.stepNo,
       status_code: REQUEST_STATUS.SENT_BACK,
@@ -1550,6 +1540,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         completedAt: now
       }).where({ ID: request.ID }));
       await this._writeHistory(tx, request.ID, step.stepNo, "REQUEST_COMPLETED", user, request.status_code, REQUEST_STATUS.COMPLETED, remarks);
+      await this._notifyRequestOutcome(tx, request.ID, "Approved");
       await this._createSesSuccessor(tx, request, user);
       await this._triggerFlowmateIntegrationIfRequired(req, request.ID);
       return true;
@@ -1616,7 +1607,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     };
   };
 
-  async _initializeWorkflow(tx, requestId, requestTypeCode, requestVariantCode, details) {
+  async _initializeWorkflow(tx, requestId, requestTypeCode, requestVariantCode, details, user, req) {
     const configs = await SELECT.from(this.db.WorkflowStepConfigs)
       .where({ requestType_code: requestTypeCode, isActive: true })
       .orderBy("stepNo");
@@ -1646,10 +1637,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }));
     await tx.run(INSERT.into(this.db.RequestStepInstances).entries(stepEntries));
 
-    // Step 1 belongs to the requester. It opens with the request rather than being
-    // auto-completed, so they can review or correct the details before the request
-    // moves on - the same path a send-back to step 1 uses. The task is built by the
-    // shared builder, so it is claimed and approved exactly like any other step.
+    // Step 1 belongs to the requester. Submitting the request is their sign-off, so its task
+    // is approved and the step completed straight away. The task stays on the requester, so a
+    // send-back to step 1 reopens it to them and they can edit the details as before.
     const requesterStep = stepEntries[0];
     await this._createConfiguredTaskIfMissing(tx, requestId, requesterStep);
 
@@ -1658,6 +1648,26 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: REQUEST_STATUS.SUBMITTED,
       submittedAt
     }).where({ ID: requestId }));
+
+    const remarks = "Auto-completed on submission";
+    const request = await tx.run(SELECT.one.from(this.db.CARequests).where({ ID: requestId }));
+    const requesterTasks = await tx.run(SELECT.from(this.db.CATasks).where({
+      request_ID: requestId,
+      stepNo: requesterStep.stepNo
+    }));
+    for (const task of requesterTasks) {
+      await tx.run(UPDATE(this.db.CATasks).set({
+        status_code: TASK_STATUS.APPROVED,
+        decision: "APPROVED",
+        remarks,
+        completedAt: submittedAt,
+        assignedUser_ID: request.requester_ID,
+        assignedName: request.requesterName,
+        assignedEmail: request.requesterEmail
+      }).where({ ID: task.ID }));
+      await this._writeHistory(tx, requestId, requesterStep.stepNo, "TASK_APPROVED", user, task.status_code, TASK_STATUS.APPROVED, remarks);
+    }
+    await this._advanceFromStep(tx, request, requesterStep, stepEntries, user, remarks, req);
   }
 
   // An APPROVER step goes straight to the user the requester picked on the form
@@ -1839,6 +1849,23 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         completedAt: null,
         ...approver
       }).where({ ID: { in: existing.map((task) => task.ID) } }));
+      // A step reached again after a send-back is e-mailed only to the person who handled it
+      // (stamped on approve / send-back). Step 1 without a recorded handler goes to the requester.
+      const request = step.stepNo === 1
+        ? await tx.run(SELECT.one.from(this.db.CARequests)
+          .columns("requester_ID", "requesterName", "requesterEmail").where({ ID: requestId }))
+        : null;
+      for (const task of existing) {
+        const reopened = { ...task, ...approver };
+        if (request && !reopened.assignedUser_ID) {
+          Object.assign(reopened, {
+            assignedUser_ID: request.requester_ID,
+            assignedName: request.requesterName,
+            assignedEmail: request.requesterEmail
+          });
+        }
+        await this._notifyTaskAssignment(tx, reopened);
+      }
       return;
     }
 
@@ -1846,7 +1873,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const team = teamId
       ? await this.master.run(SELECT.one.from(this.masterEntities.Teams).where({ ID: teamId }))
       : null;
-    await tx.run(INSERT.into(this.db.CATasks).entries({
+    const task = {
       ID: cds.utils.uuid(),
       referenceNumber: this._taskReferenceNumber(requestId),
       request_ID: requestId,
@@ -1861,8 +1888,160 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       isMandatory: config?.isMandatory ?? true,
       isApproval: config?.isApproval ?? false,
       dueDate: this._addDays(config?.slaDays || 2)
-    }));
+    };
+    await tx.run(INSERT.into(this.db.CATasks).entries(task));
+    // Step 1 is the requester's own step: they just submitted, so nobody is notified.
+    if (step.stepNo > 1) {
+      await this._notifyTaskAssignment(tx, task);
+    }
   }
+
+  // A team task records who handled it (approved or sent it back), like a claim, so a re-opened
+  // task returns to that person. Claimed and approver tasks keep their user.
+  _handlerStamp(task, user) {
+    return task.assignedUser_ID
+      ? {}
+      : { assignedUser_ID: user.ID, assignedName: user.displayName, assignedEmail: user.email };
+  }
+
+  // E-mails whoever a task is assigned to, through the SAP Build Process Automation process
+  // "Task Assignment Notification Process_CA" (destination bpa_workflow_technical): every active
+  // member of the processor team, or the one assigned user (Selected Approval, LoA, SCM). The
+  // payload is built inside the transaction; the call runs only after it commits, so a rejected
+  // approval never e-mails anyone. A BPA failure is logged and never blocks the workflow.
+  async _notifyTaskAssignment(tx, task) {
+    const log = cds.log("task-notification");
+    const recipients = await this._taskRecipients(task);
+    if (!recipients.length) {
+      log.warn(`No e-mail sent for task ${task.ID}: no recipient e-mail address`);
+      return;
+    }
+
+    const request = await tx.run(SELECT.one.from(this.db.CARequests)
+      .columns("ID", "referenceNumber", "title", "requestType_code", "requesterName")
+      .where({ ID: task.request_ID }));
+    const appUrl = this._taskAppUrl();
+    if (!appUrl) {
+      log.warn(`Task ${task.ID} is e-mailed without a link: set FLOWMATE_CA_APP_URL`);
+    }
+    const data = {
+      definitionId: process.env.BPA_TASK_NOTIFICATION_DEFINITION_ID ||
+        "ap11.arize-qas-9339ozek.taskassignmentnotificationprocessca.taskAssignmentNotificationProcess",
+      context: {
+        taskId: task.ID,
+        taskTitle: task.taskName || "Workflow task",
+        assigneeEmail: recipients,
+        assigneeName: (task.assignedUser_ID && task.assignedName) || task.assignedTeamName || "",
+        taskUrl: appUrl ? `${appUrl}#/tasks/${encodeURIComponent(task.ID)}` : "",
+        assignedDate: new Date().toISOString(),
+        requesterName: request?.requesterName || "",
+        requestId: request?.referenceNumber || task.request_ID,
+        processorTeam: task.assignedTeamName || "",
+        requestTitle: request?.title || "",
+        requestType: request?.requestType_code || ""
+      }
+    };
+
+    await this._startBpaProcess(data, `Task ${task.ID} notification for ${recipients.length} recipient(s)`);
+  }
+
+  // E-mails the requester once their request ends: status "Approved" (last step completed) or
+  // "Rejected", through the BPA process "requestStatusNotificationProcess".
+  async _notifyRequestOutcome(tx, requestId, status) {
+    const request = await tx.run(SELECT.one.from(this.db.CARequests)
+      .columns("referenceNumber", "title", "requestType_code", "requesterEmail")
+      .where({ ID: requestId }));
+    if (!request?.requesterEmail) {
+      cds.log("task-notification").warn(`No ${status} e-mail for request ${requestId}: no requester e-mail address`);
+      return;
+    }
+    const requestType = await tx.run(SELECT.one.from(this.db.RequestTypes)
+      .columns("name").where({ code: request.requestType_code }));
+    await this._startBpaProcess({
+      definitionId: process.env.BPA_REQUEST_STATUS_DEFINITION_ID ||
+        "ap11.arize-qas-9339ozek.requeststatusnotificationprocessca.requestStatusNotificationProcess",
+      context: {
+        requestermail: request.requesterEmail,
+        requesttitle: request.title || "",
+        requesttype: requestType?.name || request.requestType_code || "",
+        requestid: request.referenceNumber || requestId,
+        status
+      }
+    }, `Request ${request.referenceNumber} ${status} e-mail to the requester`);
+  }
+
+  // Starts a BPA process instance (destination bpa_workflow_technical). It runs only after the
+  // current transaction commits, so a rolled-back action never e-mails anyone; a failure is
+  // logged and never blocks the workflow.
+  async _startBpaProcess(data, description) {
+    const log = cds.log("task-notification");
+    const send = async () => {
+      try {
+        await executeHttpRequest(
+          { destinationName: process.env.BPA_WORKFLOW_DESTINATION || "bpa_workflow_technical" },
+          {
+            method: "post",
+            url: "/workflow/rest/v1/workflow-instances",
+            data,
+            headers: { "content-type": "application/json" }
+          },
+          { fetchCsrfToken: false }
+        );
+        log.info(`${description} started`);
+      } catch (error) {
+        log.error(`Could not start ${description}: ${error.message}`);
+      }
+    };
+    if (typeof cds.context?.on === "function") {
+      cds.context.on("succeeded", send);
+    } else {
+      await send();
+    }
+  }
+
+  // The assigned user, or every active member of the processor team. A membership without a
+  // copied e-mail falls back to the user's own e-mail.
+  async _taskRecipients(task) {
+    if (task.assignedUser_ID) {
+      if (task.assignedEmail) {
+        return [task.assignedEmail];
+      }
+      const user = await this.master.run(SELECT.one.from(this.masterEntities.Users)
+        .columns("email").where({ ID: task.assignedUser_ID }));
+      return user?.email ? [user.email] : [];
+    }
+    if (!task.assignedTeam_ID) {
+      return [];
+    }
+    const members = await this.master.run(SELECT.from(this.masterEntities.TeamMembers)
+      .columns("email", "user_ID")
+      .where({ team_ID: task.assignedTeam_ID, isActive: true }));
+    const missing = members.filter((member) => !member.email && member.user_ID).map((member) => member.user_ID);
+    const users = missing.length
+      ? await this.master.run(SELECT.from(this.masterEntities.Users).columns("email")
+        .where({ ID: { in: missing }, isActive: true }))
+      : [];
+    return [...new Set(members.map((member) => member.email)
+      .concat(users.map((user) => user.email))
+      .filter(Boolean))];
+  }
+
+  // The CA app's URL for the e-mail link: FLOWMATE_CA_APP_URL when set (local runs), otherwise
+  // the approuter host the current request came through (it serves index.html at its root).
+  _taskAppUrl() {
+    const configured = String(process.env.FLOWMATE_CA_APP_URL || "").split("#")[0];
+    if (configured) {
+      return configured;
+    }
+    const headers = cds.context?.http?.req?.headers || {};
+    const host = headers["x-forwarded-host"];
+    if (!host) {
+      return "";
+    }
+    const protocol = String(headers["x-forwarded-proto"] || "https").split(",")[0].trim();
+    return `${protocol}://${String(host).split(",")[0].trim()}/index.html`;
+  }
+
   // An APPROVER or SCM step goes to the user named on the form; every other step stays in
   // its processor team's queue.
   async _resolveStepAssignment(tx, requestId, config) {

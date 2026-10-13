@@ -403,6 +403,18 @@
   background: #dff5e6;
 }
 
+.caMilestone .sapMBtnInner.sapMBtnReject {
+  color: #aa0808;
+  border-color: #e9737e;
+  background: #fde7e9;
+}
+
+.caMilestone .sapMBtnInner.sapMBtnAttention {
+  color: #a14a00;
+  border-color: #f0ab5c;
+  background: #fff3e0;
+}
+
 .caMilestone .sapMBtnInner.sapMBtnEmphasized {
   border-color: #0a6ed1;
   background: #d9ebff;

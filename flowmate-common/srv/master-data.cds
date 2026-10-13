@@ -286,6 +286,12 @@ entity Customers as projection on db.Customers;
     { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
     { grant: '*', to: 'MasterDataAdmin' }
   ]
+  entity ProductHierarchy as projection on db.ProductHierarchy;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
   entity ArPcc as projection on db.ArPcc;
 
   @restrict: [

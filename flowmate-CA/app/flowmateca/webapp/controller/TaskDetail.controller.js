@@ -11,15 +11,6 @@ sap.ui.define([
 ], function (BaseController, FormDefinitions, JSONModel, MessageBox, SimpleForm, Label, Column, ColumnListItem, Button) {
   "use strict";
 
-  const MATERIAL_TASK_FIELDS = {
-    "Provide G/L account": { name: "glAccount", label: "GL Account", type: "input" },
-    "Provide valuation class": {
-      name: "valuationClass_code", label: "Valuation Class", type: "combo",
-      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
-    },
-    "Validate material in S/4": { name: "materialCode", label: "Material Code", type: "input" }
-  };
-
   return BaseController.extend("flowmateca.controller.TaskDetail", {
     onInit: function () {
       this.getView().setModel(new JSONModel({}), "task");
@@ -82,33 +73,50 @@ sap.ui.define([
         const currentStep = (request.stepInstances || []).find(function (step) {
           return step.stepNo === task.stepNo;
         });
-        task.needsGlAccount = request.requestType?.code === "SERVICE_CODE"
-          && this.isSingleLineDetail(request, details)
+        // Service Code and Material Code share the G/L Account and Valuation Class steps; the
+        // S/4 Data Validation step asks for the created Service Code / Material Code.
+        const typeCode = request.requestType?.code;
+        // Existing variants change a code that already exists in S/4, so no step asks for a
+        // G/L Account, Valuation Class or created code. Mirrors _approveTask in srv/flowmate-ca.js.
+        const existingVariant = /_EXISTING$/.test(request.requestVariant?.code || "");
+        const enriched = (typeCode === "SERVICE_CODE" || typeCode === "MATERIAL_CODE") && !existingVariant;
+        const singleLine = enriched && this.isSingleLineDetail(request, details);
+        const s4Step = /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
+        task.needsGlAccount = singleLine
           && /g\s*\/?\s*l\s+account\s+enrichment/i.test(currentStep?.stepName || "");
-        task.needsValuationClass = request.requestType?.code === "SERVICE_CODE"
-          && this.isSingleLineDetail(request, details)
+        task.needsValuationClass = singleLine
           && /valuation\s+class/i.test(currentStep?.stepName || "");
-        task.needsServiceCode = request.requestType?.code === "SERVICE_CODE"
-          && this.isSingleLineDetail(request, details)
-          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
+        task.needsServiceCode = singleLine && typeCode === "SERVICE_CODE" && s4Step;
+        task.needsMaterialCode = singleLine && typeCode === "MATERIAL_CODE" && s4Step;
+        // The pop-up starts from what is already recorded (e.g. the requester's Valuation Class).
+        task.prefill = {
+          glAccount: details.glAccount || "",
+          valuationClass: details.valuationClass_code || "",
+          serviceCode: details.serviceCode || "",
+          materialCode: details.materialCode || ""
+        };
         task.needsEquipmentCode = request.requestType?.code === "EQUIPMENT_CODE"
+          && !existingVariant
           && !(details.items || []).length
           && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
         // Multiple line items: the same steps ask for the value per line, in a table that shows
-        // each line's service description.
+        // each line's service / material description.
         task.lineEntry = null;
         task.lineEntryRows = [];
-        if (request.requestType?.code === "SERVICE_CODE" && (details.items || []).length) {
+        if (enriched && (details.items || []).length) {
+          const isMaterial = typeCode === "MATERIAL_CODE";
           const stepName = currentStep?.stepName || "";
           const target = /g\s*\/?\s*l\s+account\s+enrichment/i.test(stepName)
             ? { field: "glAccount", label: "G/L Account", maxLength: 80 }
             : (/valuation\s+class/i.test(stepName)
               ? { field: "valuationClass_code", label: "Valuation Class", maxLength: 40 }
-              : (/s\s*\/?\s*4\s+data\s+validation/i.test(stepName)
-                ? { field: "serviceCode", label: "Service Code", maxLength: 80 }
+              : (s4Step
+                ? (isMaterial
+                  ? { field: "materialCode", label: "Material Code", maxLength: 40 }
+                  : { field: "serviceCode", label: "Service Code", maxLength: 80 })
                 : null));
           if (target) {
-            target.info1Label = "Service Description";
+            target.info1Label = isMaterial ? "Material Description" : "Service Description";
             task.lineEntry = target;
             task.lineEntryRows = details.items.slice()
               .sort(function (left, right) { return left.itemNo - right.itemNo; })
@@ -116,7 +124,7 @@ sap.ui.define([
                 return {
                   itemId: item.ID,
                   itemNo: item.itemNo,
-                  info1: item.serviceDescription || "",
+                  info1: (isMaterial ? item.description : item.serviceDescription) || "",
                   value: item[target.field] || ""
                 };
               });
@@ -124,7 +132,7 @@ sap.ui.define([
         }
         // Equipment Code with multiple line items: S/4 Data Validation records the Equipment
         // Code per line, next to that line's Site ID and Site Name.
-        if (request.requestType?.code === "EQUIPMENT_CODE" && (details.items || []).length
+        if (request.requestType?.code === "EQUIPMENT_CODE" && !existingVariant && (details.items || []).length
           && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "")) {
           task.lineEntry = {
             field: "equipmentCode", label: "Equipment Code", maxLength: 80,
@@ -177,9 +185,6 @@ sap.ui.define([
         // Step 1 is the requester's own: they correct the details here and send the
         // request on, rather than approving it.
         task.isRequesterStep = task.stepNo === 1 && task.canProcess;
-        task.materialEditStep = task.canProcess && request.requestType?.code === "MATERIAL_CODE"
-          && ["MAT_NEW", "MAT_NEW_REF"].includes(request.requestVariant?.code)
-          && Boolean(MATERIAL_TASK_FIELDS[task.taskName]);
         this.getView().getModel("task").setData(task);
         // User/vendor fields are stored as IDs; show their names.
         this.resolveIdLabels(request, details, "task", "/detailFields");
@@ -187,11 +192,7 @@ sap.ui.define([
         if (task.isRequesterStep) {
           await this._renderEditableStep(request, details);
         } else {
-          if (task.materialEditStep) {
-            await this._renderMaterialEditStep(details, task.taskName);
-          } else {
-            this.byId("taskDetailFormHost")?.destroyItems();
-          }
+          this.byId("taskDetailFormHost")?.destroyItems();
           this.renderDetailItemsTable(
             this.byId("taskItemsTable"),
             request,
@@ -243,7 +244,7 @@ sap.ui.define([
       // is the same rule the create page applies.
       const singleLine = this.isSingleLineDetail(request, details);
       this._headerFields = this.detailFieldDefinitions(request, details)
-        .filter(function (field) { return field.type !== "file" && field.source !== "request" && !field.stepOnly; });
+        .filter(function (field) { return field.type !== "file" && field.source !== "request"; });
       this._itemColumns = (!singleLine || FormDefinitions.hasHeaderTable(variantCode))
         ? FormDefinitions.getItemColumns(typeCode, variantCode, categoryCode)
           .filter(function (col) { return col.name !== "itemNo"; })
@@ -263,28 +264,6 @@ sap.ui.define([
       this._renderEditableGrid("items");
       this._renderEditableGrid("headers");
       this._applyConditionalVisibility();
-    },
-
-    _renderMaterialEditStep: async function (details, taskName) {
-      const stepField = MATERIAL_TASK_FIELDS[taskName];
-      if (!stepField) {
-        return;
-      }
-      this._materialTaskField = stepField;
-      this.getView().getModel("form").setData({ details: Object.assign({}, details) });
-      await this._loadFieldCatalogs([stepField]);
-      const host = this.byId("taskDetailFormHost");
-      host.destroyItems();
-      const form = new SimpleForm({
-        editable: true,
-        layout: "ColumnLayout",
-        columnsXL: 2,
-        columnsL: 2,
-        columnsM: 1
-      });
-      form.addContent(new Label({ text: stepField.label }));
-      form.addContent(this._createFieldControl(stepField, "form>/details/" + stepField.name));
-      host.addItem(form);
     },
 
     _renderEditableFields: function () {
@@ -446,6 +425,7 @@ sap.ui.define([
     },
 
     onApprove: function () {
+      const prefill = this.getView().getModel("task").getProperty("/prefill") || {};
       this.getView().getModel("decision").setData({
         title: "Approve Task",
         action: "approve",
@@ -453,11 +433,13 @@ sap.ui.define([
         needsPoNumber: !!this.getView().getModel("task").getProperty("/needsPoNumber"),
         purchaseOrderNo: "",
         needsGlAccount: !!this.getView().getModel("task").getProperty("/needsGlAccount"),
-        glAccount: "",
+        glAccount: prefill.glAccount || "",
         needsValuationClass: !!this.getView().getModel("task").getProperty("/needsValuationClass"),
-        valuationClass: "",
+        valuationClass: prefill.valuationClass || "",
         needsServiceCode: !!this.getView().getModel("task").getProperty("/needsServiceCode"),
-        serviceCode: "",
+        serviceCode: prefill.serviceCode || "",
+        needsMaterialCode: !!this.getView().getModel("task").getProperty("/needsMaterialCode"),
+        materialCode: prefill.materialCode || "",
         needsEquipmentCode: !!this.getView().getModel("task").getProperty("/needsEquipmentCode"),
         equipmentCode: "",
         needsProjectValue: !!this.getView().getModel("task").getProperty("/needsProjectValue"),
@@ -507,6 +489,11 @@ sap.ui.define([
         MessageBox.warning("Enter the Service Code to approve this task.");
         return;
       }
+      const materialCode = String(decision.materialCode || "").trim();
+      if (!rejecting && decision.needsMaterialCode && !materialCode) {
+        MessageBox.warning("Enter the Material Code to approve this task.");
+        return;
+      }
       const equipmentCode = String(decision.equipmentCode || "").trim();
       if (!rejecting && decision.needsEquipmentCode && !equipmentCode) {
         MessageBox.warning("Enter the Equipment Code to approve this task.");
@@ -530,6 +517,9 @@ sap.ui.define([
       if (!rejecting && decision.needsServiceCode) {
         body.serviceCode = serviceCode;
       }
+      if (!rejecting && decision.needsMaterialCode) {
+        body.materialCode = materialCode;
+      }
       if (!rejecting && decision.needsEquipmentCode) {
         body.equipmentCode = equipmentCode;
       }
@@ -546,11 +536,6 @@ sap.ui.define([
         body.lineValues = JSON.stringify(rows.map(function (row) {
           return { itemId: row.itemId, value: String(row.value).trim() };
         }));
-      }
-      if (!rejecting && this.getView().getModel("task").getProperty("/materialEditStep")) {
-        const fieldName = this._materialTaskField.name;
-        const details = this.getView().getModel("form").getProperty("/details") || {};
-        body.materialDetails = JSON.stringify({ [fieldName]: details[fieldName] || "" });
       }
       this.setBusy(true);
       try {

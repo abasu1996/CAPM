@@ -172,13 +172,13 @@ service FlowmateCAService {
     glAccount: String(80),
     valuationClass: String(40),
     serviceCode: String(80),
+    materialCode: String(40),
     equipmentCode: String(80),
     // Project Code at S/4 Data Validation: the Project Code, or the Function Location / Activity.
     projectValue: String(80),
     // Service Code with multiple line items: JSON [{ itemId, value }], one per line item, for the
     // G/L Account Enrichment, Valuation Class or S/4 Data Validation step.
-    lineValues: LargeString,
-    materialDetails: LargeString
+    lineValues: LargeString
   ) returns Boolean;
   action rejectTask(taskId: UUID, remarks: LargeString) returns Boolean;
   action sendBackTask(taskId: UUID, targetStepNo: Integer, remarks: LargeString) returns Boolean;
@@ -281,6 +281,7 @@ service CAMasterDataService {
    entity ExtensionMaterialGroup as projection on common.ExtensionMaterialGroup;
    entity ContractType as projection on common.ContractType;
    entity BudgetCode as projection on common.BudgetCode;
+   entity ProductHierarchy as projection on common.ProductHierarchy;
    entity ArPcc as projection on common.ArPcc;
    entity VendorsPcc as projection on common.VendorsPcc;
    entity DivisionsPcc as projection on common.DivisionsPcc;

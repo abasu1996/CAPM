@@ -197,7 +197,7 @@ entity MaterialCodeDetails : cuid, managed {
   materialCategory       : String(40);
   transactionType        : String(40);
   materialCode           : String(40);
-  glAccount              : String(40);
+  glAccount              : String(80);
   cepDE                  : Boolean default false;
   materialStatus         : String(20);
   divisionChanging       : String(255);
@@ -258,6 +258,11 @@ entity MaterialCodeItems : cuid, managed {
   itemNo  : Integer;
   materialCategory       : String(40);
   transactionType        : String(40);
+  materialStatus         : String(20);
+  divisionChanging       : String(255);
+  serialNumberChange     : String(255);
+  shippingLoadingData    : String(255);
+  infoRecord             : Boolean default false;
   referenceMaterialCode  : String(40);
   dmsUpdate              : Boolean default false;
   plant_code             : String(40);
@@ -300,6 +305,8 @@ entity MaterialCodeItems : cuid, managed {
   perUnitPrice           : Decimal(15,2);
   approvalDocumentsAttachment: String(255);
   dmsSapMaterialCode     : String(40);
+  glAccount              : String(80);
+  materialCode           : String(40);
   materialType           : String(60);
   mrpType                : String(60);
   availabilityCheck      : String(60);
@@ -359,6 +366,7 @@ entity EquipmentCodeDetails : cuid, managed {
   materialDescription: String(180);
   plant_code       : String(40);
   existingFunctionalLocation : String(80);
+  existingEquipmentCode : String(80);
   equipmentCode    : String(80);
   items : Composition of many EquipmentCodeItems
             on items.details = $self;
@@ -379,6 +387,7 @@ entity EquipmentCodeItems : cuid, managed {
   materialDescription: String(180);
   plant_code       : String(40);
   existingFunctionalLocation : String(80);
+  existingEquipmentCode : String(80);
   equipmentCode    : String(80);
 }
 

@@ -42,6 +42,7 @@ const SHARED_ENTITIES = [
   "ExtensionMaterialGroup",
   "ContractType",
   "BudgetCode",
+  "ProductHierarchy",
   "ArPcc",
   "VendorsPcc",
   "DivisionsPcc",

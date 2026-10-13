@@ -345,6 +345,14 @@ service CommonMasterDataService {
     isActive : Boolean default true;
   }
 
+  @cds.persistence.skip
+  entity ProductHierarchy {
+    key ID : UUID;
+    productHierarchyCode        : String(40) not null;
+    productHierarchyDescription : String(180);
+    isActive                    : Boolean default true;
+  }
+
   // Project Code Creation (PCC) masters.
   @cds.persistence.skip
   entity ArPcc {

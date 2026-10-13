@@ -8,7 +8,6 @@
   <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{detail>/title}">
     <headerContent>
       <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
-      <Button text="Create Successor" icon="sap-icon://chain-link" type="Transparent" press=".onOpenSuccessorDialog"/>
     </headerContent>
     <content>
       <VBox>
@@ -85,7 +84,7 @@
                   press=".onStepPress"
                   class="caMilestone"/>
                 <ObjectStatus
-                  text="{detail>status}"
+                  text="{path: 'detail>status', formatter: '.stepStatusText'}"
                   state="{path: 'detail>status', formatter: '.stepState'}"
                   inverted="true"/>
                 <Title text="{detail>stepName}" level="H5"/>
@@ -268,7 +267,7 @@
       <Dialog id="stepDialog" title="{step>/stepName}" contentWidth="32rem">
         <content>
           <VBox class="sapUiSmallMargin">
-            <ObjectStatus text="{step>/status}" state="{path: 'step>/status', formatter: '.stepState'}" inverted="true"/>
+            <ObjectStatus text="{path: 'step>/status', formatter: '.stepStatusText'}" state="{path: 'step>/status', formatter: '.stepState'}" inverted="true"/>
             <Title text="Activity" level="H4" class="sapUiSmallMarginTop"/>
             <Text text="{step>/activityDescription}" wrapping="true"/>
           </VBox>
@@ -317,25 +316,6 @@
         </beginButton>
         <endButton>
           <Button text="{i18n>cancel}" press=".onCloseAddTaskDialog"/>
-        </endButton>
-      </Dialog>
-
-      <Dialog id="successorDialog" title="Create Successor Request" contentWidth="36rem">
-        <content>
-          <form:SimpleForm editable="true" layout="ResponsiveGridLayout" class="sapUiSmallMargin">
-            <Label text="{i18n>requestType}" required="true"/>
-            <ComboBox selectedKey="{successor>/requestTypeCode}" items="{catalog>/RequestTypes}">
-              <core:Item key="{catalog>code}" text="{catalog>name}"/>
-            </ComboBox>
-            <Label text="{i18n>title}" required="true"/>
-            <Input value="{successor>/title}"/>
-          </form:SimpleForm>
-        </content>
-        <beginButton>
-          <Button text="Create" type="Emphasized" press=".onCreateSuccessor"/>
-        </beginButton>
-        <endButton>
-          <Button text="{i18n>cancel}" press=".onCloseSuccessorDialog"/>
         </endButton>
       </Dialog>
     </dependents>

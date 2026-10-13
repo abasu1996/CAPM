@@ -309,6 +309,13 @@ entity BudgetCode : cuid, managed {
   isActive : Boolean default true;
 }
 
+// Material Code (Trading): Product Hierarchy pick list, maintained in the CA Admin console.
+entity ProductHierarchy : cuid, managed {
+  productHierarchyCode        : String(40) not null;
+  productHierarchyDescription : String(180);
+  isActive                    : Boolean default true;
+}
+
 // Project Code Creation (PCC) masters, maintained in the CA Admin console.
 entity ArPcc : cuid, managed {
   srNo           : String(10);

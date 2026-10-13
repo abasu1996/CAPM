@@ -48,7 +48,7 @@ sap.ui.define([
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
     "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments",
     "ContractType", "PurchasingOrganizations", "CompanyCodes", "Incoterms", "CostCenter", "ApplicableTaxes",
-    "BudgetCode", "ArPcc", "VendorsPcc", "DivisionsPcc", "ScopePcc", "ProjectTypePcc"
+    "BudgetCode", "ProductHierarchy", "ArPcc", "VendorsPcc", "DivisionsPcc", "ScopePcc", "ProjectTypePcc"
   ]);
   const STATUS_MESSAGES = {
     400: "Some of the information provided is invalid. Please review it and try again.",
@@ -562,6 +562,7 @@ sap.ui.define([
 
     // A field is mandatory outright (required) or only while another field has a given value
     // (requiredWhen), which is how Plant is mandatory for an extension but not for a change.
+    // notEquals reverses the rule: mandatory unless the field has that value.
     _isFieldRequired: function (definition) {
       if (definition.required) {
         return true;
@@ -572,7 +573,9 @@ sap.ui.define([
       }
       const form = this.getView().getModel("form").getData();
       const source = definition.source === "request" ? form : (form.details || {});
-      return source[rule.field] === rule.equals;
+      return rule.notEquals !== undefined
+        ? source[rule.field] !== rule.notEquals
+        : source[rule.field] === rule.equals;
     },
 
     _applyConditionalVisibility: function () {

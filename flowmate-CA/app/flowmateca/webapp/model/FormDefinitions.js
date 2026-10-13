@@ -143,8 +143,14 @@ sap.ui.define([], function () {
       entity: "Plant", key: "plantCode", text: "plantName"
     }),
     field("taxClass", "Tax Class", "input", { required: true }),
-    field("accountAssignmentGroup", "Account Assignment Group", "input", { required: true }),
-    field("productHierarchy", "Product Hierarchy", "input", { required: true }),
+    // Both pick from Admin console tables (Account Assignments, Product Hierarchy).
+    field("accountAssignmentGroup", "Account Assignment Group", "combo", {
+      required: true, entity: "AccountAssignments"
+    }),
+    field("productHierarchy", "Product Hierarchy", "combo", {
+      required: true, entity: "ProductHierarchy",
+      key: "productHierarchyCode", text: "productHierarchyDescription", secondaryText: "productHierarchyCode"
+    }),
     field("inspectionStock", "Post to Inspection Stock", "checkbox"),
     field("sourceList", "Source List", "checkbox")
   ];
@@ -179,14 +185,6 @@ sap.ui.define([], function () {
     placeholder: "Existing SAP material code"
   });
 
-  const materialTaskFields = [
-    field("glAccount", "GL Account", "input", { stepOnly: 3 }),
-    field("valuationClass_code", "Valuation Class", "combo", {
-      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription", stepOnly: 4
-    }),
-    field("materialCode", "Material Code", "input", { stepOnly: 5 })
-  ];
-
   const materialStatus = field("materialStatus", "Material Status (Block/Unblock)", "select", {
     options: [{ key: "BLOCK", text: "Block" }, { key: "UNBLOCK", text: "Unblock" }]
   });
@@ -208,21 +206,29 @@ sap.ui.define([], function () {
   // An extension needs a plant to extend into; a change works on the material as it stands,
   // so the plant is only mandatory for the extension.
   const modificationPlant = Object.assign({}, plant, { required: false, requiredWhen: whenExtension });
+  // Trading needs the plant for an extension and a change with DMS update, but not for DMS update only.
+  const tradingModificationPlant = Object.assign({}, plant, {
+    required: false,
+    requiredWhen: { field: "transactionType", notEquals: "DMS_UPDATE_ONLY" }
+  });
+  // lineItem: with Multiple Line Items the field is a column of the items table, shown or hidden
+  // by its visibleWhen rule, instead of a header field.
   const materialModificationFields = [
     field("referenceMaterialCode", "Material Code", "input", { required: true }),
     modificationPlant,
     field("storageLocation", "Storage Location", "combo", {
-      entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName", visibleWhen: whenExtension
+      entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName",
+      visibleWhen: whenExtension, lineItem: true
     }),
     field("serialNumberProfile", "Serial Number Profile", "combo", {
       entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription", visibleWhen: whenChange
     }),
     field("description", "Material Description", "input", { maxLength: 40, visibleWhen: whenChange }),
-    Object.assign({}, materialStatus, { visibleWhen: whenChange })
+    Object.assign({}, materialStatus, { visibleWhen: whenChange, lineItem: true })
   ];
   const tradingModificationFields = [
     field("referenceMaterialCode", "Material Code", "input", { required: true }),
-    plant,
+    tradingModificationPlant,
     field("storageLocation", "Storage Location", "combo", {
       entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName", visibleWhen: whenExtension
     }),
@@ -232,12 +238,18 @@ sap.ui.define([], function () {
     field("salesOrganization", "Sales Org", "combo", {
       entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName", visibleWhen: whenExtension
     }),
-    field("divisionChanging", "Division Changing", "input", { maxLength: 255, visibleWhen: whenTradingChange }),
+    field("divisionChanging", "Division Changing", "input", {
+      maxLength: 255, visibleWhen: whenTradingChange, lineItem: true
+    }),
     field("description", "Material Description", "input", { maxLength: 40, visibleWhen: whenTradingChange }),
-    field("serialNumberChange", "Serial Number", "input", { maxLength: 255, visibleWhen: whenTradingChange }),
-    field("shippingLoadingData", "Shipping / Loading Data", "input", { maxLength: 255, visibleWhen: whenTradingChange }),
-    Object.assign({}, materialStatus, { visibleWhen: whenTradingChange }),
-    field("infoRecord", "Info Record", "checkbox", { visibleWhen: whenTradingChange }),
+    field("serialNumberChange", "Serial Number", "input", {
+      maxLength: 255, visibleWhen: whenTradingChange, lineItem: true
+    }),
+    field("shippingLoadingData", "Shipping / Loading Data", "input", {
+      maxLength: 255, visibleWhen: whenTradingChange, lineItem: true
+    }),
+    Object.assign({}, materialStatus, { visibleWhen: whenTradingChange, lineItem: true }),
+    field("infoRecord", "Info Record", "checkbox", { visibleWhen: whenTradingChange, lineItem: true }),
     field("dmsUpdate", "DMS Update", "checkbox", { visibleWhen: whenTradingChange }),
     field("dmsUpdate", "DMS Update", "checkbox", {
       visibleWhen: { field: "transactionType", equals: "DMS_UPDATE_ONLY" }
@@ -278,7 +290,7 @@ sap.ui.define([], function () {
   const materialDefinitions = {};
   Object.keys(materialCategoryFields).forEach(function (categoryCode) {
     const base = materialCategoryFields[categoryCode];
-    materialDefinitions[categoryCode + ":MAT_NEW"] = base.concat(materialTaskFields);
+    materialDefinitions[categoryCode + ":MAT_NEW"] = base;
     const referenceFields = [
       field("referenceMaterialCode", categoryCode === "TRADING" ? "Material Code" : "Reference Material Code", "input", {
         required: true, placeholder: "Existing SAP material code"
@@ -298,9 +310,8 @@ sap.ui.define([], function () {
         field("cepDE", "CEP (DE)", "checkbox")
       );
     }
-    // A trading material raised with reference has no DMS update, so neither the toggle nor the
-    // fields it reveals are offered. They come from base too, which appendMissingFields would
-    // otherwise add straight back.
+    // Trading material with reference has no DMS update, so keep the DMS toggle and dependent
+    // fields out of this variant instead of adding them back from the base definition.
     const dmsNames = new Set([dmsToggle.name].concat(dmsBlock.map(function (definition) { return definition.name; })));
     const referenceBase = categoryCode === "TRADING"
       ? optionalMaterialFields(base).filter(function (definition) { return !dmsNames.has(definition.name); })
@@ -314,7 +325,7 @@ sap.ui.define([], function () {
     appendMissingFields(existingFields, modificationFields.slice(2));
     materialDefinitions[categoryCode + ":MAT_EXISTING"] = existingFields;
     materialDefinitions[categoryCode + ":MAT_NEW_REF"] = appendMissingFields(
-      referenceFields.concat(materialTaskFields),
+      referenceFields,
       referenceBase
     );
   });
@@ -361,8 +372,11 @@ sap.ui.define([], function () {
         entity: "Plant", key: "plantCode", text: "plantName"
       }),
       field("taxClass", "Tax Class", "input"),
-      field("accountAssignmentGroup", "Account Assignment Group", "input"),
-      field("productHierarchy", "Product Hierarchy", "input"),
+      field("accountAssignmentGroup", "Account Assignment Group", "combo", { entity: "AccountAssignments" }),
+      field("productHierarchy", "Product Hierarchy", "combo", {
+        entity: "ProductHierarchy",
+        key: "productHierarchyCode", text: "productHierarchyDescription", secondaryText: "productHierarchyCode"
+      }),
       field("profitCenter_code", "Profit Center", "combo", {
         entity: "ProfitCenter", key: "profitCenterCode", text: "profitCenterDescription"
       }),
@@ -438,7 +452,12 @@ sap.ui.define([], function () {
         maxLength: 40,
         placeholder: "Existing service code to copy from"
       }),
-      ...serviceNewBase
+      // Category, Unit of Measure and Group are inherited from the reference service code.
+      ...serviceNewBase.map(function (definition) {
+        return ["serviceCategory", "unitOfMeasure_code", "serviceGroup_code"].indexOf(definition.name) >= 0
+          ? Object.assign({}, definition, { required: false })
+          : definition;
+      })
     ],
     SVC_EXISTING: [
       field("referenceServiceCode", "Existing Service Code", "input", {
@@ -448,7 +467,7 @@ sap.ui.define([], function () {
         maxLength: 40,
         placeholder: "Maximum 40 characters"
       }),
-      uom,
+      Object.assign({}, uom, { required: false }),
       field("serviceGroup_code", "Service Group", "combo", {
         entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
       }),
@@ -482,6 +501,11 @@ sap.ui.define([], function () {
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     EQP_EXISTING: [
+      field("existingEquipmentCode", "Existing Equipment Code", "input", {
+        required: true,
+        maxLength: 80,
+        placeholder: "Enter the existing equipment code"
+      }),
       field("siteId", "Site ID", "combo", {
         required: true,
         entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
@@ -1004,8 +1028,8 @@ sap.ui.define([], function () {
   ];
 
   const isHeaderOnlyField = (field, drivers) =>
-    field.type === "file" || !!field.visibleWhen || field.source === "request" || !!field.headerOnly
-      || drivers.has(field.name);
+    field.type === "file" || (!!field.visibleWhen && !field.lineItem) || field.source === "request"
+      || !!field.headerOnly || drivers.has(field.name);
 
   const fieldToColumn = (field) => {
     const col = {};
@@ -1014,6 +1038,9 @@ sap.ui.define([], function () {
         col[prop] = field[prop];
       }
     });
+    if (field.lineItem && field.visibleWhen) {
+      col.visibleWhen = field.visibleWhen;
+    }
     return col;
   };
 
@@ -1417,9 +1444,12 @@ sap.ui.define([], function () {
     // approvers enter per line. Editing tables keep using getItemColumns.
     getItemDisplayColumns: function (requestTypeCode, variantCode, categoryCode) {
       const columns = this.getItemColumns(requestTypeCode, variantCode, categoryCode);
-      // The S/4 Data Validation approver records the Equipment Code per line.
+      // The S/4 Data Validation approver records the Equipment Code per line (New only; Existing
+      // already names its code in Existing Equipment Code).
       if (requestTypeCode === "EQUIPMENT_CODE") {
-        return columns.concat([column("equipmentCode", "Equipment Code")]);
+        return variantCode === "EQP_EXISTING"
+          ? columns
+          : columns.concat([column("equipmentCode", "Equipment Code")]);
       }
       // ... and the Project Code, or the Function Location / Activity (per Object Type).
       if (requestTypeCode === "PROJECT_CODE") {
@@ -1434,14 +1464,22 @@ sap.ui.define([], function () {
           ]
           : [column("projectCode", "Project Code")]);
       }
-      if (requestTypeCode !== "SERVICE_CODE") {
+      let approverColumns;
+      if (requestTypeCode === "SERVICE_CODE") {
+        const serviceCodeColumn = column("serviceCode", "Service Code");
+        // New and New with Reference record the G/L Account and Valuation Class.
+        approverColumns = variantCode === "SVC_NEW" || variantCode === "SVC_NEW_REF"
+          ? [column("glAccount", "G/L Account"), column("valuationClass_code", "Valuation Class"), serviceCodeColumn]
+          : [serviceCodeColumn];
+      } else if (requestTypeCode === "MATERIAL_CODE") {
+        const materialCodeColumn = column("materialCode", "Material Code");
+        // New and New with Reference have the G/L Account Enrichment and Valuation Class steps.
+        approverColumns = variantCode === "MAT_NEW" || variantCode === "MAT_NEW_REF"
+          ? [column("glAccount", "G/L Account"), column("valuationClass_code", "Valuation Class"), materialCodeColumn]
+          : [materialCodeColumn];
+      } else {
         return columns;
       }
-      const serviceCodeColumn = column("serviceCode", "Service Code");
-      // Only New Service Code has the G/L Account Enrichment and Valuation Class steps.
-      const approverColumns = variantCode === "SVC_NEW"
-        ? [column("glAccount", "G/L Account"), column("valuationClass_code", "Valuation Class"), serviceCodeColumn]
-        : [serviceCodeColumn];
       const existing = new Set(columns.map(function (col) { return col.name; }));
       return columns.concat(approverColumns.filter(function (col) { return !existing.has(col.name); }));
     },

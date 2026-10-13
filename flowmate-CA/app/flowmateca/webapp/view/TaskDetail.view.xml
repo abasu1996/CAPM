@@ -100,15 +100,15 @@
               </form:SimpleForm>
             </content>
           </Panel>
-          <Panel headerText="Process-Specific Details" class="caFormSection" visible="{= ${task>/isRequesterStep} ? ${task>/hasEditableFields} : (${task>/materialEditStep} || ${task>/hasDetailFields}) }">
+          <Panel headerText="Process-Specific Details" class="caFormSection" visible="{= ${task>/isRequesterStep} ? ${task>/hasEditableFields} : ${task>/hasDetailFields} }">
             <content>
-              <FlexBox visible="{= !${task>/isRequesterStep} &amp;&amp; !${task>/materialEditStep} }" items="{task>/detailFields}" wrap="Wrap" renderType="Div" class="caDetailFieldGrid">
+              <FlexBox visible="{= !${task>/isRequesterStep} }" items="{task>/detailFields}" wrap="Wrap" renderType="Div" class="caDetailFieldGrid">
                 <VBox class="caDetailField">
                   <Label text="{task>label}"/>
                   <Text text="{task>value}" wrapping="true"/>
                 </VBox>
               </FlexBox>
-              <VBox id="taskDetailFormHost" visible="{= ${task>/isRequesterStep} || ${task>/materialEditStep} }"/>
+              <VBox id="taskDetailFormHost" visible="{= ${task>/isRequesterStep} }"/>
             </content>
           </Panel>
 
@@ -163,6 +163,9 @@
             <Label text="Service Code" required="true" visible="{= ${decision>/needsServiceCode} === true }"/>
             <Input value="{decision>/serviceCode}" placeholder="Enter the Service Code" maxLength="80"
               visible="{= ${decision>/needsServiceCode} === true }" class="sapUiSmallMarginBottom"/>
+            <Label text="Material Code" required="true" visible="{= ${decision>/needsMaterialCode} === true }"/>
+            <Input value="{decision>/materialCode}" placeholder="Enter the Material Code" maxLength="40"
+              visible="{= ${decision>/needsMaterialCode} === true }" class="sapUiSmallMarginBottom"/>
             <Label text="Equipment Code" required="true" visible="{= ${decision>/needsEquipmentCode} === true }"/>
             <Input value="{decision>/equipmentCode}" placeholder="Enter the Equipment Code" maxLength="80"
               visible="{= ${decision>/needsEquipmentCode} === true }" class="sapUiSmallMarginBottom"/>
@@ -193,7 +196,7 @@
                 </ColumnListItem>
               </items>
             </Table>
-            <Label text="Remarks"/>
+            <Label text="Remarks" required="{= ${decision>/action} === 'reject' }"/>
             <TextArea value="{decision>/remarks}" rows="4" width="100%"/>
           </VBox>
         </content>

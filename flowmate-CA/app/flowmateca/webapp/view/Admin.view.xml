@@ -1426,6 +1426,34 @@
         </items>
     </Table>
 </IconTabFilter>
+<IconTabFilter key="productHierarchy" text="Product Hierarchy" icon="sap-icon://tree">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Product Hierarchy" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="productHierarchy"/>
+    </Toolbar>
+    <Table items="{admin>/pcc/productHierarchy}" growing="true" growingThreshold="50" class="caAdminTable">
+        <columns>
+            <Column width="14rem"><Text text="Product Hierarchy Code"/></Column>
+            <Column><Text text="Description"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input value="{admin>productHierarchyCode}"/>
+                    <Input value="{admin>productHierarchyDescription}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="productHierarchy"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="productHierarchy"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
 
 <IconTabFilter key="plant" text="Plants" icon="sap-icon://factory">
     <Toolbar class="caSectionToolbar">
