@@ -150,6 +150,27 @@ sap.ui.define([
               };
             });
         }
+        // Material Reservation: the S/4 step records the Material Reservation Number per line, next to
+        // that line's Site ID, Site Name and Material Code.
+        if (request.requestType?.code === "MATERIAL_RESERVATION" && (details.items || []).length
+          && /s\s*\/?\s*4\s+(data\s+validation|material\s+reservation)/i.test(currentStep?.stepName || "")) {
+          task.lineEntry = {
+            field: "reservationNumber", label: "Material Reservation Number", maxLength: 40,
+            info1Label: "Site ID", info2Label: "Site Name", info3Label: "Material Code"
+          };
+          task.lineEntryRows = details.items.slice()
+            .sort(function (left, right) { return left.itemNo - right.itemNo; })
+            .map(function (item) {
+              return {
+                itemId: item.ID,
+                itemNo: item.itemNo,
+                info1: item.siteId || "",
+                info2: item.siteName || "",
+                info3: item.materialCode || "",
+                value: item.reservationNumber || ""
+              };
+            });
+        }
         // Project Code at S/4 Data Validation: the created Project Code (New / Modification), or the
         // Function Location / Activity per the Object Type. One field, or one value per line.
         task.needsProjectValue = false;
@@ -455,7 +476,7 @@ sap.ui.define([
 
     onReject: function () {
       this.getView().getModel("decision").setData({
-        title: "Reject Request",
+        title: "Terminate Request",
         action: "reject",
         remarks: ""
       });
@@ -466,7 +487,7 @@ sap.ui.define([
       const decision = this.getView().getModel("decision").getData();
       const rejecting = decision.action === "reject";
       if (rejecting && !String(decision.remarks || "").trim()) {
-        MessageBox.warning("A reason is required to reject a request.");
+        MessageBox.warning("A reason is required to terminate a request.");
         return;
       }
       const purchaseOrderNo = String(decision.purchaseOrderNo || "").trim();
@@ -548,7 +569,7 @@ sap.ui.define([
           body: body
         });
         this.byId("decisionDialog").close();
-        this.showSuccess(rejecting ? "Request rejected" : "Task approved");
+        this.showSuccess(rejecting ? "Request terminated" : "Task approved");
         await this.onRefresh();
       } catch (error) {
         this.showError(error);

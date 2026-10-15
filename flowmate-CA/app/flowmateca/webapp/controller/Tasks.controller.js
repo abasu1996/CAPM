@@ -57,7 +57,7 @@ sap.ui.define([
 
         const filterQuery = filters.length ? `&$filter=${encodeURIComponent(filters.join(" and "))}` : "";
         const result = await this.request(
-          `${entity}?$expand=request,status&$orderby=createdAt desc${filterQuery}`
+          `${entity}?$expand=request($expand=requestType),status&$orderby=createdAt desc${filterQuery}`
         );
         this.getView().getModel("tasks").setProperty("/items", result.value || []);
       } catch (error) {

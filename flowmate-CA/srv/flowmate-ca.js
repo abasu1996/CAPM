@@ -19,6 +19,11 @@ const TASK_STATUS = {
   REJECTED: "REJECTED"
 };
 
+// SLA days are calendar days; due dates are shown and compared in Sri Lankan time.
+const SLA_TIME_ZONE = process.env.SLA_TIME_ZONE || "Asia/Colombo";
+const DAY_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+
 const DETAIL_ENTITY_BY_REQUEST_TYPE = {
   MATERIAL_CODE: "MaterialCodeDetails",
   SERVICE_CODE: "ServiceCodeDetails",
@@ -29,6 +34,10 @@ const DETAIL_ENTITY_BY_REQUEST_TYPE = {
   PURCHASE_ORDER: "PurchaseOrderDetails",
   SERVICE_ENTRY_SHEET: "ServiceEntrySheetDetails"
 };
+
+// Status values the BPA "Request Status Notification Process" script builds an e-mail for; any
+// other value produces an e-mail with an empty subject and body.
+const REQUEST_OUTCOME = { COMPLETED: "Completed", REJECTED: "Rejected", SENT_BACK: "Sendback" };
 
 const ITEMS_ENTITY_BY_REQUEST_TYPE = {
   MATERIAL_CODE: "MaterialCodeItems",
@@ -131,6 +140,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
     this.on("previewProjectCode", this._previewProjectCode);
+    this.on("slaPreview", this._slaPreview);
+    this.on("runSlaBreachScan", this._runSlaBreachScan);
     this.on("createFlowmatePaymentRun", this._createFlowmatePaymentRun);
     this.on("createFlowmateServiceEntrySheet", this._createFlowmateServiceEntrySheet);
     this.on("createBulkRequests", this._createBulkRequests);
@@ -1254,6 +1265,18 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
 
+    // Material Reservation: the approver of the S/4 step records the Material Reservation Number
+    // created in S/4 for each line item (both variants).
+    if (request?.requestType_code === "MATERIAL_RESERVATION" && this._isReservationS4Step(step?.stepName)) {
+      const reservationDetails = await SELECT.one.from(this.db.MaterialReservationDetails)
+        .where({ request_ID: task.request_ID });
+      if (reservationDetails) {
+        const failure = await this._applyLineValues(tx, req, this.db.MaterialReservationItems, reservationDetails.ID,
+          { column: "reservationNumber", label: "Material Reservation Number", maxLength: 40 });
+        if (failure) return failure;
+      }
+    }
+
     // The last step of a PO with "Create SES Successor" captures the PO number for the SES.
     const poDetails = await this._poDetailsNeedingNumber(tx, task);
     if (poDetails) {
@@ -1266,14 +1289,21 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         .where({ ID: poDetails.ID }));
     }
 
+    const approvedAt = new Date().toISOString();
+    const lateness = this._lateDecision(task, approvedAt);
     await tx.run(UPDATE(this.db.CATasks).set({
       status_code: TASK_STATUS.APPROVED,
       decision: "APPROVED",
       remarks: req.data.remarks,
-      completedAt: new Date().toISOString(),
+      completedAt: approvedAt,
+      ...lateness,
       ...this._handlerStamp(task, user)
     }).where({ ID: task.ID }));
     await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_APPROVED", user, task.status_code, TASK_STATUS.APPROVED, req.data.remarks);
+    if (task.slaBreached || lateness.slaBreached) {
+      await this._writeHistory(tx, task.request_ID, task.stepNo, "APPROVED_AFTER_SLA", user, null, null,
+        `Approved ${this._overdueText(task.slaDueAt, approvedAt)} after the SLA due date`);
+    }
     await this._autoCompleteStepIfDone(req, tx, task, user);
     return true;
   };
@@ -1373,6 +1403,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   // What the Project Code S/4 Data Validation approver enters. Mirrored in TaskDetail.controller.js.
+  // The step that creates the reservation in S/4 (named "S/4 Material Reservation" in the workflow).
+  // Mirrored in TaskDetail.controller.js.
+  _isReservationS4Step(stepName) {
+    return /s\s*\/?\s*4\s+(data\s+validation|material\s+reservation)/i.test(stepName || "");
+  }
+
   _projectValueTarget(variantCode, transactionType) {
     if (variantCode === "PROJECT_NEW_MOD") {
       return { column: "projectCode", label: "Project Code", maxLength: 80 };
@@ -1475,7 +1511,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: TASK_STATUS.REJECTED,
       decision: "REJECTED",
       remarks: req.data.remarks,
-      completedAt: rejectedAt
+      completedAt: rejectedAt,
+      ...this._lateDecision(task, rejectedAt)
     }).where({ ID: task.ID }));
     await tx.run(UPDATE(this.db.CATasks).set({
       status_code: TASK_STATUS.REJECTED,
@@ -1494,7 +1531,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       completedAt: rejectedAt
     }).where({ ID: task.request_ID }));
     await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_REJECTED", user, task.status_code, TASK_STATUS.REJECTED, req.data.remarks);
-    await this._notifyRequestOutcome(tx, task.request_ID, "Rejected");
+    await this._notifyRequestOutcome(tx, task.request_ID, REQUEST_OUTCOME.REJECTED, req.data.remarks);
     return true;
   };
 
@@ -1527,8 +1564,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       decision: "SENT_BACK",
       remarks: req.data.remarks,
       completedAt: null,
+      ...this._lateDecision(task, new Date().toISOString()),
       ...this._handlerStamp(task, user)
     }).where({ ID: task.ID }));
+    await this._replanSlaFrom(tx, task.request_ID, targetStep.stepNo);
     await tx.run(UPDATE(this.db.RequestStepInstances).set({
       status: "OPEN",
       completedAt: null,
@@ -1551,8 +1590,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: REQUEST_STATUS.SENT_BACK,
       completedAt: null
     }).where({ ID: task.request_ID }));
-    await this._createConfiguredTaskIfMissing(tx, task.request_ID, targetStep);
+    // The reopened step's e-mail says it was sent back and carries the sender's remarks.
+    await this._createConfiguredTaskIfMissing(tx, task.request_ID, targetStep, {
+      notificationType: "SENT_BACK",
+      remarks: req.data.remarks,
+      sentBackBy: user.displayName
+    });
     await this._writeHistory(tx, task.request_ID, targetStep.stepNo, "TASK_SENT_BACK", user, task.status_code, TASK_STATUS.SENT_BACK, req.data.remarks);
+    // The requester is told too, with the remarks, besides the task e-mail to the step's owner.
+    await this._notifyRequestOutcome(tx, task.request_ID, REQUEST_OUTCOME.SENT_BACK, req.data.remarks);
     return true;
   };
 
@@ -1657,7 +1703,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         completedAt: now
       }).where({ ID: request.ID }));
       await this._writeHistory(tx, request.ID, step.stepNo, "REQUEST_COMPLETED", user, request.status_code, REQUEST_STATUS.COMPLETED, remarks);
-      await this._notifyRequestOutcome(tx, request.ID, "Approved");
+      await this._notifyRequestOutcome(tx, request.ID, REQUEST_OUTCOME.COMPLETED);
       await this._createSesSuccessor(tx, request, user);
       await this._triggerFlowmateIntegrationIfRequired(req, request.ID);
       return true;
@@ -1739,6 +1785,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const teams = await this.master.run(SELECT.from(this.masterEntities.Teams));
     const teamsById = new Map(teams.map((team) => [team.ID, team]));
     const submittedAt = new Date().toISOString();
+    // Step 1 is signed off by submitting, so it takes no SLA time; the rest are planned from now.
+    const schedule = this._planSlaSchedule(
+      selectedConfigs.map((config, index) => (index === 0 ? 0 : config.slaDays)),
+      submittedAt
+    );
     const stepEntries = selectedConfigs.map((config, index) => ({
       ID: cds.utils.uuid(),
       request_ID: requestId,
@@ -1749,6 +1800,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       processorTeam_ID: config.processorTeam_ID,
       processorTeamName: teamsById.get(config.processorTeam_ID)?.name || null,
       status: index === 0 ? "OPEN" : "PENDING",
+      slaDays: config.slaDays,
+      ...schedule[index],
       startedAt: index === 0 ? submittedAt : null,
       completedAt: null
     }));
@@ -1760,10 +1813,13 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const requesterStep = stepEntries[0];
     await this._createConfiguredTaskIfMissing(tx, requestId, requesterStep);
 
+    const lastDeadline = schedule[schedule.length - 1];
     await tx.run(UPDATE(this.db.CARequests).set({
       currentStep: requesterStep.stepNo,
       status_code: REQUEST_STATUS.SUBMITTED,
-      submittedAt
+      submittedAt,
+      dueDate: lastDeadline.dueDate,
+      slaDueAt: lastDeadline.slaDueAt
     }).where({ ID: requestId }));
 
     const remarks = "Auto-completed on submission";
@@ -1791,14 +1847,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // (approver_ID, or loaApprover_ID for SES), so it lands in that user's Pending Approval.
   // Without a selection the task stays in the processor team's queue.
   // SCM steps of an outline contract go to the SCM user named on the form: SCM Assign User
-  // (Contract Modification) or row 1's SCM SPOC (New Contract). Both store an email.
+  // (Contract Modification) or the SCM SPOC (New Contract; older requests kept it on row 1).
+  // All store an email.
   async _approverAssignment(config, details) {
     let where = null;
     if (config?.roleCode === "APPROVER") {
       const approverId = details?.approver_ID || details?.loaApprover_ID;
       where = approverId ? { ID: approverId } : null;
     } else if (config?.roleCode === "SCM") {
-      const email = details?.scmAssignUser || details?.items?.[0]?.scmSpocUserId;
+      const email = details?.scmAssignUser || details?.scmSpocUserId || details?.items?.[0]?.scmSpocUserId;
       where = email ? { email } : null;
     }
     if (!where) {
@@ -1944,7 +2001,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return configs.filter((config) => !config.requestVariant_code);
   }
 
-  async _createConfiguredTaskIfMissing(tx, requestId, step) {
+  // notice: extra e-mail content for the (re)opened task, e.g. a send-back's remarks.
+  async _createConfiguredTaskIfMissing(tx, requestId, step, notice = {}) {
     const existing = await SELECT.from(this.db.CATasks).where({
       request_ID: requestId,
       stepNo: step.stepNo
@@ -1958,12 +2016,20 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     // Resolved before the re-open branch too: the requester may have named a different
     // approver while the step was rolled back, so a reopened task must not keep the old one.
     const approver = await this._resolveStepAssignment(tx, requestId, config);
+    // The step's planned deadline (re-planned on a send-back). Requests planned before step SLAs
+    // existed have none and keep the old "SLA days from today" due date.
+    const planned = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
+      .columns("slaDueAt", "dueDate").where({ ID: step.ID }));
+    const sla = planned?.slaDueAt
+      ? { dueDate: planned.dueDate, slaDueAt: planned.slaDueAt, slaStartedAt: new Date().toISOString() }
+      : null;
 
     if (existing.length) {
       await tx.run(UPDATE(this.db.CATasks).set({
         status_code: TASK_STATUS.OPEN,
         decision: null,
         completedAt: null,
+        ...(sla ? { ...sla, slaBreached: false, slaBreachedAt: null } : {}),
         ...approver
       }).where({ ID: { in: existing.map((task) => task.ID) } }));
       // A step reached again after a send-back is e-mailed only to the person who handled it
@@ -1981,7 +2047,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
             assignedEmail: request.requesterEmail
           });
         }
-        await this._notifyTaskAssignment(tx, reopened);
+        await this._notifyTaskAssignment(tx, reopened, notice);
       }
       return;
     }
@@ -2004,12 +2070,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: TASK_STATUS.OPEN,
       isMandatory: config?.isMandatory ?? true,
       isApproval: config?.isApproval ?? false,
-      dueDate: this._addDays(config?.slaDays || 2)
+      ...(sla || { dueDate: this._addDays(config?.slaDays || 2) })
     };
     await tx.run(INSERT.into(this.db.CATasks).entries(task));
     // Step 1 is the requester's own step: they just submitted, so nobody is notified.
     if (step.stepNo > 1) {
-      await this._notifyTaskAssignment(tx, task);
+      await this._notifyTaskAssignment(tx, task, notice);
     }
   }
 
@@ -2026,7 +2092,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // member of the processor team, or the one assigned user (Selected Approval, LoA, SCM). The
   // payload is built inside the transaction; the call runs only after it commits, so a rejected
   // approval never e-mails anyone. A BPA failure is logged and never blocks the workflow.
-  async _notifyTaskAssignment(tx, task) {
+  // notice.notificationType is "ASSIGNED" (default) or "SENT_BACK"; a send-back adds the
+  // remarks and who sent it back, which the BPA template shows.
+  async _notifyTaskAssignment(tx, task, notice = {}) {
     const log = cds.log("task-notification");
     const recipients = await this._taskRecipients(task);
     if (!recipients.length) {
@@ -2055,18 +2123,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         requestId: request?.referenceNumber || task.request_ID,
         processorTeam: task.assignedTeamName || "",
         requestTitle: request?.title || "",
-        requestType: request?.requestType_code || ""
+        requestType: request?.requestType_code || "",
+        notificationType: notice.notificationType || "ASSIGNED",
+        remarks: notice.remarks || "",
+        sentBackBy: notice.sentBackBy || ""
       }
     };
 
     await this._startBpaProcess(data, `Task ${task.ID} notification for ${recipients.length} recipient(s)`);
   }
 
-  // E-mails the requester once their request ends: status "Approved" (last step completed) or
-  // "Rejected", through the BPA process "requestStatusNotificationProcess".
-  async _notifyRequestOutcome(tx, requestId, status) {
+  // E-mails the requester about their request through the BPA process
+  // "requestStatusNotificationProcess": "Completed" (last step completed), "Rejected" or
+  // "Sendback" (REQUEST_OUTCOME), with the approver's remarks.
+  async _notifyRequestOutcome(tx, requestId, status, remarks = "") {
     const request = await tx.run(SELECT.one.from(this.db.CARequests)
-      .columns("referenceNumber", "title", "requestType_code", "requesterEmail")
+      .columns("referenceNumber", "title", "requestType_code", "requesterEmail", "requesterName")
       .where({ ID: requestId }));
     if (!request?.requesterEmail) {
       cds.log("task-notification").warn(`No ${status} e-mail for request ${requestId}: no requester e-mail address`);
@@ -2074,36 +2146,57 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     const requestType = await tx.run(SELECT.one.from(this.db.RequestTypes)
       .columns("name").where({ code: request.requestType_code }));
-    await this._startBpaProcess({
-      definitionId: process.env.BPA_REQUEST_STATUS_DEFINITION_ID ||
-        "ap11.arize-qas-9339ozek.requeststatusnotificationprocessca.requestStatusNotificationProcess",
-      context: {
-        requestermail: request.requesterEmail,
-        requesttitle: request.title || "",
-        requesttype: requestType?.name || request.requestType_code || "",
-        requestid: request.referenceNumber || requestId,
-        status
+    const recipients = [request.requesterEmail];
+    // A completed outline contract also goes to the "User to be notified" named on the form.
+    if (status === REQUEST_OUTCOME.COMPLETED && request.requestType_code === "OUTLINE_CONTRACT") {
+      const contract = await tx.run(SELECT.one.from(this.db.OutlineContractDetails)
+        .columns("notifyUserEmail").where({ request_ID: requestId }));
+      const notifyEmail = String(contract?.notifyUserEmail || "").trim();
+      if (notifyEmail && notifyEmail.toLowerCase() !== String(request.requesterEmail).trim().toLowerCase()) {
+        recipients.push(notifyEmail);
       }
-    }, `Request ${request.referenceNumber} ${status} e-mail to the requester`);
+    }
+    for (const recipient of recipients) {
+      await this._startBpaProcess({
+        definitionId: process.env.BPA_REQUEST_STATUS_DEFINITION_ID ||
+          "ap11.arize-qas-9339ozek.requeststatusnotificationprocessca.requestStatusNotificationProcess",
+        context: {
+          requestermail: recipient,
+          requesttitle: request.title || "",
+          requesttype: requestType?.name || request.requestType_code || "",
+          requestid: request.referenceNumber || requestId,
+          status,
+          remarks: remarks || "",
+          requestername: request.requesterName || ""
+        }
+      }, `Request ${request.referenceNumber} ${status} e-mail to ${recipient}`);
+    }
   }
 
   // Starts a BPA process instance (destination bpa_workflow_technical). It runs only after the
   // current transaction commits, so a rolled-back action never e-mails anyone; a failure is
-  // logged and never blocks the workflow.
-  async _startBpaProcess(data, description) {
+  // logged and never blocks the workflow. awaitResult sends at once and rethrows a failure,
+  // for callers that record whether the e-mail went out (the SLA breach scan).
+  async _startBpaProcess(data, description, { awaitResult = false } = {}) {
     const log = cds.log("task-notification");
+    const post = () => executeHttpRequest(
+      { destinationName: process.env.BPA_WORKFLOW_DESTINATION || "bpa_workflow_technical" },
+      {
+        method: "post",
+        url: "/workflow/rest/v1/workflow-instances",
+        data,
+        headers: { "content-type": "application/json" }
+      },
+      { fetchCsrfToken: false }
+    );
+    if (awaitResult) {
+      await post();
+      log.info(`${description} started`);
+      return;
+    }
     const send = async () => {
       try {
-        await executeHttpRequest(
-          { destinationName: process.env.BPA_WORKFLOW_DESTINATION || "bpa_workflow_technical" },
-          {
-            method: "post",
-            url: "/workflow/rest/v1/workflow-instances",
-            data,
-            headers: { "content-type": "application/json" }
-          },
-          { fetchCsrfToken: false }
-        );
+        await post();
         log.info(`${description} started`);
       } catch (error) {
         log.error(`Could not start ${description}: ${error.message}`);
@@ -2114,6 +2207,204 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     } else {
       await send();
     }
+  }
+
+  // ---- SLA ----
+  // Every step of a request shares one schedule fixed at submission: a step is due its own SLA
+  // days after the step before it is due. A step finished late therefore leaves less time for the
+  // steps after it, and the request is due when its last step is.
+
+  _slaPreview = async (req) => {
+    let details = {};
+    try {
+      details = JSON.parse(req.data.details || "{}") || {};
+    } catch (error) {
+      details = {};
+    }
+    const configs = await SELECT.from(this.db.WorkflowStepConfigs)
+      .where({ requestType_code: req.data.requestTypeCode, isActive: true })
+      .orderBy("stepNo");
+    const selected = this._selectWorkflowConfigs(configs, req.data.requestVariantCode)
+      .filter((config) => this._isStepApplicable(config, details));
+    if (!selected.length) {
+      return { dueDate: null, slaDueAt: null, totalDays: 0, stepCount: 0 };
+    }
+    const totalDays = selected.slice(1).reduce((sum, config) => sum + Number(config.slaDays || 0), 0);
+    return { ...this._slaDeadline(new Date(), totalDays), totalDays, stepCount: selected.length };
+  };
+
+  // Calendar days: the deadline is slaDays x 24h after
+  // the start, and its date is the Sri Lankan calendar date of that moment.
+  _slaDeadline(startAt, slaDays) {
+    const dueAt = new Date(new Date(startAt).getTime() + Number(slaDays || 0) * DAY_MS);
+    return { slaDueAt: dueAt.toISOString(), dueDate: this._slaLocalDate(dueAt) };
+  }
+
+  _slaLocalDate(date) {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: SLA_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
+    }).format(date);
+  }
+
+  _planSlaSchedule(slaDaysPerStep, startAt) {
+    let cursor = startAt;
+    return slaDaysPerStep.map((slaDays) => {
+      const deadline = this._slaDeadline(cursor, slaDays);
+      cursor = deadline.slaDueAt;
+      return deadline;
+    });
+  }
+
+  // A send-back is rework: the target step gets its full SLA again from now and the steps after
+  // it follow on, so the person the request returns to is not breached the moment it arrives.
+  async _replanSlaFrom(tx, requestId, fromStepNo) {
+    const steps = (await tx.run(SELECT.from(this.db.RequestStepInstances)
+      .columns("ID", "stepNo", "slaDays", "slaDueAt")
+      .where({ request_ID: requestId })
+      .orderBy("stepNo")))
+      .filter((step) => step.stepNo >= fromStepNo);
+    if (!steps.length || !steps.every((step) => step.slaDueAt)) {
+      return;
+    }
+    const schedule = this._planSlaSchedule(steps.map((step) => step.slaDays), new Date().toISOString());
+    for (let index = 0; index < steps.length; index++) {
+      await tx.run(UPDATE(this.db.RequestStepInstances).set(schedule[index]).where({ ID: steps[index].ID }));
+    }
+    await tx.run(UPDATE(this.db.CARequests).set(schedule[schedule.length - 1]).where({ ID: requestId }));
+  }
+
+  // Closing a task after its deadline marks it breached for good, so it shows as approved with
+  // a breach rather than as on time.
+  _lateDecision(task, decidedAt) {
+    if (task.slaBreached || !task.slaDueAt || Date.parse(decidedAt) <= Date.parse(task.slaDueAt)) {
+      return {};
+    }
+    return { slaBreached: true, slaBreachedAt: decidedAt };
+  }
+
+  _overdueText(slaDueAt, at = new Date()) {
+    const late = Math.max(0, new Date(at).getTime() - Date.parse(slaDueAt));
+    if (late >= DAY_MS) {
+      return `${Math.floor(late / DAY_MS)} day(s)`;
+    }
+    return `${Math.max(1, Math.ceil(late / HOUR_MS))} hour(s)`;
+  }
+
+  // Run by SAP Job Scheduling (scope SlaScheduler) or an administrator. Every open task past its
+  // deadline is marked breached and its assignee - or, for an unclaimed team task, every active
+  // member - is e-mailed once through "SLA Breach Notification Process_CA". Each e-mail is
+  // claimed in SlaNotificationStates first, so overlapping or repeated scans never send it twice
+  // and a failed send is retried on later scans up to SLA_MAX_RETRIES times.
+  _runSlaBreachScan = async (req) => {
+    const tx = cds.tx(req);
+    const now = new Date().toISOString();
+    const tasks = await tx.run(SELECT.from(this.db.CATasks).where({
+      status_code: TASK_STATUS.OPEN,
+      slaDueAt: { "<": now }
+    }));
+    const result = { overdueTasks: tasks.length, notificationsSent: 0, notificationsFailed: 0, notificationsSkipped: 0 };
+    const monitor = { displayName: "SLA Monitor", email: null };
+
+    for (const task of tasks) {
+      if (!task.slaBreached) {
+        await tx.run(UPDATE(this.db.CATasks).set({ slaBreached: true, slaBreachedAt: now }).where({ ID: task.ID }));
+        await this._writeHistory(tx, task.request_ID, task.stepNo, "SLA_BREACHED", monitor, null, null,
+          `${task.taskName} is ${this._overdueText(task.slaDueAt)} past its SLA due date`);
+      }
+      const recipients = await this._taskRecipients(task);
+      if (!recipients.length) {
+        result.notificationsSkipped += 1;
+        cds.log("sla-scheduler").warn(`No recipient for the SLA breach of task ${task.ID}`);
+        continue;
+      }
+      for (const email of recipients) {
+        const key = ["SLA_BREACH", "TASK", task.ID, task.slaDueAt, email].join(":").toLowerCase();
+        if (!await this._claimSlaNotification(tx, key, task, email)) {
+          result.notificationsSkipped += 1;
+          continue;
+        }
+        try {
+          await this._notifySlaBreach(tx, task, email);
+          await this._completeSlaNotification(tx, key, "SENT");
+          result.notificationsSent += 1;
+        } catch (error) {
+          await this._completeSlaNotification(tx, key, "FAILED", error.message);
+          result.notificationsFailed += 1;
+        }
+      }
+    }
+    cds.log("sla-scheduler").info("SLA breach scan completed", result);
+    return result;
+  };
+
+  async _claimSlaNotification(tx, key, task, recipient) {
+    const existing = await tx.run(SELECT.one.from(this.db.SlaNotificationStates).where({ notificationKey: key }));
+    const maxAttempts = Math.max(1, Number(process.env.SLA_MAX_RETRIES || 5));
+    const attempts = Number(existing?.attempts || 0);
+    const inFlight = existing?.status === "PROCESSING"
+      && Date.parse(existing.lastAttemptAt || 0) > Date.now() - 15 * 60 * 1000;
+    if (existing?.status === "SENT" || attempts >= maxAttempts || inFlight) {
+      return false;
+    }
+    const now = new Date().toISOString();
+    if (existing) {
+      await tx.run(UPDATE(this.db.SlaNotificationStates).set({
+        status: "PROCESSING", attempts: attempts + 1, lastAttemptAt: now, lastError: null
+      }).where({ notificationKey: key }));
+      return true;
+    }
+    try {
+      await tx.run(INSERT.into(this.db.SlaNotificationStates).entries({
+        notificationKey: key,
+        request_ID: task.request_ID,
+        task_ID: task.ID,
+        recipient,
+        dueDate: task.dueDate,
+        status: "PROCESSING",
+        attempts: 1,
+        lastAttemptAt: now
+      }));
+      return true;
+    } catch (error) {
+      if (/unique|duplicate|constraint/i.test(error.message || "")) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  async _completeSlaNotification(tx, key, status, errorMessage = null) {
+    await tx.run(UPDATE(this.db.SlaNotificationStates).set({
+      status,
+      notifiedAt: status === "SENT" ? new Date().toISOString() : null,
+      lastError: errorMessage
+    }).where({ notificationKey: key }));
+  }
+
+  async _notifySlaBreach(tx, task, email) {
+    const request = await tx.run(SELECT.one.from(this.db.CARequests)
+      .columns("title", "requestType_code").where({ ID: task.request_ID }));
+    const requestType = await tx.run(SELECT.one.from(this.db.RequestTypes)
+      .columns("name").where({ code: request?.requestType_code }));
+    const appUrl = this._taskAppUrl();
+    const data = {
+      definitionId: process.env.BPA_SLA_BREACH_DEFINITION_ID ||
+        "ap11.arize-qas-9339ozek.slabreachnotificationprocessca.sLABreachNotificationProcess",
+      context: {
+        taskId: task.ID,
+        taskTitle: task.taskName || "Workflow task",
+        assigneeEmail: [email],
+        assigneeName: (task.assignedUser_ID && task.assignedName) || task.assignedTeamName || "",
+        taskUrl: appUrl ? `${appUrl}#/tasks/${encodeURIComponent(task.ID)}` : "",
+        slaDueDate: new Intl.DateTimeFormat("en-GB", {
+          timeZone: SLA_TIME_ZONE, day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+        }).format(new Date(task.slaDueAt)),
+        breachDuration: this._overdueText(task.slaDueAt),
+        requestTitle: request?.title || "",
+        requestType: requestType?.name || request?.requestType_code || ""
+      }
+    };
+    await this._startBpaProcess(data, `SLA breach e-mail for task ${task.ID} to ${email}`, { awaitResult: true });
   }
 
   // The assigned user, or every active member of the processor team. A membership without a
@@ -2448,3 +2739,5 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return date.toISOString().slice(0, 10);
   }
 };
+
+module.exports.REQUEST_OUTCOME = REQUEST_OUTCOME;

@@ -135,6 +135,23 @@ service FlowmateCAService {
   // server would generate for these details (JSON in, JSON out). Nothing is saved.
   function previewProjectCode(details: LargeString) returns LargeString;
   function getFlowmateRequestFormCatalog() returns LargeString;
+  // The due date a request would get if submitted now: the step SLAs of its workflow added up.
+  // details (JSON) decides conditional steps such as the DMS step. Nothing is saved.
+  function slaPreview(requestTypeCode: String(40), requestVariantCode: String(40), details: LargeString) returns {
+    dueDate   : Date;
+    slaDueAt  : DateTime;
+    totalDays : Integer;
+    stepCount : Integer;
+  };
+  // Flags open tasks past their SLA and e-mails each assignee once. Run by SAP Job Scheduling;
+  // an administrator may run it on demand.
+  @requires: ['SlaScheduler', 'CAAdmin']
+  action runSlaBreachScan() returns {
+    overdueTasks         : Integer;
+    notificationsSent    : Integer;
+    notificationsFailed  : Integer;
+    notificationsSkipped : Integer;
+  };
   @description: 'Creates the linked Flowmate Payment Run request after the purchase order request is successfully completed.'
   action createFlowmatePaymentRun(requestId: UUID) returns {
     created          : Boolean;

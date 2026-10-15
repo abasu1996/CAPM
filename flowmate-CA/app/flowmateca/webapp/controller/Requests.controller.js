@@ -18,6 +18,8 @@ sap.ui.define([
     _onRouteMatched: async function (event) {
       this._query = event.getParameter("arguments")["?query"] || {};
       this.byId("requestStatusFilter").setSelectedKey(this._query.status || "");
+      // The Sent Back / Rejected / Completed tiles open this list with a status: Request Type only.
+      this.getView().getModel("list").setProperty("/showRequester", !this._query.status);
       await this._loadCatalog();
       await this.onRefresh();
     },

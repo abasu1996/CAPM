@@ -869,3 +869,18 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* My Tasks / Team Queue: the table keeps its column widths and its ScrollContainer scrolls
+   sideways, instead of being squeezed into (and clipped at) the page width. */
+.caWorklistTable.caScrollTable.sapMList {
+  width: 120rem !important;
+  min-width: calc(100% - 3rem);
+  max-width: none;
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
+.caSlaRemaining.sapMText {
+  font-size: 0.75rem;
+  color: var(--ca-text-muted);
+}

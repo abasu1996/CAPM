@@ -55,21 +55,35 @@
         itemPress=".onItemPress"
         class="caWorklistTable">
         <columns>
-          <Column width="12rem"><Text text="Request ID"/></Column>
+          <Column width="16rem"><Text text="Request ID"/></Column>
           <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestType}"/></Column>
+          <!-- Hidden on the Sent Back / Rejected / Completed tile lists (opened with a status). -->
+          <Column minScreenWidth="Tablet" demandPopin="true" visible="{list>/showRequester}"><Text text="Requester"/></Column>
           <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestVariant}"/></Column>
           <Column><Text text="{i18n>title}"/></Column>
           <Column width="9rem"><Text text="{i18n>status}"/></Column>
           <Column width="9rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>dueDate}"/></Column>
         </columns>
         <items>
-          <ColumnListItem type="Navigation">
+          <ColumnListItem
+            type="Navigation"
+            highlight="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.formatRequestSlaHighlight'}">
             <cells>
-              <ObjectIdentifier title="{list>referenceNumber}" text="{list>requesterName}"/>
+              <ObjectIdentifier title="{list>referenceNumber}"/>
               <Text text="{list>requestType/name}"/>
+              <Text text="{list>requesterName}"/>
               <Text text="{list>requestVariant/name}"/>
               <Text text="{list>title}" maxLines="2"/>
-              <ObjectStatus text="{list>status/name}" state="{path: 'list>status/code', formatter: '.statusState'}"/>
+              <VBox>
+                <ObjectStatus text="{list>status/name}" state="{path: 'list>status/code', formatter: '.statusState'}"/>
+                <ObjectStatus
+                  text="{i18n>slaBreachedLabel}"
+                  icon="sap-icon://lateness"
+                  state="Error"
+                  inverted="true"
+                  class="sapUiTinyMarginTop"
+                  visible="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.isRequestOverdue'}"/>
+              </VBox>
               <Text text="{path: 'list>dueDate', formatter: '.formatDate'}"/>
             </cells>
           </ColumnListItem>

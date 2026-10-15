@@ -33,33 +33,63 @@
       </OverflowToolbar>
     </subHeader>
     <content>
+      <!-- Scrolls sideways instead of squeezing: every column keeps a readable width. -->
+      <ScrollContainer horizontal="true" vertical="false" width="100%" focusable="false">
       <Table
         items="{tasks>/items}"
         growing="true"
-        growingScrollToLoad="true"
+        growingScrollToLoad="false"
         noDataText="No tasks are available in this queue"
         itemPress=".onItemPress"
-        class="caWorklistTable">
+        class="caWorklistTable caScrollTable">
         <columns>
-          <Column width="13rem"><Text text="Task ID"/></Column>
-          <Column width="11rem"><Text text="Request ID"/></Column>
-          <Column><Text text="Task"/></Column>
-          <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Request"/></Column>
-          <Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="Step"/></Column>
+          <Column width="14rem"><Text text="Task ID"/></Column>
+          <Column width="13rem"><Text text="Request ID"/></Column>
+          <Column width="12rem"><Text text="{i18n>requestType}"/></Column>
+          <Column width="11rem"><Text text="Requester"/></Column>
+          <Column width="16rem"><Text text="Task"/></Column>
+          <Column width="20rem"><Text text="Request"/></Column>
+          <Column width="5rem"><Text text="Step"/></Column>
           <Column width="10rem"><Text text="{i18n>status}"/></Column>
-          <Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>dueDate}"/></Column>
-          <Column width="8rem" visible="{taskView>/isTeamMode}"><Text text="Action"/></Column>
+          <Column width="12rem"><Text text="{i18n>slaDue}"/></Column>
+          <Column width="10rem" visible="{taskView>/isTeamMode}"><Text text="Action"/></Column>
         </columns>
         <items>
-          <ColumnListItem type="Navigation">
+          <ColumnListItem
+            type="Navigation"
+            highlight="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.formatSlaHighlight'}">
             <cells>
               <ObjectIdentifier title="{tasks>referenceNumber}" text="{tasks>assignedTeamName}"/>
-              <Link text="{tasks>request/referenceNumber}" press=".onRequestLinkPress"/>
+              <Link text="{tasks>request/referenceNumber}" wrapping="true" press=".onRequestLinkPress"/>
+              <Text text="{tasks>request/requestType/name}"/>
+              <Text text="{tasks>request/requesterName}"/>
               <ObjectIdentifier title="{tasks>taskName}" text="{tasks>description}"/>
               <Text text="{tasks>request/title}" maxLines="2"/>
               <ObjectNumber number="{tasks>stepNo}"/>
-              <ObjectStatus text="{tasks>status/name}" state="{path: 'tasks>status/code', formatter: '.statusState'}"/>
-              <Text text="{path: 'tasks>dueDate', formatter: '.formatDate'}"/>
+              <VBox>
+                <ObjectStatus text="{tasks>status/name}" state="{path: 'tasks>status/code', formatter: '.statusState'}"/>
+                <ObjectStatus
+                  text="{i18n>slaBreachedLabel}"
+                  icon="sap-icon://lateness"
+                  state="Error"
+                  inverted="true"
+                  class="sapUiTinyMarginTop"
+                  visible="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.isSlaBreached'}"/>
+                <ObjectStatus
+                  text="{i18n>withinSlaLabel}"
+                  icon="sap-icon://accept"
+                  state="Success"
+                  inverted="true"
+                  class="sapUiTinyMarginTop"
+                  visible="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.isWithinSla'}"/>
+              </VBox>
+              <VBox>
+                <Text text="{= ${tasks>slaDueAt} ? ${path: 'tasks>slaDueAt', formatter: '.formatDateTime'} : ${path: 'tasks>dueDate', formatter: '.formatDate'} }"/>
+                <Text
+                  text="{parts: ['tasks>slaDueAt', 'tasks>status/code'], formatter: '.formatSlaRemaining'}"
+                  class="caSlaRemaining"
+                  visible="{= ${tasks>status/code} === 'OPEN' &amp;&amp; !!${tasks>slaDueAt} }"/>
+              </VBox>
               <Button
                 text="Assign to Me"
                 icon="sap-icon://employee-approvals"
@@ -70,6 +100,7 @@
           </ColumnListItem>
         </items>
       </Table>
+      </ScrollContainer>
     </content>
   </Page>
 </mvc:View>

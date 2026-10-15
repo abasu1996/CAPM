@@ -56,9 +56,10 @@
             </OverflowToolbar>
           </headerToolbar>
           <columns>
-            <Column width="13rem"><Text text="Request ID"/></Column>
+            <Column width="16rem"><Text text="Request ID"/></Column>
             <Column><Text text="{i18n>title}"/></Column>
             <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestType}"/></Column>
+            <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Requester"/></Column>
             <Column width="10rem"><Text text="{i18n>status}"/></Column>
             <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>processorTeam}"/></Column>
             <Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>createdOn}"/></Column>
@@ -66,9 +67,10 @@
           <items>
             <ColumnListItem type="Navigation">
               <cells>
-                <ObjectIdentifier title="{referenceNumber}" text="{requesterName}"/>
+                <ObjectIdentifier title="{referenceNumber}"/>
                 <Text text="{title}" maxLines="2"/>
                 <Text text="{requestType/name}"/>
+                <Text text="{requesterName}"/>
                 <ObjectStatus text="{status/name}" state="{path: 'status_code', formatter: '.statusState'}"/>
                 <Text text="{ownerTeamName}"/>
                 <Text text="{path: 'createdAt', formatter: '.formatDate'}"/>

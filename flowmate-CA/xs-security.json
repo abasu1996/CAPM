@@ -23,6 +23,13 @@
       "description": "Supervise queues and maintain delegations"
     },
     {
+      "name": "$XSAPPNAME.SlaScheduler",
+      "description": "Execute the scheduled Flowmate CA SLA breach scan",
+      "grant-as-authority-to-apps": [
+        "84245ff9-2e43-4213-9a3f-dd72ea770caf!b47994|sap-jobscheduler!b1"
+      ]
+    },
+    {
       "name": "$XSAPPNAME.CAAdmin",
       "description": "Maintain Flowmate CA configuration and master data",
       "grant-as-authority-to-apps": [

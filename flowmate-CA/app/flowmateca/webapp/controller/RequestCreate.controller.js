@@ -442,6 +442,7 @@ sap.ui.define([
       this._filterVariants(typeCode);
       this._renderDynamicForm();
       this._renderItemsTable();
+      this._refreshSlaPreview();
     },
 
     onBulkUploadChange: async function () {
@@ -540,6 +541,7 @@ sap.ui.define([
       this.getView().getModel("form").setProperty("/requestVariantCode", "");
       this.getView().getModel("form").setProperty("/details", {});
       await this._renderDynamicForm();
+      this._refreshSlaPreview();
     },
 
     _renderDynamicForm: async function () {
@@ -664,6 +666,44 @@ sap.ui.define([
         });
       } catch (error) {
         // The preview is a convenience; the server still generates the values on submit.
+      }
+    },
+
+    // Due Date is read-only: the step SLAs of the chosen workflow added up from now, the same
+    // way the server plans them on submit. Scalar details are sent because they decide
+    // conditional steps (DMS Update adds the DMS step and its days).
+    _refreshSlaPreview: async function () {
+      const formModel = this.getView().getModel("form");
+      const typeCode = formModel.getProperty("/requestTypeCode");
+      const variantCode = formModel.getProperty("/requestVariantCode");
+      const details = formModel.getProperty("/details") || {};
+      const conditions = {};
+      Object.keys(details).forEach(function (name) {
+        if (["string", "number", "boolean"].indexOf(typeof details[name]) >= 0) {
+          conditions[name] = details[name];
+        }
+      });
+      const key = JSON.stringify([typeCode, variantCode, conditions]);
+      if (key === this._slaPreviewKey) {
+        return;
+      }
+      this._slaPreviewKey = key;
+      if (!typeCode || !variantCode) {
+        formModel.setProperty("/dueDate", "");
+        return;
+      }
+      const literal = `'${JSON.stringify(conditions).replace(/'/g, "''")}'`;
+      try {
+        const result = await this.request(
+          `slaPreview(requestTypeCode='${typeCode}',requestVariantCode='${variantCode}',details=@d)?@d=${encodeURIComponent(literal)}`
+        );
+        if (key !== this._slaPreviewKey) {
+          return;
+        }
+        formModel.setProperty("/dueDate", result.dueDate || "");
+      } catch (error) {
+        // The server sets the due date on submit regardless.
+        this._slaPreviewKey = null;
       }
     },
 
@@ -937,11 +977,8 @@ sap.ui.define([
           items: {
             path: `catalog>/${definition.catalog}`,
             templateShareable: true,
-            template: new ListItem({
-              key: `{catalog>${definition.key || "code"}}`,
-              text: `{catalog>${definition.text || "name"}}`,
-              additionalText: `{catalog>${definition.secondaryText || "code"}}`
-            })
+            template: this._comboListItem(definition, definition.key || "code", definition.text || "name",
+              definition.secondaryText || "code")
           }
         }).bindProperty("selectedKey", modelPath);
       }
@@ -1223,11 +1260,8 @@ sap.ui.define([
           items: {
             path: `catalog>/${definition.catalog}`,
             templateShareable: true,
-            template: new ListItem({
-              key: `{catalog>${definition.key || "code"}}`,
-              text: `{catalog>${definition.text || "name"}}`,
-              additionalText: `{catalog>${definition.secondaryText || "code"}}`
-            })
+            template: this._comboListItem(definition, definition.key || "code", definition.text || "name",
+              definition.secondaryText || "code")
           },
           selectionChange: function (event) {
             const item = event.getParameter("selectedItem");
@@ -1328,11 +1362,7 @@ sap.ui.define([
         items: {
           path: "catalog>/flowmateProcessTypes",
           templateShareable: true,
-          template: new ListItem({
-            key: "{catalog>code}",
-            text: "{catalog>name}",
-            additionalText: "{catalog>code}"
-          })
+          template: this._comboListItem({ key: "code", text: "name", codeField: "code" }, "code", "name")
         },
         selectionChange: this.onPaymentRunProcessTypeChange.bind(this)
       }).bindProperty("selectedKey", "paymentRun>/processType_code");
@@ -1342,11 +1372,7 @@ sap.ui.define([
         items: {
           path: "catalog>/flowmateProcessSubTypesFiltered",
           templateShareable: true,
-          template: new ListItem({
-            key: "{catalog>code}",
-            text: "{catalog>name}",
-            additionalText: "{catalog>code}"
-          })
+          template: this._comboListItem({ key: "code", text: "name", codeField: "code" }, "code", "name")
         },
         selectionChange: this.onPaymentRunSubProcessTypeChange.bind(this)
       }).bindProperty("selectedKey", "paymentRun>/subProcessType_code");
@@ -1359,11 +1385,7 @@ sap.ui.define([
         items: {
           path: "catalog>/flowmatePriorities",
           templateShareable: true,
-          template: new ListItem({
-            key: "{catalog>code}",
-            text: "{catalog>name}",
-            additionalText: "{catalog>code}"
-          })
+          template: this._comboListItem({ key: "code", text: "name", codeField: "code" }, "code", "name")
         }
       });
       priority.bindProperty("selectedKey", "paymentRun>/priorityConfig_code");
@@ -1379,11 +1401,7 @@ sap.ui.define([
         items: {
           path: "catalog>/flowmateTeams",
           templateShareable: true,
-          template: new ListItem({
-            key: "{catalog>ID}",
-            text: "{catalog>name}",
-            additionalText: "{catalog>teamCode}"
-          })
+          template: this._comboListItem({ key: "ID", text: "name", codeField: "teamCode" }, "ID", "name")
         },
         selectionChange: function (event) {
           const item = event.getParameter("selectedItem");
@@ -1403,6 +1421,12 @@ sap.ui.define([
       this._renderPaymentRunDetails();
     },
 
+    // The catalog row's own name: the item text also carries the code ("CODE - Name").
+    _selectedRowName: function (item) {
+      const context = item && item.getBindingContext("catalog");
+      return context ? (context.getProperty("name") || "") : "";
+    },
+
     onPaymentRunProcessTypeChange: function (event) {
       const selected = event.getParameter("selectedItem");
       const model = this.getView().getModel("paymentRun");
@@ -1414,7 +1438,7 @@ sap.ui.define([
       });
       catalog.setProperty("/flowmateProcessSubTypesFiltered", filtered);
       model.setProperty("/processType_code", code);
-      model.setProperty("/processTypeName", selected ? selected.getText() : "");
+      model.setProperty("/processTypeName", this._selectedRowName(selected));
       model.setProperty("/subProcessType_code", "");
       model.setProperty("/subProcessTypeName", "");
       model.setProperty("/details", {});
@@ -1426,7 +1450,7 @@ sap.ui.define([
       const model = this.getView().getModel("paymentRun");
       const code = selected ? selected.getKey() : "";
       model.setProperty("/subProcessType_code", code);
-      model.setProperty("/subProcessTypeName", selected ? selected.getText() : "");
+      model.setProperty("/subProcessTypeName", this._selectedRowName(selected));
       // A subtype change must not carry composition rows from the previous
       // subtype into the next Flowmate request.
       model.setProperty("/details", {});
@@ -1591,14 +1615,16 @@ sap.ui.define([
       formModel.setProperty("/offersLineModeChoice", typeCode !== "MATERIAL_RESERVATION"
         && FormDefinitions.offersLineModeChoice(variantCode));
       formModel.setProperty("/showsItemsTable", this._itemColumns.length > 0
+        && FormDefinitions.capturesLineItems(variantCode)
         && (FormDefinitions.hasHeaderTable(variantCode)
           || lineMode === "MULTIPLE_LINE"
           || typeCode === "MATERIAL_RESERVATION"
           || FormDefinitions.alwaysHasItems(typeCode)));
       // "Contract Creation Details" is an Outline Contract title; every other type calls the
-      // second table its line items, header table or not.
+      // second table its line items, header table or not (optional ones for a Purchase Order).
       formModel.setProperty("/itemsTableTitle", this.getView().getModel("i18n").getResourceBundle()
-        .getText(typeCode === "OUTLINE_CONTRACT" ? "contractItemsTableTitle" : "itemsTableTitle"));
+        .getText(typeCode === "OUTLINE_CONTRACT" ? "contractItemsTableTitle"
+          : typeCode === "PURCHASE_ORDER" ? "optionalItemsTableTitle" : "itemsTableTitle"));
       this._renderGrid("items");
       this._renderGrid("headers");
       this._renderConditionalGrids(typeCode, variantCode);
@@ -2024,7 +2050,13 @@ sap.ui.define([
       }.bind(this));
       if (missing) {
         MessageBox.warning(`${missing.definition.label} is required.`);
-        missing.control.focus();
+        this._focusFieldControl(missing.control);
+        return;
+      }
+      const badEmail = this._firstInvalidEmailField(this._fieldControls, form.details);
+      if (badEmail) {
+        MessageBox.warning(`${badEmail.entry.definition.label}: "${badEmail.email}" is not a valid e-mail address.`);
+        this._focusFieldControl(badEmail.entry.control);
         return;
       }
 
@@ -2048,7 +2080,8 @@ sap.ui.define([
         }
       }
       if (form.showsItemsTable) {
-        if (!itemRows.length) {
+        // Purchase Order line items are optional; a row that is entered still needs its required cells.
+        if (!itemRows.length && form.requestTypeCode !== "PURCHASE_ORDER") {
           MessageBox.warning(`Add at least one row to the ${itemsTitle} table.`);
           return;
         }
@@ -2196,10 +2229,15 @@ sap.ui.define([
         MessageBox.warning(`Purchase Order Details - ${missingRow}`);
         return;
       }
-      if (!items.length) {
-        MessageBox.warning("Add at least one line item.");
+      const badRowEmail = rows.reduce(function (found, row, index) {
+        const email = found ? null : this._firstInvalidEmail(row.approvedPoRecipientEmail);
+        return found || (email ? { index: index, email: email } : null);
+      }.bind(this), null);
+      if (badRowEmail) {
+        MessageBox.warning(`Purchase Order Details - Row ${badRowEmail.index + 1}: "${badRowEmail.email}" is not a valid e-mail address.`);
         return;
       }
+      // Line items are optional; the ones entered need their required cells and a valid Row #.
       const missingItem = this._firstMissingItemCell(items);
       if (missingItem) {
         MessageBox.warning(`Line Items - ${missingItem}`);
@@ -2211,13 +2249,6 @@ sap.ui.define([
       });
       if (strayItem >= 0) {
         MessageBox.warning(`Line Items - Row ${strayItem + 1}: Row # must be between 1 and ${rows.length}.`);
-        return;
-      }
-      const rowWithoutItems = rows.findIndex(function (_row, index) {
-        return !items.some(function (item) { return Number(item.poRow) === index + 1; });
-      });
-      if (rowWithoutItems >= 0) {
-        MessageBox.warning(`Purchase Order Details - Row ${rowWithoutItems + 1} has no line items.`);
         return;
       }
 

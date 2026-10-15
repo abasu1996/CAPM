@@ -34,7 +34,7 @@
                   <Column><Text text="Step Name"/></Column>
                   <Column minScreenWidth="Desktop" demandPopin="true"><Text text="Processor Team"/></Column>
                   <Column width="8rem"><Text text="Mandatory"/></Column>
-                  <Column width="6rem"><Text text="SLA"/></Column>
+                  <Column width="7rem"><Text text="SLA (Days)"/></Column>
                   <Column width="6rem"><Text text="Actions"/></Column>
                 </columns>
                 <items>
@@ -3273,6 +3273,8 @@
               </ComboBox>
               <Label text="Task Name" class="sapUiSmallMarginTop"/>
               <Input value="{newItem>/taskName}"/>
+              <Label text="SLA (Days)" required="true" class="sapUiSmallMarginTop"/>
+              <StepInput value="{newItem>/slaDays}" min="1" max="30" width="8rem"/>
             </VBox>
 
             <VBox visible="{newItem>/isVariant}">

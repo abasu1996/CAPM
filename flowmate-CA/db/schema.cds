@@ -74,6 +74,7 @@ entity CARequests : cuid, managed {
   priority        : Association to Priorities;
   currentStep     : Integer default 0;
   dueDate         : Date;
+  slaDueAt        : DateTime;
   submittedAt     : DateTime;
   completedAt     : DateTime;
   externalObjectId: String(120);
@@ -122,6 +123,9 @@ entity RequestStepInstances : cuid, managed {
   processorTeam       : Association to common.Teams;
   processorTeamName   : String(160);
   status              : String(30) default 'PENDING';
+  slaDays             : Integer;
+  slaDueAt            : DateTime;
+  dueDate             : Date;
   startedAt           : DateTime;
   completedAt         : DateTime;
 }
@@ -142,6 +146,10 @@ entity CATasks : cuid, managed {
   isMandatory     : Boolean default true;
   isApproval      : Boolean default false;
   dueDate         : Date;
+  slaStartedAt    : DateTime;
+  slaDueAt        : DateTime;
+  slaBreached     : Boolean default false;
+  slaBreachedAt   : DateTime;
   decision        : String(40);
   remarks         : LargeString;
   completedAt     : DateTime;
@@ -190,6 +198,20 @@ entity CAHistory : cuid, managed {
   oldStatus : String(40);
   newStatus : String(40);
   remarks   : LargeString;
+}
+
+@assert.unique.slaNotification: [notificationKey]
+entity SlaNotificationStates : managed {
+  key notificationKey : String(512);
+  request             : Association to CARequests;
+  task                : Association to CATasks;
+  recipient           : String(255);
+  dueDate             : Date;
+  status              : String(30) default 'PROCESSING';
+  attempts            : Integer default 0;
+  lastAttemptAt       : DateTime;
+  notifiedAt          : DateTime;
+  lastError           : LargeString;
 }
 
 entity MaterialCodeDetails : cuid, managed {
@@ -477,6 +499,7 @@ entity MaterialReservationItems : cuid, managed {
   indentWo     : String(80);
   equipmentNo  : String(80);
   materialCode: String(40);
+  reservationNumber: String(40);
   description : String(180);
   plant        : String(40);
   storageLocation: String(40);
@@ -499,7 +522,9 @@ entity OutlineContractDetails : cuid, managed {
   otherSupportingDocumentsAttachment: String(255);
   otherComments    : LargeString;
   contractCount    : Integer;
-  scmSpocUserId    : String(80);
+  scmSpocUserId    : String(255);
+  // New Contract: also receives the completion e-mail.
+  notifyUserEmail  : String(255);
   totalTargetValue : Decimal(17,2);
   sapVendorCode    : String(40);
   sapSourcingEventNo: String(80);
@@ -541,6 +566,8 @@ entity OutlineContractDetails : cuid, managed {
   conditionChange        : String(10);
   conditionChangeDetails : LargeString;
   amendmentComments      : LargeString;
+  // Contract Modification (Multiple layout): the mandatory Contract Amendment Documents file.
+  amendmentDocumentsAttachment: String(255);
   changeItems      : Composition of many OutlineContractChangeItems
                        on changeItems.details = $self;
 }
@@ -639,13 +666,14 @@ entity PurchaseOrderDetails : cuid, managed {
   siteId                  : String(80);
   currency                : Association to common.Currencies;
   plant_code              : String(40);
+  accountAssignment       : String(80);
   totalValue              : Decimal(17,2);
   paymentTerms            : Association to common.PaymentTerms;
   remarks                 : LargeString;
   termsOfDelivery         : LargeString;
   warranty                : LargeString;
   paymentMilestone        : String(120);
-  approvedPoRecipientEmail: String(255);
+  approvedPoRecipientEmail: String(1000); // one or more e-mails, "; "-separated
   invoiceBoqAttachment    : String(255);
   emailApprovalAttachment : String(255);
   summary                 : LargeString;

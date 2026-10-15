@@ -67,7 +67,11 @@
               <Label text="{i18n>title}" required="true"/>
               <Input value="{form>/title}" maxLength="255" placeholder="Briefly describe the required outcome"/>
               <Label text="{i18n>dueDate}"/>
-              <DatePicker value="{form>/dueDate}" valueFormat="yyyy-MM-dd" displayFormat="medium"/>
+              <Input
+                id="slaDueDate"
+                value="{path: 'form>/dueDate', formatter: '.formatDate'}"
+                editable="false"
+                placeholder="Set from the step SLAs once a process variant is chosen"/>
               <Label text="Link to Existing Request"/>
               <ComboBox
                 selectedKey="{form>/predecessorId}"

@@ -66,6 +66,13 @@ sap.ui.define([
       request.tasks = (request.tasks || []).sort(function (left, right) {
         return left.stepNo - right.stepNo;
       });
+      // A step shows "SLA Breached" when any of its tasks breached (open past due, or closed late).
+      request.stepInstances.forEach(function (step) {
+        step.slaBreached = request.tasks.some(function (task) {
+          return task.stepNo === step.stepNo
+            && this.isSlaBreached(task.slaDueAt, task.status?.code || task.status_code, task.slaBreached);
+        }.bind(this));
+      }.bind(this));
       request.history = (request.history || []).sort(function (left, right) {
         return new Date(right.createdAt) - new Date(left.createdAt);
       });

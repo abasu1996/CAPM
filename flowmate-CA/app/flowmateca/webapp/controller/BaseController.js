@@ -19,9 +19,20 @@ sap.ui.define([
   "flowmateca/model/serviceUrl",
   "sap/m/Table",
   "sap/m/Panel",
-  "sap/m/ScrollContainer"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer) {
+  "sap/m/ScrollContainer",
+  "sap/m/VBox",
+  "sap/m/HBox",
+  "sap/m/Button",
+  "sap/m/FlexItemData"
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData) {
   "use strict";
+
+  // A VBox that a SimpleForm accepts as a field (forms only take IFormContent controls); it holds
+  // the rows of an e-mail list field.
+  const FormVBox = VBox.extend("flowmateca.control.FormVBox", {
+    metadata: { interfaces: ["sap.ui.core.IFormContent"] },
+    renderer: "sap.m.VBoxRenderer"
+  });
 
   // A request carries exactly one detail child, named per request type. Shared so the
   // request page and the task page resolve it the same way.
@@ -239,6 +250,74 @@ sap.ui.define([
         month: "short",
         day: "2-digit"
       }).format(new Date(value));
+    },
+
+    formatDateTime: function (value) {
+      if (!value) {
+        return "";
+      }
+      return new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(value));
+    },
+
+    // A task is breached once it is past its deadline while open, or when it was closed late
+    // (slaBreached is stored then), so an approved task keeps the badge.
+    isSlaBreached: function (slaDueAt, statusCode, slaBreached) {
+      if (slaBreached) {
+        return true;
+      }
+      return statusCode === "OPEN" && !!slaDueAt && new Date(slaDueAt) < new Date();
+    },
+
+    isWithinSla: function (slaDueAt, statusCode, slaBreached) {
+      return !!slaDueAt && statusCode !== "REJECTED" && !this.isSlaBreached(slaDueAt, statusCode, slaBreached);
+    },
+
+    formatSlaHighlight: function (slaDueAt, statusCode, slaBreached) {
+      if (this.isSlaBreached(slaDueAt, statusCode, slaBreached)) {
+        return "Error";
+      }
+      return this.isWithinSla(slaDueAt, statusCode, slaBreached) ? "Success" : "None";
+    },
+
+    // "Due in 2 days" / "3 days overdue" for an open task; nothing once it is closed.
+    formatSlaRemaining: function (slaDueAt, statusCode) {
+      if (!slaDueAt || statusCode !== "OPEN") {
+        return "";
+      }
+      const diff = new Date(slaDueAt).getTime() - Date.now();
+      const hours = Math.abs(diff) / 3600000;
+      const wholeHours = Math.max(1, Math.ceil(hours));
+      const inDays = wholeHours >= 24;
+      const amount = inDays ? Math.max(1, Math.floor(hours / 24)) : wholeHours;
+      const unit = inDays ? (amount === 1 ? "day" : "days") : (amount === 1 ? "hour" : "hours");
+      return diff >= 0 ? `Due in ${amount} ${unit}` : `${amount} ${unit} overdue`;
+    },
+
+    // A request is past its SLA while still running after its last step's deadline.
+    isRequestOverdue: function (slaDueAt, statusCode) {
+      return !!slaDueAt && statusCode !== "COMPLETED" && statusCode !== "REJECTED"
+        && new Date(slaDueAt) < new Date();
+    },
+
+    formatRequestSlaHighlight: function (slaDueAt, statusCode) {
+      return this.isRequestOverdue(slaDueAt, statusCode) ? "Error" : "None";
+    },
+
+    formatSlaBreachMessage: function (slaDueAt, statusCode) {
+      if (!slaDueAt) {
+        return "";
+      }
+      const due = this.formatDateTime(slaDueAt);
+      if (statusCode === "OPEN") {
+        return `SLA breached: this task was due ${due} and is ${this.formatSlaRemaining(slaDueAt, statusCode)}.`;
+      }
+      return `Completed after the SLA: this task was due ${due}.`;
     },
 
     formatInitials: function (value) {
@@ -622,6 +701,10 @@ sap.ui.define([
         }
       }.bind(this));
 
+      // the create page's due date follows the steps a change switches on or off (e.g. DMS)
+      if (typeof this._refreshSlaPreview === "function") {
+        this._refreshSlaPreview();
+      }
       // row tables that carry a requiredWhen column keep their header asterisks in step
       if (typeof this._refreshGridRequiredMarkers === "function") {
         this._refreshGridRequiredMarkers();
@@ -713,12 +796,10 @@ sap.ui.define([
         control.bindItems({
           path: `catalog>/${definition.entity}`,
           templateShareable: true,
-          template: new ListItem({
-            key: `{catalog>${key}}`,
-            text: `{catalog>${text}}`,
-            additionalText: `{catalog>${secondaryText}}`
-          })
+          template: this._comboListItem(definition, key, text, secondaryText)
         });
+      } else if (definition.type === "emailList") {
+        control = this._createEmailListControl(definition, dataPath);
       } else {
         control = new Input({
           type: definition.type === "number" ? "Number" : "Text",
@@ -727,6 +808,171 @@ sap.ui.define([
         }).bindValue(path);
       }
       return control;
+    },
+
+    // "CODE - Name" for master-data dropdowns, or whichever of the two is present.
+    codeAndText: function (code, text) {
+      const codeValue = code === undefined || code === null ? "" : String(code).trim();
+      const textValue = text === undefined || text === null ? "" : String(text).trim();
+      if (!codeValue || !textValue || codeValue === textValue) {
+        return codeValue || textValue;
+      }
+      return `${codeValue} - ${textValue}`;
+    },
+
+    // The code and name properties a master-data combo shows: codeField when the definition names
+    // one, else its key (unless that is a technical ID), else its secondary text. Users have no
+    // code and return null, keeping name + e-mail.
+    _comboFields: function (definition) {
+      if (definition.entity === "Users") {
+        return null;
+      }
+      const code = definition.codeField
+        || (definition.key && definition.key !== "ID" ? definition.key : definition.secondaryText)
+        || "code";
+      const text = definition.text || "name";
+      const name = text !== code ? text : (definition.secondaryText !== code ? definition.secondaryText : null);
+      return { code: code, text: name };
+    },
+
+    _comboListItem: function (definition, key, text, secondaryText) {
+      const fields = this._comboFields(definition);
+      if (!fields) {
+        return new ListItem({
+          key: `{catalog>${key}}`,
+          text: `{catalog>${text}}`,
+          additionalText: `{catalog>${secondaryText}}`
+        });
+      }
+      // The secondary column only stays for a third property (e.g. an AR's High Level PC).
+      const extra = definition.secondaryText && definition.secondaryText !== fields.code
+        && definition.secondaryText !== fields.text ? definition.secondaryText : null;
+      return new ListItem({
+        key: `{catalog>${key}}`,
+        text: {
+          parts: [`catalog>${fields.code}`].concat(fields.text ? [`catalog>${fields.text}`] : []),
+          formatter: this.codeAndText
+        },
+        additionalText: extra ? `{catalog>${extra}}` : ""
+      });
+    },
+
+    // One e-mail input per row: the first row carries the + button, every added row a - button.
+    // /emailLists/<field> holds the row ids (it only changes on + and -, so typing never rebuilds
+    // the inputs) and /emailValues/<field>/<id> the addresses. The field itself gets the non-blank
+    // ones joined with "; ", so the required check, the payload and the display pages see one string.
+    _createEmailListControl: function (definition, dataPath) {
+      const formModel = this.getView().getModel("form");
+      const listPath = `/emailLists/${definition.name}`;
+      const valuesPath = `/emailValues/${definition.name}`;
+      const i18n = this.getView().getModel("i18n").getResourceBundle();
+      const existing = String(formModel.getProperty(dataPath) || "")
+        .split(";")
+        .map(function (email) { return email.trim(); })
+        .filter(Boolean);
+      let nextId = 0;
+      const rows = [];
+      const values = {};
+      (existing.length ? existing : [""]).forEach(function (email) {
+        const id = `e${nextId++}`;
+        rows.push({ id: id });
+        values[id] = email;
+      });
+      ["/emailLists", "/emailValues"].forEach(function (root) {
+        if (!formModel.getProperty(root)) {
+          formModel.setProperty(root, {});
+        }
+      });
+      formModel.setProperty(valuesPath, values);
+      formModel.setProperty(listPath, rows);
+
+      const sync = function () {
+        const current = formModel.getProperty(valuesPath) || {};
+        const emails = (formModel.getProperty(listPath) || [])
+          .map(function (row) { return String(current[row.id] || "").trim(); })
+          .filter(Boolean);
+        formModel.setProperty(dataPath, emails.join("; "));
+      };
+
+      return new FormVBox({
+        width: "100%",
+        items: {
+          path: `form>${listPath}`,
+          factory: function (id, context) {
+            const rowId = context.getProperty("id");
+            const first = Number(context.getPath().split("/").pop()) === 0;
+            const button = first
+              ? new Button({
+                icon: "sap-icon://add",
+                tooltip: i18n.getText("addEmail"),
+                press: function () {
+                  const newId = `e${nextId++}`;
+                  formModel.setProperty(`${valuesPath}/${newId}`, "");
+                  formModel.setProperty(listPath, (formModel.getProperty(listPath) || []).concat([{ id: newId }]));
+                }
+              })
+              : new Button({
+                icon: "sap-icon://less",
+                type: "Transparent",
+                tooltip: i18n.getText("removeEmail"),
+                press: function () {
+                  formModel.setProperty(listPath, (formModel.getProperty(listPath) || []).filter(function (row) {
+                    return row.id !== rowId;
+                  }));
+                  sync();
+                }
+              });
+            return new HBox({
+              width: "100%",
+              alignItems: "Center",
+              items: [
+                new Input({
+                  type: "Email",
+                  width: "100%",
+                  placeholder: definition.placeholder || "name@example.com",
+                  valueLiveUpdate: true,
+                  liveChange: sync,
+                  change: sync,
+                  layoutData: new FlexItemData({ growFactor: 1 })
+                }).bindValue(`form>${valuesPath}/${rowId}`),
+                button.addStyleClass("sapUiTinyMarginBegin")
+              ]
+            }).addStyleClass("sapUiTinyMarginBottom");
+          }
+        }
+      });
+    },
+
+    // The first malformed address of an e-mail list field, or null.
+    _firstInvalidEmail: function (value) {
+      return String(value || "")
+        .split(";")
+        .map(function (email) { return email.trim(); })
+        .filter(Boolean)
+        .find(function (email) { return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }) || null;
+    },
+
+    // The first visible e-mail list field holding a malformed address: { entry, email } or null.
+    _firstInvalidEmailField: function (entries, details) {
+      for (let index = 0; index < (entries || []).length; index++) {
+        const entry = entries[index];
+        if (entry.definition.type !== "emailList" || !this._isFieldVisible(entry.definition)) {
+          continue;
+        }
+        const email = this._firstInvalidEmail((details || {})[entry.definition.name]);
+        if (email) {
+          return { entry: entry, email: email };
+        }
+      }
+      return null;
+    },
+
+    // An e-mail list is a VBox of rows; focus its first input instead.
+    _focusFieldControl: function (control) {
+      const input = control && typeof control.findAggregatedObjects === "function"
+        ? control.findAggregatedObjects(true, function (child) { return child.isA("sap.m.Input"); })[0]
+        : null;
+      (input || control).focus();
     },
     _renumberItems: function (items) {
       items.forEach(function (row, index) {

@@ -13,6 +13,7 @@ sap.ui.define([], function () {
     { key: "YES", text: "Yes" },
     { key: "NO", text: "No" }
   ];
+  const HEADER_CHANGE = "Contract Header Change";
 
   const plant = field("plant_code", "Plant", "combo", {
     required: true,
@@ -568,7 +569,7 @@ sap.ui.define([], function () {
       // Vendor, Scope, Division, Project Type and AR come from the PCC masters (Admin console);
       // the server builds Project ID / Category / Description from them (see previewProjectCode).
       field("vendorPcc", "Vendor", "combo", {
-        required: true, entity: "VendorsPcc", key: "vendor", text: "vendor", secondaryText: "vendorLetter"
+        required: true, entity: "VendorsPcc", key: "vendor", text: "vendor", secondaryText: "vendorLetter", codeField: "vendorLetter"
       }),
       // Spec 8: Scope applies to engineering requests only.
       field("scope", "Scope", "combo", {
@@ -580,7 +581,7 @@ sap.ui.define([], function () {
         required: true, entity: "Entity", key: "code", text: "description", secondaryText: "code"
       }),
       field("division", "Division", "combo", {
-        required: true, entity: "DivisionsPcc", key: "division", text: "division", secondaryText: "divisionLetter"
+        required: true, entity: "DivisionsPcc", key: "division", text: "division", secondaryText: "divisionLetter", codeField: "divisionLetter"
       }),
       field("projectTypePcc", "Project Type", "combo", {
         required: true, entity: "ProjectTypePcc", key: "projectType", text: "projectType", secondaryText: "projectType"
@@ -716,61 +717,76 @@ sap.ui.define([], function () {
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
     CONTRACT_NEW: [
-      field("approvalDocumentsAttachment", "Approval Documents Attachment", "file"),
+      // The SCM step is routed to the SCM SPOC; the user to be notified also gets the completion
+      // e-mail (srv _notifyRequestOutcome).
+      field("scmSpocUserId", "User ID - SCM SPOC", "combo", {
+        required: true,
+        entity: "Users", key: "email", text: "displayName", secondaryText: "email"
+      }),
+      field("notifyUserEmail", "User to be notified", "combo", {
+        entity: "Users", key: "email", text: "displayName", secondaryText: "email"
+      }),
+      field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", { required: true }),
       field("otherComments", "Other Comments", "textarea")
       // Contract count, SCM SPOC, target value and the SAP header terms are captured per row
       // in the Header Creation and Contract Creation Details tables (see headerTableColumns).
     ],
+    // Contract Modification, Multiple layout: only Contract Number, Contract Revoked, SCM Assign
+    // User and the amendment documents are mandatory; no line items (variantsWithoutLineItems).
     CONTRACT_MOD: [
       field("transactionType", "Contract Action", "select", {
-        required: true,
+        section: HEADER_CHANGE,
         options: [
           { key: "HEADER_CHANGE", text: "Contract Header Change" },
           { key: "AMENDMENT", text: "Contract Amendment" }
         ]
       }),
       field("selectionMode", "Selection", "select", {
+        section: HEADER_CHANGE,
         options: [
           { key: "SINGLE", text: "Single" },
           { key: "MULTIPLE", text: "Multiple" }
         ]
       }),
-      field("contractNumber", "Contract Number", "input", { required: true }),
-      field("category_code", "Contract Category", "combo", {
+      field("contractNumber", "Contract Number", "input", { section: HEADER_CHANGE, required: true }),
+      field("contractRevoked", "Contract Revoked", "select", { section: HEADER_CHANGE, required: true, options: YES_NO }),
+      field("scmAssignUser", "SCM Assign User", "combo", {
+        section: HEADER_CHANGE,
         required: true,
+        entity: "Users", key: "email", text: "displayName", secondaryText: "email"
+      }),
+      field("category_code", "Contract Category", "combo", {
+        section: HEADER_CHANGE,
         entity: "ContractCategories"
       }),
-      field("approvalReference", "Approval Reference", "input"),
-      field("remarks", "Remarks", "textarea"),
-      field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
+      field("approvalReference", "Approval Reference", "input", { section: HEADER_CHANGE }),
+      field("remarks", "Remarks", "textarea", { section: HEADER_CHANGE }),
+      field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", { section: HEADER_CHANGE, required: true }),
+      field("otherSupportingDocumentsAttachment", "Other Supporting Documents", "file", { section: HEADER_CHANGE }),
+      field("otherComments", "Other Comments", "textarea", { section: HEADER_CHANGE }),
+      field("contractCount", "Contract Count", "number", { section: HEADER_CHANGE }),
+      field("scmSpocUserId", "User ID - SCM SPOC", "input", { section: HEADER_CHANGE }),
+      field("totalTargetValue", "Total Target Value (Contract Ceiling)", "number", { section: HEADER_CHANGE }),
+      field("sapVendorCode", "SAP Header - Vendor Code", "input", { section: HEADER_CHANGE }),
+      field("sapSourcingEventNo", "SAP Header - Sourcing Event No.", "input", { section: HEADER_CHANGE }),
+      field("sapPoHeaderText", "SAP Header - PO Header Text", "textarea", { section: HEADER_CHANGE }),
+      field("sapPaymentTerms", "SAP Header - Payment Terms", "input", { section: HEADER_CHANGE }),
+      field("sapWarranty", "SAP Header - Warranty", "textarea", { section: HEADER_CHANGE }),
+      field("sapPenalties", "SAP Header - Penalties for Breach of Contract (LD / Service Credits)", "textarea", { section: HEADER_CHANGE }),
+      field("sapTermsOfDelivery", "SAP Header - Terms of Delivery / Delivery SLA", "textarea", { section: HEADER_CHANGE }),
+      field("sapGuarantees", "SAP Header - Guarantees / Performance Bond", "textarea", { section: HEADER_CHANGE }),
+      field("sapOtherCommercialTerms", "SAP Header - Any Other Commercial Terms for PO", "textarea", { section: HEADER_CHANGE }),
+      field("amendmentDocumentsAttachment", "Contract Amendment Documents", "file", {
+        section: "Contract Amendment",
         required: true
       }),
-      field("otherSupportingDocumentsAttachment", "Other Supporting Documents", "file"),
-      field("otherComments", "Other Comments", "textarea"),
-      field("contractCount", "Contract Count", "number", { required: true }),
-      field("scmSpocUserId", "User ID - SCM SPOC", "input", { required: true }),
-      field("totalTargetValue", "Total Target Value (Contract Ceiling)", "number", {
-        required: true
-      }),
-      field("sapVendorCode", "SAP Header - Vendor Code", "input", { required: true }),
-      field("sapSourcingEventNo", "SAP Header - Sourcing Event No.", "input", {
-        required: true
-      }),
-      field("sapPoHeaderText", "SAP Header - PO Header Text", "textarea", {
-        required: true
-      }),
-      field("sapPaymentTerms", "SAP Header - Payment Terms", "input", { required: true }),
-      field("sapWarranty", "SAP Header - Warranty", "textarea"),
-      field("sapPenalties", "SAP Header - Penalties for Breach of Contract (LD / Service Credits)", "textarea"),
-      field("sapTermsOfDelivery", "SAP Header - Terms of Delivery / Delivery SLA", "textarea"),
-      field("sapGuarantees", "SAP Header - Guarantees / Performance Bond", "textarea"),
-      field("sapOtherCommercialTerms", "SAP Header - Any Other Commercial Terms for PO", "textarea")
+      field("amendmentComments", "Comments", "textarea", { section: "Contract Amendment" })
     ],
     // Contract Modification with Single Line Items (getFields lineMode "SINGLE_LINE").
     // Fields carry a section; the Yes drivers of the Details section also open the change
     // tables defined in conditionalGrids.
     CONTRACT_MOD_SINGLE: [
-      field("contractNumber", "Contract Number", "input", { section: "Header Change" }),
+      field("contractNumber", "Contract Number", "input", { section: "Header Change", required: true }),
       field("headerTaxCode", "Tax Code", "input", { section: "Header Change" }),
       field("headerServiceCode", "Service Code", "input", { section: "Header Change" }),
       field("headerMaterialCode", "Material Code", "input", { section: "Header Change" }),
@@ -786,7 +802,7 @@ sap.ui.define([], function () {
       field("headerChangesAttachment", "Header Changes Attachment", "file", { section: "Header Change" }),
       field("headerComment", "Comment", "textarea", { section: "Header Change" }),
 
-      field("amendmentContractNumber", "Contract Number", "input", { section: "Details" }),
+      field("amendmentContractNumber", "Contract Number", "input", { section: "Details", required: true }),
       field("priceChange", "Price Change", "select", { section: "Details", options: YES_NO }),
       field("serviceAddition", "Service Addition", "select", { section: "Details", options: YES_NO }),
       field("materialAddition", "Material Addition", "select", { section: "Details", options: YES_NO }),
@@ -810,7 +826,7 @@ sap.ui.define([], function () {
         section: "Details", required: true,
         visibleWhen: { field: "conditionChange", equals: "YES" }
       }),
-      field("approvalDocumentsAttachment", "Approval Attachments", "file", { section: "Details" }),
+      field("approvalDocumentsAttachment", "Approval Attachments", "file", { section: "Details", required: true }),
       field("amendmentComments", "Comments", "textarea", { section: "Details" })
     ],
     PO_CAPEX_IM: [],
@@ -876,14 +892,13 @@ sap.ui.define([], function () {
       entity: "ApplicableTaxes", key: "taxCode", text: "taxDescription", secondaryText: "taxCode",
       visibleWhen: { field: "taxApplicable", equals: true }
     }),
-    field("clearanceChargeApplicable", "Clearance Charge Applicable", "checkbox"),
+    field("clearanceChargeApplicable", "Clearance Charge Applicable in LKR", "checkbox"),
     field("clearanceCharge", "Clearance Charge", "number", {
       required: true,
       visibleWhen: { field: "clearanceChargeApplicable", equals: true }
     }),
     field("materialImported", "Material Imported", "checkbox"),
     field("sesRequired", "Create SES Successor", "checkbox"),
-    field("paymentRequestRequired", "Create Payment Successor", "checkbox"),
     field("paymentRun", "Payment Run", "checkbox", { onSelect: "onPaymentRunSelect" }),
     field("poHeaderText", "PO Header Text", "textarea", { required: true }),
     field("WorkHUBID", "WorkHub ID", "input"),
@@ -915,7 +930,14 @@ sap.ui.define([], function () {
       required: true,
       entity: "PurchasingGroups", key: "purchasingGroupCode", text: "purchasingGroupName", secondaryText: "purchasingGroupCode"
     }),
-    // Site ID, Plant and Currency are captured per line item (itemColumns.PURCHASE_ORDER).
+    // Currency, Plant and Account Assignment are captured once per PO; Site ID stays per line
+    // item (itemColumns.PURCHASE_ORDER).
+    field("currency_code", "Currency", "combo", { required: true, entity: "Currencies" }),
+    field("plant_code", "Plant", "combo", {
+      required: true,
+      entity: "Plant", key: "plantCode", text: "plantName", secondaryText: "plantCode"
+    }),
+    field("accountAssignment", "Account Assignment", "combo", { required: true, entity: "AccountAssignments" }),
     field("totalValue", "PO Value (Without Taxes)", "number", { required: true }),
     field("poValueWithTaxes", "PO Value (With Taxes)", "readonly", {
       placeholder: "Calculated from the PO value and the applicable tax"
@@ -928,7 +950,8 @@ sap.ui.define([], function () {
     field("termsOfDelivery", "Terms of Delivery", "textarea", { required: true }),
     field("warranty", "Warranty", "textarea", { required: true }),
     field("paymentMilestone", "Payment Milestone", "input"),
-    field("approvedPoRecipientEmail", "Approved PO Recipient Email", "input", {
+    // One e-mail is mandatory; the + button adds more (stored "a@x.com; b@y.com").
+    field("approvedPoRecipientEmail", "Approved PO Recipient Email", "emailList", {
       required: true
     }),
     field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file", {
@@ -948,9 +971,7 @@ sap.ui.define([], function () {
     field("procurementApprovalAttachment", "Procurement Approval", "file", {
       required: true
     }),
-    field("supportiveDocumentAttachment", "Supportive Document", "file", {
-      required: true
-    })
+    field("supportiveDocumentAttachment", "Supporting Document", "file")
   ];
   poFields.push(...requesterFields);
   definitions.PO_CAPEX_IM = poFields;
@@ -1035,7 +1056,7 @@ sap.ui.define([], function () {
 
   const COLUMN_KEYS = [
     "name", "label", "type", "required", "requiredWhen", "entity", "key", "text", "secondaryText",
-    "options", "maxLength", "autoFills", "placeholder"
+    "options", "maxLength", "autoFills", "placeholder", "codeField"
   ];
 
   const isHeaderOnlyField = (field, drivers) =>
@@ -1138,17 +1159,11 @@ sap.ui.define([], function () {
       }),
       column("quantity", "Quantity", "number", { required: true }),
       column("unitPrice", "Unit Price", "number", { required: true }),
-      column("currency", "Currency", "combo", { required: true, entity: "Currencies" }),
-      column("taxCode", "Applicable Taxes", "combo", {
-        required: true, entity: "ApplicableTaxes", key: "taxCode", text: "taxDescription", secondaryText: "taxCode"
-      }),
       column("campaignLocationCode", "Campaign / Location Code", "combo", {
         entity: "Sites", key: "siteId", text: "siteName", secondaryText: "siteId"
       }),
       column("siteId", "Site ID Available", "combo", { entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName" }),
-      column("plant", "Plant", "combo", { required: true, entity: "Plant", key: "plantCode", text: "plantName" }),
       column("itemCategory", "Item Category", "combo", { required: true, entity: "ItemCategories" }),
-      column("accountAssignment", "Account Assignment", "combo", { required: true, entity: "AccountAssignments" }),
       column("materialGroup", "Material Group", "combo", {
         required: true, entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription", secondaryText: "matGroupCode"
       })
@@ -1256,11 +1271,8 @@ sap.ui.define([], function () {
       contractColumn.accountAssignment,
       contractColumn.costCenter,
       column("orderNumber", "Order Number"),
-      Object.assign({}, contractColumn.wbsElement, { label: "Work Breakdown Structure Element (WBS Element)" }),
-      column("scmSpocUserId", "User ID - SCM SPOC", "combo", {
-        required: true,
-        entity: "Users", key: "email", text: "displayName", secondaryText: "email"
-      })
+      Object.assign({}, contractColumn.wbsElement, { label: "Work Breakdown Structure Element (WBS Element)" })
+      // User ID - SCM SPOC is captured once, in the Details section (definitions.CONTRACT_NEW).
     ]
   };
 
@@ -1290,6 +1302,9 @@ sap.ui.define([], function () {
   // CONTRACT_NEW has no Single/Multiple choice and always shows both tables. SES keeps the
   // choice: its header table replaces those form fields only in Multiple Line mode.
   const headerTableOnlyWhenMultiple = new Set(["SES_NEW", "SES_MOD"]);
+  // Variants whose form has no line-item table even in Multiple mode (older requests that do
+  // have items still show them, since itemColumns stay defined).
+  const variantsWithoutLineItems = new Set(["CONTRACT_MOD"]);
 
   Object.assign(definitions, materialDefinitions);
 
@@ -1404,6 +1419,9 @@ sap.ui.define([], function () {
       }
       return headerTableOnlyWhenMultiple.has(variantCode) ? lineMode === "MULTIPLE_LINE" : true;
     },
+    capturesLineItems: function (variantCode) {
+      return !variantsWithoutLineItems.has(variantCode);
+    },
     offersLineModeChoice: function (variantCode) {
       return !headerTableColumns[variantCode] || headerTableOnlyWhenMultiple.has(variantCode);
     },
@@ -1428,6 +1446,11 @@ sap.ui.define([], function () {
           const col = fieldToColumn(definition);
           if (definition.visibleWhen) {
             col.required = false;
+          }
+          // A table cell cannot hold the + rows of an e-mail list: one text cell, ";"-separated.
+          if (definition.type === "emailList") {
+            col.type = "input";
+            col.placeholder = "Separate multiple e-mails with ;";
           }
           return col;
         }));
@@ -1461,6 +1484,10 @@ sap.ui.define([], function () {
         return variantCode === "EQP_EXISTING"
           ? columns
           : columns.concat([column("equipmentCode", "Equipment Code")]);
+      }
+      // The S/4 approver records the Material Reservation Number per line.
+      if (requestTypeCode === "MATERIAL_RESERVATION") {
+        return columns.concat([column("reservationNumber", "Material Reservation Number")]);
       }
       // ... and the Project Code, or the Function Location / Activity (per Object Type).
       if (requestTypeCode === "PROJECT_CODE") {

@@ -40,7 +40,7 @@
             </VBox>
             <VBox class="caFact">
               <Label text="Due Date"/>
-              <Text text="{path: 'detail>/dueDate', formatter: '.formatDate'}"/>
+              <Text text="{= ${detail>/slaDueAt} ? ${path: 'detail>/slaDueAt', formatter: '.formatDateTime'} : ${path: 'detail>/dueDate', formatter: '.formatDate'} }"/>
             </VBox>
             <VBox class="caFact">
               <Label text="Submitted"/>
@@ -89,6 +89,17 @@
                   inverted="true"/>
                 <Title text="{detail>stepName}" level="H5"/>
                 <Text text="{detail>activityDescription}" maxLines="2" textAlign="Center"/>
+                <Text
+                  text="Due {path: 'detail>slaDueAt', formatter: '.formatDateTime'}"
+                  class="caSlaRemaining"
+                  textAlign="Center"
+                  visible="{= !!${detail>slaDueAt} &amp;&amp; ${detail>stepNo} > 1 }"/>
+                <ObjectStatus
+                  text="{i18n>slaBreachedLabel}"
+                  icon="sap-icon://lateness"
+                  state="Error"
+                  inverted="true"
+                  visible="{= !!${detail>slaBreached} }"/>
               </VBox>
             </FlexBox>
           </content>
@@ -154,7 +165,7 @@
                 </Toolbar>
                 <Table items="{detail>/tasks}" itemPress=".onTaskPress" class="caWorklistTable">
                   <columns>
-                    <Column width="12rem"><Text text="Task ID"/></Column>
+                    <Column width="17rem"><Text text="Task ID"/></Column>
                     <Column><Text text="Task"/></Column>
                     <Column width="6rem"><Text text="Step"/></Column>
                     <Column width="11rem"><Text text="Assigned To"/></Column>

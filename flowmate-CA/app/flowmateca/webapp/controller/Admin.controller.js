@@ -642,6 +642,7 @@ onAddBudgetCode: function () {
         requestVariantCode: "",
         variants: [],
         stepNo: 1,
+        slaDays: 2,
         name: "",
         description: "",
         code: "",
@@ -726,7 +727,7 @@ onAddBudgetCode: function () {
               taskName: item.taskName || item.name,
               isMandatory: true,
               isApproval: false,
-              slaDays: 2,
+              slaDays: Number(item.slaDays),
               isActive: true
             }
           });

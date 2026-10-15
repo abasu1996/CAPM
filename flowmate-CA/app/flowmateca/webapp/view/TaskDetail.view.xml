@@ -21,17 +21,18 @@
         visible="{task>/canProcess}"
         press=".onApprove"/>
       <Button
-        text="{i18n>reject}"
-        icon="sap-icon://decline"
-        type="Reject"
-        press=".onReject"
-        visible="{= ${task>/canProcess} &amp;&amp; !${task>/isRequesterStep} }"/>
-      <Button
         text="{i18n>sendBack}"
         icon="sap-icon://undo"
         class="caBtnSendBack"
         visible="{task>/canSendBack}"
         press=".onOpenSendBack"/>
+      <!-- "Terminate" in the UI only; the request status, filters and e-mails say Rejected. -->
+      <Button
+        text="{i18n>terminate}"
+        icon="sap-icon://decline"
+        type="Reject"
+        press=".onReject"
+        visible="{= ${task>/canProcess} &amp;&amp; !${task>/isRequesterStep} }"/>
     </headerContent>
     <content>
       <VBox>
@@ -42,11 +43,26 @@
               <Title text="{task>/referenceNumber}" level="H1"/>
               <Link text="{task>/request/referenceNumber}" press=".onRequestPress"/>
             </VBox>
-            <ObjectStatus
-              text="{task>/status/name}"
-              state="{path: 'task>/status/code', formatter: '.statusState'}"
-              inverted="true"/>
+            <HBox alignItems="Center">
+              <ObjectStatus
+                text="{i18n>slaBreachedLabel}"
+                icon="sap-icon://lateness"
+                state="Error"
+                inverted="true"
+                class="sapUiSmallMarginEnd"
+                visible="{parts: ['task>/slaDueAt', 'task>/status/code', 'task>/slaBreached'], formatter: '.isSlaBreached'}"/>
+              <ObjectStatus
+                text="{task>/status/name}"
+                state="{path: 'task>/status/code', formatter: '.statusState'}"
+                inverted="true"/>
+            </HBox>
           </HBox>
+          <MessageStrip
+            text="{parts: ['task>/slaDueAt', 'task>/status/code'], formatter: '.formatSlaBreachMessage'}"
+            type="Error"
+            showIcon="true"
+            class="sapUiSmallMarginTop"
+            visible="{parts: ['task>/slaDueAt', 'task>/status/code', 'task>/slaBreached'], formatter: '.isSlaBreached'}"/>
           <FlexBox wrap="Wrap" class="caFactGrid">
             <VBox class="caFact">
               <Label text="Workflow Step"/>
@@ -61,8 +77,12 @@
               <Text text="{task>/assignedTeamName}"/>
             </VBox>
             <VBox class="caFact">
-              <Label text="{i18n>dueDate}"/>
-              <Text text="{path: 'task>/dueDate', formatter: '.formatDate'}"/>
+              <Label text="{i18n>slaDue}"/>
+              <Text text="{= ${task>/slaDueAt} ? ${path: 'task>/slaDueAt', formatter: '.formatDateTime'} : ${path: 'task>/dueDate', formatter: '.formatDate'} }"/>
+              <ObjectStatus
+                text="{parts: ['task>/slaDueAt', 'task>/status/code'], formatter: '.formatSlaRemaining'}"
+                state="{parts: ['task>/slaDueAt', 'task>/status/code', 'task>/slaBreached'], formatter: '.formatSlaHighlight'}"
+                visible="{= ${task>/status/code} === 'OPEN' &amp;&amp; !!${task>/slaDueAt} }"/>
             </VBox>
             <VBox class="caFact">
               <Label text="Mandatory"/>
@@ -182,6 +202,7 @@
                 <Column width="3rem"><Text text="#"/></Column>
                 <Column><Text text="{decision>/lineEntry/info1Label}"/></Column>
                 <Column visible="{= !!${decision>/lineEntry/info2Label} }"><Text text="{decision>/lineEntry/info2Label}"/></Column>
+                <Column visible="{= !!${decision>/lineEntry/info3Label} }"><Text text="{decision>/lineEntry/info3Label}"/></Column>
                 <Column><Label text="{decision>/lineEntry/label}" required="true"/></Column>
               </columns>
               <items>
@@ -190,6 +211,7 @@
                     <Text text="{decision>itemNo}"/>
                     <Text text="{decision>info1}"/>
                     <Text text="{decision>info2}"/>
+                    <Text text="{decision>info3}"/>
                     <Input value="{decision>value}" maxLength="{decision>/lineEntry/maxLength}"
                       placeholder="{= 'Enter the ' + ${decision>/lineEntry/label} }"/>
                   </cells>
