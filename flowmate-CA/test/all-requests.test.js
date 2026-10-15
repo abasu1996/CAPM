@@ -78,6 +78,7 @@ test("dashboard counts all users and teams while My Requests remains personal", 
   const service = new FlowmateCAService("FlowmateCAService");
   service.db = { CARequests: "requests", CATasks: "tasks" };
   service._ensureCurrentUser = async () => ({ ID: "alice" });
+  service._effectiveTaskUserIds = async () => ["alice"];
   service._teamIdsOf = async () => [];
   const requests = [
     { requester_ID: "alice", ownerTeam_ID: "team-a", status_code: "SUBMITTED" },

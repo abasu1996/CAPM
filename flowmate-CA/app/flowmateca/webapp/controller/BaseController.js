@@ -222,6 +222,14 @@ sap.ui.define([
       }[status] || "None";
     },
 
+    canActForAssignedUser: function (assignedUserId, currentUser) {
+      const user = currentUser || this.getAppModel().getProperty("/currentUser") || {};
+      return Boolean(assignedUserId && (
+        assignedUserId === user.ID ||
+        (user.activeDelegatorUserIds || []).includes(assignedUserId)
+      ));
+    },
+
     formatDate: function (value) {
       if (!value) {
         return "";

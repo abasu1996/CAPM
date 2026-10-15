@@ -16,10 +16,12 @@ service FlowmateCAService {
   }
 
   type CurrentUser {
-    ID          : UUID;
-    displayName : String(160);
-    email       : String(255);
-    isAdmin     : Boolean;
+    ID                     : UUID;
+    displayName            : String(160);
+    email                  : String(255);
+    isAdmin                : Boolean;
+    canDelegateOnBehalf    : Boolean;
+    activeDelegatorUserIds : many UUID;
   }
 
   type NewRequestInput {
@@ -53,6 +55,7 @@ service FlowmateCAService {
   entity Teams as projection on common.Teams;
   entity TeamMembers as projection on common.TeamMembers;
   entity Vendors as projection on common.Vendors;
+  entity Delegations as projection on common.Delegations;
 
 
   entity ExternalMaterialGroups as projection on db.ExternalMaterialGroups;
@@ -222,9 +225,7 @@ service CAMasterDataService {
   entity Vendors as projection on common.Vendors;
 
   @restrict: [
-    { grant: 'READ', to: 'authenticated-user' },
-    { grant: '*', to: 'CASupervisor' },
-    { grant: '*', to: 'CAAdmin' }
+    { grant: 'READ', to: 'authenticated-user' }
   ]
   entity Delegations as projection on common.Delegations;
 

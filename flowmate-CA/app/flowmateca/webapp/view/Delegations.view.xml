@@ -1,0 +1,99 @@
+<mvc:View
+  controllerName="flowmateca.controller.Delegations"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
+  xmlns:form="sap.ui.layout.form"
+  xmlns="sap.m">
+  <Page class="caPage" showNavButton="true" navButtonPress=".onNavHome" title="{i18n>delegationsTitle}">
+    <headerContent>
+      <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+    </headerContent>
+    <content>
+      <VBox class="sapUiResponsiveContentPadding">
+        <MessageStrip
+          text="{i18n>delegationHelpText}"
+          type="Information"
+          showIcon="true"
+          class="sapUiSmallMarginBottom"/>
+        <Table
+          id="delegationsTable"
+          class="caWorklistTable"
+          growing="true"
+          growingScrollToLoad="true"
+          noDataText="{i18n>noDelegationsText}"
+          items="{path: '/Delegations', parameters: {$expand: 'delegator,delegate'}, sorter: {path: 'startDate', descending: true}}">
+          <headerToolbar>
+            <OverflowToolbar>
+              <Title text="{i18n>delegationsTableHeader}" level="H2"/>
+              <ToolbarSpacer/>
+              <SearchField width="18rem" liveChange=".onSearch" search=".onSearch"/>
+              <Button text="{i18n>addDelegationButton}" icon="sap-icon://add" type="Emphasized" press=".onOpenCreateDialog"/>
+            </OverflowToolbar>
+          </headerToolbar>
+          <columns>
+            <Column><Text text="{i18n>delegatorLabel}"/></Column>
+            <Column><Text text="{i18n>delegateLabel}"/></Column>
+            <Column width="10rem"><Text text="{i18n>startDateLabel}"/></Column>
+            <Column width="10rem"><Text text="{i18n>endDateLabel}"/></Column>
+            <Column width="9rem"><Text text="{i18n>notificationForwardingLabel}"/></Column>
+            <Column width="9rem"><Text text="{i18n>status}"/></Column>
+            <Column width="6rem" hAlign="End"><Text text="{i18n>actionsLabel}"/></Column>
+          </columns>
+          <items>
+            <ColumnListItem>
+              <cells>
+                <ObjectIdentifier title="{delegator/displayName}" text="{delegator/email}"/>
+                <ObjectIdentifier title="{delegate/displayName}" text="{delegate/email}"/>
+                <Text text="{startDate}"/>
+                <Text text="{endDate}"/>
+                <ObjectStatus text="{= ${forwardNotifications} ? ${i18n>enabledLabel} : ${i18n>disabledLabel} }"
+                  state="{= ${forwardNotifications} ? 'Success' : 'None' }" inverted="true"/>
+                <ObjectStatus text="{parts: ['startDate', 'endDate', 'enabled'], formatter: '.formatDelegationStatus'}"
+                  state="{parts: ['startDate', 'endDate', 'enabled'], formatter: '.formatDelegationState'}" inverted="true"/>
+                <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>deleteDelegationButton}" press=".onDeleteDelegation"/>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
+      </VBox>
+    </content>
+    <dependents>
+      <Dialog id="createDelegationDialog" title="{i18n>addDelegationButton}" contentWidth="40rem" stretchOnPhone="true">
+        <content>
+          <form:SimpleForm editable="true" layout="ResponsiveGridLayout" class="sapUiContentPadding">
+            <Label text="{i18n>adminEntryLabel}" visible="{app>/currentUser/canDelegateOnBehalf}"/>
+            <CheckBox text="{i18n>adminEntryCheckbox}" selected="{newDelegation>/onBehalfOfUser}"
+              visible="{app>/currentUser/canDelegateOnBehalf}"/>
+            <Label text="{i18n>delegatorLabel}" visible="{= ${app>/currentUser/canDelegateOnBehalf} &amp;&amp; ${newDelegation>/onBehalfOfUser} }" required="true"/>
+            <Input value="{newDelegation>/delegatorName}" valueHelpOnly="true" showValueHelp="true"
+              visible="{= ${app>/currentUser/canDelegateOnBehalf} &amp;&amp; ${newDelegation>/onBehalfOfUser} }"
+              valueHelpRequest=".onDelegatorValueHelpRequest" change=".onClearDelegator"/>
+            <Label text="{i18n>delegateLabel}" required="true"/>
+            <Input value="{newDelegation>/delegateName}" valueHelpOnly="true" showValueHelp="true"
+              valueHelpRequest=".onDelegateValueHelpRequest" change=".onClearDelegate"/>
+            <Label text="{i18n>startDateLabel}" required="true"/>
+            <DatePicker value="{newDelegation>/startDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" required="true"/>
+            <Label text="{i18n>endDateLabel}" required="true"/>
+            <DatePicker value="{newDelegation>/endDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" required="true"/>
+            <Label text="{i18n>notificationForwardingLabel}"/>
+            <CheckBox text="{i18n>notificationForwardingCheckbox}" selected="{newDelegation>/forwardNotifications}"/>
+          </form:SimpleForm>
+        </content>
+        <beginButton><Button text="{i18n>createButton}" type="Emphasized" press=".onCreateDelegation"/></beginButton>
+        <endButton><Button text="{i18n>cancel}" press=".onCloseCreateDialog"/></endButton>
+      </Dialog>
+      <TableSelectDialog id="delegatorValueHelpDialog" title="{i18n>selectDelegatorTitle}"
+        search=".onUserValueHelpSearch" confirm=".onDelegatorValueHelpConfirm" cancel=".onUserValueHelpClose"
+        items="{path: '/Users', filters: [{path: 'isActive', operator: 'EQ', value1: true}], sorter: {path: 'displayName'}}">
+        <ColumnListItem type="Active"><cells><Text text="{displayName}"/><Text text="{email}"/><Text text="{department}"/></cells></ColumnListItem>
+        <columns><Column><Text text="{i18n>userNameLabel}"/></Column><Column><Text text="{i18n>emailLabel}"/></Column><Column><Text text="{i18n>departmentLabel}"/></Column></columns>
+      </TableSelectDialog>
+      <TableSelectDialog id="delegateValueHelpDialog" title="{i18n>selectDelegateTitle}"
+        search=".onUserValueHelpSearch" confirm=".onDelegateValueHelpConfirm" cancel=".onUserValueHelpClose"
+        items="{path: '/Users', filters: [{path: 'isActive', operator: 'EQ', value1: true}], sorter: {path: 'displayName'}}">
+        <ColumnListItem type="Active"><cells><Text text="{displayName}"/><Text text="{email}"/><Text text="{department}"/></cells></ColumnListItem>
+        <columns><Column><Text text="{i18n>userNameLabel}"/></Column><Column><Text text="{i18n>emailLabel}"/></Column><Column><Text text="{i18n>departmentLabel}"/></Column></columns>
+      </TableSelectDialog>
+    </dependents>
+  </Page>
+</mvc:View>

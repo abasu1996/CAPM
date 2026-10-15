@@ -101,6 +101,13 @@
               </TileContent>
             </tileContent>
           </GenericTile>
+          <GenericTile class="caTile caTileBlue" header="{i18n>delegationsTitle}" subheader="{i18n>delegationsSubtitle}" press=".onDelegations">
+            <tileContent>
+              <TileContent>
+                <ImageContent src="sap-icon://employee-approvals"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
         </FlexBox>
 
       </VBox>

@@ -119,6 +119,10 @@ sap.ui.define([
 
     onAdmin: function () {
       this.navTo("admin");
+    },
+
+    onDelegations: function () {
+      this.navTo("delegations");
     }
   });
 });

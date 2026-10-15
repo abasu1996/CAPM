@@ -34,7 +34,9 @@ sap.ui.define([
         currentUser: {
           displayName: "",
           email: "",
-          isAdmin: false
+          isAdmin: false,
+          canDelegateOnBehalf: false,
+          activeDelegatorUserIds: []
         }
       }), "app");
       this.getRouter().initialize();

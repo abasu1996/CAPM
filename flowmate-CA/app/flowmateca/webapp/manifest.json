@@ -161,6 +161,11 @@
           "name": "admin",
           "pattern": "admin",
           "target": "admin"
+        },
+        {
+          "name": "delegations",
+          "pattern": "delegations",
+          "target": "delegations"
         }
       ],
       "targets": {
@@ -195,6 +200,10 @@
         "admin": {
           "id": "Admin",
           "name": "Admin"
+        },
+        "delegations": {
+          "id": "Delegations",
+          "name": "Delegations"
         }
       }
     }

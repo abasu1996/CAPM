@@ -84,7 +84,8 @@ sap.ui.define([
         return task.isMandatory && task.status?.code !== "APPROVED";
       });
       const currentUser = this.getAppModel().getProperty("/currentUser") || {};
-      const isOwner = request.owner_ID === currentUser.ID || request.requester_ID === currentUser.ID;
+      const isOwner = this.canActForAssignedUser(request.owner_ID, currentUser)
+        || this.canActForAssignedUser(request.requester_ID, currentUser);
       request.canCompleteCurrentStep = !["COMPLETED", "REJECTED"].includes(request.status?.code)
         && !blockingTask
         && (isOwner || currentUser.isAdmin);
@@ -95,8 +96,8 @@ sap.ui.define([
       // looking at it needs a way through - otherwise a send-back looks like a dead end.
       const myTask = currentTasks.find(function (task) {
         return task.status?.code === "OPEN"
-          && (task.assignedUser_ID === currentUser.ID || (!task.assignedUser_ID && isOwner));
-      });
+          && (this.canActForAssignedUser(task.assignedUser_ID, currentUser) || (!task.assignedUser_ID && isOwner));
+      }.bind(this));
       request.myOpenTaskId = myTask ? myTask.ID : null;
       request.myOpenTaskName = myTask ? (myTask.taskName || "Open My Task") : "";
       request.detailFields = this._detailFields(request);

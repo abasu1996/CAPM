@@ -46,7 +46,7 @@ sap.ui.define([
         // lies dormant until that step is reached again, and is reopened then.
         const processableStatus = task.status?.code === "OPEN";
         task.canClaim = processableStatus && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID;
-        task.canProcess = processableStatus && task.assignedUser_ID === user?.ID;
+        task.canProcess = processableStatus && this.canActForAssignedUser(task.assignedUser_ID, user);
         task.canSendBack = task.canProcess && task.stepNo > 1;
 
         const request = task.request || {};

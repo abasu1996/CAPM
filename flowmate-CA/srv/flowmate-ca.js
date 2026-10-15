@@ -111,6 +111,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return this.master.run(req.query);
     });
 
+    this.before("CREATE", "Delegations", this._prepareDelegationCreate);
+    this.before("READ", "Delegations", this._filterDelegations);
+    this.before("UPDATE", "Delegations", (req) => {
+      return req.reject(405, "Delete and recreate a delegation to change its details");
+    });
+    this.before("DELETE", "Delegations", this._authorizeDelegationDelete);
+    this.on(["READ", "CREATE", "UPDATE", "DELETE"], "Delegations", (req) => {
+      return this.master.run(req.query);
+    });
+
     this.before("READ", "MyRequests", this._filterMyRequests);
     this.before("READ", "MyTasks", this._filterMyTasks);
     this.before("READ", "MyTeamTasks", this._filterMyTeamTasks);
@@ -547,6 +557,107 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return handler.call(this, integrationReq);
   };
 
+  _prepareDelegationCreate = async (req) => {
+    const delegation = req.data;
+    const currentUser = await this._ensureCurrentUser(req);
+    const privileged = this._canMaintainDelegations(req);
+    const requestedDelegatorId = delegation.delegator_ID || delegation.delegator?.ID;
+    const delegateId = delegation.delegate_ID || delegation.delegate?.ID;
+    const delegatorId = requestedDelegatorId || currentUser.ID;
+
+    if (requestedDelegatorId && requestedDelegatorId !== currentUser.ID && !privileged) {
+      return req.reject(403, "Only an administrator or supervisor can create a delegation for another user");
+    }
+    if (!delegateId) {
+      return req.reject(400, "Select a delegate from the user list");
+    }
+
+    const users = await this.master.run(
+      SELECT.from(this.masterEntities.Users)
+        .columns("ID", "isActive")
+        .where({ ID: { in: [...new Set([delegatorId, delegateId])] } })
+    );
+    const activeUserIds = new Set(users.filter((user) => user.isActive !== false).map((user) => user.ID));
+    if (!activeUserIds.has(delegatorId)) {
+      return req.reject(400, "Selected user on leave was not found or is inactive");
+    }
+    if (!activeUserIds.has(delegateId)) {
+      return req.reject(400, "Selected delegate was not found or is inactive");
+    }
+    if (!delegation.startDate || !delegation.endDate) {
+      return req.reject(400, "User, delegate, start date, and end date are required");
+    }
+    if (delegatorId === delegateId) {
+      return req.reject(400, "A user cannot be assigned as their own delegate");
+    }
+    if (delegation.startDate > delegation.endDate) {
+      return req.reject(400, "End date must be on or after start date");
+    }
+
+    delegation.delegator_ID = delegatorId;
+    delegation.delegate_ID = delegateId;
+    delegation.forwardNotifications ??= true;
+    delegation.enabled ??= true;
+    delegation.createdOnBehalf = delegatorId !== currentUser.ID;
+    delete delegation.delegator;
+    delete delegation.delegate;
+  };
+
+  _filterDelegations = async (req) => {
+    if (this._canMaintainDelegations(req)) {
+      return;
+    }
+    const currentUser = await this._ensureCurrentUser(req);
+    req.query.where({ delegator_ID: currentUser.ID });
+  };
+
+  _authorizeDelegationDelete = async (req) => {
+    if (this._canMaintainDelegations(req)) {
+      return;
+    }
+    const delegationId = req.data.ID || req.params?.[0]?.ID;
+    const [delegation, currentUser] = await Promise.all([
+      this.master.run(SELECT.one.from(this.masterEntities.Delegations).columns("delegator_ID").where({ ID: delegationId })),
+      this._ensureCurrentUser(req)
+    ]);
+    if (!delegation || delegation.delegator_ID !== currentUser.ID) {
+      return req.reject(403, "Only the delegation owner or an administrator can delete this assignment");
+    }
+  };
+
+  _canMaintainDelegations(req) {
+    return Boolean(req.user.is("CAAdmin") || req.user.is("CASupervisor"));
+  }
+
+  async _activeDelegatorIds(req, delegateUserId) {
+    if (!delegateUserId) {
+      return [];
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const delegations = await this.master.run(
+      SELECT.from(this.masterEntities.Delegations)
+        .columns("delegator_ID")
+        .where({
+          delegate_ID: delegateUserId,
+          enabled: true,
+          startDate: { "<=": today },
+          endDate: { ">=": today }
+        })
+    );
+    return [...new Set(delegations.map((delegation) => delegation.delegator_ID).filter(Boolean))];
+  }
+
+  async _effectiveTaskUserIds(req, userId) {
+    return [...new Set([userId, ...(await this._activeDelegatorIds(req, userId))].filter(Boolean))];
+  }
+
+  async _canActForUser(req, actingUserId, assignedUserId) {
+    if (!actingUserId || !assignedUserId) {
+      return false;
+    }
+    return (await this._effectiveTaskUserIds(req, actingUserId)).includes(assignedUserId);
+  }
+
   _filterMyRequests = async (req) => {
     const user = await this._ensureCurrentUser(req);
     req.query.where({ requester_ID: user.ID });
@@ -554,7 +665,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   _filterMyTasks = async (req) => {
     const user = await this._ensureCurrentUser(req);
-    req.query.where({ assignedUser_ID: user.ID });
+    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    req.query.where({ assignedUser_ID: { in: effectiveUserIds } });
   };
 
   _filterMyTeamTasks = async (req) => {
@@ -578,11 +690,14 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   _getCurrentUser = async (req) => {
     const user = await this._ensureCurrentUser(req);
+    const activeDelegatorUserIds = await this._activeDelegatorIds(req, user.ID);
     return {
       ID: user.ID,
       displayName: user.displayName,
       email: user.email,
-      isAdmin: req.user.is("CAAdmin")
+      isAdmin: req.user.is("CAAdmin"),
+      canDelegateOnBehalf: this._canMaintainDelegations(req),
+      activeDelegatorUserIds
     };
   };
 
@@ -590,7 +705,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const user = await this._ensureCurrentUser(req);
     const isAdmin = req.user.is("CAAdmin");
     const requestedBy = { requester_ID: user.ID };
-    const assignedToMe = { assignedUser_ID: user.ID };
+    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    const assignedToMe = { assignedUser_ID: { in: effectiveUserIds } };
     // Only OPEN tasks are waiting on someone. A SENT_BACK task belongs to a step that
     // has been rolled back and is reopened when that step comes around again.
     const openStatus = { status_code: TASK_STATUS.OPEN };
@@ -1453,8 +1569,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(404, "Request not found");
     }
     this._assertMutableRequest(req, request);
-    if (request.owner_ID !== user.ID) {
-      return req.reject(403, "Only the requester can edit their own request");
+    if (!(await this._canActForUser(req, user.ID, request.owner_ID))) {
+      return req.reject(403, "Only the requester or an active delegate can edit this request");
     }
 
     const step = await SELECT.one.from(this.db.RequestStepInstances)
@@ -1485,8 +1601,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(404, "Request not found");
     }
     this._assertMutableRequest(req, request);
-    if (request.owner_ID !== user.ID && !req.user.is("CAAdmin") && !req.user.is("CASupervisor")) {
-      return req.reject(403, "Only the request owner or supervisor can complete a step");
+    if (!(await this._canActForUser(req, user.ID, request.owner_ID))
+        && !req.user.is("CAAdmin") && !req.user.is("CASupervisor")) {
+      return req.reject(403, "Only the request owner, an active delegate, or a supervisor can complete a step");
     }
 
     const steps = await SELECT.from(this.db.RequestStepInstances)
@@ -2003,12 +2120,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // copied e-mail falls back to the user's own e-mail.
   async _taskRecipients(task) {
     if (task.assignedUser_ID) {
-      if (task.assignedEmail) {
-        return [task.assignedEmail];
-      }
       const user = await this.master.run(SELECT.one.from(this.masterEntities.Users)
-        .columns("email").where({ ID: task.assignedUser_ID }));
-      return user?.email ? [user.email] : [];
+        .columns("ID", "email").where({ ID: task.assignedUser_ID }));
+      return this._delegatedNotificationEmails([{ ID: task.assignedUser_ID, email: user?.email || task.assignedEmail }]);
     }
     if (!task.assignedTeam_ID) {
       return [];
@@ -2018,12 +2132,50 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       .where({ team_ID: task.assignedTeam_ID, isActive: true }));
     const missing = members.filter((member) => !member.email && member.user_ID).map((member) => member.user_ID);
     const users = missing.length
-      ? await this.master.run(SELECT.from(this.masterEntities.Users).columns("email")
+      ? await this.master.run(SELECT.from(this.masterEntities.Users).columns("ID", "email")
         .where({ ID: { in: missing }, isActive: true }))
       : [];
-    return [...new Set(members.map((member) => member.email)
-      .concat(users.map((user) => user.email))
-      .filter(Boolean))];
+    const usersById = new Map(users.map((user) => [user.ID, user]));
+    return this._delegatedNotificationEmails(members.map((member) => ({
+      ID: member.user_ID,
+      email: member.email || usersById.get(member.user_ID)?.email
+    })));
+  }
+
+  async _delegatedNotificationEmails(recipients) {
+    const normalized = recipients.filter((recipient) => recipient?.ID || recipient?.email);
+    const userIds = [...new Set(normalized.map((recipient) => recipient.ID).filter(Boolean))];
+    if (!userIds.length) {
+      return [...new Set(normalized.map((recipient) => recipient.email).filter(Boolean))];
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const delegations = await this.master.run(
+      SELECT.from(this.masterEntities.Delegations)
+        .columns("delegator_ID", "delegate_ID")
+        .where({
+          delegator_ID: { in: userIds },
+          enabled: true,
+          forwardNotifications: true,
+          startDate: { "<=": today },
+          endDate: { ">=": today }
+        })
+    );
+    const delegatedByUser = new Map(delegations.map((delegation) => [delegation.delegator_ID, delegation.delegate_ID]));
+    const delegateIds = [...new Set([...delegatedByUser.values()].filter(Boolean))];
+    const delegates = delegateIds.length
+      ? await this.master.run(
+        SELECT.from(this.masterEntities.Users)
+          .columns("ID", "email")
+          .where({ ID: { in: delegateIds }, isActive: true })
+      )
+      : [];
+    const delegateEmailById = new Map(delegates.map((user) => [user.ID, user.email]));
+
+    return [...new Set(normalized.map((recipient) => {
+      const delegateId = delegatedByUser.get(recipient.ID);
+      return delegateEmailById.get(delegateId) || recipient.email;
+    }).filter(Boolean))];
   }
 
   // The CA app's URL for the e-mail link: FLOWMATE_CA_APP_URL when set (local runs), otherwise
@@ -2210,8 +2362,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (req.user.is("CAAdmin") || req.user.is("CASupervisor")) {
       return;
     }
-    if (task.assignedUser_ID === user.ID) {
-      return;
+    if (task.assignedUser_ID) {
+      const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+      if (effectiveUserIds.includes(task.assignedUser_ID)) {
+        return;
+      }
+      return req.reject(403, "This task is assigned to another user and is not covered by an active delegation");
     }
     if (task.assignedTeam_ID) {
       const membership = await this.master.run(SELECT.one.from(this.masterEntities.TeamMembers).where({
