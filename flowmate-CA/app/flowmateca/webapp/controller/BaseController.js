@@ -23,8 +23,10 @@ sap.ui.define([
   "sap/m/VBox",
   "sap/m/HBox",
   "sap/m/Button",
-  "sap/m/FlexItemData"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData) {
+  "sap/m/FlexItemData",
+  "sap/ui/model/Sorter",
+  "sap/m/GroupHeaderListItem"
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem) {
   "use strict";
 
   // A VBox that a SimpleForm accepts as a field (forms only take IFormContent controls); it holds
@@ -361,7 +363,7 @@ sap.ui.define([
     },
 
     // Read-only row table: a leading "#" (itemNo) column plus one Text column per definition.
-    renderReadOnlyRows: function (tableId, path, allColumns) {
+    renderReadOnlyRows: function (tableId, path, allColumns, variantCode) {
       const table = this.byId(tableId);
       if (!table) {
         return;
@@ -388,14 +390,48 @@ sap.ui.define([
         }));
       });
 
-      table.bindItems({
+      table.bindItems(Object.assign({
         path: path,
         template: new ColumnListItem({
           cells: [new Text({ text: `{${modelName}>itemNo}` })].concat(columns.map(function (col) {
             return new Text({ text: `{${modelName}>${col.name}}` });
           }))
         })
-      });
+      }, this._headerGrouping(variantCode, modelName)));
+    },
+
+    // New Contract line items, grouped under the Header Creation row they name (headerRowNo):
+    // "Header 1 · Vendor 100021 · Ariba Event 123". Other variants are not grouped.
+    _headerGrouping: function (variantCode, modelName) {
+      if (variantCode !== "CONTRACT_NEW") {
+        return {};
+      }
+      const model = this.getView().getModel(modelName);
+      return {
+        sorter: [
+          new Sorter("headerRowNo", false, function (context) {
+            const headerNo = context.getProperty("headerRowNo");
+            return { key: String(headerNo ?? ""), headerNo: headerNo };
+          }),
+          new Sorter("itemNo", false)
+        ],
+        groupHeaderFactory: function (group) {
+          const header = ((model && model.getProperty("/detailHeaders")) || []).find(function (row) {
+            return Number(row.itemNo) === Number(group.headerNo);
+          });
+          const parts = [`Header ${group.headerNo ?? "-"}`];
+          if (header && header.vendorCode) {
+            parts.push(`Vendor ${header.vendorCode}`);
+          }
+          if (header && header.coupaSourcingEventNo) {
+            parts.push(`Ariba Event ${header.coupaSourcingEventNo}`);
+          }
+          if (header && header.contractNumber) {
+            parts.push(`Contract ${header.contractNumber}`);
+          }
+          return new GroupHeaderListItem({ title: parts.join(" · ") });
+        }
+      };
     },
 
     // Contract Modification change rows: one read-only table per changeType that has rows,
@@ -565,14 +601,14 @@ sap.ui.define([
         }));
       });
 
-      table.bindItems({
+      table.bindItems(Object.assign({
         path: itemsPath,
         template: new ColumnListItem({
           cells: [new Text({ text: `{${modelName}>itemNo}` })].concat(columns.map(function (col) {
             return new Text({ text: `{${modelName}>${col.name}}` });
           }))
         })
-      });
+      }, this._headerGrouping(request.requestVariant?.code, modelName)));
     },
 
     // --- dynamic form + editable grid builders -------------------------------

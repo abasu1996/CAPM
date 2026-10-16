@@ -1240,7 +1240,9 @@ sap.ui.define([], function () {
     ],
     // Labels follow "Details of Contract Creation-SCC M-212.csv" so that file imports as-is.
     CONTRACT_NEW: [
-      column("itemNo", "ID", "readonly"),
+      // Entered by the user: the ID of the Header Creation row this line item belongs to (one
+      // header row can have several line items). itemNo stays the internal running number.
+      column("headerRowNo", "ID", "number", { required: true }),
       column("contractCount", "Contract Count", "number", { required: true }),
       contractColumn.contractType,
       column("lineItem", "Line Item"),
@@ -1524,8 +1526,33 @@ sap.ui.define([], function () {
     alwaysHasItems: function (requestTypeCode) {
       return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";
     },
+    // New Contract: every line item's ID must name an existing Header Creation row, and every
+    // header row needs at least one line item. Returns the first problem as text, or null.
+    contractItemHeaderProblem: function (items, headerCount) {
+      const rows = items || [];
+      for (let index = 0; index < rows.length; index++) {
+        const headerNo = Number(rows[index].headerRowNo);
+        if (!Number.isInteger(headerNo) || headerNo < 1 || headerNo > headerCount) {
+          return `Contract Creation Details - Row ${index + 1}: ID must match a Header Creation row (1-${headerCount}).`;
+        }
+      }
+      for (let headerNo = 1; headerNo <= headerCount; headerNo++) {
+        if (!rows.some(function (row) { return Number(row.headerRowNo) === headerNo; })) {
+          return `Header Creation - Row ${headerNo} has no line items.`;
+        }
+      }
+      return null;
+    },
     getHeaderTableColumns: function (variantCode) {
       return headerTableColumns[variantCode] || [];
+    },
+    // Read-only header tables (Overview, task page): the header columns plus the Contract Number
+    // the S/4 Data Validation approver records per row (New Contract).
+    getHeaderDisplayColumns: function (variantCode) {
+      const columns = this.getHeaderTableColumns(variantCode);
+      return variantCode === "CONTRACT_NEW"
+        ? columns.concat([column("contractNumber", "Contract Number")])
+        : columns;
     },
     getConditionalGrids: function (variantCode) {
       return (conditionalGrids[variantCode] || []).map(function (grid) {

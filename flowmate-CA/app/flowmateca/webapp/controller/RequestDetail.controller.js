@@ -177,9 +177,9 @@ sap.ui.define([
       const details = detail[this.detailNavigationFor(typeCode)] || {};
       const variantCode = detail.requestVariant && detail.requestVariant.code;
       this.renderReadOnlyRows("detailItemsTable", "detail>/detailItems",
-        FormDefinitions.getItemDisplayColumns(typeCode, variantCode, details.materialCategory));
+        FormDefinitions.getItemDisplayColumns(typeCode, variantCode, details.materialCategory), variantCode);
       this.renderReadOnlyRows("detailHeadersTable", "detail>/detailHeaders",
-        FormDefinitions.getHeaderTableColumns(variantCode));
+        FormDefinitions.getHeaderDisplayColumns(variantCode));
       this.renderChangeTables("detailChangeTablesHost", "detail", variantCode, details.changeItems);
     },
 

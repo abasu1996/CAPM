@@ -588,6 +588,8 @@ entity OutlineContractHeaders : cuid, managed {
   itemNo               : Integer;
   vendorCode           : String(40);
   coupaSourcingEventNo : String(80);
+  // Recorded per row by the S/4 Data Validation approver (New Contract).
+  contractNumber       : String(80);
   poHeaderText         : LargeString;
   paymentTerms         : String(80);
   warranty             : LargeString;
@@ -600,6 +602,8 @@ entity OutlineContractHeaders : cuid, managed {
 entity OutlineContractItems : cuid, managed {
   details            : Association to OutlineContractDetails not null;
   itemNo             : Integer;
+  // New Contract: the Header Creation row (its itemNo) this line item belongs to.
+  headerRowNo        : Integer;
   contractCount        : Integer;
   contractType        : String(40);
   lineItem            : String(40);

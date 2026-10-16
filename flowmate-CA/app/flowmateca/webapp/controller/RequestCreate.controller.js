@@ -2090,6 +2090,14 @@ sap.ui.define([
           MessageBox.warning(`${itemsTitle} - ${missingItem}`);
           return;
         }
+        // New Contract: each line item names its Header Creation row; every header row needs one.
+        if (form.requestVariantCode === "CONTRACT_NEW") {
+          const headerProblem = FormDefinitions.contractItemHeaderProblem(itemRows, headerRows.length);
+          if (headerProblem) {
+            MessageBox.warning(headerProblem);
+            return;
+          }
+        }
       }
 
       // Conditional grids: an open grid (driver "YES") needs rows; a closed one sends nothing.

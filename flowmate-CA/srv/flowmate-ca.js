@@ -1265,6 +1265,21 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
 
+    // New Contract: the S/4 Data Validation approver records the created Contract Number per
+    // Header Creation row (each row shows its Vendor Code in the approve dialog).
+    if (serviceCodeStep && request?.requestType_code === "OUTLINE_CONTRACT"
+      && request.requestVariant_code === "CONTRACT_NEW") {
+      const contractDetails = await SELECT.one.from(this.db.OutlineContractDetails)
+        .where({ request_ID: task.request_ID });
+      const hasHeaderRows = contractDetails && await SELECT.one.from(this.db.OutlineContractHeaders)
+        .where({ details_ID: contractDetails.ID });
+      if (hasHeaderRows) {
+        const failure = await this._applyLineValues(tx, req, this.db.OutlineContractHeaders, contractDetails.ID,
+          { column: "contractNumber", label: "Contract Number", maxLength: 80 });
+        if (failure) return failure;
+      }
+    }
+
     // Material Reservation: the approver of the S/4 step records the Material Reservation Number
     // created in S/4 for each line item (both variants).
     if (request?.requestType_code === "MATERIAL_RESERVATION" && this._isReservationS4Step(step?.stepName)) {

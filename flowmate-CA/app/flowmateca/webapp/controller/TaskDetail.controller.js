@@ -203,6 +203,26 @@ sap.ui.define([
             });
         }
 
+        // New Contract at S/4 Data Validation: a Contract Number per Header Creation row, next to
+        // the row's Vendor Code (auto-filled from the request).
+        if (request.requestType?.code === "OUTLINE_CONTRACT" && request.requestVariant?.code === "CONTRACT_NEW"
+          && (details.headers || []).length
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "")) {
+          task.lineEntry = {
+            field: "contractNumber", label: "Contract Number", maxLength: 80,
+            info1Label: "Vendor Code", info2Label: "Ariba Sourcing Event No"
+          };
+          task.lineEntryRows = this.sortedDetailHeaders(details).map(function (header) {
+            return {
+              itemId: header.ID,
+              itemNo: header.itemNo,
+              info1: header.vendorCode || "",
+              info2: header.coupaSourcingEventNo || "",
+              value: header.contractNumber || ""
+            };
+          });
+        }
+
         // Step 1 is the requester's own: they correct the details here and send the
         // request on, rather than approving it.
         task.isRequesterStep = task.stepNo === 1 && task.canProcess;
@@ -223,7 +243,7 @@ sap.ui.define([
           );
           const variantCode = request.requestVariant?.code;
           this.renderReadOnlyRows("taskHeadersTable", "task>/detailHeaders",
-            FormDefinitions.getHeaderTableColumns(variantCode));
+            FormDefinitions.getHeaderDisplayColumns(variantCode));
           this.renderChangeTables("taskChangeTablesHost", "task", variantCode, details.changeItems);
         }
       } catch (error) {
@@ -239,6 +259,7 @@ sap.ui.define([
     _renderEditableStep: async function (request, details) {
       const typeCode = request.requestType && request.requestType.code;
       const variantCode = request.requestVariant && request.requestVariant.code;
+      this._editVariantCode = variantCode;
       const categoryCode = details.materialCategory;
       const formModel = this.getView().getModel("form");
 
@@ -401,6 +422,14 @@ sap.ui.define([
       if (missingCell) {
         MessageBox.warning(missingCell);
         return false;
+      }
+      // New Contract: each line item names its Header Creation row; every header row needs one.
+      if (this._editVariantCode === "CONTRACT_NEW") {
+        const headerProblem = FormDefinitions.contractItemHeaderProblem(details.items || [], (details.headers || []).length);
+        if (headerProblem) {
+          MessageBox.warning(headerProblem);
+          return false;
+        }
       }
 
       await this.request("saveRequesterDetails", {
