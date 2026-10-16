@@ -347,6 +347,22 @@
                 <Text text="WBS Code"/>
             </Column>
 
+            <Column width="10rem">
+                <Text text="WBS ID"/>
+            </Column>
+
+            <Column width="10rem">
+                <Text text="Project ID"/>
+            </Column>
+
+            <Column width="8rem">
+                <Text text="Plant"/>
+            </Column>
+
+            <Column width="10rem">
+                <Text text="Company Code"/>
+            </Column>
+
             <Column>
                 <Text text="WBS Description"/>
             </Column>
@@ -365,6 +381,14 @@
                 <cells>
 
                     <Text text="{admin>wbsCode}"/>
+
+                    <Input value="{admin>WBSID}"/>
+
+                    <Input value="{admin>ProjectID}"/>
+
+                    <Input value="{admin>Plant}"/>
+
+                    <Input value="{admin>CompanyCode}"/>
 
                     <Input value="{admin>wbsDescription}"/>
 
@@ -3338,6 +3362,14 @@
             <Input value="{newItem>/wbsCode}"  placeholder="Enter WBS Code"/>
             <Label text="WBS Description" required="true" class="sapUiSmallMarginTop"/>
             <Input value="{newItem>/wbsDescription}" placeholder="Enter WBS Description"/>
+            <Label text="WBS ID" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/WBSID}" placeholder="Enter WBS ID"/>
+            <Label text="Project ID" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/ProjectID}" placeholder="Enter Project ID"/>
+            <Label text="Plant" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/Plant}" placeholder="Enter Plant"/>
+            <Label text="Company Code" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/CompanyCode}" placeholder="Enter Company Code"/>
             </VBox>
 
             <VBox visible="{newItem>/isDocumentType}">

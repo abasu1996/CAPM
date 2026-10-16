@@ -669,6 +669,12 @@ onAddBudgetCode: function () {
         unitOfMeasureDescription: "",
         entityCode: "",
         entityDescription: "",
+        wbsCode: "",
+        wbsDescription: "",
+        WBSID: "",
+        Plant: "",
+        ProjectID: "",
+        CompanyCode: "",
         projectID: "",
         projectCategory: "",
         projectDescription: "",
@@ -819,6 +825,10 @@ onAddBudgetCode: function () {
             body: {
               wbsCode: item.wbsCode,
               wbsDescription: item.wbsDescription,
+              Plant: item.Plant || null,
+              ProjectID: item.ProjectID || null,
+              WBSID: item.WBSID || null,
+              CompanyCode: item.CompanyCode || null,
               isActive: true
             }
           });
@@ -1683,6 +1693,10 @@ onSaveWBS: function (event) {
       return this._patch("Wbs", row.ID, {
         wbsCode: row.wbsCode,
         wbsDescription: row.wbsDescription,
+        Plant: row.Plant || null,
+        ProjectID: row.ProjectID || null,
+        WBSID: row.WBSID || null,
+        CompanyCode: row.CompanyCode || null,
         isActive: row.isActive
       });
     },

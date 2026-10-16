@@ -88,9 +88,13 @@ entity Materials: cuid, managed {
 }
 
 entity Wbs: cuid, managed {
-  wbsCode : String(40) not null;
+  wbsCode        : String(40) not null;
   wbsDescription : String(180) not null;
-  isActive     : Boolean default true;
+  Plant          : String(40);
+  ProjectID      : String(40);
+  WBSID          : String(40);
+  CompanyCode    : String(40);
+  isActive       : Boolean default true;
 }
 
 entity DocumentTypes : cuid, managed {

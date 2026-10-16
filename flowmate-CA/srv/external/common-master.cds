@@ -90,6 +90,10 @@ service CommonMasterDataService {
     key ID       : UUID;
         wbsCode   : String(40);
         wbsDescription : String(180);
+        Plant     : String(40);
+        ProjectID : String(40);
+        WBSID     : String(40);
+        CompanyCode : String(40);
         isActive : Boolean;
   }
 
