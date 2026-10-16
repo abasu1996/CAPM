@@ -504,6 +504,7 @@ sap.ui.define([
             const sVendorCode = String(oEntry.vendorCode || "").trim();
             const sVendorName = String(oEntry.vendorName || "").trim();
             const sVendorEmail = String(oEntry.vendorEmail || "").trim();
+            const sAccountGroup = String(oEntry.AccountGroup || "").trim();
 
             if (!sVendorCode || !sVendorName) {
                 MessageBox.warning(this.getText("vendorRequiredMessage"));
@@ -522,7 +523,8 @@ sap.ui.define([
                 payload: {
                     vendorCode: sVendorCode,
                     vendorName: sVendorName,
-                    vendorEmail: sVendorEmail || null
+                    vendorEmail: sVendorEmail || null,
+                    AccountGroup: sAccountGroup || null
                 },
                 successCreateKey: "vendorCreatedMessage",
                 successUpdateKey: "vendorUpdatedMessage",
@@ -1095,7 +1097,8 @@ sap.ui.define([
                 ID: "",
                 vendorCode: "",
                 vendorName: "",
-                vendorEmail: ""
+                vendorEmail: "",
+                AccountGroup: ""
             };
         },
         

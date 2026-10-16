@@ -647,6 +647,7 @@ onAddBudgetCode: function () {
         description: "",
         code: "",
         email: "",
+        AccountGroup: "",
         managerId: "",
         teamId: "",
         taskName: "",
@@ -789,6 +790,7 @@ onAddBudgetCode: function () {
               vendorCode: item.code,
               vendorName: item.name,
               vendorEmail: item.email,
+              AccountGroup: item.AccountGroup || null,
               isActive: true
             }
           });
@@ -1652,6 +1654,7 @@ else if (item.type === "mrpType") {
       return this._patch("Vendors", row.ID, {
         vendorName: row.vendorName,
         vendorEmail: row.vendorEmail,
+        AccountGroup: row.AccountGroup || null,
         isActive: row.isActive
       });
     },

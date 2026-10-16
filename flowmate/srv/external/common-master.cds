@@ -52,6 +52,7 @@ service CommonMasterDataService {
         vendorCode : String(40);
         vendorName : String(180);
         vendorEmail: String(255);
+        AccountGroup : String(80);
         isActive   : Boolean;
   }
 

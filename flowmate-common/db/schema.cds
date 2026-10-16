@@ -51,10 +51,11 @@ entity TeamMembers : cuid, managed {
 
 @assert.unique.vendorCode: [vendorCode]
 entity Vendors : cuid, managed {
-  vendorCode  : String(40) not null;
-  vendorName  : String(180) not null;
-  vendorEmail : String(255);
-  isActive    : Boolean default true;
+  vendorCode   : String(40) not null;
+  vendorName   : String(180) not null;
+  vendorEmail  : String(255);
+  AccountGroup : String(80);
+  isActive     : Boolean default true;
 }
 @assert.unique.customerCode: [customerCode]
 entity Customers : cuid, managed {

@@ -438,6 +438,7 @@
                                     <Column width="12rem"><Text text="{i18n>vendorCodeLabel}" wrapping="true" /></Column>
                                     <Column><Text text="{i18n>vendorNameLabel}" wrapping="true" /></Column>
                                     <Column width="20rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>vendorEmailLabel}" wrapping="true" /></Column>
+                                    <Column width="12rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>accountGroupLabel}" wrapping="true" /></Column>
                                     <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items>
@@ -446,6 +447,7 @@
                                             <ObjectIdentifier title="{vendorCode}" />
                                             <Text text="{vendorName}" wrapping="true" />
                                             <Link text="{vendorEmail}" href="{= ${vendorEmail} ? 'mailto:' + ${vendorEmail} : '' }" />
+                                            <Text text="{AccountGroup}" />
                                             <Button
                                                 icon="sap-icon://edit"
                                                 type="Transparent"
@@ -950,6 +952,8 @@
                         type="Email"
                         maxLength="255"
                         placeholder="{i18n>vendorEmailPlaceholder}" />
+                    <Label text="{i18n>accountGroupLabel}" />
+                    <Input value="{vendorEdit>/AccountGroup}" maxLength="80" />
                 </form:SimpleForm>
             </content>
             <beginButton>

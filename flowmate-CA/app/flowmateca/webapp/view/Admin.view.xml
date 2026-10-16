@@ -171,6 +171,7 @@
                   <Column width="12rem"><Text text="Vendor Code"/></Column>
                   <Column><Text text="Vendor Name"/></Column>
                   <Column><Text text="Vendor Email"/></Column>
+                  <Column width="12rem"><Text text="Account Group"/></Column>
                   <Column width="7rem"><Text text="Active"/></Column>
                   <Column width="6rem"><Text text="Actions"/></Column>
                 </columns>
@@ -180,6 +181,7 @@
                       <Text text="{admin>vendorCode}"/>
                       <Input value="{admin>vendorName}"/>
                       <Input value="{admin>vendorEmail}" type="Email"/>
+                      <Input value="{admin>AccountGroup}"/>
                       <Switch state="{admin>isActive}"/>
                       <HBox>
                         <Button icon="sap-icon://save" type="Transparent" press=".onSaveVendor"/>
@@ -3341,6 +3343,8 @@
               <Input value="{newItem>/name}"/>
               <Label text="Vendor Email" class="sapUiSmallMarginTop"/>
               <Input value="{newItem>/email}" type="Email"/>
+              <Label text="Account Group" class="sapUiSmallMarginTop"/>
+              <Input value="{newItem>/AccountGroup}"/>
             </VBox>
 
             <VBox visible="{newItem>/isSite}">
