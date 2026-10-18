@@ -3,6 +3,7 @@
   xmlns:mvc="sap.ui.core.mvc"
   xmlns:core="sap.ui.core"
   xmlns:form="sap.ui.layout.form"
+  xmlns:unified="sap.ui.unified"
   xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
   xmlns="sap.m">
   <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{task>/taskName}">
@@ -14,11 +15,20 @@
         type="Emphasized"
         visible="{task>/canClaim}"
         press=".onClaim"/>
+      <!-- Purchase Order S/4 Data Validation: Approve waits until the Budget Check is done. -->
+      <Button
+        text="{i18n>budgetCheck}"
+        icon="sap-icon://money-bills"
+        type="Emphasized"
+        visible="{task>/canRequestBudgetCheck}"
+        press=".onRequestBudgetCheck"/>
       <Button
         text="{i18n>approve}"
         icon="sap-icon://accept"
         type="Accept"
         visible="{task>/canProcess}"
+        enabled="{= !${task>/budgetCheckBlocksApproval} }"
+        tooltip="{= ${task>/budgetCheckBlocksApproval} ? 'Complete the Budget Check first' : '' }"
         press=".onApprove"/>
       <Button
         text="{i18n>sendBack}"
@@ -26,7 +36,7 @@
         class="caBtnSendBack"
         visible="{task>/canSendBack}"
         press=".onOpenSendBack"/>
-      <!-- "Terminate" in the UI only; the request status, filters and e-mails say Rejected. -->
+      <!-- "Terminate" in the UI; the stored status code stays REJECTED and e-mails say Rejected. -->
       <Button
         text="{i18n>terminate}"
         icon="sap-icon://decline"
@@ -52,7 +62,7 @@
                 class="sapUiSmallMarginEnd"
                 visible="{parts: ['task>/slaDueAt', 'task>/status/code', 'task>/slaBreached'], formatter: '.isSlaBreached'}"/>
               <ObjectStatus
-                text="{task>/status/name}"
+                text="{parts: ['task>/status/name', 'task>/status/code'], formatter: '.statusName'}"
                 state="{path: 'task>/status/code', formatter: '.statusState'}"
                 inverted="true"/>
             </HBox>
@@ -63,6 +73,12 @@
             showIcon="true"
             class="sapUiSmallMarginTop"
             visible="{parts: ['task>/slaDueAt', 'task>/status/code', 'task>/slaBreached'], formatter: '.isSlaBreached'}"/>
+          <MessageStrip
+            text="{task>/budgetCheckMessage}"
+            type="{task>/budgetCheckMessageType}"
+            showIcon="true"
+            class="sapUiSmallMarginTop"
+            visible="{= !!${task>/budgetCheckMessage} }"/>
           <FlexBox wrap="Wrap" class="caFactGrid">
             <VBox class="caFact">
               <Label text="Workflow Step"/>
@@ -78,7 +94,7 @@
             </VBox>
             <VBox class="caFact">
               <Label text="{i18n>slaDue}"/>
-              <Text text="{= ${task>/slaDueAt} ? ${path: 'task>/slaDueAt', formatter: '.formatDateTime'} : ${path: 'task>/dueDate', formatter: '.formatDate'} }"/>
+              <Text text="{= ${task>/status/code} === 'IN_PROGRESS' ? 'Paused while the Budget Check runs' : (${task>/slaDueAt} ? ${path: 'task>/slaDueAt', formatter: '.formatDateTime'} : ${path: 'task>/dueDate', formatter: '.formatDate'}) }"/>
               <ObjectStatus
                 text="{parts: ['task>/slaDueAt', 'task>/status/code'], formatter: '.formatSlaRemaining'}"
                 state="{parts: ['task>/slaDueAt', 'task>/status/code', 'task>/slaBreached'], formatter: '.formatSlaHighlight'}"
@@ -116,7 +132,7 @@
                 <Label text="{i18n>requester}"/>
                 <Text text="{task>/request/requesterName}"/>
                 <Label text="{i18n>status}"/>
-                <ObjectStatus text="{task>/request/status/name}" state="{path: 'task>/request/status/code', formatter: '.statusState'}"/>
+                <ObjectStatus text="{parts: ['task>/request/status/name', 'task>/request/status/code'], formatter: '.statusName'}" state="{path: 'task>/request/status/code', formatter: '.statusState'}"/>
               </form:SimpleForm>
             </content>
           </Panel>
@@ -134,6 +150,11 @@
 
           <Panel headerText="Header Creation" class="caFormSection caItemsSection" visible="{= !${task>/isRequesterStep} &amp;&amp; ${task>/hasDetailHeaders} }">
             <content>
+              <Toolbar>
+                <ToolbarSpacer/>
+                <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent"
+                  press=".onExportTaskTable" app:table="headers" visible="{task>/isAssignedToMe}"/>
+              </Toolbar>
               <ScrollContainer horizontal="true" vertical="false" width="100%">
                 <Table id="taskHeadersTable" fixedLayout="true" class="caWorklistTable"/>
               </ScrollContainer>
@@ -144,6 +165,11 @@
               <Toolbar>
                 <ToolbarSpacer/>
                 <Button text="Add Row" icon="sap-icon://add" press=".onAddTaskItemRow" app:grid="headers"/>
+                <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent"
+                  press=".onExportTaskRows" app:grid="headers"/>
+                <unified:FileUploader buttonOnly="true" buttonText="Import" icon="sap-icon://upload"
+                  fileType="xlsx,csv" sameFilenameAllowed="true" change=".onImportTaskRows" app:grid="headers"
+                  tooltip="Replace the rows with an edited Excel (.xlsx) or CSV file"/>
               </Toolbar>
               <ScrollContainer horizontal="true" vertical="false" width="100%">
                 <Table id="taskHeadersEditTable" fixedLayout="true" class="caWorklistTable"/>
@@ -153,9 +179,18 @@
           <VBox id="taskChangeTablesHost" visible="{= !${task>/isRequesterStep} }"/>
           <Panel headerText="{task>/detailItemsTitle}" class="caFormSection caItemsSection" visible="{= ${task>/isRequesterStep} ? ${task>/hasEditableItems} : ${task>/hasDetailItems} }">
             <content>
-              <Toolbar visible="{= ${task>/isRequesterStep} }">
+              <Toolbar>
                 <ToolbarSpacer/>
-                <Button text="Add Row" icon="sap-icon://add" press=".onAddTaskItemRow" app:grid="items"/>
+                <Button text="Add Row" icon="sap-icon://add" press=".onAddTaskItemRow" app:grid="items"
+                  visible="{= ${task>/isRequesterStep} }"/>
+                <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent"
+                  press=".onExportTaskRows" app:grid="items" visible="{= ${task>/isRequesterStep} }"/>
+                <unified:FileUploader buttonOnly="true" buttonText="Import" icon="sap-icon://upload"
+                  fileType="xlsx,csv" sameFilenameAllowed="true" change=".onImportTaskRows" app:grid="items"
+                  visible="{= ${task>/isRequesterStep} }"
+                  tooltip="Replace the rows with an edited Excel (.xlsx) or CSV file"/>
+                <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent"
+                  press=".onExportTaskTable" app:table="items" visible="{= !${task>/isRequesterStep} &amp;&amp; ${task>/isAssignedToMe} }"/>
               </Toolbar>
               <ScrollContainer horizontal="true" vertical="false" width="100%">
                 <Table id="taskItemsTable" fixedLayout="true" class="caWorklistTable"/>
@@ -193,9 +228,21 @@
             <Label text="{decision>/projectValueLabel}" required="true" visible="{= ${decision>/needsProjectValue} === true }"/>
             <Input value="{decision>/projectValue}" placeholder="{= 'Enter the ' + ${decision>/projectValueLabel} }" maxLength="80"
               visible="{= ${decision>/needsProjectValue} === true }" class="sapUiSmallMarginBottom"/>
+            <!-- New SES, Single Line Items: the SES Number created at S/4 Data Validation. -->
+            <Label text="SES Number" required="true" visible="{= ${decision>/needsSesNumber} === true }"/>
+            <Input value="{decision>/sesNumber}" placeholder="Enter the SES Number" maxLength="80"
+              visible="{= ${decision>/needsSesNumber} === true }" class="sapUiSmallMarginBottom"/>
             <!-- Multiple line items (Service Code, Equipment Code, Project Code): one value per line. -->
-            <Title text="{= ${decision>/lineEntry/label} + ' per line item' }" level="H5"
-              visible="{= !!${decision>/lineEntry} }"/>
+            <!-- Export the table, fill the value column in Excel, Import it to fill the inputs. -->
+            <Toolbar visible="{= !!${decision>/lineEntry} }" style="Clear">
+              <Title text="{= ${decision>/lineEntry/title} || (${decision>/lineEntry/label} + ' per line item') }" level="H5"/>
+              <ToolbarSpacer/>
+              <Button text="Export" icon="sap-icon://excel-attachment" type="Transparent" press=".onExportLineEntry"
+                tooltip="Download this table to fill it in Excel"/>
+              <unified:FileUploader buttonOnly="true" buttonText="Import" icon="sap-icon://upload"
+                fileType="xlsx,csv" sameFilenameAllowed="true" change=".onImportLineEntry"
+                tooltip="{= 'Fill the ' + ${decision>/lineEntry/label} + ' column from an edited Excel (.xlsx) or CSV file' }"/>
+            </Toolbar>
             <Table items="{path: 'decision>/lineEntryRows', templateShareable: false}"
               visible="{= !!${decision>/lineEntry} }" class="sapUiSizeCompact sapUiSmallMarginBottom">
               <columns>

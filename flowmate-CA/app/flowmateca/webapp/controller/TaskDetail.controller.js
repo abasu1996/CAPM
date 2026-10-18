@@ -1,24 +1,25 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
   "flowmateca/model/FormDefinitions",
-  "sap/ui/model/json/JSONModel",
+  "flowmateca/model/tableFile",
+  "flowmateca/model/ListModel",
   "sap/m/MessageBox",
   "sap/ui/layout/form/SimpleForm",
   "sap/m/Label",
   "sap/m/Column",
   "sap/m/ColumnListItem",
   "sap/m/Button"
-], function (BaseController, FormDefinitions, JSONModel, MessageBox, SimpleForm, Label, Column, ColumnListItem, Button) {
+], function (BaseController, FormDefinitions, tableFile, ListModel, MessageBox, SimpleForm, Label, Column, ColumnListItem, Button) {
   "use strict";
 
   return BaseController.extend("flowmateca.controller.TaskDetail", {
     onInit: function () {
-      this.getView().setModel(new JSONModel({}), "task");
-      this.getView().setModel(new JSONModel({}), "decision");
-      this.getView().setModel(new JSONModel({}), "sendBack");
-      this.getView().setModel(new JSONModel({ details: {} }), "form");
+      this.getView().setModel(new ListModel({}), "task");
+      this.getView().setModel(new ListModel({}), "decision");
+      this.getView().setModel(new ListModel({}), "sendBack");
+      this.getView().setModel(new ListModel({ details: {} }), "form");
       // Pick lists for the editable step-1 form, same shape the create page uses.
-      this.getView().setModel(new JSONModel({}), "catalog");
+      this.getView().setModel(new ListModel({}), "catalog");
       this.getRouter().getRoute("taskDetail").attachPatternMatched(this._onRouteMatched, this);
     },
 
@@ -47,6 +48,8 @@ sap.ui.define([
         const processableStatus = task.status?.code === "OPEN";
         task.canClaim = processableStatus && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID;
         task.canProcess = processableStatus && this.canActForAssignedUser(task.assignedUser_ID, user);
+        // Line-item exports are for the approver the task is assigned to (once claimed), also after deciding it.
+        task.isAssignedToMe = this.canActForAssignedUser(task.assignedUser_ID, user);
         task.canSendBack = task.canProcess && task.stepNo > 1;
 
         const request = task.request || {};
@@ -69,10 +72,31 @@ sap.ui.define([
         }));
         task.needsPoNumber = request.requestType?.code === "PURCHASE_ORDER"
           && details.sesRequired === true
+          && !details.purchaseOrderNumber
           && task.stepNo === lastStepNo;
         const currentStep = (request.stepInstances || []).find(function (step) {
           return step.stepNo === task.stepNo;
         });
+        // Budget Check (Purchase Order, New SES; srv _requestBudgetCheck): optional; the S/4 Data
+        // Validation task may run it, and cannot be approved while it is running. Step names as in
+        // srv/flowmate-ca.js (Budget Check).
+        const budgetStatus = ["PURCHASE_ORDER", "SERVICE_ENTRY_SHEET"].indexOf(request.requestType?.code) >= 0
+          ? (details.budgetCheckStatus || null) : null;
+        const onS4Step = /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
+        const onBudgetStep = /budget\s+(check|confirmation)/i.test(currentStep?.stepName || "");
+        task.canRequestBudgetCheck = task.canProcess && onS4Step && budgetStatus === "NOT_REQUESTED";
+        task.budgetCheckBlocksApproval = onS4Step && budgetStatus === "REQUESTED";
+        task.budgetCheckMessage = "";
+        if (budgetStatus && onS4Step) {
+          task.budgetCheckMessage = {
+            NOT_REQUESTED: "Optional: use Budget Check if Finance should confirm the budget before you approve.",
+            REQUESTED: "Budget Check in progress. This task reopens for approval once the Budget Check task is completed.",
+            COMPLETED: "Budget Check completed. This task can be approved."
+          }[budgetStatus] || "";
+        } else if (budgetStatus === "REQUESTED" && onBudgetStep && task.status?.code === "OPEN") {
+          task.budgetCheckMessage = "Requested from S/4 Data Validation. Approving this task returns the request to S/4 Data Validation for approval.";
+        }
+        task.budgetCheckMessageType = budgetStatus === "COMPLETED" ? "Success" : "Information";
         // Service Code and Material Code share the G/L Account and Valuation Class steps; the
         // S/4 Data Validation step asks for the created Service Code / Material Code.
         const typeCode = request.requestType?.code;
@@ -203,6 +227,32 @@ sap.ui.define([
             });
         }
 
+        // New SES at S/4 Data Validation: the SES Number, one field (Single Line Items) or one per
+        // Header Creation row, each row being one SES (Multiple Line Items). Mirrors _approveTask.
+        task.needsSesNumber = false;
+        if (request.requestType?.code === "SERVICE_ENTRY_SHEET" && request.requestVariant?.code === "SES_NEW"
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "")) {
+          if ((details.headers || []).length) {
+            const paymentOptions = { SES_REQUIRED: "SES Required", PAYMENT_REQUIRED: "Payment Required", PAYMENT_REQUIRED_GRN_PO: "Payment Required for GRN PO" };
+            task.lineEntry = {
+              field: "sesNumber", label: "SES Number", title: "SES Number per Header Creation row", maxLength: 80,
+              info1Label: "Purchase Order Number", info2Label: "SES / Payment Option"
+            };
+            task.lineEntryRows = this.sortedDetailHeaders(details).map(function (header) {
+              return {
+                itemId: header.ID,
+                itemNo: header.itemNo,
+                info1: header.purchaseOrderNo || "",
+                info2: paymentOptions[header.sesPaymentOption] || header.sesPaymentOption || "",
+                value: header.sesNumber || ""
+              };
+            });
+          } else {
+            task.needsSesNumber = true;
+            task.sesNumberPrefill = details.sesNumber || "";
+          }
+        }
+
         // New Contract at S/4 Data Validation: a Contract Number per Header Creation row, next to
         // the row's Vendor Code (auto-filled from the request).
         if (request.requestType?.code === "OUTLINE_CONTRACT" && request.requestVariant?.code === "CONTRACT_NEW"
@@ -221,6 +271,32 @@ sap.ui.define([
               value: header.contractNumber || ""
             };
           });
+        }
+
+        // Purchase Order at S/4 Data Validation: the PO Number (mandatory), next to the PO's
+        // Procurement Category and Vendor Name. One row: each PO is its own request and task.
+        if (request.requestType?.code === "PURCHASE_ORDER"
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "")) {
+          const [vendor, category] = await Promise.all([
+            details.vendor_ID
+              ? this.request(`Vendors(${details.vendor_ID})?$select=vendorCode,vendorName`).catch(function () { return null; })
+              : null,
+            details.procurementCategory_code
+              ? this.requestMaster(`ProcurementCategories('${encodeURIComponent(details.procurementCategory_code)}')?$select=code,name`)
+                .catch(function () { return null; })
+              : null
+          ]);
+          task.lineEntry = {
+            field: "purchaseOrderNumber", label: "PO Number", title: "PO Number", maxLength: 80,
+            info1Label: "Procurement Category", info2Label: "Vendor Name", sendAs: "purchaseOrderNo"
+          };
+          task.lineEntryRows = [{
+            itemId: details.ID,
+            itemNo: 1,
+            info1: this.codeAndText(details.procurementCategory_code, category && category.name) || "",
+            info2: this.codeAndText(vendor && vendor.vendorCode, vendor && vendor.vendorName) || "",
+            value: details.purchaseOrderNumber || ""
+          }];
         }
 
         // Step 1 is the requester's own: they correct the details here and send the
@@ -242,9 +318,10 @@ sap.ui.define([
             "task>/detailItems"
           );
           const variantCode = request.requestVariant?.code;
+          this._exportSource = { request: request, details: details };
           this.renderReadOnlyRows("taskHeadersTable", "task>/detailHeaders",
             FormDefinitions.getHeaderDisplayColumns(variantCode));
-          this.renderChangeTables("taskChangeTablesHost", "task", variantCode, details.changeItems);
+          this.renderChangeTables("taskChangeTablesHost", "task", variantCode, details.changeItems, "{task>/isAssignedToMe}");
         }
       } catch (error) {
         this.showError(error);
@@ -387,6 +464,44 @@ sap.ui.define([
       formModel.setProperty(grid.path, this._renumberItems(rows.concat([blank])));
     },
 
+    // Requester step: export an editable table with its stored values, edit it in Excel and import
+    // it back. The file decides the rows (add or remove them there); see tableFile.toRows.
+    onExportTaskRows: function (event) {
+      const gridKey = this._gridOf(event.getSource());
+      const grid = this._editableGrid(gridKey);
+      const rows = this.getView().getModel("form").getProperty(grid.path) || [];
+      const reference = this.getView().getModel("task").getProperty("/request/referenceNumber");
+      const title = gridKey === "headers" ? "Header Creation"
+        : (this.getView().getModel("task").getProperty("/detailItemsTitle") || "Line Items");
+      this.exportToExcel([reference, title].filter(Boolean).join(" - "),
+        [{ label: "#", value: function (row) { return row.itemNo; }, width: 6 }].concat(grid.columns.map(function (col) {
+          return { label: col.label, value: function (row) { return row[col.name]; } };
+        })), rows).catch(this.showError.bind(this));
+    },
+
+    onImportTaskRows: async function (event) {
+      const uploader = event.getSource();
+      const file = (event.getParameter("files") || [])[0];
+      if (!file) {
+        return;
+      }
+      const grid = this._editableGrid(this._gridOf(uploader));
+      const formModel = this.getView().getModel("form");
+      try {
+        const result = tableFile.toRows(await tableFile.readTableFile(file), grid.columns, formModel.getProperty(grid.path));
+        if (!result.matched) {
+          MessageBox.error("None of the file's column headings match this table. Use Export to get a file in the right layout, edit it and import it.");
+          return;
+        }
+        formModel.setProperty(grid.path, result.rows);
+        this.showSuccess(`${result.rows.length} row(s) imported`);
+      } catch (error) {
+        MessageBox.error(`The file could not be read: ${error.message}`);
+      } finally {
+        uploader.clear();
+      }
+    },
+
     onRemoveTaskItemRow: function (gridKey, event) {
       const grid = this._editableGrid(gridKey);
       const formModel = this.getView().getModel("form");
@@ -411,6 +526,12 @@ sap.ui.define([
       }.bind(this));
       if (missingField) {
         MessageBox.warning(missingField.label + " is required.");
+        return false;
+      }
+      // Service Entry Sheet, tax based: the two dates may be at most 30 days apart.
+      const sesDateProblem = FormDefinitions.sesDateProblem(details);
+      if (sesDateProblem) {
+        MessageBox.warning(sesDateProblem);
         return false;
       }
       const missingHeader = this._firstMissingItemCell(details.headers || [], this._headerColumns || []);
@@ -440,6 +561,30 @@ sap.ui.define([
         }
       });
       return true;
+    },
+
+    onRequestBudgetCheck: function () {
+      MessageBox.confirm("Send this purchase order for a Budget Check? This task stays In Progress until the Budget Check task is completed.", {
+        title: this.getView().getModel("i18n").getResourceBundle().getText("budgetCheck"),
+        onClose: async function (action) {
+          if (action !== MessageBox.Action.OK) {
+            return;
+          }
+          this.setBusy(true);
+          try {
+            await this.request("requestBudgetCheck", {
+              method: "POST",
+              body: { taskId: this._taskId }
+            });
+            this.showSuccess("Budget Check requested");
+            await this.onRefresh();
+          } catch (error) {
+            this.showError(error);
+          } finally {
+            this.setBusy(false);
+          }
+        }.bind(this)
+      });
     },
 
     onClaim: async function () {
@@ -474,6 +619,66 @@ sap.ui.define([
       return null;
     },
 
+    // Export to Excel of the Line Items / Header Creation table shown on the task.
+    onExportTaskTable: function (event) {
+      const source = this._exportSource;
+      if (!source) {
+        return;
+      }
+      const task = this.getView().getModel("task").getData();
+      const headers = event.getSource().data("table") === "headers";
+      const columns = headers
+        ? FormDefinitions.getHeaderDisplayColumns(source.request.requestVariant?.code)
+        : FormDefinitions.getItemDisplayColumns(source.request.requestType?.code, source.request.requestVariant?.code,
+          source.details.materialCategory).filter(function (col) {
+          return !col.visibleWhen || source.details[col.visibleWhen.field] === col.visibleWhen.equals;
+        });
+      const title = headers ? "Header Creation" : (task.detailItemsTitle || "Line Items");
+      this.exportTableRows([task.request?.referenceNumber, title].filter(Boolean).join(" - "), columns,
+        headers ? task.detailHeaders : task.detailItems);
+    },
+
+    // Approve dialog, per-line entry table: export it, fill the value column in Excel, import it back.
+    onExportLineEntry: function () {
+      const decision = this.getView().getModel("decision").getData();
+      const entry = decision.lineEntry || {};
+      const columns = [{ label: "#", value: function (row) { return row.itemNo; }, width: 6 }]
+        .concat(["info1", "info2", "info3"].filter(function (key) { return entry[`${key}Label`]; }).map(function (key) {
+          return { label: entry[`${key}Label`], value: function (row) { return row[key]; }, width: 24 };
+        }))
+        .concat([{ label: entry.label, value: function (row) { return row.value; }, width: 24 }]);
+      const reference = this.getView().getModel("task").getProperty("/request/referenceNumber");
+      this.exportToExcel([reference, entry.title || `${entry.label} per line item`].filter(Boolean).join(" - "),
+        columns, decision.lineEntryRows || []).catch(this.showError.bind(this));
+    },
+
+    onImportLineEntry: async function (event) {
+      const uploader = event.getSource();
+      const file = (event.getParameter("files") || [])[0];
+      if (!file) {
+        return;
+      }
+      const model = this.getView().getModel("decision");
+      const entry = model.getProperty("/lineEntry") || {};
+      try {
+        const rows = await tableFile.readTableFile(file);
+        const result = tableFile.applyImport(rows, model.getProperty("/lineEntryRows"), {
+          valueLabel: entry.label, maxLength: entry.maxLength
+        });
+        if (result.missingColumn) {
+          MessageBox.error(`The file needs the columns "#" and "${entry.label}". Use Export to get a file in the right layout, fill in the ${entry.label} column and import it.`);
+          return;
+        }
+        model.setProperty("/lineEntryRows", result.rows);
+        const skipped = result.unmatched.length ? `; no line for # ${result.unmatched.join(", ")}` : "";
+        this.showSuccess(`${result.updated} row(s) filled in from the file${skipped}`);
+      } catch (error) {
+        MessageBox.error(`The file could not be read: ${error.message}`);
+      } finally {
+        uploader.clear();
+      }
+    },
+
     onApprove: function () {
       const prefill = this.getView().getModel("task").getProperty("/prefill") || {};
       this.getView().getModel("decision").setData({
@@ -495,6 +700,8 @@ sap.ui.define([
         needsProjectValue: !!this.getView().getModel("task").getProperty("/needsProjectValue"),
         projectValueLabel: this.getView().getModel("task").getProperty("/projectValueLabel") || "",
         projectValue: "",
+        needsSesNumber: !!this.getView().getModel("task").getProperty("/needsSesNumber"),
+        sesNumber: this.getView().getModel("task").getProperty("/sesNumberPrefill") || "",
         lineEntry: this.getView().getModel("task").getProperty("/lineEntry"),
         lineEntryRows: (this.getView().getModel("task").getProperty("/lineEntryRows") || []).map(function (row) {
           return Object.assign({}, row);
@@ -554,7 +761,15 @@ sap.ui.define([
         MessageBox.warning(`Enter the ${decision.projectValueLabel} to approve this task.`);
         return;
       }
+      const sesNumber = String(decision.sesNumber || "").trim();
+      if (!rejecting && decision.needsSesNumber && !sesNumber) {
+        MessageBox.warning("Enter the SES Number to approve this task.");
+        return;
+      }
       const body = { taskId: this._taskId, remarks: decision.remarks };
+      if (!rejecting && decision.needsSesNumber) {
+        body.sesNumber = sesNumber;
+      }
       if (!rejecting && decision.needsPoNumber) {
         body.purchaseOrderNo = purchaseOrderNo;
       }
@@ -583,9 +798,14 @@ sap.ui.define([
           MessageBox.warning(`Row ${missing.itemNo}: enter the ${decision.lineEntry.label}.`);
           return;
         }
-        body.lineValues = JSON.stringify(rows.map(function (row) {
-          return { itemId: row.itemId, value: String(row.value).trim() };
-        }));
+        if (decision.lineEntry.sendAs) {
+          // A single value entered in the table (e.g. a PO's PO Number), sent as its own field.
+          body[decision.lineEntry.sendAs] = String(rows[0].value).trim();
+        } else {
+          body.lineValues = JSON.stringify(rows.map(function (row) {
+            return { itemId: row.itemId, value: String(row.value).trim() };
+          }));
+        }
       }
       this.setBusy(true);
       try {

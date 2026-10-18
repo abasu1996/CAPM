@@ -95,6 +95,8 @@ entity CARequests : cuid, managed {
                       on involvedParties.request = $self;
   history         : Composition of many CAHistory
                       on history.request = $self;
+  versions        : Composition of many RequestVersions
+                      on versions.request = $self;
 
   materialCode       : Composition of one MaterialCodeDetails
                          on materialCode.request = $self;
@@ -153,11 +155,16 @@ entity CATasks : cuid, managed {
   decision        : String(40);
   remarks         : LargeString;
   completedAt     : DateTime;
+  completedByName : String(160);
+  // A send-back opens a new task for the step; the earlier one stays as history, superseded.
+  isSuperseded    : Boolean default false;
+  reworkOf        : Association to CATasks;
 }
 
 entity CAAttachments : Attachments {
   request : Association to CARequests not null;
   category: String(60);
+  uploadedByName: String(160);
 }
 
 annotate CAAttachments with {
@@ -198,6 +205,25 @@ entity CAHistory : cuid, managed {
   oldStatus : String(40);
   newStatus : String(40);
   remarks   : LargeString;
+}
+
+// The request's details as submitted (version 1), as resubmitted after each send-back and as
+// changed by each approval (version 2, 3, ...): a JSON snapshot of the details row with its line
+// items and header rows. stepNo / stepName name the approval step; empty for the requester.
+entity RequestVersions : cuid, managed {
+  request       : Association to CARequests not null;
+  versionNo     : Integer not null;
+  snapshot      : LargeString;
+  createdByName : String(160);
+  stepNo        : Integer;
+  stepName      : String(160);
+}
+
+// The running number in request titles (MCC-26-0001), one counter per request type and year.
+entity RequestTitleCounters {
+  key requestType : String(40);
+  key year        : Integer;
+  lastNumber      : Integer default 0;
 }
 
 @assert.unique.slaNotification: [notificationKey]
@@ -706,6 +732,10 @@ entity PurchaseOrderDetails : cuid, managed {
   sesDraft                : LargeString;
   // Entered by the approver of the last PO step; copied into the SES successor.
   purchaseOrderNumber     : String(80);
+  // Budget Check (PO step "Budget Check", auto-completed on submit): null = no budget gating
+  // (older requests), NOT_REQUESTED, REQUESTED (S/4 task on hold) or COMPLETED. The S/4 Data
+  // Validation approver cannot approve until it is COMPLETED.
+  budgetCheckStatus       : String(20);
   items                   : Composition of many PurchaseOrderItems
                               on items.details = $self;
 }
@@ -736,6 +766,15 @@ entity PurchaseOrderItems : cuid, managed {
 
 entity ServiceEntrySheetDetails : cuid, managed {
   request          : Association to CARequests not null;
+  // Single Line Items: TAX_BASED / NON_TAX_BASED; a tax based one has both dates, at most 30
+  // days apart (srv/lib/ses-dates.js).
+  taxTransactionType : String(20);
+  invoiceDate        : Date;
+  serviceObtainedDate: Date;
+  // New SES Budget Check, as on PurchaseOrderDetails: null, NOT_REQUESTED, REQUESTED or COMPLETED.
+  budgetCheckStatus  : String(20);
+  // New SES, Single Line Items: the SES Number recorded at S/4 Data Validation.
+  sesNumber          : String(80);
   transactionType  : String(40);
   sourceMode       : String(40);
   purchaseOrderNo  : String(80);
@@ -771,6 +810,8 @@ entity ServiceEntrySheetDetails : cuid, managed {
 entity ServiceEntrySheetHeaders : cuid, managed {
   details               : Association to ServiceEntrySheetDetails not null;
   itemNo                : Integer;
+  // New SES, Multiple Line Items: the SES Number of this row, recorded at S/4 Data Validation.
+  sesNumber             : String(80);
   sourceMode            : String(40);
   purchaseOrderNo       : String(80);
   existingSesNo         : String(80);

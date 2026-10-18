@@ -1,20 +1,43 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
-  "sap/ui/model/json/JSONModel",
+  "flowmateca/model/ListModel",
   "sap/ui/model/FilterType",
+  "sap/ui/model/Sorter",
   "flowmateca/model/requestFilters"
-], function (BaseController, JSONModel, FilterType, requestFilters) {
+], function (BaseController, ListModel, FilterType, Sorter, requestFilters) {
   "use strict";
 
   return BaseController.extend("flowmateca.controller.AllRequests", {
     onInit: function () {
-      this.getView().setModel(new JSONModel({ total: 0 }), "view");
+      this.getView().setModel(new ListModel({ total: 0, sort: "desc" }), "view");
       this.getRouter().getRoute("allRequests").attachPatternMatched(this.onRefresh, this);
     },
 
     onExit: function () {
       clearTimeout(this._filterTimer);
       this.getRouter().getRoute("allRequests").detachPatternMatched(this.onRefresh, this);
+    },
+
+    // Exports every request matching the filters, not only the rows loaded so far.
+    onExportExcel: async function () {
+      const binding = this.byId("allRequestsTable").getBinding("items");
+      this.setBusy(true);
+      try {
+        const contexts = await binding.requestContexts(0, binding.getCount() || binding.getLength());
+        await this.exportToExcel("All Requests", [
+          { label: "Request ID", value: (r) => r.referenceNumber },
+          { label: "Title", value: (r) => r.title },
+          { label: "Request Type", value: (r) => r.requestType && r.requestType.name },
+          { label: "Requester", value: (r) => r.requesterName },
+          { label: "Status", value: (r) => r.status && this.statusName(r.status.name, r.status_code) },
+          { label: "Processor Team", value: (r) => r.ownerTeamName },
+          { label: "Created", value: (r) => this.formatDateTime(r.createdAt) }
+        ], contexts.map((context) => context.getObject()));
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        this.setBusy(false);
+      }
     },
 
     onRefresh: function () {
@@ -25,6 +48,15 @@ sap.ui.define([
     onFilterChange: function () {
       clearTimeout(this._filterTimer);
       this._filterTimer = setTimeout(this._applyFilters.bind(this), 250);
+    },
+
+    // Created date, newest ("desc", the default) or oldest first; the ID breaks ties the same way.
+    onSortChange: function () {
+      const descending = this.getView().getModel("view").getProperty("/sort") !== "asc";
+      this.byId("allRequestsTable").getBinding("items").sort([
+        new Sorter("createdAt", descending),
+        new Sorter("ID", descending)
+      ]);
     },
 
     onDateChange: function (event) {
@@ -64,6 +96,8 @@ sap.ui.define([
       this.byId("allRequestsSearch").setValue("");
       this.byId("allRequestsStatus").setSelectedKey("").setValue("");
       this.byId("allRequestsType").setSelectedKey("").setValue("");
+      this.getView().getModel("view").setProperty("/sort", "desc");
+      this.onSortChange();
       ["allRequestsCreatedFrom", "allRequestsCreatedTo"].forEach((id) => {
         this.byId(id).setValue("").setDateValue(null).setValueState("None").data("invalidDate", false);
       });

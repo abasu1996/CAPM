@@ -1,15 +1,15 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
-  "sap/ui/model/json/JSONModel",
+  "flowmateca/model/ListModel",
   "sap/ui/model/Filter",
   "sap/ui/model/FilterOperator",
   "sap/m/MessageBox"
-], function (BaseController, JSONModel, Filter, FilterOperator, MessageBox) {
+], function (BaseController, ListModel, Filter, FilterOperator, MessageBox) {
   "use strict";
 
   return BaseController.extend("flowmateca.controller.Delegations", {
     onInit: function () {
-      this.getView().setModel(new JSONModel(this._emptyDelegation()), "newDelegation");
+      this.getView().setModel(new ListModel(this._emptyDelegation()), "newDelegation");
       this.getRouter().getRoute("delegations").attachPatternMatched(this.onRefresh, this);
     },
 

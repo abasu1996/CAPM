@@ -25,8 +25,10 @@ sap.ui.define([
   "sap/m/Button",
   "sap/m/FlexItemData",
   "sap/ui/model/Sorter",
-  "sap/m/GroupHeaderListItem"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem) {
+  "sap/m/GroupHeaderListItem",
+  "sap/m/Toolbar",
+  "sap/m/ToolbarSpacer"
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer) {
   "use strict";
 
   // A VBox that a SimpleForm accepts as a field (forms only take IFormContent controls); it holds
@@ -94,6 +96,9 @@ sap.ui.define([
     return (!generic && !technical && cleaned) || STATUS_MESSAGES[code] || fallback ||
       "The request could not be completed. Please try again.";
   }
+
+  // Master data whose fields show only the code once picked (the drop-down lists code and name).
+  const CODE_ONLY_ENTITIES = new Set(["Sites", "Materials"]);
 
   return Controller.extend("flowmateca.controller.BaseController", {
     getRouter: function () {
@@ -301,7 +306,102 @@ sap.ui.define([
       return diff >= 0 ? `Due in ${amount} ${unit}` : `${amount} ${unit} overdue`;
     },
 
-    // A request is past its SLA while still running after its last step's deadline.
+    // Downloads rows as an .xlsx. columns: [{ label, value: row => text }]; the values are written
+    // as text, exactly as the list shows them.
+    exportToExcel: function (fileName, columns, rows) {
+      return new Promise(function (resolve, reject) {
+        sap.ui.require(["sap/ui/export/Spreadsheet"], function (Spreadsheet) {
+          const data = rows.map(function (row) {
+            const flat = {};
+            columns.forEach(function (col, index) {
+              const value = col.value(row);
+              flat["c" + index] = value === undefined || value === null ? "" : String(value);
+            });
+            return flat;
+          });
+          const sheet = new Spreadsheet({
+            workbook: {
+              columns: columns.map(function (col, index) {
+                return { label: col.label, property: "c" + index, type: "string", width: col.width || 18 };
+              })
+            },
+            dataSource: data,
+            fileName: `${fileName}.xlsx`,
+            worker: false,
+            // The sheet is destroyed once built; its delayed progress dialog would then stay open.
+            showProgress: false
+          });
+          sheet.build().then(resolve, reject).finally(function () {
+            sheet.destroy();
+          });
+        }, reject);
+      });
+    },
+
+    formatSlaText: function (slaDueAt, statusCode, slaBreached) {
+      // S/4 Data Validation waiting on its Budget Check: its SLA restarts when the check is done.
+      if (statusCode === "IN_PROGRESS") {
+        return "SLA paused · Budget Check";
+      }
+      if (this.isSlaBreached(slaDueAt, statusCode, slaBreached)) {
+        return "SLA Breached";
+      }
+      return this.isWithinSla(slaDueAt, statusCode, slaBreached) ? "Within SLA" : "";
+    },
+
+    // One-line SLA cell: "SLA Breached · 1 day overdue", "Within SLA · Due in 2 days" or just the
+    // badge text once the task is closed.
+    formatSlaCell: function (slaDueAt, statusCode, slaBreached) {
+      const badge = this.formatSlaText(slaDueAt, statusCode, slaBreached);
+      const remaining = this.formatSlaRemaining(slaDueAt, statusCode);
+      return [badge, remaining].filter(Boolean).join(" · ");
+    },
+
+    // Request and task statuses keep the code REJECTED; the UI calls it Terminated.
+    statusName: function (name, code) {
+      return code === "REJECTED" ? "Terminated" : name;
+    },
+
+    // "Approved · Finance Processor" for a decided task; empty while open. The time has its own column.
+    formatTaskOutcome: function (statusCode, completedByName, assignedName) {
+      const outcome = { APPROVED: "Approved", REJECTED: "Terminated", SENT_BACK: "Sent back" }[statusCode];
+      if (!outcome) {
+        return "";
+      }
+      return [outcome, completedByName || assignedName].filter(Boolean).join(" · ");
+    },
+
+    // Lists keep dates short ("Oct 20, 01:34 AM"); detail pages show the year too.
+    formatDateTimeShort: function (value) {
+      if (!value) {
+        return "";
+      }
+      return new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(value));
+    },
+
+    // The due date in a list cell ("Oct 20, 01:34 AM"); the time left is its tooltip.
+    formatSlaDue: function (slaDueAt, dueDate) {
+      return slaDueAt ? this.formatDateTimeShort(slaDueAt) : this.formatDate(dueDate);
+    },
+
+    formatSlaLength: function (slaDays) {
+      return `SLA ${slaDays} ${Number(slaDays) === 1 ? "day" : "days"}`;
+    },
+
+    // "Uploaded by Name · 16 Oct 2026, 15:40", with "Remarks screenshot" marked as such.
+    formatUploadInfo: function (uploadedByName, createdBy, createdAt, category) {
+      const who = uploadedByName || createdBy || "";
+      const parts = [who && `Uploaded by ${who}`, this.formatDateTime(createdAt)].filter(Boolean);
+      const text = parts.join(" · ");
+      return category === "REMARKS_SCREENSHOT" ? `Remarks screenshot · ${text}` : text;
+    },
+
+    // A request is past its SLA while still running after its (projected) due date.
     isRequestOverdue: function (slaDueAt, statusCode) {
       return !!slaDueAt && statusCode !== "COMPLETED" && statusCode !== "REJECTED"
         && new Date(slaDueAt) < new Date();
@@ -436,7 +536,8 @@ sap.ui.define([
 
     // Contract Modification change rows: one read-only table per changeType that has rows,
     // built inside the VBox hostId. Rows are published on the model as /changeRows_<key>.
-    renderChangeTables: function (hostId, modelName, variantCode, changeItems) {
+    // exportVisible: when the Export button shows (a binding or boolean; shown by default).
+    renderChangeTables: function (hostId, modelName, variantCode, changeItems, exportVisible) {
       const host = this.byId(hostId);
       if (!host) {
         return;
@@ -453,12 +554,35 @@ sap.ui.define([
         model.setProperty(`/changeRows_${grid.key}`, rows);
         const tableId = `${hostId}-${grid.key}`;
         const table = new Table(this.createId(tableId)).addStyleClass("caWorklistTable");
+        const reference = model.getProperty("/request/referenceNumber") || model.getProperty("/referenceNumber");
         host.addItem(new Panel({
           headerText: grid.title,
-          content: [new ScrollContainer({ horizontal: true, vertical: false, width: "100%", content: [table] })]
+          content: [
+            new Toolbar({ content: [new ToolbarSpacer(), new Button({
+              text: "Export to Excel",
+              icon: "sap-icon://excel-attachment",
+              type: "Transparent",
+              visible: exportVisible === undefined ? true : exportVisible,
+              press: function () {
+                this.exportTableRows([reference, grid.title].filter(Boolean).join(" - "), grid.columns, rows);
+              }.bind(this)
+            })] }),
+            new ScrollContainer({ horizontal: true, vertical: false, width: "100%", content: [table] })
+          ]
         }).addStyleClass("caFormSection caItemsSection"));
         this.renderReadOnlyRows(tableId, `${modelName}>/changeRows_${grid.key}`, grid.columns);
       }.bind(this));
+    },
+
+    // Exports a read-only row table as shown: "#" (itemNo) plus one column per definition, with
+    // select values as their text and flags as Yes/No.
+    exportTableRows: function (fileName, columns, rows) {
+      const shown = columns.filter(function (col) { return col.name !== "itemNo"; });
+      return this.exportToExcel(fileName, [{ label: "#", value: function (row) { return row.itemNo; }, width: 6 }]
+        .concat(shown.map(function (col) {
+          return { label: col.label, value: function (row) { return this.formatDetailValue(col, {}, row); }.bind(this) };
+        }.bind(this))), (rows || []).slice().sort(function (left, right) { return left.itemNo - right.itemNo; }))
+        .catch(this.showError.bind(this));
     },
 
     // Header rows of an outline contract (New Contract), sorted for display.
@@ -518,6 +642,24 @@ sap.ui.define([
       });
     },
 
+    // A field's display text ("" when empty): Yes/No for flags, the option text for selects.
+    // Request-level fields (source "request") are read from the request instead of details.
+    formatDetailValue: function (definition, request, details) {
+      let value = definition.source === "request"
+        ? (definition.name === "requestDateTime" ? request.createdAt : request[definition.name])
+        : details[definition.name];
+      if (typeof value === "boolean") {
+        value = value ? "Yes" : "No";
+      }
+      if (definition.type === "select" && value) {
+        const option = (definition.options || []).find(function (entry) {
+          return entry.key === value;
+        });
+        value = option ? option.text : value;
+      }
+      return value === null || value === undefined ? "" : String(value);
+    },
+
     buildDetailFields: function (request, details) {
       // The Single/Multiple choice is not stored, so it is inferred from the stored data:
       // a single-line request keeps its line values on the detail row and has no item rows.
@@ -525,23 +667,17 @@ sap.ui.define([
       // as well as every other variant offering the choice.
       const definitions = this._shownDetailDefinitions(request, details);
       return definitions.map(function (definition) {
-        let value = definition.source === "request"
-          ? (definition.name === "requestDateTime" ? request.createdAt : request[definition.name])
-          : details[definition.name];
-        if (typeof value === "boolean") {
-          value = value ? "Yes" : "No";
-        }
-        if (definition.type === "select" && value) {
-          const option = (definition.options || []).find(function (entry) {
-            return entry.key === value;
-          });
-          value = option ? option.text : value;
-        }
+        const value = this.formatDetailValue(definition, request, details);
         return {
           label: definition.label,
-          value: value === null || value === undefined || value === "" ? "Not provided" : String(value)
+          value: value === "" ? "Not provided" : value
         };
-      });
+      }.bind(this)).concat(request.requestType?.code === "PURCHASE_ORDER" && details.purchaseOrderNumber
+        // Recorded at S/4 Data Validation; appended last so resolveIdLabels' indexes still match.
+        ? [{ label: "PO Number", value: String(details.purchaseOrderNumber) }]
+        : []).concat(request.requestType?.code === "SERVICE_ENTRY_SHEET" && details.sesNumber
+        ? [{ label: "SES Number", value: String(details.sesNumber) }]
+        : []);
     },
 
     // Combos keyed by a UUID (users, vendor, purchasing organization) store the ID; swap it for
@@ -687,7 +823,10 @@ sap.ui.define([
     // A field is mandatory outright (required) or only while another field has a given value
     // (requiredWhen), which is how Plant is mandatory for an extension but not for a change.
     // notEquals reverses the rule: mandatory unless the field has that value.
-    _isFieldRequired: function (definition) {
+    // requiredWhen: { field, equals | notEquals | in: [...] }. A rule marked row: true (a bulk
+    // table column that depends on another column) is read from that row, so it has no single
+    // answer for the column header.
+    _isFieldRequired: function (definition, row) {
       if (definition.required) {
         return true;
       }
@@ -695,11 +834,21 @@ sap.ui.define([
       if (!rule) {
         return false;
       }
-      const form = this.getView().getModel("form").getData();
-      const source = definition.source === "request" ? form : (form.details || {});
-      return rule.notEquals !== undefined
-        ? source[rule.field] !== rule.notEquals
-        : source[rule.field] === rule.equals;
+      let source;
+      if (rule.row) {
+        if (!row) {
+          return false;
+        }
+        source = row;
+      } else {
+        const form = this.getView().getModel("form").getData();
+        source = definition.source === "request" ? form : (form.details || {});
+      }
+      const value = source[rule.field];
+      if (Array.isArray(rule.in)) {
+        return rule.in.indexOf(value) >= 0;
+      }
+      return rule.notEquals !== undefined ? value !== rule.notEquals : value === rule.equals;
     },
 
     _applyConditionalVisibility: function () {
@@ -873,6 +1022,14 @@ sap.ui.define([
 
     _comboListItem: function (definition, key, text, secondaryText) {
       const fields = this._comboFields(definition);
+      // Site ID / Material Code: the list shows the name next to the code, the field only the code.
+      if (fields && fields.text && CODE_ONLY_ENTITIES.has(definition.entity)) {
+        return new ListItem({
+          key: `{catalog>${key}}`,
+          text: `{catalog>${fields.code}}`,
+          additionalText: `{catalog>${fields.text}}`
+        });
+      }
       if (!fields) {
         return new ListItem({
           key: `{catalog>${key}}`,
@@ -1032,7 +1189,7 @@ sap.ui.define([
     _firstMissingItemCell: function (items, columns) {
       for (let index = 0; index < items.length; index++) {
         const missing = (columns || this._itemColumns || []).find(function (col) {
-          if (!this._isFieldRequired(col) || !this._isColumnShown(col)) {
+          if (!this._isFieldRequired(col, items[index]) || !this._isColumnShown(col)) {
             return false;
           }
           const value = items[index][col.name];

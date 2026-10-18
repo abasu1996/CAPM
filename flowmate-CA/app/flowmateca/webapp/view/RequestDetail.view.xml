@@ -20,7 +20,7 @@
             </VBox>
             <HBox wrap="Wrap" class="caHeaderActions">
               <ObjectStatus
-                text="{detail>/status/name}"
+                text="{parts: ['detail>/status/name', 'detail>/status/code'], formatter: '.statusName'}"
                 state="{path: 'detail>/status/code', formatter: '.statusState'}"
                 inverted="true"/>
             </HBox>
@@ -93,7 +93,12 @@
                   text="Due {path: 'detail>slaDueAt', formatter: '.formatDateTime'}"
                   class="caSlaRemaining"
                   textAlign="Center"
-                  visible="{= !!${detail>slaDueAt} &amp;&amp; ${detail>stepNo} > 1 }"/>
+                  visible="{= ${detail>status} === 'OPEN' &amp;&amp; !!${detail>slaDueAt} }"/>
+                <Text
+                  text="{path: 'detail>slaDays', formatter: '.formatSlaLength'}"
+                  class="caSlaRemaining"
+                  textAlign="Center"
+                  visible="{= ${detail>status} === 'PENDING' &amp;&amp; ${detail>slaDays} > 0 }"/>
                 <ObjectStatus
                   text="{i18n>slaBreachedLabel}"
                   icon="sap-icon://lateness"
@@ -121,10 +126,6 @@
                       <Text text="{detail>/title}"/>
                       <Label text="{i18n>description}"/>
                       <Text text="{detail>/description}"/>
-                      <Label text="External Object"/>
-                      <Text text="{detail>/externalObjectId}"/>
-                      <Label text="External Status"/>
-                      <Text text="{detail>/externalStatus}"/>
                     </form:SimpleForm>
                   </content>
                 </Panel>
@@ -163,24 +164,40 @@
                   <ToolbarSpacer/>
                   <Button text="Add Task" icon="sap-icon://add" type="Emphasized" press=".onOpenAddTaskDialog"/>
                 </Toolbar>
-                <Table items="{detail>/tasks}" itemPress=".onTaskPress" class="caWorklistTable">
+                <!-- One line per task: a send-back adds a new task (tagged Sent Back) under the one it replaces. -->
+                <Table id="requestTasksTable" items="{detail>/tasks}" itemPress=".onTaskPress" class="caWorklistTable caCompactTasks sapUiSizeCompact">
                   <columns>
-                    <Column width="17rem"><Text text="Task ID"/></Column>
+                    <Column width="12.5rem"><Text text="Task ID"/></Column>
                     <Column><Text text="Task"/></Column>
-                    <Column width="6rem"><Text text="Step"/></Column>
-                    <Column width="11rem"><Text text="Assigned To"/></Column>
-                    <Column width="10rem"><Text text="{i18n>status}"/></Column>
-                    <Column width="7rem"><Text text="Mandatory"/></Column>
+                    <Column width="3rem" hAlign="Center"><Text text="Step"/></Column>
+                    <Column width="9.5rem"><Text text="Assigned To"/></Column>
+                    <Column width="9.5rem"><Text text="{i18n>status}"/></Column>
+                    <Column width="12rem"><Text text="SLA"/></Column>
+                    <Column width="12rem"><Text text="Completed On"/></Column>
                   </columns>
                   <items>
                     <ColumnListItem type="Navigation">
                       <cells>
-                        <ObjectIdentifier title="{detail>referenceNumber}"/>
-                        <ObjectIdentifier title="{detail>taskName}" text="{detail>description}"/>
-                        <ObjectNumber number="{detail>stepNo}"/>
-                        <Text text="{= ${detail>assignedName} || ${detail>assignedTeamName} }"/>
-                        <ObjectStatus text="{detail>status/name}" state="{path: 'detail>status/code', formatter: '.statusState'}"/>
-                        <ObjectStatus text="{= ${detail>isMandatory} ? 'Yes' : 'No' }" state="{= ${detail>isMandatory} ? 'Warning' : 'None' }"/>
+                        <Text text="{detail>referenceNumber}" wrapping="false"/>
+                        <Text text="{detail>taskName}" tooltip="{detail>description}" wrapping="false"/>
+                        <Text text="{detail>stepNo}" wrapping="false"/>
+                        <Text text="{= ${detail>assignedName} || ${detail>assignedTeamName} }" wrapping="false"/>
+                        <HBox alignItems="Center" wrap="NoWrap">
+                          <ObjectStatus text="{parts: ['detail>status/name', 'detail>status/code'], formatter: '.statusName'}" state="{path: 'detail>status/code', formatter: '.statusState'}"/>
+                          <ObjectStatus
+                            text="Sent Back"
+                            state="Warning"
+                            inverted="true"
+                            class="sapUiTinyMarginBegin"
+                            visible="{= !!${detail>reworkOf_ID} }"/>
+                        </HBox>
+                        <ObjectStatus
+                          text="{parts: ['detail>slaDueAt', 'detail>status/code', 'detail>slaBreached'], formatter: '.formatSlaCell'}"
+                          state="{parts: ['detail>slaDueAt', 'detail>status/code', 'detail>slaBreached'], formatter: '.formatSlaHighlight'}"/>
+                        <Text
+                          text="{path: 'detail>completedAt', formatter: '.formatDateTime'}"
+                          tooltip="{parts: ['detail>status/code', 'detail>completedByName', 'detail>assignedName'], formatter: '.formatTaskOutcome'}"
+                          wrapping="false"/>
                       </cells>
                     </ColumnListItem>
                   </items>
@@ -200,12 +217,13 @@
                     change=".onDetailFilesSelected"
                     buttonOnly="true"
                     buttonText="Upload"
-                    icon="sap-icon://upload"/>
+                    icon="sap-icon://upload"
+                    visible="{detail>/canContribute}"/>
                 </Toolbar>
                 <List items="{detail>/attachments}" noDataText="No supporting documents">
                   <StandardListItem
                     title="{detail>filename}"
-                    description="{detail>mimeType}"
+                    description="{parts: ['detail>uploadedByName', 'detail>createdBy', 'detail>createdAt', 'detail>category'], formatter: '.formatUploadInfo'}"
                     icon="sap-icon://document"
                     type="Active"
                     press=".onAttachmentPress"/>
@@ -240,7 +258,7 @@
 
             <IconTabFilter key="comments" text="Comments" icon="sap-icon://discussion-2" count="{detail>/comments/count}">
               <VBox class="sapUiResponsiveContentPadding">
-                <HBox class="caCommentComposer">
+                <HBox class="caCommentComposer" visible="{detail>/canContribute}">
                   <TextArea id="newComment" rows="2" width="100%" placeholder="Add a comment"/>
                   <Button icon="sap-icon://paper-plane" type="Emphasized" tooltip="Post comment" press=".onAddComment"/>
                 </HBox>
@@ -248,26 +266,52 @@
                   <FeedListItem
                     sender="{detail>authorName}"
                     text="{detail>comment}"
-                    timestamp="{path: 'detail>createdAt', formatter: '.formatDate'}"
+                    timestamp="{path: 'detail>createdAt', formatter: '.formatDateTime'}"
                     icon="sap-icon://person-placeholder"/>
                 </List>
               </VBox>
             </IconTabFilter>
 
             <IconTabFilter key="history" text="History" icon="sap-icon://history" count="{detail>/history/count}">
-              <List items="{detail>/history}" noDataText="No history entries" class="caHistoryList">
-                <CustomListItem>
-                  <HBox class="caHistoryRow" alignItems="Start">
-                    <Avatar src="sap-icon://history" displaySize="XS" displayShape="Circle"/>
-                    <VBox>
-                      <ObjectStatus text="{detail>action}" state="Information"/>
-                      <Text text="{detail>remarks}" visible="{= !!${detail>remarks} }"/>
-                      <Text text="{= ${detail>actorName} + ' · Step ' + ${detail>stepNo} }" class="caMuted"/>
-                      <Text text="{path: 'detail>createdAt', formatter: '.formatDate'}" class="caMuted"/>
-                    </VBox>
-                  </HBox>
-                </CustomListItem>
-              </List>
+              <!-- Left: what happened and when (date and time). Right: the request's data per version. -->
+              <HBox class="caHistoryLayout" wrap="Wrap" renderType="Bare">
+                <VBox class="caHistoryTimeline" renderType="Bare">
+                  <Title text="Activity" level="H4" class="caHistoryHeading"/>
+                  <ScrollContainer vertical="true" horizontal="false" height="34rem" width="100%">
+                    <List items="{detail>/history}" noDataText="No history entries" class="caHistoryList">
+                      <CustomListItem>
+                        <HBox class="caHistoryRow" alignItems="Start">
+                          <Avatar src="sap-icon://history" displaySize="XS" displayShape="Circle"/>
+                          <VBox>
+                            <ObjectStatus text="{path: 'detail>action', formatter: '.formatHistoryAction'}" state="Information"/>
+                            <Text text="{detail>remarks}" visible="{= !!${detail>remarks} }"/>
+                            <Text text="{= ${detail>actorName} + ' · Step ' + ${detail>stepNo} }" class="caMuted"/>
+                            <Text text="{path: 'detail>createdAt', formatter: '.formatDateTime'}" class="caMuted"/>
+                          </VBox>
+                        </HBox>
+                      </CustomListItem>
+                    </List>
+                  </ScrollContainer>
+                </VBox>
+                <!-- Shown once the request has been sent back; until then Activity takes the width. -->
+                <VBox class="caHistoryVersions" renderType="Bare" visible="{detail>/hasSendBack}">
+                  <Title text="{= 'Versions (' + ${versions>/count} + ')' }" level="H4" class="caHistoryHeading"/>
+                  <Text text="Each page compares a version with the one before it: edited fields are highlighted, and line items show only the fields that changed." class="caMuted caVersionsHint"/>
+                  <!-- Page n = Version n and Version n + 1; opens on the latest pair. -->
+                  <Toolbar style="Clear" class="caVersionsPager">
+                    <Button text="Previous" icon="sap-icon://navigation-left-arrow" type="Transparent"
+                      enabled="{= ${versions>/page} > 1 }" press=".onVersionsPrevious"/>
+                    <ToolbarSpacer/>
+                    <Text text="{versions>/pageText}"/>
+                    <ToolbarSpacer/>
+                    <Button text="Next" icon="sap-icon://navigation-right-arrow" iconFirst="false" type="Transparent"
+                      enabled="{= ${versions>/page} &lt; ${versions>/pageCount} }" press=".onVersionsNext"/>
+                  </Toolbar>
+                  <ScrollContainer id="versionsScroll" vertical="true" horizontal="true" height="34rem" width="100%" class="caVersionsScroll">
+                    <Table id="versionsTable" fixedLayout="true" class="caVersionsTable" noDataText="No data captured"/>
+                  </ScrollContainer>
+                </VBox>
+              </HBox>
             </IconTabFilter>
           </items>
         </IconTabBar>

@@ -15,46 +15,49 @@
           type="Information"
           showIcon="true"
           class="sapUiSmallMarginBottom"/>
-        <Table
-          id="delegationsTable"
-          class="caWorklistTable"
-          growing="true"
-          growingScrollToLoad="true"
-          noDataText="{i18n>noDelegationsText}"
-          items="{path: '/Delegations', parameters: {$expand: 'delegator,delegate'}, sorter: {path: 'startDate', descending: true}}">
-          <headerToolbar>
-            <OverflowToolbar>
-              <Title text="{i18n>delegationsTableHeader}" level="H2"/>
-              <ToolbarSpacer/>
-              <SearchField width="18rem" liveChange=".onSearch" search=".onSearch"/>
-              <Button text="{i18n>addDelegationButton}" icon="sap-icon://add" type="Emphasized" press=".onOpenCreateDialog"/>
-            </OverflowToolbar>
-          </headerToolbar>
-          <columns>
-            <Column><Text text="{i18n>delegatorLabel}"/></Column>
-            <Column><Text text="{i18n>delegateLabel}"/></Column>
-            <Column width="10rem"><Text text="{i18n>startDateLabel}"/></Column>
-            <Column width="10rem"><Text text="{i18n>endDateLabel}"/></Column>
-            <Column width="9rem"><Text text="{i18n>notificationForwardingLabel}"/></Column>
-            <Column width="9rem"><Text text="{i18n>status}"/></Column>
-            <Column width="6rem" hAlign="End"><Text text="{i18n>actionsLabel}"/></Column>
-          </columns>
-          <items>
-            <ColumnListItem>
-              <cells>
-                <ObjectIdentifier title="{delegator/displayName}" text="{delegator/email}"/>
-                <ObjectIdentifier title="{delegate/displayName}" text="{delegate/email}"/>
-                <Text text="{startDate}"/>
-                <Text text="{endDate}"/>
-                <ObjectStatus text="{= ${forwardNotifications} ? ${i18n>enabledLabel} : ${i18n>disabledLabel} }"
-                  state="{= ${forwardNotifications} ? 'Success' : 'None' }" inverted="true"/>
-                <ObjectStatus text="{parts: ['startDate', 'endDate', 'enabled'], formatter: '.formatDelegationStatus'}"
-                  state="{parts: ['startDate', 'endDate', 'enabled'], formatter: '.formatDelegationState'}" inverted="true"/>
-                <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>deleteDelegationButton}" press=".onDeleteDelegation"/>
-              </cells>
-            </ColumnListItem>
-          </items>
-        </Table>
+        <!-- Columns keep their full width; the card scrolls sideways and down, headers stay in view. -->
+        <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
+          <Table
+            id="delegationsTable"
+            fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable"
+            growing="true"
+            growingScrollToLoad="true"
+            noDataText="{i18n>noDelegationsText}"
+            items="{path: '/Delegations', parameters: {$expand: 'delegator,delegate'}, sorter: {path: 'startDate', descending: true}}">
+            <headerToolbar>
+              <OverflowToolbar>
+                <Title text="{i18n>delegationsTableHeader}" level="H2"/>
+                <ToolbarSpacer/>
+                <SearchField width="18rem" liveChange=".onSearch" search=".onSearch"/>
+                <Button text="{i18n>addDelegationButton}" icon="sap-icon://add" type="Emphasized" press=".onOpenCreateDialog"/>
+              </OverflowToolbar>
+            </headerToolbar>
+            <columns>
+              <Column><Text text="{i18n>delegatorLabel}"/></Column>
+              <Column><Text text="{i18n>delegateLabel}"/></Column>
+              <Column width="10rem"><Text text="{i18n>startDateLabel}"/></Column>
+              <Column width="10rem"><Text text="{i18n>endDateLabel}"/></Column>
+              <Column width="9rem"><Text text="{i18n>notificationForwardingLabel}"/></Column>
+              <Column width="9rem"><Text text="{i18n>status}"/></Column>
+              <Column width="6rem" hAlign="End"><Text text="{i18n>actionsLabel}"/></Column>
+            </columns>
+            <items>
+              <ColumnListItem>
+                <cells>
+                  <ObjectIdentifier title="{delegator/displayName}" text="{delegator/email}"/>
+                  <ObjectIdentifier title="{delegate/displayName}" text="{delegate/email}"/>
+                  <Text text="{startDate}"/>
+                  <Text text="{endDate}"/>
+                  <ObjectStatus text="{= ${forwardNotifications} ? ${i18n>enabledLabel} : ${i18n>disabledLabel} }"
+                    state="{= ${forwardNotifications} ? 'Success' : 'None' }" inverted="true"/>
+                  <ObjectStatus text="{parts: ['startDate', 'endDate', 'enabled'], formatter: '.formatDelegationStatus'}"
+                    state="{parts: ['startDate', 'endDate', 'enabled'], formatter: '.formatDelegationState'}" inverted="true"/>
+                  <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>deleteDelegationButton}" press=".onDeleteDelegation"/>
+                </cells>
+              </ColumnListItem>
+            </items>
+          </Table>
+        </ScrollContainer>
       </VBox>
     </content>
     <dependents>

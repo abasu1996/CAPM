@@ -95,6 +95,7 @@ service FlowmateCAService {
   entity Comments as projection on db.CAComments;
   entity InvolvedParties as projection on db.CAInvolvedParties;
   entity History as projection on db.CAHistory;
+  @readonly entity RequestVersions as projection on db.RequestVersions;
   entity WorkflowStepConfigs as projection on db.WorkflowStepConfigs;
 
   entity MaterialCodeDetails as projection on db.MaterialCodeDetails;
@@ -135,7 +136,11 @@ service FlowmateCAService {
   // server would generate for these details (JSON in, JSON out). Nothing is saved.
   function previewProjectCode(details: LargeString) returns LargeString;
   function getFlowmateRequestFormCatalog() returns LargeString;
-  // The due date a request would get if submitted now: the step SLAs of its workflow added up.
+  // The title the next request of this type will get (MCC-26-0001); assigned for real on create.
+  function previewRequestTitle(requestTypeCode: String(40)) returns String(40);
+  // Whether the signed-in user may add comments and attachments to this request.
+  function canContribute(requestId: UUID) returns Boolean;
+  // The Due Date the create page shows: today plus the step SLAs of the chosen workflow.
   // details (JSON) decides conditional steps such as the DMS step. Nothing is saved.
   function slaPreview(requestTypeCode: String(40), requestVariantCode: String(40), details: LargeString) returns {
     dueDate   : Date;
@@ -184,6 +189,9 @@ service FlowmateCAService {
     dueDate: Date
   ) returns Tasks;
   action claimTeamTask(taskId: UUID) returns Boolean;
+  // Purchase Order S/4 Data Validation: opens the (auto-completed) Budget Check step's task and
+  // puts this task In Progress until the Budget Check is approved.
+  action requestBudgetCheck(taskId: UUID) returns Boolean;
   // purchaseOrderNo is required only on the last step of a PO that has "Create SES Successor".
   action approveTask(
     taskId: UUID,
@@ -196,6 +204,9 @@ service FlowmateCAService {
     equipmentCode: String(80),
     // Project Code at S/4 Data Validation: the Project Code, or the Function Location / Activity.
     projectValue: String(80),
+    // New SES at S/4 Data Validation, Single Line Items: the created SES Number (Multiple Line
+    // Items send one per Header Creation row in lineValues).
+    sesNumber: String(80),
     // Service Code with multiple line items: JSON [{ itemId, value }], one per line item, for the
     // G/L Account Enrichment, Valuation Class or S/4 Data Validation step.
     lineValues: LargeString

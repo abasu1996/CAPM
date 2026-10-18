@@ -319,12 +319,6 @@ sap.ui.define([], function () {
         field("cepDE", "CEP (DE)", "checkbox")
       );
     }
-    // Trading material with reference has no DMS update, so keep the DMS toggle and dependent
-    // fields out of this variant instead of adding them back from the base definition.
-    const dmsNames = new Set([dmsToggle.name].concat(dmsBlock.map(function (definition) { return definition.name; })));
-    const referenceBase = categoryCode === "TRADING"
-      ? optionalMaterialFields(base).filter(function (definition) { return !dmsNames.has(definition.name); })
-      : optionalMaterialFields(base);
     const modificationFields = categoryCode === "TRADING"
       ? tradingModificationFields
       : materialModificationFields;
@@ -335,7 +329,7 @@ sap.ui.define([], function () {
     materialDefinitions[categoryCode + ":MAT_EXISTING"] = existingFields;
     materialDefinitions[categoryCode + ":MAT_NEW_REF"] = appendMissingFields(
       referenceFields,
-      referenceBase
+      optionalMaterialFields(base)
     );
   });
 
@@ -882,7 +876,10 @@ sap.ui.define([], function () {
         return { key, text: key };
       })
     }),
-    field("arNumber", "AR Number", "input"),
+    // Mandatory for Capex purchases only.
+    field("arNumber", "AR Number", "input", {
+      requiredWhen: { field: "procurementCategory_code", in: ["CAPEX_IM", "CAPEX_FM"] }
+    }),
     // WBS Element, Cost Center, Budget Code and Campaign / Location Code are captured per line
     // item (itemColumns.PURCHASE_ORDER). Tax stays here because it drives PO Value (With Taxes).
     field("documentType", "Document Type", "combo", { entity: "DocumentTypes", key: "documentTypeCode", text: "documentTypeDescription" }),
@@ -906,7 +903,9 @@ sap.ui.define([], function () {
     field("procurementDescription", "Procurement Description", "textarea", {
       required: true
     }),
+    // Mandatory: the (mandatory) Vendor Code is filled from it.
     field("vendor_ID", "Vendor Name", "combo", {
+      required: true,
       entity: "Vendors",
       key: "ID",
       text: "vendorName",
@@ -990,7 +989,8 @@ sap.ui.define([], function () {
     }),
     field("paymentRequestRequired", "Available Invoices", "checkbox"),
     field("flowmateSesRequest", "Create Flowmate Service Entry Sheet Request", "checkbox", { onSelect: "onFlowmateServiceEntrySheetSelect" }),
-    field("remarks", "Remarks", "textarea"),
+    // Mandatory in both variants: on the form (Single Line) and in each Header Creation row (Multiple).
+    field("remarks", "Remarks", "textarea", { required: true }),
     field("sesPaymentOption", "SES / Payment Option", "select", {
       required: true,
       options: [
@@ -1044,8 +1044,31 @@ sap.ui.define([], function () {
   // Single Line keeps every field on the form; Multiple Line moves the row fields into the
   // header table. LOA approval applies to both variants, so both collect the LOA approver.
   const sesHeaderRowFields = {};
+  // Single Line Items only: Type of Transaction, and for a tax based one the Invoice Date and
+  // Service Obtained Date (at most 30 days apart, see sesDateProblem), placed before Remarks.
+  const sesTaxFields = [
+    field("taxTransactionType", "Type of Transaction", "select", {
+      required: true,
+      options: [
+        { key: "TAX_BASED", text: "Tax based" },
+        { key: "NON_TAX_BASED", text: "Non tax based" }
+      ]
+    }),
+    field("invoiceDate", "Invoice Date", "date", {
+      required: true,
+      visibleWhen: { field: "taxTransactionType", equals: "TAX_BASED" }
+    }),
+    field("serviceObtainedDate", "Service Obtained Date", "date", {
+      required: true,
+      visibleWhen: { field: "taxTransactionType", equals: "TAX_BASED" }
+    })
+  ];
+  const withSesTaxFields = function (fields) {
+    const at = fields.findIndex(function (f) { return f.name === "remarks"; });
+    return fields.slice(0, at).concat(sesTaxFields, fields.slice(at));
+  };
   Object.keys(sesVariantFields).forEach(function (variant) {
-    definitions[variant + "_SINGLE"] = sesVariantFields[variant];
+    definitions[variant + "_SINGLE"] = withSesTaxFields(sesVariantFields[variant]);
     definitions[variant] = sesVariantFields[variant]
       .filter(function (f) { return sesFormFieldNames.has(f.name); });
     sesHeaderRowFields[variant] = sesVariantFields[variant]
@@ -1449,6 +1472,10 @@ sap.ui.define([], function () {
           if (definition.visibleWhen) {
             col.required = false;
           }
+          // A rule on another PO field reads that field from the same row of the table.
+          if (definition.requiredWhen && poFields.some(function (other) { return other.name === definition.requiredWhen.field; })) {
+            col.requiredWhen = Object.assign({}, definition.requiredWhen, { row: true });
+          }
           // A table cell cannot hold the + rows of an e-mail list: one text cell, ";"-separated.
           if (definition.type === "emailList") {
             col.type = "input";
@@ -1543,6 +1570,24 @@ sap.ui.define([], function () {
       }
       return null;
     },
+    // Service Entry Sheet, tax based: the Invoice Date and Service Obtained Date may be at most 30
+    // days apart (either order). Returns the warning, or null. Mirrors sesDateProblem in srv/flowmate-ca.js.
+    sesDateProblem: function (details) {
+      const source = details || {};
+      // Single Line Items only: a Multiple Line SES (with Header Creation rows) has no Type of Transaction.
+      if ((source.headers || []).length || source.taxTransactionType !== "TAX_BASED" || !source.invoiceDate || !source.serviceObtainedDate) {
+        return null;
+      }
+      const day = function (value) { return Date.parse(String(value).slice(0, 10) + "T00:00:00Z"); };
+      const invoice = day(source.invoiceDate);
+      const service = day(source.serviceObtainedDate);
+      if (Number.isNaN(invoice) || Number.isNaN(service)) {
+        return null;
+      }
+      return Math.abs(invoice - service) / 86400000 > 30
+        ? "The difference between the Invoice Date and the Service Obtained Date is more than 30 days, so you cannot proceed with the creation of this request."
+        : null;
+    },
     getHeaderTableColumns: function (variantCode) {
       return headerTableColumns[variantCode] || [];
     },
@@ -1550,9 +1595,9 @@ sap.ui.define([], function () {
     // the S/4 Data Validation approver records per row (New Contract).
     getHeaderDisplayColumns: function (variantCode) {
       const columns = this.getHeaderTableColumns(variantCode);
-      return variantCode === "CONTRACT_NEW"
-        ? columns.concat([column("contractNumber", "Contract Number")])
-        : columns;
+      // ... and the SES Number recorded per Header Creation row of a New SES.
+      const recorded = { CONTRACT_NEW: column("contractNumber", "Contract Number"), SES_NEW: column("sesNumber", "SES Number") }[variantCode];
+      return recorded && columns.length ? columns.concat([recorded]) : columns;
     },
     getConditionalGrids: function (variantCode) {
       return (conditionalGrids[variantCode] || []).map(function (grid) {

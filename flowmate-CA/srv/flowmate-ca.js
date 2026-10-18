@@ -3,6 +3,170 @@ const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails } = require("./lib/po-integration");
 const { SELECT, INSERT, UPDATE } = cds.ql;
 
+// ---- Budget Check (Purchase Order, New Service Entry Sheet) ----
+// "Budget Check" (Purchase Order, and New Service Entry Sheet): the step auto-completes when the
+// flow reaches it. It is optional: the S/4 Data Validation approver may request it with the
+// Budget Check button, or approve without it. Which variants have it is set by their workflow
+// config (a step named Budget Check before S/4 Data Validation).
+// PurchaseOrderDetails.budgetCheckStatus: null = no budget gating (requests created before the
+// Budget Check existed), otherwise one of BUDGET_CHECK.
+const BUDGET_CHECK = {
+  NOT_REQUESTED: "NOT_REQUESTED",
+  REQUESTED: "REQUESTED",
+  COMPLETED: "COMPLETED"
+};
+
+// The details entity that holds budgetCheckStatus, per request type.
+const BUDGET_CHECK_DETAILS = {
+  PURCHASE_ORDER: "PurchaseOrderDetails",
+  SERVICE_ENTRY_SHEET: "ServiceEntrySheetDetails"
+};
+const budgetDetailsEntity = (requestTypeCode) => BUDGET_CHECK_DETAILS[requestTypeCode] || null;
+
+// Existing Capex-FM / Opex configs still call the step "Budget Confirmation".
+const isBudgetCheckStep = (stepName) => /budget\s+(check|confirmation)/i.test(stepName || "");
+const isS4ValidationStep = (stepName) => /s\s*\/?\s*4\s+data\s+validation/i.test(stepName || "");
+
+// The S/4 Data Validation task may not be approved while a requested Budget Check is running.
+const approvalBlockedByBudgetCheck = (status) => status === BUDGET_CHECK.REQUESTED;
+
+// ---- Service Entry Sheet dates (Single Line Items) ----
+// Service Entry Sheet, Single Line Items: a tax based transaction needs an Invoice Date and a
+// Service Obtained Date at most 30 days apart (either order). Mirrors FormDefinitions.sesDateProblem.
+const MAX_DAYS_APART = 30;
+
+const calendarDay = (value) => Date.parse(`${String(value).slice(0, 10)}T00:00:00Z`);
+
+const TAX_FIELDS = ["taxTransactionType", "invoiceDate", "serviceObtainedDate"];
+
+// Multiple Line Items is the mode with Header Creation rows.
+const isMultipleLine = (details) => Array.isArray(details?.headers) && details.headers.length > 0;
+
+// The reason a Service Entry Sheet's details cannot be accepted, or null. Single Line only.
+function sesDateProblem(details) {
+  const source = details || {};
+  if (isMultipleLine(source) || source.taxTransactionType !== "TAX_BASED") {
+    return null;
+  }
+  if (!source.invoiceDate || !source.serviceObtainedDate) {
+    return "Enter the Invoice Date and the Service Obtained Date for a tax based transaction";
+  }
+  const invoice = calendarDay(source.invoiceDate);
+  const service = calendarDay(source.serviceObtainedDate);
+  if (Number.isNaN(invoice) || Number.isNaN(service)) {
+    return "Enter valid Invoice and Service Obtained Dates";
+  }
+  return Math.abs(invoice - service) / 86400000 > MAX_DAYS_APART
+    ? "The difference between the Invoice Date and the Service Obtained Date is more than 30 days, so you cannot proceed with the creation of this request."
+    : null;
+}
+
+// Multiple Line Items has no Type of Transaction: values typed before switching from Single Line
+// are cleared rather than stored.
+function withoutMultipleLineTaxFields(details) {
+  if (!isMultipleLine(details)) {
+    return details;
+  }
+  const cleared = { ...details };
+  TAX_FIELDS.forEach((name) => { cleared[name] = null; });
+  return cleared;
+}
+
+// ---- Recipients of the Completed e-mail ----
+// Who gets the "Completed" e-mail of a request: the requester, plus the addresses named on the
+// request (Outline Contract: User to be notified; Purchase Order: Approved PO Recipient Email;
+// Service Entry Sheet: SES Recipient Email, on the form or on each Header Creation row).
+// Lists may be separated by commas, semicolons or spaces; each address is e-mailed once.
+
+const addressesIn = (value) => String(value || "")
+  .split(/[\s,;]+/)
+  .map((address) => address.trim())
+  .filter((address) => address.includes("@"));
+
+function completionRecipients(requesterEmail, namedAddresses) {
+  const seen = new Set();
+  const recipients = [];
+  [requesterEmail, ...(namedAddresses || [])].flatMap(addressesIn).forEach((address) => {
+    const key = address.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      recipients.push(address);
+    }
+  });
+  return recipients;
+}
+
+// ---- Request versions: which filled values an update changed ----
+// Which values an update changed among those that already had one. An approver filling in blank
+// approval data (codes, PO / SES Numbers) changes none; editing what was there does.
+
+const isBlankValue = (value) => value === undefined || value === null || value === "";
+
+// { "vendorName": "ACME", "items.1.quantity": 2, "headers.2.sesNumber": "100" } from a snapshot.
+function flattenSnapshot(snapshot) {
+  const values = {};
+  const source = snapshot || {};
+  Object.keys(source).forEach((key) => {
+    if (key === "items" || key === "headers") {
+      (source[key] || []).forEach((row, index) => {
+        Object.keys(row || {}).forEach((field) => {
+          values[`${key}.${row.itemNo ?? index + 1}.${field}`] = row[field];
+        });
+      });
+    } else {
+      values[key] = source[key];
+    }
+  });
+  return values;
+}
+
+// The keys whose earlier non-blank value is now different (or gone).
+function changedFilledValues(previous, next) {
+  const before = flattenSnapshot(previous);
+  const after = flattenSnapshot(next);
+  return Object.keys(before).filter((key) => !isBlankValue(before[key]) && String(after[key] ?? "") !== String(before[key]));
+}
+
+// ---- Texts for the BPA e-mail processes ----
+// Texts for the BPA e-mail processes (Request Status Notification, Task Assignment Notification),
+// which print the values they are given as they are.
+
+// "18 Oct 2026, 09:15 PM" in the given time zone (Sri Lanka by default), or "" without a date.
+function formatAssignedDate(value, timeZone = "Asia/Colombo") {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) {
+    return "";
+  }
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {
+    timeZone, day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true
+  }).formatToParts(date).map((part) => [part.type, part.value]));
+  return `${parts.day} ${parts.month} ${parts.year}, ${parts.hour}:${parts.minute} ${String(parts.dayPeriod || "").toUpperCase()}`;
+}
+
+// "Validate purchase order (Step 3 - S/4 Data Validation)": the task and the step it sits at.
+function taskAtStep(taskName, stepNo, stepName) {
+  const step = [stepNo ? `Step ${stepNo}` : "", stepName || ""].filter(Boolean).join(" - ");
+  return step ? `${taskName || stepName || "Task"} (${step})` : (taskName || "");
+}
+
+// The Status line of a task reopened by a send-back:
+// "Sent back by Ravi Kumar at Step 3 - S/4 Data Validation: Attach the quotation".
+function sentBackStatus({ sentBackBy, fromStepNo, fromStepName, remarks } = {}) {
+  const step = [fromStepNo ? `Step ${fromStepNo}` : "", fromStepName || ""].filter(Boolean).join(" - ");
+  const text = `Sent back${sentBackBy ? ` by ${sentBackBy}` : ""}${step ? ` at ${step}` : ""}`;
+  return remarks ? `${text}: ${remarks}` : text;
+}
+
+// The approval data of a completed request as e-mail lines: [[label, value], ...] ->
+// "<b>Approval data:</b><br>Service Code: SC-100<br>GL Account: 400100". Blank values are left
+// out; "" when there are none.
+function approvalDataText(entries) {
+  const lines = (entries || [])
+    .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== "")
+    .map(([label, value]) => `${label}: ${String(value).trim()}`);
+  return lines.length ? `<b>Approval data:</b><br>${lines.join("<br>")}` : "";
+}
+
 const REQUEST_STATUS = {
   DRAFT: "DRAFT",
   SUBMITTED: "SUBMITTED",
@@ -14,6 +178,8 @@ const REQUEST_STATUS = {
 
 const TASK_STATUS = {
   OPEN: "OPEN",
+  // A Purchase Order's S/4 Data Validation task while the Budget Check it requested is open.
+  IN_PROGRESS: "IN_PROGRESS",
   APPROVED: "APPROVED",
   SENT_BACK: "SENT_BACK",
   REJECTED: "REJECTED"
@@ -49,6 +215,25 @@ const ITEMS_ENTITY_BY_REQUEST_TYPE = {
   PURCHASE_ORDER: "PurchaseOrderItems",
   SERVICE_ENTRY_SHEET: "ServiceEntrySheetItems"
 };
+
+// Values approvers record on the details row, listed in the Completed e-mail (label per field).
+const APPROVAL_DATA_FIELDS = {
+  SERVICE_CODE: [["glAccount", "GL Account"], ["valuationClass_code", "Valuation Class"], ["serviceCode", "Service Code"]],
+  MATERIAL_CODE: [["glAccount", "GL Account"], ["valuationClass_code", "Valuation Class"], ["materialCode", "Material Code"]],
+  EQUIPMENT_CODE: [["equipmentCode", "Equipment Code"]],
+  PROJECT_CODE: [["projectCode", "Project Code"], ["functionLocation", "Function Location"], ["activityNumber", "Activity"]],
+  PURCHASE_ORDER: [["purchaseOrderNumber", "PO Number"]],
+  SERVICE_ENTRY_SHEET: [["sesNumber", "SES Number"]]
+};
+
+// "CA-POC-26-000001-T03": a request's 3rd task.
+function formatTaskReference(requestReference, taskNumber) {
+  return `${requestReference || "TASK"}-T${String(taskNumber).padStart(2, "0")}`;
+}
+
+// Columns left out of version snapshots: keys and bookkeeping, not request data (the Budget
+// Check status is workflow state).
+const VERSION_TECHNICAL_FIELDS = new Set(["ID", "request_ID", "details_ID", "createdAt", "createdBy", "modifiedAt", "modifiedBy", "budgetCheckStatus"]);
 
 // Second row table carried in details.headers (Outline Contract - New Contract).
 const HEADERS_ENTITY_BY_REQUEST_TYPE = {
@@ -140,7 +325,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
     this.on("previewProjectCode", this._previewProjectCode);
+    this.on("previewRequestTitle", this._previewRequestTitle);
     this.on("slaPreview", this._slaPreview);
+    this.on("canContribute", this._canContributeToRequest);
+    this.before("CREATE", "Attachments", this._beforeCreateAttachment);
     this.on("runSlaBreachScan", this._runSlaBreachScan);
     this.on("createFlowmatePaymentRun", this._createFlowmatePaymentRun);
     this.on("createFlowmateServiceEntrySheet", this._createFlowmateServiceEntrySheet);
@@ -148,6 +336,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("submitRequest", this._submitRequest);
     this.on("addTask", this._addTask);
     this.on("claimTeamTask", this._claimTeamTask);
+    this.on("requestBudgetCheck", this._requestBudgetCheck);
     this.on("approveTask", this._approveTask);
     this.on("rejectTask", this._rejectTask);
     this.on("sendBackTask", this._sendBackTask);
@@ -832,8 +1021,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   async _insertOneRequest(req, tx, user, { requestType, requestVariant, processorTeam, input, integration }) {
     const requestId = cds.utils.uuid();
-    const referenceNumber = this._referenceNumber(requestType.code);
-    const details = this._parseDetails(req, input.details);
+    let details = this._parseDetails(req, input.details);
     if (details.paymentRun && requestType.code !== "PURCHASE_ORDER") {
       return req.reject(400, "Payment Run is only supported for purchase order requests");
     }
@@ -883,15 +1071,32 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
     if (integration) assertTechnicalDetails(req, details);
+    if (requestType.code === "SERVICE_ENTRY_SHEET") {
+      details = withoutMultipleLineTaxFields(details);
+    }
+    if (requestType.code === "SERVICE_ENTRY_SHEET" && sesDateProblem(details)) {
+      return req.reject(400, sesDateProblem(details));
+    }
+    // A PO's SES successor is created when the PO completes; its dates are checked now.
+    if (requestType.code === "PURCHASE_ORDER" && details.sesRequired && details.sesDraft) {
+      const draftProblem = sesDateProblem(typeof details.sesDraft === "string" ? this._parseDetails(req, details.sesDraft) : details.sesDraft);
+      if (draftProblem) {
+        return req.reject(400, `SES Successor: ${draftProblem}`);
+      }
+    }
     await this._assertNoDuplicateMaterialDescription(req, requestType.code, details);
     await this._applyProjectCode(req, requestType.code, requestVariant?.code, details);
 
+    // One serial per request type and year names both: title POC-26-0001, Request ID CA-POC-26-000001.
+    const serial = await this._nextRequestSerial(tx, requestType);
+    const title = this._formatRequestTitle(requestType, serial.year, serial.number);
+    const referenceNumber = this._formatRequestReference(requestType, serial.year, serial.number);
     await tx.run(INSERT.into(this.db.CARequests).entries({
       ID: requestId,
       referenceNumber,
       requestType_code: requestType.code,
       requestVariant_code: requestVariant?.code || null,
-      title: input.title,
+      title,
       description: input.description,
       requester_ID: user.ID,
       requesterName: user.displayName,
@@ -901,12 +1106,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       ownerTeamName: processorTeam?.name || null,
       status_code: REQUEST_STATUS.DRAFT,
       priority_code: input.priorityCode || "MEDIUM",
-      dueDate: input.dueDate || null,
       predecessor_ID: input.predecessorId || null,
       currentStep: 0
     }));
 
     await this._insertDetails(tx, requestType.code, requestId, details);
+    await this._recordVersion(tx, requestId, requestType.code, user);
     await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, details, user, req);
     const creationRemarks = integration ? JSON.stringify({
       source: "TECHNICAL_API",
@@ -969,9 +1174,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index] || {};
       const { title, priorityCode, dueDate, requestVariantCode, ...details } = row;
-      if (!String(title || "").trim()) {
-        return req.reject(400, `Row ${index + 1}: Title is required`);
-      }
       const variantCode = requestVariantCode || input.requestVariantCode;
       const requestVariant = await resolveVariant(variantCode);
       if (variantCode && !requestVariant) {
@@ -1061,7 +1263,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const taskId = cds.utils.uuid();
     const task = {
       ID: taskId,
-      referenceNumber: this._taskReferenceNumber(request.referenceNumber),
+      referenceNumber: await this._taskReferenceNumber(tx, request.ID),
       request_ID: request.ID,
       stepInstance_ID: step.ID,
       stepNo: step.stepNo,
@@ -1132,6 +1334,76 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return true;
   };
 
+  // Purchase Order: the S/4 Data Validation approver runs the Budget Check. The Budget Check step
+  // (auto-completed on submit) opens with a task for its team, and this task waits In Progress;
+  // approving the Budget Check task reopens it (_approveTask, _advanceFromStep).
+  _requestBudgetCheck = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req, tx);
+    const task = await SELECT.one.from(this.db.CATasks).where({ ID: req.data.taskId });
+
+    if (!task) {
+      return req.reject(404, "Task not found");
+    }
+    await this._assertTaskAccess(req, task, user);
+    if (task.status_code !== TASK_STATUS.OPEN) {
+      return req.reject(409, "Only an open task can request a Budget Check");
+    }
+    const request = await SELECT.one.from(this.db.CARequests).where({ ID: task.request_ID });
+    const budgetEntity = budgetDetailsEntity(request?.requestType_code);
+    if (!budgetEntity) {
+      return req.reject(400, "The Budget Check applies to purchase orders and service entry sheets only");
+    }
+    const steps = await SELECT.from(this.db.RequestStepInstances)
+      .where({ request_ID: request.ID })
+      .orderBy("stepNo");
+    const step = steps.find((entry) => entry.stepNo === task.stepNo);
+    const budgetStep = steps.find((entry) => entry.stepNo < task.stepNo && isBudgetCheckStep(entry.stepName));
+    if (!isS4ValidationStep(step?.stepName) || !budgetStep) {
+      return req.reject(409, "The Budget Check is requested from the S/4 Data Validation task of a request with a Budget Check step");
+    }
+    const budgetDetails = await SELECT.one.from(this.db[budgetEntity])
+      .columns("ID", "budgetCheckStatus").where({ request_ID: request.ID });
+    if (budgetDetails?.budgetCheckStatus !== BUDGET_CHECK.NOT_REQUESTED) {
+      return req.reject(409, budgetDetails?.budgetCheckStatus === BUDGET_CHECK.REQUESTED
+        ? "A Budget Check is already in progress"
+        : "The Budget Check is already completed");
+    }
+    // Conditional on the current state, so a double click cannot open the Budget Check twice.
+    const requested = await tx.run(UPDATE(this.db[budgetEntity])
+      .set({ budgetCheckStatus: BUDGET_CHECK.REQUESTED })
+      .where({ ID: budgetDetails.ID, budgetCheckStatus: BUDGET_CHECK.NOT_REQUESTED }));
+    if (!requested) {
+      return req.reject(409, "A Budget Check is already in progress");
+    }
+
+    const now = new Date().toISOString();
+    // The task comes back to whoever requested the Budget Check. Its SLA stops meanwhile (the
+    // Budget Check task runs on its own SLA) and restarts in full when the check is done.
+    await tx.run(UPDATE(this.db.CATasks).set({
+      status_code: TASK_STATUS.IN_PROGRESS,
+      slaDueAt: null,
+      dueDate: null,
+      slaStartedAt: null,
+      ...this._handlerStamp(task, user)
+    }).where({ ID: task.ID }));
+    await tx.run(UPDATE(this.db.RequestStepInstances).set({ slaDueAt: null, dueDate: null }).where({ ID: step.ID }));
+    await tx.run(UPDATE(this.db.RequestStepInstances).set({
+      status: "OPEN",
+      startedAt: now,
+      completedAt: null
+    }).where({ ID: budgetStep.ID }));
+    await tx.run(UPDATE(this.db.CARequests).set({
+      currentStep: budgetStep.stepNo,
+      status_code: REQUEST_STATUS.IN_PROGRESS
+    }).where({ ID: request.ID }));
+    await this._createConfiguredTaskIfMissing(tx, request.ID, budgetStep);
+    await this._refreshRequestSla(tx, request.ID);
+    await this._writeHistory(tx, request.ID, task.stepNo, "BUDGET_CHECK_REQUESTED", user, TASK_STATUS.OPEN, TASK_STATUS.IN_PROGRESS,
+      `${task.taskName}: its SLA is paused until the Budget Check is completed`);
+    return true;
+  };
+
   _approveTask = async (req) => {
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req, tx);
@@ -1153,6 +1425,38 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const glEnrichmentStep = /g\s*\/?\s*l\s+account\s+enrichment/i.test(step?.stepName || "");
     const valuationClassStep = /valuation\s+class/i.test(step?.stepName || "");
     const serviceCodeStep = /s\s*\/?\s*4\s+data\s+validation/i.test(step?.stepName || "");
+    // Purchase Order / Service Entry Sheet: S/4 Data Validation cannot be approved while a
+    // requested Budget Check is running (the Budget Check itself is optional); approving the
+    // Budget Check task marks it done.
+    const budgetEntity = budgetDetailsEntity(request?.requestType_code);
+    if (budgetEntity) {
+      const budget = await SELECT.one.from(this.db[budgetEntity])
+        .columns("ID", "budgetCheckStatus").where({ request_ID: task.request_ID });
+      if (budget && isS4ValidationStep(step?.stepName) && approvalBlockedByBudgetCheck(budget.budgetCheckStatus)) {
+        return req.reject(409, "Complete the Budget Check before approving this task");
+      }
+      // Purchase Order: the S/4 Data Validation approver records the PO Number (the SES successor
+      // reuses it).
+      if (budget && request.requestType_code === "PURCHASE_ORDER" && isS4ValidationStep(step?.stepName)) {
+        const poNumber = String(req.data.purchaseOrderNo || "").trim();
+        if (!poNumber) {
+          return req.reject(400, "Enter the PO Number to approve this task");
+        }
+        if (poNumber.length > 80) {
+          return req.reject(400, "PO Number must be 80 characters or fewer");
+        }
+        await tx.run(UPDATE(this.db.PurchaseOrderDetails)
+          .set({ purchaseOrderNumber: poNumber }).where({ ID: budget.ID }));
+      }
+      if (budget?.budgetCheckStatus && isBudgetCheckStep(step?.stepName)) {
+        await tx.run(UPDATE(this.db[budgetEntity])
+          .set({ budgetCheckStatus: BUDGET_CHECK.COMPLETED }).where({ ID: budget.ID }));
+        // The S/4 task that waited resumes (OPEN again, full SLA from now) before the step advances.
+        if (budget.budgetCheckStatus === BUDGET_CHECK.REQUESTED) {
+          await this._resumeAfterBudgetCheck(tx, task.request_ID, task.stepNo);
+        }
+      }
+    }
     // Existing variants change a code that already exists in S/4, so none of these steps
     // records a value for them. Mirrored in TaskDetail.controller.js.
     const existingVariant = /_EXISTING$/.test(request?.requestVariant_code || "");
@@ -1265,6 +1569,29 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
 
+    // New SES: the S/4 Data Validation approver records the created SES Number, once (Single Line
+    // Items) or per Header Creation row (Multiple Line Items, one SES per row).
+    if (serviceCodeStep && request?.requestType_code === "SERVICE_ENTRY_SHEET" && request.requestVariant_code === "SES_NEW") {
+      const sesDetails = await SELECT.one.from(this.db.ServiceEntrySheetDetails)
+        .where({ request_ID: task.request_ID });
+      const hasHeaderRows = sesDetails && await SELECT.one.from(this.db.ServiceEntrySheetHeaders)
+        .where({ details_ID: sesDetails.ID });
+      if (sesDetails && hasHeaderRows) {
+        const failure = await this._applyLineValues(tx, req, this.db.ServiceEntrySheetHeaders, sesDetails.ID,
+          { column: "sesNumber", label: "SES Number", maxLength: 80 });
+        if (failure) return failure;
+      } else if (sesDetails) {
+        const sesNumber = String(req.data.sesNumber || "").trim();
+        if (!sesNumber) {
+          return req.reject(400, "Enter the SES Number to approve this task");
+        }
+        if (sesNumber.length > 80) {
+          return req.reject(400, "SES Number must be 80 characters or fewer");
+        }
+        await tx.run(UPDATE(this.db.ServiceEntrySheetDetails).set({ sesNumber }).where({ ID: sesDetails.ID }));
+      }
+    }
+
     // New Contract: the S/4 Data Validation approver records the created Contract Number per
     // Header Creation row (each row shows its Vendor Code in the approve dialog).
     if (serviceCodeStep && request?.requestType_code === "OUTLINE_CONTRACT"
@@ -1311,6 +1638,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       decision: "APPROVED",
       remarks: req.data.remarks,
       completedAt: approvedAt,
+      completedByName: user.displayName,
       ...lateness,
       ...this._handlerStamp(task, user)
     }).where({ ID: task.ID }));
@@ -1319,6 +1647,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       await this._writeHistory(tx, task.request_ID, task.stepNo, "APPROVED_AFTER_SLA", user, null, null,
         `Approved ${this._overdueText(task.slaDueAt, approvedAt)} after the SLA due date`);
     }
+    // Values the approver entered (codes, numbers per line) become a version of their own.
+    await this._recordVersion(tx, task.request_ID, request?.requestType_code, user,
+      { approverStep: { stepNo: task.stepNo, stepName: step?.stepName || task.taskName } });
     await this._autoCompleteStepIfDone(req, tx, task, user);
     return true;
   };
@@ -1482,10 +1813,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!step || step.status !== "OPEN") {
       return;
     }
-    const stepTasks = await tx.run(SELECT.from(this.db.CATasks).where({
+    const stepTasks = (await tx.run(SELECT.from(this.db.CATasks).where({
       request_ID: request.ID,
       stepNo: step.stepNo
-    }));
+    }))).filter((entry) => !entry.isSuperseded);
     const stillOpen = stepTasks.some((entry) => entry.status_code === TASK_STATUS.OPEN);
     const mandatoryPending = stepTasks.some((entry) => entry.isMandatory && entry.status_code !== TASK_STATUS.APPROVED);
     if (stillOpen || mandatoryPending) {
@@ -1494,10 +1825,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const lastStepNo = Math.max(...steps.map((entry) => entry.stepNo));
     if (step.stepNo === lastStepNo) {
       const incompleteStep = steps.find((entry) => entry.stepNo !== step.stepNo && entry.status !== "COMPLETED");
-      const openTask = await tx.run(SELECT.one.from(this.db.CATasks).where({
+      const openTask = (await tx.run(SELECT.from(this.db.CATasks).where({
         request_ID: request.ID,
         status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
-      }));
+      }))).find((entry) => !entry.isSuperseded);
       if (incompleteStep || openTask) {
         return;
       }
@@ -1527,16 +1858,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       decision: "REJECTED",
       remarks: req.data.remarks,
       completedAt: rejectedAt,
+      completedByName: user.displayName,
       ...this._lateDecision(task, rejectedAt)
     }).where({ ID: task.ID }));
-    await tx.run(UPDATE(this.db.CATasks).set({
-      status_code: TASK_STATUS.REJECTED,
-      decision: "REJECTED",
-      completedAt: rejectedAt
-    }).where({
+    // Only tasks still waiting are closed; approved and sent-back tasks keep their outcome.
+    const liveTaskIds = (await tx.run(SELECT.from(this.db.CATasks).columns("ID", "isSuperseded").where({
       request_ID: task.request_ID,
-      status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
-    }));
+      // IN_PROGRESS: a PO's S/4 Data Validation task waiting on the Budget Check it requested.
+      status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.IN_PROGRESS] }
+    }))).filter((entry) => !entry.isSuperseded).map((entry) => entry.ID);
+    if (liveTaskIds.length) {
+      await tx.run(UPDATE(this.db.CATasks).set({
+        status_code: TASK_STATUS.REJECTED,
+        decision: "REJECTED",
+        completedAt: rejectedAt
+      }).where({ ID: { in: liveTaskIds } }));
+    }
     await tx.run(UPDATE(this.db.RequestStepInstances).set({
       status: "REJECTED",
       completedAt: rejectedAt
@@ -1546,7 +1883,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       completedAt: rejectedAt
     }).where({ ID: task.request_ID }));
     await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_REJECTED", user, task.status_code, TASK_STATUS.REJECTED, req.data.remarks);
-    await this._notifyRequestOutcome(tx, task.request_ID, REQUEST_OUTCOME.REJECTED, req.data.remarks);
+    await this._notifyRequestOutcome(tx, task.request_ID, REQUEST_OUTCOME.REJECTED, req.data.remarks,
+      await this._decisionContext(tx, task, user));
     return true;
   };
 
@@ -1574,15 +1912,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(400, "The selected target step does not exist");
     }
 
+    const sentBackAt = new Date().toISOString();
     await tx.run(UPDATE(this.db.CATasks).set({
       status_code: TASK_STATUS.SENT_BACK,
       decision: "SENT_BACK",
       remarks: req.data.remarks,
-      completedAt: null,
-      ...this._lateDecision(task, new Date().toISOString()),
+      completedAt: sentBackAt,
+      completedByName: user.displayName,
+      ...this._lateDecision(task, sentBackAt),
       ...this._handlerStamp(task, user)
     }).where({ ID: task.ID }));
-    await this._replanSlaFrom(tx, task.request_ID, targetStep.stepNo);
     await tx.run(UPDATE(this.db.RequestStepInstances).set({
       status: "OPEN",
       completedAt: null,
@@ -1606,14 +1945,24 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       completedAt: null
     }).where({ ID: task.request_ID }));
     // The reopened step's e-mail says it was sent back and carries the sender's remarks.
+    // A PO's S/4 task waiting on its Budget Check is rolled back with the request: it lies dormant
+    // (SENT_BACK) until its step is reached again, like the task of any later step.
+    await tx.run(UPDATE(this.db.CATasks).set({ status_code: TASK_STATUS.SENT_BACK }).where({
+      request_ID: task.request_ID,
+      status_code: TASK_STATUS.IN_PROGRESS,
+      stepNo: { ">": targetStep.stepNo }
+    }));
+    const decision = await this._decisionContext(tx, task, user);
     await this._createConfiguredTaskIfMissing(tx, task.request_ID, targetStep, {
       notificationType: "SENT_BACK",
       remarks: req.data.remarks,
-      sentBackBy: user.displayName
+      sentBackBy: user.displayName,
+      fromStepNo: decision.stepNo,
+      fromStepName: decision.stepName
     });
     await this._writeHistory(tx, task.request_ID, targetStep.stepNo, "TASK_SENT_BACK", user, task.status_code, TASK_STATUS.SENT_BACK, req.data.remarks);
     // The requester is told too, with the remarks, besides the task e-mail to the step's owner.
-    await this._notifyRequestOutcome(tx, task.request_ID, REQUEST_OUTCOME.SENT_BACK, req.data.remarks);
+    await this._notifyRequestOutcome(tx, task.request_ID, REQUEST_OUTCOME.SENT_BACK, req.data.remarks, decision);
     return true;
   };
 
@@ -1643,13 +1992,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(409, "The request is no longer waiting on the requester");
     }
 
-    const details = this._parseDetails(req, req.data.details);
+    let details = this._parseDetails(req, req.data.details);
+    if (request.requestType_code === "SERVICE_ENTRY_SHEET") {
+      details = withoutMultipleLineTaxFields(details);
+    }
+    if (request.requestType_code === "SERVICE_ENTRY_SHEET" && sesDateProblem(details)) {
+      return req.reject(400, sesDateProblem(details));
+    }
     await this._assertNoDuplicateMaterialDescription(req, request.requestType_code, details, request.ID);
     if (request.requestType_code === "PROJECT_CODE") {
       const stored = await SELECT.one.from(this.db.ProjectCodeDetails).columns("projectId").where({ request_ID: request.ID });
       await this._applyProjectCode(req, request.requestType_code, request.requestVariant_code, details, stored?.projectId);
     }
+    // A request created before versions were kept gets its stored data as version 1 first.
+    await this._recordVersion(tx, request.ID, request.requestType_code, user, { baselineOf: request });
     await this._updateDetails(tx, request.requestType_code, request.ID, details);
+    await this._recordVersion(tx, request.ID, request.requestType_code, user);
     return true;
   };
 
@@ -1675,10 +2033,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(404, "Workflow step not found");
     }
 
-    const tasks = await SELECT.from(this.db.CATasks).where({
+    const tasks = (await SELECT.from(this.db.CATasks).where({
       request_ID: request.ID,
       stepNo: step.stepNo
-    });
+    })).filter((task) => !task.isSuperseded);
     const blockingTask = tasks.find((task) => task.isMandatory && task.status_code !== TASK_STATUS.APPROVED);
     if (blockingTask) {
       return req.reject(409, `Approve mandatory task "${blockingTask.taskName}" before completing this step`);
@@ -1687,10 +2045,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const lastStepNo = Math.max(...steps.map((entry) => entry.stepNo));
     if (step.stepNo === lastStepNo) {
       const incompleteStep = steps.find((entry) => entry.stepNo !== step.stepNo && entry.status !== "COMPLETED");
-      const openTask = await SELECT.one.from(this.db.CATasks).where({
+      const openTask = (await SELECT.from(this.db.CATasks).where({
         request_ID: request.ID,
         status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
-      });
+      })).find((task) => !task.isSuperseded);
       if (incompleteStep || openTask) {
         return req.reject(409, "Complete every preceding step and approve every open task before closing the final step");
       }
@@ -1724,7 +2082,21 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return true;
     }
 
-    const nextStep = steps.find((entry) => entry.stepNo > step.stepNo && entry.status !== "COMPLETED");
+    // Submitting (or resubmitting) step 1 means the Budget Check has to be run (again).
+    const budgetEntity = budgetDetailsEntity(request.requestType_code);
+    if (step.stepNo === 1 && budgetEntity) {
+      await tx.run(UPDATE(this.db[budgetEntity])
+        .set({ budgetCheckStatus: null }).where({ request_ID: request.ID }));
+    }
+
+    let nextStep = steps.find((entry) => entry.stepNo > step.stepNo && entry.status !== "COMPLETED");
+    // The PO Budget Check step completes on its own; S/4 Data Validation opens it on demand.
+    while (nextStep && await this._autoCompletesBudgetCheck(tx, request, nextStep)) {
+      await this._autoCompleteBudgetCheckStep(tx, request, nextStep, user, now);
+      nextStep.status = "COMPLETED";
+      const skipped = nextStep;
+      nextStep = steps.find((entry) => entry.stepNo > skipped.stepNo && entry.status !== "COMPLETED");
+    }
     if (nextStep) {
       await tx.run(UPDATE(this.db.RequestStepInstances).set({
         status: "OPEN",
@@ -1741,9 +2113,74 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return true;
   }
 
+  // A Budget Check step (Purchase Order, New SES) is passed over automatically unless the S/4
+  // Data Validation approver has requested it (budgetCheckStatus REQUESTED).
+  async _autoCompletesBudgetCheck(tx, request, step) {
+    const budgetEntity = budgetDetailsEntity(request.requestType_code);
+    if (!budgetEntity || !isBudgetCheckStep(step.stepName)) {
+      return false;
+    }
+    const details = await tx.run(SELECT.one.from(this.db[budgetEntity])
+      .columns("budgetCheckStatus").where({ request_ID: request.ID }));
+    return Boolean(details) && details.budgetCheckStatus !== BUDGET_CHECK.REQUESTED;
+  }
+
+  // The S/4 Data Validation task that requested the Budget Check carries on: OPEN again with a full
+  // SLA from now, back with whoever requested it (e-mailed). Being OPEN, it is kept as it is when
+  // the flow reaches its step (_createConfiguredTaskIfMissing makes no rework copy of it).
+  async _resumeAfterBudgetCheck(tx, requestId, budgetStepNo) {
+    const waiting = (await tx.run(SELECT.from(this.db.CATasks).where({
+      request_ID: requestId,
+      status_code: TASK_STATUS.IN_PROGRESS
+    }))).filter((entry) => !entry.isSuperseded && entry.stepNo > budgetStepNo);
+    const startedAt = new Date().toISOString();
+    for (const waitingTask of waiting) {
+      const step = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
+        .columns("ID", "slaDays").where({ request_ID: requestId, stepNo: waitingTask.stepNo }));
+      const deadline = this._slaDeadline(startedAt, step?.slaDays ?? 2);
+      const resumed = { status_code: TASK_STATUS.OPEN, ...deadline, slaStartedAt: startedAt, slaBreached: false, slaBreachedAt: null };
+      await tx.run(UPDATE(this.db.CATasks).set(resumed).where({ ID: waitingTask.ID }));
+      if (step) {
+        await tx.run(UPDATE(this.db.RequestStepInstances).set(deadline).where({ ID: step.ID }));
+      }
+      await this._notifyTaskAssignment(tx, { ...waitingTask, ...resumed });
+      await this._writeHistory(tx, requestId, waitingTask.stepNo, "SLA_RESTARTED", { displayName: "SLA Monitor", email: null },
+        TASK_STATUS.IN_PROGRESS, TASK_STATUS.OPEN, `${waitingTask.taskName}: Budget Check completed, a full SLA starts now`);
+    }
+    if (waiting.length) {
+      await this._refreshRequestSla(tx, requestId);
+    }
+  }
+
+  async _autoCompleteBudgetCheckStep(tx, request, step, user, now) {
+    const remarks = "Auto-completed: run from S/4 Data Validation with the Budget Check button";
+    await tx.run(UPDATE(this.db.RequestStepInstances).set({
+      status: "COMPLETED",
+      startedAt: now,
+      completedAt: now
+    }).where({ ID: step.ID }));
+    // Budget Check tasks of an earlier round (e.g. sent back) keep their outcome as history and are
+    // superseded, as for any step reached again, so they cannot hold up the final step.
+    await tx.run(UPDATE(this.db.CATasks).set({ isSuperseded: true }).where({
+      request_ID: request.ID,
+      stepNo: step.stepNo,
+      isSuperseded: false
+    }));
+    await tx.run(UPDATE(this.db[budgetDetailsEntity(request.requestType_code)])
+      .set({ budgetCheckStatus: BUDGET_CHECK.NOT_REQUESTED }).where({ request_ID: request.ID }));
+    await this._writeHistory(tx, request.ID, step.stepNo, "STEP_AUTO_COMPLETED", user, step.status, "COMPLETED", remarks);
+  }
+
   _addComment = async (req) => {
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req, tx);
+    const request = await SELECT.one.from(this.db.CARequests).where({ ID: req.data.requestId });
+    if (!request) {
+      return req.reject(404, "Request not found");
+    }
+    if (!await this._canContribute(req, request, user)) {
+      return req.reject(403, "Only the person working on the open task can add comments");
+    }
     const id = cds.utils.uuid();
     await tx.run(INSERT.into(this.db.CAComments).entries({
       ID: id,
@@ -1800,11 +2237,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const teams = await this.master.run(SELECT.from(this.masterEntities.Teams));
     const teamsById = new Map(teams.map((team) => [team.ID, team]));
     const submittedAt = new Date().toISOString();
-    // Step 1 is signed off by submitting, so it takes no SLA time; the rest are planned from now.
-    const schedule = this._planSlaSchedule(
-      selectedConfigs.map((config, index) => (index === 0 ? 0 : config.slaDays)),
-      submittedAt
-    );
     const stepEntries = selectedConfigs.map((config, index) => ({
       ID: cds.utils.uuid(),
       request_ID: requestId,
@@ -1816,7 +2248,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       processorTeamName: teamsById.get(config.processorTeam_ID)?.name || null,
       status: index === 0 ? "OPEN" : "PENDING",
       slaDays: config.slaDays,
-      ...schedule[index],
       startedAt: index === 0 ? submittedAt : null,
       completedAt: null
     }));
@@ -1828,13 +2259,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const requesterStep = stepEntries[0];
     await this._createConfiguredTaskIfMissing(tx, requestId, requesterStep);
 
-    const lastDeadline = schedule[schedule.length - 1];
     await tx.run(UPDATE(this.db.CARequests).set({
       currentStep: requesterStep.stepNo,
       status_code: REQUEST_STATUS.SUBMITTED,
-      submittedAt,
-      dueDate: lastDeadline.dueDate,
-      slaDueAt: lastDeadline.slaDueAt
+      submittedAt
     }).where({ ID: requestId }));
 
     const remarks = "Auto-completed on submission";
@@ -1849,6 +2277,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         decision: "APPROVED",
         remarks,
         completedAt: submittedAt,
+        completedByName: request.requesterName,
         assignedUser_ID: request.requester_ID,
         assignedName: request.requesterName,
         assignedEmail: request.requesterEmail
@@ -1898,9 +2327,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return null;
     }
     const details = await tx.run(SELECT.one.from(this.db.PurchaseOrderDetails)
-      .columns("ID", "sesRequired")
+      .columns("ID", "sesRequired", "purchaseOrderNumber")
       .where({ request_ID: request.ID }));
-    if (!details?.sesRequired) {
+    // Already captured at S/4 Data Validation: the last step does not ask again.
+    if (!details?.sesRequired || details.purchaseOrderNumber) {
       return null;
     }
     const steps = await tx.run(SELECT.from(this.db.RequestStepInstances)
@@ -2018,10 +2448,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   // notice: extra e-mail content for the (re)opened task, e.g. a send-back's remarks.
   async _createConfiguredTaskIfMissing(tx, requestId, step, notice = {}) {
-    const existing = await SELECT.from(this.db.CATasks).where({
+    const existing = (await SELECT.from(this.db.CATasks).where({
       request_ID: requestId,
       stepNo: step.stepNo
-    });
+    })).filter((task) => !task.isSuperseded);
     if (existing.some((task) => task.status_code === TASK_STATUS.OPEN)) {
       return;
     }
@@ -2031,39 +2461,58 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     // Resolved before the re-open branch too: the requester may have named a different
     // approver while the step was rolled back, so a reopened task must not keep the old one.
     const approver = await this._resolveStepAssignment(tx, requestId, config);
-    // The step's planned deadline (re-planned on a send-back). Requests planned before step SLAs
-    // existed have none and keep the old "SLA days from today" due date.
-    const planned = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
-      .columns("slaDueAt", "dueDate").where({ ID: step.ID }));
-    const sla = planned?.slaDueAt
-      ? { dueDate: planned.dueDate, slaDueAt: planned.slaDueAt, slaStartedAt: new Date().toISOString() }
-      : null;
+    // The SLA clock starts the moment the task reaches its team (the previous task was just
+    // completed, or the request was sent back to it); claiming it does not restart it.
+    const instance = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
+      .columns("slaDays").where({ ID: step.ID }));
+    const startedAt = new Date().toISOString();
+    const deadline = this._slaDeadline(startedAt, instance?.slaDays ?? config?.slaDays ?? 2);
+    const sla = { ...deadline, slaStartedAt: startedAt };
+    await tx.run(UPDATE(this.db.RequestStepInstances).set(deadline).where({ ID: step.ID }));
 
+    // A step reached again (after a send-back) gets a new task for each of its earlier ones; the
+    // earlier tasks stay with their outcome as history and are marked superseded. The new task goes
+    // to whoever handled the earlier one (stamped on approve / send-back); step 1 without a
+    // recorded handler goes to the requester.
     if (existing.length) {
-      await tx.run(UPDATE(this.db.CATasks).set({
-        status_code: TASK_STATUS.OPEN,
-        decision: null,
-        completedAt: null,
-        ...(sla ? { ...sla, slaBreached: false, slaBreachedAt: null } : {}),
-        ...approver
-      }).where({ ID: { in: existing.map((task) => task.ID) } }));
-      // A step reached again after a send-back is e-mailed only to the person who handled it
-      // (stamped on approve / send-back). Step 1 without a recorded handler goes to the requester.
+      await tx.run(UPDATE(this.db.CATasks).set({ isSuperseded: true })
+        .where({ ID: { in: existing.map((task) => task.ID) } }));
       const request = step.stepNo === 1
         ? await tx.run(SELECT.one.from(this.db.CARequests)
           .columns("requester_ID", "requesterName", "requesterEmail").where({ ID: requestId }))
         : null;
-      for (const task of existing) {
-        const reopened = { ...task, ...approver };
-        if (request && !reopened.assignedUser_ID) {
-          Object.assign(reopened, {
+      for (const previous of existing) {
+        const rework = {
+          ID: cds.utils.uuid(),
+          referenceNumber: await this._taskReferenceNumber(tx, requestId),
+          request_ID: requestId,
+          stepInstance_ID: step.ID,
+          stepNo: step.stepNo,
+          taskName: previous.taskName,
+          description: previous.description,
+          assignedTeam_ID: previous.assignedTeam_ID,
+          assignedTeamName: previous.assignedTeamName,
+          assignedUser_ID: previous.assignedUser_ID,
+          assignedName: previous.assignedName,
+          assignedEmail: previous.assignedEmail,
+          ...approver,
+          status_code: TASK_STATUS.OPEN,
+          isMandatory: previous.isMandatory,
+          isApproval: previous.isApproval,
+          reworkOf_ID: previous.ID,
+          ...sla
+        };
+        if (request && !rework.assignedUser_ID) {
+          Object.assign(rework, {
             assignedUser_ID: request.requester_ID,
             assignedName: request.requesterName,
             assignedEmail: request.requesterEmail
           });
         }
-        await this._notifyTaskAssignment(tx, reopened, notice);
+        await tx.run(INSERT.into(this.db.CATasks).entries(rework));
+        await this._notifyTaskAssignment(tx, rework, notice);
       }
+      await this._refreshRequestSla(tx, requestId);
       return;
     }
 
@@ -2073,7 +2522,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       : null;
     const task = {
       ID: cds.utils.uuid(),
-      referenceNumber: this._taskReferenceNumber(requestId),
+      referenceNumber: await this._taskReferenceNumber(tx, requestId),
       request_ID: requestId,
       stepInstance_ID: step.ID,
       stepNo: step.stepNo,
@@ -2085,9 +2534,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: TASK_STATUS.OPEN,
       isMandatory: config?.isMandatory ?? true,
       isApproval: config?.isApproval ?? false,
-      ...(sla || { dueDate: this._addDays(config?.slaDays || 2) })
+      ...sla
     };
     await tx.run(INSERT.into(this.db.CATasks).entries(task));
+    await this._refreshRequestSla(tx, requestId);
     // Step 1 is the requester's own step: they just submitted, so nobody is notified.
     if (step.stepNo > 1) {
       await this._notifyTaskAssignment(tx, task, notice);
@@ -2120,6 +2570,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const request = await tx.run(SELECT.one.from(this.db.CARequests)
       .columns("ID", "referenceNumber", "title", "requestType_code", "requesterName")
       .where({ ID: task.request_ID }));
+    const requestType = request?.requestType_code
+      ? await tx.run(SELECT.one.from(this.db.RequestTypes).columns("name").where({ code: request.requestType_code }))
+      : null;
     const appUrl = this._taskAppUrl();
     if (!appUrl) {
       log.warn(`Task ${task.ID} is e-mailed without a link: set FLOWMATE_CA_APP_URL`);
@@ -2128,20 +2581,19 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       definitionId: process.env.BPA_TASK_NOTIFICATION_DEFINITION_ID ||
         "ap11.arize-qas-9339ozek.taskassignmentnotificationprocessca.taskAssignmentNotificationProcess",
       context: {
-        taskId: task.ID,
+        taskId: task.referenceNumber || task.ID,
         taskTitle: task.taskName || "Workflow task",
         assigneeEmail: recipients,
         assigneeName: (task.assignedUser_ID && task.assignedName) || task.assignedTeamName || "",
         taskUrl: appUrl ? `${appUrl}#/tasks/${encodeURIComponent(task.ID)}` : "",
-        assignedDate: new Date().toISOString(),
+        assignedDate: formatAssignedDate(task.slaStartedAt || task.createdAt || new Date(), SLA_TIME_ZONE),
         requesterName: request?.requesterName || "",
         requestId: request?.referenceNumber || task.request_ID,
         processorTeam: task.assignedTeamName || "",
         requestTitle: request?.title || "",
-        requestType: request?.requestType_code || "",
-        notificationType: notice.notificationType || "ASSIGNED",
-        remarks: notice.remarks || "",
-        sentBackBy: notice.sentBackBy || ""
+        requestType: requestType?.name || request?.requestType_code || "",
+        // A task reopened by a send-back says who sent it back, from which step and why.
+        status: notice.notificationType === "SENT_BACK" ? sentBackStatus(notice) : "Assigned"
       }
     };
 
@@ -2151,7 +2603,23 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // E-mails the requester about their request through the BPA process
   // "requestStatusNotificationProcess": "Completed" (last step completed), "Rejected" or
   // "Sendback" (REQUEST_OUTCOME), with the approver's remarks.
-  async _notifyRequestOutcome(tx, requestId, status, remarks = "") {
+  // Who decided a task and at which step, for the Rejected / Sent Back e-mail.
+  async _decisionContext(tx, task, user) {
+    const step = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
+      .columns("stepName").where({ request_ID: task.request_ID, stepNo: task.stepNo }));
+    return { actorName: user.displayName, task, stepNo: task.stepNo, stepName: step?.stepName || "" };
+  }
+
+  // The approval data approvers record on the request's details row (a single-line request's
+  // codes and numbers), as e-mail lines for the Completed e-mail.
+  async _approvalDataSummary(tx, requestTypeCode, requestId) {
+    const fields = APPROVAL_DATA_FIELDS[requestTypeCode];
+    const details = fields ? await this._loadDetails(tx, requestTypeCode, requestId) : null;
+    return details ? approvalDataText(fields.map(([name, label]) => [label, details[name]])) : "";
+  }
+
+  // decision: { actorName, task, stepNo, stepName } of a rejection or send-back.
+  async _notifyRequestOutcome(tx, requestId, status, remarks = "", decision = {}) {
     const request = await tx.run(SELECT.one.from(this.db.CARequests)
       .columns("referenceNumber", "title", "requestType_code", "requesterEmail", "requesterName")
       .where({ ID: requestId }));
@@ -2161,16 +2629,14 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     const requestType = await tx.run(SELECT.one.from(this.db.RequestTypes)
       .columns("name").where({ code: request.requestType_code }));
-    const recipients = [request.requesterEmail];
-    // A completed outline contract also goes to the "User to be notified" named on the form.
-    if (status === REQUEST_OUTCOME.COMPLETED && request.requestType_code === "OUTLINE_CONTRACT") {
-      const contract = await tx.run(SELECT.one.from(this.db.OutlineContractDetails)
-        .columns("notifyUserEmail").where({ request_ID: requestId }));
-      const notifyEmail = String(contract?.notifyUserEmail || "").trim();
-      if (notifyEmail && notifyEmail.toLowerCase() !== String(request.requesterEmail).trim().toLowerCase()) {
-        recipients.push(notifyEmail);
-      }
-    }
+    // A completed request's e-mail lists the approval data in its Remarks.
+    const text = status === REQUEST_OUTCOME.COMPLETED
+      ? [remarks, await this._approvalDataSummary(tx, request.requestType_code, requestId)].filter(Boolean).join("<br><br>")
+      : remarks || "";
+    // A completed request also goes to the addresses named on it (see completionRecipients).
+    const recipients = status === REQUEST_OUTCOME.COMPLETED
+      ? completionRecipients(request.requesterEmail, await this._completionAddresses(tx, request.requestType_code, requestId))
+      : [request.requesterEmail];
     for (const recipient of recipients) {
       await this._startBpaProcess({
         definitionId: process.env.BPA_REQUEST_STATUS_DEFINITION_ID ||
@@ -2181,11 +2647,42 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           requesttype: requestType?.name || request.requestType_code || "",
           requestid: request.referenceNumber || requestId,
           status,
-          remarks: remarks || "",
-          requestername: request.requesterName || ""
+          remarks: text,
+          requestername: request.requesterName || "",
+          rejectedby: status === REQUEST_OUTCOME.REJECTED ? decision.actorName || "" : "",
+          sendbackby: status === REQUEST_OUTCOME.SENT_BACK ? decision.actorName || "" : "",
+          taskid: decision.task ? decision.task.referenceNumber || decision.task.ID : "",
+          taskname: decision.task ? taskAtStep(decision.task.taskName, decision.stepNo, decision.stepName) : ""
         }
       }, `Request ${request.referenceNumber} ${status} e-mail to ${recipient}`);
     }
+  }
+
+  // The e-mail addresses a completed request names: Outline Contract "User to be notified",
+  // Purchase Order "Approved PO Recipient Email", Service Entry Sheet "SES Recipient Email"
+  // (Single Line on the form, Multiple Line on each Header Creation row).
+  async _completionAddresses(tx, requestTypeCode, requestId) {
+    if (requestTypeCode === "OUTLINE_CONTRACT") {
+      const contract = await tx.run(SELECT.one.from(this.db.OutlineContractDetails)
+        .columns("notifyUserEmail").where({ request_ID: requestId }));
+      return [contract?.notifyUserEmail];
+    }
+    if (requestTypeCode === "PURCHASE_ORDER") {
+      const po = await tx.run(SELECT.one.from(this.db.PurchaseOrderDetails)
+        .columns("approvedPoRecipientEmail").where({ request_ID: requestId }));
+      return [po?.approvedPoRecipientEmail];
+    }
+    if (requestTypeCode === "SERVICE_ENTRY_SHEET") {
+      const ses = await tx.run(SELECT.one.from(this.db.ServiceEntrySheetDetails)
+        .columns("ID", "sesRecipientEmail").where({ request_ID: requestId }));
+      if (!ses) {
+        return [];
+      }
+      const rows = await tx.run(SELECT.from(this.db.ServiceEntrySheetHeaders)
+        .columns("sesRecipientEmail").where({ details_ID: ses.ID }).orderBy("itemNo"));
+      return [ses.sesRecipientEmail, ...rows.map((row) => row.sesRecipientEmail)];
+    }
+    return [];
   }
 
   // Starts a BPA process instance (destination bpa_workflow_technical). It runs only after the
@@ -2224,11 +2721,114 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
   }
 
-  // ---- SLA ----
-  // Every step of a request shares one schedule fixed at submission: a step is due its own SLA
-  // days after the step before it is due. A step finished late therefore leaves less time for the
-  // steps after it, and the request is due when its last step is.
+  // ---- Request titles ----
+  // Titles are numbered per request type and year from the initials of the type's name:
+  // Material Code Creation -> MCC-26-0001.
+  _titlePrefix(requestType) {
+    return String(requestType?.name || requestType?.code || "")
+      .split(/[^A-Za-z0-9]+/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase())
+      .join("");
+  }
 
+  _titleYear() {
+    return Number(new Intl.DateTimeFormat("en-CA", { timeZone: SLA_TIME_ZONE, year: "numeric" }).format(new Date()));
+  }
+
+  _formatRequestTitle(requestType, year, number) {
+    return `${this._titlePrefix(requestType)}-${String(year).slice(-2)}-${String(number).padStart(4, "0")}`;
+  }
+
+  // "CA-POC-26-000001": the request type's title prefix, the year and the serial.
+  _formatRequestReference(requestType, year, number) {
+    return `CA-${this._titlePrefix(requestType)}-${String(year).slice(-2)}-${String(number).padStart(6, "0")}`;
+  }
+
+  // Takes the next number inside the create transaction, so parallel creates never share one.
+  async _nextRequestSerial(tx, requestType) {
+    const key = { requestType: requestType.code, year: this._titleYear() };
+    const bump = () => tx.run(UPDATE(this.db.RequestTitleCounters).with({ lastNumber: { "+=": 1 } }).where(key));
+    const read = () => tx.run(SELECT.one.from(this.db.RequestTitleCounters).where(key));
+    await bump();
+    let counter = await read();
+    if (!counter) {
+      // First request of this type this year; a parallel create may insert it first.
+      try {
+        await tx.run(INSERT.into(this.db.RequestTitleCounters).entries({ ...key, lastNumber: 1 }));
+      } catch (error) {
+        await bump();
+      }
+      counter = await read();
+    }
+    return { year: key.year, number: counter.lastNumber };
+  }
+
+  // The title the next request of this type would get; shown on the create page, taken on submit.
+  _previewRequestTitle = async (req) => {
+    const requestType = await SELECT.one.from(this.db.RequestTypes).where({ code: req.data.requestTypeCode });
+    if (!requestType) {
+      return null;
+    }
+    const year = this._titleYear();
+    const counter = await SELECT.one.from(this.db.RequestTitleCounters).where({ requestType: requestType.code, year });
+    return this._formatRequestTitle(requestType, year, Number(counter?.lastNumber || 0) + 1);
+  };
+
+  // ---- Comments and attachments ----
+  // Only someone the request is waiting on may add to it: the person holding an open task, the
+  // members of the team an unclaimed open task sits with, or an administrator. The requester may
+  // also attach files while creating the request (the create page uploads right after creating).
+  async _canContribute(req, request, user) {
+    if (req.user.is("CAAdmin")) {
+      return true;
+    }
+    const openTasks = await SELECT.from(this.db.CATasks)
+      .columns("assignedUser_ID", "assignedTeam_ID")
+      .where({ request_ID: request.ID, status_code: TASK_STATUS.OPEN });
+    if (openTasks.some((task) => task.assignedUser_ID === user.ID)) {
+      return true;
+    }
+    const teamIds = openTasks.filter((task) => !task.assignedUser_ID && task.assignedTeam_ID)
+      .map((task) => task.assignedTeam_ID);
+    if (teamIds.length && (await this._teamIdsOf(user)).some((teamId) => teamIds.includes(teamId))) {
+      return true;
+    }
+    return false;
+  }
+
+  _canContributeToRequest = async (req) => {
+    const user = await this._ensureCurrentUser(req);
+    const request = await SELECT.one.from(this.db.CARequests).where({ ID: req.data.requestId });
+    return !!request && this._canContribute(req, request, user);
+  };
+
+  _beforeCreateAttachment = async (req) => {
+    const user = await this._ensureCurrentUser(req, cds.tx(req));
+    const request = await SELECT.one.from(this.db.CARequests).where({ ID: req.data.request_ID });
+    if (!request) {
+      return req.reject(404, "Request not found");
+    }
+    const creating = request.requester_ID === user.ID
+      && Date.now() - Date.parse(request.createdAt) < 15 * 60 * 1000;
+    if (!creating && !await this._canContribute(req, request, user)) {
+      return req.reject(403, "Only the person working on the open task can upload attachments");
+    }
+    // The media type comes from the file name, so the name decides what counts as a screenshot.
+    if (req.data.category === "REMARKS_SCREENSHOT" && !/\.(png|jpe?g|gif|webp)$/i.test(req.data.filename || "")) {
+      return req.reject(400, "A remarks screenshot must be an image (PNG, JPG, GIF or WebP)");
+    }
+    req.data.uploadedByName = user.displayName;
+  };
+
+  // ---- SLA ----
+  // A task's SLA runs from the moment it reaches its team: the previous task's completion, or a
+  // send-back to it. A late step therefore pushes every later due date out, and the request's
+  // due date is a projection that moves with it.
+
+  // The create page's Due Date: today plus the SLA days of every step the request will go through
+  // (step 1 is signed off on submit). Shown only; each task keeps its own SLA from when it
+  // reaches its team, and the stored due date follows the tasks.
   _slaPreview = async (req) => {
     let details = {};
     try {
@@ -2261,31 +2861,20 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }).format(date);
   }
 
-  _planSlaSchedule(slaDaysPerStep, startAt) {
-    let cursor = startAt;
-    return slaDaysPerStep.map((slaDays) => {
-      const deadline = this._slaDeadline(cursor, slaDays);
-      cursor = deadline.slaDueAt;
-      return deadline;
-    });
-  }
-
-  // A send-back is rework: the target step gets its full SLA again from now and the steps after
-  // it follow on, so the person the request returns to is not breached the moment it arrives.
-  async _replanSlaFrom(tx, requestId, fromStepNo) {
-    const steps = (await tx.run(SELECT.from(this.db.RequestStepInstances)
-      .columns("ID", "stepNo", "slaDays", "slaDueAt")
+  // The open step's deadline plus the SLA days of the steps still to come.
+  async _refreshRequestSla(tx, requestId) {
+    const steps = await tx.run(SELECT.from(this.db.RequestStepInstances)
+      .columns("stepNo", "status", "slaDays", "slaDueAt")
       .where({ request_ID: requestId })
-      .orderBy("stepNo")))
-      .filter((step) => step.stepNo >= fromStepNo);
-    if (!steps.length || !steps.every((step) => step.slaDueAt)) {
+      .orderBy("stepNo"));
+    const open = steps.find((step) => step.status === "OPEN" && step.slaDueAt);
+    if (!open) {
       return;
     }
-    const schedule = this._planSlaSchedule(steps.map((step) => step.slaDays), new Date().toISOString());
-    for (let index = 0; index < steps.length; index++) {
-      await tx.run(UPDATE(this.db.RequestStepInstances).set(schedule[index]).where({ ID: steps[index].ID }));
-    }
-    await tx.run(UPDATE(this.db.CARequests).set(schedule[schedule.length - 1]).where({ ID: requestId }));
+    const remainingDays = steps
+      .filter((step) => step.stepNo > open.stepNo && step.status !== "COMPLETED")
+      .reduce((sum, step) => sum + Number(step.slaDays || 0), 0);
+    await tx.run(UPDATE(this.db.CARequests).set(this._slaDeadline(open.slaDueAt, remainingDays)).where({ ID: requestId }));
   }
 
   // Closing a task after its deadline marks it breached for good, so it shows as approved with
@@ -2406,7 +2995,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       definitionId: process.env.BPA_SLA_BREACH_DEFINITION_ID ||
         "ap11.arize-qas-9339ozek.slabreachnotificationprocessca.sLABreachNotificationProcess",
       context: {
-        taskId: task.ID,
+        taskId: task.referenceNumber || task.ID,
         taskTitle: task.taskName || "Workflow task",
         assigneeEmail: [email],
         assigneeName: (task.assignedUser_ID && task.assignedName) || task.assignedTeamName || "",
@@ -2694,6 +3283,80 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
   }
 
+  // The stored details with their line items and header rows, without technical columns,
+  // so versions compare like for like.
+  async _detailsSnapshot(tx, requestTypeCode, requestId) {
+    const details = await this._loadDetails(tx, requestTypeCode, requestId);
+    if (!details) {
+      return null;
+    }
+    const clean = (row) => Object.fromEntries(Object.entries(row)
+      .filter(([key]) => !VERSION_TECHNICAL_FIELDS.has(key)));
+    const rowsOf = async (entityName) => entityName
+      ? (await tx.run(SELECT.from(this.db[entityName]).where({ details_ID: details.ID }).orderBy("itemNo"))).map(clean)
+      : [];
+    const snapshot = clean(details);
+    snapshot.items = await rowsOf(ITEMS_ENTITY_BY_REQUEST_TYPE[requestTypeCode]);
+    snapshot.headers = await rowsOf(HEADERS_ENTITY_BY_REQUEST_TYPE[requestTypeCode]);
+    return snapshot;
+  }
+
+  // Version 1 on creation; then the requester's resubmission after each send-back (a further
+  // save in the same round replaces that round's version), and each approval that changed the
+  // data (approverStep: the step it was made at). A save that changes nothing adds nothing.
+  // With baselineOf, only records the current data as version 1 when the request has none.
+  async _recordVersion(tx, requestId, requestTypeCode, user, { baselineOf, approverStep } = {}) {
+    const versions = await tx.run(SELECT.from(this.db.RequestVersions)
+      .columns("ID", "versionNo", "createdAt", "snapshot", "stepName")
+      .where({ request_ID: requestId })
+      .orderBy("versionNo desc"));
+    if (baselineOf && versions.length) {
+      return;
+    }
+    // A request created before versions were kept starts them at the requester's resubmission.
+    if (approverStep && !versions.length) {
+      return;
+    }
+    const snapshot = await this._detailsSnapshot(tx, requestTypeCode, requestId);
+    if (!snapshot) {
+      return;
+    }
+    const json = JSON.stringify(snapshot);
+    const latest = versions[0];
+    if (latest && latest.snapshot === json) {
+      return;
+    }
+    // An approver filling in blank approval data is not a new version: it joins the current one.
+    // Only changing a value that was already there makes one.
+    if (latest && approverStep && !changedFilledValues(JSON.parse(latest.snapshot || "{}"), snapshot).length) {
+      await tx.run(UPDATE(this.db.RequestVersions).set({ snapshot: json }).where({ ID: latest.ID }));
+      return;
+    }
+    if (latest && !approverStep && !latest.stepName) {
+      const sentBack = await tx.run(SELECT.one.from(this.db.CAHistory)
+        .columns("createdAt")
+        .where({ request_ID: requestId, action: "TASK_SENT_BACK" })
+        .orderBy("createdAt desc"));
+      const newRound = sentBack && new Date(sentBack.createdAt) > new Date(latest.createdAt);
+      if (!newRound) {
+        await tx.run(UPDATE(this.db.RequestVersions)
+          .set({ snapshot: json, createdByName: user.displayName })
+          .where({ ID: latest.ID }));
+        return;
+      }
+    }
+    await tx.run(INSERT.into(this.db.RequestVersions).entries({
+      ID: cds.utils.uuid(),
+      request_ID: requestId,
+      versionNo: latest ? latest.versionNo + 1 : 1,
+      snapshot: json,
+      createdByName: baselineOf ? baselineOf.requesterName : user.displayName,
+      stepNo: approverStep ? approverStep.stepNo : null,
+      stepName: approverStep ? approverStep.stepName : null,
+      ...(baselineOf ? { createdAt: baselineOf.createdAt } : {})
+    }));
+  }
+
   async _writeHistory(tx, requestId, stepNo, action, user, oldStatus, newStatus, remarks) {
     await tx.run(INSERT.into(this.db.CAHistory).entries({
       ID: cds.utils.uuid(),
@@ -2732,27 +3395,31 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
   }
 
-  _referenceNumber(typeCode) {
-    const date = new Date();
-    const datePart = [
-      String(date.getUTCFullYear()).slice(-2),
-      String(date.getUTCMonth() + 1).padStart(2, "0"),
-      String(date.getUTCDate()).padStart(2, "0")
-    ].join("");
-    const suffix = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
-    return `CA-${typeCode.slice(0, 4)}-${datePart}-${suffix}`;
-  }
-
-  _taskReferenceNumber(requestReference) {
-    const suffix = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
-    return `TASK-${String(requestReference).slice(-12)}-${suffix}`;
-  }
-
-  _addDays(days) {
-    const date = new Date();
-    date.setUTCDate(date.getUTCDate() + Number(days || 0));
-    return date.toISOString().slice(0, 10);
+  // "<Request ID>-T01", "-T02", ...: the request's tasks numbered in the order they are created.
+  async _taskReferenceNumber(tx, requestId) {
+    const [request, count] = await Promise.all([
+      tx.run(SELECT.one.from(this.db.CARequests).columns("referenceNumber").where({ ID: requestId })),
+      tx.run(SELECT.one.from(this.db.CATasks).columns("count(1) as n").where({ request_ID: requestId }))
+    ]);
+    return formatTaskReference(request?.referenceNumber, Number(count?.n || 0) + 1);
   }
 };
 
 module.exports.REQUEST_OUTCOME = REQUEST_OUTCOME;
+module.exports.formatTaskReference = formatTaskReference;
+// Rules and texts used by the service, exported for the unit tests.
+Object.assign(module.exports, {
+  BUDGET_CHECK,
+  budgetDetailsEntity,
+  isBudgetCheckStep,
+  isS4ValidationStep,
+  approvalBlockedByBudgetCheck,
+  sesDateProblem,
+  withoutMultipleLineTaxFields,
+  completionRecipients,
+  changedFilledValues,
+  formatAssignedDate,
+  taskAtStep,
+  sentBackStatus,
+  approvalDataText
+});

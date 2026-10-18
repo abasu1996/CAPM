@@ -11,6 +11,7 @@
           <SegmentedButtonItem key="team" text="Team Queue" icon="sap-icon://group"/>
         </items>
       </SegmentedButton>
+      <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent" press=".onExportExcel"/>
       <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
     </headerContent>
     <subHeader>
@@ -24,82 +25,99 @@
         <Select id="taskStatusFilter" width="12rem" change=".onFilterChange">
           <core:Item key="" text="All statuses"/>
           <core:Item key="OPEN" text="Open"/>
+          <core:Item key="IN_PROGRESS" text="In Progress"/>
           <core:Item key="SENT_BACK" text="Sent Back"/>
           <core:Item key="APPROVED" text="Approved"/>
-          <core:Item key="REJECTED" text="Rejected"/>
+          <core:Item key="REJECTED" text="Terminated"/>
         </Select>
+        <!-- Team Queue only: narrow the shared queue by request type and requester. -->
+        <ComboBox
+          id="taskTypeFilter"
+          width="15rem"
+          placeholder="{i18n>requestType}"
+          visible="{taskView>/isTeamMode}"
+          items="{catalog>/requestTypes}"
+          selectionChange=".onFilterChange">
+          <core:Item key="{catalog>code}" text="{catalog>name}"/>
+        </ComboBox>
+        <SearchField
+          id="taskRequesterFilter"
+          width="13rem"
+          placeholder="{i18n>requesterFilterPlaceholder}"
+          visible="{taskView>/isTeamMode}"
+          liveChange=".onFilterChange"
+          search=".onFilterChange"/>
         <ToolbarSpacer/>
+        <Label text="{i18n>sortBy}" labelFor="taskSort"/>
+        <Select id="taskSort" width="14rem" selectedKey="{sortView>/key}" change=".onSortChange">
+          <core:Item key="asc" text="{i18n>sortSlaAsc}"/>
+          <core:Item key="desc" text="{i18n>sortSlaDesc}"/>
+        </Select>
         <Button text="Clear" icon="sap-icon://clear-filter" type="Transparent" press=".onClearFilters"/>
       </OverflowToolbar>
     </subHeader>
     <content>
-      <!-- Scrolls sideways instead of squeezing: every column keeps a readable width. -->
-      <ScrollContainer horizontal="true" vertical="false" width="100%" focusable="false">
-      <Table
-        items="{tasks>/items}"
-        growing="true"
-        growingScrollToLoad="false"
-        noDataText="No tasks are available in this queue"
-        itemPress=".onItemPress"
-        class="caWorklistTable caScrollTable">
-        <columns>
-          <Column width="14rem"><Text text="Task ID"/></Column>
-          <Column width="13rem"><Text text="Request ID"/></Column>
-          <Column width="12rem"><Text text="{i18n>requestType}"/></Column>
-          <Column width="11rem"><Text text="Requester"/></Column>
-          <Column width="16rem"><Text text="Task"/></Column>
-          <Column width="20rem"><Text text="Request"/></Column>
-          <Column width="5rem"><Text text="Step"/></Column>
-          <Column width="10rem"><Text text="{i18n>status}"/></Column>
-          <Column width="12rem"><Text text="{i18n>slaDue}"/></Column>
-          <Column width="10rem" visible="{taskView>/isTeamMode}"><Text text="Action"/></Column>
-        </columns>
-        <items>
-          <ColumnListItem
-            type="Navigation"
-            highlight="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.formatSlaHighlight'}">
-            <cells>
-              <ObjectIdentifier title="{tasks>referenceNumber}" text="{tasks>assignedTeamName}"/>
-              <Link text="{tasks>request/referenceNumber}" wrapping="true" press=".onRequestLinkPress"/>
-              <Text text="{tasks>request/requestType/name}"/>
-              <Text text="{tasks>request/requesterName}"/>
-              <ObjectIdentifier title="{tasks>taskName}" text="{tasks>description}"/>
-              <Text text="{tasks>request/title}" maxLines="2"/>
-              <ObjectNumber number="{tasks>stepNo}"/>
-              <VBox>
-                <ObjectStatus text="{tasks>status/name}" state="{path: 'tasks>status/code', formatter: '.statusState'}"/>
-                <ObjectStatus
-                  text="{i18n>slaBreachedLabel}"
-                  icon="sap-icon://lateness"
-                  state="Error"
-                  inverted="true"
-                  class="sapUiTinyMarginTop"
-                  visible="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.isSlaBreached'}"/>
-                <ObjectStatus
-                  text="{i18n>withinSlaLabel}"
-                  icon="sap-icon://accept"
-                  state="Success"
-                  inverted="true"
-                  class="sapUiTinyMarginTop"
-                  visible="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.isWithinSla'}"/>
-              </VBox>
-              <VBox>
-                <Text text="{= ${tasks>slaDueAt} ? ${path: 'tasks>slaDueAt', formatter: '.formatDateTime'} : ${path: 'tasks>dueDate', formatter: '.formatDate'} }"/>
+      <!-- Columns keep their full width; the card scrolls sideways and down, headers stay in view. -->
+      <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
+        <Table
+          id="tasksTable"
+          items="{tasks>/items}"
+          growing="true"
+          growingScrollToLoad="false"
+          popinLayout="GridSmall"
+          noDataText="No tasks are available in this queue"
+          itemPress=".onItemPress"
+          fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable">
+          <columns>
+            <Column width="12.5rem"><Text text="Task ID"/></Column>
+            <Column width="11.5rem"><Text text="Request ID"/></Column>
+            <Column><Text text="Task"/></Column>
+            <Column width="16rem"><Text text="Title"/></Column>
+            <Column width="3rem" hAlign="Center"><Text text="Step"/></Column>
+            <Column width="9rem"><Text text="{i18n>status}"/></Column>
+            <Column width="8.5rem"><Text text="{i18n>slaDue}"/></Column>
+            <!-- When the task reached me (My Tasks) or my team's queue (Team Queue). -->
+            <Column width="8.5rem"><Text text="{= ${taskView>/isTeamMode} ? 'Received On' : 'Assigned On' }"/></Column>
+            <!-- My Tasks only: when the task was approved (Team Queue holds open tasks). -->
+            <Column width="8.5rem" visible="{= !${taskView>/isTeamMode} }"><Text text="Approved On"/></Column>
+            <Column width="9rem" visible="{taskView>/isTeamMode}"><Text text="Action"/></Column>
+          </columns>
+          <items>
+            <ColumnListItem
+              type="Navigation"
+              highlight="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.formatSlaHighlight'}">
+              <cells>
+                <Text text="{tasks>referenceNumber}" tooltip="{tasks>assignedTeamName}" wrapping="false"/>
+                <Link text="{tasks>request/referenceNumber}" wrapping="false" press=".onRequestLinkPress"/>
+                <Text text="{tasks>taskName}" tooltip="{tasks>description}" wrapping="false"/>
+                <Text text="{tasks>request/title}" tooltip="{= ${tasks>request/requestType/name} + ' · ' + ${tasks>request/requesterName} }" maxLines="2" class="caTitleCell"/>
+                <Text text="{tasks>stepNo}" wrapping="false"/>
+                <HBox alignItems="Center" wrap="NoWrap">
+                  <ObjectStatus text="{parts: ['tasks>status/name', 'tasks>status/code'], formatter: '.statusName'}" state="{path: 'tasks>status/code', formatter: '.statusState'}"/>
+                  <ObjectStatus
+                    text="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.formatSlaText'}"
+                    state="{parts: ['tasks>slaDueAt', 'tasks>status/code', 'tasks>slaBreached'], formatter: '.formatSlaHighlight'}"
+                    class="sapUiTinyMarginBegin"/>
+                </HBox>
                 <Text
-                  text="{parts: ['tasks>slaDueAt', 'tasks>status/code'], formatter: '.formatSlaRemaining'}"
-                  class="caSlaRemaining"
-                  visible="{= ${tasks>status/code} === 'OPEN' &amp;&amp; !!${tasks>slaDueAt} }"/>
-              </VBox>
-              <Button
-                text="Assign to Me"
-                icon="sap-icon://employee-approvals"
-                type="Emphasized"
-                visible="{taskView>/isTeamMode}"
-                press=".onClaimTask"/>
-            </cells>
-          </ColumnListItem>
-        </items>
-      </Table>
+                  text="{parts: ['tasks>slaDueAt', 'tasks>dueDate'], formatter: '.formatSlaDue'}"
+                  tooltip="{parts: ['tasks>slaDueAt', 'tasks>status/code'], formatter: '.formatSlaRemaining'}"
+                  wrapping="false"/>
+                <Text text="{path: 'tasks>createdAt', formatter: '.formatDateTimeShort'}" tooltip="{path: 'tasks>createdAt', formatter: '.formatDateTime'}" wrapping="false"/>
+                <Text
+                  text="{parts: ['tasks>completedAt', 'tasks>status/code'], formatter: '.formatApprovedOn'}"
+                  tooltip="{parts: ['tasks>completedAt', 'tasks>status/code'], formatter: '.formatApprovedOnFull'}"
+                  wrapping="false"/>
+                <Button
+                  text="Assign to Me"
+                  icon="sap-icon://employee-approvals"
+                  type="Emphasized"
+                  visible="{taskView>/isTeamMode}"
+                  press=".onClaimTask"/>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
       </ScrollContainer>
     </content>
   </Page>

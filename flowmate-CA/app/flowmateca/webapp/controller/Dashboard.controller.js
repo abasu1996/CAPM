@@ -1,12 +1,12 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
-  "sap/ui/model/json/JSONModel"
-], function (BaseController, JSONModel) {
+  "flowmateca/model/ListModel"
+], function (BaseController, ListModel) {
   "use strict";
 
   return BaseController.extend("flowmateca.controller.Dashboard", {
     onInit: function () {
-      this.getView().setModel(new JSONModel({
+      this.getView().setModel(new ListModel({
         allRequests: 0,
         myRequests: 0,
         myOpenTasks: 0,

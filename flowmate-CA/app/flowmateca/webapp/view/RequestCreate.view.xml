@@ -64,14 +64,18 @@
                 <core:Item key="SINGLE_LINE" text="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' ? ${i18n>singleRequest} : ${i18n>singleLineItems} }"/>
                 <core:Item key="MULTIPLE_LINE" text="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' ? ${i18n>multipleRequest} : ${i18n>multipleLineItems} }"/>
               </Select>
-              <Label text="{i18n>title}" required="true"/>
-              <Input value="{form>/title}" maxLength="255" placeholder="Briefly describe the required outcome"/>
+              <Label text="{i18n>title}"/>
+              <Input
+                id="requestTitle"
+                value="{form>/title}"
+                editable="false"
+                placeholder="Numbered automatically once a request type is chosen"/>
               <Label text="{i18n>dueDate}"/>
               <Input
                 id="slaDueDate"
                 value="{path: 'form>/dueDate', formatter: '.formatDate'}"
                 editable="false"
-                placeholder="Set from the step SLAs once a process variant is chosen"/>
+                placeholder="Calculated from the step SLAs once a process variant is chosen"/>
               <Label text="Link to Existing Request"/>
               <ComboBox
                 selectedKey="{form>/predecessorId}"
@@ -86,13 +90,13 @@
               <Label text="{i18n>requester}"/>
               <Input id="requesterInput" value="{form>/requesterName}" editable="false" placeholder="Logged-in user"/>
 
-<Label text="Processor Team" required="true"/>
+<Label text="Requester Team" required="true"/>
 <ComboBox
     id="processorTeamComboBox"
     selectedKey="{form>/processorTeamCode}"
     items="{catalog>/teams}"
     showSecondaryValues="true"
-    placeholder="Select processor team"
+    placeholder="Select requester team"
     selectionChange=".onProcessorTeamChange">
     <core:ListItem
         key="{catalog>teamCode}"

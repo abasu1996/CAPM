@@ -1,8 +1,8 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
-  "sap/ui/model/json/JSONModel",
+  "flowmateca/model/ListModel",
   "sap/m/MessageBox"
-], function (BaseController, JSONModel, MessageBox) {
+], function (BaseController, ListModel, MessageBox) {
   "use strict";
 
   // Simple masters with one Admin tab each (the Project Code Creation (PCC) tables and Product
@@ -63,7 +63,7 @@ sap.ui.define([
 
   return BaseController.extend("flowmateca.controller.Admin", {
     onInit: function () {
-      this.getView().setModel(new JSONModel({
+      this.getView().setModel(new ListModel({
         steps: [],
         requestTypes: [],
         variants: [],
@@ -110,10 +110,8 @@ sap.ui.define([
         budgetCodes: [],
         pcc: {}
       }), "admin");
-      this.getView().setModel(new JSONModel({}), "newItem");
-      this.getView().setModel(new JSONModel({ members: [], availableUsers: [], selectedUserIds: [] }), "teamManage");
-      // A JSONModel renders only its first 100 list entries by default; there are more teams than that.
-      this.getView().getModel("admin").setSizeLimit(10000);
+      this.getView().setModel(new ListModel({}), "newItem");
+      this.getView().setModel(new ListModel({ members: [], availableUsers: [], selectedUserIds: [] }), "teamManage");
       this.getRouter().getRoute("admin").attachPatternMatched(this.onRefresh, this);
     },
 

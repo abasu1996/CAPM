@@ -1,13 +1,17 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
-  "sap/ui/model/json/JSONModel"
-], function (BaseController, JSONModel) {
+  "flowmateca/model/ListModel",
+  "flowmateca/model/sortRows"
+], function (BaseController, ListModel, sortRows) {
   "use strict";
 
   return BaseController.extend("flowmateca.controller.Tasks", {
     onInit: function () {
-      this.getView().setModel(new JSONModel({ items: [] }), "tasks");
-      this.getView().setModel(new JSONModel({
+      this.getView().setModel(new ListModel({ items: [] }), "tasks");
+      this.getView().setModel(new ListModel({ requestTypes: [] }), "catalog");
+      // Sort by SLA Due: "asc" = earliest first (most urgent on top), tasks without a date last.
+      this.getView().setModel(new ListModel({ key: "asc" }), "sortView");
+      this.getView().setModel(new ListModel({
         mode: "mine",
         isTeamMode: false,
         title: "My Tasks"
@@ -23,7 +27,28 @@ sap.ui.define([
       model.setProperty("/isTeamMode", mode === "team");
       model.setProperty("/title", mode === "team" ? "Team Task Queue" : "My Tasks");
       this._approvalOnly = query.approval === "true";
+      this.getView().getModel("sortView").setProperty("/key", "asc");
+      // The request type / requester filters belong to the Team Queue; never let them apply hidden.
+      if (mode !== "team") {
+        this.byId("taskTypeFilter").setSelectedKey("");
+        this.byId("taskRequesterFilter").setValue("");
+      } else {
+        this._loadRequestTypes();
+      }
       this.onRefresh();
+    },
+
+    _loadRequestTypes: async function () {
+      if (this._requestTypesLoaded) {
+        return;
+      }
+      try {
+        const types = await this.request("RequestTypes?$filter=isActive eq true&$orderby=sortOrder");
+        this.getView().getModel("catalog").setProperty("/requestTypes", types.value || []);
+        this._requestTypesLoaded = true;
+      } catch (error) {
+        this.showError(error);
+      }
     },
 
     onModeChange: function (event) {
@@ -43,6 +68,8 @@ sap.ui.define([
         const filters = [];
         const search = this.byId("taskSearch").getValue().trim().toLowerCase();
         const status = this.byId("taskStatusFilter").getSelectedKey();
+        const type = mode === "team" ? this.byId("taskTypeFilter").getSelectedKey() : "";
+        const requester = mode === "team" ? this.byId("taskRequesterFilter").getValue().trim().toLowerCase() : "";
 
         if (search) {
           const safeSearch = search.replace(/'/g, "''");
@@ -50,6 +77,12 @@ sap.ui.define([
         }
         if (status) {
           filters.push(`status_code eq '${status}'`);
+        }
+        if (type) {
+          filters.push(`request/requestType_code eq '${type}'`);
+        }
+        if (requester) {
+          filters.push(`contains(tolower(request/requesterName),'${requester.replace(/'/g, "''")}')`);
         }
         if (this._approvalOnly) {
           filters.push("isApproval eq true");
@@ -59,7 +92,7 @@ sap.ui.define([
         const result = await this.request(
           `${entity}?$expand=request($expand=requestType),status&$orderby=createdAt desc${filterQuery}`
         );
-        this.getView().getModel("tasks").setProperty("/items", result.value || []);
+        this.getView().getModel("tasks").setProperty("/items", this._sorted(result.value || []));
       } catch (error) {
         this.showError(error);
       } finally {
@@ -67,14 +100,56 @@ sap.ui.define([
       }
     },
 
+    _sorted: function (rows) {
+      const descending = this.getView().getModel("sortView").getProperty("/key") === "desc";
+      return sortRows.sortRows(rows, sortRows.slaDueKey, descending);
+    },
+
+    // Re-sorts the tasks already loaded; no new request.
+    onSortChange: function () {
+      const model = this.getView().getModel("tasks");
+      model.setProperty("/items", this._sorted(model.getProperty("/items") || []));
+    },
+
+    // Approved On: the approval date and time of an approved task, blank otherwise.
+    formatApprovedOn: function (completedAt, statusCode) {
+      return statusCode === "APPROVED" && completedAt ? this.formatDateTimeShort(completedAt) : "";
+    },
+
+    formatApprovedOnFull: function (completedAt, statusCode) {
+      return statusCode === "APPROVED" && completedAt ? this.formatDateTime(completedAt) : "";
+    },
+
     onFilterChange: function () {
       clearTimeout(this._filterTimer);
       this._filterTimer = setTimeout(this.onRefresh.bind(this), 250);
     },
 
+    // Exports the tasks the list shows (its filters included).
+    onExportExcel: function () {
+      const view = this.getView().getModel("taskView").getData();
+      return this.exportToExcel(this._approvalOnly ? "Pending Approval" : (view.title || "Tasks"), [
+        { label: "Task ID", value: (t) => t.referenceNumber },
+        { label: "Request ID", value: (t) => t.request && t.request.referenceNumber },
+        { label: "Request Type", value: (t) => t.request && t.request.requestType && t.request.requestType.name },
+        { label: "Requester", value: (t) => t.request && t.request.requesterName },
+        { label: "Task", value: (t) => t.taskName },
+        { label: "Title", value: (t) => t.request && t.request.title },
+        { label: "Step", value: (t) => t.stepNo },
+        { label: "Status", value: (t) => t.status && this.statusName(t.status.name, t.status.code) },
+        { label: "SLA", value: (t) => this.formatSlaText(t.slaDueAt, t.status && t.status.code, t.slaBreached) },
+        { label: "SLA Due", value: (t) => this.formatDateTime(t.slaDueAt) || this.formatDate(t.dueDate) },
+        { label: "Assigned To", value: (t) => t.assignedName || t.assignedTeamName },
+        { label: view.isTeamMode ? "Received On" : "Assigned On", value: (t) => this.formatDateTime(t.createdAt) }
+      ], this.getView().getModel("tasks").getProperty("/items") || []).catch(this.showError.bind(this));
+    },
+
     onClearFilters: function () {
       this.byId("taskSearch").setValue("");
       this.byId("taskStatusFilter").setSelectedKey("");
+      this.byId("taskTypeFilter").setSelectedKey("");
+      this.byId("taskRequesterFilter").setValue("");
+      this.getView().getModel("sortView").setProperty("/key", "asc");
       this._approvalOnly = false;
       this.onRefresh();
     },

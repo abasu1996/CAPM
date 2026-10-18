@@ -6,6 +6,7 @@
   <Page class="caPage" showNavButton="true" navButtonPress=".onNavHome" title="{i18n>myRequests}">
     <headerContent>
       <Button text="{i18n>createRequest}" icon="sap-icon://add" type="Emphasized" press=".onCreate"/>
+      <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent" press=".onExportExcel"/>
       <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
     </headerContent>
     <subHeader>
@@ -38,57 +39,65 @@
           <core:Item key="IN_PROGRESS" text="In Progress"/>
           <core:Item key="SENT_BACK" text="Sent Back"/>
           <core:Item key="COMPLETED" text="Completed"/>
-          <core:Item key="REJECTED" text="Rejected"/>
+          <core:Item key="REJECTED" text="Terminated"/>
         </Select>
         <ToolbarSpacer/>
+        <Label text="{i18n>sortBy}" labelFor="requestSort"/>
+        <Select id="requestSort" width="14rem" selectedKey="{sortView>/key}" change=".onSortChange">
+          <core:Item key="asc" text="{i18n>sortDueAsc}"/>
+          <core:Item key="desc" text="{i18n>sortDueDesc}"/>
+        </Select>
         <Button text="Clear" icon="sap-icon://clear-filter" type="Transparent" press=".onClearFilters"/>
       </OverflowToolbar>
     </subHeader>
     <content>
-      <Table
-        id="requestsTable"
-        items="{list>/items}"
-        mode="None"
-        growing="true"
-        growingScrollToLoad="true"
-        noDataText="No requests match the selected filters"
-        itemPress=".onItemPress"
-        class="caWorklistTable">
-        <columns>
-          <Column width="16rem"><Text text="Request ID"/></Column>
-          <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestType}"/></Column>
-          <!-- Hidden on the Sent Back / Rejected / Completed tile lists (opened with a status). -->
-          <Column minScreenWidth="Tablet" demandPopin="true" visible="{list>/showRequester}"><Text text="Requester"/></Column>
-          <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestVariant}"/></Column>
-          <Column><Text text="{i18n>title}"/></Column>
-          <Column width="9rem"><Text text="{i18n>status}"/></Column>
-          <Column width="9rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>dueDate}"/></Column>
-        </columns>
-        <items>
-          <ColumnListItem
-            type="Navigation"
-            highlight="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.formatRequestSlaHighlight'}">
-            <cells>
-              <ObjectIdentifier title="{list>referenceNumber}"/>
-              <Text text="{list>requestType/name}"/>
-              <Text text="{list>requesterName}"/>
-              <Text text="{list>requestVariant/name}"/>
-              <Text text="{list>title}" maxLines="2"/>
-              <VBox>
-                <ObjectStatus text="{list>status/name}" state="{path: 'list>status/code', formatter: '.statusState'}"/>
-                <ObjectStatus
-                  text="{i18n>slaBreachedLabel}"
-                  icon="sap-icon://lateness"
-                  state="Error"
-                  inverted="true"
-                  class="sapUiTinyMarginTop"
-                  visible="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.isRequestOverdue'}"/>
-              </VBox>
-              <Text text="{path: 'list>dueDate', formatter: '.formatDate'}"/>
-            </cells>
-          </ColumnListItem>
-        </items>
-      </Table>
+      <!-- Columns keep their full width; the card scrolls sideways and down, headers stay in view. -->
+      <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
+        <Table
+          id="requestsTable"
+          items="{list>/items}"
+          mode="None"
+          growing="true"
+          growingScrollToLoad="true"
+          noDataText="No requests match the selected filters"
+          itemPress=".onItemPress"
+          fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable">
+          <columns>
+            <Column width="16rem"><Text text="Request ID"/></Column>
+            <Column><Text text="{i18n>requestType}"/></Column>
+            <!-- Hidden on the Sent Back / Terminated / Completed tile lists (opened with a status). -->
+            <Column visible="{list>/showRequester}"><Text text="Requester"/></Column>
+            <Column><Text text="{i18n>requestVariant}"/></Column>
+            <Column width="16rem"><Text text="{i18n>title}"/></Column>
+            <Column width="9rem"><Text text="{i18n>status}"/></Column>
+            <Column width="9rem"><Text text="{i18n>dueDate}"/></Column>
+          </columns>
+          <items>
+            <ColumnListItem
+              type="Navigation"
+              highlight="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.formatRequestSlaHighlight'}">
+              <cells>
+                <ObjectIdentifier title="{list>referenceNumber}"/>
+                <Text text="{list>requestType/name}"/>
+                <Text text="{list>requesterName}"/>
+                <Text text="{list>requestVariant/name}"/>
+                <Text text="{list>title}" maxLines="2" class="caTitleCell"/>
+                <VBox>
+                  <ObjectStatus text="{parts: ['list>status/name', 'list>status/code'], formatter: '.statusName'}" state="{path: 'list>status/code', formatter: '.statusState'}"/>
+                  <ObjectStatus
+                    text="{i18n>slaBreachedLabel}"
+                    icon="sap-icon://lateness"
+                    state="Error"
+                    inverted="true"
+                    class="sapUiTinyMarginTop"
+                    visible="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.isRequestOverdue'}"/>
+                </VBox>
+                <Text text="{path: 'list>dueDate', formatter: '.formatDate'}"/>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
+      </ScrollContainer>
     </content>
   </Page>
 </mvc:View>

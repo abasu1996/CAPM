@@ -1,13 +1,16 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
-  "sap/ui/model/json/JSONModel"
-], function (BaseController, JSONModel) {
+  "flowmateca/model/ListModel",
+  "flowmateca/model/sortRows"
+], function (BaseController, ListModel, sortRows) {
   "use strict";
 
   return BaseController.extend("flowmateca.controller.Requests", {
     onInit: function () {
-      this.getView().setModel(new JSONModel({ items: [] }), "list");
-      this.getView().setModel(new JSONModel({
+      this.getView().setModel(new ListModel({ items: [] }), "list");
+      // Sort by Due Date: "asc" = earliest first (most urgent on top), rows without a due date last.
+      this.getView().setModel(new ListModel({ key: "asc" }), "sortView");
+      this.getView().setModel(new ListModel({
         requestTypes: [],
         variants: [],
         filteredVariants: []
@@ -18,8 +21,9 @@ sap.ui.define([
     _onRouteMatched: async function (event) {
       this._query = event.getParameter("arguments")["?query"] || {};
       this.byId("requestStatusFilter").setSelectedKey(this._query.status || "");
-      // The Sent Back / Rejected / Completed tiles open this list with a status: Request Type only.
+      // The Sent Back / Terminated / Completed tiles open this list with a status: Request Type only.
       this.getView().getModel("list").setProperty("/showRequester", !this._query.status);
+      this.getView().getModel("sortView").setProperty("/key", "asc");
       await this._loadCatalog();
       await this.onRefresh();
     },
@@ -62,12 +66,23 @@ sap.ui.define([
         const result = await this.request(
           `MyRequests?$expand=requestType,requestVariant,status&$orderby=createdAt desc${filterQuery}`
         );
-        this.getView().getModel("list").setProperty("/items", result.value || []);
+        this.getView().getModel("list").setProperty("/items", this._sorted(result.value || []));
       } catch (error) {
         this.showError(error);
       } finally {
         this.setBusy(false);
       }
+    },
+
+    _sorted: function (rows) {
+      const descending = this.getView().getModel("sortView").getProperty("/key") === "desc";
+      return sortRows.sortRows(rows, function (row) { return row.dueDate; }, descending);
+    },
+
+    // Re-sorts the rows already loaded; no new request.
+    onSortChange: function () {
+      const model = this.getView().getModel("list");
+      model.setProperty("/items", this._sorted(model.getProperty("/items") || []));
     },
 
     onFilterChange: function () {
@@ -86,11 +101,32 @@ sap.ui.define([
       this.onFilterChange();
     },
 
+    // Exports the requests the list shows (its filters included).
+    onExportExcel: function () {
+      // Named after the tile it was opened from (Sent Back, Terminated, Completed) or the page.
+      const statusItem = this.byId("requestStatusFilter").getSelectedItem();
+      const name = this._query && this._query.status && statusItem
+        ? `${statusItem.getText()} Requests`
+        : this.getView().getContent()[0].getTitle();
+      return this.exportToExcel(name || "Requests", [
+        { label: "Request ID", value: (r) => r.referenceNumber },
+        { label: "Request Type", value: (r) => r.requestType && r.requestType.name },
+        { label: "Requester", value: (r) => r.requesterName },
+        { label: "Process Variant", value: (r) => r.requestVariant && r.requestVariant.name },
+        { label: "Title", value: (r) => r.title },
+        { label: "Status", value: (r) => r.status && this.statusName(r.status.name, r.status.code) },
+        { label: "SLA", value: (r) => (this.isRequestOverdue(r.slaDueAt, r.status && r.status.code) ? "SLA Breached" : "") },
+        { label: "Due Date", value: (r) => this.formatDate(r.dueDate) },
+        { label: "Created", value: (r) => this.formatDateTime(r.createdAt) }
+      ], this.getView().getModel("list").getProperty("/items") || []).catch(this.showError.bind(this));
+    },
+
     onClearFilters: function () {
       this.byId("requestSearch").setValue("");
       this.byId("requestTypeFilter").setSelectedKey("");
       this.byId("requestVariantFilter").setSelectedKey("");
       this.byId("requestStatusFilter").setSelectedKey("");
+      this.getView().getModel("sortView").setProperty("/key", "asc");
       this.getView().getModel("catalog").setProperty(
         "/filteredVariants",
         this.getView().getModel("catalog").getProperty("/variants")

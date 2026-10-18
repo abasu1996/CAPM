@@ -1,19 +1,35 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
   "flowmateca/model/FormDefinitions",
-  "sap/ui/model/json/JSONModel",
+  "flowmateca/model/versionTable",
+  "flowmateca/model/ListModel",
   "sap/m/MessageBox",
+  "sap/m/Column",
+  "sap/m/ColumnListItem",
+  "sap/m/Text",
+  "sap/m/VBox",
+  "sap/ui/core/CustomData",
   "sap/base/Log"
-], function (BaseController, FormDefinitions, JSONModel, MessageBox, Log) {
+], function (BaseController, FormDefinitions, versionTable, ListModel, MessageBox, Column, ColumnListItem, Text, VBox, CustomData, Log) {
   "use strict";
+
+  // Fields approvers fill in on the request's details row, per request type (Versions rows).
+  const APPROVER_FIELDS = {
+    SERVICE_CODE: [["glAccount", "GL Account"], ["valuationClass_code", "Valuation Class"], ["serviceCode", "Service Code"]],
+    MATERIAL_CODE: [["glAccount", "GL Account"], ["materialCode", "Material Code"]],
+    EQUIPMENT_CODE: [["equipmentCode", "Equipment Code"]],
+    PROJECT_CODE: [["projectCode", "Project Code"], ["functionLocation", "Function Location"], ["activityNumber", "Activity"]],
+    PURCHASE_ORDER: [["purchaseOrderNumber", "PO Number"]],
+    SERVICE_ENTRY_SHEET: [["sesNumber", "SES Number"]]
+  };
 
   return BaseController.extend("flowmateca.controller.RequestDetail", {
     onInit: function () {
-      this.getView().setModel(new JSONModel({}), "detail");
-      this.getView().setModel(new JSONModel({}), "step");
-      this.getView().setModel(new JSONModel({}), "taskForm");
-      this.getView().setModel(new JSONModel({}), "catalog");
-      this.getView().getModel("catalog").setSizeLimit(10000);
+      this.getView().setModel(new ListModel({}), "detail");
+      this.getView().setModel(new ListModel({}), "step");
+      this.getView().setModel(new ListModel({}), "taskForm");
+      this.getView().setModel(new ListModel({}), "catalog");
+      this.getView().setModel(new ListModel({ rows: [] }), "versions");
       this.getRouter().getRoute("requestDetail").attachPatternMatched(this._onRouteMatched, this);
     },
 
@@ -38,6 +54,7 @@ sap.ui.define([
           "comments",
           "involvedParties",
           "history",
+          "versions($select=ID,versionNo,snapshot,createdAt,createdByName,stepName)",
           "materialCode($expand=items)",
           "serviceCode($expand=items)",
           "equipmentCode($expand=items)",
@@ -47,11 +64,16 @@ sap.ui.define([
           "purchaseOrder($expand=items)",
           "serviceEntrySheet($expand=items,headers)"
         ].join(",");
-        const request = await this.request(`Requests(${this._requestId})?$expand=${expand}`);
+        const [request, contribute] = await Promise.all([
+          this.request(`Requests(${this._requestId})?$expand=${expand}`),
+          this.request(`canContribute(requestId=${this._requestId})`)
+        ]);
+        // Comments and uploads are for the person the request is waiting on (checked on the server too).
+        request.canContribute = contribute.value === true;
         this._prepareDetail(request);
         this.getView().getModel("detail").setData(request);
         this._renderDetailItems(request.requestType?.code);
-        await this._resolveIdLabels(request);
+        await Promise.all([this._resolveIdLabels(request), this._renderVersions(request)]);
       } catch (error) {
         this.showError(error);
       } finally {
@@ -63,8 +85,9 @@ sap.ui.define([
       request.stepInstances = (request.stepInstances || []).sort(function (left, right) {
         return left.stepNo - right.stepNo;
       });
+      // By step, then oldest first, so a task opened by a send-back sits under the one it replaces.
       request.tasks = (request.tasks || []).sort(function (left, right) {
-        return left.stepNo - right.stepNo;
+        return left.stepNo - right.stepNo || new Date(left.createdAt) - new Date(right.createdAt);
       });
       // A step shows "SLA Breached" when any of its tasks breached (open past due, or closed late).
       request.stepInstances.forEach(function (step) {
@@ -76,6 +99,8 @@ sap.ui.define([
       request.history = (request.history || []).sort(function (left, right) {
         return new Date(right.createdAt) - new Date(left.createdAt);
       });
+      // Versions are shown once the request has been sent back.
+      request.hasSendBack = request.history.some(function (entry) { return entry.action === "TASK_SENT_BACK"; });
       request.attachments = request.attachments || [];
       request.comments = request.comments || [];
       request.successors = request.successors || [];
@@ -85,7 +110,7 @@ sap.ui.define([
       request.history.count = request.history.length;
 
       const currentTasks = request.tasks.filter(function (task) {
-        return task.stepNo === request.currentStep;
+        return task.stepNo === request.currentStep && !task.isSuperseded;
       });
       const blockingTask = currentTasks.some(function (task) {
         return task.isMandatory && task.status?.code !== "APPROVED";
@@ -170,6 +195,164 @@ sap.ui.define([
     _resolveIdLabels: function (request) {
       const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
       return this.resolveIdLabels(request, details, "detail", "/detailFields");
+    },
+
+    // History tab: "TASK_SENT_BACK" -> "Task Sent Back"; a rejection reads as Terminated.
+    formatHistoryAction: function (action) {
+      return String(action || "").replace("REJECTED", "TERMINATED").toLowerCase().split("_").map(function (word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(" ");
+    },
+
+    // History tab, Versions: one page per pair of versions - page 1 is Version 1 and Version 2,
+    // page 2 Version 2 and Version 3, and so on - opening on the latest pair. Each page lists the
+    // form fields and the line item / header row fields that changed (versionTable.pair). A
+    // request with a single version, or created before versions were kept, shows it in full.
+    _renderVersions: async function (request) {
+      const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
+      const stored = (request.versions || []).slice().sort(function (left, right) {
+        return left.versionNo - right.versionNo;
+      }).map(function (version) {
+        let snapshot = {};
+        try {
+          snapshot = JSON.parse(version.snapshot || "{}");
+        } catch (error) {
+          Log.warning("Unreadable request version", String(version.versionNo));
+        }
+        return {
+          title: `Version ${version.versionNo}`,
+          // An approver's version names the step it was made at.
+          subtitle: [version.stepName, version.createdByName, this.formatDateTime(version.createdAt)].filter(Boolean).join(" · "),
+          snapshot: snapshot
+        };
+      }.bind(this));
+      const versions = stored.length ? stored : [{
+        title: "Current data", subtitle: "Created before versions were kept", snapshot: details
+      }];
+      const labelCache = new Map();
+      const described = await Promise.all(versions.map(function (version) {
+        return this._describeVersion(request, version.snapshot, labelCache);
+      }.bind(this)));
+      this._versionPages = versions.map(function (version, index) {
+        return Object.assign({ rows: described[index] }, version);
+      });
+      this._renderVersionsTable();
+      this._showVersionPage(Math.max(1, versions.length - 1));
+    },
+
+    // Page n (1-based) shows version n and version n + 1; a single version is page 1 on its own.
+    _showVersionPage: function (page) {
+      const versions = this._versionPages || [];
+      const pageCount = Math.max(1, versions.length - 1);
+      const current = Math.min(Math.max(1, page), pageCount);
+      const shown = versions.slice(current - 1, current + 1);
+      const table = shown.length === 2
+        ? versionTable.pair(shown[0].rows, shown[1].rows)
+        : versionTable.build(shown.map(function (version) { return { rows: version.rows }; }));
+      this.getView().getModel("versions").setData({
+        rows: table.rows,
+        count: versions.length,
+        page: current,
+        pageCount: pageCount,
+        pageText: shown.length === 2
+          ? `${shown[0].title} → ${shown[1].title} (page ${current} of ${pageCount})`
+          : (shown[0] ? shown[0].title : ""),
+        columns: shown.map(function (version, index) {
+          return { title: version.title, subtitle: version.subtitle, changedCount: index ? table.changedCount : 0, first: index === 0 };
+        })
+      });
+    },
+
+    onVersionsPrevious: function () {
+      this._showVersionPage(this.getView().getModel("versions").getProperty("/page") - 1);
+    },
+
+    onVersionsNext: function () {
+      this._showVersionPage(this.getView().getModel("versions").getProperty("/page") + 1);
+    },
+
+    // { key, label, value } rows for one version's details, formatted like the Overview.
+    _describeVersion: async function (request, snapshot, labelCache) {
+      const typeCode = request.requestType?.code;
+      const variantCode = request.requestVariant?.code;
+      const rows = [];
+      const add = async function (key, label, definition, source) {
+        let value = this.formatDetailValue(definition, request, source);
+        if (definition.name === "requestDateTime") {
+          value = this.formatDateTime(request.createdAt);
+        } else if (definition.key === "ID" && definition.entity && value) {
+          value = await this._versionIdLabel(definition, value, labelCache);
+        }
+        rows.push({ key: key, label: label, value: value });
+      }.bind(this);
+      const definitions = this.detailFieldDefinitions(request, snapshot);
+      for (const definition of definitions) {
+        await add(`field:${definition.name}`, definition.label, definition, snapshot);
+      }
+      // Values approvers record on the request itself (codes, PO / SES Number).
+      for (const [name, label] of APPROVER_FIELDS[typeCode] || []) {
+        if (!definitions.some(function (definition) { return definition.name === name; })) {
+          await add(`field:${name}`, label, { name: name }, snapshot);
+        }
+      }
+      const lineRows = async function (prefix, label, entries, columns) {
+        for (const [index, row] of entries.entries()) {
+          for (const col of columns) {
+            if (col.name !== "itemNo") {
+              await add(`${prefix}:${index + 1}:${col.name}`, `${label} ${index + 1} · ${col.label}`, col, row);
+            }
+          }
+        }
+      };
+      await lineRows("header", "Header", this.sortedDetailHeaders(snapshot), FormDefinitions.getHeaderDisplayColumns(variantCode));
+      const items = (snapshot.items || []).slice().sort(function (left, right) { return left.itemNo - right.itemNo; });
+      await lineRows("line", "Line", items, FormDefinitions.getItemDisplayColumns(typeCode, variantCode, snapshot.materialCategory));
+      return rows;
+    },
+
+    // User / vendor / purchasing organization IDs shown by name; one lookup per ID.
+    _versionIdLabel: function (definition, value, labelCache) {
+      const path = `${definition.entity}(${value})`;
+      if (!labelCache.has(path)) {
+        labelCache.set(path, this.request(path).catch(function () {
+          return this.requestMaster(path);
+        }.bind(this)).then(function (row) {
+          return (row && row[definition.text || "name"]) || value;
+        }, function () {
+          return value;
+        }));
+      }
+      return labelCache.get(path).then(String);
+    },
+
+    // Field, the earlier version of the page and the later one (hidden when there is only one).
+    _renderVersionsTable: function () {
+      const table = this.byId("versionsTable");
+      table.destroyColumns();
+      table.unbindItems();
+      table.setWidth("100%");
+      table.addColumn(new Column({ width: "30%", header: new Text({ text: "Field" }) }));
+      const cells = [new Text({ text: "{versions>label}" }).addStyleClass("caVersionField")];
+      for (let index = 0; index < 2; index++) {
+        const column = `versions>/columns/${index}`;
+        table.addColumn(new Column({
+          width: "35%",
+          visible: `{= !!\${${column}} }`,
+          header: new VBox({ items: [
+            new Text({ text: `{${column}/title}` }).addStyleClass("caVersionTitle"),
+            new Text({ text: `{${column}/subtitle}` }).addStyleClass("caMuted"),
+            new Text({
+              text: `{= \${${column}/changedCount} + ' field(s) edited' }`,
+              visible: `{= !\${${column}/first} }`
+            }).addStyleClass("caMuted")
+          ] })
+        }));
+        cells.push(new Text({
+          text: `{versions>cells/${index}/text}`,
+          customData: [new CustomData({ key: "changed", value: `{= String(\${versions>cells/${index}/changed}) }`, writeToDom: true })]
+        }).addStyleClass("caVersionCell"));
+      }
+      table.bindItems({ path: "versions>/rows", template: new ColumnListItem({ cells: cells }) });
     },
 
     _renderDetailItems: function (typeCode) {
@@ -432,7 +615,7 @@ sap.ui.define([
     },
 
     stepStatusText: function (status) {
-      return String(status || "").replace(/_/g, " ");
+      return status === "REJECTED" ? "TERMINATED" : String(status || "").replace(/_/g, " ");
     },
 
     onClose: function () {

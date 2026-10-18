@@ -870,17 +870,117 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* My Tasks / Team Queue: the table keeps its column widths and its ScrollContainer scrolls
-   sideways, instead of being squeezed into (and clipped at) the page width. */
-.caWorklistTable.caScrollTable.sapMList {
-  width: 120rem !important;
-  min-width: calc(100% - 3rem);
-  max-width: none;
-  margin-left: 1.5rem;
-  margin-right: 1.5rem;
-}
-
 .caSlaRemaining.sapMText {
   font-size: 0.75rem;
   color: var(--ca-text-muted);
+}
+
+/* Request page Tasks tab: one line per task. */
+.caCompactTasks .sapMListTblCell .sapMText,
+.caCompactTasks .sapMListTblCell .sapMObjStatusText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* History tab: activity timeline beside the Versions table; stacks on narrow screens. */
+.caHistoryLayout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.caHistoryTimeline {
+  flex: 2 1 20rem;
+  min-width: 0;
+}
+
+.caHistoryVersions {
+  flex: 3 1 28rem;
+  min-width: 0;
+}
+
+.caHistoryHeading {
+  margin-bottom: 0.5rem;
+}
+
+.caVersionsHint {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.caVersionsScroll {
+  border: 1px solid var(--ca-border);
+  border-radius: 0.55rem;
+  background: #fff;
+}
+
+.caVersionTitle,
+.caVersionField {
+  font-weight: 600;
+}
+
+.caVersionCell[data-changed="true"] {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: #fff4d6;
+  font-weight: 600;
+}
+
+/* Tile lists: the card sits on the scroll container, so every column keeps its full width and a
+   table wider than the screen scrolls sideways inside the card instead of squeezing its columns. */
+.caWorklistScroll.sapMScrollCont {
+  box-sizing: border-box;
+  width: calc(100% - 3rem) !important;
+  max-width: 92rem;
+  margin: 1.25rem auto 2rem;
+  border: 1px solid var(--ca-border);
+  border-radius: 0.65rem;
+  background: #fff;
+  box-shadow: var(--ca-shadow);
+  max-height: calc(100vh - 11rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sapUiResponsiveContentPadding > .caWorklistScroll.sapMScrollCont {
+  width: 100% !important;
+  margin: 0;
+}
+
+.caWorklistScroll .caWorklistTable.sapMList {
+  width: auto !important;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+  overflow: visible;
+}
+
+.caWorklistScroll .sapMListTbl {
+  width: max-content;
+  min-width: 100%;
+}
+
+.caWorklistScroll .sapMListTblHeaderCell,
+.caWorklistScroll .sapMListTblCell .sapMText:not(.caTitleCell),
+.caWorklistScroll .sapMListTblCell .sapMObjStatusText {
+  white-space: nowrap;
+}
+
+.caWorklistScroll .caTitleCell {
+  display: block;
+  min-width: 12rem;
+  max-width: 22rem;
+  white-space: normal;
+}
+
+/* UI5's off-screen screen-reader helper sits past the table's edge; keep it from adding scroll. */
+.caWorklistScroll .sapMTableScreenReaderOnly {
+  max-width: 1px;
+  overflow: hidden;
 }

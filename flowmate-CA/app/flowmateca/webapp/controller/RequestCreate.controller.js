@@ -2,7 +2,8 @@ sap.ui.define([
   "flowmateca/controller/BaseController",
   "flowmateca/model/FormDefinitions",
   "flowmateca/model/FlowmateRequestFormDefinitions",
-  "sap/ui/model/json/JSONModel",
+  "flowmateca/model/tableFile",
+  "flowmateca/model/ListModel",
   "sap/ui/layout/form/SimpleForm",
   "sap/m/Label",
   "sap/m/Input",
@@ -33,7 +34,8 @@ sap.ui.define([
   BaseController,
   FormDefinitions,
   FlowmateRequestFormDefinitions,
-  JSONModel,
+  tableFile,
+  ListModel,
   SimpleForm,
   Label,
   Input,
@@ -201,7 +203,7 @@ sap.ui.define([
     },
 
     onInit: function () {
-      const formModel = new JSONModel(this._emptyForm());
+      const formModel = new ListModel(this._emptyForm());
       // PO Value (With Taxes) follows the PO value and the chosen tax; propertyChange fires for
       // every value the user edits through a two-way binding.
       formModel.attachPropertyChange(function (event) {
@@ -227,7 +229,7 @@ sap.ui.define([
         }
       }, this);
       this.getView().setModel(formModel, "form");
-      this.getView().setModel(new JSONModel({
+      this.getView().setModel(new ListModel({
         requestTypes: [],
         variants: [],
         materialCategories: [],
@@ -236,11 +238,10 @@ sap.ui.define([
         myRequests: [],
         teams:[]
       }), "catalog");
-      this.getView().getModel("catalog").setSizeLimit(10000);
-      this.getView().setModel(new JSONModel({ items: [] }), "files");
-      this.getView().setModel(new JSONModel({ items: [] }), "paymentRunFiles");
-      this.getView().setModel(new JSONModel(this._emptyPaymentRunForm()), "paymentRun");
-      this.getView().setModel(new JSONModel({}), "paymentRunGridEdit");
+      this.getView().setModel(new ListModel({ items: [] }), "files");
+      this.getView().setModel(new ListModel({ items: [] }), "paymentRunFiles");
+      this.getView().setModel(new ListModel(this._emptyPaymentRunForm()), "paymentRun");
+      this.getView().setModel(new ListModel({}), "paymentRunGridEdit");
       this._paymentRunGridDialogs = {};
       this._flowmateIntegrationMode = "paymentRun";
       this.getRouter().getRoute("requestCreate").attachPatternMatched(this._onRouteMatched, this);
@@ -338,6 +339,7 @@ sap.ui.define([
       }
       this._renderDynamicForm();
       this._renderItemsTable();
+      this._refreshTitlePreview();
     },
     onProcessorTeamChange: function (event) {
 
@@ -370,14 +372,13 @@ sap.ui.define([
     _loadCatalog: async function () {
       this.setBusy(true);
       try {
-        const [types, variants, materialCategories, priorities, requests, teams, stepConfigs] = await Promise.all([
+        const [types, variants, materialCategories, priorities, requests, teams] = await Promise.all([
           this.request("RequestTypes?$filter=isActive eq true&$orderby=sortOrder"),
           this.request("RequestVariants?$filter=isActive eq true&$orderby=sortOrder"),
           this.request("MaterialCategories?$filter=isActive eq true&$orderby=sortOrder"),
           this.request("Priorities?$filter=isActive eq true&$orderby=sortOrder"),
-          this.request("MyRequests?$select=ID,referenceNumber,title&$orderby=createdAt desc&$top=100"),
-          this.request("Teams?$filter=isActive eq true&$orderby=name"),
-          this.request("WorkflowStepConfigs?$select=processorTeam_ID&$filter=isActive eq true")
+          this.request("MyRequests?$select=ID,referenceNumber,title&$orderby=createdAt desc&$top=5000"),
+          this.request("Teams?$filter=isActive eq true&$orderby=name")
         ]);
         const catalog = this.getView().getModel("catalog");
         catalog.setProperty("/requestTypes", types.value || []);
@@ -385,15 +386,8 @@ sap.ui.define([
         catalog.setProperty("/materialCategories", materialCategories.value || []);
         catalog.setProperty("/priorities", priorities.value || []);
         catalog.setProperty("/myRequests", requests.value || []);
-        // Only teams that a workflow step actually routes to are selectable as the processor
-        // team. flowmate-common carries the full Dialog org (110+ teams); offering all of them
-        // here is noise, since the rest never receive a task.
-        const workflowTeamIds = new Set((stepConfigs.value || [])
-          .map(function (config) { return config.processorTeam_ID; })
-          .filter(Boolean));
-        const allTeams = teams.value || [];
-        const processorTeams = allTeams.filter(function (team) { return workflowTeamIds.has(team.ID); });
-        catalog.setProperty("/teams", processorTeams.length ? processorTeams : allTeams);
+        // Requester Team: every active team maintained in the Admin Console.
+        catalog.setProperty("/teams", teams.value || []);
       } catch (error) {
         this.showError(error);
       } finally {
@@ -442,6 +436,7 @@ sap.ui.define([
       this._filterVariants(typeCode);
       this._renderDynamicForm();
       this._renderItemsTable();
+      this._refreshTitlePreview();
       this._refreshSlaPreview();
     },
 
@@ -492,9 +487,7 @@ sap.ui.define([
 
       const rows = this._groupItemsBySite(items).map(function (group) {
         return Object.assign({}, headerFields, {
-          title: `Material Reservation - ${group.siteName}`,
-          dueDate: form.dueDate || null,
-          items: group.items.map(function (row, index) {
+          title: `Material Reservation - ${group.siteName}`,          items: group.items.map(function (row, index) {
             return Object.assign({}, row, { itemNo: index + 1 });
           })
         });
@@ -621,6 +614,10 @@ sap.ui.define([
           label,
           control
         });
+        if (definition.name === "remarks") {
+          formsBySection.get(section).addContent(new Label({ text: "Remarks Screenshot" }));
+          formsBySection.get(section).addContent(this._remarksScreenshotUploader());
+        }
       }.bind(this));
       this._applyConditionalVisibility();
     },
@@ -669,8 +666,35 @@ sap.ui.define([
       }
     },
 
-    // Due Date is read-only: the step SLAs of the chosen workflow added up from now, the same
-    // way the server plans them on submit. Scalar details are sent because they decide
+    // Remarks may carry one screenshot. Images only - PDFs and other documents go to the attachment
+    // fields; the server refuses anything else for this category too.
+    _remarksScreenshotUploader: function () {
+      return new FileUploader({
+        width: "100%",
+        buttonText: "Attach Screenshot",
+        icon: "sap-icon://add-photo",
+        fileType: ["png", "jpg", "jpeg", "gif", "webp"],
+        mimeType: ["image/png", "image/jpeg", "image/gif", "image/webp"],
+        placeholder: "PNG, JPG, GIF or WebP image",
+        typeMissmatch: function (event) {
+          event.getSource().clear();
+          delete this._dynamicFileUploads.remarksScreenshot;
+          MessageBox.warning("Only an image can be attached to the remarks (PNG, JPG, GIF or WebP).");
+        }.bind(this),
+        change: function (event) {
+          const files = event.getParameter("files");
+          const file = files && files.length ? files[0] : null;
+          if (file) {
+            this._dynamicFileUploads.remarksScreenshot = file;
+          } else {
+            delete this._dynamicFileUploads.remarksScreenshot;
+          }
+        }.bind(this)
+      });
+    },
+
+    // Due Date: the step SLAs of the chosen workflow added up from now, as the server calculates
+    // it. Only shown - each task keeps its own SLA. Scalar details are sent because they decide
     // conditional steps (DMS Update adds the DMS step and its days).
     _refreshSlaPreview: async function () {
       const formModel = this.getView().getModel("form");
@@ -697,13 +721,30 @@ sap.ui.define([
         const result = await this.request(
           `slaPreview(requestTypeCode='${typeCode}',requestVariantCode='${variantCode}',details=@d)?@d=${encodeURIComponent(literal)}`
         );
-        if (key !== this._slaPreviewKey) {
-          return;
+        if (key === this._slaPreviewKey) {
+          formModel.setProperty("/dueDate", result.dueDate || "");
         }
-        formModel.setProperty("/dueDate", result.dueDate || "");
       } catch (error) {
-        // The server sets the due date on submit regardless.
         this._slaPreviewKey = null;
+      }
+    },
+
+    // The request title is numbered by the server (MCC-26-0001); the next number is shown here and
+    // taken for real when the request is created.
+    _refreshTitlePreview: async function () {
+      const formModel = this.getView().getModel("form");
+      const typeCode = formModel.getProperty("/requestTypeCode");
+      formModel.setProperty("/title", "");
+      if (!typeCode) {
+        return;
+      }
+      try {
+        const result = await this.request(`previewRequestTitle(requestTypeCode='${typeCode}')`);
+        if (formModel.getProperty("/requestTypeCode") === typeCode) {
+          formModel.setProperty("/title", result.value || "");
+        }
+      } catch (error) {
+        // The server numbers the title on create regardless.
       }
     },
 
@@ -736,12 +777,20 @@ sap.ui.define([
 
     // ---- "Create SES Successor" pop-up (Purchase Order) ----------------------------------------
     // The SES is captured here and stored with the PO; the server creates the SES request when
-    // the PO workflow completes. The fields are the Single SES New request form; the Purchase
-    // Order Number is left out because it is filled from the PO's last approval.
+    // the PO workflow completes. The fields are the SES New request form for Single Line Items
+    // (Type of Transaction and its dates included); the Purchase Order Number is left out because it
+    // is filled from the PO's last approval.
     _sesDialogFields: function () {
       return FormDefinitions.getFields("SES_NEW", undefined, "SINGLE_LINE").filter(function (definition) {
         return definition.source !== "request" && definition.name !== "purchaseOrderNo";
       });
+    },
+
+    // A pop-up field whose visibleWhen rule does not match the draft (e.g. the dates of a non tax
+    // based transaction) is hidden and not required.
+    _sesFieldShown: function (definition, details) {
+      const rule = definition.visibleWhen;
+      return !rule || (details || {})[rule.field] === rule.equals;
     },
 
     _openSesDialog: async function () {
@@ -773,7 +822,19 @@ sap.ui.define([
         if (chosenFile) {
           control.setValue(chosenFile);
         }
-        simpleForm.addContent(new Label({ text: definition.label, required: definition.required }));
+        const label = new Label({ text: definition.label, required: definition.required });
+        const rule = definition.visibleWhen;
+        if (rule) {
+          const visible = function () {
+            return {
+              path: `form>/sesDraft/details/${rule.field}`,
+              formatter: function (value) { return value === rule.equals; }
+            };
+          };
+          label.bindProperty("visible", visible());
+          control.bindProperty("visible", visible());
+        }
+        simpleForm.addContent(label);
         simpleForm.addContent(control);
         this._sesControls.push({ definition, control });
       }.bind(this));
@@ -805,11 +866,24 @@ sap.ui.define([
       const draft = formModel.getProperty("/sesDraft");
       const missing = (this._sesControls || []).find(function (entry) {
         const value = draft.details[entry.definition.name];
-        return entry.definition.required && (value === undefined || value === null || value === "");
-      });
+        return entry.definition.required && this._sesFieldShown(entry.definition, draft.details)
+          && (value === undefined || value === null || value === "");
+      }.bind(this));
       if (missing) {
         MessageBox.warning(`${missing.definition.label} is required.`);
         missing.control.focus();
+        return;
+      }
+      // Hidden fields (the dates of a non tax based transaction) are not kept.
+      (this._sesControls || []).forEach(function (entry) {
+        if (!this._sesFieldShown(entry.definition, draft.details)) {
+          formModel.setProperty(`/sesDraft/details/${entry.definition.name}`, null);
+        }
+      }.bind(this));
+      // As on the SES request: tax based dates may be at most 30 days apart.
+      const sesDateProblem = FormDefinitions.sesDateProblem(draft.details);
+      if (sesDateProblem) {
+        MessageBox.warning(sesDateProblem);
         return;
       }
       if (!(draft.items || []).length) {
@@ -1917,33 +1991,7 @@ sap.ui.define([
         if (!rows.length) {
           return;
         }
-        const header = rows[0].map(function (cell) {
-          return String(cell).trim().toLowerCase();
-        });
-        const columnByHeader = {};
-        columns.forEach(function (col) {
-          columnByHeader[col.label.trim().toLowerCase()] = col.name;
-        });
-        const items = rows.slice(1)
-          .filter(function (row) {
-            return row.some(function (cell) { return cell !== ""; });
-          })
-          .map(function (row) {
-            const item = {};
-            columns.forEach(function (col) {
-              item[col.name] = col.type === "checkbox" ? false : "";
-            });
-            header.forEach(function (headerText, index) {
-              const key = columnByHeader[headerText];
-              if (!key) {
-                return;
-              }
-              const raw = row[index] !== undefined ? row[index] : "";
-              const col = columns.find(function (entry) { return entry.name === key; });
-              item[key] = col && col.type === "checkbox" ? this._asBoolean(raw) : raw;
-            }.bind(this));
-            return item;
-          }.bind(this));
+        const items = tableFile.toRows(rows, columns, []).rows;
         this.getView().getModel("form").setProperty(GRIDS[gridKey].path, this._renumberItems(items));
         this.showSuccess(`${items.length} row(s) imported`);
       }.bind(this);
@@ -1951,52 +1999,8 @@ sap.ui.define([
       event.getSource().clear();
     },
 
-    _asBoolean: function (value) {
-      return value === true || ["true", "yes", "x", "1"].indexOf(String(value).trim().toLowerCase()) >= 0;
-    },
-
     _parseCsv: function (text) {
-      const rows = [];
-      let row = [];
-      let field = "";
-      let inQuotes = false;
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        if (inQuotes) {
-          if (char === '"') {
-            if (text[i + 1] === '"') {
-              field += '"';
-              i++;
-            } else {
-              inQuotes = false;
-            }
-          } else {
-            field += char;
-          }
-        } else if (char === '"') {
-          inQuotes = true;
-        } else if (char === ",") {
-          row.push(field);
-          field = "";
-        } else if (char === "\n" || char === "\r") {
-          if (char === "\r" && text[i + 1] === "\n") {
-            i++;
-          }
-          row.push(field);
-          field = "";
-          if (row.length > 1 || row[0] !== "") {
-            rows.push(row);
-          }
-          row = [];
-        } else {
-          field += char;
-        }
-      }
-      if (field !== "" || row.length) {
-        row.push(field);
-        rows.push(row);
-      }
-      return rows;
+      return tableFile.parseCsv(text);
     },
 
     onFilesSelected: function (event) {
@@ -2014,7 +2018,7 @@ sap.ui.define([
       const form = this.getView().getModel("form").getData();
       if (form.requestTypeCode === "MATERIAL_RESERVATION") {
         if (!form.requestVariantCode || !form.processorTeamCode) {
-          MessageBox.warning("Process variant and processor team are required.");
+          MessageBox.warning("Process variant and requester team are required.");
           return;
         }
         return this._submitBulk(form);
@@ -2022,8 +2026,8 @@ sap.ui.define([
       if (this._isPoBulk()) {
         return this._submitPoBulk(form);
       }
-      if (!form.requestTypeCode || !form.requestVariantCode || !form.title.trim() || !form.processorTeamCode)  {
-        MessageBox.warning("Request type, process variant, title and processor team are required.");
+      if (!form.requestTypeCode || !form.requestVariantCode || !form.processorTeamCode)  {
+        MessageBox.warning("Request type, process variant and requester team are required.");
         return;
       }
       const paymentRunSelected = Boolean(form.details && form.details.paymentRun);
@@ -2051,6 +2055,13 @@ sap.ui.define([
       if (missing) {
         MessageBox.warning(`${missing.definition.label} is required.`);
         this._focusFieldControl(missing.control);
+        return;
+      }
+      // Service Entry Sheet, tax based: the two dates may be at most 30 days apart.
+      const sesDateProblem = form.requestTypeCode === "SERVICE_ENTRY_SHEET"
+        && FormDefinitions.sesDateProblem(form.details);
+      if (sesDateProblem) {
+        MessageBox.warning(sesDateProblem);
         return;
       }
       const badEmail = this._firstInvalidEmailField(this._fieldControls, form.details);
@@ -2142,9 +2153,7 @@ sap.ui.define([
               requestTypeCode: form.requestTypeCode,
               requestVariantCode: form.requestVariantCode,
               title: form.title.trim(),
-              description: form.description,
-              dueDate: form.dueDate || null,
-              predecessorId: form.predecessorId || null,
+              description: form.description,              predecessorId: form.predecessorId || null,
               processorTeamCode: form.processorTeamCode,
               details: JSON.stringify(Object.assign(
                 {},
@@ -2213,8 +2222,8 @@ sap.ui.define([
     // Bulk Request = Multiple for a Purchase Order: one PO request per row of the details table.
     // Line items join their row through Row #; the shared attachments and Remarks go to every PO.
     _submitPoBulk: async function (form) {
-      if (!form.requestVariantCode || !String(form.title || "").trim() || !form.processorTeamCode) {
-        MessageBox.warning("Request type, process variant, title and processor team are required.");
+      if (!form.requestVariantCode || !form.processorTeamCode) {
+        MessageBox.warning("Request type, process variant and requester team are required.");
         return;
       }
       const missingShared = (this._fieldControls || []).find(function (entry) {
@@ -2277,9 +2286,7 @@ sap.ui.define([
       const title = form.title.trim();
       const payloadRows = rows.map(function (row, index) {
         return Object.assign(blankToNull(row, ["itemNo"]), shared, {
-          title: `${title} - Row ${index + 1}`,
-          dueDate: form.dueDate || null,
-          items: items
+          title: `${title} - Row ${index + 1}`,          items: items
             .filter(function (item) { return Number(item.poRow) === index + 1; })
             .map(function (item, itemIndex) {
               return Object.assign(blankToNull(item, ["poRow"]), { itemNo: itemIndex + 1 });
