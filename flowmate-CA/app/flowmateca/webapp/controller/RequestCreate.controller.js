@@ -577,6 +577,13 @@ sap.ui.define([
           formModel.setProperty(path, definition.defaultValue);
         }
       });
+      // A Purchase Order's Procurement Category is its Process Variant.
+      const variantCategory = FormDefinitions.procurementCategoryForVariant(variantCode);
+      fields.forEach(function (definition) {
+        if (definition.fromVariant && variantCategory) {
+          formModel.setProperty(`/details/${definition.name}`, variantCategory);
+        }
+      });
 
       await this._loadFieldCatalogs(fields);
       // One form per section, stacked top to bottom. A single ColumnLayout form would place
@@ -778,11 +785,13 @@ sap.ui.define([
     // ---- "Create SES Successor" pop-up (Purchase Order) ----------------------------------------
     // The SES is captured here and stored with the PO; the server creates the SES request when
     // the PO workflow completes. The fields are the SES New request form for Single Line Items
-    // (Type of Transaction and its dates included); the Purchase Order Number is left out because it
-    // is filled from the PO's last approval.
+    // (Type of Transaction and its dates included). Left out: the Purchase Order Number, filled from
+    // the PO's last approval, and "Create Flowmate Service Entry Sheet Request", which belongs to an
+    // SES request of its own, not to a PO's successor.
     _sesDialogFields: function () {
+      const notInPopup = ["purchaseOrderNo", "flowmateSesRequest"];
       return FormDefinitions.getFields("SES_NEW", undefined, "SINGLE_LINE").filter(function (definition) {
-        return definition.source !== "request" && definition.name !== "purchaseOrderNo";
+        return definition.source !== "request" && notInPopup.indexOf(definition.name) < 0;
       });
     },
 
@@ -2070,6 +2079,15 @@ sap.ui.define([
         this._focusFieldControl(badEmail.entry.control);
         return;
       }
+      const emailLimit = (this._fieldControls || []).map(function (entry) {
+        return entry.definition.type === "emailList"
+          ? this._emailLimitProblem(entry.definition, form.details[entry.definition.name])
+          : null;
+      }.bind(this)).find(Boolean);
+      if (emailLimit) {
+        MessageBox.warning(emailLimit);
+        return;
+      }
 
       // Each visible row table needs at least one complete row. Which tables are shown is
       // already decided in _renderItemsTable, so the same flags drive the validation.
@@ -2204,7 +2222,7 @@ sap.ui.define([
         }
         let uploadResult = { failedCount: 0 };
         if (uploads.length) {
-          uploadResult = await this._uploadFiles(request.ID, uploads);
+          uploadResult = await this.uploadAttachments(request.ID, uploads);
         }
         if ((paymentRunSelected || serviceEntrySheetSelected) && uploadResult.failedCount) {
           throw new Error(`The CA request could not be completed because one or more ${paymentRunSelected ? "Payment Run" : "Service Entry Sheet"} attachments could not be uploaded.`);
@@ -2235,6 +2253,12 @@ sap.ui.define([
         missingShared.control.focus();
         return;
       }
+      // Every PO of the table takes its Procurement Category from the Process Variant (set before
+      // the checks, as the AR Number rule reads it per row).
+      const variantCategory = FormDefinitions.procurementCategoryForVariant(form.requestVariantCode);
+      (form.details.bulkRows || []).forEach(function (row) {
+        row.procurementCategory_code = variantCategory;
+      });
       const rows = form.details.bulkRows || [];
       const items = form.details.items || [];
       if (!rows.length) {
@@ -2252,6 +2276,15 @@ sap.ui.define([
       }.bind(this), null);
       if (badRowEmail) {
         MessageBox.warning(`Purchase Order Details - Row ${badRowEmail.index + 1}: "${badRowEmail.email}" is not a valid e-mail address.`);
+        return;
+      }
+      const emailColumn = GRIDS.bulkRows.columns.find(function (col) { return col.name === "approvedPoRecipientEmail"; });
+      const rowLimit = emailColumn && rows.reduce(function (found, row, index) {
+        const problem = found ? null : this._emailLimitProblem(emailColumn, row.approvedPoRecipientEmail);
+        return found || (problem ? `Purchase Order Details - Row ${index + 1}: ${problem}` : null);
+      }.bind(this), null);
+      if (rowLimit) {
+        MessageBox.warning(rowLimit);
         return;
       }
       // Line items are optional; the ones entered need their required cells and a valid Row #.
@@ -2318,7 +2351,7 @@ sap.ui.define([
         }.bind(this));
         if (uploads.length) {
           for (const requestId of JSON.parse(result.requestIds || "[]")) {
-            await this._uploadFiles(requestId, uploads);
+            await this.uploadAttachments(requestId, uploads);
           }
         }
         this.showSuccess(`${result.created} Purchase Order request(s) created: ${JSON.parse(result.referenceNumbers || "[]").join(", ")}`);
@@ -2328,63 +2361,6 @@ sap.ui.define([
       } finally {
         this.setBusy(false);
       }
-    },
-
-    _uploadFiles: async function (requestId, uploads) {
-      const results = await Promise.allSettled(uploads.map(async function (upload) {
-        const file = upload.file;
-        // Only elements that exist on FlowmateCAService.Attachments may be sent - CAP
-        // rejects unknown properties with 400. mimeType is derived server-side from the
-        // filename extension by @cap-js/attachments, so it must not be sent here.
-        const attachment = await this.request("Attachments", {
-          method: "POST",
-          body: {
-            request_ID: requestId,
-            filename: file.name,
-            category: upload.category || "SUPPORTING_DOCUMENT"
-          }
-        });
-        const token = await this._csrfToken();
-        const response = await fetch(this.resolveAppUri(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`), {
-          method: "PUT",
-          headers: {
-            "X-CSRF-Token": token,
-            "Content-Type": file.type || "application/octet-stream"
-          },
-          body: file
-        });
-        if (!response.ok) {
-          // The row was created before the content was accepted; drop it so the
-          // request does not keep an attachment that has no file behind it.
-          let reason = "";
-          try {
-            const body = await response.json();
-            reason = (body && body.error && body.error.message) || "";
-          } catch (parseError) {
-            reason = "";
-          }
-          try {
-            await this.request(`Attachments(${attachment.ID})`, { method: "DELETE" });
-          } catch (cleanupError) {
-            Log.warning("Could not remove the incomplete attachment " + attachment.ID, cleanupError);
-          }
-          throw new Error(reason || `Upload failed for ${file.name}`);
-        }
-      }.bind(this)));
-      const failed = results.filter(function (result) {
-        return result.status === "rejected";
-      });
-      if (failed.length) {
-        const reasons = failed.map(function (result) {
-          return result.reason && result.reason.message;
-        }).filter(Boolean);
-        MessageBox.warning(`${failed.length} attachment(s) could not be uploaded.
-
-${reasons.join("\n")}`);
-      } else {
-        this.showSuccess("Supporting documents uploaded");
-      }
-      return { failedCount: failed.length };
     },
 
     onCancel: function () {

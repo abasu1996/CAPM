@@ -650,8 +650,11 @@ sap.ui.define([], function () {
         entity: "ReservationBatches",
         visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
       }),
+      // Set by the process variant (the server enforces it too), so it is shown, not chosen.
       field("materialType", "Material Type", "select", {
         required: true,
+        readOnly: true,
+        defaultValue: "DIRECT",
         options: [
           { key: "WAREHOUSE", text: "Warehouse" },
           { key: "DIRECT", text: "Direct Delivery" }
@@ -689,8 +692,11 @@ sap.ui.define([], function () {
         entity: "ReservationBatches",
         visibleWhen: { field: "engineeringType", equals: "ENGINEERING" }
       }),
+      // Set by the process variant (the server enforces it too), so it is shown, not chosen.
       field("materialType", "Material Type", "select", {
         required: true,
+        readOnly: true,
+        defaultValue: "WAREHOUSE",
         options: [
           { key: "WAREHOUSE", text: "Warehouse" },
           { key: "DIRECT", text: "Direct Delivery" }
@@ -866,9 +872,12 @@ sap.ui.define([], function () {
       options: PSR_IDS,
       visibleWhen: { field: "procurementType", equals: "DECENTRALIZED" }
     }),
+    // Filled from the Process Variant (Opex / Capex FM / Capex IM) and read-only.
     field("procurementCategory_code", "Procurement Category", "combo", {
       required: true,
-      entity: "ProcurementCategories"
+      entity: "ProcurementCategories",
+      readOnly: true,
+      fromVariant: true
     }),
     field("division", "Division", "combo", { entity: "Divisions", key: "divisionCode", text: "divisionName" }),
     field("specialPersonArea", "Special Person Area", "select", {
@@ -949,9 +958,10 @@ sap.ui.define([], function () {
     field("termsOfDelivery", "Terms of Delivery", "textarea", { required: true }),
     field("warranty", "Warranty", "textarea", { required: true }),
     field("paymentMilestone", "Payment Milestone", "input"),
-    // One e-mail is mandatory; the + button adds more (stored "a@x.com; b@y.com").
+    // One e-mail is mandatory; the + button adds more, up to 4 (stored "a@x.com; b@y.com").
     field("approvedPoRecipientEmail", "Approved PO Recipient Email", "emailList", {
-      required: true
+      required: true,
+      maxEmails: 4
     }),
     field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file", {
       required: true
@@ -1461,7 +1471,8 @@ sap.ui.define([], function () {
       if (requestTypeCode !== "PURCHASE_ORDER") {
         return [];
       }
-      const excluded = ["sesRequired", "paymentRequestRequired", "remarks"];
+      // The Procurement Category comes from the Process Variant, the same for every row.
+      const excluded = ["sesRequired", "paymentRequestRequired", "remarks", "procurementCategory_code"];
       return [column("itemNo", "Row #", "readonly")].concat(poFields
         .filter(function (definition) {
           return definition.source !== "request" && definition.type !== "file"
@@ -1479,7 +1490,10 @@ sap.ui.define([], function () {
           // A table cell cannot hold the + rows of an e-mail list: one text cell, ";"-separated.
           if (definition.type === "emailList") {
             col.type = "input";
-            col.placeholder = "Separate multiple e-mails with ;";
+            col.maxEmails = definition.maxEmails;
+            col.placeholder = definition.maxEmails
+              ? `Up to ${definition.maxEmails} e-mails, separated by ;`
+              : "Separate multiple e-mails with ;";
           }
           return col;
         }));
@@ -1572,6 +1586,71 @@ sap.ui.define([], function () {
     },
     // Service Entry Sheet, tax based: the Invoice Date and Service Obtained Date may be at most 30
     // days apart (either order). Returns the warning, or null. Mirrors sesDateProblem in srv/flowmate-ca.js.
+    // A Purchase Order's Procurement Category is its Process Variant: PO_OPEX -> OPEX,
+    // PO_CAPEX_FM -> CAPEX_FM, PO_CAPEX_IM -> CAPEX_IM; null for anything else.
+    procurementCategoryForVariant: function (variantCode) {
+      return /^PO_/.test(variantCode || "") ? variantCode.slice(3) : null;
+    },
+    // Attachments tab: the group a file is listed under, from the category it was uploaded with.
+    // A form file field's category is its name in capitals (taxInvoiceAttachment ->
+    // TAX_INVOICE_ATTACHMENT; SES_... for a PO's SES Successor). Returns { order, label }: form
+    // fields in form order first, then Supporting Documents, then the other kinds of upload.
+    attachmentGroup: function (category, variantCode, categoryCode) {
+      const code = String(category || "SUPPORTING_DOCUMENT").toUpperCase();
+      const words = function (text) {
+        return text.toLowerCase().split("_").filter(Boolean).map(function (word) {
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(" ");
+      };
+      const fixed = {
+        SUPPORTING_DOCUMENT: "Supporting Documents",
+        PAYMENT_RUN: "Payment Run",
+        FLOWMATE_SES: "Flowmate Service Entry Sheet",
+        REMARKS_SCREENSHOT: "Remarks Screenshots"
+      };
+      const successor = code.indexOf("SES_") === 0 && variantCode !== "SES_NEW" && variantCode !== "SES_MOD";
+      const own = successor ? code.slice(4) : code;
+      if (fixed[own]) {
+        const order = own === "SUPPORTING_DOCUMENT" ? 1000 : 2000;
+        return successor
+          ? { order: order + 500, label: `SES Successor - ${fixed[own]}` }
+          : { order: order, label: fixed[own] };
+      }
+      // The form fields of the request (both line modes), or of the SES Successor form.
+      const fields = successor
+        ? this.getFields("SES_NEW", undefined, "SINGLE_LINE")
+        : this.getFields(variantCode, categoryCode, "SINGLE_LINE").concat(this.getFields(variantCode, categoryCode));
+      const index = fields.findIndex(function (field) {
+        return field.name.replace(/([A-Z])/g, "_$1").toUpperCase() === own;
+      });
+      const label = index >= 0 ? fields[index].label : words(own);
+      return successor
+        ? { order: 1500 + Math.max(index, 0), label: `SES Successor - ${label}` }
+        : { order: index >= 0 ? index : 2500, label: label };
+    },
+    // Attachments of form fields hold one current file each: within a field's group the newest is
+    // current and every earlier one gets replacedAt = when the next newer file was uploaded.
+    // attachments carry groupOrder / groupLabel (attachmentGroup); Supporting Documents and the
+    // other kinds of upload (order 1000 and above, SES Successor documents) are never replaced.
+    markReplacedAttachments: function (attachments) {
+      const byField = {};
+      (attachments || []).forEach(function (attachment) {
+        const order = attachment.groupOrder;
+        const fieldGroup = order < 1000 || (order >= 1500 && order < 2000);
+        if (fieldGroup) {
+          (byField[attachment.groupLabel] = byField[attachment.groupLabel] || []).push(attachment);
+        }
+      });
+      Object.keys(byField).forEach(function (label) {
+        const files = byField[label].slice().sort(function (left, right) {
+          return Date.parse(right.createdAt || 0) - Date.parse(left.createdAt || 0);
+        });
+        files.forEach(function (attachment, index) {
+          attachment.replacedAt = index ? files[index - 1].createdAt : null;
+        });
+      });
+      return attachments;
+    },
     sesDateProblem: function (details) {
       const source = details || {};
       // Single Line Items only: a Multiple Line SES (with Header Creation rows) has no Type of Transaction.

@@ -54,6 +54,17 @@ sap.ui.define([
     SERVICE_ENTRY_SHEET: "serviceEntrySheet"
   };
 
+  // Values approvers record on the request's details row, per request type: shown after the form
+  // fields on the request and on later tasks, and in the version tables.
+  const APPROVER_FIELDS = {
+    SERVICE_CODE: [["glAccount", "GL Account"], ["valuationClass_code", "Valuation Class"], ["serviceCode", "Service Code"]],
+    MATERIAL_CODE: [["glAccount", "GL Account"], ["valuationClass_code", "Valuation Class"], ["materialCode", "Material Code"]],
+    EQUIPMENT_CODE: [["equipmentCode", "Equipment Code"]],
+    PROJECT_CODE: [["projectCode", "Project Code"], ["functionLocation", "Function Location"], ["activityNumber", "Activity"]],
+    PURCHASE_ORDER: [["purchaseOrderNumber", "PO Number"]],
+    SERVICE_ENTRY_SHEET: [["sesNumber", "SES Number"]]
+  };
+
   const MAIN_SERVICE_URL = "odata/v4/flowmate-ca/";
   const MASTER_SERVICE_URL = "odata/v4/flowmate-ca-master/";
 
@@ -627,6 +638,66 @@ sap.ui.define([
       }.bind(this));
     },
 
+    // Uploads files to a request: uploads = [{ file, category }] (category defaults to
+    // SUPPORTING_DOCUMENT; a form field's file uses the field name in capitals). Used by the create
+    // page and by the requester's form after a send-back. Returns { failedCount }.
+    uploadAttachments: async function (requestId, uploads) {
+      const results = await Promise.allSettled(uploads.map(async function (upload) {
+        const file = upload.file;
+        // Only elements that exist on FlowmateCAService.Attachments may be sent - CAP
+        // rejects unknown properties with 400. mimeType is derived server-side from the
+        // filename extension by @cap-js/attachments, so it must not be sent here.
+        const attachment = await this.request("Attachments", {
+          method: "POST",
+          body: {
+            request_ID: requestId,
+            filename: file.name,
+            category: upload.category || "SUPPORTING_DOCUMENT"
+          }
+        });
+        const token = await this._csrfToken();
+        const response = await fetch(this.resolveAppUri(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`), {
+          method: "PUT",
+          headers: {
+            "X-CSRF-Token": token,
+            "Content-Type": file.type || "application/octet-stream"
+          },
+          body: file
+        });
+        if (!response.ok) {
+          // The row was created before the content was accepted; drop it so the
+          // request does not keep an attachment that has no file behind it.
+          let reason = "";
+          try {
+            const body = await response.json();
+            reason = (body && body.error && body.error.message) || "";
+          } catch (parseError) {
+            reason = "";
+          }
+          try {
+            await this.request(`Attachments(${attachment.ID})`, { method: "DELETE" });
+          } catch (cleanupError) {
+            Log.warning("Could not remove the incomplete attachment " + attachment.ID, cleanupError);
+          }
+          throw new Error(reason || `Upload failed for ${file.name}`);
+        }
+      }.bind(this)));
+      const failed = results.filter(function (result) {
+        return result.status === "rejected";
+      });
+      if (failed.length) {
+        const reasons = failed.map(function (result) {
+          return result.reason && result.reason.message;
+        }).filter(Boolean);
+        MessageBox.warning(`${failed.length} attachment(s) could not be uploaded.
+
+${reasons.join("\n")}`);
+      } else {
+        this.showSuccess("Attachments uploaded");
+      }
+      return { failedCount: failed.length };
+    },
+
     // Exports a read-only row table as shown: "#" (itemNo) plus one column per definition, with
     // select values as their text and flags as Yes/No.
     exportTableRows: function (fileName, columns, rows) {
@@ -672,6 +743,25 @@ sap.ui.define([
           const value = details[column.name];
           return value !== null && value !== undefined && value !== "";
         });
+    },
+
+    approverFieldsFor: function (typeCode) {
+      return APPROVER_FIELDS[typeCode] || [];
+    },
+
+    // Adds the approver-recorded values (GL Account, Valuation Class, codes, PO / SES Number) that
+    // are not already form fields, so the next approver and the request overview see them.
+    appendApproverFields: function (request, details, fields) {
+      const formNames = new Set(this.detailFieldDefinitions(request, details).map(function (definition) {
+        return definition.name;
+      }));
+      this.approverFieldsFor(request.requestType?.code).forEach(function (entry) {
+        const value = details[entry[0]];
+        if (!formNames.has(entry[0]) && value !== undefined && value !== null && value !== "") {
+          fields.push({ label: entry[1], value: String(value) });
+        }
+      });
+      return fields;
     },
 
     detailFieldDefinitions: function (request, details) {
@@ -1045,6 +1135,10 @@ sap.ui.define([
           placeholder: definition.placeholder || ""
         }).bindValue(path);
       }
+      // readOnly: the value is decided for the user (e.g. by the process variant) and only shown.
+      if (definition.readOnly && typeof control.setEditable === "function") {
+        control.setEditable(false);
+      }
       return control;
     },
 
@@ -1147,11 +1241,23 @@ sap.ui.define([
           factory: function (id, context) {
             const rowId = context.getProperty("id");
             const first = Number(context.getPath().split("/").pop()) === 0;
+            // maxEmails: the + button stops adding once the list is full.
             const button = first
               ? new Button({
                 icon: "sap-icon://add",
-                tooltip: i18n.getText("addEmail"),
+                tooltip: definition.maxEmails
+                  ? `${i18n.getText("addEmail")} (up to ${definition.maxEmails})`
+                  : i18n.getText("addEmail"),
+                enabled: {
+                  path: `form>${listPath}`,
+                  formatter: function (list) {
+                    return !definition.maxEmails || (list || []).length < definition.maxEmails;
+                  }
+                },
                 press: function () {
+                  if (definition.maxEmails && (formModel.getProperty(listPath) || []).length >= definition.maxEmails) {
+                    return;
+                  }
                   const newId = `e${nextId++}`;
                   formModel.setProperty(`${valuesPath}/${newId}`, "");
                   formModel.setProperty(listPath, (formModel.getProperty(listPath) || []).concat([{ id: newId }]));
@@ -1196,6 +1302,14 @@ sap.ui.define([
         .map(function (email) { return email.trim(); })
         .filter(Boolean)
         .find(function (email) { return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }) || null;
+    },
+
+    // "Label: up to N e-mail addresses." when an e-mail list holds more than its maxEmails, else null.
+    _emailLimitProblem: function (definition, value) {
+      const count = String(value || "").split(";").filter(function (email) { return email.trim(); }).length;
+      return definition.maxEmails && count > definition.maxEmails
+        ? `${definition.label}: up to ${definition.maxEmails} e-mail addresses (${count} entered).`
+        : null;
     },
 
     // The first visible e-mail list field holding a malformed address: { entry, email } or null.

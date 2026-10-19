@@ -9,19 +9,12 @@ sap.ui.define([
   "sap/m/Text",
   "sap/m/VBox",
   "sap/ui/core/CustomData",
+  "sap/ui/model/Sorter",
+  "sap/m/GroupHeaderListItem",
   "sap/base/Log"
-], function (BaseController, FormDefinitions, versionTable, ListModel, MessageBox, Column, ColumnListItem, Text, VBox, CustomData, Log) {
+], function (BaseController, FormDefinitions, versionTable, ListModel, MessageBox, Column, ColumnListItem, Text, VBox, CustomData, Sorter,
+  GroupHeaderListItem, Log) {
   "use strict";
-
-  // Fields approvers fill in on the request's details row, per request type (Versions rows).
-  const APPROVER_FIELDS = {
-    SERVICE_CODE: [["glAccount", "GL Account"], ["valuationClass_code", "Valuation Class"], ["serviceCode", "Service Code"]],
-    MATERIAL_CODE: [["glAccount", "GL Account"], ["materialCode", "Material Code"]],
-    EQUIPMENT_CODE: [["equipmentCode", "Equipment Code"]],
-    PROJECT_CODE: [["projectCode", "Project Code"], ["functionLocation", "Function Location"], ["activityNumber", "Activity"]],
-    PURCHASE_ORDER: [["purchaseOrderNumber", "PO Number"]],
-    SERVICE_ENTRY_SHEET: [["sesNumber", "SES Number"]]
-  };
 
   return BaseController.extend("flowmateca.controller.RequestDetail", {
     onInit: function () {
@@ -83,6 +76,7 @@ sap.ui.define([
         this._prepareDetail(request);
         this.getView().getModel("detail").setData(request);
         this._renderDetailItems(request.requestType?.code);
+        this._bindAttachments(request.attachments);
         await Promise.all([this._resolveIdLabels(request), this._renderVersions(request)]);
       } catch (error) {
         this.showError(error);
@@ -100,18 +94,34 @@ sap.ui.define([
         return left.stepNo - right.stepNo || new Date(left.createdAt) - new Date(right.createdAt);
       });
       // A step shows "SLA Breached" when any of its tasks breached (open past due, or closed late).
+      // A completed step names who closed it (its latest approved task).
       request.stepInstances.forEach(function (step) {
         step.slaBreached = request.tasks.some(function (task) {
           return task.stepNo === step.stepNo
             && this.isSlaBreached(task.slaDueAt, task.status?.code || task.status_code, task.slaBreached);
         }.bind(this));
+        const approved = request.tasks.filter(function (task) {
+          return task.stepNo === step.stepNo && (task.status?.code || task.status_code) === "APPROVED";
+        }).pop();
+        step.completedByName = approved ? (approved.completedByName || approved.assignedName || "") : "";
       }.bind(this));
       request.history = (request.history || []).sort(function (left, right) {
         return new Date(right.createdAt) - new Date(left.createdAt);
       });
       // Versions are shown once the request has been sent back.
       request.hasSendBack = request.history.some(function (entry) { return entry.action === "TASK_SENT_BACK"; });
-      request.attachments = request.attachments || [];
+      // Each file is listed under the field it was uploaded for, or under Supporting Documents.
+      request.attachments = (request.attachments || []).map(function (attachment) {
+        const group = FormDefinitions.attachmentGroup(attachment.category, request.requestVariant?.code,
+          (request[this.detailNavigationFor(request.requestType?.code)] || {}).materialCategory);
+        return Object.assign({}, attachment, { groupOrder: group.order, groupLabel: group.label });
+      }.bind(this));
+      // A field's earlier files stay listed, marked "Replaced on <date>".
+      FormDefinitions.markReplacedAttachments(request.attachments);
+      request.attachments.forEach(function (attachment) {
+        const info = this.formatUploadInfo(attachment.uploadedByName, attachment.createdBy, attachment.createdAt, attachment.category);
+        attachment.uploadInfo = attachment.replacedAt ? `Replaced on ${this.formatDateTime(attachment.replacedAt)} · ${info}` : info;
+      }.bind(this));
       request.comments = request.comments || [];
       request.successors = request.successors || [];
       request.tasks.count = request.tasks.length;
@@ -160,48 +170,7 @@ sap.ui.define([
 
     _detailFields: function (request) {
       const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
-      const fields = this.buildDetailFields(request, details);
-      if (request.requestType?.code === "SERVICE_CODE"
-        && details.glAccount) {
-        fields.push({ label: "GL Account", value: String(details.glAccount) });
-      }
-      if (request.requestType?.code === "SERVICE_CODE") {
-        [
-          ["valuationClass_code", "Valuation Class"],
-          ["serviceCode", "Service Code"]
-        ].forEach(function (entry) {
-          if (details[entry[0]]) {
-            fields.push({ label: entry[1], value: String(details[entry[0]]) });
-          }
-        });
-      }
-      // Material Code: the approvers' G/L Account and Material Code (Valuation Class is already a
-      // form field, so it shows the approver's value there).
-      if (request.requestType?.code === "MATERIAL_CODE") {
-        [
-          ["glAccount", "GL Account"],
-          ["materialCode", "Material Code"]
-        ].forEach(function (entry) {
-          if (details[entry[0]]) {
-            fields.push({ label: entry[1], value: String(details[entry[0]]) });
-          }
-        });
-      }
-      if (request.requestType?.code === "EQUIPMENT_CODE" && details.equipmentCode) {
-        fields.push({ label: "Equipment Code", value: String(details.equipmentCode) });
-      }
-      if (request.requestType?.code === "PROJECT_CODE") {
-        [
-          ["projectCode", "Project Code"],
-          ["functionLocation", "Function Location"],
-          ["activityNumber", "Activity"]
-        ].forEach(function (entry) {
-          if (details[entry[0]]) {
-            fields.push({ label: entry[1], value: String(details[entry[0]]) });
-          }
-        });
-      }
-      return fields;
+      return this.appendApproverFields(request, details, this.buildDetailFields(request, details));
     },
 
     // Combos keyed by a UUID (approver, LOA approver, vendor) store the ID; swap it for the
@@ -304,7 +273,7 @@ sap.ui.define([
         await add(`field:${definition.name}`, definition.label, definition, snapshot);
       }
       // Values approvers record on the request itself (codes, PO / SES Number).
-      for (const [name, label] of APPROVER_FIELDS[typeCode] || []) {
+      for (const [name, label] of this.approverFieldsFor(typeCode)) {
         if (!definitions.some(function (definition) { return definition.name === name; })) {
           await add(`field:${name}`, label, { name: name }, snapshot);
         }
@@ -367,6 +336,34 @@ sap.ui.define([
         }).addStyleClass("caVersionCell"));
       }
       table.bindItems({ path: "versions>/rows", template: new ColumnListItem({ cells: cells }) });
+    },
+
+    // Attachments tab: one group per field ("Tax Invoice Attachment (2)"), in form order, then
+    // Supporting Documents; newest file first within a group.
+    _bindAttachments: function (attachments) {
+      const list = this.byId("attachmentsList");
+      if (!this._attachmentTemplate) {
+        this._attachmentTemplate = list.getBindingInfo("items").template;
+      }
+      const counts = {};
+      attachments.forEach(function (attachment) {
+        counts[attachment.groupLabel] = (counts[attachment.groupLabel] || 0) + 1;
+      });
+      list.bindItems({
+        path: "detail>/attachments",
+        template: this._attachmentTemplate,
+        templateShareable: true,
+        sorter: [
+          new Sorter("groupOrder", false, function (context) {
+            const label = context.getProperty("groupLabel");
+            return { key: label, text: `${label} (${counts[label] || 0})` };
+          }),
+          new Sorter("createdAt", true)
+        ],
+        groupHeaderFactory: function (group) {
+          return new GroupHeaderListItem({ title: group.text });
+        }
+      });
     },
 
     _renderDetailItems: function (typeCode) {

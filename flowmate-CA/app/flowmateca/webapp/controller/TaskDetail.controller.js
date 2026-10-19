@@ -57,7 +57,8 @@ sap.ui.define([
 
         const request = task.request || {};
         const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
-        task.detailFields = this.buildDetailFields(request, details);
+        // Values earlier approvers recorded (GL Account, Valuation Class, ...) follow the form fields.
+        task.detailFields = this.appendApproverFields(request, details, this.buildDetailFields(request, details));
         task.detailItems = details.items || [];
         task.hasDetailItems = task.detailItems.length > 0;
         task.hasDetailFields = task.detailFields.length > 0;
@@ -369,8 +370,10 @@ sap.ui.define([
       // form. Its items table still shows for variants that capture rows in both modes, which
       // is the same rule the create page applies.
       const singleLine = this.isSingleLineDetail(request, details);
+      // File fields stay: choosing a new file replaces the one attached before (see _saveRequesterDetails).
       this._headerFields = this.detailFieldDefinitions(request, details)
-        .filter(function (field) { return field.type !== "file" && field.source !== "request"; });
+        .filter(function (field) { return field.source !== "request"; });
+      this._dynamicFileUploads = {};
       this._itemColumns = (!singleLine || FormDefinitions.hasHeaderTable(variantCode))
         ? FormDefinitions.getItemColumns(typeCode, variantCode, categoryCode)
           .filter(function (col) { return col.name !== "itemNo"; })
@@ -409,6 +412,12 @@ sap.ui.define([
       this._headerFields.forEach(function (definition) {
         const label = new Label({ text: definition.label, required: !!this._isFieldRequired(definition) });
         const control = this._createFieldControl(definition);
+        // A file field shows the file attached now; choosing another one replaces it.
+        const currentFile = definition.type === "file"
+          && this.getView().getModel("form").getProperty(`/details/${definition.name}`);
+        if (currentFile) {
+          control.setValue(currentFile);
+        }
         form.addContent(label);
         form.addContent(control);
         this._fieldControls.push({ definition: definition, control: control, label: label });
@@ -560,13 +569,25 @@ sap.ui.define([
         }
       }
 
+      const requestId = this.getView().getModel("task").getProperty("/request_ID");
       await this.request("saveRequesterDetails", {
         method: "POST",
         body: {
-          requestId: this.getView().getModel("task").getProperty("/request_ID"),
+          requestId: requestId,
           details: JSON.stringify(details)
         }
       });
+      // Files chosen again replace the field's attachment; the earlier one stays, marked replaced.
+      const uploads = Object.keys(this._dynamicFileUploads || {}).map(function (name) {
+        return { file: this._dynamicFileUploads[name], category: name.replace(/([A-Z])/g, "_$1").toUpperCase() };
+      }.bind(this));
+      if (uploads.length) {
+        const result = await this.uploadAttachments(requestId, uploads);
+        if (result.failedCount) {
+          return false;
+        }
+        this._dynamicFileUploads = {};
+      }
       return true;
     },
 

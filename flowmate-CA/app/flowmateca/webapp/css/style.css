@@ -107,12 +107,67 @@
   box-shadow: inset 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
 }
 
+/* Dashboard: the main call to action, sized and rounded like the rest of the page */
+.caHeroAction.sapMBtn {
+  height: auto;
+  padding: 0;
+}
+
 .caHeroAction .sapMBtnInner {
-  min-height: 2.5rem;
-  padding-right: 1rem;
-  padding-left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 1.25rem 0 1rem;
+  position: relative;
+  overflow: hidden;
   border-radius: 0.5rem;
   box-shadow: 0 0.25rem 0.7rem rgba(10, 110, 209, 0.2);
+}
+
+/* a soft light sweeps across the button every few seconds */
+.caHeroAction .sapMBtnInner::after {
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 45%;
+  height: 100%;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 100%);
+  animation: caHeroSheen 3.6s ease-in-out infinite;
+}
+
+.caHeroAction .sapMBtnIcon {
+  position: static;
+  width: auto;
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: transform 200ms ease;
+}
+
+/* the plus icon nudges on hover */
+.caHeroAction:hover .sapMBtnIcon {
+  transform: scale(1.15) rotate(-8deg);
+}
+
+@keyframes caHeroSheen {
+  0%, 55% { left: -60%; }
+  100% { left: 130%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caHeroAction .sapMBtnInner::after { animation: none; display: none; }
+  .caHeroAction .sapMBtnIcon { transition: none; }
+}
+
+.caHeroAction .sapMBtnContent {
+  padding: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .caTileGrid {
@@ -364,10 +419,11 @@
   padding: 0 0.75rem 1rem;
 }
 
+/* the line from the previous step into this one, through the middle of the circles */
 .caStepNode::before {
   position: absolute;
   z-index: 0;
-  top: 1.55rem;
+  top: 1.375rem;
   right: 50%;
   width: 100%;
   height: 0.3rem;
@@ -381,20 +437,34 @@
 
 .caMilestone.sapMBtn {
   z-index: 1;
-  width: 3.2rem;
-  height: 3.2rem;
-  margin-bottom: 0.5rem;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.6rem;
+  padding: 0;
 }
 
+/* the icon sits in the exact centre of the circle */
 .caMilestone .sapMBtnInner {
-  min-width: 3.2rem;
-  height: 3.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 3rem;
+  min-width: 3rem;
+  height: 3rem;
+  padding: 0;
   border-radius: 50%;
 }
 
 .caMilestone .sapMBtnIcon {
-  line-height: 3rem;
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
   font-size: 1.2rem;
+  line-height: 1;
+  color: inherit;
 }
 
 .caMilestone .sapMBtnInner.sapMBtnAccept {
@@ -420,6 +490,17 @@
   background: #d9ebff;
   color: #075aab;
   box-shadow: 0 0 0 0.25rem rgba(10, 110, 209, 0.14);
+}
+
+/* the theme colours button icons itself; the icon takes its circle's colour */
+.caMilestone .sapMBtnInner.sapMBtnAccept .sapMBtnIcon,
+.caMilestone .sapMBtnInner.sapMBtnReject .sapMBtnIcon,
+.caMilestone .sapMBtnInner.sapMBtnAttention .sapMBtnIcon {
+  color: inherit !important;
+}
+
+.caStepNode .caStepCompleted.sapMText {
+  color: var(--ca-text);
 }
 
 .caStepNode .sapMTitle {
@@ -741,7 +822,13 @@
   }
 
   .caHeroAction {
-    margin-top: 0.5rem;
+    width: 100%;
+    margin-top: 0.75rem;
+  }
+
+  .caHeroAction .sapMBtnInner {
+    justify-content: center;
+    width: 100%;
   }
 
   .caTile.sapMGT {
@@ -929,20 +1016,20 @@
   font-weight: 600;
 }
 
-/* Tile lists: the card sits on the scroll container, so every column keeps its full width and a
-   table wider than the screen scrolls sideways inside the card instead of squeezing its columns. */
+/* Tile lists: the table sits in a card that fits the page width. The page scrolls (the column
+   headers stay in view), so the card ends at the last row; long values end in "…" with the full
+   value as the tooltip. */
 .caWorklistScroll.sapMScrollCont {
   box-sizing: border-box;
   width: calc(100% - 3rem) !important;
   max-width: 92rem;
-  margin: 1.25rem auto 2rem;
+  margin: 1.25rem auto 1.5rem;
   border: 1px solid var(--ca-border);
   border-radius: 0.65rem;
   background: #fff;
   box-shadow: var(--ca-shadow);
-  max-height: calc(100vh - 11rem);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  /* sticky column headers need every box around the table to let it overflow */
+  overflow: visible !important;
 }
 
 .sapUiResponsiveContentPadding > .caWorklistScroll.sapMScrollCont {
@@ -951,32 +1038,33 @@
 }
 
 .caWorklistScroll .caWorklistTable.sapMList {
-  width: auto !important;
+  width: 100% !important;
   max-width: none;
   margin: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 0.65rem;
   box-shadow: none;
   animation: none;
   overflow: visible;
 }
 
 .caWorklistScroll .sapMListTbl {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  table-layout: fixed;
 }
 
-.caWorklistScroll .sapMListTblHeaderCell,
-.caWorklistScroll .sapMListTblCell .sapMText:not(.caTitleCell),
+.caWorklistScroll .sapMListTblHeaderCell .sapMText,
+.caWorklistScroll .sapMListTblCell .sapMText,
+.caWorklistScroll .sapMListTblCell .sapMLnkText,
+.caWorklistScroll .sapMListTblCell .sapMObjectIdentifierTitle,
 .caWorklistScroll .sapMListTblCell .sapMObjStatusText {
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .caWorklistScroll .caTitleCell {
   display: block;
-  min-width: 12rem;
-  max-width: 22rem;
-  white-space: normal;
 }
 
 /* UI5's off-screen screen-reader helper sits past the table's edge; keep it from adding scroll. */

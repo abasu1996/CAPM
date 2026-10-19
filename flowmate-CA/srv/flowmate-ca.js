@@ -74,6 +74,16 @@ function withoutMultipleLineTaxFields(details) {
   return cleared;
 }
 
+// ---- Purchase Order: the Procurement Category is the Process Variant ----
+// PO_OPEX -> OPEX, PO_CAPEX_FM -> CAPEX_FM, PO_CAPEX_IM -> CAPEX_IM (mirrors
+// FormDefinitions.procurementCategoryForVariant), so a PO's variant and category never disagree.
+const procurementCategoryForVariant = (variantCode) => (/^PO_/.test(variantCode || "") ? variantCode.slice(3) : null);
+
+function withVariantProcurementCategory(details, variantCode) {
+  const category = procurementCategoryForVariant(variantCode);
+  return category ? { ...details, procurementCategory_code: category } : details;
+}
+
 // ---- Recipients of the Completed e-mail ----
 // Who gets the "Completed" e-mail of a request: the requester, plus the addresses named on the
 // request (Outline Contract: User to be notified; Purchase Order: Approved PO Recipient Email;
@@ -1080,6 +1090,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
     if (integration) assertTechnicalDetails(req, details);
+    if (requestType.code === "PURCHASE_ORDER") {
+      details = withVariantProcurementCategory(details, requestVariant?.code);
+    }
     if (requestType.code === "SERVICE_ENTRY_SHEET") {
       details = withoutMultipleLineTaxFields(details);
     }
@@ -1094,7 +1107,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
     await this._assertNoDuplicateMaterialDescription(req, requestType.code, details);
+    this._assertEmailLimits(req, requestType.code, details);
     await this._applyProjectCode(req, requestType.code, requestVariant?.code, details);
+    this._applyReservationMaterialType(requestType.code, requestVariant?.code, details);
 
     // One serial per request type and year names both: title POC-26-0001, Request ID CA-POC-26-000001.
     const serial = await this._nextRequestSerial(tx, requestType);
@@ -1837,6 +1852,23 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // What the Project Code S/4 Data Validation approver enters. Mirrored in TaskDetail.controller.js.
   // The step that creates the reservation in S/4 (named "S/4 Material Reservation" in the workflow).
   // Mirrored in TaskDetail.controller.js.
+  // Material Reservation: the Material Type is decided by the process variant, whatever was sent.
+  _applyReservationMaterialType(requestTypeCode, variantCode, details) {
+    const materialType = requestTypeCode === "MATERIAL_RESERVATION"
+      && { RES_DIRECT: "DIRECT", RES_WAREHOUSE: "WAREHOUSE" }[variantCode];
+    if (materialType && details) {
+      details.materialType = materialType;
+    }
+  }
+
+  // Warehouse Material: the Vendor Allocation step goes to the Vendor Allocation Owner picked on
+  // the request. Matched by name, like the S/4 step.
+  _isVendorAllocationStep(config) {
+    return config?.requestType_code === "MATERIAL_RESERVATION"
+      && config?.requestVariant_code === "RES_WAREHOUSE"
+      && /vendor\s+allocation/i.test(config?.stepName || "");
+  }
+
   _isReservationS4Step(stepName) {
     return /s\s*\/?\s*4\s+(data\s+validation|material\s+reservation)/i.test(stepName || "");
   }
@@ -2086,10 +2118,14 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (request.requestType_code === "SERVICE_ENTRY_SHEET") {
       details = withoutMultipleLineTaxFields(details);
     }
+    if (request.requestType_code === "PURCHASE_ORDER") {
+      details = withVariantProcurementCategory(details, request.requestVariant_code);
+    }
     if (request.requestType_code === "SERVICE_ENTRY_SHEET" && sesDateProblem(details)) {
       return req.reject(400, sesDateProblem(details));
     }
     await this._assertNoDuplicateMaterialDescription(req, request.requestType_code, details, request.ID);
+    this._assertEmailLimits(req, request.requestType_code, details);
     if (request.requestType_code === "PROJECT_CODE") {
       const stored = await SELECT.one.from(this.db.ProjectCodeDetails).columns("projectId").where({ request_ID: request.ID });
       await this._applyProjectCode(req, request.requestType_code, request.requestVariant_code, details, stored?.projectId);
@@ -2388,6 +2424,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (config?.roleCode === "APPROVER") {
       const approverId = details?.approver_ID || details?.loaApprover_ID;
       where = approverId ? { ID: approverId } : null;
+    } else if (this._isVendorAllocationStep(config)) {
+      where = details?.allocationOwner_ID ? { ID: details.allocationOwner_ID } : null;
     } else if (config?.roleCode === "SCM") {
       const email = details?.scmAssignUser || details?.scmSpocUserId || details?.items?.[0]?.scmSpocUserId;
       where = email ? { email } : null;
@@ -2876,24 +2914,19 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   // ---- Comments and attachments ----
-  // Only someone the request is waiting on may add to it: the person holding an open task, the
-  // members of the team an unclaimed open task sits with, or an administrator. The requester may
-  // also attach files while creating the request (the create page uploads right after creating).
+  // Only the person holding an open task of the request (or their active delegate) may add
+  // attachments and comments to it. An unclaimed team task lets nobody add anything until someone
+  // takes it; administrators have no override. The requester may also attach files while creating
+  // the request (the create page uploads right after creating, see _beforeCreateAttachment).
   async _canContribute(req, request, user) {
-    if (req.user.is("CAAdmin")) {
-      return true;
-    }
-    const openTasks = await SELECT.from(this.db.CATasks)
-      .columns("assignedUser_ID", "assignedTeam_ID")
-      .where({ request_ID: request.ID, status_code: TASK_STATUS.OPEN });
-    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
-    if (openTasks.some((task) => task.assignedUser_ID && effectiveUserIds.includes(task.assignedUser_ID))) {
-      return true;
-    }
-    const teamIds = openTasks.filter((task) => !task.assignedUser_ID && task.assignedTeam_ID)
-      .map((task) => task.assignedTeam_ID);
-    if (teamIds.length && (await this._teamIdsOf(user)).some((teamId) => teamIds.includes(teamId))) {
-      return true;
+    const openTasks = (await SELECT.from(this.db.CATasks)
+      .columns("assignedUser_ID", "isSuperseded")
+      .where({ request_ID: request.ID, status_code: TASK_STATUS.OPEN }))
+      .filter((task) => !task.isSuperseded && task.assignedUser_ID);
+    for (const task of openTasks) {
+      if (await this._canActForUser(req, user.ID, task.assignedUser_ID)) {
+        return true;
+      }
     }
     return false;
   }
@@ -3193,7 +3226,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // An APPROVER or SCM step goes to the user named on the form; every other step stays in
   // its processor team's queue.
   async _resolveStepAssignment(tx, requestId, config) {
-    if (!["APPROVER", "SCM"].includes(config?.roleCode)) {
+    if (!["APPROVER", "SCM"].includes(config?.roleCode) && !this._isVendorAllocationStep(config)) {
       return {};
     }
     const request = await tx.run(SELECT.one.from(this.db.CARequests).columns("requestType_code").where({ ID: requestId }));
@@ -3206,6 +3239,17 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         .orderBy("itemNo"));
     }
     return this._approverAssignment(config, details);
+  }
+
+  // E-mail list fields ("a@x.com; b@y.com") that take a limited number of addresses.
+  _assertEmailLimits(req, requestTypeCode, details) {
+    const limits = { PURCHASE_ORDER: [["approvedPoRecipientEmail", "Approved PO Recipient Email", 4]] }[requestTypeCode] || [];
+    for (const [name, label, max] of limits) {
+      const count = String(details?.[name] || "").split(";").filter((email) => email.trim()).length;
+      if (count > max) {
+        return req.reject(400, `${label}: up to ${max} e-mail addresses (${count} entered)`);
+      }
+    }
   }
 
   // excludeRequestId lets a requester re-submit their own request without the
@@ -3510,6 +3554,8 @@ module.exports.REQUEST_OUTCOME = REQUEST_OUTCOME;
 module.exports.formatTaskReference = formatTaskReference;
 // Rules and texts used by the service, exported for the unit tests.
 Object.assign(module.exports, {
+  procurementCategoryForVariant,
+  withVariantProcurementCategory,
   BUDGET_CHECK,
   budgetDetailsEntity,
   isBudgetCheckStep,

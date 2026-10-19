@@ -39,10 +39,10 @@
     </subHeader>
     <content>
       <!-- Columns keep their full width; the card scrolls sideways and down, headers stay in view. -->
-      <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
+      <ScrollContainer horizontal="false" vertical="false" width="100%" class="caWorklistScroll">
         <Table id="allRequestsTable" mode="None" growing="true" growingThreshold="50"
           growingScrollToLoad="false" noDataText="{i18n>noMatchingRequests}"
-          updateFinished=".onUpdateFinished" itemPress=".onItemPress" fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable"
+          updateFinished=".onUpdateFinished" itemPress=".onItemPress" sticky="ColumnHeaders" class="caWorklistTable"
           items="{
             path: '/Requests',
             parameters: {$count: true, $expand: 'requestType,status'},
@@ -50,10 +50,10 @@
             events: {dataReceived: '.onDataReceived'}
           }">
           <columns>
-            <Column width="16rem"><Text text="Request ID"/></Column>
+            <Column width="13rem"><Text text="Request ID"/></Column>
             <Column><Text text="{i18n>requestType}"/></Column>
-            <Column><Text text="Requester"/></Column>
-            <Column width="16rem"><Text text="{i18n>title}"/></Column>
+            <Column width="9rem"><Text text="Requester"/></Column>
+            <Column><Text text="{i18n>title}"/></Column>
             <Column width="9rem"><Text text="{i18n>status}"/></Column>
             <Column><Text text="{i18n>processorTeam}"/></Column>
             <Column width="9rem"><Text text="{i18n>createdOn}"/></Column>
@@ -64,7 +64,7 @@
                 <ObjectIdentifier title="{referenceNumber}"/>
                 <Text text="{requestType/name}"/>
                 <Text text="{requesterName}"/>
-                <Text text="{title}" maxLines="2" class="caTitleCell"/>
+                <Text text="{title}" tooltip="{title}" class="caTitleCell"/>
                 <ObjectStatus text="{parts: ['status/name', 'status_code'], formatter: '.statusName'}"
                   state="{path: 'status_code', formatter: '.statusState'}"/>
                 <Text text="{ownerTeamName}"/>

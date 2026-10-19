@@ -58,7 +58,7 @@
     </subHeader>
     <content>
       <!-- Columns keep their full width; the card scrolls sideways and down, headers stay in view. -->
-      <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
+      <ScrollContainer horizontal="false" vertical="false" width="100%" class="caWorklistScroll">
         <Table
           id="tasksTable"
           items="{tasks>/items}"
@@ -67,19 +67,19 @@
           popinLayout="GridSmall"
           noDataText="No tasks are available in this queue"
           itemPress=".onItemPress"
-          fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable">
+          sticky="ColumnHeaders" class="caWorklistTable">
           <columns>
             <Column width="12.5rem"><Text text="Task ID"/></Column>
             <Column width="11.5rem"><Text text="Request ID"/></Column>
             <Column><Text text="Task"/></Column>
-            <Column width="16rem"><Text text="Title"/></Column>
+            <Column><Text text="Title"/></Column>
             <Column width="3rem" hAlign="Center"><Text text="Step"/></Column>
-            <Column width="9rem"><Text text="{i18n>status}"/></Column>
-            <Column width="8.5rem"><Text text="{i18n>slaDue}"/></Column>
+            <Column width="12rem"><Text text="{i18n>status}"/></Column>
+            <Column width="8rem"><Text text="{i18n>slaDue}"/></Column>
             <!-- When the task reached me (My Tasks) or my team's queue (Team Queue). -->
-            <Column width="8.5rem"><Text text="{= ${taskView>/isTeamMode} ? 'Received On' : 'Assigned On' }"/></Column>
+            <Column width="8rem"><Text text="{= ${taskView>/isTeamMode} ? 'Received On' : 'Assigned On' }"/></Column>
             <!-- My Tasks only: when the task was approved (Team Queue holds open tasks). -->
-            <Column width="8.5rem" visible="{= !${taskView>/isTeamMode} }"><Text text="Approved On"/></Column>
+            <Column width="8rem" visible="{= !${taskView>/isTeamMode} }"><Text text="Approved On"/></Column>
             <Column width="9rem" visible="{taskView>/isTeamMode}"><Text text="Action"/></Column>
           </columns>
           <items>
@@ -90,7 +90,7 @@
                 <Text text="{tasks>referenceNumber}" tooltip="{tasks>assignedTeamName}" wrapping="false"/>
                 <Link text="{tasks>request/referenceNumber}" wrapping="false" press=".onRequestLinkPress"/>
                 <Text text="{tasks>taskName}" tooltip="{tasks>description}" wrapping="false"/>
-                <Text text="{tasks>request/title}" tooltip="{= ${tasks>request/requestType/name} + ' · ' + ${tasks>request/requesterName} }" maxLines="2" class="caTitleCell"/>
+                <Text text="{tasks>request/title}" tooltip="{= ${tasks>request/requestType/name} + ' · ' + ${tasks>request/requesterName} }" class="caTitleCell"/>
                 <Text text="{tasks>stepNo}" wrapping="false"/>
                 <HBox alignItems="Center" wrap="NoWrap">
                   <ObjectStatus text="{parts: ['tasks>status/name', 'tasks>status/code'], formatter: '.statusName'}" state="{path: 'tasks>status/code', formatter: '.statusState'}"/>

@@ -51,8 +51,8 @@
       </OverflowToolbar>
     </subHeader>
     <content>
-      <!-- Columns keep their full width; the card scrolls sideways and down, headers stay in view. -->
-      <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
+      <!-- Fits the page width; the page scrolls and the column headers stay in view. -->
+      <ScrollContainer horizontal="false" vertical="false" width="100%" class="caWorklistScroll">
         <Table
           id="requestsTable"
           items="{list>/items}"
@@ -61,16 +61,17 @@
           growingScrollToLoad="true"
           noDataText="No requests match the selected filters"
           itemPress=".onItemPress"
-          fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable">
+          sticky="ColumnHeaders" class="caWorklistTable">
           <columns>
-            <Column width="16rem"><Text text="Request ID"/></Column>
-            <Column><Text text="{i18n>requestType}"/></Column>
+            <Column width="13rem"><Text text="Request ID"/></Column>
+            <Column width="11rem"><Text text="{i18n>requestType}"/></Column>
             <!-- Hidden on the Sent Back / Terminated / Completed tile lists (opened with a status). -->
-            <Column visible="{list>/showRequester}"><Text text="Requester"/></Column>
-            <Column><Text text="{i18n>requestVariant}"/></Column>
-            <Column width="16rem"><Text text="{i18n>title}"/></Column>
+            <Column width="9rem" visible="{list>/showRequester}"><Text text="Requester"/></Column>
+            <Column width="9rem"><Text text="{i18n>requestVariant}"/></Column>
+            <Column><Text text="{i18n>title}"/></Column>
             <Column width="9rem"><Text text="{i18n>status}"/></Column>
-            <Column width="9rem"><Text text="{i18n>dueDate}"/></Column>
+            <Column width="8rem"><Text text="{i18n>dueDate}"/></Column>
+            <Column width="8.5rem"><Text text="Created"/></Column>
           </columns>
           <items>
             <ColumnListItem
@@ -81,7 +82,7 @@
                 <Text text="{list>requestType/name}"/>
                 <Text text="{list>requesterName}"/>
                 <Text text="{list>requestVariant/name}"/>
-                <Text text="{list>title}" maxLines="2" class="caTitleCell"/>
+                <Text text="{list>title}" tooltip="{list>title}" class="caTitleCell"/>
                 <VBox>
                   <ObjectStatus text="{parts: ['list>status/name', 'list>status/code'], formatter: '.statusName'}" state="{path: 'list>status/code', formatter: '.statusState'}"/>
                   <ObjectStatus
@@ -93,6 +94,7 @@
                     visible="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.isRequestOverdue'}"/>
                 </VBox>
                 <Text text="{path: 'list>dueDate', formatter: '.formatDate'}"/>
+                <Text text="{path: 'list>createdAt', formatter: '.formatDateTimeShort'}" tooltip="{path: 'list>createdAt', formatter: '.formatDateTime'}" wrapping="false"/>
               </cells>
             </ColumnListItem>
           </items>

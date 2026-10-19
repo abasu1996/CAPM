@@ -100,6 +100,16 @@
                   textAlign="Center"
                   visible="{= ${detail>status} === 'OPEN' &amp;&amp; !!${detail>slaDueAt} }"/>
                 <Text
+                  text="Completed {path: 'detail>completedAt', formatter: '.formatDateTime'}"
+                  class="caStepCompleted"
+                  textAlign="Center"
+                  visible="{= ${detail>status} === 'COMPLETED' &amp;&amp; !!${detail>completedAt} }"/>
+                <Text
+                  text="by {detail>completedByName}"
+                  class="caSlaRemaining"
+                  textAlign="Center"
+                  visible="{= ${detail>status} === 'COMPLETED' &amp;&amp; !!${detail>completedByName} }"/>
+                <Text
                   text="{path: 'detail>slaDays', formatter: '.formatSlaLength'}"
                   class="caSlaRemaining"
                   textAlign="Center"
@@ -172,7 +182,7 @@
                 <!-- One line per task: a send-back adds a new task (tagged Sent Back) under the one it replaces. -->
                 <Table id="requestTasksTable" items="{detail>/tasks}" itemPress=".onTaskPress" class="caWorklistTable caCompactTasks sapUiSizeCompact">
                   <columns>
-                    <Column width="12.5rem"><Text text="Task ID"/></Column>
+                    <Column width="14.5rem"><Text text="Task ID"/></Column>
                     <Column><Text text="Task"/></Column>
                     <Column width="3rem" hAlign="Center"><Text text="Step"/></Column>
                     <Column width="9.5rem"><Text text="Assigned To"/></Column>
@@ -188,7 +198,7 @@
                         <Text text="{detail>stepNo}" wrapping="false"/>
                         <Text text="{= ${detail>assignedName} || ${detail>assignedTeamName} }" wrapping="false"/>
                         <HBox alignItems="Center" wrap="NoWrap">
-                          <ObjectStatus text="{parts: ['detail>status/name', 'detail>status/code'], formatter: '.statusName'}" state="{path: 'detail>status/code', formatter: '.statusState'}"/>
+                          <ObjectStatus text="{parts: ['detail>status/name', 'detail>status/code'], formatter: '.statusName'}" state="{path: 'detail>status/code', formatter: '.statusState'}" inverted="true"/>
                           <ObjectStatus
                             text="Sent Back"
                             state="Warning"
@@ -213,7 +223,7 @@
             <IconTabFilter key="attachments" text="Attachments" icon="sap-icon://attachment" count="{detail>/attachments/count}">
               <VBox class="sapUiResponsiveContentPadding">
                 <Toolbar class="caSectionToolbar">
-                  <Title text="Supporting Documents" level="H3"/>
+                  <Title text="Attachments" level="H3"/>
                   <ToolbarSpacer/>
                   <unified:FileUploader
                     id="detailAttachmentUploader"
@@ -221,15 +231,16 @@
                     uploadOnChange="false"
                     change=".onDetailFilesSelected"
                     buttonOnly="true"
-                    buttonText="Upload"
+                    buttonText="Upload Supporting Document"
                     icon="sap-icon://upload"
                     visible="{detail>/canContribute}"/>
                 </Toolbar>
-                <List items="{detail>/attachments}" noDataText="No supporting documents">
+                <!-- Grouped by field in the controller (_bindAttachments). -->
+                <List id="attachmentsList" items="{path: 'detail>/attachments', templateShareable: true}" noDataText="No attachments">
                   <StandardListItem
                     title="{detail>filename}"
-                    description="{parts: ['detail>uploadedByName', 'detail>createdBy', 'detail>createdAt', 'detail>category'], formatter: '.formatUploadInfo'}"
-                    icon="sap-icon://document"
+                    description="{detail>uploadInfo}"
+                    icon="{= ${detail>replacedAt} ? 'sap-icon://document-text' : 'sap-icon://document' }"
                     type="Active"
                     press=".onAttachmentPress"/>
                 </List>
