@@ -3517,7 +3517,7 @@ async onBudgetCheckConfirm() {
             return Boolean(
                 oRequest?.reservedBy
                 && oRequest?.processorUser_ID
-                && oRequest.processorUser_ID === this._sCurrentReservationUserId
+                //&& oRequest.processorUser_ID === this._sCurrentReservationUserId
                 && !["COMPLETED", "REJECTED", "PENDING_APPROVAL"].includes(oRequest?.status_code)
             );
         },

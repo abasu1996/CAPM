@@ -2370,9 +2370,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       const oReservationUser = await this._currentReservationUser(req, Users);
 
-      if (request.reservedBy && !await this._canActForReservedRequest(req, request, oReservationUser)) {
-        return req.reject(403, `Request is reserved by ${request.reservedBy} and cannot be accessed by another user`);
-      }
+      // if (request.reservedBy && !await this._canActForReservedRequest(req, request, oReservationUser)) {
+      //   return req.reject(403, `Request is reserved by ${request.reservedBy} and cannot be accessed by another user`);
+      // }
 
       return cds.tx(req).run(
         SELECT.from(this._dbProcessTasksEntity())
@@ -5640,7 +5640,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return req.reject(400, "Reserve the request before completing a guided step");
     }
 
-    await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
+    //await this._rejectIfRequestReservedByAnotherUser(req, request, Users);
 
     if (this._isLockedRequest(request)) {
       return this._rejectLockedRequest(req);
