@@ -74,23 +74,27 @@ test("search is an OR group combined with the other filters", () => {
   for (const filter of filters[1].filters) assert.equal(filter.value, "O'Brien");
 });
 
-test("dashboard counts all users and teams while My Requests remains personal", async () => {
+test("dashboard counts include requests created or owned by the current user or active delegators", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   service.db = { CARequests: "requests", CATasks: "tasks" };
   service._ensureCurrentUser = async () => ({ ID: "alice" });
-  service._effectiveTaskUserIds = async () => ["alice"];
+  service._effectiveTaskUserIds = async () => ["alice", "bob"];
   service._teamIdsOf = async () => [];
   const requests = [
     { requester_ID: "alice", ownerTeam_ID: "team-a", status_code: "SUBMITTED" },
     { requester_ID: "bob", ownerTeam_ID: "team-b", status_code: "REJECTED" },
-    { requester_ID: "integration", ownerTeam_ID: "team-c", status_code: "COMPLETED" },
+    { requester_ID: "integration", owner_ID: "alice", ownerTeam_ID: "team-c", status_code: "COMPLETED" },
     { requester_ID: "bob", ownerTeam_ID: null, status_code: "DRAFT" }
   ];
-  service._count = async (entity, where) => entity === "tasks" ? 0 : requests.filter((row) =>
-    Object.entries(where).every(([key, value]) => row[key] === value)).length;
+  service._count = async (entity, where) => entity === "tasks" ? 0 : requests.filter((row) => {
+    if (!Array.isArray(where)) return true;
+    const ids = where[0].xpr[2].list.map((item) => item.val);
+    return (ids.includes(row.requester_ID) || ids.includes(row.owner_ID))
+      && (where.length === 1 || row.status_code === where[4].val);
+  }).length;
   const counts = await service._getDashboardCounts({ user: { is: () => false } });
   assert.equal(counts.allRequests, 4);
-  assert.equal(counts.myRequests, 1);
-  assert.equal(counts.rejectedRequests, 0);
-  assert.equal(counts.completedRequests, 0);
+  assert.equal(counts.myRequests, 4);
+  assert.equal(counts.rejectedRequests, 1);
+  assert.equal(counts.completedRequests, 1);
 });

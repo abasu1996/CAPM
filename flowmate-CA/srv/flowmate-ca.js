@@ -2,6 +2,8 @@ const cds = require("@sap/cds");
 const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails } = require("./lib/po-integration");
 const { SELECT, INSERT, UPDATE } = cds.ql;
+// Only the server's completion path can mark a request as an automatic handoff.
+const INTERNAL_FLOWMATE_HANDOFF = Symbol("internalFlowmateHandoff");
 
 // ---- Budget Check (Purchase Order, New Service Entry Sheet) ----
 // "Budget Check" (Purchase Order, and New Service Entry Sheet): the step auto-completes when the
@@ -318,6 +320,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.before("READ", "MyRequests", this._filterMyRequests);
     this.before("READ", "MyTasks", this._filterMyTasks);
     this.before("READ", "MyTeamTasks", this._filterMyTeamTasks);
+    this.before("UPDATE", ["Requests", "MyRequests", "RequestQueue"], this._protectRequestAssignment);
+    this.before("UPDATE", ["Tasks", "MyTasks", "MyTeamTasks"], this._protectTaskAssignment);
 
     this.on("getCurrentUser", this._getCurrentUser);
     this.on("getFlowmateRequestFormCatalog", this._getFlowmateRequestFormCatalog);
@@ -336,6 +340,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("submitRequest", this._submitRequest);
     this.on("addTask", this._addTask);
     this.on("claimTeamTask", this._claimTeamTask);
+    this.on("reassignRequest", this._reassignRequest);
+    this.on("reassignTask", this._reassignTask);
     this.on("requestBudgetCheck", this._requestBudgetCheck);
     this.on("approveTask", this._approveTask);
     this.on("rejectTask", this._rejectTask);
@@ -430,8 +436,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (request.requestType_code !== "PURCHASE_ORDER") {
       return req.reject(400, "Flowmate Payment Run integration is only available for purchase orders");
     }
-    if (request.requester_ID !== user.ID && !req.user.is("CAAdmin")) {
-      return req.reject(403, "Only the request creator or an administrator can create the Flowmate Payment Run request");
+    if (!req[INTERNAL_FLOWMATE_HANDOFF] && request.requester_ID !== user.ID
+        && !(await this._canActForUser(req, user.ID, request.owner_ID)) && !req.user.is("CAAdmin")) {
+      return req.reject(403, "Only the request creator, owner, active owner delegate, or an administrator can create the Flowmate Payment Run request");
     }
     if (request.status_code !== REQUEST_STATUS.COMPLETED) {
       return req.reject(409, "The Flowmate Payment Run request can only be created after the purchase order flow is successfully completed");
@@ -577,8 +584,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (request.requestType_code !== "SERVICE_ENTRY_SHEET") {
       return req.reject(400, "Flowmate Service Entry Sheet integration is only available for service entry sheet requests");
     }
-    if (request.requester_ID !== user.ID && !req.user.is("CAAdmin")) {
-      return req.reject(403, "Only the request creator or an administrator can create the Flowmate Service Entry Sheet request");
+    if (!req[INTERNAL_FLOWMATE_HANDOFF] && request.requester_ID !== user.ID
+        && !(await this._canActForUser(req, user.ID, request.owner_ID)) && !req.user.is("CAAdmin")) {
+      return req.reject(403, "Only the request creator, owner, active owner delegate, or an administrator can create the Flowmate Service Entry Sheet request");
     }
     if (request.status_code !== REQUEST_STATUS.COMPLETED) {
       return req.reject(409, "The Flowmate Service Entry Sheet request can only be created after the service entry sheet flow is successfully completed");
@@ -751,6 +759,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     // Use the same authenticated user and transaction context, but pass only
     // the action payload expected by the integration handler.
     const integrationReq = Object.create(req);
+    integrationReq[INTERNAL_FLOWMATE_HANDOFF] = true;
     integrationReq.event = event;
     integrationReq.data = { requestId };
     integrationReq.reject = (status, message) => req.reject(status, message);
@@ -821,7 +830,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       this._ensureCurrentUser(req)
     ]);
     if (!delegation || delegation.delegator_ID !== currentUser.ID) {
-      return req.reject(403, "Only the delegation owner or an administrator can delete this assignment");
+      return req.reject(403, "Only the delegation owner, an administrator, or a supervisor can delete this assignment");
     }
   };
 
@@ -860,8 +869,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   _filterMyRequests = async (req) => {
     const user = await this._ensureCurrentUser(req);
-    req.query.where({ requester_ID: user.ID });
+    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    req.query.where(this._myRequestWhere(effectiveUserIds));
   };
+
+  _myRequestWhere(ids, status) {
+    const list = { list: ids.map((val) => ({ val })) };
+    const where = [{ xpr: [{ ref: ["requester_ID"] }, "in", list, "or", { ref: ["owner_ID"] }, "in", list] }];
+    if (status) where.push("and", { ref: ["status_code"] }, "=", { val: status });
+    return where;
+  }
 
   _filterMyTasks = async (req) => {
     const user = await this._ensureCurrentUser(req);
@@ -897,6 +914,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       email: user.email,
       isAdmin: req.user.is("CAAdmin"),
       canDelegateOnBehalf: this._canMaintainDelegations(req),
+      canReassign: this._canMaintainDelegations(req),
       activeDelegatorUserIds
     };
   };
@@ -904,8 +922,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _getDashboardCounts = async (req) => {
     const user = await this._ensureCurrentUser(req);
     const isAdmin = req.user.is("CAAdmin");
-    const requestedBy = { requester_ID: user.ID };
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    const requestedBy = this._myRequestWhere(effectiveUserIds);
     const assignedToMe = { assignedUser_ID: { in: effectiveUserIds } };
     // Only OPEN tasks are waiting on someone. A SENT_BACK task belongs to a step that
     // has been rolled back and is reopened when that step comes around again.
@@ -924,23 +942,14 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       this._count(this.db.CARequests, {}),
       this._count(this.db.CARequests, requestedBy),
       this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }),
-      this._count(this.db.CARequests, {
-        ...requestedBy,
-        status_code: REQUEST_STATUS.SENT_BACK
-      }),
-      this._count(this.db.CARequests, {
-        ...requestedBy,
-        status_code: REQUEST_STATUS.REJECTED
-      }),
+      this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.SENT_BACK)),
+      this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED)),
       this._count(this.db.CATasks, {
         ...assignedToMe,
         ...openStatus,
         isApproval: true
       }),
-      this._count(this.db.CARequests, {
-        ...requestedBy,
-        status_code: REQUEST_STATUS.COMPLETED
-      })
+      this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.COMPLETED))
     ]);
 
     let myTeamTasks = 0;
@@ -1331,6 +1340,83 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(409, "This task was just assigned to another team member");
     }
     await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_CLAIMED", user, null, TASK_STATUS.OPEN, task.taskName);
+    return true;
+  };
+
+  _protectRequestAssignment = (req) => {
+    if (["owner_ID", "owner", "requester_ID", "requester", "requesterName", "requesterEmail", "tasks"]
+      .some((key) => Object.prototype.hasOwnProperty.call(req.data, key))) {
+      return req.reject(403, "Use the reassignment action to change request ownership; the original requester cannot be changed");
+    }
+  };
+
+  _protectTaskAssignment = (req) => {
+    if (["assignedUser_ID", "assignedUser", "assignedName", "assignedEmail", "assignedTeam_ID", "assignedTeam", "assignedTeamName"]
+      .some((key) => Object.prototype.hasOwnProperty.call(req.data, key))) {
+      return req.reject(403, "Use the task assignment actions to change the task assignee");
+    }
+  };
+
+  async _reassignmentUsers(req) {
+    if (!this._canMaintainDelegations(req)) {
+      return req.reject(403, "Only an administrator or supervisor can reassign requests or tasks");
+    }
+    const actor = await this._ensureCurrentUser(req);
+    if (!req.data.userId) return req.reject(400, "Select a user to assign the work to");
+    const target = await this.master.run(SELECT.one.from(this.masterEntities.Users).where({ ID: req.data.userId, isActive: true }));
+    if (!target) return req.reject(400, "The selected user was not found or is inactive");
+    return { actor, target };
+  }
+
+  _reassignRequest = async (req) => {
+    const { actor, target } = await this._reassignmentUsers(req);
+    const tx = cds.tx(req);
+    const request = await tx.run(SELECT.one.from(this.db.CARequests).where({ ID: req.data.requestId }));
+    if (!request) return req.reject(404, "Request not found");
+    this._assertMutableRequest(req, request);
+    if (request.owner_ID === target.ID) return req.reject(409, "This user already owns the request");
+    const oldOwner = request.owner_ID || request.requester_ID;
+    const updated = await tx.run(UPDATE(this.db.CARequests).set({ owner_ID: target.ID }).where({
+      ID: request.ID, owner_ID: request.owner_ID || null, status_code: request.status_code
+    }));
+    if (!updated) return req.reject(409, "The request changed while it was being assigned. Refresh and try again");
+
+    // Only open first-step work assigned to the former owner follows the request. Other people's
+    // work, approval decisions and all historic tasks retain their existing assignees.
+    const tasks = oldOwner ? await tx.run(SELECT.from(this.db.CATasks).where({
+      request_ID: request.ID, stepNo: 1, assignedUser_ID: oldOwner, status_code: TASK_STATUS.OPEN
+    })) : [];
+    for (const task of tasks.filter((item) => !item.isSuperseded && !item.isApproval)) {
+      const changed = await tx.run(UPDATE(this.db.CATasks).set({
+        assignedUser_ID: target.ID, assignedName: target.displayName, assignedEmail: target.email
+      }).where({ ID: task.ID, assignedUser_ID: oldOwner, status_code: TASK_STATUS.OPEN }));
+      if (!changed) return req.reject(409, "A requester task changed while assigning the request. Refresh and try again");
+      await this._notifyTaskAssignment(tx, { ...task, assignedUser_ID: target.ID, assignedName: target.displayName, assignedEmail: target.email });
+    }
+    await this._writeHistory(tx, request.ID, request.currentStep, "REQUEST_REASSIGNED", actor, null, null,
+      `Request owner changed from ${oldOwner || "unassigned"} to ${target.displayName || target.ID} (${target.ID}). from=${oldOwner || "none"}; to=${target.ID}`);
+    return true;
+  };
+
+  _reassignTask = async (req) => {
+    const { actor, target } = await this._reassignmentUsers(req);
+    const tx = cds.tx(req);
+    const task = await tx.run(SELECT.one.from(this.db.CATasks).where({ ID: req.data.taskId }));
+    if (!task) return req.reject(404, "Task not found");
+    const request = await tx.run(SELECT.one.from(this.db.CARequests).where({ ID: task.request_ID }));
+    if (!request) return req.reject(404, "Request not found");
+    this._assertMutableRequest(req, request);
+    if (![TASK_STATUS.OPEN, TASK_STATUS.IN_PROGRESS].includes(task.status_code) || task.isSuperseded) {
+      return req.reject(409, "Only an open or in-progress current task can be reassigned");
+    }
+    if (task.assignedUser_ID === target.ID) return req.reject(409, "This task is already assigned to the selected user");
+    const changed = await tx.run(UPDATE(this.db.CATasks).set({
+      assignedUser_ID: target.ID, assignedName: target.displayName, assignedEmail: target.email
+    }).where({ ID: task.ID, assignedUser_ID: task.assignedUser_ID || null, status_code: task.status_code }));
+    if (!changed) return req.reject(409, "The task changed while it was being assigned. Refresh and try again");
+    await this._writeHistory(tx, task.request_ID, task.stepNo, "TASK_REASSIGNED", actor, null, null,
+      `${task.referenceNumber || task.taskName}: ${task.assignedName || "team queue"} (${task.assignedUser_ID || "unassigned"}) to ${target.displayName || target.ID} (${target.ID})`);
+    await this._notifyTaskAssignment(tx, { ...task, assignedUser_ID: target.ID, assignedName: target.displayName, assignedEmail: target.email });
     return true;
   };
 
@@ -1973,18 +2059,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _saveRequesterDetails = async (req) => {
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req, tx);
-    const request = await SELECT.one.from(this.db.CARequests).where({ ID: req.data.requestId });
+    const request = await tx.run(SELECT.one.from(this.db.CARequests).where({ ID: req.data.requestId }));
 
     if (!request) {
       return req.reject(404, "Request not found");
     }
     this._assertMutableRequest(req, request);
-    if (!(await this._canActForUser(req, user.ID, request.owner_ID))) {
-      return req.reject(403, "Only the requester or an active delegate can edit this request");
+    const effectiveIds = await this._effectiveTaskUserIds(req, user.ID);
+    const requesterTasks = await tx.run(SELECT.from(this.db.CATasks).where({
+      request_ID: request.ID, stepNo: 1, status_code: TASK_STATUS.OPEN
+    }));
+    if (!requesterTasks.some((task) => !task.isSuperseded && !task.isApproval && effectiveIds.includes(task.assignedUser_ID))) {
+      return req.reject(403, "Only the person assigned to the open requester task or an active delegate can edit these details");
     }
 
-    const step = await SELECT.one.from(this.db.RequestStepInstances)
-      .where({ request_ID: request.ID, stepNo: 1 });
+    const step = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
+      .where({ request_ID: request.ID, stepNo: 1 }));
     if (!step) {
       return req.reject(404, "Workflow step not found");
     }
@@ -2448,15 +2538,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   // notice: extra e-mail content for the (re)opened task, e.g. a send-back's remarks.
   async _createConfiguredTaskIfMissing(tx, requestId, step, notice = {}) {
-    const existing = (await SELECT.from(this.db.CATasks).where({
+    const existing = (await tx.run(SELECT.from(this.db.CATasks).where({
       request_ID: requestId,
       stepNo: step.stepNo
-    })).filter((task) => !task.isSuperseded);
+    }))).filter((task) => !task.isSuperseded);
     if (existing.some((task) => task.status_code === TASK_STATUS.OPEN)) {
       return;
     }
     const config = step.config_ID
-      ? await SELECT.one.from(this.db.WorkflowStepConfigs).where({ ID: step.config_ID })
+      ? await tx.run(SELECT.one.from(this.db.WorkflowStepConfigs).where({ ID: step.config_ID }))
       : null;
     // Resolved before the re-open branch too: the requester may have named a different
     // approver while the step was rolled back, so a reopened task must not keep the old one.
@@ -2479,7 +2569,17 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         .where({ ID: { in: existing.map((task) => task.ID) } }));
       const request = step.stepNo === 1
         ? await tx.run(SELECT.one.from(this.db.CARequests)
-          .columns("requester_ID", "requesterName", "requesterEmail").where({ ID: requestId }))
+          .columns("requester_ID", "requesterName", "requesterEmail", "owner_ID").where({ ID: requestId }))
+        : null;
+      const ownerHistory = request ? await tx.run(SELECT.from(this.db.CAHistory)
+        .columns("remarks").where({ request_ID: requestId, action: "REQUEST_REASSIGNED" })) : [];
+      const ownerIds = new Set([request?.requester_ID, request?.owner_ID]);
+      for (const entry of ownerHistory) {
+        const match = /from=([^;]+); to=([^\s]+)/.exec(entry.remarks || "");
+        if (match) { ownerIds.add(match[1]); ownerIds.add(match[2]); }
+      }
+      const owner = request?.owner_ID && request.owner_ID !== request.requester_ID
+        ? await this.master.run(SELECT.one.from(this.masterEntities.Users).where({ ID: request.owner_ID }))
         : null;
       for (const previous of existing) {
         const rework = {
@@ -2502,11 +2602,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           reworkOf_ID: previous.ID,
           ...sla
         };
-        if (request && !rework.assignedUser_ID) {
+        if (request && !previous.isApproval && (!rework.assignedUser_ID || ownerIds.has(rework.assignedUser_ID))) {
           Object.assign(rework, {
-            assignedUser_ID: request.requester_ID,
-            assignedName: request.requesterName,
-            assignedEmail: request.requesterEmail
+            assignedUser_ID: request.owner_ID || request.requester_ID,
+            assignedName: request.owner_ID && request.owner_ID !== request.requester_ID ? owner?.displayName || null : request.requesterName,
+            assignedEmail: request.owner_ID && request.owner_ID !== request.requester_ID ? owner?.email || null : request.requesterEmail
           });
         }
         await tx.run(INSERT.into(this.db.CATasks).entries(rework));
@@ -2786,7 +2886,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const openTasks = await SELECT.from(this.db.CATasks)
       .columns("assignedUser_ID", "assignedTeam_ID")
       .where({ request_ID: request.ID, status_code: TASK_STATUS.OPEN });
-    if (openTasks.some((task) => task.assignedUser_ID === user.ID)) {
+    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    if (openTasks.some((task) => task.assignedUser_ID && effectiveUserIds.includes(task.assignedUser_ID))) {
       return true;
     }
     const teamIds = openTasks.filter((task) => !task.assignedUser_ID && task.assignedTeam_ID)

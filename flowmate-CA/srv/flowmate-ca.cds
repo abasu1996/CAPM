@@ -21,6 +21,7 @@ service FlowmateCAService {
     email                  : String(255);
     isAdmin                : Boolean;
     canDelegateOnBehalf    : Boolean;
+    canReassign            : Boolean;
     activeDelegatorUserIds : many UUID;
   }
 
@@ -189,6 +190,8 @@ service FlowmateCAService {
     dueDate: Date
   ) returns Tasks;
   action claimTeamTask(taskId: UUID) returns Boolean;
+  action reassignRequest(requestId: UUID, userId: UUID) returns Boolean;
+  action reassignTask(taskId: UUID, userId: UUID) returns Boolean;
   // Purchase Order S/4 Data Validation: opens the (auto-completed) Budget Check step's task and
   // puts this task In Progress until the Budget Check is approved.
   action requestBudgetCheck(taskId: UUID) returns Boolean;

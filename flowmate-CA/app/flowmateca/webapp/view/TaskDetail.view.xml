@@ -9,6 +9,7 @@
   <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{task>/taskName}">
     <headerContent>
       <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+      <Button text="Assign Task" icon="sap-icon://employee" visible="{task>/canReassign}" press=".onReassignTask"/>
       <Button
         text="{i18n>claimTask}"
         icon="sap-icon://employee-approvals"

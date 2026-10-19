@@ -68,8 +68,18 @@ sap.ui.define([
           this.request(`Requests(${this._requestId})?$expand=${expand}`),
           this.request(`canContribute(requestId=${this._requestId})`)
         ]);
+        if (!this.getAppModel().getProperty("/currentUser/ID")) {
+          await this.loadCurrentUser();
+        }
         // Comments and uploads are for the person the request is waiting on (checked on the server too).
         request.canContribute = contribute.value === true;
+        request.ownerName = request.owner_ID === request.requester_ID ? request.requesterName : "";
+        if (request.owner_ID && request.owner_ID !== request.requester_ID) {
+          try {
+            const owner = await this.request(`Users(${request.owner_ID})?$select=ID,displayName`);
+            request.ownerName = owner.displayName || request.owner_ID;
+          } catch (error) { request.ownerName = request.owner_ID; }
+        }
         this._prepareDetail(request);
         this.getView().getModel("detail").setData(request);
         this._renderDetailItems(request.requestType?.code);
@@ -116,8 +126,8 @@ sap.ui.define([
         return task.isMandatory && task.status?.code !== "APPROVED";
       });
       const currentUser = this.getAppModel().getProperty("/currentUser") || {};
-      const isOwner = this.canActForAssignedUser(request.owner_ID, currentUser)
-        || this.canActForAssignedUser(request.requester_ID, currentUser);
+      const isOwner = this.canActForAssignedUser(request.owner_ID || request.requester_ID, currentUser);
+      request.canReassign = Boolean(currentUser.canReassign) && !["COMPLETED", "REJECTED"].includes(request.status?.code || request.status_code);
       request.canCompleteCurrentStep = !["COMPLETED", "REJECTED"].includes(request.status?.code)
         && !blockingTask
         && (isOwner || currentUser.isAdmin);
@@ -142,6 +152,10 @@ sap.ui.define([
       request.detailItemsTitle = request.hasDetailHeaders && request.requestType?.code === "OUTLINE_CONTRACT"
         ? "Contract Creation Details"
         : "Line Items";
+    },
+
+    onReassignRequest: function () {
+      this.openReassignment("request", this._requestId);
     },
 
     _detailFields: function (request) {

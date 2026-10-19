@@ -41,12 +41,15 @@ sap.ui.define([
         const task = await this.request(
           `Tasks(${this._taskId})?$expand=status,request($expand=${requestExpand})`
         );
-        const user = this.getAppModel().getProperty("/currentUser") || await this.loadCurrentUser();
+        let user = this.getAppModel().getProperty("/currentUser");
+        if (!user?.ID) user = await this.loadCurrentUser();
         // A task is only actionable while it is OPEN. SENT_BACK marks the task of the
         // person who sent the request back: their step has been rolled back, so the task
         // lies dormant until that step is reached again, and is reopened then.
         const processableStatus = task.status?.code === "OPEN";
         task.canClaim = processableStatus && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID;
+        task.canReassign = Boolean(user?.canReassign) && ["OPEN", "IN_PROGRESS"].includes(task.status?.code) && !task.isSuperseded
+          && !["COMPLETED", "REJECTED"].includes(task.request?.status?.code || task.request?.status_code);
         task.canProcess = processableStatus && this.canActForAssignedUser(task.assignedUser_ID, user);
         // Line-item exports are for the approver the task is assigned to (once claimed), also after deciding it.
         task.isAssignedToMe = this.canActForAssignedUser(task.assignedUser_ID, user);
@@ -328,6 +331,10 @@ sap.ui.define([
       } finally {
         this.setBusy(false);
       }
+    },
+
+    onReassignTask: function () {
+      this.openReassignment("task", this._taskId);
     },
 
     // Seeds the editable form from the stored detail row and renders the same field

@@ -27,8 +27,11 @@ sap.ui.define([
   "sap/ui/model/Sorter",
   "sap/m/GroupHeaderListItem",
   "sap/m/Toolbar",
-  "sap/m/ToolbarSpacer"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer) {
+  "sap/m/ToolbarSpacer",
+  "sap/m/SelectDialog",
+  "sap/m/StandardListItem",
+  "sap/ui/model/json/JSONModel"
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel) {
   "use strict";
 
   // A VBox that a SimpleForm accepts as a field (forms only take IFormContent controls); it holds
@@ -111,6 +114,56 @@ sap.ui.define([
 
     setBusy: function (busy) {
       this.getAppModel().setProperty("/busy", busy);
+    },
+
+    openReassignment: function (kind, id) {
+      const controller = this;
+      let searchVersion = 0;
+      let closed = false;
+      const dialog = new SelectDialog({
+        title: kind === "request" ? "Assign request to user" : "Assign task to user",
+        noDataText: "No active users found. Search by name or email.",
+        items: {
+          path: "assignees>/users",
+          template: new StandardListItem({ title: "{assignees>displayName}", description: "{assignees>email}" })
+        },
+        search: function (event) { loadUsers(event.getParameter("value")); },
+        confirm: function (event) {
+          const item = event.getParameter("selectedItem");
+          const selected = item && item.getBindingContext("assignees").getObject();
+          if (!selected) return;
+          MessageBox.confirm(`Assign this ${kind} to ${selected.displayName || selected.email}?`, {
+            onClose: async function (choice) {
+              if (choice !== MessageBox.Action.OK) return;
+              controller.setBusy(true);
+              try {
+                const body = kind === "request" ? { requestId: id, userId: selected.ID } : { taskId: id, userId: selected.ID };
+                await controller.request(kind === "request" ? "reassignRequest" : "reassignTask", { method: "POST", body });
+                MessageToast.show(`${kind === "request" ? "Request" : "Task"} assigned to ${selected.displayName || selected.email}`);
+                await controller.onRefresh();
+              } catch (error) { controller.showError(error); }
+              finally { controller.setBusy(false); }
+            }
+          });
+        },
+        afterClose: function () { closed = true; dialog.destroy(); }
+      });
+      const users = new JSONModel({ users: [] });
+      dialog.setModel(users, "assignees");
+      this.getView().addDependent(dialog);
+      async function loadUsers(search) {
+        const version = ++searchVersion;
+        const value = String(search || "").trim().replace(/'/g, "''");
+        const filter = "isActive eq true" + (value ? ` and (contains(displayName,'${value}') or contains(email,'${value}'))` : "");
+        dialog.setBusy(true);
+        try {
+          const result = await controller.request(`Users?$select=ID,displayName,email&$orderby=displayName&$top=100&$filter=${encodeURIComponent(filter)}`);
+          if (!closed && version === searchVersion) users.setProperty("/users", result.value || []);
+        } catch (error) { if (!closed) controller.showError(error); }
+        finally { if (!closed && version === searchVersion) dialog.setBusy(false); }
+      }
+      dialog.open();
+      loadUsers("");
     },
 
     navTo: function (route, parameters, replace) {

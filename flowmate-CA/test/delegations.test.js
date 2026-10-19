@@ -17,6 +17,21 @@ test("active delegations extend the effective task owners", async () => {
   assert.deepEqual(await service._effectiveTaskUserIds({}, "delegate"), ["delegate", "owner-a", "owner-b"]);
 });
 
+test("delegation lookup excludes disabled, future and expired assignments", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service.masterEntities = { Delegations: "Delegations" };
+  let filter;
+  service.master = { run: async (query) => { filter = query.SELECT.where; return []; } };
+  await service._activeDelegatorIds({}, "delegate");
+  const today = new Date().toISOString().slice(0, 10);
+  assert.deepEqual(filter, [
+    { ref: ["delegate_ID"] }, "=", { val: "delegate" }, "and",
+    { ref: ["enabled"] }, "=", { val: true }, "and",
+    { ref: ["startDate"] }, "<=", { val: today }, "and",
+    { ref: ["endDate"] }, ">=", { val: today }
+  ]);
+});
+
 test("a delegate can process the delegator's assigned task", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   service._effectiveTaskUserIds = async () => ["delegate", "owner"];
@@ -61,7 +76,7 @@ test("delegated notification replaces the original recipient", async () => {
   ]), ["delegate@example.test"]);
 });
 
-test("regular users cannot create a delegation for someone else", async () => {
+test("regular users can create their own delegation but not one for someone else", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   service._ensureCurrentUser = async () => ({ ID: "current" });
   const req = {
@@ -75,4 +90,49 @@ test("regular users cannot create a delegation for someone else", async () => {
     reject
   };
   await assert.rejects(service._prepareDelegationCreate(req), { status: 403 });
+  service.masterEntities = { Users: "Users" };
+  service.master = { run: async () => [{ ID: "current", isActive: true }, { ID: "delegate", isActive: true }] };
+  req.data.delegator_ID = "current";
+  await assert.doesNotReject(service._prepareDelegationCreate(req));
+  assert.equal(req.data.createdOnBehalf, false);
+  delete req.data.delegator_ID;
+  await assert.doesNotReject(service._prepareDelegationCreate(req));
+  assert.equal(req.data.delegator_ID, "current");
+});
+
+test("administrators and supervisors may create and delete delegations for others", async () => {
+  for (const role of ["CAAdmin", "CASupervisor"]) {
+    const service = new FlowmateCAService("FlowmateCAService");
+    service._ensureCurrentUser = async () => ({ ID: "admin" });
+    service.masterEntities = { Users: "Users" };
+    service.master = { run: async () => [{ ID: "owner", isActive: true }, { ID: "delegate", isActive: true }] };
+    const req = {
+      user: { is: (name) => name === role }, reject,
+      data: { delegator_ID: "owner", delegate_ID: "delegate", startDate: "2026-10-01", endDate: "2026-10-31" }
+    };
+    await service._prepareDelegationCreate(req);
+    assert.equal(req.data.createdOnBehalf, true);
+    await assert.doesNotReject(service._authorizeDelegationDelete(req));
+  }
+});
+
+test("regular users may delete only their own delegation", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._ensureCurrentUser = async () => ({ ID: "current" });
+  service.masterEntities = { Delegations: "Delegations" };
+  let owner = "current";
+  service.master = { run: async () => ({ delegator_ID: owner }) };
+  const req = { user: { is: () => false }, data: { ID: "delegation" }, reject };
+  await assert.doesNotReject(service._authorizeDelegationDelete(req));
+  owner = "other-user";
+  await assert.rejects(service._authorizeDelegationDelete(req), { status: 403 });
+});
+
+test("My Requests includes active delegators using the same scope as the dashboard", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._ensureCurrentUser = async () => ({ ID: "delegate" });
+  service._effectiveTaskUserIds = async () => ["delegate", "owner"];
+  let applied;
+  await service._filterMyRequests({ query: { where: (filter) => { applied = filter; } } });
+  assert.deepEqual(applied, service._myRequestWhere(["delegate", "owner"]));
 });

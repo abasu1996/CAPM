@@ -8,6 +8,7 @@
   <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{detail>/title}">
     <headerContent>
       <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+      <Button text="Assign Request" icon="sap-icon://employee" visible="{detail>/canReassign}" press=".onReassignRequest"/>
     </headerContent>
     <content>
       <VBox>
@@ -29,6 +30,10 @@
             <VBox class="caFact">
               <Label text="Requester"/>
               <Text text="{detail>/requesterName}"/>
+            </VBox>
+            <VBox class="caFact">
+              <Label text="Request Owner"/>
+              <Text text="{detail>/ownerName}"/>
             </VBox>
             <VBox class="caFact">
               <Label text="Owner Team"/>
