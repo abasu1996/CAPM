@@ -11,8 +11,10 @@ sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/Sorter",
-    "sap/ui/model/json/JSONModel"
-], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, Sorter, JSONModel) => {
+    "sap/ui/model/json/JSONModel",
+    "sap/m/Label",
+    "sap/ui/core/ListItem"
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, Sorter, JSONModel, Label, ListItem) => {
     "use strict";
 
     return BaseController.extend("flowmate.controller.MyTasks", {
@@ -22,7 +24,8 @@ sap.ui.define([
             }), "statusEdit");
             this.getView().setModel(new JSONModel({
                 sendBackStepNo: "",
-                steps: []
+                steps: [],
+                requestTeamId: ""
             }), "taskAction");
             this.getView().setModel(new JSONModel({
                 processorUser_ID: "",
@@ -441,7 +444,7 @@ sap.ui.define([
             oTaskPage.bindElement({
                 path: `${this._taskCollectionPath()}(guid'${sTaskId}')`,
                 parameters: {
-                    expand: "request"
+                    expand: "request,treasuryEntries,whtEntries"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -502,7 +505,7 @@ sap.ui.define([
                     : [new Filter("isLoaApproval", FilterOperator.EQ, false)],
                 sorter: new Sorter("referenceNumber", true),
                 parameters: {
-                    expand: "request"
+                    expand: "request,treasuryEntries,whtEntries"
                 },
                 template: this._oTasksTableTemplate,
                 templateShareable: true,
@@ -557,16 +560,15 @@ sap.ui.define([
                 return;
             }
 
-            let iSendBackStepNo;
+            let oSendBack;
 
-            if (sAction === "sendBack") {
-                iSendBackStepNo = await this._chooseSendBackStep();
+                if (sAction === "sendBack") {
+                    oSendBack = await this._chooseSendBackStep();
 
-                if (!iSendBackStepNo) {
-                    return;
+                    if (!oSendBack) {
+                        return;
+                    }
                 }
-            }
-
             this.showBusy();
 
             try {
@@ -575,8 +577,11 @@ sap.ui.define([
                     remarks: this.byId("taskRemarksTextArea").getValue()
                 };
 
-                if (sAction === "sendBack") {
-                    oPayload.targetStepNo = iSendBackStepNo;
+                 if (sAction === "sendBack") {
+                    oPayload.targetStepNo = oSendBack.stepNo;
+                    if (oSendBack.processorUserId) {
+                        oPayload.processorUserId = oSendBack.processorUserId;
+                    }
                 }
 
                 await this.callAction(sAction, oPayload);
@@ -599,7 +604,8 @@ sap.ui.define([
 
             oTaskActionModel.setData({
                 sendBackStepNo: "",
-                steps: []
+                steps: [],
+                requestTeamId: ""
             });
 
             if (!sSubProcessTypeCode) {
@@ -615,12 +621,14 @@ sap.ui.define([
                     .filter((oStep) => Number(oStep.stepNo || 0) < iCurrentStepNo)
                     .map((oStep) => ({
                         stepNo: String(oStep.stepNo),
-                        text: this.getText("sendBackStepOptionText", [oStep.stepNo, oStep.stepName || ""])
+                        text: this.getText("sendBackStepOptionText", [oStep.stepNo, oStep.stepName || ""]),
+                        teamId: oStep.processorTeam_ID || ""
                     }));
 
                 oTaskActionModel.setData({
                     sendBackStepNo: aStepItems[0]?.stepNo || "",
-                    steps: aStepItems
+                    steps: aStepItems,
+                    requestTeamId: oContext?.getProperty("request/processorTeam_ID") || ""
                 });
             } catch (oError) {
                 MessageToast.show(this.getText("sendBackStepsLoadErrorMessage"));
@@ -628,7 +636,9 @@ sap.ui.define([
         },
 
         _chooseSendBackStep() {
-            const aSteps = this.getView().getModel("taskAction").getProperty("/steps") || [];
+            const oTaskActionModel = this.getView().getModel("taskAction");
+            const aSteps = oTaskActionModel.getProperty("/steps") || [];
+            const sRequestTeamId = oTaskActionModel.getProperty("/requestTeamId") || "";
 
             if (!aSteps.length) {
                 MessageBox.warning(this.getText("noPreviousSendBackStepsMessage"));
@@ -636,29 +646,74 @@ sap.ui.define([
             }
 
             return new Promise((resolve) => {
-                const oSelect = new Select({
+                const oMemberTemplate = new ListItem({
+                    key: "{user_ID}",
+                    text: "{displayName}",
+                    additionalText: "{email}"
+                });
+                const oProcessorSelect = new Select({
+                    width: "100%",
+                    forceSelection: false,
+                    showSecondaryValues: true
+                });
+                const oHint = new Text({ wrapping: true }).addStyleClass("sapUiTinyMarginTop");
+
+                // Reload the processor list for the team that owns the selected step
+                const fnLoadTeamMembers = () => {
+                    const oStep = aSteps.find((oItem) => String(oItem.stepNo) === String(oStepSelect.getSelectedKey()));
+                    const sTeamId = oStep?.teamId || sRequestTeamId;
+
+                    oProcessorSelect.setSelectedKey("");
+                    oProcessorSelect.unbindItems();
+
+                    if (!sTeamId) {
+                        oProcessorSelect.setEnabled(false);
+                        oHint.setText(this.getText("sendBackNoTeamForStepText"));
+                        return;
+                    }
+
+                    oProcessorSelect.setEnabled(true);
+                    // oHint.setText(this.getText("sendBackProcessorHintText"));
+                    oProcessorSelect.bindItems({
+                        path: "/TeamMembers",
+                        filters: [
+                            new Filter("team_ID", FilterOperator.EQ, sTeamId),
+                            new Filter("isActive", FilterOperator.EQ, true)
+                        ],
+                        sorter: new Sorter("displayName"),
+                        template: oMemberTemplate,
+                        templateShareable: true
+                    });
+                };
+
+                const oStepSelect = new Select({
                     width: "100%",
                     selectedKey: aSteps[0].stepNo,
-                    items: aSteps.map((oStep) => new Item({
-                        key: oStep.stepNo,
-                        text: oStep.text
-                    }))
+                    items: aSteps.map((oStep) => new Item({ key: oStep.stepNo, text: oStep.text })),
+                    change: fnLoadTeamMembers
                 });
+
                 const oDialog = new Dialog({
                     title: this.getText("sendBackTargetStepDialogTitle"),
-                    contentWidth: "24rem",
+                    contentWidth: "26rem",
                     content: [
-                        new Text({
-                            text: this.getText("sendBackTargetStepDialogText"),
-                            wrapping: true
-                        }),
-                        oSelect
+                        new Text({ text: this.getText("sendBackTargetStepDialogText"), wrapping: true }),
+                        oStepSelect,
+                        new Label({
+                            text: this.getText("sendBackProcessorLabel"),
+                            labelFor: oProcessorSelect
+                        }).addStyleClass("sapUiSmallMarginTop"),
+                        oProcessorSelect,
+                        oHint
                     ],
                     beginButton: new Button({
                         text: this.getText("sendBackButton"),
                         type: "Emphasized",
                         press: () => {
-                            resolve(Number(oSelect.getSelectedKey()));
+                            resolve({
+                                stepNo: Number(oStepSelect.getSelectedKey()),
+                                processorUserId: oProcessorSelect.getSelectedKey() || null
+                            });
                             oDialog.close();
                         }
                     }),
@@ -671,8 +726,13 @@ sap.ui.define([
                     })
                 });
 
-                oDialog.attachAfterClose(() => oDialog.destroy());
+                oDialog.addStyleClass("sapUiContentPadding");
+                oDialog.attachAfterClose(() => {
+                    resolve(null); // no-op if already resolved; covers Esc
+                    oDialog.destroy();
+                });
                 this.getView().addDependent(oDialog);
+                fnLoadTeamMembers();
                 oDialog.open();
             });
         },

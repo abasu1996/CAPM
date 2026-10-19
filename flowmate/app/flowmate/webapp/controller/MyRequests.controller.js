@@ -13,8 +13,12 @@ sap.ui.define([
     "sap/ui/model/Sorter",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "sap/ui/model/json/JSONModel"
-], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, SelectDialog, StandardListItem, Text, Item, Sorter, Filter, FilterOperator, JSONModel) => {
+    "sap/ui/model/json/JSONModel",
+    "sap/m/ComboBox",
+    "sap/ui/core/ListItem",
+    "sap/m/Label"
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, SelectDialog, StandardListItem, Text, Item, Sorter, Filter, FilterOperator, JSONModel, ComboBox,
+    ListItem, Label) => {
     "use strict";
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
@@ -40,7 +44,8 @@ sap.ui.define([
             }), "statusEdit");
             this.getView().setModel(new JSONModel({
                 sendBackStepNo: "",
-                steps: []
+                steps: [],
+                requestTeamId: ""
             }), "taskAction");
             this.getView().setModel(new JSONModel({
                 requestProcessorUser_ID: "",
@@ -127,6 +132,7 @@ sap.ui.define([
                 this._sCurrentReservationUserId || ""
             );
             this.getView().getModel("viewState").setProperty("/showUnreservedOnly", this._bShowUnreservedOnly);
+            this.getView().getModel("viewState").setProperty("/showReservedOnly", this._bShowReservedOnly);
             this.getView().getModel("viewState").setProperty(
                 "/requestEntitySet",
                 this._bShowUnreservedOnly ? "TeamUnreservedRequests" : "ProcessRequests"
@@ -815,6 +821,11 @@ sap.ui.define([
             this.byId("myRequestsTeamValueHelpDialog").open();
         },
 
+        onPartyTeamValueHelpRequest() {
+            this._sTeamValueHelpTarget = "newParty";
+            this.byId("myRequestsTeamValueHelpDialog").open();
+        },
+
         onRequestProcessorSuggestionSelected(oEvent) {
             this._applyProcessorSelection(this._getSuggestionContext(oEvent), "request");
         },
@@ -894,7 +905,11 @@ sap.ui.define([
                 return;
             }
 
-            this._applyTeamSelection(oContext, this._sTeamValueHelpTarget);
+            if (this._sTeamValueHelpTarget === "newParty") {
+                this._applyPartyTeamSelection(oContext);
+            } else {
+                this._applyTeamSelection(oContext, this._sTeamValueHelpTarget);
+            }
 
             this.onTeamValueHelpClose(oEvent);
         },
@@ -1324,6 +1339,7 @@ sap.ui.define([
                     processor: oTask.processor,
                     processorEmail: oTask.processorEmail,
                     role: oTask.role,
+                    purpose: oTask.purpose,
                     isMandatory: Boolean(oTask.isMandatory),
                     status_code: "OPEN"
                 });
@@ -1412,16 +1428,32 @@ sap.ui.define([
 },
         _createEmptyTreasuryConfirmation() {
             return {
-                treasuryEntity_code: "",
-                debitAccountName: "",
-                debitAccountNumber: "",
-                beneficiary: "",
-                treasuryCurrency_code: "",
-                treasuryAmount: null,
-                treasuryDueDate: null,
-                treasuryUserDivisionRep: "",
+                entries: [this._createEmptyTreasuryEntry()],
+                purpose: "",
                 ...this._createEmptyDemandAssignee()
             };
+        },
+
+        _createEmptyTreasuryEntry() {
+            return {
+                paymentReceivedDate: null, treasuryRequestDate: null, entity_code: "",
+                bankName: "", debitAccount: "", beneficiary: "", currency_code: "",
+                amount: null, dueDate: null, paymentMode: "",
+                userDivisionRepresentative: "", i2pTeamMember: ""
+            };
+        },
+
+        _demandTaskEntries(vEntries) {
+            if (Array.isArray(vEntries)) {
+                return vEntries;
+            }
+            if (Array.isArray(vEntries?.results)) {
+                return vEntries.results;
+            }
+            if (Array.isArray(vEntries?.value)) {
+                return vEntries.value;
+            }
+            return [];
         },
 
       onOpenTreasuryConfirmationDialog() {
@@ -1433,17 +1465,26 @@ sap.ui.define([
             const oRequest = this.byId("requestObjectPage").getBindingContext()?.getObject() || {};
 
             this.getView().getModel("treasuryConfirmation").setData({
-                treasuryEntity_code: oRequest.treasuryEntity_code || "",
-                debitAccountName: oRequest.debitAccountName || "",
-                debitAccountNumber: oRequest.debitAccountNumber || "",
-                beneficiary: oRequest.beneficiary || "",
-                treasuryCurrency_code: oRequest.treasuryCurrency_code || "",
-                treasuryAmount: oRequest.treasuryAmount ?? null,
-                treasuryDueDate: oRequest.treasuryDueDate ?? null,
-                treasuryUserDivisionRep: oRequest.treasuryUserDivisionRep || "",
+                entries: [this._createEmptyTreasuryEntry()],
+                remarks: "",
                 ...this._createEmptyDemandAssignee()
             });
+            if (!this.getView().getModel("treasuryConfirmation").getProperty("/entries").length) {
+                this.getView().getModel("treasuryConfirmation").setProperty("/entries", [this._createEmptyTreasuryEntry()]);
+            }
             this.byId("treasuryConfirmationDialog").open();
+        },
+
+        onAddTreasuryRow() {
+            const oModel = this.getView().getModel("treasuryConfirmation");
+            oModel.setProperty("/entries", [...oModel.getProperty("/entries"), this._createEmptyTreasuryEntry()]);
+        },
+
+        onRemoveTreasuryRow(oEvent) {
+            const oModel = this.getView().getModel("treasuryConfirmation");
+            const iIndex = Number(oEvent.getSource().getBindingContext("treasuryConfirmation").getPath().split("/").pop());
+            const aEntries = oModel.getProperty("/entries").filter((_, index) => index !== iIndex);
+            oModel.setProperty("/entries", aEntries.length ? aEntries : [this._createEmptyTreasuryEntry()]);
         },
 
         onTreasuryConfirmationCancel() {
@@ -1452,20 +1493,24 @@ sap.ui.define([
 
         async onTreasuryConfirmationConfirm() {
             const oData = this.getView().getModel("treasuryConfirmation").getData();
-            const aMissing = [
-                "treasuryEntity_code", "debitAccountName", "debitAccountNumber",
-                "beneficiary", "treasuryCurrency_code", "treasuryAmount", "treasuryDueDate", "treasuryUserDivisionRep"
-            ].filter((sField) => !this._hasFormValue(oData[sField]));
+            // const aRequiredFields = ["paymentReceivedDate", "treasuryRequestDate", "entity_code", "bankName",
+            //     "debitAccount", "beneficiary", "currency_code", "amount", "dueDate", "paymentMode",
+            //     "userDivisionRepresentative", "i2pTeamMember"];
+            // const aMissing = !oData.entries?.length || oData.entries.some((oEntry) =>
+            //     aRequiredFields.some((sField) => !this._hasFormValue(oEntry[sField])) || !Number.isFinite(Number(oEntry.amount))
+            // );
 
-            if (aMissing.length) {
-                MessageBox.warning(this.getText("treasuryConfirmationRequiredMessage"));
-                return;
-            }
+            // if (aMissing) {
+            //     MessageBox.warning(this.getText("treasuryConfirmationRequiredMessage"));
+            //     return;
+            // }
             if (!oData.processorUser_ID && !oData.processorTeam_ID) {
                 MessageBox.warning(this.getText("selectProcessorOrTeamMessage"));
                 return;
             }
-
+            const aEntries = oData.entries
+            .map((oEntry) => this._cleanDemandEntry(oEntry))
+            .filter((oEntry) => !this._isEmptyDemandEntry(oEntry));
             this.showBusy();
 
             try {
@@ -1482,11 +1527,6 @@ sap.ui.define([
                     return;
                 }
 
-                const fAmount = Number(oData.treasuryAmount);
-                if (!Number.isFinite(fAmount)) {
-                    MessageBox.warning(this.getText("invalidAmountMessage"));
-                    return;
-                }
                 const aExistingTasks = await this._readList("/ProcessTasks", {
                     filters: [
                         new Filter("request_ID", FilterOperator.EQ, this._sSelectedRequestId),
@@ -1511,28 +1551,23 @@ sap.ui.define([
                 //     return;
                 // }
 
-                await this.updateEntry(`/ProcessRequests(${this._sSelectedRequestId})`, {
-                    treasuryEntity_code: oData.treasuryEntity_code,
-                    debitAccountName: oData.debitAccountName,
-                    debitAccountNumber: oData.debitAccountNumber,
-                    beneficiary: oData.beneficiary,
-                    treasuryCurrency_code: oData.treasuryCurrency_code,
-                    treasuryAmount: fAmount,
-                    treasuryDueDate: oData.treasuryDueDate,
-                    treasuryUserDivisionRep: oData.treasuryUserDivisionRep
-                });
-
                 // referenceNumber, processorTeamName, isTeamTask, team-member sync,
                 // team notification, and the parent request's SLA/currentStep refresh
                 // all happen automatically via the ProcessTasks before/after CREATE hooks
-                await this.createEntry("/ProcessTasks", {
+                const oCreatedTask = await this.createEntry("/ProcessTasks", {
                     request_ID: this._sSelectedRequestId,
                     stepNo: iStepNo,
                     taskName: "Treasury Confirmation",
                     // processorTeam_ID: oTreasuryTeam.ID,
-                    ...this._demandTaskAssignment(oData),
+                    ...this._demandTaskAssignment(oData), purpose: oData.purpose,
                     status_code: "OPEN"
                 });
+               await Promise.all(aEntries.map((oEntry) => this.createEntry("/TreasuryEntries", {
+                    ...oEntry,
+                    request_ID: this._sSelectedRequestId,
+                    task_ID: oCreatedTask.ID,
+                    amount: oEntry.amount === null ? null : Number(oEntry.amount)
+                })));
 
                 // Not written automatically outside the custom action - add it explicitly
                 const sActor = await this._getCurrentUserActor();
@@ -1567,16 +1602,28 @@ sap.ui.define([
         _hasFormValue(vValue) {
             return vValue !== null && vValue !== undefined && String(vValue).trim() !== "";
         },
+        _cleanDemandEntry(oEntry) {
+            return Object.fromEntries(Object.entries(oEntry).map(([sKey, vValue]) =>
+                [sKey, (vValue === "" || vValue === undefined) ? null : vValue]
+            ));
+        },
+
+        _isEmptyDemandEntry(oEntry) {
+            return Object.values(oEntry).every((vValue) => vValue === null || vValue === undefined || vValue === "");
+        },
 
         _createEmptyWhtClearance() {
             return {
-                whtEntity_code: "",
-                whtVendor: "",
-                whtCurrency_code: "",
-                whtAmount: null,
-                whtDueDate: null,
-                whtUserDivisionRep: "",
+                entries: [this._createEmptyWhtEntry()],
+                purpose: "",
                 ...this._createEmptyDemandAssignee()
+            };
+        },
+
+        _createEmptyWhtEntry() {
+            return {
+                entity_code: "", vendor: "", currency_code: "", amount: null,
+                dueDate: null, userDivisionRepresentative: ""
             };
         },
 
@@ -1590,15 +1637,26 @@ sap.ui.define([
 
             // Autofill from whatever the request already has
             this.getView().getModel("whtClearance").setData({
-                whtEntity_code: oRequest.whtEntity_code || "",
-                whtVendor: oRequest.whtVendor || "",
-                whtCurrency_code: oRequest.whtCurrency_code || "",
-                whtAmount: oRequest.whtAmount ?? null,
-                whtDueDate: oRequest.whtDueDate ?? null,
-                whtUserDivisionRep: oRequest.whtUserDivisionRep || "",
+                entries: [this._createEmptyWhtEntry()],
+                remarks: "",
                 ...this._createEmptyDemandAssignee()
             });
+            if (!this.getView().getModel("whtClearance").getProperty("/entries").length) {
+                this.getView().getModel("whtClearance").setProperty("/entries", [this._createEmptyWhtEntry()]);
+            }
             this.byId("whtClearanceDialog").open();
+        },
+
+        onAddWhtRow() {
+            const oModel = this.getView().getModel("whtClearance");
+            oModel.setProperty("/entries", [...oModel.getProperty("/entries"), this._createEmptyWhtEntry()]);
+        },
+
+        onRemoveWhtRow(oEvent) {
+            const oModel = this.getView().getModel("whtClearance");
+            const iIndex = Number(oEvent.getSource().getBindingContext("whtClearance").getPath().split("/").pop());
+            const aEntries = oModel.getProperty("/entries").filter((_, index) => index !== iIndex);
+            oModel.setProperty("/entries", aEntries.length ? aEntries : [this._createEmptyWhtEntry()]);
         },
 
         onWhtClearanceCancel() {
@@ -1607,20 +1665,22 @@ sap.ui.define([
 
         async onWhtClearanceConfirm() {
             const oData = this.getView().getModel("whtClearance").getData();
-            const aMissing = [
-                "whtEntity_code", "whtVendor", "whtCurrency_code",
-                "whtAmount", "whtDueDate", "whtUserDivisionRep"
-            ].filter((sField) => !this._hasFormValue(oData[sField]));
+            // const aRequiredFields = ["entity_code", "vendor", "currency_code", "amount", "dueDate", "userDivisionRepresentative"];
+            // const aMissing = !oData.entries?.length || oData.entries.some((oEntry) =>
+            //     aRequiredFields.some((sField) => !this._hasFormValue(oEntry[sField])) || !Number.isFinite(Number(oEntry.amount))
+            // );
 
-            if (aMissing.length) {
-                MessageBox.warning(this.getText("whtClearanceRequiredMessage"));
-                return;
-            }
+            // if (aMissing) {
+            //     MessageBox.warning(this.getText("whtClearanceRequiredMessage"));
+            //     return;
+            // }
              if (!oData.processorUser_ID && !oData.processorTeam_ID) {
                 MessageBox.warning(this.getText("selectProcessorOrTeamMessage"));
                 return;
             }
-
+            const aEntries = oData.entries
+            .map((oEntry) => this._cleanDemandEntry(oEntry))
+            .filter((oEntry) => !this._isEmptyDemandEntry(oEntry));
             this.showBusy();
 
             try {
@@ -1634,12 +1694,6 @@ sap.ui.define([
 
                 if (!Number.isInteger(Number(iStepNo)) || Number(iStepNo) <= 0) {
                     MessageBox.warning(this.getText("noActiveStepMessage"));
-                    return;
-                }
-
-                const fAmount = Number(oData.whtAmount);
-                if (!Number.isFinite(fAmount)) {
-                    MessageBox.warning(this.getText("invalidAmountMessage"));
                     return;
                 }
 
@@ -1666,23 +1720,20 @@ sap.ui.define([
                 //     return;
                 // }
 
-                await this.updateEntry(`/ProcessRequests(${this._sSelectedRequestId})`, {
-                    whtEntity_code: oData.whtEntity_code,
-                    whtVendor: oData.whtVendor,
-                    whtCurrency_code: oData.whtCurrency_code,
-                    whtAmount: fAmount,
-                    whtDueDate: oData.whtDueDate,
-                    whtUserDivisionRep: oData.whtUserDivisionRep
-                });
-
-                await this.createEntry("/ProcessTasks", {
+                const oCreatedTask = await this.createEntry("/ProcessTasks", {
                     request_ID: this._sSelectedRequestId,
                     stepNo: iStepNo,
                     taskName: "WHT Clearance",
                     // processorTeam_ID: oTaxTeam.ID,
-                    ...this._demandTaskAssignment(oData),
+                    ...this._demandTaskAssignment(oData), purpose: oData.purpose,
                     status_code: "OPEN"
                 });
+               await Promise.all(aEntries.map((oEntry) => this.createEntry("/WhtEntries", {
+                    ...oEntry,
+                    request_ID: this._sSelectedRequestId,
+                    task_ID: oCreatedTask.ID,
+                    amount: oEntry.amount === null ? null : Number(oEntry.amount)
+                })));
                 const sActor = await this._getCurrentUserActor();
                 await this.createEntry("/ProcessHistory", {
                     request_ID: this._sSelectedRequestId,
@@ -1712,7 +1763,7 @@ sap.ui.define([
         return;
     }
 
-    this.getView().getModel("budgetCheck").setData(this._createEmptyDemandAssignee());
+    this.getView().getModel("budgetCheck").setData({ ...this._createEmptyDemandAssignee(), purpose: "" });
     this.byId("budgetCheckDialog").open();
 },
 
@@ -1761,7 +1812,7 @@ async onBudgetCheckConfirm() {
             request_ID: this._sSelectedRequestId,
             stepNo: iStepNo,
             taskName: "Budget Check",
-            ...this._demandTaskAssignment(oData),
+            ...this._demandTaskAssignment(oData), purpose: oData.purpose,
             status_code: "OPEN"
         });
 
@@ -1844,6 +1895,8 @@ async onBudgetCheckConfirm() {
             oModel.setProperty("/user_ID", "");
             oModel.setProperty("/email", "");
             oModel.setProperty("/department", "");
+            oModel.setProperty("/team_ID", "");
+            oModel.setProperty("/teamName", "");
         },
 
         onPartyValueHelpSearch(oEvent) {
@@ -1865,7 +1918,7 @@ async onBudgetCheckConfirm() {
         async onAddPartyConfirm() {
             const oParty = this.getView().getModel("newParty").getData();
 
-            if (!oParty.user_ID) {
+            if (!oParty.user_ID && !oParty.team_ID) {
                 MessageBox.warning(this.getText("selectPartyMessage"));
                 return;
             }
@@ -1876,6 +1929,7 @@ async onBudgetCheckConfirm() {
                 await this.createEntry("/ProcessInvolvedParties", {
                     request_ID: this._sSelectedRequestId,
                     user_ID: oParty.user_ID,
+                    team_ID: oParty.team_ID,
                     purpose: oParty.purpose
                 });
                 this.byId("addPartyDialog").close();
@@ -1902,7 +1956,7 @@ async onBudgetCheckConfirm() {
             this.showBusy();
 
             try {
-                const oRecipient = await this.callAction("resolveInvolvedPartyNotificationRecipient", {
+                const oRecipient = await this.callAction("resolveInvolvedPartyNotificationRecipients", {
                     partyId: sPartyId
                 });
                 const sRequestTitle = oContext.getProperty("request/title")
@@ -1912,11 +1966,7 @@ async onBudgetCheckConfirm() {
                 const sSubject = this.getText("partyNotificationSubject", [sRequestTitle]);
                 const sBody = this.getText("partyNotificationBody", [sRequestTitle, sPurpose, window.location.href]);
 
-                if (oRecipient.delegated) {
-                    MessageToast.show(this.getText("notificationDelegatedMessage", [oRecipient.recipient]));
-                }
-
-                window.location.href = `mailto:${encodeURIComponent(oRecipient.recipient)}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
+                window.location.href = `mailto:${oRecipient.recipients}?subject=${encodeURIComponent(sSubject)}&body=${encodeURIComponent(sBody)}`;
             } catch (oError) {
                 MessageBox.error(this.getErrorMessage(oError, this.getText("partyEmailMissingMessage")));
             } finally {
@@ -2468,7 +2518,7 @@ async onBudgetCheckConfirm() {
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,paymentMethod,typeOfPayment,guaranteeType,paymentSubCategory"
+                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,paymentMethod,typeOfPayment,guaranteeType,paymentSubCategory,treasuryEntries,whtEntries"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -2528,7 +2578,7 @@ async onBudgetCheckConfirm() {
         _bindRequestSectionTables(sRequestId) {
             this._bindRequestSectionTable("requestTasksTable", "/RequestDetailTasks", sRequestId, {
                 parameters: {
-                    expand: "request"
+                    expand: "request,treasuryEntries,whtEntries"
                 }
             });
             this._bindRequestSectionTable("requestPartiesTable", "/ProcessInvolvedParties", sRequestId);
@@ -2624,7 +2674,7 @@ async onBudgetCheckConfirm() {
             try {
                 const oTask = await this._readEntry(sTaskPath, {
                     urlParameters: {
-                        "$expand": "request"
+                        "$expand": "request,treasuryEntries,whtEntries"
                     }
                 });
 
@@ -2635,7 +2685,7 @@ async onBudgetCheckConfirm() {
                 oTaskPage.bindElement({
                     path: sTaskPath,
                     parameters: {
-                        expand: "request"
+                        expand: "request,treasuryEntries,whtEntries"
                     }
                 });
                 this.getView().getModel("statusEdit").setProperty("/taskStatus", oTask.status_code || "");
@@ -2677,15 +2727,22 @@ async onBudgetCheckConfirm() {
             }
 
             const sRemarks = this.byId("requestTaskRemarksTextArea").getValue();
-            let iSendBackStepNo;
+            // let iSendBackStepNo;
+            // if (sAction === "sendBack") {
+            //     iSendBackStepNo = await this._chooseSendBackStep();
 
+            //     if (!iSendBackStepNo) {
+            //         return;
+            //     }
+            // }
+            let oSendBack;
             if (sAction === "sendBack") {
-                iSendBackStepNo = await this._chooseSendBackStep();
+                oSendBack = await this._chooseSendBackStep();
 
-                if (!iSendBackStepNo) {
+                if (!oSendBack) {
                     return;
                 }
-            }
+            }    
 
             this.showBusy();
 
@@ -2700,8 +2757,14 @@ async onBudgetCheckConfirm() {
                         remarks: sRemarks
                     };
 
+                    // if (sAction === "sendBack") {
+                    //     oPayload.targetStepNo = iSendBackStepNo;
+                    // }
                     if (sAction === "sendBack") {
-                        oPayload.targetStepNo = iSendBackStepNo;
+                        oPayload.targetStepNo = oSendBack.stepNo;
+                        if (oSendBack.processorUserId) {
+                            oPayload.processorUserId = oSendBack.processorUserId;
+                        }
                     }
 
                     await this.callAction(sAction, oPayload);
@@ -2833,6 +2896,7 @@ async onBudgetCheckConfirm() {
                 processorTeam_ID: "",
                 processorTeamName: "",
                 role: "",
+                purpose: "",
                 isMandatory: false
             };
         },
@@ -2843,6 +2907,8 @@ async onBudgetCheckConfirm() {
                 displayName: "",
                 email: "",
                 department: "",
+                team_ID: "",
+                teamName: "",
                 purpose: ""
             };
         },
@@ -2956,6 +3022,32 @@ async onBudgetCheckConfirm() {
             oModel.setProperty("/displayName", oContext.getProperty("displayName"));
             oModel.setProperty("/email", oContext.getProperty("email"));
             oModel.setProperty("/department", oContext.getProperty("department"));
+            oModel.setProperty("/team_ID", "");
+            oModel.setProperty("/teamName", "");
+        },
+
+        onPartyTeamSuggestionSelected(oEvent) {
+            this._applyPartyTeamSelection(this._getSuggestionContext(oEvent));
+        },
+
+        _applyPartyTeamSelection(oContext) {
+            if (!oContext) return;
+            const oModel = this.getView().getModel("newParty");
+            oModel.setProperty("/team_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/teamName", oContext.getProperty("name"));
+            oModel.setProperty("/user_ID", "");
+            oModel.setProperty("/displayName", "");
+            oModel.setProperty("/email", "");
+            oModel.setProperty("/department", "");
+        },
+
+        onPartyTeamLiveChange() {
+            const oModel = this.getView().getModel("newParty");
+            oModel.setProperty("/team_ID", "");
+            oModel.setProperty("/user_ID", "");
+            oModel.setProperty("/displayName", "");
+            oModel.setProperty("/email", "");
+            oModel.setProperty("/department", "");
         },
 
         _addEmailToRecipients(aUsers) {
@@ -3279,10 +3371,7 @@ async onBudgetCheckConfirm() {
             const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
             const iCurrentStepNo = Number(oContext?.getProperty("stepNo") || 0);
 
-            oTaskActionModel.setData({
-                sendBackStepNo: "",
-                steps: []
-            });
+            oTaskActionModel.setData({ sendBackStepNo: "", steps: [], requestTeamId: "" });
 
             if (!sSubProcessTypeCode) {
                 return;
@@ -3297,12 +3386,14 @@ async onBudgetCheckConfirm() {
                     .filter((oStep) => Number(oStep.stepNo || 0) < iCurrentStepNo)
                     .map((oStep) => ({
                         stepNo: String(oStep.stepNo),
-                        text: this.getText("sendBackStepOptionText", [oStep.stepNo, oStep.stepName || ""])
+                        text: this.getText("sendBackStepOptionText", [oStep.stepNo, oStep.stepName || ""]),
+                        teamId: oStep.processorTeam_ID || ""
                     }));
 
                 oTaskActionModel.setData({
                     sendBackStepNo: aStepItems[0]?.stepNo || "",
-                    steps: aStepItems
+                    steps: aStepItems,
+                    requestTeamId: oContext?.getProperty("request/processorTeam_ID") || ""
                 });
             } catch (oError) {
                 MessageToast.show(this.getText("sendBackStepsLoadErrorMessage"));
@@ -3310,7 +3401,9 @@ async onBudgetCheckConfirm() {
         },
 
         _chooseSendBackStep() {
-            const aSteps = this.getView().getModel("taskAction").getProperty("/steps") || [];
+            const oTaskActionModel = this.getView().getModel("taskAction");
+            const aSteps = oTaskActionModel.getProperty("/steps") || [];
+            const sRequestTeamId = oTaskActionModel.getProperty("/requestTeamId") || "";
 
             if (!aSteps.length) {
                 MessageBox.warning(this.getText("noPreviousSendBackStepsMessage"));
@@ -3318,29 +3411,74 @@ async onBudgetCheckConfirm() {
             }
 
             return new Promise((resolve) => {
-                const oSelect = new Select({
+                const oMemberTemplate = new ListItem({
+                    key: "{user_ID}",
+                    text: "{displayName}",
+                    additionalText: "{email}"
+                });
+                const oProcessorSelect = new Select({
+                    width: "100%",
+                    forceSelection: false,
+                    showSecondaryValues: true
+                });
+                const oHint = new Text({ wrapping: true }).addStyleClass("sapUiTinyMarginTop");
+
+                // Reload the processor list for the team that owns the selected step
+                const fnLoadTeamMembers = () => {
+                    const oStep = aSteps.find((oItem) => String(oItem.stepNo) === String(oStepSelect.getSelectedKey()));
+                    const sTeamId = oStep?.teamId || sRequestTeamId;
+
+                    oProcessorSelect.setSelectedKey("");
+                    oProcessorSelect.unbindItems();
+
+                    if (!sTeamId) {
+                        oProcessorSelect.setEnabled(false);
+                        oHint.setText(this.getText("sendBackNoTeamForStepText"));
+                        return;
+                    }
+
+                    oProcessorSelect.setEnabled(true);
+                    // oHint.setText(this.getText("sendBackProcessorHintText"));
+                    oProcessorSelect.bindItems({
+                        path: "/TeamMembers",
+                        filters: [
+                            new Filter("team_ID", FilterOperator.EQ, sTeamId),
+                            new Filter("isActive", FilterOperator.EQ, true)
+                        ],
+                        sorter: new Sorter("displayName"),
+                        template: oMemberTemplate,
+                        templateShareable: true
+                    });
+                };
+
+                const oStepSelect = new Select({
                     width: "100%",
                     selectedKey: aSteps[0].stepNo,
-                    items: aSteps.map((oStep) => new Item({
-                        key: oStep.stepNo,
-                        text: oStep.text
-                    }))
+                    items: aSteps.map((oStep) => new Item({ key: oStep.stepNo, text: oStep.text })),
+                    change: fnLoadTeamMembers
                 });
+
                 const oDialog = new Dialog({
                     title: this.getText("sendBackTargetStepDialogTitle"),
-                    contentWidth: "24rem",
+                    contentWidth: "26rem",
                     content: [
-                        new Text({
-                            text: this.getText("sendBackTargetStepDialogText"),
-                            wrapping: true
-                        }),
-                        oSelect
+                        new Text({ text: this.getText("sendBackTargetStepDialogText"), wrapping: true }),
+                        oStepSelect,
+                        new Label({
+                            text: this.getText("sendBackProcessorLabel"),
+                            labelFor: oProcessorSelect
+                        }).addStyleClass("sapUiSmallMarginTop"),
+                        oProcessorSelect,
+                        oHint
                     ],
                     beginButton: new Button({
                         text: this.getText("sendBackButton"),
                         type: "Emphasized",
                         press: () => {
-                            resolve(Number(oSelect.getSelectedKey()));
+                            resolve({
+                                stepNo: Number(oStepSelect.getSelectedKey()),
+                                processorUserId: oProcessorSelect.getSelectedKey() || null
+                            });
                             oDialog.close();
                         }
                     }),
@@ -3353,8 +3491,13 @@ async onBudgetCheckConfirm() {
                     })
                 });
 
-                oDialog.attachAfterClose(() => oDialog.destroy());
+                oDialog.addStyleClass("sapUiContentPadding");
+                oDialog.attachAfterClose(() => {
+                    resolve(null); // no-op if already resolved; covers Esc
+                    oDialog.destroy();
+                });
                 this.getView().addDependent(oDialog);
+                fnLoadTeamMembers();
                 oDialog.open();
             });
         },

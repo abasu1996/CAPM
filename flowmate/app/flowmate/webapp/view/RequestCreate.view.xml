@@ -1761,30 +1761,29 @@
                             </ComboBox>
                             <Label
                                 text="{i18n>totalRentValueLabel}"
-                                required="{create>/isOfnAuthority}"
+                               
                             />
                             <Input
                                 value="{create>/totalRentValue}"
-                                required="{create>/isOfnAuthority}"
                                 type="Number"
                             />
                             <Label
                                 text="{i18n>totalSupervisionValueLabel}"
-                                required="{create>/isOfnAuthority}"
+                                
                             />
                             <Input
                                 value="{create>/totalSupervisionValue}"
                                 type="Number"
-                                required="{create>/isOfnAuthority}"
+                               
                             />
                             <Label
                                 text="{i18n>securityDepositValueLabel}"
-                                required="{create>/isOfnAuthority}"
+                                
                             />
                             <Input
                                 value="{create>/securityDepositValue}"
                                 type="Number"
-                                required="{create>/isOfnAuthority}"
+                                
                             />
                             <Label
                                 text="{i18n>totalValueLabel}"
@@ -1806,19 +1805,19 @@
                             />
                             <Label
                                 text="{i18n>siteIdLabel}"
-                                required="{create>/isOfnAuthority}"
+                                
                             />
                             <Input
                                 value="{create>/siteId}"
-                                required="{create>/isOfnAuthority}"
+                                
                             />
                             <Label
                                 text="{i18n>siteNameLabel}"
-                                required="{create>/isOfnAuthority}"
+                                
                             />
                             <Input
                                 value="{create>/siteName}"
-                                required="{create>/isOfnAuthority}"
+                               
                             />
 
                             <Label text="{i18n>remarksLabel}" />
@@ -3493,7 +3492,20 @@
                                 width="100%"
                                 required="{create>/isNonPoSiteRentStampAdhoc}"
                             />
+                            <Label text="{i18n>glAccountLabel}" />
+                            <Input value="{create>/glAccount}" />
 
+                            <Label text="{i18n>profitCentreLabel}" />
+                            <Input value="{create>/profitCentre}" />
+
+                            <Label
+                                text="{i18n>costCentreLabel}"
+                                required="{create>/isNonPoSiteRentStampAdhoc}"
+                            />
+                            <Input
+                                value="{create>/costCentre}"
+                                required="{create>/isNonPoSiteRentStampAdhoc}"
+                            />
                             <Label text="{i18n>remarksLabel}" />
                             <TextArea
                                 value="{create>/remarks}"
@@ -3593,11 +3605,10 @@
 
                             <Label
                                 text="{i18n>authorityVendorCodeLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
                             <Input
                                 value="{create>/authorityVendorCode}"
-                                required="{create>/isDirectNonPoReimbursement}"
                                 placeholder="{i18n>selectVendorPlaceholder}"
                                 showValueHelp="true"
                                 showSuggestion="true"
@@ -3620,12 +3631,12 @@
 
                             <Label
                                 text="{i18n>authorityVendorNameLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
                             <Input
                                 value="{create>/authorityVendorName}"
                                 editable="false"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
 
                             <Label
@@ -3702,11 +3713,11 @@
 
                             <Label
                                 text="{i18n>wbsElementLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
                             <Input
                                 value="{create>/wbsElement}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
 
                             <Label
@@ -3722,29 +3733,29 @@
 
                             <Label
                                 text="{i18n>ofnReferenceLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
                             <Input
                                 value="{create>/ofnReference}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
 
                             <Label
                                 text="{i18n>siteIdLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
                             <Input
                                 value="{create>/siteId}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
 
                             <Label
                                 text="{i18n>siteNameLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
                             <Input
                                 value="{create>/siteName}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                
                             />
 
                             <Label text="{i18n>remarksLabel}" />
@@ -4755,6 +4766,11 @@
                                 value="{create>/vatAmount}"
                                 type="Number"
                             />
+                            <Label text="{i18n>glAccountLabel}" />
+                            <Input value="{create>/glAccount}" />
+
+                            <Label text="{i18n>costCentreLabel}" />
+                            <Input value="{create>/costCentre}" />
 
                             <Label text="{i18n>remarksLabel}" />
                             <TextArea
@@ -4898,6 +4914,15 @@
                                 value="{create>/customerName}"
                                 editable="false"
                                 required="{create>/isNonPoInterconnectRoamPay}"
+                            />
+                            <Label
+                                text="{i18n>ivDocNumberLabel}"
+                                required="{create>/isNonPoInterconnectRoamPay}"
+                            />
+                            <Input
+                                value="{create>/ivDocNumber}"
+                                required="{create>/isNonPoInterconnectRoamPay}"
+                                maxLength="50"
                             />
 
                             <Label
@@ -5062,6 +5087,19 @@
                                 type="Number"
                                 required="{create>/isNonPoRoamingLiability}"
                                 change=".onLoaSourceFieldChange"
+                            />
+                            <Label text="{i18n>glAccountLabel}" />
+                            <Input value="{create>/glAccount}" />
+
+                            <Label text="{i18n>costCentreLabel}" />
+                            <Input value="{create>/costCentre}" />
+
+                            <Label text="{i18n>remarksLabel}" />
+                            <TextArea
+                                value="{create>/remarks}"
+                                rows="4"
+                                width="100%"
+                                placeholder="{i18n>requestRemarksPlaceholder}"
                             />
                         </form:SimpleForm>
                     </content>
@@ -6094,32 +6132,30 @@
 
                             <Label
                                 text="{i18n>stampDutyLabel}"
-                                required="{create>/isNonPoCcSettlement}"
                             />
                             <Input
                                 value="{create>/stampDuty}"
                                 type="Number"
-                                required="{create>/isNonPoCcSettlement}"
                             />
 
                             <Label
                                 text="{i18n>latePaymentFeeLabel}"
-                                required="{create>/isNonPoCcSettlement}"
+                               
                             />
                             <Input
                                 value="{create>/latePaymentFee}"
                                 type="Number"
-                                required="{create>/isNonPoCcSettlement}"
+                                
                             />
 
                             <Label
                                 text="{i18n>interestChargesLabel}"
-                                required="{create>/isNonPoCcSettlement}"
+                                
                             />
                             <Input
                                 value="{create>/interestCharges}"
                                 type="Number"
-                                required="{create>/isNonPoCcSettlement}"
+                               
                             />
 
                             <Label
@@ -6231,6 +6267,15 @@
                                         wrapping="true"
                                     />
                                 </Column>
+                                <Column width="7rem">
+                                    <Text text="{i18n>currencyLabel}" wrapping="true" />
+                                </Column>
+                                <!-- <Column width="9rem">
+                                    <Text text="{i18n>vendorCodeLabel}" wrapping="true" />
+                                </Column>
+                                <Column width="12rem">
+                                    <Text text="{i18n>vendorNameLabel}" wrapping="true" />
+                                </Column> -->
                                 <Column
                                     width="8rem"
                                     hAlign="Center"
@@ -6286,6 +6331,9 @@
                                             text="{create>transactionAmountLocalCurrency}"
                                             textAlign="End"
                                         />
+                                        <Text text="{create>currency_code}" />
+                                        <!-- <Text text="{create>vendorCode}" wrapping="true" />
+                                        <Text text="{create>vendorName}" wrapping="true" /> -->
                                         <core:Icon
                                             src="{= ${create>availabilityOfInvoice} ? 'sap-icon://accept' : 'sap-icon://decline' }"
                                             color="{= ${create>availabilityOfInvoice} ? '#107e3e' : '#bb0000' }"
@@ -6423,11 +6471,11 @@
 
                             <Label
                                 text="{i18n>processingBankAccountDetailsLabel}"
-                                required="{create>/isNonPoMerchantSettlements}"
+                                
                             />
                             <Input
                                 value="{create>/processingBankAccountDetails}"
-                                required="{create>/isNonPoMerchantSettlements}"
+                                
                             />
                         </form:SimpleForm>
                     </content>
@@ -6951,16 +6999,14 @@
 
                             <Label
                                 text="{i18n>tenderDateLabel}"
-                                required="{create>/isBankGuarantee}"
                             />
                             <DatePicker
                                 id="bankGuaranteeTenderDate"
                                 value="{
-                    'path': 'create>/tenderDate',
-                    'type': 'sap.ui.model.type.Date',
-                    'formatOptions': { 'pattern': 'yyyy-MM-dd' }
-                }"
-                                required="{create>/isBankGuarantee}"
+                                'path': 'create>/tenderDate',
+                                'type': 'sap.ui.model.type.Date',
+                                'formatOptions': { 'pattern': 'yyyy-MM-dd' }
+                            }"
                                 placeholder="{i18n>selectDatePlaceholder}"
                             />
 
@@ -6992,11 +7038,9 @@
 
                             <Label
                                 text="{i18n>bidTenderReferenceLabel}"
-                                required="{create>/isBankGuarantee}"
                             />
                             <Input
                                 value="{create>/bidTenderReference}"
-                                required="{create>/isBankGuarantee}"
                             />
 
                             <Label
@@ -7028,7 +7072,6 @@
 
                             <Label
                                 text="{i18n>specificBgFormatAvailableLabel}"
-                                required="{create>/isBankGuarantee}"
                             />
                             <CheckBox
                                 selected="{create>/specificBgFormatAvailable}"
@@ -7107,7 +7150,35 @@
                         </form:SimpleForm>
                     </content>
                 </Panel>
-
+                <Panel
+                    class="flowmateCreateSection"
+                    backgroundDesign="Transparent"
+                    expandable="false">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <core:Icon src="sap-icon://chain-link" />
+                            <Label text="Document Archival Link" />
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <content>
+                        <VBox class="flowmateDialogContent">
+                            <Text
+                                class="flowmateSectionHelpText"
+                                text="Optional link to the archived supporting documents." />
+                            <Input
+                                value="{create>/documentArchiveUrl}"
+                                type="Url"
+                                placeholder="Paste document link"
+                                maxLength="2048" />
+                            <Link
+                                class="sapUiSmallMarginTop"
+                                text="Open document archival link"
+                                href="{create>/documentArchiveUrl}"
+                                target="_blank"
+                                visible="{= !!${create>/documentArchiveUrl} }" />    
+                        </VBox>
+                    </content>
+                </Panel>
                 <Panel
                     class="flowmateCreateSection"
                     backgroundDesign="Transparent"
@@ -7541,6 +7612,24 @@
                 >
                     <Text text="{i18n>sesReferenceLabel}" />
                 </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="{i18n>currencyLabel}" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="{i18n>vendorCodeLabel}" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Desktop"
+                >
+                    <Text text="{i18n>vendorNameLabel}" />
+                </Column>
             </columns>
             <ColumnListItem type="Active">
                 <cells>
@@ -7548,6 +7637,9 @@
                     <Text text="{title}" />
                     <Text text="{poNumber}" />
                     <Text text="{sesReference}" />
+                    <Text text="{currency_code}" />
+                    <Text text="{vendorCode}" />
+                    <Text text="{vendorName}" wrapping="true" />
                 </cells>
             </ColumnListItem>
         </TableSelectDialog>
@@ -7759,6 +7851,7 @@
                         value="{directForeignTravelEdit>/perDayAllowanceUSD}"
                         type="Number"
                         required="true"
+                        liveChange=".onTwoDecimalLiveChange"
                     />
 
                     <Label
@@ -7773,9 +7866,9 @@
 
                     <Label text="{i18n>exchangeRateLabel}" />
                     <Input
-                        value="{directForeignTravelEdit>/exchangeRate}"
-                        type="Number"
-                    />
+                    value="{directForeignTravelEdit>/exchangeRate}"
+                    type="Number"
+                    liveChange=".onTwoDecimalLiveChange" />
 
                     <Label text="{i18n>totalInUSDLabel}" />
                     <HBox
@@ -8077,7 +8170,8 @@
                             <core:ListItem
                                 key="{ID}"
                                 text="{referenceNumber}"
-                                additionalText="{title}"
+                                additionalText="{= ${vendorCode} ? ${vendorCode} + ' - ' + ${vendorName} + ' (' + ${currency_code} + ')' : ${title} }"
+                                
                             />
                         </suggestionItems>
                     </Input>
@@ -8119,6 +8213,14 @@
                         width="100%"
                         editable="false"
                     />
+                    <Label text="{i18n>currencyLabel}" />
+                    <Input value="{settlementEntryEdit>/currency_code}" editable="false" />
+
+                    <Label text="{i18n>vendorCodeLabel}" />
+                    <Input value="{settlementEntryEdit>/vendorCode}" editable="false" />
+
+                    <Label text="{i18n>vendorNameLabel}" />
+                    <Input value="{settlementEntryEdit>/vendorName}" editable="false" />
 
                     <Label
                         text="{i18n>transactionAmountDocumentCurrencyLabel}"

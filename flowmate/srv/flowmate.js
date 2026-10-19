@@ -98,7 +98,7 @@ const PO_ADV_SETTLEMENT_100_FIELDS = {
   optional: ["remarks"]
 };
 const NON_PO_OFN_FIELDS = {
-  required: [
+required: [
     "paymentCategory_code",
     "businessEntity_code",
     "currency_code",
@@ -112,14 +112,16 @@ const NON_PO_OFN_FIELDS = {
     "paymentMethod_code",
     "totalValue",
     "ofnReference",
+    "wbsElement"
+],
+optional: [
+    "siteName",
     "siteId",
-    "wbsElement",
     "totalRentValue",
     "totalSupervisionValue",
     "securityDepositValue",
-    "siteName"
-  ],
-  optional: ["remarks"]
+    "remarks"
+]
 };
 const NON_PO_IDEAMART_APPMAKER_FIELDS = {
   required: [
@@ -154,14 +156,26 @@ const NON_PO_SITE_SHARING_FIELDS = {
   ]
 };
 const DIRECT_NON_PO_REIMBURSEMENT_FIELDS = {
-  required: [
-    "paymentCategory_code", "businessEntity_code", "currency_code",
-    "authorityVendorCode", "authorityVendorName",
-    "employeeVendorCode", "employeeVendorName",
-    "invoiceDate", "invoiceNumber", "costCentre", "wbsElement",
-    "totalValue", "ofnReference", "siteId", "siteName"
-  ],
-  optional: ["remarks"]
+    required: [
+        "paymentCategory_code",
+        "businessEntity_code",
+        "currency_code",
+        "employeeVendorCode",
+        "employeeVendorName",
+        "invoiceDate",
+        "invoiceNumber",
+        "costCentre",
+        "totalValue"
+    ],
+    optional: [
+        "authorityVendorCode",
+        "authorityVendorName",
+        "wbsElement",
+        "ofnReference",
+        "siteId",
+        "siteName",
+        "remarks"
+    ]
 };
 const NON_PO_TAX_LIABILITY_FIELDS = {
   required: [
@@ -188,7 +202,8 @@ required: [
     "currency_code",
     "customer_ID",
     "customerCode",
-    "customerName"
+    "customerName",
+    "ivDocNumber"
 ],
 optional: ["remarks", "whtCertificateReference"]
 };
@@ -306,10 +321,10 @@ const SUBTYPE_FIELDS = {
     required: [
       "paymentCategory_code", "businessEntity_code",
       "vendor_ID", "vendorCode", "vendorName",
-      "currency_code", "totalPayableValue", "paymentDescription"
+      "currency_code", "totalPayableValue", "paymentDescription","costCentre"
     ],
     optional: [
-      "invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
+      "glAccount","profitCentre","invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
     ]
   },
   DIRECT_NON_PO_REIMB_LIAB: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
@@ -345,7 +360,7 @@ const SUBTYPE_FIELDS = {
       "totalInvoiceValueRelevantCurrency",
       "totalInvoiceValueLKR"
     ],
-    optional: ["vatAmount", "remarks"]
+    optional: ["vatAmount", "glAccount", "costCentre", "remarks"]
   },
   NON_PO_INTERCONNECTION_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
   NON_PO_ROAMING_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
@@ -360,7 +375,7 @@ const SUBTYPE_FIELDS = {
       "totalInvoiceValueRelevantCurrency",
       "totalInvoiceValueLKR"
     ],
-    optional: []
+    optional: ["glAccount", "costCentre", "remarks"]
   },
   NON_PO_STAR_POINT_PAYMENTS: {
     required: [
@@ -422,21 +437,12 @@ const SUBTYPE_FIELDS = {
     optional: ["invoiceDate", "invoiceNumber", "budgetCode", "remarks"]
   },
   NON_PO_CC_SETTLEMENT: {
-    required: [
-      "paymentCategory_code",
-      "businessEntity_code",
-      "currency_code",
-      "bankName",
-      "ccCustodianName",
-      "ccPeriodFromDate",
-      "ccPeriodToDate",
-      "settlementEntries",
-      "stampDuty",
-      "latePaymentFee",
-      "interestCharges",
-      "totalAmountPayableCcSettlement"
-    ],
-    optional: ["annualFee", "remarks"]
+      required: [
+          "paymentCategory_code", "businessEntity_code", "currency_code",
+          "bankName", "ccCustodianName", "ccPeriodFromDate", "ccPeriodToDate",
+          "settlementEntries", "totalAmountPayableCcSettlement"
+      ],
+      optional: ["annualFee", "stampDuty", "latePaymentFee", "interestCharges", "remarks"]
   },
   NON_PO_MERCHANT_SETTLEMENTS: {
     required: [
@@ -445,10 +451,10 @@ const SUBTYPE_FIELDS = {
       "currency_code",
       "merchantEntityValues",
       "highestValueInExcel",
-      "aggregateTotalValueAcrossAllFiles",
-      "processingBankAccountDetails"
+      "aggregateTotalValueAcrossAllFiles"
+      
     ],
-    optional: []
+    optional: ["processingBankAccountDetails"]
   },
   NON_PO_MISC_RECEIPTS: {
     required: [
@@ -471,26 +477,12 @@ const SUBTYPE_FIELDS = {
   },
   BANK_GUARANTEE: {
     required: [
-      "paymentCategory_code",
-      "businessEntity_code",
-      "currency_code",
-      "amountPayable",
-      "guaranteeType_code",
-      "beneficiaryName",
-      "beneficiaryAddress",
-      "commencingDate",
-      "expiryDate",
-      "claimDate",
-      "tenderDate",
-      "expectedDate",
-      "purposeOfBankGuarantee",
-      "bidTenderReference",
-      "collectorName",
-      "collectorNic",
-      "collectorContactNumber",
-      "specificBgFormatAvailable"
-    ],
-    optional: ["remarks"]
+      "paymentCategory_code", "businessEntity_code", "currency_code",
+      "amountPayable", "guaranteeType_code", "beneficiaryName", "beneficiaryAddress",
+      "commencingDate", "expiryDate", "claimDate", "expectedDate",
+      "purposeOfBankGuarantee", "collectorName", "collectorNic", "collectorContactNumber"
+  ],
+  optional: ["tenderDate", "bidTenderReference", "specificBgFormatAvailable", "remarks"]
   }
 };
 const LOA_AMOUNT_SOURCE_FIELD = {
@@ -2080,12 +2072,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("CREATE", ProcessInvolvedParties, async (req) => {
-      if (!req.data.request_ID || !req.data.user_ID) {
-        return req.reject(400, "Select a request and an involved party");
+      if (!req.data.request_ID || (!req.data.user_ID && !req.data.team_ID) || (req.data.user_ID && req.data.team_ID)) {
+        return req.reject(400, "Select either an involved party or an involved party team");
       }
 
       const oRequest = await this._getRequest(req, req.data.request_ID);
-      const oUser = await this._getUser(req, req.data.user_ID, Users);
+      const oUser = req.data.user_ID ? await this._getUser(req, req.data.user_ID, Users) : null;
 
       if (!oRequest) {
         return req.reject(400, "Selected request was not found");
@@ -2095,14 +2087,21 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return this._rejectLockedRequest(req);
       }
 
-      if (!oUser) {
+      if (req.data.user_ID && !oUser) {
         return req.reject(400, "Selected involved party was not found");
+      }
+
+      if (req.data.team_ID) {
+        const oTeam = await this._getTeam(req, req.data.team_ID, Teams);
+        if (!oTeam) return req.reject(400, "Selected involved party team was not found");
+        req.data.teamName = oTeam.name;
       }
 
       const oExisting = await cds.tx(req).run(
         SELECT.one.from(ProcessInvolvedParties).where({
           request_ID: req.data.request_ID,
-          user_ID: req.data.user_ID
+          user_ID: req.data.user_ID || null,
+          team_ID: req.data.team_ID || null
         })
       );
 
@@ -2111,9 +2110,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       req.data.referenceNumber = await this._nextReferenceNumber(req, ProcessInvolvedParties, "PTY");
-      req.data.displayName = this._userDisplayName(oUser);
-      req.data.email = oUser.email;
-      req.data.department = oUser.department;
+      if (oUser) {
+        req.data.displayName = this._userDisplayName(oUser);
+        req.data.email = oUser.email;
+        req.data.department = oUser.department;
+      } else {
+        // A team belongs exclusively in the Processor Team column.
+        req.data.displayName = null;
+        req.data.email = null;
+        req.data.department = null;
+      }
     });
 
     this.before(["UPDATE", "DELETE"], ProcessInvolvedParties, async (req) => {
@@ -2430,7 +2436,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.on("sendBack", async (req) => {
-      const { taskId, remarks, targetStepNo } = req.data;
+      const { taskId, remarks, targetStepNo, processorUserId  } = req.data;
       const task = await this._getTask(req, taskId);
 
       if (!task) {
@@ -2467,6 +2473,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, `Guided step ${sendBackStepNo} is not configured for this request type`);
       }
 
+      
+      let oAssignee = null;
+      if (processorUserId) {
+        oAssignee = await this._getUser(req, processorUserId, Users);
+        if (!oAssignee) {
+          return req.reject(400, "Select an active user to assign the sent back task to");
+        }
+        const sTargetTeamId = sendBackStep.processorTeam_ID || request.processorTeam_ID;
+        const aTeamIds = await this._activeTeamIdsForUser(oAssignee.ID);
+        if (!sTargetTeamId || !aTeamIds.includes(sTargetTeamId)) {
+          return req.reject(400, `The selected processor must be an active member of the team responsible for step ${sendBackStep.stepNo}`);
+        }
+      }
+      
       await cds.tx(req).run(
         UPDATE(ProcessTasks, taskId).set({
           status_code: TASK_STATUS.SENT_BACK,
@@ -2476,7 +2496,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         })
       );
 
-      await this._createTask(req, task.request_ID, sendBackStep, { request });
+      await this._createTask(req, task.request_ID, sendBackStep, { request, assignToUser: oAssignee });
       const oDeadline = await this._calculateSlaDeadline(req, request.subProcessType_code, sendBackStep.slaDays);
 
       await cds.tx(req).run(
@@ -2495,9 +2515,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         actor: req.user?.id,
         oldStatus: request.status_code,
         newStatus: PROCESS_STATUS.SENT_BACK,
-        remarks: sendBackStep.stepNo === task.stepNo
-          ? remarks
-          : `${remarks || ""} Sent back from step ${task.stepNo || ""} to step ${sendBackStep.stepNo}.`.trim()
+        remarks: (sendBackStep.stepNo === task.stepNo
+        ? (remarks || "")
+        : `${remarks || ""} Sent back from step ${task.stepNo || ""} to step ${sendBackStep.stepNo}.`.trim())
+        + (oAssignee ? ` Assigned to ${this._userDisplayName(oAssignee)}.` : "")
       });
 
       return true;
@@ -3252,6 +3273,31 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       return this._resolveDelegatedRecipient(req, oUser.email, Delegations);
+    });
+
+    this.on("resolveInvolvedPartyNotificationRecipients", async (req) => {
+      const oParty = await cds.tx(req).run(
+        SELECT.one.from(ProcessInvolvedParties).where({ ID: req.data.partyId })
+      );
+      if (!oParty) return req.reject(404, `Involved party ${req.data.partyId} was not found`);
+
+      if (oParty.team_ID) {
+        const aMemberships = await this.master.run(
+          SELECT.from(TeamMembers).columns("user_ID").where({ team_ID: oParty.team_ID, isActive: true })
+        );
+        const aUserIds = [...new Set(aMemberships.map((membership) => membership.user_ID).filter(Boolean))];
+        const aUsers = aUserIds.length ? await this.master.run(
+          SELECT.from(Users).columns("email").where({ ID: { in: aUserIds }, isActive: true })
+        ) : [];
+        const aRecipients = [...new Set(aUsers.map((user) => user.email).filter(Boolean))];
+        if (!aRecipients.length) return req.reject(400, "No active team member has an email address.");
+        return { recipients: aRecipients.join(","), recipientCount: aRecipients.length };
+      }
+
+      const oUser = await this.master.run(SELECT.one.from(Users).where({ ID: oParty.user_ID, isActive: true }));
+      if (!oUser?.email) return req.reject(400, "Please maintain an email first for the involved party.");
+      const oRecipient = await this._resolveDelegatedRecipient(req, oUser.email, Delegations);
+      return { recipients: oRecipient.recipient, recipientCount: 1 };
     });
 
     this.on("sendRequestEmail", async (req) => {
@@ -5830,56 +5876,158 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return steps[steps.length - 1]?.stepNo || currentStep.stepNo;
   }
 
-// When an advance-settlement request completes, complete its predecessor
-// (the advance payment request) as well.
 async _completePredecessorOnSettlement(req, request) {
-  if (!ADV_SETTLEMENT_SUBTYPES.has(request?.subProcessType_code) || !request.predecessor_ID) {
+  const sSubType = request?.subProcessType_code;
+
+  if (sSubType === "NON_PO_CC_SETTLEMENT") {
+    return this._completeCcPaymentsOnSettlement(req, request);
+  }
+  if (ADV_SETTLEMENT_SUBTYPES.has(sSubType)) {
+    return this._completeAdvancePaymentOnSettlement(req, request);
+  }
+}
+
+async _completeAdvancePaymentOnSettlement(req, request) {
+  if (!request.predecessor_ID) {
     return;
   }
 
+  const oPredecessor = await cds.tx(req).run(
+    SELECT.one.from(this.entities.ProcessRequests)
+      .where({ ID: request.predecessor_ID })
+      .forUpdate()
+  );
+
+  // Only an advance payment request is closed by its settlement
+  if (!oPredecessor || !ADVANCE_PAYMENT_SUBTYPES.has(oPredecessor.subProcessType_code)) {
+    return;
+  }
+
+  await this._completePaymentsViaSettlement(req, request, [oPredecessor]);
+}
+
+async _completeCcPaymentsOnSettlement(req, request) {
   const tx = cds.tx(req);
-  const oPredecessor = await tx.run(
-    SELECT.one.from(this.entities.ProcessRequests).where({ ID: request.predecessor_ID }).forUpdate()
-  );
+  const { SettlementEntries } = cds.entities("flowmate.db");
 
-  if (!oPredecessor
-    || this._isLockedRequest(oPredecessor)
-    || oPredecessor.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
-    return; // already closed, or still awaiting LoA approval
-  }
-  // Only an advance payment request to be closed by its settlement
-  if (!ADVANCE_PAYMENT_SUBTYPES.has(oPredecessor.subProcessType_code)) {
+  const aEntries = await tx.run(
+    SELECT.from(SettlementEntries)
+      .columns("paymentRequestRef_ID")
+      .where({ request_ID: request.ID })
+  );
+  const aPaymentIds = [...new Set(
+    aEntries.map((oEntry) => oEntry.paymentRequestRef_ID).filter(Boolean)
+  )];
+
+  if (!aPaymentIds.length) {
     return;
   }
-  // Close its open work so nothing stays in users' task lists
-  await tx.run(
-    UPDATE(this.entities.ProcessTasks).set({
-      status_code: TASK_STATUS.CANCELLED,
-      decision: "SUPERSEDED",
-      remarks: `Closed because settlement request ${request.referenceNumber || request.ID} was completed`,
-      completedAt: this._now()
-    }).where({
-      request_ID: oPredecessor.ID,
-      status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
-    })
+
+  const aPayments = await tx.run(
+    SELECT.from(this.entities.ProcessRequests)
+      .where({
+        ID: { in: aPaymentIds },
+        subProcessType_code: "NON_PO_CC_PAYMENT"
+      })
+      .forUpdate()
   );
 
-  await tx.run(
-    UPDATE(this.entities.ProcessRequests, oPredecessor.ID).set({
-      status_code: PROCESS_STATUS.COMPLETED,
-      completedAt: this._now()
-    })
-  );
+  await this._completePaymentsViaSettlement(req, request, aPayments);
+}
+async _completePaymentsViaSettlement(req, settlement, payments) {
+  const tx = cds.tx(req);
+  const { ProcessRequests, ProcessTasks } = this.entities;
+  const sSettlementRef = settlement.referenceNumber || settlement.ID;
 
-  await this._writeHistory(req, {
-    requestId: oPredecessor.ID,
-    stepNo: oPredecessor.currentStep || 0,
-    action: "COMPLETED_VIA_SETTLEMENT",
-    actor: req.user?.id,
-    oldStatus: oPredecessor.status_code,
-    newStatus: PROCESS_STATUS.COMPLETED,
-    remarks: `Completed automatically because settlement request ${request.referenceNumber || request.ID} was completed`
-  });
+  // Completed / rejected payments need no action
+  const aPayments = payments.filter((oPayment) => oPayment && !this._isLockedRequest(oPayment));
+
+  if (!aPayments.length) {
+    return;
+  }
+
+  // ---- 1. Validate every payment first ----
+  const aProblems = [];
+  const mLastStepNo = new Map();
+
+  for (const oPayment of aPayments) {
+    const sRef = oPayment.referenceNumber || oPayment.ID;
+    const aSteps = await this._getSteps(req, oPayment.subProcessType_code);
+    const oLastStep = aSteps[aSteps.length - 1];
+    const iLastStepNo = Number(oLastStep?.stepNo || 0);
+    mLastStepNo.set(oPayment.ID, iLastStepNo);
+
+    if (oPayment.status_code === PROCESS_STATUS.PENDING_APPROVAL) {
+      aProblems.push(`${sRef} is still awaiting LoA approval`);
+      continue;
+    }
+
+    // Must be at the final step
+    if (iLastStepNo && Number(oPayment.currentStep || 0) < iLastStepNo) {
+      aProblems.push(
+        `${sRef} is at step ${oPayment.currentStep || 0}; it must reach the final step ${iLastStepNo}${oLastStep.stepName ? ` (${oLastStep.stepName})` : ""}`
+      );
+    }
+
+    // No pending work before the final step
+    const aPendingTasks = await tx.run(
+      SELECT.from(ProcessTasks)
+        .columns("taskName", "stepNo")
+        .where({
+          request_ID: oPayment.ID,
+          status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] },
+          stepNo: { "!=": iLastStepNo }
+        })
+    );
+
+    if (aPendingTasks.length) {
+      const sTasks = aPendingTasks
+        .map((oTask) => `${oTask.taskName || "Task"} (step ${oTask.stepNo})`)
+        .join(", ");
+      aProblems.push(`${sRef} has ${aPendingTasks.length} pending task(s): ${sTasks}`);
+    }
+  }
+
+  if (aProblems.length) {
+    return req.reject(
+      409,
+      `Settlement request ${sSettlementRef} cannot be completed yet. ` +
+      `Please complete the following payment request(s) first: ${aProblems.join("; ")}.`
+    );
+  }
+
+  // ---- 2. All payments are ready: complete them ----
+  for (const oPayment of aPayments) {
+    await tx.run(
+      UPDATE(ProcessTasks).set({
+        status_code: TASK_STATUS.APPROVED,
+        decision: "APPROVED",
+        remarks: `Completed with settlement request ${sSettlementRef}`,
+        completedAt: this._now()
+      }).where({
+        request_ID: oPayment.ID,
+        stepNo: mLastStepNo.get(oPayment.ID),
+        status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
+      })
+    );
+
+    await tx.run(
+      UPDATE(ProcessRequests, oPayment.ID).set({
+        status_code: PROCESS_STATUS.COMPLETED,
+        completedAt: this._now()
+      })
+    );
+
+    await this._writeHistory(req, {
+      requestId: oPayment.ID,
+      stepNo: oPayment.currentStep || 0,
+      action: "COMPLETED_VIA_SETTLEMENT",
+      actor: req.user?.id,
+      oldStatus: oPayment.status_code,
+      newStatus: PROCESS_STATUS.COMPLETED,
+      remarks: `Completed automatically because settlement request ${sSettlementRef} was completed`
+    });
+  }
 }
 
   _getTaskProgressionError(task, request, currentStep) {
@@ -6698,7 +6846,7 @@ async _completePredecessorOnSettlement(req, request) {
       request,
       step,
       oPredecessor,
-      options.autoComplete ? options.ownerUser : null
+      options.assignToUser || (options.autoComplete ? options.ownerUser : null)
     );
     const aExistingTasks = await cds.tx(req).run(
       SELECT.from(this.entities.ProcessTasks).where({ request_ID: requestId, stepNo: step.stepNo })

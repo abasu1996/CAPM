@@ -34,7 +34,7 @@ sap.ui.define([
             this.getView().bindElement({
                 path: `/ProcessTasks(guid'${sTaskId}')`,
                 parameters: {
-                    expand: "request"
+                    expand: "request,treasuryEntries,whtEntries"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -228,6 +228,25 @@ sap.ui.define([
 
         onRefresh() {
             this.getView().getElementBinding()?.refresh();
+        },
+          onNavToTeamTasks() {
+            this.navTo("RouteMyTasks", {
+                "?query": { team: "true" }
+            });
+        },
+
+        onRelatedRequestPress(oEvent) {
+            const oContext = oEvent.getSource().getBindingContext();
+            const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
+
+            if (!sRequestId) {
+                MessageToast.show(this.getText("selectRequestMessage"));
+                return;
+            }
+
+            this.navTo("RouteMyRequests", {
+                "?query": { requestId: sRequestId }
+            });
         },
 
         _filterUsers(oDialog, sQuery) {

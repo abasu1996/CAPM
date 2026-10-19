@@ -243,6 +243,8 @@ entity ProcessRequests : cuid, managed {
     remainingBalanceAfterAdvanceSettlement : Decimal(15, 2); 
     invoiceDate: Date;
     invoiceNumber: String(50);
+    ivDocNumber : String(50);
+    glAccount : String(50);
     costCentre : String(50);
     profitCentre : String(50);
     wbsElement : String(50);
@@ -356,6 +358,7 @@ entity ProcessRequests : cuid, managed {
     vendorCode       : String(30);
     vendorName       : String(150);
     remarks          : LargeString;
+    documentArchiveUrl : String(2048);
     requester   : String(100);
     processor   : String(255);
     processorEmail : String(255);
@@ -415,6 +418,10 @@ entity ProcessRequests : cuid, managed {
                     on settlementEntries.request = $self;
     merchantEntityValues : Composition of many MerchantEntityValues
                     on merchantEntityValues.request = $self;
+    treasuryEntries : Composition of many TreasuryEntries
+                    on treasuryEntries.request = $self;
+    whtEntries : Composition of many WhtEntries
+                    on whtEntries.request = $self;
     tasks       : Composition of many ProcessTasks
                     on tasks.request = $self;
     involvedParties : Composition of many ProcessInvolvedParties
@@ -427,6 +434,32 @@ entity ProcessRequests : cuid, managed {
                     on emailMessages.request = $self;
     history     : Composition of many ProcessHistory
                     on history.request = $self;
+}
+entity TreasuryEntries : cuid, managed {
+    request : Association to ProcessRequests;
+    task : Association to ProcessTasks;
+    paymentReceivedDate : Date;
+    treasuryRequestDate : Date;
+    entity : Association to FtkEntities @assert.target;
+    bankName : String(150);
+    debitAccount : String(50);
+    beneficiary : String(150);
+    currency : Association to Currencies @assert.target;
+    amount : Decimal(15, 2);
+    dueDate : Date;
+    paymentMode : String(100);
+    userDivisionRepresentative : String(100);
+    i2pTeamMember : String(100);
+}
+entity WhtEntries : cuid, managed {
+    request : Association to ProcessRequests;
+    task : Association to ProcessTasks;
+    entity : Association to FtkEntities @assert.target;
+    vendor : String(150);
+    currency : Association to Currencies @assert.target;
+    amount : Decimal(15, 2);
+    dueDate : Date;
+    userDivisionRepresentative : String(100);
 }
 entity Invoices : cuid, managed {
     request         : Association to ProcessRequests;
@@ -469,6 +502,9 @@ entity SettlementEntries : cuid, managed {
     invoiceNumber            : String(50);
     invoiceDate               : Date;
     description                : String(500);
+    currency               : Association to Currencies;
+    vendorCode             : String(30);
+    vendorName             : String(150);
     transactionAmountDocumentCurrency : Decimal(15, 2);
     transactionAmountLocalCurrency    : Decimal(15, 2);
     availabilityOfInvoice     : Boolean default false;
@@ -495,7 +531,7 @@ entity DirectForeignTravelEntries : cuid, managed {
     perDayAllowanceUSD         : Decimal(15, 2);
     noOfDays                   : Integer;
     totalInUSD                 : Decimal(15, 2);
-    exchangeRate               : Decimal(15, 6);
+    exchangeRate               : Decimal(15, 2);
     totalInLKR                 : Decimal(15, 2);
     totalCostForeignCurrency   : Decimal(15, 2);
     totalCostLKR               : Decimal(15, 2);
@@ -524,10 +560,16 @@ entity ProcessTasks : cuid, managed {
     isLoaApproval : Boolean default false;
     status      : Association to TaskStatus;
     decision    : String(30);
+    // Captured when a demand task is created; approval remarks remain separate.
+    purpose     : LargeString;
     remarks     : LargeString;
     completedAt : DateTime;
     teamMembers : Composition of many ProcessTaskTeamMembers
                     on teamMembers.task = $self;
+    treasuryEntries : Composition of many TreasuryEntries
+                    on treasuryEntries.task = $self;
+    whtEntries : Composition of many WhtEntries
+                    on whtEntries.task = $self;
 }
 
 /**
@@ -594,7 +636,9 @@ entity ProcessInvolvedParties : cuid, managed {
     referenceNumber : String(30);
     request          : Association to ProcessRequests;
     user             : Association to Users;
+    team             : Association to Teams;
     displayName      : String(150);
+    teamName         : String(150);
     email            : String(255);
     department       : String(100);
     purpose          : String(255);

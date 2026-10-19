@@ -27,6 +27,11 @@
                                 text="{i18n>dashboardNavButton}"
                                 press=".onNavToDashboard" />
                             <Button
+                            icon="sap-icon://workflow-tasks"
+                            text="{i18n>tasksNavButton}"
+                            visible="{= ${taskView>/teamMode} || ${taskView>/approvalMode} }"
+                            press=".onNavToTasks" />    
+                            <Button
                                 icon="sap-icon://request"
                                 text="{i18n>requestsNavButton}"
                                 press=".onNavToRequests" />
@@ -200,23 +205,6 @@
                                 type="Emphasized"
                                 visible="{taskView>/teamMode}"
                                 press=".onAssignTeamTaskToMe" />
-                            <!-- <Button
-                                text="{i18n>approveButton}"
-                                type="Accept"
-                                visible="{= !${taskView>/teamMode} }"
-                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
-                                press=".onApprove" />
-                            <Button
-                                text="{i18n>sendBackButton}"
-                                visible="{= !${taskView>/teamMode} &amp;&amp; !${taskView>/approvalMode} }"
-                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
-                                press=".onSendBack" />
-                            <Button
-                                text="{i18n>rejectButton}"
-                                type="Reject"
-                                visible="{= !${taskView>/teamMode} }"
-                                enabled="{= ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
-                                press=".onReject" /> -->
                              <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
@@ -304,7 +292,7 @@
                                         suggest=".onUserSuggest"
                                         suggestionItemSelected=".onProcessorSuggestionSelected"
                                         liveChange=".onProcessorLiveChange"
-                                        enabled="{= !${processorTeam_ID} &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                        enabled="{= !${processorTeam_ID} &amp;&amp; !${processorUser_ID} &amp;&amp; ${status_code} !== 'APPROVED'&amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                         valueHelpRequest=".onProcessorValueHelpRequest"
                                         suggestionItems="{/Users}">
                                         <suggestionItems>
@@ -314,7 +302,7 @@
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
-                                        enabled="{= !${processorTeam_ID} &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                        enabled="{= !${processorTeam_ID} &amp;&amp; !${processorUser_ID} &amp;&amp; ${status_code} !== 'APPROVED'&amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                         tooltip="{i18n>saveProcessorButton}"
                                         press=".onSaveTaskProcessor" />
                                 </HBox>
@@ -332,6 +320,10 @@
                                         <Link
                                             text="{request/referenceNumber}"
                                             press=".onRelatedRequestPress" />
+                                        <Label class="sapUiSmallMarginTop" text="{i18n>purposeLabel}"
+                                            visible="{= !!${purpose} &amp;&amp; ${taskName} !== 'Treasury Confirmation' &amp;&amp; ${taskName} !== 'WHT Clearance' &amp;&amp; ${taskName} !== 'Budget Check' }" />
+                                        <Text text="{purpose}" wrapping="true"
+                                            visible="{= !!${purpose} &amp;&amp; ${taskName} !== 'Treasury Confirmation' &amp;&amp; ${taskName} !== 'WHT Clearance' &amp;&amp; ${taskName} !== 'Budget Check' }" />
                                         <Label
                                             class="sapUiSmallMarginTop"
                                             text="{i18n>decisionLabel}" />
@@ -341,52 +333,52 @@
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
-                    <uxap:ObjectPageSection
+                   <uxap:ObjectPageSection
                         title="Treasury Confirmation"
                         visible="{= ${taskName} === 'Treasury Confirmation' }">
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <form:SimpleForm
-                                        editable="false"
-                                        layout="ResponsiveGridLayout"
-                                        labelSpanXL="3"
-                                        labelSpanL="3"
-                                        labelSpanM="4"
-                                        columnsXL="2"
-                                        columnsL="2"
-                                        columnsM="1"
-                                        adjustLabelSpan="false">
-
-                                        <Label text="{i18n>entityLabel}" />
-                                        <Text text="{request/treasuryEntity_code}" />
-
-                                        <Label text="{i18n>debitAccountNameLabel}" />
-                                        <Text text="{request/debitAccountName}" />
-
-                                        <Label text="{i18n>debitAccountNumberLabel}" />
-                                        <Text text="{request/debitAccountNumber}" />
-
-                                        <Label text="{i18n>beneficiaryLabel}" />
-                                        <Text text="{request/beneficiary}" />
-
-                                        <Label text="{i18n>currencyLabel}" />
-                                        <Text text="{request/treasuryCurrency_code}" />
-
-                                        <Label text="{i18n>amountLabel}" />
-                                        <Text text="{request/treasuryAmount}" />
-
-                                        <Label text="{i18n>dueDateLabel}" />
-                                        <Text
-                                            text="{
-                                                path: 'request/treasuryDueDate',
-                                                type: 'sap.ui.model.type.Date',
-                                                formatOptions: { pattern: 'yyyy-MM-dd' }
-                                            }" />
-
-                                        <Label text="{i18n>userDivisionRepresentativeNameLabel}" />
-                                        <Text text="{request/treasuryUserDivisionRep}" />
-                                    </form:SimpleForm>
+                                    <VBox width="100%">
+                                        <ScrollContainer width="100%" height="18rem" horizontal="true" vertical="true">
+                                            <Table width="110rem" fixedLayout="false" items="{path: 'treasuryEntries'}" growing="true">
+                                                <columns>
+                                                    <Column><Text text="{i18n>paymentReceivedDateLabel}" /></Column>
+                                                    <Column><Text text="{i18n>treasuryRequestDateLabel}" /></Column>
+                                                    <Column><Text text="{i18n>entityLabel}" /></Column>
+                                                    <Column><Text text="{i18n>bankNameLabel}" /></Column>
+                                                    <Column><Text text="{i18n>debitAccountLabel}" /></Column>
+                                                    <Column><Text text="{i18n>beneficiaryLabel}" /></Column>
+                                                    <Column><Text text="{i18n>currencyLabel}" /></Column>
+                                                    <Column><Text text="{i18n>amountLabel}" /></Column>
+                                                    <Column><Text text="{i18n>dueDateLabel}" /></Column>
+                                                    <Column><Text text="{i18n>paymentModeLabel}" /></Column>
+                                                    <Column><Text text="{i18n>userDivisionRepresentativeNameLabel}" /></Column>
+                                                    <Column><Text text="{i18n>i2pTeamMemberLabel}" /></Column>
+                                                </columns>
+                                                <items>
+                                                    <ColumnListItem>
+                                                       <Text text="{path: 'paymentReceivedDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                                        <Text text="{path: 'treasuryRequestDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                                        <Text text="{entity_code}" />
+                                                        <Text text="{bankName}" />
+                                                        <Text text="{debitAccount}" />
+                                                        <Text text="{beneficiary}" />
+                                                        <Text text="{currency_code}" />
+                                                        <Text text="{amount}" />
+                                                        <Text text="{path: 'dueDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                                        <Text text="{paymentMode}" />
+                                                        <Text text="{userDivisionRepresentative}" />
+                                                        <Text text="{i2pTeamMember}" />
+                                                    </ColumnListItem>
+                                                </items>
+                                            </Table>
+                                        </ScrollContainer>
+                                        <VBox class="flowmateDetailBlock sapUiSmallMarginTop" width="100%">
+                                            <Label text="{i18n>purposeLabel}" />
+                                            <Text text="{purpose}" wrapping="true" />
+                                        </VBox>
+                                    </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
@@ -397,44 +389,42 @@
                         <uxap:subSections>
                             <uxap:ObjectPageSubSection>
                                 <uxap:blocks>
-                                    <form:SimpleForm
-                                        editable="false"
-                                        layout="ResponsiveGridLayout"
-                                        labelSpanXL="3"
-                                        labelSpanL="3"
-                                        labelSpanM="4"
-                                        columnsXL="2"
-                                        columnsL="2"
-                                        columnsM="1"
-                                        adjustLabelSpan="false">
-
-                                        <Label text="{i18n>entityLabel}" />
-                                        <Text text="{request/whtEntity_code}" />
-
-                                        <Label text="{i18n>vendorLabel}" />
-                                        <Text text="{request/whtVendor}" />
-
-                                        <Label text="{i18n>currencyLabel}" />
-                                        <Text text="{request/whtCurrency_code}" />
-
-                                        <Label text="{i18n>amountLabel}" />
-                                        <Text text="{request/whtAmount}" />
-
-                                        <Label text="{i18n>dueDateLabel}" />
-                                        <Text
-                                            text="{
-                                                path: 'request/whtDueDate',
-                                                type: 'sap.ui.model.type.Date',
-                                                formatOptions: { pattern: 'yyyy-MM-dd' }
-                                            }" />
-
-                                        <Label text="{i18n>userDivisionRepresentativeNameLabel}" />
-                                        <Text text="{request/whtUserDivisionRep}" />
-
-                                    </form:SimpleForm>
+                                    <VBox width="100%">
+                                        <ScrollContainer width="100%" height="18rem" horizontal="true" vertical="true">
+                                            <Table width="62rem" fixedLayout="false" items="{path: 'whtEntries'}" growing="true">
+                                                <columns>
+                                                    <Column><Text text="{i18n>entityLabel}" /></Column>
+                                                    <Column><Text text="{i18n>vendorLabel}" /></Column>
+                                                    <Column><Text text="{i18n>currencyLabel}" /></Column>
+                                                    <Column><Text text="{i18n>amountLabel}" /></Column>
+                                                    <Column><Text text="{i18n>dueDateLabel}" /></Column>
+                                                    <Column><Text text="{i18n>userDivisionRepresentativeNameLabel}" /></Column>
+                                                </columns>
+                                                <items>
+                                                    <ColumnListItem>
+                                                        <Text text="{entity_code}" />
+                                                        <Text text="{vendor}" />
+                                                        <Text text="{currency_code}" />
+                                                        <Text text="{amount}" />
+                                                        <Text text="{path: 'dueDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                                                        <Text text="{userDivisionRepresentative}" />
+                                                    </ColumnListItem>
+                                                </items>
+                                            </Table>
+                                        </ScrollContainer>
+                                        <VBox class="flowmateDetailBlock sapUiSmallMarginTop" width="100%">
+                                            <Label text="{i18n>purposeLabel}" />
+                                            <Text text="{purpose}" wrapping="true" />
+                                        </VBox>
+                                    </VBox>
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
+                    </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="Budget Check" visible="{= ${taskName} === 'Budget Check' }">
+                        <uxap:subSections><uxap:ObjectPageSubSection><uxap:blocks>
+                            <VBox class="flowmateDetailBlock"><Label text="{i18n>purposeLabel}" /><Text text="{purpose}" wrapping="true" /></VBox>
+                        </uxap:blocks></uxap:ObjectPageSubSection></uxap:subSections>
                     </uxap:ObjectPageSection>
                     <uxap:ObjectPageSection title="{i18n>taskActionsTitle}">
                         <uxap:subSections>

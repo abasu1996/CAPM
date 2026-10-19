@@ -188,10 +188,19 @@ service FlowmateService {
     request : redirected to ProcessRequests,
     businessEntity : redirected to FtkEntities
     };
+    entity TreasuryEntries as projection on fldb.TreasuryEntries {
+        *, request : redirected to ProcessRequests, task : redirected to ProcessTasks, entity : redirected to FtkEntities,
+        currency : redirected to Currencies
+    };
+    entity WhtEntries as projection on fldb.WhtEntries {
+        *, request : redirected to ProcessRequests, task : redirected to ProcessTasks, entity : redirected to FtkEntities,
+        currency : redirected to Currencies
+    };
     entity SettlementEntries as projection on fldb.SettlementEntries {
         *,
         request : redirected to ProcessRequests,
-        paymentRequestRef : redirected to ProcessRequests
+        paymentRequestRef : redirected to ProcessRequests,
+        currency : redirected to Currencies
     };
     @cds.redirection.target
     entity ProcessRequests as projection on fldb.ProcessRequests {
@@ -213,6 +222,8 @@ service FlowmateService {
         glBreakups: redirected to GLBreakups,
         settlementEntries : redirected to SettlementEntries,
         merchantEntityValues : redirected to MerchantEntityValues,
+        treasuryEntries : redirected to TreasuryEntries,
+        whtEntries : redirected to WhtEntries,
         attachments : redirected to ProcessAttachments,
         emailMessages : redirected to ProcessEmailMessages,
         treasuryEntity : redirected to FtkEntities,
@@ -244,31 +255,41 @@ service FlowmateService {
     entity ProcessTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests,
-        teamMembers : redirected to ProcessTaskTeamMembers
+        teamMembers : redirected to ProcessTaskTeamMembers,
+        treasuryEntries : redirected to TreasuryEntries,
+        whtEntries : redirected to WhtEntries
     };
     // Queue projections are read-only. All writes use ProcessTasks/workflow
     // actions so ownership and LoA transition validations cannot be bypassed.
     @readonly
     entity MyAssignedTasks as projection on fldb.ProcessTasks {
         *,
-        request : redirected to ProcessRequests
+        request : redirected to ProcessRequests,
+        treasuryEntries : redirected to TreasuryEntries,
+        whtEntries : redirected to WhtEntries
     };
     @readonly
     entity MyPendingApprovalTasks as projection on fldb.ProcessTasks {
         *,
-        request : redirected to ProcessRequests
+        request : redirected to ProcessRequests,
+        treasuryEntries : redirected to TreasuryEntries,
+        whtEntries : redirected to WhtEntries
     };
     @readonly
     entity MyTeamTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests,
-        teamMembers : redirected to ProcessTaskTeamMembers
+        teamMembers : redirected to ProcessTaskTeamMembers,
+        treasuryEntries : redirected to TreasuryEntries,
+        whtEntries : redirected to WhtEntries
     };
     @readonly
     entity RequestDetailTasks as projection on fldb.ProcessTasks {
         *,
         request : redirected to ProcessRequests,
-        teamMembers : redirected to ProcessTaskTeamMembers
+        teamMembers : redirected to ProcessTaskTeamMembers,
+        treasuryEntries : redirected to TreasuryEntries,
+        whtEntries : redirected to WhtEntries
     };
     entity ProcessTaskTeamMembers as projection on fldb.ProcessTaskTeamMembers {
         *,
@@ -347,7 +368,7 @@ service FlowmateService {
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
     action approveLoaRequest(taskId: UUID, remarks: String) returns Boolean;
     action rejectLoaRequest(taskId: UUID, remarks: String) returns Boolean;
-    action sendBack(taskId: UUID, remarks: String, targetStepNo: Integer) returns Boolean;
+    action sendBack(taskId: UUID, remarks: String, targetStepNo: Integer, processorUserId: UUID) returns Boolean;
     action sendRequestEmail(
         requestId: UUID,
         toRecipients: LargeString,
@@ -427,6 +448,10 @@ service FlowmateService {
         recipient         : String(255);
         delegated         : Boolean;
         delegationId      : UUID;
+    };
+    action resolveInvolvedPartyNotificationRecipients(partyId: UUID) returns {
+        recipients : LargeString;
+        recipientCount : Integer;
     };
     action getUserAdministrationCapabilities() returns {
         canMaintainUsers : Boolean;

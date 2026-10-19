@@ -77,14 +77,16 @@ sap.ui.define([
             "paymentMethod_code",
             "totalValue",
             "ofnReference",
+            "wbsElement"
+        ],
+        optional: [
+            "siteName",
             "siteId",
-            "wbsElement",
             "totalRentValue",
             "totalSupervisionValue",
             "securityDepositValue",
-            "siteName"
-        ],
-        optional: ["remarks"]
+            "remarks"
+        ]
     };
     const NON_PO_IDEAMART_APPMAKER_FIELDS = {
         required: [
@@ -120,13 +122,25 @@ sap.ui.define([
     };
     const DIRECT_NON_PO_REIMBURSEMENT_FIELDS = {
         required: [
-            "paymentCategory_code", "businessEntity_code", "currency_code",
-            "authorityVendorCode", "authorityVendorName",
-            "employeeVendorCode", "employeeVendorName",
-            "invoiceDate", "invoiceNumber", "costCentre", "wbsElement",
-            "totalValue", "ofnReference", "siteId", "siteName"
+            "paymentCategory_code",
+            "businessEntity_code",
+            "currency_code",
+            "employeeVendorCode",
+            "employeeVendorName",
+            "invoiceDate",
+            "invoiceNumber",
+            "costCentre",
+            "totalValue"
         ],
-        optional: ["remarks"]
+        optional: [
+            "authorityVendorCode",
+            "authorityVendorName",
+            "wbsElement",
+            "ofnReference",
+            "siteId",
+            "siteName",
+            "remarks"
+        ]
     };
     const NON_PO_TAX_LIABILITY_FIELDS = {
         required: [
@@ -153,7 +167,8 @@ sap.ui.define([
         "currency_code",
         "customer_ID",
         "customerCode",
-        "customerName"
+        "customerName",
+        "ivDocNumber"
     ],
     optional: ["remarks", "whtCertificateReference"]
     };
@@ -279,10 +294,10 @@ sap.ui.define([
             required: [
                 "paymentCategory_code", "businessEntity_code",
                 "vendor_ID", "vendorCode", "vendorName",
-                "currency_code", "totalPayableValue", "paymentDescription"
+                "currency_code", "totalPayableValue", "paymentDescription", "costCentre"
             ],
             optional: [
-                "invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
+                "glAccount","profitCentre","invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
             ]
         },
         DIRECT_NON_PO_REIMB_LIAB: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
@@ -314,7 +329,7 @@ sap.ui.define([
                 "totalInvoiceValueRelevantCurrency",
                 "totalInvoiceValueLKR"
             ],
-            optional: ["vatAmount", "remarks"]
+            optional: ["vatAmount", "glAccount", "costCentre", "remarks"]
         },
         NON_PO_INTERCONNECTION_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
         NON_PO_ROAMING_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
@@ -329,7 +344,7 @@ sap.ui.define([
                 "totalInvoiceValueRelevantCurrency",
                 "totalInvoiceValueLKR"
             ],
-            optional: []
+            optional: ["glAccount", "costCentre", "remarks"]
         },
         NON_PO_STAR_POINT_PAYMENTS: {
             required: [
@@ -392,20 +407,11 @@ sap.ui.define([
         },
         NON_PO_CC_SETTLEMENT: {
             required: [
-                "paymentCategory_code",
-                "businessEntity_code",
-                "currency_code",
-                "bankName",
-                "ccCustodianName",
-                "ccPeriodFromDate",
-                "ccPeriodToDate",
-                "settlementEntries",
-                "stampDuty",
-                "latePaymentFee",
-                "interestCharges",
-                "totalAmountPayableCcSettlement"
+                "paymentCategory_code", "businessEntity_code", "currency_code",
+                "bankName", "ccCustodianName", "ccPeriodFromDate", "ccPeriodToDate",
+                "settlementEntries", "totalAmountPayableCcSettlement"
             ],
-            optional: ["annualFee", "remarks"]
+            optional: ["annualFee", "stampDuty", "latePaymentFee", "interestCharges", "remarks"]
         },
         NON_PO_MERCHANT_SETTLEMENTS: {
             required: [
@@ -414,10 +420,10 @@ sap.ui.define([
                 "currency_code",
                 "merchantEntityValues",
                 "highestValueInExcel",
-                "aggregateTotalValueAcrossAllFiles",
-                "processingBankAccountDetails"
+                "aggregateTotalValueAcrossAllFiles"
+                
             ],
-            optional: []
+            optional: ["processingBankAccountDetails"]
         },
         NON_PO_MISC_RECEIPTS: {
             required: [
@@ -440,26 +446,12 @@ sap.ui.define([
         },
         BANK_GUARANTEE: {
             required: [
-                "paymentCategory_code",
-                "businessEntity_code",
-                "currency_code",
-                "amountPayable",
-                "guaranteeType_code",
-                "beneficiaryName",
-                "beneficiaryAddress",
-                "commencingDate",
-                "expiryDate",
-                "claimDate",
-                "tenderDate",
-                "expectedDate",
-                "purposeOfBankGuarantee",
-                "bidTenderReference",
-                "collectorName",
-                "collectorNic",
-                "collectorContactNumber",
-                "specificBgFormatAvailable"
-            ],
-            optional: ["remarks"]
+            "paymentCategory_code", "businessEntity_code", "currency_code",
+            "amountPayable", "guaranteeType_code", "beneficiaryName", "beneficiaryAddress",
+            "commencingDate", "expiryDate", "claimDate", "expectedDate",
+            "purposeOfBankGuarantee", "collectorName", "collectorNic", "collectorContactNumber"
+        ],
+        optional: ["tenderDate", "bidTenderReference", "specificBgFormatAvailable", "remarks"]
         }
 
     };
@@ -707,6 +699,11 @@ sap.ui.define([
                 collectorNic: "",
                 collectorContactNumber: "",
                 specificBgFormatAvailable: false,
+                costCentre: "",
+                glAccount: "",
+                profitCentre: "",
+                ivDocNumber: "",
+                documentArchiveUrl: "",
                 vendor_ID: "",
                 vendorCode: "",
                 vendorName: "",
@@ -795,6 +792,9 @@ sap.ui.define([
                 invoiceNumber: "",
                 invoiceDate: null,
                 description: "",
+                currency_code: "",
+                vendorCode: "",
+                vendorName: "",
                 transactionAmountDocumentCurrency: null,
                 transactionAmountLocalCurrency: null,
                 availabilityOfInvoice: false
@@ -1069,6 +1069,9 @@ sap.ui.define([
                                     invoiceNumber: oEntry.invoiceNumber,
                                     invoiceDate: oEntry.invoiceDate,
                                     description: oEntry.description,
+                                    currency_code: oEntry.currency_code || undefined,
+                                    vendorCode: oEntry.vendorCode || undefined,
+                                    vendorName: oEntry.vendorName || undefined,
                                     transactionAmountDocumentCurrency: Number(oEntry.transactionAmountDocumentCurrency),
                                     transactionAmountLocalCurrency: Number(oEntry.transactionAmountLocalCurrency),
                                     availabilityOfInvoice: Boolean(oEntry.availabilityOfInvoice)
@@ -1115,12 +1118,13 @@ sap.ui.define([
                         return oResult;
                     }, {})
                     : {};
-
+                    
                 const oCreated = await this.createEntry("/ProcessRequests", {
                     processType_code: oPayload.processType_code,
                     subProcessType_code: oPayload.subProcessType_code || undefined,
                     title: oPayload.title,
                     description: oPayload.description,
+                    documentArchiveUrl: oPayload.documentArchiveUrl || undefined,
                     requesterUser_ID: oPayload.requesterUser_ID || undefined,
                     requester: oPayload.requester,
                     processorTeam_ID: oPayload.processorTeam_ID || undefined,
@@ -1678,6 +1682,12 @@ sap.ui.define([
             oCreateModel.setProperty("/customerCode", oContext.getProperty("customerCode"));
             oCreateModel.setProperty("/customerName", oContext.getProperty("customerName"));
         },
+        _getSettlementPaymentRequestBaseFilters() {
+            return [
+                new Filter("subProcessType_code", FilterOperator.EQ, "NON_PO_CC_PAYMENT"),
+                new Filter("status_code", FilterOperator.EQ, "IN_PROGRESS")
+            ];
+        },
         _setSettlementPaymentRequest(oContext) {
             const oModel = this.getView().getModel("settlementEntryEdit");
 
@@ -1688,16 +1698,19 @@ sap.ui.define([
             oModel.setProperty("/invoiceNumber", oContext.getProperty("invoiceNumber") || "");
             oModel.setProperty("/invoiceDate", oContext.getProperty("invoiceDate") || null);
             oModel.setProperty("/description", oContext.getProperty("descriptionOfPayment") || "");
+            oModel.setProperty("/currency_code", oContext.getProperty("currency_code") || "");
+            oModel.setProperty("/vendorCode", oContext.getProperty("vendorCode") || "");
+            oModel.setProperty("/vendorName", oContext.getProperty("vendorName") || "");
             oModel.setProperty("/transactionAmountDocumentCurrency", oContext.getProperty("transactionAmountDocumentCurrency"));
             oModel.setProperty("/transactionAmountLocalCurrency", oContext.getProperty("transactionAmountLocalCurrency"));
         },
 
         onSettlementPaymentRequestSuggest(oEvent) {
-            const aFixedFilters = [
-                new Filter("subProcessType_code", FilterOperator.EQ, "NON_PO_CC_PAYMENT")
-            ];
-
-            this._filterSuggestionItems(oEvent, ["referenceNumber", "title", "poNumber", "sesReference"], aFixedFilters);
+            this._filterSuggestionItems(
+                oEvent,
+                ["referenceNumber", "title", "poNumber", "sesReference", "vendorCode", "vendorName"],
+                this._getSettlementPaymentRequestBaseFilters()
+            );
         },
 
         onSettlementPaymentRequestSuggestionSelected(oEvent) {
@@ -1717,6 +1730,9 @@ sap.ui.define([
             oModel.setProperty("/invoiceNumber", "");
             oModel.setProperty("/invoiceDate", null);
             oModel.setProperty("/description", "");
+            oModel.setProperty("/currency_code", "");
+            oModel.setProperty("/vendorCode", "");
+            oModel.setProperty("/vendorName", "");
             oModel.setProperty("/transactionAmountDocumentCurrency", null);
             oModel.setProperty("/transactionAmountLocalCurrency", null);
         },
@@ -1747,9 +1763,7 @@ sap.ui.define([
 
         _filterSettlementPaymentRequestDialog(oDialog, sQuery) {
             const oBinding = oDialog.getBinding("items");
-            const aFilters = [
-                new Filter("subProcessType_code", FilterOperator.EQ, "NON_PO_CC_PAYMENT")
-            ];
+            const aFilters = this._getSettlementPaymentRequestBaseFilters();
 
             if (sQuery) {
                 aFilters.push(new Filter({
@@ -1757,7 +1771,9 @@ sap.ui.define([
                         new Filter("referenceNumber", FilterOperator.Contains, sQuery),
                         new Filter("title", FilterOperator.Contains, sQuery),
                         new Filter("poNumber", FilterOperator.Contains, sQuery),
-                        new Filter("sesReference", FilterOperator.Contains, sQuery)
+                        new Filter("sesReference", FilterOperator.Contains, sQuery),
+                        new Filter("vendorCode", FilterOperator.Contains, sQuery),
+                        new Filter("vendorName", FilterOperator.Contains, sQuery)
                     ],
                     and: false
                 }));
@@ -1931,20 +1947,22 @@ sap.ui.define([
         onCalculateDirectForeignTravelTotals() {
             const oModel = this.getView().getModel("directForeignTravelEdit");
             const oData = oModel.getData();
-
-            const fPerDay = Number(oData.perDayAllowanceUSD) || 0;
+            const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+            const fPerDay = round2(oData.perDayAllowanceUSD || 0);
             const iDays = Number(oData.noOfDays) || 0;
-            const fTotalUSD = fPerDay * iDays;
-            const fExchangeRate = Number(oData.exchangeRate) || 0;
-            const fTotalLKR = fTotalUSD * fExchangeRate;
-            const fAirfare = Number(oData.airfare) || 0;
-            const fVisaFee = Number(oData.visaFee) || 0;
-            const fTotalForeign = fAirfare + fVisaFee + fTotalUSD;
+            const fExchangeRate = round2(oData.exchangeRate || 0);
+            const fAirfare = round2(oData.airfare || 0);
+            const fVisaFee = round2(oData.visaFee || 0);
+
+            const fTotalUSD = round2(fPerDay * iDays);
+            const fTotalLKR = round2(fTotalUSD * fExchangeRate);
+            const fTotalForeign = round2(fAirfare + fVisaFee + fTotalUSD);
+            const fTotalCostLKR = round2(fTotalForeign * fExchangeRate);
 
             oModel.setProperty("/totalInUSD", fTotalUSD);
             oModel.setProperty("/totalInLKR", fTotalLKR);
             oModel.setProperty("/totalCostForeignCurrency", fTotalForeign);
-            oModel.setProperty("/totalCostLKR", fTotalForeign * fExchangeRate);
+            oModel.setProperty("/totalCostLKR", fTotalCostLKR);
         },
         onAddDirectForeignTravelEntry() {
             const oModel = this.getView().getModel("directForeignTravelEdit");
@@ -1979,11 +1997,29 @@ sap.ui.define([
 
             this.getView().byId("directForeignTravelDialog").open();
         },
+        onTwoDecimalLiveChange(oEvent) {
+            const oInput = oEvent.getSource();
+            const sRaw = oEvent.getParameter("value") || "";
+
+            // keep digits and a single dot, max 2 decimals
+            let sClean = sRaw.replace(/[^\d.]/g, "");
+            const iDot = sClean.indexOf(".");
+            if (iDot !== -1) {
+                sClean =
+                    sClean.slice(0, iDot + 1) +
+                    sClean.slice(iDot + 1).replace(/\./g, "").slice(0, 2);
+            }
+
+            if (sClean !== sRaw) {
+                oInput.setValue(sClean);
+            }
+        },
 
         onSaveDirectForeignTravelEntry() {
             const oModel = this.getView().getModel("directForeignTravelEdit");
             const oCreateModel = this.getView().getModel("create");
             const oEntry = oModel.getData();
+            
 
             if (
                 !String(oEntry.travelerName || "").trim() ||
@@ -2342,6 +2378,9 @@ sap.ui.define([
                 invoiceNumber: "",
                 invoiceDate: null,
                 description: "",
+                currency_code: "",
+                vendorCode: "",
+                vendorName: "",
                 transactionAmountDocumentCurrency: null,
                 transactionAmountLocalCurrency: null,
                 availabilityOfInvoice: false
@@ -2379,6 +2418,9 @@ sap.ui.define([
                 invoiceNumber: oEntry.invoiceNumber || "",
                 invoiceDate: oEntry.invoiceDate,
                 description: String(oEntry.description).trim(),
+                currency_code: oEntry.currency_code || "",
+                vendorCode: oEntry.vendorCode || "",
+                vendorName: oEntry.vendorName || "",
                 transactionAmountDocumentCurrency: Number(oEntry.transactionAmountDocumentCurrency),
                 transactionAmountLocalCurrency: Number(oEntry.transactionAmountLocalCurrency),
                 availabilityOfInvoice: Boolean(oEntry.availabilityOfInvoice)
@@ -3170,6 +3212,7 @@ sap.ui.define([
                     "siteName",
                     "currency_code",
                     "paymentDescription",
+                    "glAccount", "profitCentre", "costCentre",
                     "remarks"
                 ].forEach((sProperty) => {
                     oCreateModel.setProperty(`/${sProperty}`, "");
@@ -3289,6 +3332,8 @@ sap.ui.define([
                     "customerCode",
                     "customerName",
                     "invoiceDebitNoteNumber",
+                    "glAccount", 
+                    "costCentre",
                     "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
 
@@ -3313,6 +3358,7 @@ sap.ui.define([
                     "customer_ID",
                     "customerCode",
                     "customerName",
+                    "ivDocNumber",
                     "whtCertificateReference",
                     "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
@@ -3329,7 +3375,8 @@ sap.ui.define([
                     "currency_code",
                     "customer_ID",
                     "customerCode",
-                    "customerName"
+                    "customerName",
+                    "glAccount", "costCentre", "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
 
                 oCreateModel.setProperty("/totalInvoiceValueRelevantCurrency", null);
@@ -4281,6 +4328,9 @@ _prefillSubtypeFields(oPredecessor, sSubProcessTypeCode) {
             invoiceNumber: oRow.invoiceNumber || "",
             invoiceDate: oRow.invoiceDate,
             description: oRow.description,
+            currency_code: oRow.currency_code || "",
+            vendorCode: oRow.vendorCode || "",
+            vendorName: oRow.vendorName || "",
             transactionAmountDocumentCurrency: oRow.transactionAmountDocumentCurrency,
             transactionAmountLocalCurrency: oRow.transactionAmountLocalCurrency,
             availabilityOfInvoice: Boolean(oRow.availabilityOfInvoice)
