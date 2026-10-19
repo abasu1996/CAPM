@@ -2496,7 +2496,7 @@
                                                 icon="sap-icon://attachment"
                                                 maximumFileSize="50"
                                                 multiple="true"
-                                                enabled="{= !${uploads>/active} &amp;&amp; ${requestEdit>/editable} }"
+                                                enabled="{= !${uploads>/active} &amp;&amp; ${requestEdit>/attachmentUploadAllowed} }"
                                                 sameFilenameAllowed="true" />
                                             <Button
                                                 icon="sap-icon://delete"

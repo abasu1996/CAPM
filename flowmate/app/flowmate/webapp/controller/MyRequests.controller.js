@@ -63,7 +63,8 @@ sap.ui.define([
                 endFullScreen: false
             }), "fclState");
             this.getView().setModel(new JSONModel({
-                editable: false
+                editable: false,
+                attachmentUploadAllowed: false
             }), "requestEdit");
             this.getView().setModel(new JSONModel({
                 currentUserId: ""
@@ -2515,6 +2516,7 @@ async onBudgetCheckConfirm() {
 
         _showRequestDetailById(sRequestId) {
             this._sSelectedRequestId = sRequestId;
+            this.getView().getModel("requestEdit").setProperty("/attachmentUploadAllowed", false);
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
@@ -2534,6 +2536,10 @@ async onBudgetCheckConfirm() {
                         this.getView().getModel("requestEdit").setProperty(
                             "/editable",
                             this._isRequestEditable(oRequest)
+                        );
+                        this.getView().getModel("requestEdit").setProperty(
+                            "/attachmentUploadAllowed",
+                            Boolean(oRequest && !["COMPLETED", "REJECTED"].includes(oRequest.status_code))
                         );
                         this.getView().getModel("processorEdit").setProperty(
                             "/requestProcessorUser_ID",
@@ -2646,6 +2652,7 @@ async onBudgetCheckConfirm() {
             this._sSelectedPartyId = null;
             this._setRequestsLayout(fLibrary.LayoutType.OneColumn);
             this.getView().getModel("requestEdit").setProperty("/editable", false);
+            this.getView().getModel("requestEdit").setProperty("/attachmentUploadAllowed", false);
             this.getView().getModel("processFlow").setData({
                 visible: false,
                 loading: false,
@@ -3664,7 +3671,17 @@ async onBudgetCheckConfirm() {
                 throw new Error(this.getText("attachmentMetadataErrorMessage", [oFile.name]));
             }
 
-            return oResponse.json();
+            const sBody = await oResponse.text();
+            let oAttachment;
+            try {
+                oAttachment = sBody ? JSON.parse(sBody) : null;
+            } catch (oError) {
+                throw new Error(this.getText("attachmentMetadataMissingIdMessage", [oFile.name]));
+            }
+            if (!oAttachment?.ID) {
+                throw new Error(this.getText("attachmentMetadataMissingIdMessage", [oFile.name]));
+            }
+            return oAttachment;
         },
 
         _uploadAttachmentContent(sAttachmentId, oFile, sToken, fnProgress) {

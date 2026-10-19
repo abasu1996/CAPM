@@ -743,14 +743,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
 
     this.before("READ", ProcessAttachments, async (req) => {
-      if (this._canProvisionRequests(req)) {
-        const qCreatedRequests = SELECT.from(ProcessRequests)
-          .columns("ID")
-          .where({ createdBy: req.user.id });
-        req.query.where({ request_ID: { in: qCreatedRequests } });
-        return;
-      }
-      await this._filterByVisibleRequests(req, Users, "request_ID");
+      await this._filterAttachmentReads(req, Users);
     });
 
     this.before("READ", ProcessEmailMessages, async (req) => {
@@ -2146,12 +2139,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(400, "Selected request was not found");
       }
 
-      await this._rejectIfAttachmentRequestLocked(req);
+      await this._rejectIfAttachmentRequestLocked(req, { upload: true });
       req.data.referenceNumber ??= await this._nextReferenceNumber(req, ProcessAttachments, "ATT");
     });
 
     this.before(["UPDATE", "DELETE"], ProcessAttachments, async (req) => {
-      await this._rejectIfAttachmentRequestLocked(req);
+      await this._rejectIfAttachmentRequestLocked(req, { upload: this._isAttachmentContentUpload(req) });
     });
 
     this.before("UPDATE", ProcessAttachments, (req) => {
@@ -4636,6 +4629,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     ]);
   }
 
+  async _filterAttachmentReads(req, Users = this.masterEntities.Users) {
+    if (this._isAdministrator(req)) return;
+
+    if (this._canProvisionRequests(req)) {
+      const qCreatedRequests = SELECT.from(this.entities.ProcessRequests)
+        .columns("ID")
+        .where({ createdBy: req.user.id });
+      req.query.where({ request_ID: { in: qCreatedRequests } });
+      return;
+    }
+
+    await this._filterByVisibleRequests(req, Users, "request_ID");
+  }
+
   async _filterByVisibleEmails(req, Users, ProcessEmailMessages = this.entities.ProcessEmailMessages) {
     const oReservationUser = await this._currentReservationUser(req, Users);
     const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
@@ -5101,10 +5108,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     await this._rejectIfRequestLocked(req, comment?.request_ID || req.data?.request_ID);
   }
 
-  async _rejectIfAttachmentRequestLocked(req) {
-    const attachmentId = this._requestIdFromReq(req);
+  _isAttachmentContentUpload(req) {
+    const aFields = Object.keys(req.data || {});
+    return req.event === "UPDATE"
+      && aFields.includes("content")
+      && req.data.content != null
+      && aFields.every((field) => field === "ID" || field === "content");
+  }
+
+  async _rejectIfAttachmentRequestLocked(req, { upload = false } = {}) {
+    const attachmentId = req.event === "CREATE" ? null : this._requestIdFromReq(req);
     const attachment = attachmentId
-      ? await cds.tx(req).run(SELECT.one.from(this.entities.ProcessAttachments).where({ ID: attachmentId }))
+      ? await cds.tx(req).run(SELECT.one.from(this.entities.ProcessAttachments)
+        .columns("ID", "request_ID", "createdBy").where({ ID: attachmentId }))
       : null;
 
     const requestId = attachment?.request_ID || req.data?.request_ID;
@@ -5124,6 +5140,22 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (this._canProvisionRequests(req)) {
       if (request.createdBy === req.user?.id) return;
       return req.reject(403, "The integration client can only change attachments for requests it created");
+    }
+
+    if (upload) {
+      // A user who can see the request may add an attachment.  The second
+      // upload step may only fill metadata created by that same user.
+      if (attachmentId && (!attachment || attachment.createdBy !== req.user?.id)) {
+        return req.reject(403, "You can only upload content for an attachment you created");
+      }
+      const oReservationUser = await this._currentReservationUser(req);
+      const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
+      const qVisibleRequest = SELECT.one.from(this.entities.ProcessRequests).columns("ID").where({ ID: requestId });
+      this._applyVisibleRequestsWhere(qVisibleRequest, oReservationUser, aDelegatorIds);
+      if (!await cds.tx(req).run(qVisibleRequest)) {
+        return req.reject(403, "You cannot upload attachments to a request you cannot access");
+      }
+      return;
     }
 
     // The requester must be able to finish the metadata + binary upload while
