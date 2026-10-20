@@ -1,0 +1,1422 @@
+[
+  {
+    "ID": "0f0d0079-95f3-4ed2-8158-c611c04da8f4",
+    "CREATEDAT": "2026-10-13T18:29:17.903",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:29:17.903",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "Z001",
+    "MATGROUPDESCRIPTION": "Service Materials Service Materials (ZSRV)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "32a9d7bf-0c69-4c76-a93c-6d8288d5ae75",
+    "CREATEDAT": "2026-10-13T18:30:05.824",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:30:05.824",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T036",
+    "MATGROUPDESCRIPTION": "DTV Installation Trading Material DTV Ins.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "227e4b5e-907c-4fd5-92d0-c9c52aa8cf69",
+    "CREATEDAT": "2026-10-13T18:30:22.817",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:30:22.817",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T035",
+    "MATGROUPDESCRIPTION": "DTV Cable Trading Material DTV Cable",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a66ca9db-e422-41ea-a10c-ab0a7606c332",
+    "CREATEDAT": "2026-10-13T18:30:40.557",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:30:40.557",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T034",
+    "MATGROUPDESCRIPTION": "DTV Dish Trading Material DTV Dish",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ccec8ce1-3936-46be-bc76-72690583327d",
+    "CREATEDAT": "2026-10-13T18:30:55.076",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:30:55.076",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T033",
+    "MATGROUPDESCRIPTION": "WIFI AP TRD WIFI AP TRD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ef853c9-5be1-416d-a90d-7c747f053b08",
+    "CREATEDAT": "2026-10-13T18:31:20.998",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:31:20.998",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T032",
+    "MATGROUPDESCRIPTION": "IOT Products IOT Products",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "93e756cd-496e-4a7d-be5e-f257a953343c",
+    "CREATEDAT": "2026-10-13T18:32:10.819",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:32:10.819",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T031",
+    "MATGROUPDESCRIPTION": "LTE Prepaid LTE Prepaid",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "64652fbe-cc6b-4175-a5b0-f2f970440878",
+    "CREATEDAT": "2026-10-13T18:32:42.584",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:32:42.584",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T030",
+    "MATGROUPDESCRIPTION": "WOW Product WOW Product",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bfdd23af-c2a3-4d4a-8388-66c22fa25c29",
+    "CREATEDAT": "2026-10-13T18:33:04.967",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:33:04.967",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T029",
+    "MATGROUPDESCRIPTION": "DDTL Services DDTL Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3e1a7965-6958-49fb-a29a-697699f47d09",
+    "CREATEDAT": "2026-10-13T18:33:35.121",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:33:35.121",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T028",
+    "MATGROUPDESCRIPTION": "DDTL Accessory Pack DDTL Accessory Pack",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ffc148dc-a2f7-4caf-92bf-0ff345fd504f",
+    "CREATEDAT": "2026-10-13T18:34:10.16",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:34:10.16",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T027",
+    "MATGROUPDESCRIPTION": "DDTL Power Supply DDTL Power Supply",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ce6fa1ca-8048-4dee-8c87-adf66dab5ef5",
+    "CREATEDAT": "2026-10-13T18:50:48.63",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:50:48.63",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T026",
+    "MATGROUPDESCRIPTION": "DDTL LNB DDTL LNB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7d347291-8d50-4791-a777-6a47f96b1e35",
+    "CREATEDAT": "2026-10-13T18:51:06.542",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:51:06.542",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T025",
+    "MATGROUPDESCRIPTION": "DDTL RCU DDTL RCU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0059b288-a1f8-4971-a62c-08a803c70e4f",
+    "CREATEDAT": "2026-10-13T18:51:28.563",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:51:28.563",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T024",
+    "MATGROUPDESCRIPTION": "DDTL SIM DDTL SIM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cd6bdcc2-f792-43a3-98cb-5c4d9e8e9482",
+    "CREATEDAT": "2026-10-13T18:51:47.555",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:51:47.555",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T023",
+    "MATGROUPDESCRIPTION": "DDTL STB DDTL STB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f25b70a6-ff99-4a7d-855d-96fdbf13108f",
+    "CREATEDAT": "2026-10-13T18:52:08.212",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:52:08.212",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T022",
+    "MATGROUPDESCRIPTION": "DDTL Accessories DDTL Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b318dcc9-bfac-4fb6-8320-a9e375588ecb",
+    "CREATEDAT": "2026-10-13T18:52:26.867",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:52:26.867",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T021",
+    "MATGROUPDESCRIPTION": "DDTL CPE DDTL CPE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4062722d-5823-41f6-b57d-e24b203a4a4b",
+    "CREATEDAT": "2026-10-13T18:52:55.674",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:52:55.674",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T020",
+    "MATGROUPDESCRIPTION": "IT Items IT Items",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2ee48d52-cf4c-49bc-bdfc-7b6dc82f39b6",
+    "CREATEDAT": "2026-10-13T18:53:22.939",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:53:22.939",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T019",
+    "MATGROUPDESCRIPTION": "OAF Books OAF Books",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8b1166ea-0c62-4105-805f-ba2b9672a5a5",
+    "CREATEDAT": "2026-10-13T18:58:51.259",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:58:51.259",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T018",
+    "MATGROUPDESCRIPTION": "Spare parts Spare parts",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b690f15-9d59-4a35-ab53-5736c5575567",
+    "CREATEDAT": "2026-10-13T18:59:23.932",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:59:23.932",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T017",
+    "MATGROUPDESCRIPTION": "Testing Devices Testing Devices",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7673e910-c372-470e-a8f0-92b05407a865",
+    "CREATEDAT": "2026-10-13T18:59:44.568",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T18:59:44.568",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T016",
+    "MATGROUPDESCRIPTION": "Books Books",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "98fe2194-ab2f-4d04-b307-7ac30452ea12",
+    "CREATEDAT": "2026-10-13T19:00:16.013",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:00:16.013",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T015",
+    "MATGROUPDESCRIPTION": "Connection fees Connection fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8e4de95b-73c9-4b09-8a31-450fea8b2126",
+    "CREATEDAT": "2026-10-13T19:00:35.956",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:00:35.956",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T014",
+    "MATGROUPDESCRIPTION": "Navigators Navigators",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6ba27273-88b2-4003-9cae-70abc8980614",
+    "CREATEDAT": "2026-10-13T19:00:55.013",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:00:55.013",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T013",
+    "MATGROUPDESCRIPTION": "Reload Reload",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fcbfb3cd-1e11-4d0a-b86f-63b4bc97b9e6",
+    "CREATEDAT": "2026-10-13T19:01:15.911",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:01:15.911",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T012",
+    "MATGROUPDESCRIPTION": "Scratch Cards Scratch Cards",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1f3f593-58a2-4840-b8ff-49e8d697648a",
+    "CREATEDAT": "2026-10-13T19:01:35.032",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:01:35.032",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T011",
+    "MATGROUPDESCRIPTION": "Gift Vouchers Gift Vouchers",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fe6c69c1-fc6f-4064-8d28-2b8bc8a82f9b",
+    "CREATEDAT": "2026-10-13T19:01:57.277",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:01:57.277",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T010",
+    "MATGROUPDESCRIPTION": "Blackberry Ent Soln Blackberry Enterprise Solution",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1fa8021-cdbf-4b40-90da-2f4dc49b4749",
+    "CREATEDAT": "2026-10-13T19:02:33.572",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:02:33.572",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T009",
+    "MATGROUPDESCRIPTION": "Booklet/Packing Mats Booklet & Packing Materials",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "392d96c2-b29c-4a4d-afe3-a403549e8e9e",
+    "CREATEDAT": "2026-10-13T19:03:06.275",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:03:06.275",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T008",
+    "MATGROUPDESCRIPTION": "Bundle/Compl. Items Bundle Compliments Items",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "703ac45d-e211-4e1d-96da-0f1f53d48bae",
+    "CREATEDAT": "2026-10-13T19:03:24.895",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:03:24.895",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T007",
+    "MATGROUPDESCRIPTION": "LCD Books LCD Books",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7358cbfd-daad-4edb-9af2-8ab0d771b699",
+    "CREATEDAT": "2026-10-13T19:03:45.013",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:03:45.013",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T006",
+    "MATGROUPDESCRIPTION": "Trading Accessories Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "30abeefb-3214-462b-985f-1e72838c0ab9",
+    "CREATEDAT": "2026-10-13T19:04:05.317",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:04:05.317",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T005",
+    "MATGROUPDESCRIPTION": "SIM SIM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3fff312f-8712-4957-8f76-e0fabdae7883",
+    "CREATEDAT": "2026-10-13T19:04:24.829",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:04:24.829",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T004",
+    "MATGROUPDESCRIPTION": "Starterpack Starterpack",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8e8e1bf5-cd73-4df0-9489-6ca319247f54",
+    "CREATEDAT": "2026-10-13T19:04:44.845",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:04:44.845",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T003",
+    "MATGROUPDESCRIPTION": "Laptop Laptop",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4581a2b8-8061-4657-b957-5594a5020931",
+    "CREATEDAT": "2026-10-13T19:05:04.358",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:05:04.358",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T002",
+    "MATGROUPDESCRIPTION": "Data Card/USB Modem Data Card & USB Modem",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3268b444-f11d-4780-8923-f0e2c05c9a4c",
+    "CREATEDAT": "2026-10-13T19:05:34.13",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:05:34.13",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "T001",
+    "MATGROUPDESCRIPTION": "Phones Phones",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b57254f5-e878-4da9-a2dd-6eed5f6d38c4",
+    "CREATEDAT": "2026-10-13T19:06:41.827",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:06:41.827",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M015",
+    "MATGROUPDESCRIPTION": "Loyalty Promotions Loyalty Promotions",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e94ec46d-2bdf-4f10-9948-edc2005f0d6a",
+    "CREATEDAT": "2026-10-13T19:07:02.455",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:07:02.455",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M014",
+    "MATGROUPDESCRIPTION": "Marketing Printing Marketing Printing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ec5e03f7-7105-4336-93e8-57dcc67b79d2",
+    "CREATEDAT": "2026-10-13T19:07:31.81",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:07:31.81",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M013",
+    "MATGROUPDESCRIPTION": "Revenue Share Revenue Share",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "836ac81c-2ceb-4840-9758-8e8fc8a2a437",
+    "CREATEDAT": "2026-10-13T19:07:55.456",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:07:55.456",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M012",
+    "MATGROUPDESCRIPTION": "Marketing Model Expe Marketing Model Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8c67e391-4f8b-4f8d-b831-6bbbfee5991c",
+    "CREATEDAT": "2026-10-13T19:08:21.029",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:08:21.029",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M011",
+    "MATGROUPDESCRIPTION": "Marketing Sponsorshi Marketing Sponsorships",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9ddd54cb-29ac-4d78-8f20-db4ff13d8231",
+    "CREATEDAT": "2026-10-13T19:08:39.259",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:08:39.259",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M010",
+    "MATGROUPDESCRIPTION": "Promotion Promotion",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "252d20e0-9975-4433-99f2-fcb9293b8a44",
+    "CREATEDAT": "2026-10-13T19:08:58.719",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:08:58.719",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M009",
+    "MATGROUPDESCRIPTION": "Marketing General Marketing General",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dba3a979-7e4f-4f58-8f01-4c04b7bfbb7c",
+    "CREATEDAT": "2026-10-13T19:09:19.402",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:09:19.402",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M008",
+    "MATGROUPDESCRIPTION": "Marketing Event Mana Marketing Event Management",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "02dc0164-b010-4346-a2b2-46252f75d31a",
+    "CREATEDAT": "2026-10-13T19:09:41.848",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:09:41.848",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M007",
+    "MATGROUPDESCRIPTION": "CAG CAG",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8c2277aa-e1c3-4681-b315-5317194093d6",
+    "CREATEDAT": "2026-10-13T19:10:10.702",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:10:10.702",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M006",
+    "MATGROUPDESCRIPTION": "Marketing Research Marketing Research",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f70ee673-bb77-4662-8a93-218160bdafc4",
+    "CREATEDAT": "2026-10-13T19:10:33.433",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:10:33.433",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M005",
+    "MATGROUPDESCRIPTION": "Outdoor Outdoor",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1424a5b2-3759-4217-9e7f-8bfbfee34a4c",
+    "CREATEDAT": "2026-10-13T19:10:59.673",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:10:59.673",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M004",
+    "MATGROUPDESCRIPTION": "Production Production",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1abb31d4-4333-4903-a0cf-6781c34c443c",
+    "CREATEDAT": "2026-10-13T19:11:23.954",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:11:23.954",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M003",
+    "MATGROUPDESCRIPTION": "Scheduling Scheduling",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1532c5fb-944c-4398-bb91-dd84e625dabd",
+    "CREATEDAT": "2026-10-13T19:12:04.144",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:12:04.144",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M002",
+    "MATGROUPDESCRIPTION": "POSM POSM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "374e89e0-2e60-4a25-a477-83baf4c60430",
+    "CREATEDAT": "2026-10-13T19:12:35.46",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:12:35.46",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "M001",
+    "MATGROUPDESCRIPTION": "Merchandising Merchandising",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "52030178-21ab-4ff3-b483-d6b9b5b40e01",
+    "CREATEDAT": "2026-10-13T19:13:02.259",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:13:02.259",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "I017",
+    "MATGROUPDESCRIPTION": "IT Licensing Fees IT Licensing Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4c16ab00-8b6e-4397-ab80-5d25256fed41",
+    "CREATEDAT": "2026-10-13T19:13:23.258",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:13:23.258",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "I016",
+    "MATGROUPDESCRIPTION": "IT Software Services IT Software Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "877aa5a7-1988-42b4-8657-3324efc9762c",
+    "CREATEDAT": "2026-10-13T19:13:46.954",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:13:46.954",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "I015",
+    "MATGROUPDESCRIPTION": "IT Implementation Se IT Implementation Se",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1eb0aaa2-242a-41fd-9bb7-fa44a88347f4",
+    "CREATEDAT": "2026-10-13T19:14:08.39",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:14:08.39",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "I014",
+    "MATGROUPDESCRIPTION": "IT Labour Services IT Labour Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1110fd4d-7143-4877-819a-974060c2b7b5",
+    "CREATEDAT": "2026-10-13T19:14:30.206",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:14:30.206",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "I013",
+    "MATGROUPDESCRIPTION": "IT Testing Services IT Testing Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8c58cace-89bf-4fc5-90d6-93cc7dc8bcbf",
+    "CREATEDAT": "2026-10-13T19:15:02.859",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:15:02.859",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "I012",
+    "MATGROUPDESCRIPTION": "IT Consultancy Fees IT Consultancy Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e0d6c2d9-a7f3-4409-960c-82df2c73f49f",
+    "CREATEDAT": "2026-10-13T19:15:22.03",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:15:22.03",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "I011",
+    "MATGROUPDESCRIPTION": "IT Training Services IT Training Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "86822dba-2899-4587-b126-06a3fb9e4819",
+    "CREATEDAT": "2026-10-13T19:16:34.261",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T19:16:34.261",
+    "MODIFIEDBY": "system",
+    "MATGROUPCODE": "I010",
+    "MATGROUPDESCRIPTION": "IT AMC Services IT AMC Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "23aba339-22bf-543b-b6fe-5013f220569f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I009",
+    "MATGROUPDESCRIPTION": "IT Rental Services IT Rental Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f5f84b98-365f-57d8-bcd2-4e91bc3a6358",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I008",
+    "MATGROUPDESCRIPTION": "IT Repair Services IT Repair Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7d33997e-8e0d-510c-96ef-a08ec4bc4051",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I007",
+    "MATGROUPDESCRIPTION": "Printers/Scanners Printers nad Scanners",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "593eebb1-f888-548f-a100-e1e62c2b9143",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I006",
+    "MATGROUPDESCRIPTION": "IT Accessories Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a720088d-2883-54d0-9aa9-b343d94a8476",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I005",
+    "MATGROUPDESCRIPTION": "Servers/Storage Data center Equipments (servers& storages)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "010d622c-125f-5ef3-a568-897c0eb449fa",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I004",
+    "MATGROUPDESCRIPTION": "Cables and Racks Passive Equipments (cables and Racks)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b68c48f5-4186-5fcc-947c-6ac164f9a608",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I003",
+    "MATGROUPDESCRIPTION": "Voice Equipment Voice Equipments",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e89d29ef-cb12-5250-8915-93ca43df2b40",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I002",
+    "MATGROUPDESCRIPTION": "Computers/Laptops Computers and Laptops",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bf253f79-38e2-5e90-876a-a44fc047ec65",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "I001",
+    "MATGROUPDESCRIPTION": "Network Equipment Network Equipments",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a5dca519-2025-5d3a-95ff-2c7f5d5c51d6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "H110",
+    "MATGROUPDESCRIPTION": "On-premise On-premise",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d7facd27-fd97-5087-83ed-563ab1ac4872",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "H109",
+    "MATGROUPDESCRIPTION": "Bus Solu (BS)-Other Bus Solu (BS)-Other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d2efd680-6af9-5f97-a906-f19a9dd0513c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "H107",
+    "MATGROUPDESCRIPTION": "Bus Solu (BS)-D365 Bus Solu (BS)-D365",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c5ded43c-ff71-5227-8355-e673b966ae80",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "H105",
+    "MATGROUPDESCRIPTION": "Data & AI Data & AI",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6c56600d-0ebe-57ee-a8fb-96d9b84be039",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "H104",
+    "MATGROUPDESCRIPTION": "Microsoft Security Microsoft Security",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3c42c187-466b-5506-801e-de6522d62842",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "H103",
+    "MATGROUPDESCRIPTION": "Microsoft Azure Microsoft Azure",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "01135868-d559-5cb4-be06-c2a37e3e4b2f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "H102",
+    "MATGROUPDESCRIPTION": "MS Mod Wrkplace(MWP) MS Mod Wrkplace(MWP)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "95f02532-6a90-5d8f-b90a-afb9e8509d53",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "H101",
+    "MATGROUPDESCRIPTION": "Modern Apps Modern Apps",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f3aa101f-3936-5303-8902-8ed8da659281",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E021",
+    "MATGROUPDESCRIPTION": "DNS Services DNS Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8a2dd9ca-159b-5b3d-83b4-1096bbf010ce",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E020",
+    "MATGROUPDESCRIPTION": "Transmission lines Transmission lines",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "391f0344-4a15-53b0-9ee9-b5fbc52cd679",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E019",
+    "MATGROUPDESCRIPTION": "Processing Processing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1923448-8894-512c-8546-324499dfb664",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E018",
+    "MATGROUPDESCRIPTION": "Channel Fee Channel Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "596d5cba-5314-5ad8-ba77-56b239782959",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E017",
+    "MATGROUPDESCRIPTION": "SAQ Services SAQ Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "177b26b8-19d0-5ded-a5b1-81191cadd225",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E016",
+    "MATGROUPDESCRIPTION": "Labour Hire Services Labour Hire Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fff25e5a-aa82-5451-b21e-7d5e2bffe91d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E015",
+    "MATGROUPDESCRIPTION": "Transport Services Transport Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cba64bba-4342-5bc5-bf30-51db560e990d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E014",
+    "MATGROUPDESCRIPTION": "Tools Tools",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1c15d7d-31e4-57af-b21e-662af658539e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E013",
+    "MATGROUPDESCRIPTION": "DTV IT DTV IT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c7b88727-17e3-58cc-acd3-eea127681847",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E012",
+    "MATGROUPDESCRIPTION": "DATA Eqp DATA Eqp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "972d07bf-0ac3-5caa-a747-cdfc79a14799",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E011",
+    "MATGROUPDESCRIPTION": "BB Equip BB Equip",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aa9f8412-5d1f-5be5-a35a-7b18f2f9f5d1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E010",
+    "MATGROUPDESCRIPTION": "Accessory Accessory",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d5283c68-ca84-56f5-82ed-783babc64378",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E009",
+    "MATGROUPDESCRIPTION": "RF Eqp RF Eqp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a380edc6-c564-563f-b4ed-1b29184c9ee4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E008",
+    "MATGROUPDESCRIPTION": "IP Core IP Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d733ebf5-1037-5ab7-8141-a1f80d8433b6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E007",
+    "MATGROUPDESCRIPTION": "VAS VAS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6bb89d34-7fba-52d6-8e4f-9bccb84c266d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E006",
+    "MATGROUPDESCRIPTION": "Core Pkt Switching Core Packet Switching (GPRS, 3G etc)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0896e056-cb16-5ca6-b157-df7d67a7de26",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E005",
+    "MATGROUPDESCRIPTION": "Civil Civil",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "049bebee-eba8-52e6-8293-bfff99502276",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E004",
+    "MATGROUPDESCRIPTION": "Power & Electrical Power & Electrical",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "11cda8e1-49f7-5170-a48b-b5f4af9da73d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E003",
+    "MATGROUPDESCRIPTION": "Transmission Transmission",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9aafc54a-274d-589d-a097-c5b872b56f39",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E002",
+    "MATGROUPDESCRIPTION": "NSS NSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2a0d4ad4-03e5-56e8-a44c-3905b33110fe",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "E001",
+    "MATGROUPDESCRIPTION": "BSS BSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e9d0121c-076e-5100-a873-4231065c0b37",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "C008",
+    "MATGROUPDESCRIPTION": "CPE-DE Customer Premise Equipment DE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d029936e-b713-5b3d-89ed-e338055c8960",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "C007",
+    "MATGROUPDESCRIPTION": "CPE-LTE Customer Premise Equipment LTE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f64f20a2-f115-5f9c-964d-18312dea69b0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "C006",
+    "MATGROUPDESCRIPTION": "CPE-CDMA Customer Premise Equipment CDMA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bb722676-b2f6-5230-be04-15a85cd279d0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "C004",
+    "MATGROUPDESCRIPTION": "Biz Pack Connection Biz Pack Connection fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8b20d0a6-bbb0-53e7-a936-3b8a5d1eed1f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "C003",
+    "MATGROUPDESCRIPTION": "CPE-DTV Installation Customer Premise Equipment Ins.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "29dbb1f3-bdec-534d-97c9-9fa04894b549",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "C002",
+    "MATGROUPDESCRIPTION": "CPE-DTV Accessories Customer Premise Equipment Acc.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9fd03465-2674-58e2-a014-708c3ca9ec79",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "C001",
+    "MATGROUPDESCRIPTION": "CPE-DTV Customer Premise Equipment DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d9e3813e-0968-5c46-a84b-c307f8798d0d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A037",
+    "MATGROUPDESCRIPTION": "Phone repair Phone repair",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "47e806f7-a3d9-5fa6-b5cd-a4af7fe2679b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A036",
+    "MATGROUPDESCRIPTION": "Consultancy Consultancy",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "571c4772-36d4-5634-854a-2fe39619e701",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A035",
+    "MATGROUPDESCRIPTION": "Billing Billing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "81298255-98c8-57a0-be0f-984899738fc4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A034",
+    "MATGROUPDESCRIPTION": "Insurance Insurance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b5c27c34-e335-55c8-8822-21f5be1c7828",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A033",
+    "MATGROUPDESCRIPTION": "Staff Welfare and ot Staff Welfare and other Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dc43db85-935c-557e-996b-b3c04ea1dd87",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A032",
+    "MATGROUPDESCRIPTION": "Company related Company related",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6071aefc-c2b5-5c65-8df8-875bc26e3214",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A031",
+    "MATGROUPDESCRIPTION": "Content Management Content Management",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "80e15224-90e3-532d-ad82-986220c6224e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A030",
+    "MATGROUPDESCRIPTION": "CPE repair CPE repair",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "291c6530-a811-571f-983c-840650e34515",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A029",
+    "MATGROUPDESCRIPTION": "Freight Freight",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "37ba2cd4-9f89-569c-a59e-52ab02a6135f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A028",
+    "MATGROUPDESCRIPTION": "Transport & Travelli Transport & Travelling",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7670d8fd-f19d-5237-ba3d-4899de1aa2f8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A027",
+    "MATGROUPDESCRIPTION": "Sub Contractor Servi Sub Contractor Service/Labour",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e985ee61-676e-55b6-89a9-385fb1f7f9a5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A026",
+    "MATGROUPDESCRIPTION": "Security Security",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f1cae99e-bdf8-5bd3-928d-2e9a5d8e235b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A025",
+    "MATGROUPDESCRIPTION": "RM & RM Incidental RM & RM Incidental",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d72836d9-fc2e-54cf-96fc-c8a1f67351e9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A024",
+    "MATGROUPDESCRIPTION": "Printing Printing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e74e2618-5bfc-5a6b-a22d-5a0c4a1b3dfe",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A023",
+    "MATGROUPDESCRIPTION": "Postage & Courier Postage & Courier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f1c9c2d5-036d-53d5-aed1-50e0d99a19a9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A022",
+    "MATGROUPDESCRIPTION": "Interior & Project M Interior & Project Management",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6c361b71-09d4-55e3-b9c8-c53210cf2b9f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A021",
+    "MATGROUPDESCRIPTION": "Gift/Donations/Hampe Gift/Donations/Hampers",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ddaac1e1-fe78-5dad-9950-6ddf8be4c6fe",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A020",
+    "MATGROUPDESCRIPTION": "Floral Arrangements/ Floral Arrangements/Foliage/Garden Maintenance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "79ffd358-318d-5071-a025-09cbbe0c9d1f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A019",
+    "MATGROUPDESCRIPTION": "F&B/T&C F&B/T&C",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6dc4a165-75de-5a8f-9abd-edaad6fb9c9c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A018",
+    "MATGROUPDESCRIPTION": "Equipment & Furnitur Equipment & Furniture",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ded954d2-3e80-5368-8c05-bc27c5e7e52e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A017",
+    "MATGROUPDESCRIPTION": "Electrical/AC/UPS/Ge Electrical/AC/UPS/Generators",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e766c1e5-48bf-5f08-8be8-7e6630a1d805",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A016",
+    "MATGROUPDESCRIPTION": "Document Management Document Management",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "428dffdd-c2f8-5229-b863-7dcf6b8536f4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A015",
+    "MATGROUPDESCRIPTION": "Civil Work Civil Work",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f6a2a2d0-5ff4-5d90-9557-03bc9f7b4a0f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A014",
+    "MATGROUPDESCRIPTION": "Vehicles Vehicles",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1eff7aea-4826-5feb-83e6-6d0c5a6009c0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A013",
+    "MATGROUPDESCRIPTION": "Adm Tools Tools",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a9d294c3-14ad-5445-bf94-8a2bf30be236",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A012",
+    "MATGROUPDESCRIPTION": "Stationery/Off.Supp Stationery / Office Supplies / Printed Materials",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a8aa0685-8f37-52dc-9691-4ca55b3c8c62",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A011",
+    "MATGROUPDESCRIPTION": "Adm Spare Parts Spare Parts",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b64bbf74-6dbc-51de-9d6e-1abbc007839b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A010",
+    "MATGROUPDESCRIPTION": "Safety Systems/Equip Safety Systems & Safety Equipment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0d59d623-c09f-5804-ab99-fd1c3e3751fc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A009",
+    "MATGROUPDESCRIPTION": "Pest Control Pest Control",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "693dcc34-20d8-5878-b818-33ff0899f532",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A008",
+    "MATGROUPDESCRIPTION": "Publications Newspapers/Books/Magazines/Publications",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ef82e727-9c94-5733-8e9e-8d286ea3d7f9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A007",
+    "MATGROUPDESCRIPTION": "Int/Ext Fittings Interior / Exterior Fittings",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9b79b0ab-285d-54af-a7f4-66cb1d4e06e9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A006",
+    "MATGROUPDESCRIPTION": "General Materials General Materials&Supp. / Hampers /Cutlery & Crockery/Bins",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ada8b733-d6ab-5e80-a45d-eea0caa3f6a5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A005",
+    "MATGROUPDESCRIPTION": "Furniture Furniture",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bf3fb6ab-1a8f-53a9-b576-73911e97616e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A004",
+    "MATGROUPDESCRIPTION": "Food /Bev Catering Food & Beverages / Tea & Catering",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0204ddbd-a796-5daf-900a-89051676226a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A003",
+    "MATGROUPDESCRIPTION": "Adm Equipment Equipment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "93b21b8c-449c-5d4e-a040-c4b32d166d46",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A002",
+    "MATGROUPDESCRIPTION": "Bldg/Elec Items Building Materials / Electrical Items",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d56b08e9-4195-56a6-9f93-3fd4ac1530a6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATGROUPCODE": "A001",
+    "MATGROUPDESCRIPTION": "Adm Assets Assets",
+    "ISACTIVE": 1
+  }
+]

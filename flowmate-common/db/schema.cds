@@ -2,6 +2,12 @@ namespace flowmate.common.db;
 
 using { cuid, managed, sap.common.CodeList } from '@sap/cds/common';
 
+type UserType : String(20) enum {
+  INTERNAL      = 'INTERNAL';
+  VENDOR        = 'VENDOR';
+  TECHNICAL_API = 'TECHNICAL_API';
+}
+
 entity Roles : CodeList {
   key code : String(40);
   isActive : Boolean default true;
@@ -20,6 +26,8 @@ entity Users : cuid, managed {
   @Common.Text: (role.name)
   @Common.TextArrangement: #TextOnly
   role              : Association to one Roles @assert.target;
+  @title: 'User Type'
+  userType          : UserType default #INTERNAL;
   @title: 'Manager'
   @Common.Text: (manager.displayName)
   @Common.TextArrangement: #TextOnly

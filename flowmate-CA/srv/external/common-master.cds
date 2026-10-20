@@ -9,6 +9,7 @@ service CommonMasterDataService {
         email            : String(255);
         azureObjectId    : String(100);
         department       : String(100);
+        userType         : String(20);
         manager          : Association to Users;
         isActive         : Boolean;
   }

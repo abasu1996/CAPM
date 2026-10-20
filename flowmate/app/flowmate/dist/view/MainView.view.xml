@@ -131,7 +131,8 @@
                         subheader="{i18n>createRequestSubtitle}"
                         press=".onCreateRequest">
                         <TileContent>
-                            <NumericContent icon="sap-icon://add-document" />
+                            <!-- <NumericContent icon="sap-icon://add-document" /> -->
+                            <ImageContent src="sap-icon://add-document" />
                         </TileContent>
                     </GenericTile>
                     <GenericTile
@@ -150,7 +151,8 @@
                         visible="{permissions>/isAdmin}"
                         press=".onOpenConfig">
                         <TileContent>
-                            <NumericContent icon="sap-icon://action-settings" />
+                            <!-- <NumericContent icon="sap-icon://action-settings" /> -->
+                            <ImageContent src="sap-icon://action-settings" />
                         </TileContent>
                     </GenericTile>
                     <GenericTile

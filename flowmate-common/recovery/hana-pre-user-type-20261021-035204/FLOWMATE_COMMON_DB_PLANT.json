@@ -1,0 +1,502 @@
+[
+  {
+    "ID": "5e3de0c6-f75f-4c1b-b1c6-570c42740bcc",
+    "CREATEDAT": "2026-10-13T17:38:56.408",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:39:00.893",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1000",
+    "PLANTNAME": "Head Office - DAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5f05cbc8-4c5f-47bb-a251-370bde886390",
+    "CREATEDAT": "2026-10-13T17:39:19.327",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:39:25.856",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1100",
+    "PLANTNAME": "Head Office - DBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f8ae922d-81df-491f-bbfe-f01bc03f7dbd",
+    "CREATEDAT": "2026-10-13T17:39:43.956",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:39:47.159",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1150",
+    "PLANTNAME": "HS Head Office LK25",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "91247eac-e5b6-429b-a679-b61d465dee19",
+    "CREATEDAT": "2026-10-13T17:40:16.673",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:40:20.464",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1200",
+    "PLANTNAME": "Head Office - DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1c2a73ff-7891-4383-90e6-533b548059f0",
+    "CREATEDAT": "2026-10-13T17:40:51.758",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:40:56.585",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1400",
+    "PLANTNAME": "Head Office - DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1971effe-c53c-43dc-8fec-f546c6410699",
+    "CREATEDAT": "2026-10-13T17:41:26.574",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:41:31.011",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1600",
+    "PLANTNAME": "Telecard Admin Plant",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "81d0f227-dcec-43ab-a3f7-4e7b71c12d42",
+    "CREATEDAT": "2026-10-13T17:41:45.443",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:41:49.931",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1650",
+    "PLANTNAME": "DBS Admin Plant",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "316c09b0-89d7-40b2-a086-dba40f80f040",
+    "CREATEDAT": "2026-10-13T17:42:06.595",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:42:10.926",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1700",
+    "PLANTNAME": "Dialog Network Service",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7f9bda34-b12c-40b8-9b58-b6370b73ab2d",
+    "CREATEDAT": "2026-10-13T17:42:28.408",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:42:59.216",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1800",
+    "PLANTNAME": "Head Office - H1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "46c42d41-e52e-40c4-82e9-3265bf3b8528",
+    "CREATEDAT": "2026-10-13T17:42:47.916",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:42:52.494",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "1900",
+    "PLANTNAME": "DFP Admin Plant",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5d8d405c-607a-40e2-a95c-2274f8202390",
+    "CREATEDAT": "2026-10-13T17:43:14.267",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:43:20.635",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "2000",
+    "PLANTNAME": "Engineering Warehouse - DAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "98eee4d3-3bdd-4220-91f4-a24a4bd87e5f",
+    "CREATEDAT": "2026-10-13T17:43:38.332",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:43:42.509",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "2100",
+    "PLANTNAME": "Engineering Warehouse - DBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "31869982-e0e8-46e2-9138-61cbc2c7a5d1",
+    "CREATEDAT": "2026-10-13T17:43:58.05",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:44:02.073",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "2200",
+    "PLANTNAME": "Engineering Warehouse - DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5bffe831-bde7-4b01-a145-78af295ecdc3",
+    "CREATEDAT": "2026-10-13T17:44:15.502",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:44:19.698",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "2210",
+    "PLANTNAME": "Engineering Warehouse - CBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "223b158c-c0d0-4dba-bd2c-cf529a995aad",
+    "CREATEDAT": "2026-10-13T17:44:33.286",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:44:36.966",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "2220",
+    "PLANTNAME": "Engineering Warehouse - CBN ST",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bc40f1af-42f4-4a51-b99b-c3a692b17208",
+    "CREATEDAT": "2026-10-13T17:44:51.769",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:44:59.775",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "2300",
+    "PLANTNAME": "Engineering Warehouse - Airtel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "09e8dc38-811f-4880-bd11-55676558fbbe",
+    "CREATEDAT": "2026-10-13T17:45:13.926",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:45:18.924",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "2400",
+    "PLANTNAME": "Engineering - DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "06fbbe6b-f97c-40bc-838e-bc3fb53906dc",
+    "CREATEDAT": "2026-10-13T17:45:32.515",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:45:36.601",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "3000",
+    "PLANTNAME": "Trading Warehouse - DAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "66e24604-960e-43f4-bad4-41df431a620e",
+    "CREATEDAT": "2026-10-13T17:45:51.323",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:45:56.544",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "3100",
+    "PLANTNAME": "Trading Warehouse - DBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a1a9a7d9-6321-4481-bbc3-c0b10db0ff01",
+    "CREATEDAT": "2026-10-13T17:46:11.817",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:46:16.665",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "3200",
+    "PLANTNAME": "Trading Warehouse - DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "90cf9260-5385-4446-b198-77ce7a365a77",
+    "CREATEDAT": "2026-10-13T17:46:37.851",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:46:45.387",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "3300",
+    "PLANTNAME": "Trading Warehouse - Airtel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ce65cba-13d4-4244-8e40-16427481a9bc",
+    "CREATEDAT": "2026-10-13T17:47:03.312",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:54:37.38",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "3400",
+    "PLANTNAME": "Dialog Device Trading (PVT)LTD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3dc39bbe-6d4c-4fb0-bf5f-4fcaf9ec83f2",
+    "CREATEDAT": "2026-10-13T17:47:47.084",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:54:41.099",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "4000",
+    "PLANTNAME": "Arcades - DAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ef34c6be-f132-46a6-9cf0-768f41258799",
+    "CREATEDAT": "2026-10-13T17:47:58.238",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:54:43.703",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "4100",
+    "PLANTNAME": "Arcades - DBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e60101b5-f62d-48c4-9425-02e6563a7439",
+    "CREATEDAT": "2026-10-13T17:48:11.73",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:54:49.064",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "4200",
+    "PLANTNAME": "Arcades - DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c20f9295-5135-4f00-9fc7-67e53747e86b",
+    "CREATEDAT": "2026-10-13T17:48:26.377",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:54:52.739",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "4300",
+    "PLANTNAME": "Trading Outlets - Airtel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0d6d7114-5618-4731-bf76-dbfc344445e1",
+    "CREATEDAT": "2026-10-13T17:48:44.225",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:54:55.822",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "4400",
+    "PLANTNAME": "Arcades - DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3a3ea6af-49f0-48b5-a9de-06ad7249c6aa",
+    "CREATEDAT": "2026-10-13T17:48:57.394",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:54:58.994",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "5000",
+    "PLANTNAME": "CFSS - DAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0a825bf6-ea65-473a-8b56-f89635245761",
+    "CREATEDAT": "2026-10-13T17:49:13.276",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:02.407",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "5100",
+    "PLANTNAME": "GFSS / Installation - DBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e89e7c78-b903-40a1-8bf8-e7f185bc983c",
+    "CREATEDAT": "2026-10-13T17:49:26.637",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:09.469",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "5200",
+    "PLANTNAME": "GFSS / Installation - DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "25cccbea-efec-4e14-a9eb-8effea5421f0",
+    "CREATEDAT": "2026-10-13T17:49:41.539",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:13.537",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "5300",
+    "PLANTNAME": "CFSS - Airtel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8a02f108-8cc8-450d-857e-7f4c5e35642e",
+    "CREATEDAT": "2026-10-13T17:49:53.927",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:21.148",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "5400",
+    "PLANTNAME": "CFSS - DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4912684c-58ce-4ff8-91c8-59b2e29803fd",
+    "CREATEDAT": "2026-10-13T17:50:09.676",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:25.133",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6000",
+    "PLANTNAME": "Non Valuated Plant - DAP - Eng",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ccdb26ce-2f90-480b-9b4a-1e38d8513360",
+    "CREATEDAT": "2026-10-13T17:50:26.822",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:28.688",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6100",
+    "PLANTNAME": "Non Valuated Plant - DBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6ee96e5f-6c8f-4bc7-9ef5-d46baa65c560",
+    "CREATEDAT": "2026-10-13T17:50:40.813",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:41.652",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6200",
+    "PLANTNAME": "Non Valuated Plant - DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ad68a0d3-d169-4547-9b35-f256928a9505",
+    "CREATEDAT": "2026-10-13T17:50:52.639",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:49.733",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6300",
+    "PLANTNAME": "Non Valuated Plant-Airtel Eng",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "26478fe5-5913-46e7-b98a-86cf7049e0fa",
+    "CREATEDAT": "2026-10-13T17:51:04.268",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:53.777",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6400",
+    "PLANTNAME": "Non Valuated Plant - DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4376ded1-36b0-4790-a5a8-3eb8d30bb345",
+    "CREATEDAT": "2026-10-13T17:51:15.983",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:55:58.767",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6500",
+    "PLANTNAME": "Non Valuated Plant - DAP - Trd",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "db2d8ca1-f770-4d19-8f9f-26250af4c950",
+    "CREATEDAT": "2026-10-13T17:51:32.537",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:02.537",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6501",
+    "PLANTNAME": "Non Valuated Plant - DAP - Sal",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "408e9524-ecc9-4aed-a1a3-1c2649b151ff",
+    "CREATEDAT": "2026-10-13T17:51:58.826",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:05.965",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6600",
+    "PLANTNAME": "Non Valuated Plant - DBN - Trd",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e22adebb-00ab-4caa-b6f3-f303b8451788",
+    "CREATEDAT": "2026-10-13T17:52:13.485",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:18",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6601",
+    "PLANTNAME": "Non Valuated Plant - DBN - Sal",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f6c672a3-1923-4a29-8b99-a6c3e378cc1b",
+    "CREATEDAT": "2026-10-13T17:52:24.422",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:20.94",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6602",
+    "PLANTNAME": "Non Valuated Plant - DBN -CFSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "078507d8-bd78-4d44-ba6f-9d5b0df8536f",
+    "CREATEDAT": "2026-10-13T17:52:37.757",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:24.072",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6700",
+    "PLANTNAME": "Non Valuated Plant - DTV - TRD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "40ae1c31-7dea-4f1d-8acf-79d83acbaa1c",
+    "CREATEDAT": "2026-10-13T17:52:49.703",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:31.491",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6701",
+    "PLANTNAME": "Non Valuated Plant - DTV - SAL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "775db536-296d-4df2-8196-1815d0311552",
+    "CREATEDAT": "2026-10-13T17:53:01.69",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:36.07",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6702",
+    "PLANTNAME": "Non Valuated Plant - DTV-CFSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1a9e5cb-76b5-4dc0-8c92-7c449291b2a4",
+    "CREATEDAT": "2026-10-13T17:53:26.107",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:42.095",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6800",
+    "PLANTNAME": "DDTL Trading - NV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c89253cb-78c8-404b-9895-4d66f0a222a5",
+    "CREATEDAT": "2026-10-13T17:53:41.704",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:46.127",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6801",
+    "PLANTNAME": "Non Valuated Plant - DDTL -SAL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "abc03308-01eb-4e9c-880c-1d80ca42104b",
+    "CREATEDAT": "2026-10-13T17:53:57.36",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:53.927",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "6802",
+    "PLANTNAME": "DDTL-NV-CFSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ba52efec-7583-404b-82e5-d049d7f4d1bb",
+    "CREATEDAT": "2026-10-13T17:54:08.699",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:56:57.506",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "7500",
+    "PLANTNAME": "DHL - Admin",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8b76ae1e-1791-4e27-8562-b54f5b96704f",
+    "CREATEDAT": "2026-10-13T17:54:20.571",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T17:57:01.211",
+    "MODIFIEDBY": "system",
+    "PLANTCODE": "8500",
+    "PLANTNAME": "DADIF - Admin",
+    "ISACTIVE": 1
+  }
+]

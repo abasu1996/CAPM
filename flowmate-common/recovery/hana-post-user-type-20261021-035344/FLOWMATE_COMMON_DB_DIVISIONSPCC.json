@@ -1,0 +1,123 @@
+[
+  {
+    "ID": "b26b03d9-edc8-4bb0-a66e-05b0f8e4faea",
+    "CREATEDAT": "2026-10-13T20:34:46.368",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:34:50.159",
+    "MODIFIEDBY": "system",
+    "SRNO": "1",
+    "DIVISION": "Access Planning",
+    "DIVISIONLETTER": "A",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "db8c76ba-849e-4e9a-93c9-80fde1f029ba",
+    "CREATEDAT": "2026-10-13T20:35:30.056",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:35:36.62",
+    "MODIFIEDBY": "system",
+    "SRNO": "3",
+    "DIVISION": "Core",
+    "DIVISIONLETTER": "C",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "de43c05a-939c-45bb-ba35-192c21f5276b",
+    "CREATEDAT": "2026-10-13T20:35:56.749",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:36:42.689",
+    "MODIFIEDBY": "system",
+    "SRNO": "4",
+    "DIVISION": "Security",
+    "DIVISIONLETTER": "B",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "feb3adae-de50-4275-9bd2-236a31d4a657",
+    "CREATEDAT": "2026-10-13T20:35:09.842",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:36:45.174",
+    "MODIFIEDBY": "system",
+    "SRNO": "2",
+    "DIVISION": "Power",
+    "DIVISIONLETTER": "P",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e84247b8-37b3-43ff-bf6b-23b8901f0433",
+    "CREATEDAT": "2026-10-13T20:36:38.164",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:36:47.882",
+    "MODIFIEDBY": "system",
+    "SRNO": "5",
+    "DIVISION": "OFN",
+    "DIVISIONLETTER": "F",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d89a556b-4c18-48c1-840d-636d7ab0d34c",
+    "CREATEDAT": "2026-10-13T20:37:19.296",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:37:23.351",
+    "MODIFIEDBY": "system",
+    "SRNO": "6",
+    "DIVISION": "Data center",
+    "DIVISIONLETTER": "I",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6bd9eb1f-39a9-4b74-85bb-5ff535d24310",
+    "CREATEDAT": "2026-10-13T20:37:41.678",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:37:47.399",
+    "MODIFIEDBY": "system",
+    "SRNO": "7",
+    "DIVISION": "Transport",
+    "DIVISIONLETTER": "T",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "93b41f88-8675-4a2a-bf4e-5f527c1b2ee5",
+    "CREATEDAT": "2026-10-13T20:38:10.39",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:38:16.831",
+    "MODIFIEDBY": "system",
+    "SRNO": "8",
+    "DIVISION": "VAS",
+    "DIVISIONLETTER": "V",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1582459-fa3d-47e6-a39d-44cd68e707f9",
+    "CREATEDAT": "2026-10-13T20:38:56.63",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:39:01.493",
+    "MODIFIEDBY": "system",
+    "SRNO": "9",
+    "DIVISION": "Civil",
+    "DIVISIONLETTER": "S",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a1df8103-60f4-4d3a-b4c4-c1448dd88804",
+    "CREATEDAT": "2026-10-13T20:39:22.613",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:39:26.747",
+    "MODIFIEDBY": "system",
+    "SRNO": "10",
+    "DIVISION": "DTV",
+    "DIVISIONLETTER": "D",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d7e7d955-87cf-4987-865f-6299b2c0f074",
+    "CREATEDAT": "2026-10-13T20:39:51.192",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:39:57.467",
+    "MODIFIEDBY": "system",
+    "SRNO": "11",
+    "DIVISION": "Business Analytics",
+    "DIVISIONLETTER": "E",
+    "ISACTIVE": 1
+  }
+]

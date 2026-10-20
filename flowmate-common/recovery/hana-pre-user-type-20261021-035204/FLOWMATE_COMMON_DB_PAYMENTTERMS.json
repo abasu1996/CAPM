@@ -1,0 +1,1402 @@
+[
+  {
+    "CODE": "NET30",
+    "NAME": "Net 30",
+    "DESCRIPTION": "Payment due in 30 days",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "NET60",
+    "NAME": "Net 60",
+    "DESCRIPTION": "Payment due in 60 days",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "ADVANCE",
+    "NAME": "Advance Payment",
+    "DESCRIPTION": "Advance payment terms",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  },
+  {
+    "CODE": "0001",
+    "NAME": "14 Days from Invoice date,Payable immediately",
+    "DESCRIPTION": "14 Days from Invoice date,Payable immediately",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "C008",
+    "NAME": "FOC Trem",
+    "DESCRIPTION": "FOC Trem",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "FTK1",
+    "NAME": "30 Days from Invoice date after UAC",
+    "DESCRIPTION": "30 Days from Invoice date after UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  },
+  {
+    "CODE": "FTK2",
+    "NAME": "Factoring based PO - Immediately",
+    "DESCRIPTION": "Factoring based PO - Immediately",
+    "ISACTIVE": 1,
+    "SORTORDER": 40
+  },
+  {
+    "CODE": "FTK3",
+    "NAME": "LC - Due immediately",
+    "DESCRIPTION": "LC - Due immediately",
+    "ISACTIVE": 1,
+    "SORTORDER": 50
+  },
+  {
+    "CODE": "FTK4",
+    "NAME": "Add the Payment Term in the Header",
+    "DESCRIPTION": "Add the Payment Term in the Header",
+    "ISACTIVE": 1,
+    "SORTORDER": 60
+  },
+  {
+    "CODE": "IC00",
+    "NAME": "Pay immediately",
+    "DESCRIPTION": "Pay immediately",
+    "ISACTIVE": 1,
+    "SORTORDER": 70
+  },
+  {
+    "CODE": "PR01",
+    "NAME": "Add the Payment Term in the Header",
+    "DESCRIPTION": "Add the Payment Term in the Header",
+    "ISACTIVE": 1,
+    "SORTORDER": 80
+  },
+  {
+    "CODE": "V020",
+    "NAME": "30 (23) days from goods/service delivery date",
+    "DESCRIPTION": "30 (23) days from goods/service delivery date",
+    "ISACTIVE": 1,
+    "SORTORDER": 90
+  },
+  {
+    "CODE": "V021",
+    "NAME": "21 (14) days from goods/service delivery date",
+    "DESCRIPTION": "21 (14) days from goods/service delivery date",
+    "ISACTIVE": 1,
+    "SORTORDER": 100
+  },
+  {
+    "CODE": "V022",
+    "NAME": "14 (07) days from goods/service delivery date",
+    "DESCRIPTION": "14 (07) days from goods/service delivery date",
+    "ISACTIVE": 1,
+    "SORTORDER": 110
+  },
+  {
+    "CODE": "V023",
+    "NAME": "10 (03) days from goods/service delivery date",
+    "DESCRIPTION": "10 (03) days from goods/service delivery date",
+    "ISACTIVE": 1,
+    "SORTORDER": 120
+  },
+  {
+    "CODE": "V024",
+    "NAME": "7 (0) days from goods/service delivery date",
+    "DESCRIPTION": "7 (0) days from goods/service delivery date",
+    "ISACTIVE": 1,
+    "SORTORDER": 130
+  },
+  {
+    "CODE": "V025",
+    "NAME": "30 (23) days from invoice date",
+    "DESCRIPTION": "30 (23) days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 140
+  },
+  {
+    "CODE": "V026",
+    "NAME": "21 (14) days from invoice date",
+    "DESCRIPTION": "21 (14) days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 150
+  },
+  {
+    "CODE": "V027",
+    "NAME": "14 (07) days from invoice date",
+    "DESCRIPTION": "14 (07) days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 160
+  },
+  {
+    "CODE": "V028",
+    "NAME": "10 (03) days from invoice date",
+    "DESCRIPTION": "10 (03) days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 170
+  },
+  {
+    "CODE": "V029",
+    "NAME": "7 (0) days from invoice date",
+    "DESCRIPTION": "7 (0) days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 180
+  },
+  {
+    "CODE": "V030",
+    "NAME": "14 Days from Invoice date after 100% on activation",
+    "DESCRIPTION": "14 Days from Invoice date after 100% on activation",
+    "ISACTIVE": 1,
+    "SORTORDER": 190
+  },
+  {
+    "CODE": "V031",
+    "NAME": "14 Days from Invoice date, Quarterly in advance",
+    "DESCRIPTION": "14 Days from Invoice date, Quarterly in advance",
+    "ISACTIVE": 1,
+    "SORTORDER": 200
+  },
+  {
+    "CODE": "V032",
+    "NAME": "14 Days from Invoice date, Anually in advance",
+    "DESCRIPTION": "14 Days from Invoice date, Anually in advance",
+    "ISACTIVE": 1,
+    "SORTORDER": 210
+  },
+  {
+    "CODE": "V033",
+    "NAME": "14 Days from Invoice date after 100% delivery",
+    "DESCRIPTION": "14 Days from Invoice date after 100% delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 220
+  },
+  {
+    "CODE": "V034",
+    "NAME": "14 Days from Inv.date,95% on Delivery,5% after 3 m",
+    "DESCRIPTION": "14 Days from Inv.date,95% on Delivery,5% after 3 m",
+    "ISACTIVE": 1,
+    "SORTORDER": 230
+  },
+  {
+    "CODE": "V035",
+    "NAME": "70% on Deliy, 20% on UAT 10% after 3 mon UAT",
+    "DESCRIPTION": "70% on Deliy, 20% on UAT 10% after 3 mon UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 240
+  },
+  {
+    "CODE": "V036",
+    "NAME": "70% on Deliy, 20% on UAT 10% after 6 mon UAT",
+    "DESCRIPTION": "70% on Deliy, 20% on UAT 10% after 6 mon UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 250
+  },
+  {
+    "CODE": "V037",
+    "NAME": "70% on Deliy, 20% on UAT 10% after 12 mon UAT",
+    "DESCRIPTION": "70% on Deliy, 20% on UAT 10% after 12 mon UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 260
+  },
+  {
+    "CODE": "V038",
+    "NAME": "70% on UAT, 20% 3 mon UAT 10% 6 mon UAT",
+    "DESCRIPTION": "70% on UAT, 20% 3 mon UAT 10% 6 mon UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 270
+  },
+  {
+    "CODE": "V039",
+    "NAME": "70% on UAT, 20% 3 mon UAT 10% 12 mon UAT",
+    "DESCRIPTION": "70% on UAT, 20% 3 mon UAT 10% 12 mon UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 280
+  },
+  {
+    "CODE": "V040",
+    "NAME": "70% on UAT, 30% 1 month from UAT",
+    "DESCRIPTION": "70% on UAT, 30% 1 month from UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 290
+  },
+  {
+    "CODE": "V041",
+    "NAME": "70% aft 60 days fro PAC,30% aft 6 mon fro PAC",
+    "DESCRIPTION": "70% aft 60 days fro PAC,30% aft 6 mon fro PAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 300
+  },
+  {
+    "CODE": "V042",
+    "NAME": "14 Days from Invoice date after 100% Completion",
+    "DESCRIPTION": "14 Days from Invoice date after 100% Completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 310
+  },
+  {
+    "CODE": "V043",
+    "NAME": "14 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "DESCRIPTION": "14 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 320
+  },
+  {
+    "CODE": "V044",
+    "NAME": "14 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "DESCRIPTION": "14 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 330
+  },
+  {
+    "CODE": "V045",
+    "NAME": "14 Inv date 95% on com, 5% reten for 12 mon In.Pay",
+    "DESCRIPTION": "14 Inv date 95% on com, 5% reten for 12 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 340
+  },
+  {
+    "CODE": "V046",
+    "NAME": "14 D Inv.date 90% aft 30 d UAC,10% aft 3 mon UAC I",
+    "DESCRIPTION": "14 D Inv.date 90% aft 30 d UAC,10% aft 3 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 350
+  },
+  {
+    "CODE": "V047",
+    "NAME": "14 D Inv.date 90% aft 30 d UAC,10% aft 6 mon UAC I",
+    "DESCRIPTION": "14 D Inv.date 90% aft 30 d UAC,10% aft 6 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 360
+  },
+  {
+    "CODE": "V048",
+    "NAME": "14 D Inv.date 90% aft 30 dUAC,10% aft 12 mon UAC I",
+    "DESCRIPTION": "14 D Inv.date 90% aft 30 dUAC,10% aft 12 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 370
+  },
+  {
+    "CODE": "V049",
+    "NAME": "10 % in advance after mobilization 50% Interim pay",
+    "DESCRIPTION": "10 % in advance after mobilization 50% Interim pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 380
+  },
+  {
+    "CODE": "V050",
+    "NAME": "95% LC on expiry of 30 days PAC, 05 retn 3 month",
+    "DESCRIPTION": "95% LC on expiry of 30 days PAC, 05 retn 3 month",
+    "ISACTIVE": 1,
+    "SORTORDER": 390
+  },
+  {
+    "CODE": "V051",
+    "NAME": "95% LC on expiry of 30 days UAC, 05 retn 3 month",
+    "DESCRIPTION": "95% LC on expiry of 30 days UAC, 05 retn 3 month",
+    "ISACTIVE": 1,
+    "SORTORDER": 400
+  },
+  {
+    "CODE": "V052",
+    "NAME": "100% by way of LC at sight",
+    "DESCRIPTION": "100% by way of LC at sight",
+    "ISACTIVE": 1,
+    "SORTORDER": 410
+  },
+  {
+    "CODE": "V053",
+    "NAME": "100 % in Advance",
+    "DESCRIPTION": "100 % in Advance",
+    "ISACTIVE": 1,
+    "SORTORDER": 420
+  },
+  {
+    "CODE": "V100",
+    "NAME": "70% on Deliy",
+    "DESCRIPTION": "70% on Deliy",
+    "ISACTIVE": 1,
+    "SORTORDER": 430
+  },
+  {
+    "CODE": "V101",
+    "NAME": "20% on UAT",
+    "DESCRIPTION": "20% on UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 440
+  },
+  {
+    "CODE": "V102",
+    "NAME": "100% on UAT",
+    "DESCRIPTION": "100% on UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 450
+  },
+  {
+    "CODE": "V103",
+    "NAME": "95% on Delivery",
+    "DESCRIPTION": "95% on Delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 460
+  },
+  {
+    "CODE": "V104",
+    "NAME": "5% after 3 months",
+    "DESCRIPTION": "5% after 3 months",
+    "ISACTIVE": 1,
+    "SORTORDER": 470
+  },
+  {
+    "CODE": "V105",
+    "NAME": "10% after 6 months from UAT",
+    "DESCRIPTION": "10% after 6 months from UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 480
+  },
+  {
+    "CODE": "V106",
+    "NAME": "10% after 12 months from UAT",
+    "DESCRIPTION": "10% after 12 months from UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 490
+  },
+  {
+    "CODE": "V107",
+    "NAME": "70% on UAT",
+    "DESCRIPTION": "70% on UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 500
+  },
+  {
+    "CODE": "V108",
+    "NAME": "20% 3 mon from UAT",
+    "DESCRIPTION": "20% 3 mon from UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 510
+  },
+  {
+    "CODE": "V109",
+    "NAME": "10% 6 mon from UAT",
+    "DESCRIPTION": "10% 6 mon from UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 520
+  },
+  {
+    "CODE": "V110",
+    "NAME": "10% 12 mon from UAT",
+    "DESCRIPTION": "10% 12 mon from UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 530
+  },
+  {
+    "CODE": "V111",
+    "NAME": "10% after 3 months from UAT",
+    "DESCRIPTION": "10% after 3 months from UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 540
+  },
+  {
+    "CODE": "V112",
+    "NAME": "30% 1 mon from UAT",
+    "DESCRIPTION": "30% 1 mon from UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 550
+  },
+  {
+    "CODE": "V113",
+    "NAME": "70% aft 60 days fro PAC",
+    "DESCRIPTION": "70% aft 60 days fro PAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 560
+  },
+  {
+    "CODE": "V114",
+    "NAME": "30% aft 6 mon fro PAC",
+    "DESCRIPTION": "30% aft 6 mon fro PAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 570
+  },
+  {
+    "CODE": "V115",
+    "NAME": "95% on Completion",
+    "DESCRIPTION": "95% on Completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 580
+  },
+  {
+    "CODE": "V116",
+    "NAME": "5% Retention for 3 months from UAC",
+    "DESCRIPTION": "5% Retention for 3 months from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 590
+  },
+  {
+    "CODE": "V117",
+    "NAME": "5% Retention for 6 months from UAC",
+    "DESCRIPTION": "5% Retention for 6 months from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 600
+  },
+  {
+    "CODE": "V118",
+    "NAME": "5% Retention for 12 months from UAC",
+    "DESCRIPTION": "5% Retention for 12 months from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 610
+  },
+  {
+    "CODE": "V119",
+    "NAME": "90% after 30 days from UAC",
+    "DESCRIPTION": "90% after 30 days from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 620
+  },
+  {
+    "CODE": "V120",
+    "NAME": "10% after 3 months from UAC",
+    "DESCRIPTION": "10% after 3 months from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 630
+  },
+  {
+    "CODE": "V121",
+    "NAME": "10% after 6 months from UAC",
+    "DESCRIPTION": "10% after 6 months from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 640
+  },
+  {
+    "CODE": "V122",
+    "NAME": "10% after 12 months from UAC",
+    "DESCRIPTION": "10% after 12 months from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 650
+  },
+  {
+    "CODE": "V123",
+    "NAME": "10 % in advance after mobilization",
+    "DESCRIPTION": "10 % in advance after mobilization",
+    "ISACTIVE": 1,
+    "SORTORDER": 660
+  },
+  {
+    "CODE": "V124",
+    "NAME": "50 % interim payment after compl 75 % of the job",
+    "DESCRIPTION": "50 % interim payment after compl 75 % of the job",
+    "ISACTIVE": 1,
+    "SORTORDER": 670
+  },
+  {
+    "CODE": "V125",
+    "NAME": "30 % after 30days from issuance of UAC",
+    "DESCRIPTION": "30 % after 30days from issuance of UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 680
+  },
+  {
+    "CODE": "V126",
+    "NAME": "10% retention for a period of 06 months after UAC",
+    "DESCRIPTION": "10% retention for a period of 06 months after UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 690
+  },
+  {
+    "CODE": "V127",
+    "NAME": "95% by way of LC on expiry of 30 days from PAC",
+    "DESCRIPTION": "95% by way of LC on expiry of 30 days from PAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 700
+  },
+  {
+    "CODE": "V128",
+    "NAME": "05% retention on expiry of 03 months from PAC",
+    "DESCRIPTION": "05% retention on expiry of 03 months from PAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 710
+  },
+  {
+    "CODE": "V129",
+    "NAME": "95% by way of LC on expiry of 30 days from UAC",
+    "DESCRIPTION": "95% by way of LC on expiry of 30 days from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 720
+  },
+  {
+    "CODE": "V130",
+    "NAME": "05% retention on expiry of 03 months from UAC",
+    "DESCRIPTION": "05% retention on expiry of 03 months from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 730
+  },
+  {
+    "CODE": "V131",
+    "NAME": "75% in advance",
+    "DESCRIPTION": "75% in advance",
+    "ISACTIVE": 1,
+    "SORTORDER": 740
+  },
+  {
+    "CODE": "V132",
+    "NAME": "50% in advance",
+    "DESCRIPTION": "50% in advance",
+    "ISACTIVE": 1,
+    "SORTORDER": 750
+  },
+  {
+    "CODE": "V133",
+    "NAME": "25% in advance",
+    "DESCRIPTION": "25% in advance",
+    "ISACTIVE": 1,
+    "SORTORDER": 760
+  },
+  {
+    "CODE": "V134",
+    "NAME": "Balance on completion",
+    "DESCRIPTION": "Balance on completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 770
+  },
+  {
+    "CODE": "V135",
+    "NAME": "Installment payments",
+    "DESCRIPTION": "Installment payments",
+    "ISACTIVE": 1,
+    "SORTORDER": 780
+  },
+  {
+    "CODE": "V136",
+    "NAME": "Due immediately",
+    "DESCRIPTION": "Due immediately",
+    "ISACTIVE": 1,
+    "SORTORDER": 790
+  },
+  {
+    "CODE": "V137",
+    "NAME": "60 Days from Invoice date after good/service deliv",
+    "DESCRIPTION": "60 Days from Invoice date after good/service deliv",
+    "ISACTIVE": 1,
+    "SORTORDER": 800
+  },
+  {
+    "CODE": "V138",
+    "NAME": "45 Days(38 days) frm Inv date after good/serv deli",
+    "DESCRIPTION": "45 Days(38 days) frm Inv date after good/serv deli",
+    "ISACTIVE": 1,
+    "SORTORDER": 810
+  },
+  {
+    "CODE": "V139",
+    "NAME": "90 Days from Invoice date after good/service deliv",
+    "DESCRIPTION": "90 Days from Invoice date after good/service deliv",
+    "ISACTIVE": 1,
+    "SORTORDER": 820
+  },
+  {
+    "CODE": "V140",
+    "NAME": "180 Days from Invoice date after good & service de",
+    "DESCRIPTION": "180 Days from Invoice date after good & service de",
+    "ISACTIVE": 1,
+    "SORTORDER": 830
+  },
+  {
+    "CODE": "V141",
+    "NAME": "270 Days from Invoice date after good & service de",
+    "DESCRIPTION": "270 Days from Invoice date after good & service de",
+    "ISACTIVE": 1,
+    "SORTORDER": 840
+  },
+  {
+    "CODE": "V142",
+    "NAME": "365 Days from Invoice date after good & service de",
+    "DESCRIPTION": "365 Days from Invoice date after good & service de",
+    "ISACTIVE": 1,
+    "SORTORDER": 850
+  },
+  {
+    "CODE": "V143",
+    "NAME": "45 days (38 days) from invoice date",
+    "DESCRIPTION": "45 days (38 days) from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 860
+  },
+  {
+    "CODE": "V144",
+    "NAME": "60 days from invoice date",
+    "DESCRIPTION": "60 days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 870
+  },
+  {
+    "CODE": "V145",
+    "NAME": "90 days from invoice date",
+    "DESCRIPTION": "90 days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 880
+  },
+  {
+    "CODE": "V146",
+    "NAME": "180 days from invoice date",
+    "DESCRIPTION": "180 days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 890
+  },
+  {
+    "CODE": "V147",
+    "NAME": "270 days from invoice date",
+    "DESCRIPTION": "270 days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 900
+  },
+  {
+    "CODE": "V148",
+    "NAME": "365 days from invoice date",
+    "DESCRIPTION": "365 days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 910
+  },
+  {
+    "CODE": "V149",
+    "NAME": "30(23) Days from Inv date after 100% on activation",
+    "DESCRIPTION": "30(23) Days from Inv date after 100% on activation",
+    "ISACTIVE": 1,
+    "SORTORDER": 920
+  },
+  {
+    "CODE": "V150",
+    "NAME": "45 Days from Invoice date after 100% on activation",
+    "DESCRIPTION": "45 Days from Invoice date after 100% on activation",
+    "ISACTIVE": 1,
+    "SORTORDER": 930
+  },
+  {
+    "CODE": "V151",
+    "NAME": "60 Days from Invoice date after 100% on activation",
+    "DESCRIPTION": "60 Days from Invoice date after 100% on activation",
+    "ISACTIVE": 1,
+    "SORTORDER": 940
+  },
+  {
+    "CODE": "V152",
+    "NAME": "90 Days from Invoice date after 100% on activation",
+    "DESCRIPTION": "90 Days from Invoice date after 100% on activation",
+    "ISACTIVE": 1,
+    "SORTORDER": 950
+  },
+  {
+    "CODE": "V153",
+    "NAME": "180 Days from Invoice date after 100% on activatio",
+    "DESCRIPTION": "180 Days from Invoice date after 100% on activatio",
+    "ISACTIVE": 1,
+    "SORTORDER": 960
+  },
+  {
+    "CODE": "V154",
+    "NAME": "270 Days from Invoice date after 100% on activatio",
+    "DESCRIPTION": "270 Days from Invoice date after 100% on activatio",
+    "ISACTIVE": 1,
+    "SORTORDER": 970
+  },
+  {
+    "CODE": "V155",
+    "NAME": "365 Days from Invoice date after 100% on activatio",
+    "DESCRIPTION": "365 Days from Invoice date after 100% on activatio",
+    "ISACTIVE": 1,
+    "SORTORDER": 980
+  },
+  {
+    "CODE": "V156",
+    "NAME": "30 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "DESCRIPTION": "30 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "ISACTIVE": 1,
+    "SORTORDER": 990
+  },
+  {
+    "CODE": "V157",
+    "NAME": "45 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "DESCRIPTION": "45 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "ISACTIVE": 1,
+    "SORTORDER": 1000
+  },
+  {
+    "CODE": "V158",
+    "NAME": "60 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "DESCRIPTION": "60 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "ISACTIVE": 1,
+    "SORTORDER": 1010
+  },
+  {
+    "CODE": "V159",
+    "NAME": "90 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "DESCRIPTION": "90 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "ISACTIVE": 1,
+    "SORTORDER": 1020
+  },
+  {
+    "CODE": "V160",
+    "NAME": "180 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "DESCRIPTION": "180 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "ISACTIVE": 1,
+    "SORTORDER": 1030
+  },
+  {
+    "CODE": "V161",
+    "NAME": "270 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "DESCRIPTION": "270 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "ISACTIVE": 1,
+    "SORTORDER": 1040
+  },
+  {
+    "CODE": "V162",
+    "NAME": "365 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "DESCRIPTION": "365 Days Inv. date,95% on Delivery, 5% after 3 mon",
+    "ISACTIVE": 1,
+    "SORTORDER": 1050
+  },
+  {
+    "CODE": "V163",
+    "NAME": "30 Days from Invoice date after 100% Completion",
+    "DESCRIPTION": "30 Days from Invoice date after 100% Completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1060
+  },
+  {
+    "CODE": "V164",
+    "NAME": "45 Days from Invoice date after 100% Completion",
+    "DESCRIPTION": "45 Days from Invoice date after 100% Completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1070
+  },
+  {
+    "CODE": "V165",
+    "NAME": "60 Days from Invoice date after 100% Completion",
+    "DESCRIPTION": "60 Days from Invoice date after 100% Completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1080
+  },
+  {
+    "CODE": "V166",
+    "NAME": "90 Days from Invoice date after 100% Completion",
+    "DESCRIPTION": "90 Days from Invoice date after 100% Completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1090
+  },
+  {
+    "CODE": "V167",
+    "NAME": "180 Days from Invoice date after 100% Completion",
+    "DESCRIPTION": "180 Days from Invoice date after 100% Completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1100
+  },
+  {
+    "CODE": "V168",
+    "NAME": "365 Days from Invoice date after 100% Completion",
+    "DESCRIPTION": "365 Days from Invoice date after 100% Completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1110
+  },
+  {
+    "CODE": "V169",
+    "NAME": "30 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "DESCRIPTION": "30 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 1120
+  },
+  {
+    "CODE": "V170",
+    "NAME": "45 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "DESCRIPTION": "45 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 1130
+  },
+  {
+    "CODE": "V171",
+    "NAME": "60 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "DESCRIPTION": "60 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 1140
+  },
+  {
+    "CODE": "V172",
+    "NAME": "90 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "DESCRIPTION": "90 Inv date 95% on com, 5% reten for 03 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 1150
+  },
+  {
+    "CODE": "V173",
+    "NAME": "180 Inv date 95% on com, 5% reten for 03 mon In.Pa",
+    "DESCRIPTION": "180 Inv date 95% on com, 5% reten for 03 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1160
+  },
+  {
+    "CODE": "V174",
+    "NAME": "270 Inv date 95% on com, 5% reten for 03 mon In.Pa",
+    "DESCRIPTION": "270 Inv date 95% on com, 5% reten for 03 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1170
+  },
+  {
+    "CODE": "V175",
+    "NAME": "365 Inv date 95% on com, 5% reten for 03 mon In.Pa",
+    "DESCRIPTION": "365 Inv date 95% on com, 5% reten for 03 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1180
+  },
+  {
+    "CODE": "V176",
+    "NAME": "30 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "DESCRIPTION": "30 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 1190
+  },
+  {
+    "CODE": "V177",
+    "NAME": "45 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "DESCRIPTION": "45 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 1200
+  },
+  {
+    "CODE": "V178",
+    "NAME": "60 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "DESCRIPTION": "60 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 1210
+  },
+  {
+    "CODE": "V179",
+    "NAME": "90 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "DESCRIPTION": "90 Inv date 95% on com, 5% reten for 06 mon In.Pay",
+    "ISACTIVE": 1,
+    "SORTORDER": 1220
+  },
+  {
+    "CODE": "V180",
+    "NAME": "180 Inv date 95% on com, 5% reten for 06 mon In.Pa",
+    "DESCRIPTION": "180 Inv date 95% on com, 5% reten for 06 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1230
+  },
+  {
+    "CODE": "V181",
+    "NAME": "270 Inv date 95% on com, 5% reten for 06 mon In.Pa",
+    "DESCRIPTION": "270 Inv date 95% on com, 5% reten for 06 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1240
+  },
+  {
+    "CODE": "V182",
+    "NAME": "365 Inv date 95% on com, 5% reten for 06 mon In.Pa",
+    "DESCRIPTION": "365 Inv date 95% on com, 5% reten for 06 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1250
+  },
+  {
+    "CODE": "V183",
+    "NAME": "30 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "DESCRIPTION": "30 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1260
+  },
+  {
+    "CODE": "V184",
+    "NAME": "45 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "DESCRIPTION": "45 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1270
+  },
+  {
+    "CODE": "V185",
+    "NAME": "60 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "DESCRIPTION": "60 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1280
+  },
+  {
+    "CODE": "V186",
+    "NAME": "90 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "DESCRIPTION": "90 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1290
+  },
+  {
+    "CODE": "V187",
+    "NAME": "180 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "DESCRIPTION": "180 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1300
+  },
+  {
+    "CODE": "V188",
+    "NAME": "270 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "DESCRIPTION": "270 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1310
+  },
+  {
+    "CODE": "V189",
+    "NAME": "365 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "DESCRIPTION": "365 Inv date 95% on com, 5% reten for 12 mon In.Pa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1320
+  },
+  {
+    "CODE": "V190",
+    "NAME": "14 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "DESCRIPTION": "14 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "ISACTIVE": 1,
+    "SORTORDER": 1330
+  },
+  {
+    "CODE": "V191",
+    "NAME": "30 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "DESCRIPTION": "30 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "ISACTIVE": 1,
+    "SORTORDER": 1340
+  },
+  {
+    "CODE": "V192",
+    "NAME": "45 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "DESCRIPTION": "45 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "ISACTIVE": 1,
+    "SORTORDER": 1350
+  },
+  {
+    "CODE": "V193",
+    "NAME": "60 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "DESCRIPTION": "60 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "ISACTIVE": 1,
+    "SORTORDER": 1360
+  },
+  {
+    "CODE": "V194",
+    "NAME": "90 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "DESCRIPTION": "90 D Inv. date 20% On Scope /Mobi,60% UAT,20% Depl",
+    "ISACTIVE": 1,
+    "SORTORDER": 1370
+  },
+  {
+    "CODE": "V195",
+    "NAME": "180 D Inv. date 20% On Scope /Mobi,60% UAT,20% Dep",
+    "DESCRIPTION": "180 D Inv. date 20% On Scope /Mobi,60% UAT,20% Dep",
+    "ISACTIVE": 1,
+    "SORTORDER": 1380
+  },
+  {
+    "CODE": "V196",
+    "NAME": "270 D Inv. date 20% On Scope /Mobi,60% UAT,20% Dep",
+    "DESCRIPTION": "270 D Inv. date 20% On Scope /Mobi,60% UAT,20% Dep",
+    "ISACTIVE": 1,
+    "SORTORDER": 1390
+  },
+  {
+    "CODE": "V197",
+    "NAME": "365 D Inv. date 20% On Scope /Mobi,60% UAT,20% Dep",
+    "DESCRIPTION": "365 D Inv. date 20% On Scope /Mobi,60% UAT,20% Dep",
+    "ISACTIVE": 1,
+    "SORTORDER": 1400
+  },
+  {
+    "CODE": "V198",
+    "NAME": "14 Days from invoice date,Bi-Annual in Advance",
+    "DESCRIPTION": "14 Days from invoice date,Bi-Annual in Advance",
+    "ISACTIVE": 1,
+    "SORTORDER": 1410
+  },
+  {
+    "CODE": "V199",
+    "NAME": "14 Days from invoice date,Bi-Annual in Advance",
+    "DESCRIPTION": "14 Days from invoice date,Bi-Annual in Advance",
+    "ISACTIVE": 1,
+    "SORTORDER": 1420
+  },
+  {
+    "CODE": "V200",
+    "NAME": "14 Days from invoice date,Quarterl in Arrears",
+    "DESCRIPTION": "14 Days from invoice date,Quarterl in Arrears",
+    "ISACTIVE": 1,
+    "SORTORDER": 1430
+  },
+  {
+    "CODE": "V201",
+    "NAME": "30 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC IP",
+    "DESCRIPTION": "30 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1440
+  },
+  {
+    "CODE": "V202",
+    "NAME": "45 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC IP",
+    "DESCRIPTION": "45 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1450
+  },
+  {
+    "CODE": "V203",
+    "NAME": "60 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC IP",
+    "DESCRIPTION": "60 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1460
+  },
+  {
+    "CODE": "V204",
+    "NAME": "90 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC IP",
+    "DESCRIPTION": "90 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1470
+  },
+  {
+    "CODE": "V205",
+    "NAME": "180 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC I",
+    "DESCRIPTION": "180 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1480
+  },
+  {
+    "CODE": "V206",
+    "NAME": "270 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC I",
+    "DESCRIPTION": "270 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1490
+  },
+  {
+    "CODE": "V207",
+    "NAME": "365 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC I",
+    "DESCRIPTION": "365 D Inv.date 90% af 30 d UAC,10% aft 3 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1500
+  },
+  {
+    "CODE": "V208",
+    "NAME": "30 D Inv.date 90% af 30 d UAC,10% aft 6 mon UAC I",
+    "DESCRIPTION": "30 D Inv.date 90% af 30 d UAC,10% aft 6 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1510
+  },
+  {
+    "CODE": "V209",
+    "NAME": "45 D Inv.date 90% af 30 d UAC,10% aft 6 mon UAC I",
+    "DESCRIPTION": "45 D Inv.date 90% af 30 d UAC,10% aft 6 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1520
+  },
+  {
+    "CODE": "V210",
+    "NAME": "60 D Inv.date 90% af 30 d UAC,10% aft 6 mon UAC I",
+    "DESCRIPTION": "60 D Inv.date 90% af 30 d UAC,10% aft 6 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1530
+  },
+  {
+    "CODE": "V211",
+    "NAME": "90 D Inv.date 90% af 30 d UAC,10% aft 6 mon UAC I",
+    "DESCRIPTION": "90 D Inv.date 90% af 30 d UAC,10% aft 6 mon UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1540
+  },
+  {
+    "CODE": "V212",
+    "NAME": "180 D Inv.date 90% af 30 d UAC,10% aft 6 mn UAC IP",
+    "DESCRIPTION": "180 D Inv.date 90% af 30 d UAC,10% aft 6 mn UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1550
+  },
+  {
+    "CODE": "V213",
+    "NAME": "270 D Inv.date 90% af 30 d UAC,10% aft 6 mn UAC IP",
+    "DESCRIPTION": "270 D Inv.date 90% af 30 d UAC,10% aft 6 mn UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1560
+  },
+  {
+    "CODE": "V214",
+    "NAME": "365 D Inv.date 90% af 30 d UAC,10% aft 6 mn UAC IP",
+    "DESCRIPTION": "365 D Inv.date 90% af 30 d UAC,10% aft 6 mn UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1570
+  },
+  {
+    "CODE": "V215",
+    "NAME": "30 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC IP",
+    "DESCRIPTION": "30 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1580
+  },
+  {
+    "CODE": "V216",
+    "NAME": "45 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC IP",
+    "DESCRIPTION": "45 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1590
+  },
+  {
+    "CODE": "V217",
+    "NAME": "60 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC IP",
+    "DESCRIPTION": "60 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1600
+  },
+  {
+    "CODE": "V218",
+    "NAME": "90 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC IP",
+    "DESCRIPTION": "90 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC IP",
+    "ISACTIVE": 1,
+    "SORTORDER": 1610
+  },
+  {
+    "CODE": "V219",
+    "NAME": "180 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC I",
+    "DESCRIPTION": "180 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1620
+  },
+  {
+    "CODE": "V220",
+    "NAME": "270 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC I",
+    "DESCRIPTION": "270 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1630
+  },
+  {
+    "CODE": "V221",
+    "NAME": "365 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC I",
+    "DESCRIPTION": "365 D Inv.date 90% af 30 d UAC,10% aft 12 mn UAC I",
+    "ISACTIVE": 1,
+    "SORTORDER": 1640
+  },
+  {
+    "CODE": "V222",
+    "NAME": "FTK HUA Service-DAP/DBN-50%-14,30%-30,20%-UAC",
+    "DESCRIPTION": "FTK HUA Service-DAP/DBN-50%-14,30%-30,20%-UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 1650
+  },
+  {
+    "CODE": "V223",
+    "NAME": "FTK HUA Supply - DAP - 100% - 180 days",
+    "DESCRIPTION": "FTK HUA Supply - DAP - 100% - 180 days",
+    "ISACTIVE": 1,
+    "SORTORDER": 1660
+  },
+  {
+    "CODE": "V224",
+    "NAME": "FTK HUA Supply - DBN - 100%- 30 Days",
+    "DESCRIPTION": "FTK HUA Supply - DBN - 100%- 30 Days",
+    "ISACTIVE": 1,
+    "SORTORDER": 1670
+  },
+  {
+    "CODE": "V225",
+    "NAME": "FTK HUA Supply - DBN - 100%- 180 Days",
+    "DESCRIPTION": "FTK HUA Supply - DBN - 100%- 180 Days",
+    "ISACTIVE": 1,
+    "SORTORDER": 1680
+  },
+  {
+    "CODE": "V226",
+    "NAME": "FTK Ericsson Service - 50% - 14 , 50%-30",
+    "DESCRIPTION": "FTK Ericsson Service - 50% - 14 , 50%-30",
+    "ISACTIVE": 1,
+    "SORTORDER": 1690
+  },
+  {
+    "CODE": "V227",
+    "NAME": "FTK Ericsson Supply -100% - 180 Days",
+    "DESCRIPTION": "FTK Ericsson Supply -100% - 180 Days",
+    "ISACTIVE": 1,
+    "SORTORDER": 1700
+  },
+  {
+    "CODE": "V228",
+    "NAME": "30 Days from Invoice date after 100% delivery",
+    "DESCRIPTION": "30 Days from Invoice date after 100% delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 1710
+  },
+  {
+    "CODE": "V229",
+    "NAME": "45 Days from Invoice date after 100% delivery",
+    "DESCRIPTION": "45 Days from Invoice date after 100% delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 1720
+  },
+  {
+    "CODE": "V230",
+    "NAME": "60 Days from Invoice date after 100% delivery",
+    "DESCRIPTION": "60 Days from Invoice date after 100% delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 1730
+  },
+  {
+    "CODE": "V231",
+    "NAME": "90 Days from Invoice date after 100% delivery",
+    "DESCRIPTION": "90 Days from Invoice date after 100% delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 1740
+  },
+  {
+    "CODE": "V232",
+    "NAME": "180 Days from Invoice date after 100% delivery",
+    "DESCRIPTION": "180 Days from Invoice date after 100% delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 1750
+  },
+  {
+    "CODE": "V233",
+    "NAME": "270 Days from Invoice date after 100% delivery",
+    "DESCRIPTION": "270 Days from Invoice date after 100% delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 1760
+  },
+  {
+    "CODE": "V234",
+    "NAME": "365 Days from Invoice date after 100% delivery",
+    "DESCRIPTION": "365 Days from Invoice date after 100% delivery",
+    "ISACTIVE": 1,
+    "SORTORDER": 1770
+  },
+  {
+    "CODE": "V235",
+    "NAME": "Quarterly in arrears.Cre Per-30days frm Inv Subm",
+    "DESCRIPTION": "Quarterly in arrears.Cre Per-30days frm Inv Subm",
+    "ISACTIVE": 1,
+    "SORTORDER": 1780
+  },
+  {
+    "CODE": "V236",
+    "NAME": "45 Day Inv.Date_Subc-50%_Deli & 50%_Imple/100%-UAT",
+    "DESCRIPTION": "45 Day Inv.Date_Subc-50%_Deli & 50%_Imple/100%-UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 1790
+  },
+  {
+    "CODE": "V237",
+    "NAME": "100% PO val to be pd exp of 20 day frm Date of UAC",
+    "DESCRIPTION": "100% PO val to be pd exp of 20 day frm Date of UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 1800
+  },
+  {
+    "CODE": "V238",
+    "NAME": "Monthly in Arrears (within 30 days from the Inv)",
+    "DESCRIPTION": "Monthly in Arrears (within 30 days from the Inv)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1810
+  },
+  {
+    "CODE": "V239",
+    "NAME": "AMC Q1-Q4 -25% PMT within 14 D frm full completion",
+    "DESCRIPTION": "AMC Q1-Q4 -25% PMT within 14 D frm full completion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1820
+  },
+  {
+    "CODE": "V240",
+    "NAME": "30% adv upon PI- 7-10D and 70% upon del with 30 D",
+    "DESCRIPTION": "30% adv upon PI- 7-10D and 70% upon del with 30 D",
+    "ISACTIVE": 1,
+    "SORTORDER": 1830
+  },
+  {
+    "CODE": "V241",
+    "NAME": "10% beginning, 60% on UAT,30% Go-live, 30D credit",
+    "DESCRIPTION": "10% beginning, 60% on UAT,30% Go-live, 30D credit",
+    "ISACTIVE": 1,
+    "SORTORDER": 1840
+  },
+  {
+    "CODE": "V242",
+    "NAME": "Imp65%upon Inv,35%UAT(45D Cr),1-75 minApp mon in A",
+    "DESCRIPTION": "Imp65%upon Inv,35%UAT(45D Cr),1-75 minApp mon in A",
+    "ISACTIVE": 1,
+    "SORTORDER": 1850
+  },
+  {
+    "CODE": "V243",
+    "NAME": "30D from Inv,20% Proj,30% UAT,40% Comp,10% End Sup",
+    "DESCRIPTION": "30D from Inv,20% Proj,30% UAT,40% Comp,10% End Sup",
+    "ISACTIVE": 1,
+    "SORTORDER": 1860
+  },
+  {
+    "CODE": "V244",
+    "NAME": "Lic,Mange,Prof100%on INV(30DC),Intigr:100%UAT(30D)",
+    "DESCRIPTION": "Lic,Mange,Prof100%on INV(30DC),Intigr:100%UAT(30D)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1870
+  },
+  {
+    "CODE": "V245",
+    "NAME": "(45 frm INV)-Mil.Stn 20% 20% 20% 40% PROJ val Comp",
+    "DESCRIPTION": "(45 frm INV)-Mil.Stn 20% 20% 20% 40% PROJ val Comp",
+    "ISACTIVE": 1,
+    "SORTORDER": 1880
+  },
+  {
+    "CODE": "V246",
+    "NAME": "Quarterly in advance: within 30 days",
+    "DESCRIPTION": "Quarterly in advance: within 30 days",
+    "ISACTIVE": 1,
+    "SORTORDER": 1890
+  },
+  {
+    "CODE": "V247",
+    "NAME": "30D frm INV 20% Res Mobliztn 40%Del1,20%Del2 20% D",
+    "DESCRIPTION": "30D frm INV 20% Res Mobliztn 40%Del1,20%Del2 20% D",
+    "ISACTIVE": 1,
+    "SORTORDER": 1900
+  },
+  {
+    "CODE": "V248",
+    "NAME": "100% upon UAC issuance (Credit Period: 30 Days)",
+    "DESCRIPTION": "100% upon UAC issuance (Credit Period: 30 Days)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1910
+  },
+  {
+    "CODE": "V249",
+    "NAME": "70% upon delivery,30% upon signing of UAT (CR:30 D",
+    "DESCRIPTION": "70% upon delivery,30% upon signing of UAT (CR:30 D",
+    "ISACTIVE": 1,
+    "SORTORDER": 1920
+  },
+  {
+    "CODE": "V250",
+    "NAME": "100% of PO value on exp of 60 days CR from UAC",
+    "DESCRIPTION": "100% of PO value on exp of 60 days CR from UAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 1930
+  },
+  {
+    "CODE": "V251",
+    "NAME": "25%-Project Kickoff ,75% at UAT",
+    "DESCRIPTION": "25%-Project Kickoff ,75% at UAT",
+    "ISACTIVE": 1,
+    "SORTORDER": 1940
+  },
+  {
+    "CODE": "V252",
+    "NAME": "10%Rsmoblzation,30%SOW/FRS,50%UAT,10%goLive_30D",
+    "DESCRIPTION": "10%Rsmoblzation,30%SOW/FRS,50%UAT,10%goLive_30D",
+    "ISACTIVE": 1,
+    "SORTORDER": 1950
+  },
+  {
+    "CODE": "V253",
+    "NAME": "15 (10) days from invoice date",
+    "DESCRIPTION": "15 (10) days from invoice date",
+    "ISACTIVE": 1,
+    "SORTORDER": 1960
+  },
+  {
+    "CODE": "V254",
+    "NAME": "100% within 120 days from BL Date, DA",
+    "DESCRIPTION": "100% within 120 days from BL Date, DA",
+    "ISACTIVE": 1,
+    "SORTORDER": 1970
+  }
+]

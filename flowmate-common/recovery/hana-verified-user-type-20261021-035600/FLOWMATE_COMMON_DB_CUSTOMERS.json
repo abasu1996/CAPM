@@ -1,0 +1,35 @@
+[
+  {
+    "ID": "b1a1c3d4-1111-4a2b-8c3d-000000000001",
+    "CREATEDAT": null,
+    "CREATEDBY": null,
+    "MODIFIEDAT": null,
+    "MODIFIEDBY": null,
+    "CUSTOMERCODE": "CUST-001",
+    "CUSTOMERNAME": "Ceylon Telecom Solutions",
+    "CUSTOMEREMAIL": "accounts@ceylontelecom.lk",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1a1c3d4-1111-4a2b-8c3d-000000000002",
+    "CREATEDAT": null,
+    "CREATEDBY": null,
+    "MODIFIEDAT": null,
+    "MODIFIEDBY": null,
+    "CUSTOMERCODE": "CUST-002",
+    "CUSTOMERNAME": "Colombo Digital Networks",
+    "CUSTOMEREMAIL": "finance@colombodigital.lk",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1a1c3d4-1111-4a2b-8c3d-000000000003",
+    "CREATEDAT": null,
+    "CREATEDBY": null,
+    "MODIFIEDAT": null,
+    "MODIFIEDBY": null,
+    "CUSTOMERCODE": "CUST-003",
+    "CUSTOMERNAME": "Lanka Interconnect Services",
+    "CUSTOMEREMAIL": "billing@lankaic.lk",
+    "ISACTIVE": 1
+  }
+]

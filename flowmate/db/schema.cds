@@ -2,6 +2,12 @@ namespace flowmate.db;
 using { User, managed, cuid, sap.common.CodeList } from '@sap/cds/common';
 using { Attachments } from '@cap-js/attachments';
 
+type RequestOrigin : String(20) enum {
+    INTERNAL_USER = 'INTERNAL_USER';
+    VENDOR        = 'VENDOR';
+    EXTERNAL_API  = 'EXTERNAL_API';
+}
+
 entity Flows: cuid, managed {
     title       : String(100);
     description : String(500);
@@ -223,6 +229,8 @@ entity Delegations : cuid, managed {
 
 entity ProcessRequests : cuid, managed {
     referenceNumber : String(30);
+    @Core.Computed
+    requestOrigin : RequestOrigin not null default #INTERNAL_USER;
     processType : Association to ProcessTypes;
     subProcessType : Association to ProcessSubTypes;
     paymentCategory : Association to PaymentCategories @assert.target;
@@ -731,6 +739,7 @@ entity ProcessStepConfig : cuid, managed {
     stepType      : String(20) enum { PROCESSING; LOA; } default 'PROCESSING';
     activityDescription : String(500);
     role          : String(100);
+    requestOrigin : RequestOrigin default #INTERNAL_USER;
     slaDays       : Integer;
     isActiveDemandTask : Boolean default false;
     isVendorNotification : Boolean default false;

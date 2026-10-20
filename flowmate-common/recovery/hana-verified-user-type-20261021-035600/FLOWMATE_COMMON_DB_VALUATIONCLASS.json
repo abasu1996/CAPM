@@ -1,0 +1,2982 @@
+[
+  {
+    "ID": "201d59e4-f1d8-51f0-99b7-a4ab8bbf705f",
+    "CREATEDAT": "2026-10-04T18:32:31.006",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:31.006",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "3200",
+    "VALUATIONCLASSDESCRIPTION": "Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4019ca26-74f4-534a-bc39-51cfd18b4a47",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S001",
+    "VALUATIONCLASSDESCRIPTION": "Freight,Clearing,Insrnce",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "707336e5-e13f-5f64-91c3-4a43c282d2ed",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S002",
+    "VALUATIONCLASSDESCRIPTION": "Royalty Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3dac7e38-d11e-5ef1-b843-992f805dbbb9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S003",
+    "VALUATIONCLASSDESCRIPTION": "Phone Repairs Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0893cc78-daf0-5599-a0df-7c89d020c3c4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S004",
+    "VALUATIONCLASSDESCRIPTION": "TRC Cess Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "894834d6-31f9-52ba-bea1-08e766e9dbe5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S005",
+    "VALUATIONCLASSDESCRIPTION": "Frequency Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cb8e4b3c-78aa-5b45-8a44-e6a8606c0d68",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S006",
+    "VALUATIONCLASSDESCRIPTION": "NW Insurance Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "55136365-88da-544f-9369-c3933f3f5284",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S007",
+    "VALUATIONCLASSDESCRIPTION": "NW Lease Line Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "65a48324-00fa-57f0-a8d4-0d63ea4b5a03",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S008",
+    "VALUATIONCLASSDESCRIPTION": "NW Equip: & labour hiring",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c2617d09-fe9c-5d6b-a958-2a1f99f5446b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S009",
+    "VALUATIONCLASSDESCRIPTION": "NW Security Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a05b9d3b-a579-5bfe-9a2f-dbf6b788074c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S010",
+    "VALUATIONCLASSDESCRIPTION": "NW Generator Fuel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "547a5528-e510-5dd2-adb8-ae3ee8804de9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S011",
+    "VALUATIONCLASSDESCRIPTION": "NW Rates & taxes",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0387cd0d-a9e6-5597-843d-3db5b5b638bf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S012",
+    "VALUATIONCLASSDESCRIPTION": "Site abandonment cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5bb448ef-2f82-5240-8019-24bbcbe5efc0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S013",
+    "VALUATIONCLASSDESCRIPTION": "NW AMC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1b8af52-ff6f-5a31-baf2-6f2deb927f90",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S014",
+    "VALUATIONCLASSDESCRIPTION": "IT Billing AMC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "946d67d0-2285-5bb9-9465-2800653236b6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S015",
+    "VALUATIONCLASSDESCRIPTION": "NW Repaire & maintenance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0b15caf0-3092-59d0-96cb-6b6ba172d4dd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S016",
+    "VALUATIONCLASSDESCRIPTION": "IBU Field Service",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5b9ab79b-98c3-5d03-a4cc-cba26fb889f8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S017",
+    "VALUATIONCLASSDESCRIPTION": "NW Audit and Testing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2850e960-d377-5f52-a2cb-2dc4f0b7fde4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S018",
+    "VALUATIONCLASSDESCRIPTION": "NW Warehouse Rent",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "acb38e07-79ec-5dc3-845e-4fa44ad66cae",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S019",
+    "VALUATIONCLASSDESCRIPTION": "NW Project Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ce52136e-70fd-5b38-9465-6f4f5f511b96",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S020",
+    "VALUATIONCLASSDESCRIPTION": "NW Engineering Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "838fc676-075f-50a8-b4cd-b4691ae873d3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S021",
+    "VALUATIONCLASSDESCRIPTION": "OLAC - Other PSTN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1a660ef7-a956-5ada-b28d-487573cdeb48",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S022",
+    "VALUATIONCLASSDESCRIPTION": "ILAC - Other PSTN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "807f8f89-75e3-5717-8713-76b8f3920773",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S023",
+    "VALUATIONCLASSDESCRIPTION": "ILAC - Dialog",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6290d445-6d28-5a03-a294-2eb6d692b7b1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S024",
+    "VALUATIONCLASSDESCRIPTION": "Market devp Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "869cbb10-ecf7-568f-a5ca-4d07c9d7299e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S025",
+    "VALUATIONCLASSDESCRIPTION": "Interconnection Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5bdaf53f-f3d9-521a-9aa8-fdd3d9406f5d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S026",
+    "VALUATIONCLASSDESCRIPTION": "VGF Fund Operating Exp:",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "12de4e17-b868-51ba-9ee3-ec310d42e5da",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S027",
+    "VALUATIONCLASSDESCRIPTION": "Satellite Charges Voice",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4ca71351-7811-5d23-8de6-13eca7d163c7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S028",
+    "VALUATIONCLASSDESCRIPTION": "Landing Charge Voice",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4db15687-b6c8-55b1-8806-978647520e66",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S029",
+    "VALUATIONCLASSDESCRIPTION": "Port/Internet Chgs Voice",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "784c3dee-7707-5853-aa8f-40ecd5002383",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S030",
+    "VALUATIONCLASSDESCRIPTION": "Last Mile Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "61f0da7a-90ae-524d-aa2c-b4ceb32421e1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S031",
+    "VALUATIONCLASSDESCRIPTION": "Lease circuit rental",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7b47213c-e98e-5170-9e9c-8da81c838b5b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S034",
+    "VALUATIONCLASSDESCRIPTION": "SMS Domain Registration",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9f12ea43-537a-5437-aa4e-8af2844d5a20",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S035",
+    "VALUATIONCLASSDESCRIPTION": "SMW3 Bulk Landing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e341bd95-23d8-5a0a-bd19-42b28ddeeac7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S036",
+    "VALUATIONCLASSDESCRIPTION": "Dialog Int'l Serv Faclty",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "09e0b97c-0a77-5cec-a7ce-9d80cadcf29e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S037",
+    "VALUATIONCLASSDESCRIPTION": "SMW4 E1 Link Rental",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "361d131c-f097-56ff-ba3c-ddcb8b7cf00d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S038",
+    "VALUATIONCLASSDESCRIPTION": "O&M for S&T",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3a8c59c4-58ad-556a-9e82-23397eb783c2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S039",
+    "VALUATIONCLASSDESCRIPTION": "Port & Internet Chgs Data",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cc8a8a0c-8a4e-5452-be1f-3b49b8d11f1a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S040",
+    "VALUATIONCLASSDESCRIPTION": "Restoration chgs",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5f43886f-7d1f-5604-86dc-734802f2cafd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S041",
+    "VALUATIONCLASSDESCRIPTION": "Co Locan. Housing Fee/PoP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dffd0b45-88be-58b0-96bf-3e06aa91afd6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S042",
+    "VALUATIONCLASSDESCRIPTION": "Interconnection & pop chg",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b575aad-dba0-5613-aef3-4d9a795a8bd5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S043",
+    "VALUATIONCLASSDESCRIPTION": "Roaming Signal Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "420a0bc3-d85f-5188-a3f7-3fd5cdeee94e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S044",
+    "VALUATIONCLASSDESCRIPTION": "CPE Repaire & maintenace",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dad8be49-16a3-5780-8c97-7e17e21762d4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S045",
+    "VALUATIONCLASSDESCRIPTION": "CPE Installation & Hiring",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "43499c7d-242c-5857-9dde-2c7017ce7c2a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S046",
+    "VALUATIONCLASSDESCRIPTION": "Content Manag't Exp:",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b254b6d6-3e13-5301-b22b-49c1093b33aa",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S047",
+    "VALUATIONCLASSDESCRIPTION": "Channel Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f4319d3c-3542-5466-be9b-c0e34c41cd87",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S048",
+    "VALUATIONCLASSDESCRIPTION": "Transponder Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0f26949a-30c6-52b2-9c21-dc4601fa21e4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S049",
+    "VALUATIONCLASSDESCRIPTION": "Revenue Share Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9c59f3c6-0514-5657-9fc7-0b8a8f4ac037",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S050",
+    "VALUATIONCLASSDESCRIPTION": "Statutory Audit fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e7022ea6-048e-5663-92a0-73b9e022df04",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S051",
+    "VALUATIONCLASSDESCRIPTION": "Legal/Professional Chrges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b3212de5-54b0-5527-88ec-2387ba24cab7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S052",
+    "VALUATIONCLASSDESCRIPTION": "Consultancy Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4538971f-616c-56b8-b8c3-fff4592e47e3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S053",
+    "VALUATIONCLASSDESCRIPTION": "Late payment/penalty fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d30aeeb7-4a4c-514c-b915-39967b1502b0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S054",
+    "VALUATIONCLASSDESCRIPTION": "Insurance expense Staff",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c92a394f-a287-5d3b-a106-a0a52460569a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S055",
+    "VALUATIONCLASSDESCRIPTION": "Staff Welfare Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3ad14379-e29d-5550-8c6d-a49f9409e3d2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S056",
+    "VALUATIONCLASSDESCRIPTION": "Staff Recruitment & O/S",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "460faac1-8f54-531e-a488-99d2bb4d44be",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S057",
+    "VALUATIONCLASSDESCRIPTION": "Staff Training Exp:",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aec5b63c-d61b-59c0-a511-5a1decef867e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S058",
+    "VALUATIONCLASSDESCRIPTION": "Venue Hiring Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4bb617c1-dfae-5aaf-acc8-f68d68659605",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S059",
+    "VALUATIONCLASSDESCRIPTION": "Office Equipment AMC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e4e2e87b-046c-598e-ae14-9c4fbb6c9468",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S060",
+    "VALUATIONCLASSDESCRIPTION": "IT AMC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "df73a819-b189-5c74-b511-4192845ba0bc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S061",
+    "VALUATIONCLASSDESCRIPTION": "Technical Support SAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "185d2b47-27c1-54f2-b353-45e5873ba7f2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S062",
+    "VALUATIONCLASSDESCRIPTION": "Printing Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "473a520d-ebd7-558a-904a-fdd526c8ad5d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S063",
+    "VALUATIONCLASSDESCRIPTION": "Postage & Courier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b45a77bb-69fa-5f94-9e15-a628f690b9b6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S064",
+    "VALUATIONCLASSDESCRIPTION": "Office Equip: Maintenance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aad19f1e-405f-5f67-9d1d-60b46088eddb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S065",
+    "VALUATIONCLASSDESCRIPTION": "Building maintenance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "08c26862-e625-55f3-87af-c74123d4b482",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S066",
+    "VALUATIONCLASSDESCRIPTION": "Vehicle maintenanc",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8e79b6e6-79bf-58c1-a635-67656a702dbd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S067",
+    "VALUATIONCLASSDESCRIPTION": "Janitorial expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aced3490-5e43-50cd-91b8-051ef325c252",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S068",
+    "VALUATIONCLASSDESCRIPTION": "Document Archiving",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "784dfc3c-8113-5a02-83bd-377a5e857810",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S069",
+    "VALUATIONCLASSDESCRIPTION": "Hiring O/E & furtniture",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "71f7775e-9a86-571e-ac8a-0cbbf5491be0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S070",
+    "VALUATIONCLASSDESCRIPTION": "Office Security Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8afd215c-33c4-5c9c-8aa3-d2bfeb6b9827",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S071",
+    "VALUATIONCLASSDESCRIPTION": "Labour/Hiring Admin Exp:",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3076e951-1efa-58d2-a675-32dad5a09974",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S072",
+    "VALUATIONCLASSDESCRIPTION": "IT Storage & other Exp:",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "31de30f6-1fb9-5b4f-b843-a196d6e73599",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S073",
+    "VALUATIONCLASSDESCRIPTION": "Insurance expense Other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "92a057bd-5371-5f0b-add8-5f3af9dda900",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S074",
+    "VALUATIONCLASSDESCRIPTION": "News Papers Exp:",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "267b09f6-5036-5782-9b94-a571ca17259e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S075",
+    "VALUATIONCLASSDESCRIPTION": "Charity & Donation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eee75308-7a94-5b80-9553-407568e6ba91",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S076",
+    "VALUATIONCLASSDESCRIPTION": "AGM Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ad876125-72e9-5f66-8f00-cc6d7bbb0dcf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S077",
+    "VALUATIONCLASSDESCRIPTION": "Stock Exchange Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "49b4149d-48a0-5df1-9a65-52063578f384",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S078",
+    "VALUATIONCLASSDESCRIPTION": "Annual License Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8296bacf-d15d-5416-8d91-e1f015ef8f28",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S079",
+    "VALUATIONCLASSDESCRIPTION": "Parent Company support",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "976e00ff-1756-599c-bb36-dbe87ded411b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S080",
+    "VALUATIONCLASSDESCRIPTION": "Membership & Subscription",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ef25175-68f0-587a-ac58-7b913cdf6ad9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S081",
+    "VALUATIONCLASSDESCRIPTION": "Other Promotion Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "34021baa-ec99-5ccf-a524-cdf2b938de78",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S082",
+    "VALUATIONCLASSDESCRIPTION": "DTV Sale Promotion Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "af6ede93-6859-5ad0-ba32-4d159beb5f02",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S083",
+    "VALUATIONCLASSDESCRIPTION": "Bill Recovery Charge",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cdeee777-857a-5c7b-b2f6-828c0b2dfc1b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S084",
+    "VALUATIONCLASSDESCRIPTION": "Bill Printing & Postage",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "581b51e1-5263-53ca-92f8-3921dca6a8e7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S085",
+    "VALUATIONCLASSDESCRIPTION": "Production -TV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "45d8279a-c315-51ff-9214-8958a869df30",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S086",
+    "VALUATIONCLASSDESCRIPTION": "Production -Radio",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b897ecc0-16e0-50e8-a166-fcbf86ae24cd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S087",
+    "VALUATIONCLASSDESCRIPTION": "Production-Print",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c7c31b8e-b204-5366-8d31-4b901a9518ef",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S088",
+    "VALUATIONCLASSDESCRIPTION": "Production-others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5f715fef-5ed4-5e53-a4c1-fe1897aa18a1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S089",
+    "VALUATIONCLASSDESCRIPTION": "Scheduling-Radio",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "554e0de5-96db-50de-a067-678504d167e8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S090",
+    "VALUATIONCLASSDESCRIPTION": "Scheduling-TV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b69d814-513e-5d6d-84df-b7d7520eb111",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S091",
+    "VALUATIONCLASSDESCRIPTION": "Scheduling-Print",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "289c8efd-502c-594c-9528-003af94cf46f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S092",
+    "VALUATIONCLASSDESCRIPTION": "Scheduling-Other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "568f09b3-8ad4-554e-93e6-034e1366415c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S093",
+    "VALUATIONCLASSDESCRIPTION": "Scheduling-Web",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "27fe023c-d0b7-5cf7-a7f1-c9d0e4771d6a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S094",
+    "VALUATIONCLASSDESCRIPTION": "Agency Commission",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "340cc587-3aa5-58a2-bd0f-c2a0f6fc4aa9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S095",
+    "VALUATIONCLASSDESCRIPTION": "Sponsorship",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "91b5c1fe-8661-5e42-99b4-0a21a599bc2a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S096",
+    "VALUATIONCLASSDESCRIPTION": "Events",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "419fe1b0-b6b0-51a0-96b7-e7482c58d1d3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S097",
+    "VALUATIONCLASSDESCRIPTION": "Regional Events",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "08da0622-a207-528b-842d-0084158eb3ec",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S098",
+    "VALUATIONCLASSDESCRIPTION": "Printing Marketing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7e38c513-ae17-5f70-97f1-62ee8dc46e04",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S099",
+    "VALUATIONCLASSDESCRIPTION": "Outdoor Advertising",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cb4813a0-12c2-5abd-99ea-a1390f3b2866",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S100",
+    "VALUATIONCLASSDESCRIPTION": "Merchandising",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fc71d8bb-710c-5f28-8edd-3e03d9a3e1b1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S101",
+    "VALUATIONCLASSDESCRIPTION": "Brand promotion",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a095da17-72cf-57f3-b419-9455d5d68f3d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S102",
+    "VALUATIONCLASSDESCRIPTION": "Reserch & Servey Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0f7af671-4bd1-5377-bf4b-74aa895f8236",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S103",
+    "VALUATIONCLASSDESCRIPTION": "Entertainment Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eada54dd-8e43-5951-9145-7a3fbd165420",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S104",
+    "VALUATIONCLASSDESCRIPTION": "FT Air Fees & Other Charg",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "62416f7a-71cc-5c20-998c-d9a3f3eab54b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S105",
+    "VALUATIONCLASSDESCRIPTION": "Loyalty Promotional cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "59717a95-ba52-58ef-924f-3c48f6302be6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S106",
+    "VALUATIONCLASSDESCRIPTION": "CPE Removal Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3617aff9-e0c3-5132-aa0a-2b2927a5c2db",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S107",
+    "VALUATIONCLASSDESCRIPTION": "Thuraya Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b4a1d361-49f0-5e7b-9a52-c64bbadda301",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S108",
+    "VALUATIONCLASSDESCRIPTION": "NW Eq Hiring and Trnsprt",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "31ab5bce-b4c0-5489-97c6-8a7d088e01a3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S109",
+    "VALUATIONCLASSDESCRIPTION": "Billing Courier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "96403c2d-5591-5f0c-909c-894b0c6a72d0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S110",
+    "VALUATIONCLASSDESCRIPTION": "Billing Postage",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0c0f07c0-71ca-5006-8d21-6e00e2891496",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S111",
+    "VALUATIONCLASSDESCRIPTION": "Casual Wages",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f45a07d6-9756-5f8b-9dbb-bcb1d1aedc76",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S112",
+    "VALUATIONCLASSDESCRIPTION": "Billing letter printing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e91ddd72-88ed-58d0-ab0e-cf271b9d4c2e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S113",
+    "VALUATIONCLASSDESCRIPTION": "Car Rental_ Snr Mgt",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "48c1be23-3e3c-56cf-afc2-9d525c5c23ff",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S114",
+    "VALUATIONCLASSDESCRIPTION": "Staff Welfare",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "52e50162-9a6e-55d6-b2ff-0383803a87db",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S115",
+    "VALUATIONCLASSDESCRIPTION": "Advertising-General",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fc295f2e-6b62-5742-9a45-d3b7c45fd3df",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S116",
+    "VALUATIONCLASSDESCRIPTION": "Revenue Share - Alerts",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4fd933f5-9c4e-5c83-a65c-89e4d7c12f07",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S117",
+    "VALUATIONCLASSDESCRIPTION": "Revenue Share - VAS Other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "117b375a-9625-5c5d-98b1-8d9642db0d7c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S118",
+    "VALUATIONCLASSDESCRIPTION": "Revenue Share - PRBT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9e160ba8-bbf7-53fd-9a6e-032c43eebcc7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S119",
+    "VALUATIONCLASSDESCRIPTION": "Call center Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4dd20973-10a1-5d8d-8216-4c456033ca65",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S120",
+    "VALUATIONCLASSDESCRIPTION": "Interconnect - Voice",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "afa2b5cc-dcf8-5b62-8f80-fe8f1719b327",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S121",
+    "VALUATIONCLASSDESCRIPTION": "Interconnect - SMS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f8334966-b5ca-5736-be07-e67827edf7a1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S122",
+    "VALUATIONCLASSDESCRIPTION": "Interconnect - MMS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ff03c0d6-edba-528c-acf7-832ed8c3a12d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S123",
+    "VALUATIONCLASSDESCRIPTION": "Company Vehicle- Fuel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "712aa434-3ef2-5751-88a2-a7c3405087f5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S124",
+    "VALUATIONCLASSDESCRIPTION": "Staff Allowances-Fuel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d1c8fbf6-0645-5374-abd8-a46738b931b1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S125",
+    "VALUATIONCLASSDESCRIPTION": "Staff Uniforms & Others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eb10ddc3-21ed-5181-92b5-d970db57151f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S126",
+    "VALUATIONCLASSDESCRIPTION": "Outsourced services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0f27307f-d5c8-5e13-ae88-2222c9c67c41",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S127",
+    "VALUATIONCLASSDESCRIPTION": "Local Channel Fee's",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2273172c-df9a-560c-815d-6a6d948adc74",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S128",
+    "VALUATIONCLASSDESCRIPTION": "Commission - Aviation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c007ae1a-2730-5e3a-a5ae-1d2883415322",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S129",
+    "VALUATIONCLASSDESCRIPTION": "Retail Branding",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0f68cf48-0204-50ab-a647-067e95a5545b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S130",
+    "VALUATIONCLASSDESCRIPTION": "Vehicle Parking Fee-Offic",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4434b382-8e4c-5e6f-a39e-1b920d450451",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S131",
+    "VALUATIONCLASSDESCRIPTION": "Repair- IT assets",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9f76149e-421a-57a9-aabe-578fb5f4f3dd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S132",
+    "VALUATIONCLASSDESCRIPTION": "Franchise Refurbishment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "426f2872-ee59-5371-a47e-1d53c3253af9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S133",
+    "VALUATIONCLASSDESCRIPTION": "Commission -Application",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9bdb4859-fcbc-5694-abcd-da06136017e0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S134",
+    "VALUATIONCLASSDESCRIPTION": "Out Sourced IT & Others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5adfed6a-90d5-5ad1-838b-e969711dedda",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S135",
+    "VALUATIONCLASSDESCRIPTION": "Expert Salaries/Benefits",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c03b9e5e-a625-57f4-8a35-d37583a846c8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S136",
+    "VALUATIONCLASSDESCRIPTION": "Infra Channel Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d197dbdb-8c8a-5f91-afdc-8449525c38ab",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S137",
+    "VALUATIONCLASSDESCRIPTION": "Exp Corporate Solution",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "70830391-c930-5fa6-815d-cfefae70118b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S138",
+    "VALUATIONCLASSDESCRIPTION": "Sales Commission Others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "36aa85e5-2316-525c-a14a-d3e6adb1d6b9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S139",
+    "VALUATIONCLASSDESCRIPTION": "Pre acquisition Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "69326460-1ef4-5e13-9522-c1029f92f5b8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S140",
+    "VALUATIONCLASSDESCRIPTION": "EZ Cash Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2077822a-6520-5d10-9776-a8eb9b241d93",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S141",
+    "VALUATIONCLASSDESCRIPTION": "DF Charity & Donation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f308932c-fed0-5571-a47b-695d75f73d3c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S142",
+    "VALUATIONCLASSDESCRIPTION": "IDC Expense",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aa03346c-d54e-5403-b803-7f891983053f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S155",
+    "VALUATIONCLASSDESCRIPTION": "Warranty & Quality Exp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f6aa70f1-048a-56e9-8efe-ca2d4e1dd90c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S156",
+    "VALUATIONCLASSDESCRIPTION": "Letter Postage",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a98c63c3-d2b5-52c0-9f93-29594497cf69",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S157",
+    "VALUATIONCLASSDESCRIPTION": "Letter Courier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7f41ef4c-e21e-51eb-bc66-533c42299954",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S158",
+    "VALUATIONCLASSDESCRIPTION": "Packing Expense",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fe8012d3-96e6-5e10-9863-f14e4a6dba72",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S159",
+    "VALUATIONCLASSDESCRIPTION": "AMC Others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1c84c801-b29e-52cd-bf2b-dfdf792bcf70",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S160",
+    "VALUATIONCLASSDESCRIPTION": "Retention Payments",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "691f2f9b-6b59-5b94-b180-4b3533b9c23c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S161",
+    "VALUATIONCLASSDESCRIPTION": "SAP Support Service",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "13cad3aa-f414-5368-9925-00d049e56000",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S162",
+    "VALUATIONCLASSDESCRIPTION": "Foreign Wet",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "47f9247c-7732-5c3f-bd5e-c91128c1a8cf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S163",
+    "VALUATIONCLASSDESCRIPTION": "Foreign Backhaul",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8fc304b7-e9df-5de2-8b47-916d50b28323",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S164",
+    "VALUATIONCLASSDESCRIPTION": "Foreign Last Mile",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bb95fc35-5c36-5e8d-9c66-3b16bcbe8097",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S165",
+    "VALUATIONCLASSDESCRIPTION": "Internet Port Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f22b8ef1-81a1-5f12-a32b-118867ec25cb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S166",
+    "VALUATIONCLASSDESCRIPTION": "Colocation Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0a2259e9-8af4-5779-82fc-d57b10577de8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S167",
+    "VALUATIONCLASSDESCRIPTION": "Sri Lanka Last Mile",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d22d3d61-e37a-58bc-869d-fe5289d4a5b9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S168",
+    "VALUATIONCLASSDESCRIPTION": "Sri Lanka Landing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7b3b1e2d-1f0a-561c-a742-b519b8dabd63",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S169",
+    "VALUATIONCLASSDESCRIPTION": "IB Operating other Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f4006b19-f595-5e45-8fd5-6c5743cb83c3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S170",
+    "VALUATIONCLASSDESCRIPTION": "Intercon PSTNs",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "02b70eb9-d243-57b1-b13c-17baab047aea",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S171",
+    "VALUATIONCLASSDESCRIPTION": "SMS Gateway Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ef77c6ce-a227-5434-994e-2be06dfbbcce",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S172",
+    "VALUATIONCLASSDESCRIPTION": "Marketing - others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5fa196f6-b2d3-5a55-afcc-2a2f9ab74e02",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S173",
+    "VALUATIONCLASSDESCRIPTION": "Cx promo others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "af4d8a38-e615-596d-beb3-f4b88a5f8747",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S174",
+    "VALUATIONCLASSDESCRIPTION": "DS - Other Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a5d6f719-45f3-5e61-94c2-3de09594b961",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S175",
+    "VALUATIONCLASSDESCRIPTION": "Agri Challenge Fund",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e167b180-ce2c-5abf-a66b-9d778961680c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S176",
+    "VALUATIONCLASSDESCRIPTION": "Network sharing rent",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0a6fb81d-8b24-5075-b595-656c6a11dc08",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S177",
+    "VALUATIONCLASSDESCRIPTION": "Food and General Supplier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2aacb242-db79-545d-a3a2-1fba462b0fd3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S178",
+    "VALUATIONCLASSDESCRIPTION": "Staff Commission (OS)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1b6eeba1-a3ad-5eb3-9a33-cafb0b83b852",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S179",
+    "VALUATIONCLASSDESCRIPTION": "Handling Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3e83ddf2-10bc-5ba4-8bac-4903e6884286",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S180",
+    "VALUATIONCLASSDESCRIPTION": "Content- VAS Others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "661ed6d7-b60e-5ec5-81dc-ae33c625b583",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S181",
+    "VALUATIONCLASSDESCRIPTION": "Floodrelief- Donation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5e18df18-7d1c-5707-9db1-62a319267124",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S182",
+    "VALUATIONCLASSDESCRIPTION": "Pre sales and Marketing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "579fbf0f-1fba-5e75-ae26-a332b274892c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S183",
+    "VALUATIONCLASSDESCRIPTION": "Resource augment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b48c606d-1f2e-526a-81de-fd8a636362d5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S184",
+    "VALUATIONCLASSDESCRIPTION": "Productizing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8785fecd-81d4-5f56-859b-87ba61e25c86",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S185",
+    "VALUATIONCLASSDESCRIPTION": "DTV CCA Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "38ee887d-79df-5609-b3aa-54cd154f6578",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S186",
+    "VALUATIONCLASSDESCRIPTION": "Subscription Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "84f65049-1b93-5bc6-bc9f-8e77751c8062",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S187",
+    "VALUATIONCLASSDESCRIPTION": "Call center cost-outboud",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "84669a01-329b-5ae1-b963-ae09c8c5508a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S188",
+    "VALUATIONCLASSDESCRIPTION": "Medical claim",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2eb02a57-532b-5a5f-a0bd-0dc4a8b5280d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S189",
+    "VALUATIONCLASSDESCRIPTION": "Installation Service",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0c488c9f-dce4-52b2-909c-c562ea235962",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S191",
+    "VALUATIONCLASSDESCRIPTION": "DNS Gen Hiring",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2e5c8eda-eb0f-5291-a65f-18ee66fd2346",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S192",
+    "VALUATIONCLASSDESCRIPTION": "DNS Site Caretaker cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ce9f0993-9f2a-5912-b7cf-9b711d4dcffc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S193",
+    "VALUATIONCLASSDESCRIPTION": "DNS SAQ Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "75b9dc72-46b5-5a74-bd72-7933a42b7045",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S194",
+    "VALUATIONCLASSDESCRIPTION": "DNS E & E Repair",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5c117dc3-ebf8-5019-8bf5-d2754d5cc9e1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S195",
+    "VALUATIONCLASSDESCRIPTION": "DNS AC Repair & Maintenan",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "57245d32-81c8-528d-a3fc-ab7040f4f971",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S196",
+    "VALUATIONCLASSDESCRIPTION": "DNS Energy repair & Maint",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7586344b-42cb-5ec3-813f-c1a02673af32",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S197",
+    "VALUATIONCLASSDESCRIPTION": "DNS Civil Routine Mainten",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "97081d84-eb56-5b3a-9315-61a1f5925f51",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S198",
+    "VALUATIONCLASSDESCRIPTION": "DNS Cabin & Tower Mainten",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c5574132-6f73-58d2-b75a-a6c3dd4dd5b9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S199",
+    "VALUATIONCLASSDESCRIPTION": "DNS Gen Repair & Maintena",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "33a32cf4-073e-532d-9f43-192276a6357d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S200",
+    "VALUATIONCLASSDESCRIPTION": "DNS Passive Infra Service",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d483ebdb-82de-540d-b787-4acdd31dbf32",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S201",
+    "VALUATIONCLASSDESCRIPTION": "Sustainability Expense",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aaf5dcbb-7ed7-576f-9bbe-609ba12f3838",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S202",
+    "VALUATIONCLASSDESCRIPTION": "DNS O&M and Other expense",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3ba72450-e311-5c9a-b00d-d43c22551b7e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S203",
+    "VALUATIONCLASSDESCRIPTION": "Donation for Disaster",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "48790e38-8358-5dc8-bfa0-c0802b89433b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S204",
+    "VALUATIONCLASSDESCRIPTION": "Retail promotional expens",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3c92ad54-09ec-531a-bcf3-961c167105d9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S205",
+    "VALUATIONCLASSDESCRIPTION": "Product & solution dlvry.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "236d7362-9de6-5b4e-8a22-ddab8b757863",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S206",
+    "VALUATIONCLASSDESCRIPTION": "CX Maintainance Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "19a94e87-6a1e-5e50-b445-582a1c5ea2f3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S207",
+    "VALUATIONCLASSDESCRIPTION": "Cloud Hosting Charge",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "372a8a32-a6c6-5479-964d-d7cc6c0fbdcc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S209",
+    "VALUATIONCLASSDESCRIPTION": "Revn Shr-Data Sci Ac",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d008d447-b3f6-55c8-a585-2551560b4eee",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S210",
+    "VALUATIONCLASSDESCRIPTION": "Revn Shr-Daas Data Sci Ac",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c753675d-5bb0-5b67-be83-7ecb06d00f92",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S213",
+    "VALUATIONCLASSDESCRIPTION": "Device Purchase STC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9983f79e-bf51-5c5f-8823-5bafe6015008",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S214",
+    "VALUATIONCLASSDESCRIPTION": "VRS Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5b96bdd1-247c-5ad5-a1e7-e7ee258de466",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S215",
+    "VALUATIONCLASSDESCRIPTION": "Franchise Admin Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "42f96591-4ebc-519d-ab0c-e6c34552c911",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S216",
+    "VALUATIONCLASSDESCRIPTION": "Taxes & Rates",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c379bb53-1b6e-52e6-989a-e95881561d06",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S217",
+    "VALUATIONCLASSDESCRIPTION": "Contractual Employe",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f50e74eb-4bcd-5f97-8e48-ea500331020a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S218",
+    "VALUATIONCLASSDESCRIPTION": "Staff Trave Reimbur",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3eaeb612-ab9e-562c-afa4-fc66a04e5508",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S219",
+    "VALUATIONCLASSDESCRIPTION": "Staff & Other Refre",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d5eb0ead-79d3-5160-bc8b-90d0ef136647",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S220",
+    "VALUATIONCLASSDESCRIPTION": "Emp Recog Scheme",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "54977f7a-5570-593f-bc2a-36dbae7fd4ba",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S221",
+    "VALUATIONCLASSDESCRIPTION": "Meals & other Expens",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "73c875dc-4d07-52a2-8917-7460aec77d19",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S222",
+    "VALUATIONCLASSDESCRIPTION": "Stationery",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "72115a92-6116-592e-9412-a6d86d795f5e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S223",
+    "VALUATIONCLASSDESCRIPTION": "Generator maint Exp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a97844c0-5ae0-5789-a659-ad601d6b5e48",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S224",
+    "VALUATIONCLASSDESCRIPTION": "Running Water",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e150688c-8038-5bf9-94c0-0ab9d233fddd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S225",
+    "VALUATIONCLASSDESCRIPTION": "AR & Paper Publising",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "481aa5fe-27e3-5275-b0b5-e5e385d090a9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S226",
+    "VALUATIONCLASSDESCRIPTION": "HR Consultancy Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "93a8afd1-f9ef-53d0-94d8-3125b4038203",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S227",
+    "VALUATIONCLASSDESCRIPTION": "Credit Card Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cf42de1a-c011-51f2-ba4b-0ab08e1f0f33",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S228",
+    "VALUATIONCLASSDESCRIPTION": "CRIB Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d7789326-731f-5299-b621-5949642a3da5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S229",
+    "VALUATIONCLASSDESCRIPTION": "Deposit Insurance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1bb85f76-eb65-5f5f-9d71-f6293665bb8d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S230",
+    "VALUATIONCLASSDESCRIPTION": "Funeral Endowment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "89cdaffc-dba6-54ef-8b66-674e4bf91547",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S231",
+    "VALUATIONCLASSDESCRIPTION": "Internal Audit Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4da4f906-547e-5f5e-ac47-52b8d3bf28d0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S232",
+    "VALUATIONCLASSDESCRIPTION": "Membership Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a2bd6f2b-6528-5a20-a5a8-7b9368bbb6a5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S233",
+    "VALUATIONCLASSDESCRIPTION": "Professional Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "43c2cbfb-5999-5d1a-b4f0-75de893983dc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S234",
+    "VALUATIONCLASSDESCRIPTION": "Secretarial Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0530b430-9c2c-5fa6-89db-69840a49a954",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S235",
+    "VALUATIONCLASSDESCRIPTION": "Shifting Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c9d9233c-d83c-5a57-835c-aade19d6547f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S236",
+    "VALUATIONCLASSDESCRIPTION": "Office Travel & Tran",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6eaa90bf-37be-5165-9f8d-7f70fec00928",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S237",
+    "VALUATIONCLASSDESCRIPTION": "Comm - eZ Cash",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "65ef5c61-5dc8-54b9-a8c0-47d5ea1534d2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S238",
+    "VALUATIONCLASSDESCRIPTION": "Collection Charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "84dae63b-1ceb-5dec-9081-f7f788df8396",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S239",
+    "VALUATIONCLASSDESCRIPTION": "Recovery Expense",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eed69906-6da7-5364-a83c-8a1d6d6a8bf2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S240",
+    "VALUATIONCLASSDESCRIPTION": "Business Promotion",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f2c58de9-7d74-516d-9e2b-9005ef11707b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S241",
+    "VALUATIONCLASSDESCRIPTION": "Debit Card -MC Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "23032959-1ae5-52e4-b7bb-ae7d94e56814",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S242",
+    "VALUATIONCLASSDESCRIPTION": "Document charges",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f3df642b-14ab-5abe-b87a-574d5fdc8da3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S243",
+    "VALUATIONCLASSDESCRIPTION": "Leasing Intro Comm",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "559e5e82-b397-5196-a968-47b7aaed0b47",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S244",
+    "VALUATIONCLASSDESCRIPTION": "Lanka Clear CEFT Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6bcb3c30-e886-50c8-aebd-5e7aafee99d3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S245",
+    "VALUATIONCLASSDESCRIPTION": "Lanka Clear CAS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "07e882bb-246d-55c1-a9af-2636f0eb8a65",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S246",
+    "VALUATIONCLASSDESCRIPTION": "LC SLIP Chrg",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "969a3396-53c7-53ac-885c-65db8df0c60c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S247",
+    "VALUATIONCLASSDESCRIPTION": "NIC Verifi Chrg",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "78d2d922-6982-5136-9015-864f116f3991",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S248",
+    "VALUATIONCLASSDESCRIPTION": "Generator Fuel-Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a73453dc-5420-5c13-bcb9-bb42c82e1f40",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S249",
+    "VALUATIONCLASSDESCRIPTION": "VAT Expense",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a4100b00-c8b3-558e-ad12-2bff9956d784",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S250",
+    "VALUATIONCLASSDESCRIPTION": "ABC Collection Expense",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c6391f9c-710e-53bb-ae4f-53d9ec3ebaac",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S251",
+    "VALUATIONCLASSDESCRIPTION": "Exp.software expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "df5c7e4c-eb26-5584-b645-ea591954b4fe",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S252",
+    "VALUATIONCLASSDESCRIPTION": "Outsourced Resources Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "08cf55aa-5b33-553c-aea5-61f940715485",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S253",
+    "VALUATIONCLASSDESCRIPTION": "SIM Consumption",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "899c8a2b-8d93-5591-8ba7-8a74bb71b926",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S254",
+    "VALUATIONCLASSDESCRIPTION": "IT consumables",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "00fcb9f9-ab84-5cd2-898f-651bb3eb355d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S255",
+    "VALUATIONCLASSDESCRIPTION": "Exp.Activation commission",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2ca51ed6-7673-550f-9336-a86e0246bf92",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S256",
+    "VALUATIONCLASSDESCRIPTION": "Bill Collection Commi.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ff3ba3cc-f455-55c6-a77c-401fc1bed9b4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S257",
+    "VALUATIONCLASSDESCRIPTION": "OFN maintenance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "77dc328e-9ba2-5438-b309-61d8fddbfdc5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S258",
+    "VALUATIONCLASSDESCRIPTION": "Site Sharing rent exp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "be231728-b65b-577b-b86d-5753512deaf1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S259",
+    "VALUATIONCLASSDESCRIPTION": "Outsource ITsup service",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d0236833-a65c-51f2-8ab4-0933ecab0d31",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S260",
+    "VALUATIONCLASSDESCRIPTION": "MSP Management Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2d5f9744-9419-57e3-86d0-a4502858f113",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S261",
+    "VALUATIONCLASSDESCRIPTION": "MSP Resource Cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "76af96f3-ba14-5c92-af8b-1e3459f38909",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S262",
+    "VALUATIONCLASSDESCRIPTION": "Frontline oper handl cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "058b9c9a-3dbe-5edf-a899-a8301ec07620",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S263",
+    "VALUATIONCLASSDESCRIPTION": "Frontline acqui comm cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a2cae6d4-c476-5a79-b323-6e0ed1eb20b8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S264",
+    "VALUATIONCLASSDESCRIPTION": "CRC handling cost",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3a7a44cb-cee6-5e1a-8ef6-9eb48d557834",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S265",
+    "VALUATIONCLASSDESCRIPTION": "POS/MPOS maint exp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b701a9ef-77a9-5e41-8c23-48b495c250bb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "S266",
+    "VALUATIONCLASSDESCRIPTION": "PayDD support ser.charge",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "06492a68-6095-5b37-9c65-813063b9575e",
+    "CREATEDAT": "2026-10-04T18:32:31.006",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:31.006",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "3100",
+    "VALUATIONCLASSDESCRIPTION": "Trading goods",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6306c721-6752-5903-8dfd-35944de2278f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZDTT",
+    "VALUATIONCLASSDESCRIPTION": "CPE Trading",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c882693d-fd8a-53dc-99e7-a30acb035181",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTAC",
+    "VALUATIONCLASSDESCRIPTION": "Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dce65b8e-85a2-5729-b36b-3af9b793dd1d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTBB",
+    "VALUATIONCLASSDESCRIPTION": "Black Berry",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ea4c614c-eec2-5bec-8701-4cb706af1590",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTDL",
+    "VALUATIONCLASSDESCRIPTION": "Data Card & Laptops",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "be588ec7-7d4a-5f03-92bd-3a2c53719805",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTDV",
+    "VALUATIONCLASSDESCRIPTION": "Digital Video Broadcastin",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "32b7add3-0c6f-5a35-80f1-ce940db05d22",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTLT",
+    "VALUATIONCLASSDESCRIPTION": "LTE Pre Paid",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b7e74fbd-f9f0-59dc-b915-259d25258926",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTOT",
+    "VALUATIONCLASSDESCRIPTION": "Trading Materials - Other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6bcb64ba-5062-596d-be53-b50af688e099",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTPC",
+    "VALUATIONCLASSDESCRIPTION": "Printing Cost - Trading",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "10fc56d2-fc09-544a-a4b5-8874a5b22ffc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTPH",
+    "VALUATIONCLASSDESCRIPTION": "Phone",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0980299b-77ae-599a-bbd9-c6a94f02f3bf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTPV",
+    "VALUATIONCLASSDESCRIPTION": "Trading Material - PVR Bo",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "08351350-f706-5ddc-b800-e78a80ef0fad",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTRC",
+    "VALUATIONCLASSDESCRIPTION": "Recharge Card",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7ce0e8a0-5d85-5e81-ad3e-f8c10d584f2d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTRM",
+    "VALUATIONCLASSDESCRIPTION": "Trading Materials Remotes",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8edf58f0-a311-5234-9c55-453852baafa1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTSA",
+    "VALUATIONCLASSDESCRIPTION": "Sim - Airtel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "33812421-3e35-5fdf-b966-c87e8926c06f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTSC",
+    "VALUATIONCLASSDESCRIPTION": "Per Day TV Sachet voucher",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5daca2c5-2fe7-5bc8-ad72-d18d5a939795",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTSP",
+    "VALUATIONCLASSDESCRIPTION": "Spare Parts - Trading",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3ff19dd5-2d63-5628-ac03-92fc6bb215af",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTSS",
+    "VALUATIONCLASSDESCRIPTION": "Trading - Sim & Starter P",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f963afde-f84a-5dfb-9ca1-cd3e5ed45315",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTST",
+    "VALUATIONCLASSDESCRIPTION": "Scratch cards - Airtel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e71b6756-d97f-591a-ac8a-d20160fc2346",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZTWW",
+    "VALUATIONCLASSDESCRIPTION": "WoW products",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1b3817d-6cbe-5dce-92af-cb064a9ce9ef",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "0710",
+    "VALUATIONCLASSDESCRIPTION": "Equipment 1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c9b4a25e-f224-5cee-846d-2f254b8f4f3e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "0720",
+    "VALUATIONCLASSDESCRIPTION": "Equipment 2",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ad3db4d-f185-534b-8c4a-43a7be20a8d8",
+    "CREATEDAT": "2026-10-04T18:32:31.006",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:31.006",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "3000",
+    "VALUATIONCLASSDESCRIPTION": "Raw materials 1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "85fb88ff-a04f-5747-9ebe-955b08193f24",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "3001",
+    "VALUATIONCLASSDESCRIPTION": "Raw materials 2",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "171c9f86-e552-531c-9f9d-241ab739742e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "3002",
+    "VALUATIONCLASSDESCRIPTION": "Raw materials 3",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6fecf98d-61f8-5604-a39b-4a60bc7ab5f6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "3003",
+    "VALUATIONCLASSDESCRIPTION": "Raw materials 4",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3ec9b04e-5459-5eed-b1db-596c80e52454",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZCDA",
+    "VALUATIONCLASSDESCRIPTION": "CDMA Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "75d7da79-4534-52d1-9110-bc72577e29dc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZCPB",
+    "VALUATIONCLASSDESCRIPTION": "Customer Premise Equipmen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3d6e579b-63b5-5725-8d39-2be31995a617",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZCPT",
+    "VALUATIONCLASSDESCRIPTION": "Customer Premise Equipmen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "24fe3c66-5033-5583-8a47-e13348fd74e5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEAC",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f1d6861f-8d1f-50d8-8531-c55112616131",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEBB",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_BB Equipments",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "23e51f67-fc1c-5b7b-a3f3-a483ab0e3654",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEBS",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_BSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "63e21105-0847-5dff-845d-52e8c8628280",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZECN",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Consumable",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "46554e3c-e8d5-5c88-9782-66804e448502",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZECV",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Civil",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3954596a-ef9e-541a-aafe-46ac6112144f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEDE",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_DATA Equip",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aebd06f8-3ab1-5115-8267-63af903a907e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEDT",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_DTV IT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1371ebcc-c7f2-5928-af24-7ef268792569",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEIP",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_IP Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "376d278b-db4d-532a-a62c-ac68a2a846dd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZENC",
+    "VALUATIONCLASSDESCRIPTION": "Engineering Spares Consum",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "36aa2836-f70d-55f1-a305-90116bc55b9a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZENG",
+    "VALUATIONCLASSDESCRIPTION": "Engineering Capital Stock",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "35154ec0-e93f-5977-9a63-ba27a1b58a3c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZENN",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_NSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8d2f477a-e440-5a16-a7af-848184f81015",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZENS",
+    "VALUATIONCLASSDESCRIPTION": "Engineering Capital Spare",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "32abbd06-7937-536d-9e9f-134ba91022de",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEPC",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Packet Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a07b61a7-79c0-575e-94b3-664ae7547c0d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEPM",
+    "VALUATIONCLASSDESCRIPTION": "POS/MPOS maint",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "41261183-e103-52b1-9cf9-6c9dea2cbbbf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEPW",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Power & Elecrical",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d0253e40-105b-563e-adf4-06d3ed5ddc32",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZERF",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_RF Equipment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6ff2502c-36f3-5864-a8c7-7d082084e9c1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZESP",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Spares",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "423790f4-c738-595d-9a2f-978d847f3f70",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZESS",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Server & storage",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f995afc9-1f3b-5864-aeae-75501830dd67",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZETN",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Transmission",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a44077b3-bc44-5452-8eb1-042f56169681",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZETT",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_Tools & Test",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8c28aacd-bbaa-5337-9864-65526ca34544",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "VALUATIONCLASSCODE": "ZEVS",
+    "VALUATIONCLASSDESCRIPTION": "ENG_ FM_VAS",
+    "ISACTIVE": 1
+  }
+]

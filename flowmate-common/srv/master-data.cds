@@ -335,6 +335,7 @@ entity Customers as projection on db.Customers;
     email: String(255),
     department: String(100),
     roleCode: String(40),
+    userType: String(20),
     managerId: UUID,
     teamIds: many UUID,
     isActive: Boolean

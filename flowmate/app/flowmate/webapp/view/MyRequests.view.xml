@@ -2384,6 +2384,13 @@
                                                         </VBox>
                                                         <HBox justifyContent="End">
                                                             <Button
+                                                                icon="sap-icon://employee-approvals"
+                                                                type="Transparent"
+                                                                tooltip="{i18n>assignTeamTaskToMeButton}"
+                                                                visible="{canAssignToMe}"
+                                                                enabled="{= (${status_code} === 'OPEN' || ${status_code} === 'SENT_BACK') &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                                                press=".onAssignRequestTaskToMe" />
+                                                            <Button
                                                                 icon="sap-icon://email"
                                                                 type="Transparent"
                                                                 tooltip="{i18n>notifyProcessorButton}"
@@ -2730,6 +2737,13 @@
                                 text="{i18n>notifyTeamMembersButton}"
                                 visible="{= !!${processorTeam_ID} }"
                                 press=".onNotifyTaskTeamMembers" />
+                            <Button
+                                icon="sap-icon://employee-approvals"
+                                text="{i18n>assignTeamTaskToMeButton}"
+                                type="Emphasized"
+                                visible="{canAssignToMe}"
+                                enabled="{= (${status_code} === 'OPEN' || ${status_code} === 'SENT_BACK') &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                press=".onAssignRequestTaskToMe" />
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"

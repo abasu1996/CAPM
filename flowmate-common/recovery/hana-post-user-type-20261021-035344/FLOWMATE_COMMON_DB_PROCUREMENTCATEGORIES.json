@@ -1,0 +1,23 @@
+[
+  {
+    "CODE": "CAPEX_IM",
+    "NAME": "Capex IM",
+    "DESCRIPTION": "Capital expenditure investment management",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "CAPEX_FM",
+    "NAME": "Capex FM",
+    "DESCRIPTION": "Capital expenditure funds management",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "OPEX",
+    "NAME": "Opex",
+    "DESCRIPTION": "Operating expenditure",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  }
+]

@@ -1,0 +1,272 @@
+[
+  {
+    "ID": "68b6cb9b-339b-52b4-bafd-b8ac4e3add59",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "X0",
+    "MRPTYPEDESCRIPTION": "W/O MRP, with BOM Explosion",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "03fb4e69-5f07-5826-9eef-679d42d3ddf1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "VV",
+    "MRPTYPEDESCRIPTION": "Forecast-based planning",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "256f9300-cb45-53a7-995b-2e67c928911c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "VS",
+    "MRPTYPEDESCRIPTION": "Seasonal MRP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a191824d-d88b-5244-8c1e-da586cc788f7",
+    "CREATEDAT": "2026-10-04T18:32:27.723",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.723",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "VM",
+    "MRPTYPEDESCRIPTION": "Automatic reorder point plng",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5d0b6971-fedb-55fe-82f0-282c44a32e0a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "VI",
+    "MRPTYPEDESCRIPTION": "Vendor Managed Inventory",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5def3bed-786e-542d-8081-0f9c3c3f2df0",
+    "CREATEDAT": "2026-10-04T18:32:27.723",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.723",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "VB",
+    "MRPTYPEDESCRIPTION": "Manual reorder point planning",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1f63af47-f2cf-5c74-9c4b-cc14e73abb01",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "V2",
+    "MRPTYPEDESCRIPTION": "Autom. reord.point w. ext.reqs",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c6da085c-8375-5fb8-8216-24934a5d0a65",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "V1",
+    "MRPTYPEDESCRIPTION": "Manual reord.point w. ext.reqs",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9600d580-4454-5bbc-bcd1-6391d2ead023",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "RS",
+    "MRPTYPEDESCRIPTION": "Time-phased replenishment plng",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0bc5fc63-9120-54fc-9734-55754e304f69",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "RR",
+    "MRPTYPEDESCRIPTION": "Tmphsd. repl. w. dyn.trgt.stck",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4005acb6-aa82-557c-970b-adfd3a56fbb7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "RP",
+    "MRPTYPEDESCRIPTION": "Replenishment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "519fab4d-e809-5c36-8ce7-25c64b6814a7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "RF",
+    "MRPTYPEDESCRIPTION": "Replenish with dyn.TargetStock",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1abed03b-d772-54f3-a09a-705caff51bad",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "RE",
+    "MRPTYPEDESCRIPTION": "Replenishment plnd externally",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a1f8a63b-dbc4-5a70-8590-cb388dcde8db",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "R2",
+    "MRPTYPEDESCRIPTION": "Time-phased w.auto.reord.point",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9f0a3499-2898-5eaf-9392-9b7091ae9dac",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "R1",
+    "MRPTYPEDESCRIPTION": "Time-phased planning",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "96c36265-21d6-5214-90b1-89c3106a1164",
+    "CREATEDAT": "2026-10-04T18:32:27.723",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.723",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "PD",
+    "MRPTYPEDESCRIPTION": "MRP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aeb9df64-f7de-5a25-a941-3ebaebc45904",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "P4",
+    "MRPTYPEDESCRIPTION": "MRP, fixing type -4-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e90e4acf-4eae-5169-ad8d-be869b5f8299",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "P3",
+    "MRPTYPEDESCRIPTION": "MRP, fixing type -3-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1e1b1826-025c-5734-b78b-5249f68f9a02",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "P2",
+    "MRPTYPEDESCRIPTION": "MRP, fixing type -2-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3d0bd3df-1abc-5bdf-9e21-91b6a1873675",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "P1",
+    "MRPTYPEDESCRIPTION": "MRP, fixing type -1-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "edad9b67-6b9e-5130-8095-f9c2b3451b5b",
+    "CREATEDAT": "2026-10-04T18:32:27.723",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.723",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "ND",
+    "MRPTYPEDESCRIPTION": "No planning",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6b0cb5aa-8042-5a68-a2d4-1300fd9ef12c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "M4",
+    "MRPTYPEDESCRIPTION": "MPS, fixing type -4-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "34c4570b-78dc-5a7f-bf74-e392978e61cc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "M3",
+    "MRPTYPEDESCRIPTION": "MPS, fixing type -3-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "90486b44-917c-5b2e-ad05-d04651d733d1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "M2",
+    "MRPTYPEDESCRIPTION": "MPS, fixing type -2-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "95eac388-c1a5-5273-869d-780f2adfec82",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "M1",
+    "MRPTYPEDESCRIPTION": "MPS, fixing type -1-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "af78bbd5-964d-55df-99fa-5d8a2b5b435e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "M0",
+    "MRPTYPEDESCRIPTION": "MPS, fixing type -0-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e5a006dc-08fd-542d-b488-c21079ede765",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MRPTYPECODE": "D1",
+    "MRPTYPEDESCRIPTION": "Demand-Driven Replenishment, fixing type -1-",
+    "ISACTIVE": 1
+  }
+]

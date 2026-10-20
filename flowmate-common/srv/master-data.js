@@ -1,5 +1,6 @@
 const cds = require("@sap/cds");
 const { SELECT, INSERT, UPDATE, DELETE } = cds.ql;
+const USER_TYPES = new Set(["INTERNAL", "VENDOR", "TECHNICAL_API"]);
 
 module.exports = class CommonMasterDataService extends cds.ApplicationService {
   async init() {
@@ -203,6 +204,9 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       role_code: Object.prototype.hasOwnProperty.call(req.data, "roleCode")
         ? req.data.roleCode || null
         : oExistingUser?.role_code || null,
+      userType: Object.prototype.hasOwnProperty.call(req.data, "userType")
+        ? req.data.userType
+        : oExistingUser?.userType || "INTERNAL",
       manager_ID: Object.prototype.hasOwnProperty.call(req.data, "managerId")
         ? req.data.managerId || null
         : oExistingUser?.manager_ID || null,
@@ -271,7 +275,8 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       displayName: oUser.displayName?.trim(),
       email: oUser.email?.trim(),
       department: oUser.department?.trim() || null,
-      role_code: oUser.role_code?.trim() || null
+      role_code: oUser.role_code?.trim() || null,
+      userType: String(oUser.userType || "INTERNAL").trim().toUpperCase()
     };
   }
 
@@ -284,6 +289,7 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       email: oUser.email,
       department: oUser.department,
       role_code: oUser.role_code || null,
+      userType: oUser.userType,
       manager_ID: oUser.manager_ID || null,
       isActive: oUser.isActive !== false
     };
@@ -296,6 +302,10 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(oUser.email)) {
       return req.reject(400, "Enter a valid email address");
+    }
+
+    if (!USER_TYPES.has(oUser.userType)) {
+      return req.reject(400, "Select a valid user type: Internal User, Vendor, or Technical API User");
     }
 
     if (oUser.role_code) {

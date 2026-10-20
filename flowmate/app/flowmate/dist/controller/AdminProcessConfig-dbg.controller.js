@@ -504,6 +504,7 @@ sap.ui.define([
             const sVendorCode = String(oEntry.vendorCode || "").trim();
             const sVendorName = String(oEntry.vendorName || "").trim();
             const sVendorEmail = String(oEntry.vendorEmail || "").trim();
+            const sAccountGroup = String(oEntry.AccountGroup || "").trim();
 
             if (!sVendorCode || !sVendorName) {
                 MessageBox.warning(this.getText("vendorRequiredMessage"));
@@ -522,7 +523,8 @@ sap.ui.define([
                 payload: {
                     vendorCode: sVendorCode,
                     vendorName: sVendorName,
-                    vendorEmail: sVendorEmail || null
+                    vendorEmail: sVendorEmail || null,
+                    AccountGroup: sAccountGroup || null
                 },
                 successCreateKey: "vendorCreatedMessage",
                 successUpdateKey: "vendorUpdatedMessage",
@@ -741,6 +743,7 @@ sap.ui.define([
             this.getView().getModel("stepEdit").setData({
                 ...oEntry,
                 stepType: oEntry.stepType || "PROCESSING",
+                requestOrigin: oEntry.requestOrigin || "INTERNAL_USER",
                 isActiveDemandTask: Boolean(oEntry.isActiveDemandTask),
                 isVendorNotification: Boolean(oEntry.isVendorNotification),
                 isEdit: true,
@@ -759,16 +762,19 @@ sap.ui.define([
             if (oModel.getProperty("/stepType") === "LOA") {
                 oModel.setProperty("/processorTeam_ID", null);
                 oModel.setProperty("/processorTeamName", null);
-                oModel.setProperty("/role", null);
+                oModel.setProperty("/requestOrigin", null);
                 oModel.setProperty("/isVendorNotification", false);
                 oModel.setProperty("/isActiveDemandTask", false);
+            } else if (!oModel.getProperty("/requestOrigin")) {
+                oModel.setProperty("/requestOrigin", "INTERNAL_USER");
             }
         },
 
         async onSaveProcessStep() {
             const oEntry = this.getView().getModel("stepEdit").getData();
 
-            if (!oEntry.subProcessType_code || !oEntry.stepNo || !oEntry.stepName) {
+            if (!oEntry.subProcessType_code || !oEntry.stepNo || !oEntry.stepName
+                || (oEntry.stepType !== "LOA" && !oEntry.requestOrigin)) {
                 MessageBox.warning(this.getText("processStepRequiredMessage"));
                 return;
             }
@@ -781,7 +787,7 @@ sap.ui.define([
                 activityDescription: oEntry.activityDescription,
                 processorTeam_ID: bRequesterNotification ? null : (oEntry.processorTeam_ID || null),
                 processorTeamName: bRequesterNotification ? null : (oEntry.processorTeamName || null),
-                role: oEntry.role,
+                requestOrigin: oEntry.stepType === "LOA" ? null : oEntry.requestOrigin,
                 slaDays: this._optionalNumber(oEntry.slaDays),
                 isActiveDemandTask: Boolean(oEntry.isActiveDemandTask),
                 isVendorNotification: bRequesterNotification
@@ -1000,7 +1006,7 @@ sap.ui.define([
                 activityDescription: "",
                 processorTeam_ID: "",
                 processorTeamName: "",
-                role: "",
+                requestOrigin: "INTERNAL_USER",
                 slaDays: "",
                 isActiveDemandTask: false,
                 isVendorNotification: false
@@ -1095,7 +1101,8 @@ sap.ui.define([
                 ID: "",
                 vendorCode: "",
                 vendorName: "",
-                vendorEmail: ""
+                vendorEmail: "",
+                AccountGroup: ""
             };
         },
         
@@ -1145,6 +1152,15 @@ sap.ui.define([
 
         _optionalNumber(vValue) {
             return vValue === "" || vValue === null || vValue === undefined ? null : Number(vValue);
+        },
+
+        formatRequestOrigin(sOrigin) {
+            const mTextKeys = {
+                INTERNAL_USER: "internalUserType",
+                VENDOR: "vendorUserType",
+                EXTERNAL_API: "technicalApiUserType"
+            };
+            return mTextKeys[sOrigin] ? this.getText(mTextKeys[sOrigin]) : "";
         },
 
         _refreshTable(sTableId) {

@@ -13,6 +13,12 @@ const PROCESS_STATUS = {
   COMPLETED: "COMPLETED"
 };
 
+const REQUEST_ORIGIN = Object.freeze({
+  INTERNAL_USER: "INTERNAL_USER",
+  VENDOR: "VENDOR",
+  EXTERNAL_API: "EXTERNAL_API"
+});
+
 const LOCKED_REQUEST_STATUSES = new Set([
   PROCESS_STATUS.COMPLETED,
   PROCESS_STATUS.REJECTED
@@ -601,6 +607,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       Delegations
     } = this.masterEntities;
 
+    // requestOrigin is security-sensitive audit data. Always replace any
+    // client-supplied value with a value derived from the authenticated caller.
+    this.before("CREATE", ProcessRequests, async (req) => {
+      await this._applyTrustedRequestOrigin(req, Users);
+    });
+
+    this.before("UPDATE", ProcessRequests, (req) => {
+      if (Object.prototype.hasOwnProperty.call(req.data, "requestOrigin")) {
+        return req.reject(400, "Request origin is managed by the server and cannot be changed");
+      }
+    });
+
     this.on("READ", [ServiceUsers, ServiceRoles, ServiceTeams, ServiceVendors, ServiceCustomers, ServiceTeamMembers], (req) => {
       return this.master.run(req.query);
     });
@@ -733,6 +751,22 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     this.after("READ", ProcessTasks, fnClearUnassignedTeamTaskProcessor);
     this.after("READ", MyTeamTasks, fnClearUnassignedTeamTaskProcessor);
     this.after("READ", RequestDetailTasks, fnClearUnassignedTeamTaskProcessor);
+    this.after("READ", MyTeamTasks, (data) => {
+      this._setTeamTaskAssignmentEligibility(data, { membershipPrevalidated: true });
+    });
+    this.after("READ", RequestDetailTasks, async (data, req) => {
+      try {
+        const oReservationUser = await this._currentReservationUser(req, Users);
+        const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
+        this._setTeamTaskAssignmentEligibility(data, { teamIds: aTeamIds });
+      } catch (oError) {
+        const iStatus = Number(oError.status || oError.statusCode || oError.code);
+        if (![401, 403].includes(iStatus)) throw oError;
+        // Technical clients or unprovisioned identities may still read data
+        // allowed by their scopes, but they must never receive this UI action.
+        this._setTeamTaskAssignmentEligibility(data, { teamIds: [] });
+      }
+    });
 
     this.before("READ", ProcessTaskTeamMembers, async (req) => {
       await this._filterByVisibleTaskMembers(req, Users, ProcessTaskTeamMembers, RequestDetailTasks);
@@ -808,6 +842,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         delete cleanInput[field];
       });
       cleanInput.ID = cds.utils.uuid();
+      // This action writes directly to persistence and therefore does not run
+      // the ProcessRequests CREATE hook above.
+      const originRequest = Object.create(req);
+      originRequest.data = cleanInput;
+      await this._applyTrustedRequestOrigin(originRequest, Users);
 
       if (!cleanInput.requesterUser_ID) {
         return req.reject(400, "requesterUser_ID is required for a provisioned Flowmate request");
@@ -1168,6 +1207,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         oStep.processorTeam_ID = null;
       }
 
+      if (Object.prototype.hasOwnProperty.call(req.data, "requestOrigin")) {
+        const sRequestOrigin = String(req.data.requestOrigin || "").trim().toUpperCase();
+        const bLoaWithoutOrigin = oStep.stepType === "LOA" && !sRequestOrigin;
+        if (!bLoaWithoutOrigin && !["INTERNAL_USER", "VENDOR", "EXTERNAL_API"].includes(sRequestOrigin)) {
+          return req.reject(400, "Select a valid request origin for the process step");
+        }
+        req.data.requestOrigin = bLoaWithoutOrigin ? null : sRequestOrigin;
+        oStep.requestOrigin = req.data.requestOrigin;
+      }
+
       if (!oStep.subProcessType_code || !oStep.stepNo || !oStep.stepName) {
         return req.reject(400, "Process subtype, step number, and step name are required");
       }
@@ -1442,6 +1491,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     });
     this.before(["CREATE", "UPDATE"], ProcessRequests, async (req) => {
+      const sSelectedApprovers = req.data.selectedLoaApproverIds;
+      const bSelectionSupplied = Object.hasOwn(req.data, "selectedLoaApproverIds");
+      delete req.data.selectedLoaApproverIds;
+      if (bSelectionSupplied && req.event !== "CREATE") {
+        return req.reject(400, "LoA approvers can only be selected when creating a request");
+      }
       const sRequestId = this._requestIdFromReq(req);
       const oExisting = req.event === "UPDATE" && sRequestId
         ? await cds.tx(req).run(
@@ -1469,6 +1524,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       if (!oSubProcessType?.loaApprovalApplicable) {
+        if (bSelectionSupplied) return req.reject(400, "LoA approvers cannot be selected for this subprocess type");
         req.data.amount = null;
         req.data.role = null;
         req.data.loaRequiresAll = false;
@@ -1536,13 +1592,22 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       const bDirectUsers = this._booleanValue(oLoaRule.directUserAssignment);
+      if (req.event === "CREATE" && !req.data.loaBeforeProcessing && bSelectionSupplied) {
+        return req.reject(400, "Approvers for a later LoA step are resolved from the current matrix when that step is reached");
+      }
+      const sSelectedIds = bSelectionSupplied
+        ? await this._validateLoaSelectedApprovers(req, sSelectedApprovers, oLoaRule, Users)
+        : (oExisting?.loaApproverSource === "USER" ? oExisting.loaApproverUserIds : null);
+      if (oExisting?.loaApproverSource === "USER" && sSelectedIds) {
+        await this._validateLoaSelectedApprovers(req, sSelectedIds, oLoaRule, Users);
+      }
       req.data.amount = fAmount;
       req.data.role = bDirectUsers
         ? "DIRECT_USER"
         : (oLoaRule.approverRoleCodes || oLoaRule.roleCode || "");
       req.data.loaRequiresAll = this._booleanValue(oLoaRule.requireAllApprovers);
-      req.data.loaApproverSource = bDirectUsers ? "USER" : "ROLE";
-      req.data.loaApproverUserIds = bDirectUsers ? oLoaRule.approverUserIds : null;
+      req.data.loaApproverSource = (sSelectedIds || bDirectUsers) ? "USER" : "ROLE";
+      req.data.loaApproverUserIds = sSelectedIds || (bDirectUsers ? oLoaRule.approverUserIds : null);
       req.data.loaApprovalRuleCode = oLoaRule.ruleCode || null;
       if (req.event === "CREATE" && req.data.loaBeforeProcessing) {
         req.data.status_code = PROCESS_STATUS.PENDING_APPROVAL;
@@ -2349,6 +2414,16 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return this._analyzeGuidedStepCompletion(req, req.data.requestId, req.data.stepNo, Users);
     });
 
+    this.on("previewGuidedLoa", async (req) => {
+      return this._previewGuidedLoa(
+        req,
+        req.data.requestId,
+        req.data.stepNo,
+        req.data.progressionMode || "continue",
+        Users
+      );
+    });
+
     this.on("completeGuidedStep", async (req) => {
       return this._completeGuidedStep(
         req,
@@ -3068,6 +3143,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return this._rejectLockedRequest(req);
       }
 
+      if (!this._isOpenLikeTask(task)) {
+        return req.reject(409, "Only open or sent-back team tasks can be assigned");
+      }
+
       const oReservationUser = await this._currentReservationUser(req, Users);
       const oCurrentUser = oReservationUser.user;
 
@@ -3168,7 +3247,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         displayName: oUser ? this._userDisplayName(oUser) : oReservationUser.displayName,
         email: oUser ? this._userEmail(oUser) : oReservationUser.email,
         userPrincipalName: oUser?.userPrincipalName || "",
-        department: oUser?.department || ""
+        department: oUser?.department || "",
+        userType: oUser?.userType || "INTERNAL"
       };
     });
 
@@ -3469,18 +3549,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       const aDelegatorIds = await this._activeDelegatorIds(req, oReservationUser.user.ID);
       const aAssignmentPredicates = this._taskAssignmentPredicates(oReservationUser, aDelegatorIds);
       if (!aAssignmentPredicates.length) return 0;
-      const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
-      if (!aTeamIds.length && !this._isAdministrator(req)) return 0;
-      const qTeamRequests = SELECT.from(ProcessRequests).columns("ID");
-      if (!this._isAdministrator(req)) {
-        qTeamRequests.where({ processorTeam_ID: { in: aTeamIds } });
-      }
-      const oCount = await cds.tx(req).run(
-        SELECT.one.from(ProcessTasks).columns("count(1) as count")
-          .where({ xpr: aAssignmentPredicates })
-          .where({ request_ID: { in: qTeamRequests } })
-          .where({ isLoaApproval: true, status_code: TASK_STATUS.OPEN })
-      );
+      const qCount = SELECT.one.from(ProcessTasks).columns("count(1) as count")
+        .where({ xpr: aAssignmentPredicates })
+        .where({ isLoaApproval: true, status_code: TASK_STATUS.OPEN });
+      await this._filterTasksByRequestTeams({ user: req.user, query: qCount, reject: req.reject.bind(req) }, Users, TeamMembers);
+      const oCount = await cds.tx(req).run(qCount);
       return Number(oCount?.count || oCount?.COUNT || 0);
     });
 
@@ -4745,6 +4818,29 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return Boolean(oMembership);
   }
 
+  _setTeamTaskAssignmentEligibility(data, options = {}) {
+    const aTasks = Array.isArray(data) ? data : (data ? [data] : []);
+    const oTeamIds = new Set(options.teamIds || []);
+
+    for (const oTask of aTasks) {
+      const bTeamMember = options.membershipPrevalidated || oTeamIds.has(oTask.processorTeam_ID);
+      const bUnassigned = !oTask.processorUser_ID
+        && !oTask.processorEmail
+        && !oTask.assignedUser_ID
+        && !oTask.assignedTo;
+      const sRequestStatus = String(oTask.request?.status_code || "").toUpperCase();
+      const bRequestOpen = !LOCKED_REQUEST_STATUSES.has(sRequestStatus);
+
+      oTask.canAssignToMe = Boolean(
+        bTeamMember
+        && oTask.processorTeam_ID
+        && bUnassigned
+        && this._isOpenLikeTask(oTask)
+        && bRequestOpen
+      );
+    }
+  }
+
   _taskAssignmentPredicates(reservationUser, delegatedUserIds = []) {
     const aPredicates = [];
 
@@ -4843,7 +4939,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const sNormalizedEmail = String(sEmail || sPrincipal).trim().toLowerCase();
     const aActiveUsers = await this.master.run(
       SELECT.from(Users)
-        .columns("ID", "email", "userPrincipalName", "azureObjectId", "displayName", "department")
+        .columns("ID", "email", "userPrincipalName", "azureObjectId", "displayName", "department", "userType")
         .where({ isActive: true })
     );
     let oUser = aActiveUsers.find((oCandidate) => {
@@ -4918,13 +5014,22 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         { ref: ["processorUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) },
         "or", { ref: ["assignedUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) }
       ]);
+    const qAssignedLoaRequests = SELECT.from(this.entities.ProcessTasks)
+      .columns("request_ID")
+      .where({ isLoaApproval: true, status_code: TASK_STATUS.OPEN })
+      .where([
+        { ref: ["processorUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) },
+        "or", { ref: ["assignedUser_ID"] }, "in", { list: aTaskOwnerIds.map((id) => ({ val: id })) }
+      ]);
     const aVisibility = [
       { ref: ["requesterUser_ID"] }, "=", { val: sUserId },
       "or", "(", { ref: ["reservedBy"] }, "is not", "null", "and", "(",
       { ref: ["reservedByUser_ID"] }, "=", { val: sUserId },
       "or", { ref: ["processorUser_ID"] }, "=", { val: sUserId },
       "or", { ref: ["ID"] }, "in", qAssignedRequests,
-      ")", ")"
+      ")", ")",
+      "or", "(", { ref: ["status_code"] }, "=", { val: PROCESS_STATUS.PENDING_APPROVAL },
+      "and", { ref: ["ID"] }, "in", qAssignedLoaRequests, ")"
     ];
     query.where(aVisibility);
   }
@@ -4979,11 +5084,11 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     const oReservationUser = await this._currentReservationUser(req, Users);
     const aTeamIds = await this._activeTeamIdsForUser(oReservationUser.user.ID, TeamMembers);
     if (!aTeamIds.length) {
-      const qDirectRequests = SELECT.from(this.entities.ProcessRequests)
+      const qApprovalRequests = SELECT.from(this.entities.ProcessRequests)
         .columns("ID")
-        .where({ loaApproverSource: "USER" });
+        .where({ status_code: PROCESS_STATUS.PENDING_APPROVAL });
       req.query.where([
-        { ref: ["request_ID"] }, "in", qDirectRequests
+        { ref: ["request_ID"] }, "in", qApprovalRequests
       ]);
       return;
     }
@@ -4991,7 +5096,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       .columns("ID")
       .where([
         { ref: ["processorTeam_ID"] }, "in", { list: aTeamIds.map((sTeamId) => ({ val: sTeamId })) },
-        "or", { ref: ["loaApproverSource"] }, "=", { val: "USER" }
+        "or", { ref: ["status_code"] }, "=", { val: PROCESS_STATUS.PENDING_APPROVAL }
       ]);
     req.query.where({ request_ID: { in: qTeamRequests } });
   }
@@ -5373,6 +5478,42 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return this._looksLikeEmail(user?.id) ? user.id : "";
   }
 
+  _isTechnicalApiIdentity(req) {
+    const oAuthInfo = req?.user?.authInfo;
+    const sGrantType = oAuthInfo?.getGrantType?.()
+      || oAuthInfo?.token?.grantType
+      || oAuthInfo?.token?.payload?.grant_type
+      || req?.user?.attr?.grant_type
+      || "";
+
+    return Boolean(
+      req?.user?.is?.("system-user")
+      || String(sGrantType).trim().toLowerCase() === "client_credentials"
+    );
+  }
+
+  async _deriveTrustedRequestOrigin(req, Users = this.masterEntities.Users) {
+    if (this._isTechnicalApiIdentity(req)) {
+      return REQUEST_ORIGIN.EXTERNAL_API;
+    }
+
+    const oReservationUser = await this._currentReservationUser(req, Users);
+    const sUserType = String(oReservationUser?.user?.userType || "INTERNAL").trim().toUpperCase();
+
+    if (sUserType === "VENDOR") {
+      return REQUEST_ORIGIN.VENDOR;
+    }
+    if (sUserType === "TECHNICAL_API") {
+      return REQUEST_ORIGIN.EXTERNAL_API;
+    }
+    return REQUEST_ORIGIN.INTERNAL_USER;
+  }
+
+  async _applyTrustedRequestOrigin(req, Users = this.masterEntities.Users) {
+    req.data.requestOrigin = await this._deriveTrustedRequestOrigin(req, Users);
+    return req.data.requestOrigin;
+  }
+
   _looksLikeEmail(value) {
     return typeof value === "string" && value.includes("@");
   }
@@ -5683,20 +5824,60 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     });
   }
 
-  async _advanceGuidedStep(req, requestId, request, steps, currentStep, remarks, progressionMode, actionNames) {
+  async _resolveGuidedNextStep(req, requestId, request, steps, currentStep, progressionMode) {
     const nextStep = this._getNextStep(steps, currentStep);
-    const oldStatus = request.status_code || PROCESS_STATUS.IN_PROGRESS;
     const mandatoryStep = await this._findIncompleteMandatoryTaskStep(req, requestId, steps, {
       afterStepNo: currentStep.stepNo,
       beforeStepNo: nextStep?.stepNo
     });
-    const oChoice = await this._guidedCompletionChoice(req, requestId, steps, currentStep);
-    let guidedNextStep = mandatoryStep || this._guidedNextStepForProgression(steps, nextStep, oChoice, progressionMode);
+    const choice = await this._guidedCompletionChoice(req, requestId, steps, currentStep);
+    let guidedNextStep = mandatoryStep
+      || this._guidedNextStepForProgression(steps, nextStep, choice, progressionMode);
+
     if (request.loaWorkflowMode === "GUIDED" && request.loaApprovalState !== "APPROVED") {
       const approvalStep = this._findStepByNo(steps, request.loaStepNo);
-      if (!approvalStep || !this._isLoaStep(approvalStep)) return req.reject(409, "The configured LoA step is missing");
-      if (!guidedNextStep || Number(guidedNextStep.stepNo) >= Number(approvalStep.stepNo)) guidedNextStep = approvalStep;
+      if (!approvalStep || !this._isLoaStep(approvalStep)) {
+        return req.reject(409, "The configured LoA step is missing");
+      }
+      if (!guidedNextStep || Number(guidedNextStep.stepNo) >= Number(approvalStep.stepNo)) {
+        guidedNextStep = approvalStep;
+      }
     }
+
+    return guidedNextStep;
+  }
+
+  async _previewGuidedLoa(req, requestId, stepNo, progressionMode = "continue", Users = this.masterEntities.Users) {
+    const { request, steps, currentStep } = await this._getStepCompletionContext(
+      req, requestId, stepNo, Users
+    );
+    await this._rejectUnlessGuidedStepCanComplete(req, requestId, steps, currentStep);
+    const guidedNextStep = await this._resolveGuidedNextStep(
+      req, requestId, request, steps, currentStep, progressionMode
+    );
+
+    if (!guidedNextStep || !this._isLoaStep(guidedNextStep)) {
+      return {
+        requiresConfirmation: false,
+        stepNo: null,
+        stepName: "",
+        amount: null,
+        currencyCode: request.currency_code || "",
+        ruleCode: "",
+        ruleDescription: "",
+        requireAllApprovers: false,
+        approvers: []
+      };
+    }
+
+    return this._buildConfiguredLoaPreview(req, request, guidedNextStep);
+  }
+
+  async _advanceGuidedStep(req, requestId, request, steps, currentStep, remarks, progressionMode, actionNames) {
+    const oldStatus = request.status_code || PROCESS_STATUS.IN_PROGRESS;
+    const guidedNextStep = await this._resolveGuidedNextStep(
+      req, requestId, request, steps, currentStep, progressionMode
+    );
     let sNewRequestStatus = PROCESS_STATUS.COMPLETED;
 
     if (guidedNextStep) {
@@ -5829,6 +6010,29 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return oWinner.directUserAssignment
       ? "DIRECT_USER"
       : (oWinner.approverRoleCodes || oWinner.roleCode || "");
+  }
+
+  async _validateLoaSelectedApprovers(req, value, rule, Users = this.masterEntities.Users) {
+    if (typeof value !== "string" || value.length > 2000) {
+      return req.reject(400, "Select at least one eligible LoA approver");
+    }
+    const ids = [...new Set(value.split(";").map((id) => id.trim()).filter(Boolean))];
+    if (!ids.length || ids.some((id) => !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))) {
+      return req.reject(400, "Select at least one valid LoA approver");
+    }
+    const users = await this.master.run(SELECT.from(Users).columns("ID", "role_code")
+      .where({ isActive: true, ID: { in: ids } }));
+    const byId = new Map(users.map((user) => [String(user.ID).toLowerCase(), user]));
+    const allowedUsers = new Set(String(rule.approverUserIds || "").split(";").map((id) => id.trim().toLowerCase()).filter(Boolean));
+    const allowedRoles = new Set(String(rule.approverRoleCodes || rule.roleCode || "").split(";").map((role) => role.trim()).filter(Boolean));
+    const direct = this._booleanValue(rule.directUserAssignment);
+    if (ids.some((id) => {
+      const user = byId.get(id.toLowerCase());
+      return !user || (direct ? !allowedUsers.has(id.toLowerCase()) : !allowedRoles.has(user.role_code));
+    })) {
+      return req.reject(409, "One or more selected LoA approvers are inactive or no longer eligible for the matching approval rule");
+    }
+    return [...new Set(ids.map((id) => byId.get(id.toLowerCase()).ID))].join(";");
   }
 
   _matchesLoaCondition(conditionCode, request) {
@@ -6373,7 +6577,7 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
         ? "No active direct LoA approver is maintained"
         : `No active user is assigned to the required LoA role(s): ${aRoleCodes.join(", ")}`);
     }
-    if (request.loaWorkflowMode === "GUIDED" && !bDirectUsers) {
+    if (request.loaWorkflowMode === "GUIDED" && request.loaBeforeProcessing && !bDirectUsers) {
       const memberships = await Promise.all(aApprovers.map((user) => this._activeTeamIdsForUser(user.ID)));
       aApprovers = aApprovers.filter((user, index) => memberships[index].includes(request.processorTeam_ID));
       if (!aApprovers.length) {
@@ -6432,7 +6636,7 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
     if (request.loaWorkflowMode === "GUIDED" && Number(task.stepNo) !== Number(request.loaStepNo)) {
       return req.reject(409, "This task does not belong to the request's active LoA step");
     }
-    if (!this._isAdministrator(req)) {
+    if (!this._isAdministrator(req) && request.loaWorkflowMode !== "GUIDED") {
       const oReservationUser = await this._currentReservationUser(req, Users);
       const bDirectApprover = request.loaApproverSource === "USER";
       const aTeamIds = bDirectApprover ? [] : await this._activeTeamIdsForUser(oReservationUser.user.ID);
@@ -6670,7 +6874,8 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
     const iAutoCompleteSteps = bGuided
       ? (options.autoCompleteSteps === 0
           ? 0   // caller opted out, e.g. Pending UAC
-          : (this._isRequesterSubmissionStep(firstTaskStep) && !this._isLoaStep(firstTaskStep) ? 1 : 0))
+          : (this._isRequesterSubmissionStep(firstTaskStep, oRequest?.requestOrigin)
+            && !this._isLoaStep(firstTaskStep) ? 1 : 0))
       : Number(options.autoCompleteSteps || 0);
     if (iAutoCompleteSteps > 0) {
       const vResult = await this._autoCompleteLeadingSteps(

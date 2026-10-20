@@ -253,6 +253,8 @@
                                 visible="{create>/isPaymentRequest}"
                                 editable="false"
                             />
+                            <Label text="{i18n>loaSelectedApproversLabel}" visible="{create>/loaSelectionRequired}" />
+                            <Button text="{i18n>loaSelectApproversButton}" icon="sap-icon://approvals" visible="{create>/loaSelectionRequired}" press=".onReviewLoaApprovers" />
                             <Label text="{i18n>descriptionLabel}" />
                             <TextArea
                                 value="{create>/description}"
@@ -7317,11 +7319,14 @@
                         class="sapUiSmallMarginTop sapUiTinyMarginBottom"
                     />
                     <List
+                        id="loaApproverSelectionList"
+                        mode="MultiSelect"
                         items="{loaPreview>/approvers}"
                         noDataText="{i18n>loaNoApproversAssignedText}"
                         showSeparators="Inner"
                     >
                         <StandardListItem
+                            selected="{loaPreview>selected}"
                             icon="sap-icon://person-placeholder"
                             title="{loaPreview>displayName}"
                             description="{loaPreview>email}"
@@ -7340,11 +7345,14 @@
             </content>
             <beginButton>
                 <Button
-                    text="{i18n>closeButton}"
+                    text="{i18n>loaConfirmApproversButton}"
                     type="Emphasized"
-                    press=".onCloseLoaApprovalPreview"
+                    press=".onConfirmLoaApprovers"
                 />
             </beginButton>
+            <endButton>
+                <Button text="{i18n>cancelButton}" press=".onCloseLoaApprovalPreview" />
+            </endButton>
         </Dialog>
         <TableSelectDialog
             id="predecessorRequestValueHelpDialog"

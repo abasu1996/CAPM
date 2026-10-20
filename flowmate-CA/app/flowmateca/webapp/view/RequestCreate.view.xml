@@ -202,7 +202,7 @@
                   type="Inactive"/>
               </List>
               <MessageStrip
-                text="Files upload in the background after the request is created. The maximum size per file is 400 MB."
+                text="Files upload in the background after the request is created. The maximum size per file is 50 MB."
                 type="Information"
                 showIcon="true"
                 class="sapUiSmallMarginTop"/>

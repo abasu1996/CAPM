@@ -1,0 +1,373 @@
+{
+  "exportedAt": "2026-10-20T22:23:47.291Z",
+  "schema": "132084C5D9B8430495610CD6D0E283FE",
+  "profile": "hybrid",
+  "source": "SYS.TABLES",
+  "binaryColumnsExcluded": true,
+  "tables": [
+    {
+      "tableName": "CDS_OUTBOX_MESSAGES",
+      "file": "CDS_OUTBOX_MESSAGES.json",
+      "rowCount": 0,
+      "includedColumnCount": 11,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_ACCOUNTASSIGNMENTS",
+      "file": "FLOWMATE_COMMON_DB_ACCOUNTASSIGNMENTS.json",
+      "rowCount": 16,
+      "includedColumnCount": 5,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_APPLICABLETAXES",
+      "file": "FLOWMATE_COMMON_DB_APPLICABLETAXES.json",
+      "rowCount": 44,
+      "includedColumnCount": 9,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_ARPCC",
+      "file": "FLOWMATE_COMMON_DB_ARPCC.json",
+      "rowCount": 80,
+      "includedColumnCount": 13,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_ARREFERENCES",
+      "file": "FLOWMATE_COMMON_DB_ARREFERENCES.json",
+      "rowCount": 3,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_AVAILABILITYCHECK",
+      "file": "FLOWMATE_COMMON_DB_AVAILABILITYCHECK.json",
+      "rowCount": 3,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_BUDGETCODE",
+      "file": "FLOWMATE_COMMON_DB_BUDGETCODE.json",
+      "rowCount": 10,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_COMPANYCODES",
+      "file": "FLOWMATE_COMMON_DB_COMPANYCODES.json",
+      "rowCount": 20,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_CONTRACTTYPE",
+      "file": "FLOWMATE_COMMON_DB_CONTRACTTYPE.json",
+      "rowCount": 2,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_COSTCENTER",
+      "file": "FLOWMATE_COMMON_DB_COSTCENTER.json",
+      "rowCount": 4,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_CURRENCIES",
+      "file": "FLOWMATE_COMMON_DB_CURRENCIES.json",
+      "rowCount": 198,
+      "includedColumnCount": 5,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_CUSTOMERS",
+      "file": "FLOWMATE_COMMON_DB_CUSTOMERS.json",
+      "rowCount": 3,
+      "includedColumnCount": 9,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_DELEGATIONS",
+      "file": "FLOWMATE_COMMON_DB_DELEGATIONS.json",
+      "rowCount": 3,
+      "includedColumnCount": 12,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_DISTRIBUTIONCHANNEL",
+      "file": "FLOWMATE_COMMON_DB_DISTRIBUTIONCHANNEL.json",
+      "rowCount": 33,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_DIVISIONS",
+      "file": "FLOWMATE_COMMON_DB_DIVISIONS.json",
+      "rowCount": 42,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_DIVISIONSPCC",
+      "file": "FLOWMATE_COMMON_DB_DIVISIONSPCC.json",
+      "rowCount": 11,
+      "includedColumnCount": 9,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_DOCUMENTTYPES",
+      "file": "FLOWMATE_COMMON_DB_DOCUMENTTYPES.json",
+      "rowCount": 16,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_ENTITY",
+      "file": "FLOWMATE_COMMON_DB_ENTITY.json",
+      "rowCount": 19,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_EXTENSIONMATERIALGROUP",
+      "file": "FLOWMATE_COMMON_DB_EXTENSIONMATERIALGROUP.json",
+      "rowCount": 428,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_INCOTERMS",
+      "file": "FLOWMATE_COMMON_DB_INCOTERMS.json",
+      "rowCount": 18,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_ITEMCATEGORIES",
+      "file": "FLOWMATE_COMMON_DB_ITEMCATEGORIES.json",
+      "rowCount": 4,
+      "includedColumnCount": 5,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_MATERIALS",
+      "file": "FLOWMATE_COMMON_DB_MATERIALS.json",
+      "rowCount": 156,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_MATERIALTYPE",
+      "file": "FLOWMATE_COMMON_DB_MATERIALTYPE.json",
+      "rowCount": 10,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_MATGROUP",
+      "file": "FLOWMATE_COMMON_DB_MATGROUP.json",
+      "rowCount": 142,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_MRPTYPE",
+      "file": "FLOWMATE_COMMON_DB_MRPTYPE.json",
+      "rowCount": 27,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PAYMENTTERMS",
+      "file": "FLOWMATE_COMMON_DB_PAYMENTTERMS.json",
+      "rowCount": 200,
+      "includedColumnCount": 5,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PLANT",
+      "file": "FLOWMATE_COMMON_DB_PLANT.json",
+      "rowCount": 50,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PROCUREMENTCATEGORIES",
+      "file": "FLOWMATE_COMMON_DB_PROCUREMENTCATEGORIES.json",
+      "rowCount": 3,
+      "includedColumnCount": 5,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PRODUCTHIERARCHY",
+      "file": "FLOWMATE_COMMON_DB_PRODUCTHIERARCHY.json",
+      "rowCount": 2,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PROFITCENTER",
+      "file": "FLOWMATE_COMMON_DB_PROFITCENTER.json",
+      "rowCount": 128,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PROJECTS",
+      "file": "FLOWMATE_COMMON_DB_PROJECTS.json",
+      "rowCount": 3,
+      "includedColumnCount": 9,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PROJECTTYPEPCC",
+      "file": "FLOWMATE_COMMON_DB_PROJECTTYPEPCC.json",
+      "rowCount": 22,
+      "includedColumnCount": 7,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PURCHASINGGROUPS",
+      "file": "FLOWMATE_COMMON_DB_PURCHASINGGROUPS.json",
+      "rowCount": 203,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_PURCHASINGORGANIZATIONS",
+      "file": "FLOWMATE_COMMON_DB_PURCHASINGORGANIZATIONS.json",
+      "rowCount": 14,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_ROLES",
+      "file": "FLOWMATE_COMMON_DB_ROLES.json",
+      "rowCount": 24,
+      "includedColumnCount": 4,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_ROLES_TEXTS",
+      "file": "FLOWMATE_COMMON_DB_ROLES_TEXTS.json",
+      "rowCount": 0,
+      "includedColumnCount": 4,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_SALESORG",
+      "file": "FLOWMATE_COMMON_DB_SALESORG.json",
+      "rowCount": 11,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_SCOPEPCC",
+      "file": "FLOWMATE_COMMON_DB_SCOPEPCC.json",
+      "rowCount": 4,
+      "includedColumnCount": 7,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_SERIALNUMBERPROFILE",
+      "file": "FLOWMATE_COMMON_DB_SERIALNUMBERPROFILE.json",
+      "rowCount": 49,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_SERVICECATEGORIES",
+      "file": "FLOWMATE_COMMON_DB_SERVICECATEGORIES.json",
+      "rowCount": 8,
+      "includedColumnCount": 5,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_SERVICEGROUPS",
+      "file": "FLOWMATE_COMMON_DB_SERVICEGROUPS.json",
+      "rowCount": 147,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_SITES",
+      "file": "FLOWMATE_COMMON_DB_SITES.json",
+      "rowCount": 161,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_STORAGELOCATION",
+      "file": "FLOWMATE_COMMON_DB_STORAGELOCATION.json",
+      "rowCount": 353,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_SYSTEMCONTRACTBASEPO",
+      "file": "FLOWMATE_COMMON_DB_SYSTEMCONTRACTBASEPO.json",
+      "rowCount": 0,
+      "includedColumnCount": 5,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_TEAMMEMBERS",
+      "file": "FLOWMATE_COMMON_DB_TEAMMEMBERS.json",
+      "rowCount": 278,
+      "includedColumnCount": 12,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_TEAMS",
+      "file": "FLOWMATE_COMMON_DB_TEAMS.json",
+      "rowCount": 123,
+      "includedColumnCount": 10,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_UNITSOFMEASURE",
+      "file": "FLOWMATE_COMMON_DB_UNITSOFMEASURE.json",
+      "rowCount": 281,
+      "includedColumnCount": 5,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_USERS",
+      "file": "FLOWMATE_COMMON_DB_USERS.json",
+      "rowCount": 23,
+      "includedColumnCount": 15,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_VALUATIONCLASS",
+      "file": "FLOWMATE_COMMON_DB_VALUATIONCLASS.json",
+      "rowCount": 298,
+      "includedColumnCount": 8,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_VENDORS",
+      "file": "FLOWMATE_COMMON_DB_VENDORS.json",
+      "rowCount": 50,
+      "includedColumnCount": 10,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_VENDORSPCC",
+      "file": "FLOWMATE_COMMON_DB_VENDORSPCC.json",
+      "rowCount": 7,
+      "includedColumnCount": 9,
+      "excludedColumns": []
+    },
+    {
+      "tableName": "FLOWMATE_COMMON_DB_WBS",
+      "file": "FLOWMATE_COMMON_DB_WBS.json",
+      "rowCount": 4,
+      "includedColumnCount": 12,
+      "excludedColumns": []
+    }
+  ]
+}

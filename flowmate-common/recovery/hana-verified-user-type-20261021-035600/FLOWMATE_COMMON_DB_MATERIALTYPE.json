@@ -1,0 +1,102 @@
+[
+  {
+    "ID": "ad4f1413-e389-5025-85e6-1448cff2fc7e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZADM",
+    "MATERIALTYPEDESCRIPTION": "Admin Asset Material",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8be41988-55cb-5a0f-8e60-6d7d32e8e78f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZCON",
+    "MATERIALTYPEDESCRIPTION": "Consumable Material",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5a95dd37-4fd7-548d-afae-77aa281305c5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZCPE",
+    "MATERIALTYPEDESCRIPTION": "Customer Premise Equipment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c0880e30-7943-5868-bf21-fb6fca6c304d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZENG",
+    "MATERIALTYPEDESCRIPTION": "Engineering Material",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ce422b12-7848-51ba-81a7-0950d2ebac40",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZINV",
+    "MATERIALTYPEDESCRIPTION": "Installation Material",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ba36e54c-6f17-5d23-95fd-1d86d58c75d2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZITM",
+    "MATERIALTYPEDESCRIPTION": "IT Asset Material",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "00c5164b-de76-5bf7-b571-c6143e3d1f15",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZNOM",
+    "MATERIALTYPEDESCRIPTION": "Non Valuated Material",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d37ca7e8-a9ef-5cb8-a788-3a140987f25a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZSH1",
+    "MATERIALTYPEDESCRIPTION": "Service Material for H1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b9bfa494-4bc8-5853-9dfa-4f7387134465",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZSRV",
+    "MATERIALTYPEDESCRIPTION": "Service Material",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "40595fbb-11f8-5159-9da3-be2dfd278925",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALTYPECODE": "ZTRD",
+    "MATERIALTYPEDESCRIPTION": "Trading Material",
+    "ISACTIVE": 1
+  }
+]

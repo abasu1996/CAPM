@@ -4,8 +4,9 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
     "sap/ui/model/json/JSONModel"
-], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
+], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, Sorter, JSONModel) => {
     "use strict";
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
@@ -77,14 +78,16 @@ sap.ui.define([
             "paymentMethod_code",
             "totalValue",
             "ofnReference",
+            "wbsElement"
+        ],
+        optional: [
+            "siteName",
             "siteId",
-            "wbsElement",
             "totalRentValue",
             "totalSupervisionValue",
             "securityDepositValue",
-            "siteName"
-        ],
-        optional: ["remarks"]
+            "remarks"
+        ]
     };
     const NON_PO_IDEAMART_APPMAKER_FIELDS = {
         required: [
@@ -120,13 +123,25 @@ sap.ui.define([
     };
     const DIRECT_NON_PO_REIMBURSEMENT_FIELDS = {
         required: [
-            "paymentCategory_code", "businessEntity_code", "currency_code",
-            "authorityVendorCode", "authorityVendorName",
-            "employeeVendorCode", "employeeVendorName",
-            "invoiceDate", "invoiceNumber", "costCentre", "wbsElement",
-            "totalValue", "ofnReference", "siteId", "siteName"
+            "paymentCategory_code",
+            "businessEntity_code",
+            "currency_code",
+            "employeeVendorCode",
+            "employeeVendorName",
+            "invoiceDate",
+            "invoiceNumber",
+            "costCentre",
+            "totalValue"
         ],
-        optional: ["remarks"]
+        optional: [
+            "authorityVendorCode",
+            "authorityVendorName",
+            "wbsElement",
+            "ofnReference",
+            "siteId",
+            "siteName",
+            "remarks"
+        ]
     };
     const NON_PO_TAX_LIABILITY_FIELDS = {
         required: [
@@ -153,7 +168,8 @@ sap.ui.define([
         "currency_code",
         "customer_ID",
         "customerCode",
-        "customerName"
+        "customerName",
+        "ivDocNumber"
     ],
     optional: ["remarks", "whtCertificateReference"]
     };
@@ -279,10 +295,10 @@ sap.ui.define([
             required: [
                 "paymentCategory_code", "businessEntity_code",
                 "vendor_ID", "vendorCode", "vendorName",
-                "currency_code", "totalPayableValue", "paymentDescription"
+                "currency_code", "totalPayableValue", "paymentDescription", "costCentre"
             ],
             optional: [
-                "invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
+                "glAccount","profitCentre","invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
             ]
         },
         DIRECT_NON_PO_REIMB_LIAB: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
@@ -314,7 +330,7 @@ sap.ui.define([
                 "totalInvoiceValueRelevantCurrency",
                 "totalInvoiceValueLKR"
             ],
-            optional: ["vatAmount", "remarks"]
+            optional: ["vatAmount", "glAccount", "costCentre", "remarks"]
         },
         NON_PO_INTERCONNECTION_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
         NON_PO_ROAMING_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
@@ -329,7 +345,7 @@ sap.ui.define([
                 "totalInvoiceValueRelevantCurrency",
                 "totalInvoiceValueLKR"
             ],
-            optional: []
+            optional: ["glAccount", "costCentre", "remarks"]
         },
         NON_PO_STAR_POINT_PAYMENTS: {
             required: [
@@ -392,20 +408,11 @@ sap.ui.define([
         },
         NON_PO_CC_SETTLEMENT: {
             required: [
-                "paymentCategory_code",
-                "businessEntity_code",
-                "currency_code",
-                "bankName",
-                "ccCustodianName",
-                "ccPeriodFromDate",
-                "ccPeriodToDate",
-                "settlementEntries",
-                "stampDuty",
-                "latePaymentFee",
-                "interestCharges",
-                "totalAmountPayableCcSettlement"
+                "paymentCategory_code", "businessEntity_code", "currency_code",
+                "bankName", "ccCustodianName", "ccPeriodFromDate", "ccPeriodToDate",
+                "settlementEntries", "totalAmountPayableCcSettlement"
             ],
-            optional: ["annualFee", "remarks"]
+            optional: ["annualFee", "stampDuty", "latePaymentFee", "interestCharges", "remarks"]
         },
         NON_PO_MERCHANT_SETTLEMENTS: {
             required: [
@@ -414,10 +421,10 @@ sap.ui.define([
                 "currency_code",
                 "merchantEntityValues",
                 "highestValueInExcel",
-                "aggregateTotalValueAcrossAllFiles",
-                "processingBankAccountDetails"
+                "aggregateTotalValueAcrossAllFiles"
+                
             ],
-            optional: []
+            optional: ["processingBankAccountDetails"]
         },
         NON_PO_MISC_RECEIPTS: {
             required: [
@@ -440,26 +447,12 @@ sap.ui.define([
         },
         BANK_GUARANTEE: {
             required: [
-                "paymentCategory_code",
-                "businessEntity_code",
-                "currency_code",
-                "amountPayable",
-                "guaranteeType_code",
-                "beneficiaryName",
-                "beneficiaryAddress",
-                "commencingDate",
-                "expiryDate",
-                "claimDate",
-                "tenderDate",
-                "expectedDate",
-                "purposeOfBankGuarantee",
-                "bidTenderReference",
-                "collectorName",
-                "collectorNic",
-                "collectorContactNumber",
-                "specificBgFormatAvailable"
-            ],
-            optional: ["remarks"]
+            "paymentCategory_code", "businessEntity_code", "currency_code",
+            "amountPayable", "guaranteeType_code", "beneficiaryName", "beneficiaryAddress",
+            "commencingDate", "expiryDate", "claimDate", "expectedDate",
+            "purposeOfBankGuarantee", "collectorName", "collectorNic", "collectorContactNumber"
+        ],
+        optional: ["tenderDate", "bidTenderReference", "specificBgFormatAvailable", "remarks"]
         }
 
     };
@@ -552,6 +545,9 @@ sap.ui.define([
                 subProcessTypeName: "",
                 hasSubProcessTypes: false,
                 loaApprovalApplicable: false,
+                loaSelectionRequired: false,
+                selectedLoaApproverIds: "",
+                loaSelectionKey: "",
                 loaAmountDerived: false,
                 isPaymentRequest: false,
                 amount: null,
@@ -707,6 +703,11 @@ sap.ui.define([
                 collectorNic: "",
                 collectorContactNumber: "",
                 specificBgFormatAvailable: false,
+                costCentre: "",
+                glAccount: "",
+                profitCentre: "",
+                ivDocNumber: "",
+                documentArchiveUrl: "",
                 vendor_ID: "",
                 vendorCode: "",
                 vendorName: "",
@@ -719,6 +720,7 @@ sap.ui.define([
                 requesterUser_ID: "",
                 requesterName: "",
                 requester: "",
+                requesterUserType: "INTERNAL",
                 processorTeam_ID: "",
                 processorTeamName: "",
                 department: "",
@@ -795,6 +797,9 @@ sap.ui.define([
                 invoiceNumber: "",
                 invoiceDate: null,
                 description: "",
+                currency_code: "",
+                vendorCode: "",
+                vendorName: "",
                 transactionAmountDocumentCurrency: null,
                 transactionAmountLocalCurrency: null,
                 availabilityOfInvoice: false
@@ -814,6 +819,7 @@ sap.ui.define([
         },
 
         async onCreate() {
+            await this._pLoaTiming;
             const oPayload = this.getView().getModel("create").getData();
 
             // if (!oPayload.title || !oPayload.processType_code) {
@@ -832,6 +838,12 @@ sap.ui.define([
 
             if (!oPayload.processorTeam_ID) {
                 MessageBox.warning(this.getText("processorTeamRequiredMessage"));
+                return;
+            }
+
+            if (oPayload.loaSelectionRequired && (!oPayload.selectedLoaApproverIds
+                || oPayload.loaSelectionKey !== this._loaSelectionKey(oPayload.amount, oPayload.subProcessType_code))) {
+                MessageBox.warning(this.getText("loaSelectionRequiredMessage"));
                 return;
             }
 
@@ -1069,6 +1081,9 @@ sap.ui.define([
                                     invoiceNumber: oEntry.invoiceNumber,
                                     invoiceDate: oEntry.invoiceDate,
                                     description: oEntry.description,
+                                    currency_code: oEntry.currency_code || undefined,
+                                    vendorCode: oEntry.vendorCode || undefined,
+                                    vendorName: oEntry.vendorName || undefined,
                                     transactionAmountDocumentCurrency: Number(oEntry.transactionAmountDocumentCurrency),
                                     transactionAmountLocalCurrency: Number(oEntry.transactionAmountLocalCurrency),
                                     availabilityOfInvoice: Boolean(oEntry.availabilityOfInvoice)
@@ -1115,12 +1130,13 @@ sap.ui.define([
                         return oResult;
                     }, {})
                     : {};
-
+                    
                 const oCreated = await this.createEntry("/ProcessRequests", {
                     processType_code: oPayload.processType_code,
                     subProcessType_code: oPayload.subProcessType_code || undefined,
                     title: oPayload.title,
                     description: oPayload.description,
+                    documentArchiveUrl: oPayload.documentArchiveUrl || undefined,
                     requesterUser_ID: oPayload.requesterUser_ID || undefined,
                     requester: oPayload.requester,
                     processorTeam_ID: oPayload.processorTeam_ID || undefined,
@@ -1129,6 +1145,7 @@ sap.ui.define([
                     department: oPayload.department,
                     amount: oPayload.loaApprovalApplicable ? Number(oPayload.amount) : undefined,
                     role: oPayload.loaApprovalApplicable ? oPayload.role : undefined,
+                    selectedLoaApproverIds: oPayload.loaSelectionRequired ? oPayload.selectedLoaApproverIds : undefined,
                     priorityConfig_code: oPayload.priorityConfig_code || "MEDIUM",
                     ...(oPayload.isFtkFactoring ? {
                         paymentCategory_code: oPayload.paymentCategory_code || undefined,
@@ -1395,6 +1412,7 @@ sap.ui.define([
 
             oCreateModel.setProperty("/subProcessType_code", "");
             oCreateModel.setProperty("/loaApprovalApplicable", false);
+            oCreateModel.setProperty("/loaSelectionRequired", false);
             oCreateModel.setProperty("/isPaymentRequest", false);
             oCreateModel.setProperty("/amount", null);
             oCreateModel.setProperty("/role", "");
@@ -1678,6 +1696,12 @@ sap.ui.define([
             oCreateModel.setProperty("/customerCode", oContext.getProperty("customerCode"));
             oCreateModel.setProperty("/customerName", oContext.getProperty("customerName"));
         },
+        _getSettlementPaymentRequestBaseFilters() {
+            return [
+                new Filter("subProcessType_code", FilterOperator.EQ, "NON_PO_CC_PAYMENT"),
+                new Filter("status_code", FilterOperator.EQ, "IN_PROGRESS")
+            ];
+        },
         _setSettlementPaymentRequest(oContext) {
             const oModel = this.getView().getModel("settlementEntryEdit");
 
@@ -1688,16 +1712,19 @@ sap.ui.define([
             oModel.setProperty("/invoiceNumber", oContext.getProperty("invoiceNumber") || "");
             oModel.setProperty("/invoiceDate", oContext.getProperty("invoiceDate") || null);
             oModel.setProperty("/description", oContext.getProperty("descriptionOfPayment") || "");
+            oModel.setProperty("/currency_code", oContext.getProperty("currency_code") || "");
+            oModel.setProperty("/vendorCode", oContext.getProperty("vendorCode") || "");
+            oModel.setProperty("/vendorName", oContext.getProperty("vendorName") || "");
             oModel.setProperty("/transactionAmountDocumentCurrency", oContext.getProperty("transactionAmountDocumentCurrency"));
             oModel.setProperty("/transactionAmountLocalCurrency", oContext.getProperty("transactionAmountLocalCurrency"));
         },
 
         onSettlementPaymentRequestSuggest(oEvent) {
-            const aFixedFilters = [
-                new Filter("subProcessType_code", FilterOperator.EQ, "NON_PO_CC_PAYMENT")
-            ];
-
-            this._filterSuggestionItems(oEvent, ["referenceNumber", "title", "poNumber", "sesReference"], aFixedFilters);
+            this._filterSuggestionItems(
+                oEvent,
+                ["referenceNumber", "title", "poNumber", "sesReference", "vendorCode", "vendorName"],
+                this._getSettlementPaymentRequestBaseFilters()
+            );
         },
 
         onSettlementPaymentRequestSuggestionSelected(oEvent) {
@@ -1717,6 +1744,9 @@ sap.ui.define([
             oModel.setProperty("/invoiceNumber", "");
             oModel.setProperty("/invoiceDate", null);
             oModel.setProperty("/description", "");
+            oModel.setProperty("/currency_code", "");
+            oModel.setProperty("/vendorCode", "");
+            oModel.setProperty("/vendorName", "");
             oModel.setProperty("/transactionAmountDocumentCurrency", null);
             oModel.setProperty("/transactionAmountLocalCurrency", null);
         },
@@ -1747,9 +1777,7 @@ sap.ui.define([
 
         _filterSettlementPaymentRequestDialog(oDialog, sQuery) {
             const oBinding = oDialog.getBinding("items");
-            const aFilters = [
-                new Filter("subProcessType_code", FilterOperator.EQ, "NON_PO_CC_PAYMENT")
-            ];
+            const aFilters = this._getSettlementPaymentRequestBaseFilters();
 
             if (sQuery) {
                 aFilters.push(new Filter({
@@ -1757,7 +1785,9 @@ sap.ui.define([
                         new Filter("referenceNumber", FilterOperator.Contains, sQuery),
                         new Filter("title", FilterOperator.Contains, sQuery),
                         new Filter("poNumber", FilterOperator.Contains, sQuery),
-                        new Filter("sesReference", FilterOperator.Contains, sQuery)
+                        new Filter("sesReference", FilterOperator.Contains, sQuery),
+                        new Filter("vendorCode", FilterOperator.Contains, sQuery),
+                        new Filter("vendorName", FilterOperator.Contains, sQuery)
                     ],
                     and: false
                 }));
@@ -1931,20 +1961,22 @@ sap.ui.define([
         onCalculateDirectForeignTravelTotals() {
             const oModel = this.getView().getModel("directForeignTravelEdit");
             const oData = oModel.getData();
-
-            const fPerDay = Number(oData.perDayAllowanceUSD) || 0;
+            const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+            const fPerDay = round2(oData.perDayAllowanceUSD || 0);
             const iDays = Number(oData.noOfDays) || 0;
-            const fTotalUSD = fPerDay * iDays;
-            const fExchangeRate = Number(oData.exchangeRate) || 0;
-            const fTotalLKR = fTotalUSD * fExchangeRate;
-            const fAirfare = Number(oData.airfare) || 0;
-            const fVisaFee = Number(oData.visaFee) || 0;
-            const fTotalForeign = fAirfare + fVisaFee + fTotalUSD;
+            const fExchangeRate = round2(oData.exchangeRate || 0);
+            const fAirfare = round2(oData.airfare || 0);
+            const fVisaFee = round2(oData.visaFee || 0);
+
+            const fTotalUSD = round2(fPerDay * iDays);
+            const fTotalLKR = round2(fTotalUSD * fExchangeRate);
+            const fTotalForeign = round2(fAirfare + fVisaFee + fTotalUSD);
+            const fTotalCostLKR = round2(fTotalForeign * fExchangeRate);
 
             oModel.setProperty("/totalInUSD", fTotalUSD);
             oModel.setProperty("/totalInLKR", fTotalLKR);
             oModel.setProperty("/totalCostForeignCurrency", fTotalForeign);
-            oModel.setProperty("/totalCostLKR", fTotalForeign * fExchangeRate);
+            oModel.setProperty("/totalCostLKR", fTotalCostLKR);
         },
         onAddDirectForeignTravelEntry() {
             const oModel = this.getView().getModel("directForeignTravelEdit");
@@ -1979,11 +2011,29 @@ sap.ui.define([
 
             this.getView().byId("directForeignTravelDialog").open();
         },
+        onTwoDecimalLiveChange(oEvent) {
+            const oInput = oEvent.getSource();
+            const sRaw = oEvent.getParameter("value") || "";
+
+            // keep digits and a single dot, max 2 decimals
+            let sClean = sRaw.replace(/[^\d.]/g, "");
+            const iDot = sClean.indexOf(".");
+            if (iDot !== -1) {
+                sClean =
+                    sClean.slice(0, iDot + 1) +
+                    sClean.slice(iDot + 1).replace(/\./g, "").slice(0, 2);
+            }
+
+            if (sClean !== sRaw) {
+                oInput.setValue(sClean);
+            }
+        },
 
         onSaveDirectForeignTravelEntry() {
             const oModel = this.getView().getModel("directForeignTravelEdit");
             const oCreateModel = this.getView().getModel("create");
             const oEntry = oModel.getData();
+            
 
             if (
                 !String(oEntry.travelerName || "").trim() ||
@@ -2342,6 +2392,9 @@ sap.ui.define([
                 invoiceNumber: "",
                 invoiceDate: null,
                 description: "",
+                currency_code: "",
+                vendorCode: "",
+                vendorName: "",
                 transactionAmountDocumentCurrency: null,
                 transactionAmountLocalCurrency: null,
                 availabilityOfInvoice: false
@@ -2379,6 +2432,9 @@ sap.ui.define([
                 invoiceNumber: oEntry.invoiceNumber || "",
                 invoiceDate: oEntry.invoiceDate,
                 description: String(oEntry.description).trim(),
+                currency_code: oEntry.currency_code || "",
+                vendorCode: oEntry.vendorCode || "",
+                vendorName: oEntry.vendorName || "",
                 transactionAmountDocumentCurrency: Number(oEntry.transactionAmountDocumentCurrency),
                 transactionAmountLocalCurrency: Number(oEntry.transactionAmountLocalCurrency),
                 availabilityOfInvoice: Boolean(oEntry.availabilityOfInvoice)
@@ -2587,16 +2643,22 @@ sap.ui.define([
         _setSubProcessType(oContext) {
             const oCreateModel = this.getView().getModel("create");
             const sCode = oContext.getProperty("code");
+            if (oCreateModel.getProperty("/subProcessType_code") !== sCode) {
+                oCreateModel.setProperty("/selectedLoaApproverIds", "");
+                oCreateModel.setProperty("/loaSelectionKey", "");
+            }
             oCreateModel.setProperty("/subProcessType_code", sCode);
             oCreateModel.setProperty("/subProcessTypeName", oContext.getProperty("name"));
             const bLoaApplicable = Boolean(oContext.getProperty("loaApprovalApplicable"));
             oCreateModel.setProperty("/loaApprovalApplicable", bLoaApplicable);
+            oCreateModel.setProperty("/loaSelectionRequired", false);
             oCreateModel.setProperty("/isPaymentRequest", bLoaApplicable);
 
             if (!bLoaApplicable) {
                 oCreateModel.setProperty("/amount", null);
                 oCreateModel.setProperty("/role", "");
             }
+            this._pLoaTiming = this._configureLoaSelectionTiming(sCode, bLoaApplicable);
             this._applySubProcessTypeFlags(sCode);
             if (sCode === "FTK_DUTY_REIMBURSEMENT" || sCode === "NON_PO_IMPORT_TRC" || sCode === "NON_PO_IMPORT_ICL"
                 || sCode === "NON_PO_FUEL_GENERATOR" ||
@@ -2620,6 +2682,46 @@ sap.ui.define([
                 sCode === "DIRECT_NON_PO_REIMB_PAYMENT" || sCode === "DIRECT_NON_PO_REIMB_LIAB"
             ){
                 oCreateModel.setProperty("/paymentCategory_code", "LOCAL")
+            }
+        },
+
+        async _configureLoaSelectionTiming(sSubProcessTypeCode, bLoaApplicable) {
+            const oCreateModel = this.getView().getModel("create");
+            if (!bLoaApplicable || !sSubProcessTypeCode) {
+                oCreateModel.setProperty("/loaSelectionRequired", false);
+                return;
+            }
+
+            try {
+                const aSteps = await this._readList("/ProcessStepConfig", {
+                    filters: [new Filter("subProcessType_code", FilterOperator.EQ, sSubProcessTypeCode)],
+                    sorters: [new Sorter("stepNo")]
+                });
+                if (oCreateModel.getProperty("/subProcessType_code") !== sSubProcessTypeCode) {
+                    return;
+                }
+                const iLoaIndex = aSteps.findIndex((oStep) => oStep.stepType === "LOA");
+                const oFirstStep = aSteps[0];
+                const mOriginByUserType = {
+                    INTERNAL: "INTERNAL_USER",
+                    VENDOR: "VENDOR",
+                    TECHNICAL_API: "EXTERNAL_API"
+                };
+                const sTrustedOrigin = mOriginByUserType[
+                    String(oCreateModel.getProperty("/requesterUserType") || "INTERNAL").toUpperCase()
+                ] || "INTERNAL_USER";
+                const bRequesterSubmission = String(oFirstStep?.requestOrigin || "").toUpperCase() === sTrustedOrigin;
+                const bUpfront = iLoaIndex < 0 || iLoaIndex === 0 || (iLoaIndex === 1 && bRequesterSubmission);
+
+                oCreateModel.setProperty("/loaSelectionRequired", bUpfront);
+                if (!bUpfront) {
+                    oCreateModel.setProperty("/selectedLoaApproverIds", "");
+                    oCreateModel.setProperty("/loaSelectionKey", "");
+                    this.byId("loaApprovalPreviewDialog")?.close();
+                }
+            } catch (oError) {
+
+                oCreateModel.setProperty("/loaSelectionRequired", true);
             }
         },
 
@@ -3170,6 +3272,7 @@ sap.ui.define([
                     "siteName",
                     "currency_code",
                     "paymentDescription",
+                    "glAccount", "profitCentre", "costCentre",
                     "remarks"
                 ].forEach((sProperty) => {
                     oCreateModel.setProperty(`/${sProperty}`, "");
@@ -3289,6 +3392,8 @@ sap.ui.define([
                     "customerCode",
                     "customerName",
                     "invoiceDebitNoteNumber",
+                    "glAccount", 
+                    "costCentre",
                     "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
 
@@ -3313,6 +3418,7 @@ sap.ui.define([
                     "customer_ID",
                     "customerCode",
                     "customerName",
+                    "ivDocNumber",
                     "whtCertificateReference",
                     "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
@@ -3329,7 +3435,8 @@ sap.ui.define([
                     "currency_code",
                     "customer_ID",
                     "customerCode",
-                    "customerName"
+                    "customerName",
+                    "glAccount", "costCentre", "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
 
                 oCreateModel.setProperty("/totalInvoiceValueRelevantCurrency", null);
@@ -3567,6 +3674,10 @@ sap.ui.define([
 
             const sValue = oEvent.getParameter("value");
             const fAmount = Number(sValue);
+            if (oCreateModel.getProperty("/loaSelectionKey") !== this._loaSelectionKey(sValue, oCreateModel.getProperty("/subProcessType_code"))) {
+                oCreateModel.setProperty("/selectedLoaApproverIds", "");
+                oCreateModel.setProperty("/loaSelectionKey", "");
+            }
 
             if (sValue === "" || !Number.isFinite(fAmount)) {
                 oCreateModel.setProperty("/role", "");
@@ -3580,7 +3691,7 @@ sap.ui.define([
                 );
                 oCreateModel.setProperty("/role", oRule?.approverRoleCodes || oRule?.roleCode || "");
 
-                if (oRule) {
+                if (oRule && oCreateModel.getProperty("/loaSelectionRequired")) {
                     await this._showLoaApprovalPreview(fAmount, oRule);
                 }
             } catch (oError) {
@@ -3712,14 +3823,14 @@ sap.ui.define([
             }
 
             const aApprovers = bDirectUsers || aRoleCodes.length
-                ? await this._readList("/Users", {
-                    filters: [new Filter({ filters: aFilters, and: true })],
-                    urlParameters: {
-                        "$select": "ID,displayName,email,department,role_code"
-                    }
-                })
+                ? await this._readAllLoaApprovers(new Filter({ filters: aFilters, and: true }))
                 : [];
             const oPreviewModel = this.getView().getModel("loaPreview");
+            oPreviewModel.setSizeLimit(Math.max(100, aApprovers.length));
+            const oCreateModel = this.getView().getModel("create");
+            const sKey = this._loaSelectionKey(fAmount, oCreateModel.getProperty("/subProcessType_code"));
+            const aSelected = oCreateModel.getProperty("/loaSelectionKey") === sKey
+                ? String(oCreateModel.getProperty("/selectedLoaApproverIds") || "").split(";") : [];
 
             oPreviewModel.setData({
                 amount: fAmount,
@@ -3735,6 +3846,7 @@ sap.ui.define([
                 approvers: aApprovers
                     .map((oUser) => ({
                         ...oUser,
+                        selected: aSelected.includes(oUser.ID),
                         department: oUser.department || this.getText("loaDepartmentNotMaintainedText")
                     }))
                     .sort((a, b) => String(a.displayName || "").localeCompare(String(b.displayName || ""))),
@@ -3745,6 +3857,66 @@ sap.ui.define([
 
         onCloseLoaApprovalPreview() {
             this.byId("loaApprovalPreviewDialog").close();
+        },
+
+        async _readAllLoaApprovers(oFilter) {
+            const aUsers = [];
+            const aSeen = new Set();
+            const iPageSize = 200;
+            for (let iSkip = 0; ; iSkip += iPageSize) {
+                const aPage = await this._readList("/Users", {
+                    filters: [oFilter],
+                    urlParameters: {
+                        "$select": "ID,displayName,email,department,role_code",
+                        "$orderby": "ID asc",
+                        "$top": iPageSize,
+                        "$skip": iSkip
+                    }
+                });
+                for (const user of aPage) {
+                    if (aSeen.has(user.ID)) throw new Error(this.getText("loaPreviewLoadErrorMessage"));
+                    aSeen.add(user.ID);
+                    aUsers.push(user);
+                }
+                if (aPage.length < iPageSize) return aUsers;
+            }
+        },
+
+        _loaSelectionKey(vAmount, sSubtype) {
+            if (vAmount === "" || vAmount == null || !Number.isFinite(Number(vAmount))) return "";
+            return `${sSubtype || ""}|${Number(vAmount)}`;
+        },
+
+        onConfirmLoaApprovers() {
+            const aSelected = this.byId("loaApproverSelectionList").getSelectedItems()
+                .map((item) => item.getBindingContext("loaPreview")?.getProperty("ID"))
+                .filter(Boolean);
+            if (!aSelected.length) {
+                MessageBox.warning(this.getText("loaSelectionRequiredMessage"));
+                return;
+            }
+            const oCreate = this.getView().getModel("create");
+            oCreate.setProperty("/selectedLoaApproverIds", aSelected.join(";"));
+            oCreate.setProperty("/loaSelectionKey", this._loaSelectionKey(
+                this.getView().getModel("loaPreview").getProperty("/amount"), oCreate.getProperty("/subProcessType_code")
+            ));
+            this.byId("loaApprovalPreviewDialog").close();
+        },
+
+        async onReviewLoaApprovers() {
+            const oCreate = this.getView().getModel("create");
+            const amount = oCreate.getProperty("/amount");
+            if (amount == null || amount === "" || !Number.isFinite(Number(amount))) {
+                MessageBox.warning(this.getText("loaAmountFirstMessage"));
+                return;
+            }
+            try {
+                const rule = await this._resolveLoaRule(Number(amount), oCreate.getProperty("/subProcessType_code"));
+                if (!rule) throw new Error(this.getText("loaNoMatchingRuleMessage"));
+                await this._showLoaApprovalPreview(Number(amount), rule);
+            } catch (error) {
+                MessageBox.error(this.getErrorMessage(error, this.getText("loaPreviewLoadErrorMessage")));
+            }
         },
 
         _matchesLoaCondition(sConditionCode, sSubProcessTypeCode) {
@@ -3830,6 +4002,7 @@ sap.ui.define([
             this._setBankGuaranteeMode(false);
 
             oCreateModel.setProperty("/loaApprovalApplicable", false);
+            oCreateModel.setProperty("/loaSelectionRequired", false);
             oCreateModel.setProperty("/isPaymentRequest", false);
             oCreateModel.setProperty("/amount", null);
             oCreateModel.setProperty("/role", "");
@@ -3885,6 +4058,7 @@ sap.ui.define([
                 oCreateModel.setProperty("/processTypeName", oPredecessor.processType?.name || oPredecessor.processType_code || "");
                 oCreateModel.setProperty("/subProcessType_code", oPredecessor.subProcessType_code || "");
                 oCreateModel.setProperty("/subProcessTypeName", oPredecessor.subProcessType?.name || oPredecessor.subProcessType_code || "");
+                await this._configureLoaSelectionTiming(oPredecessor.subProcessType_code || "", bLoaApplicable);
                 // this._setFtkFactoringMode(this._isFtkFactoringSubtype(oPredecessor.subProcessType_code));
                 // oCreateModel.setProperty(
                 //     "/isFtkPoValidation",
@@ -3948,6 +4122,7 @@ sap.ui.define([
                 oCreateModel.setProperty("/requesterUser_ID", oUser.ID || "");
                 oCreateModel.setProperty("/requesterName", sRequesterName);
                 oCreateModel.setProperty("/requester", sRequesterName);
+                oCreateModel.setProperty("/requesterUserType", oUser.userType || "INTERNAL");
 
                 if (oUser.department) {
                     oCreateModel.setProperty("/department", oUser.department);
@@ -3956,6 +4131,7 @@ sap.ui.define([
                 oCreateModel.setProperty("/requesterUser_ID", "");
                 oCreateModel.setProperty("/requesterName", "");
                 oCreateModel.setProperty("/requester", "");
+                oCreateModel.setProperty("/requesterUserType", "INTERNAL");
             }
         },
 
@@ -4281,6 +4457,9 @@ _prefillSubtypeFields(oPredecessor, sSubProcessTypeCode) {
             invoiceNumber: oRow.invoiceNumber || "",
             invoiceDate: oRow.invoiceDate,
             description: oRow.description,
+            currency_code: oRow.currency_code || "",
+            vendorCode: oRow.vendorCode || "",
+            vendorName: oRow.vendorName || "",
             transactionAmountDocumentCurrency: oRow.transactionAmountDocumentCurrency,
             transactionAmountLocalCurrency: oRow.transactionAmountLocalCurrency,
             availabilityOfInvoice: Boolean(oRow.availabilityOfInvoice)

@@ -103,6 +103,7 @@ service FlowmateService {
   entity ProcessRequests {
     key ID              : UUID;
         referenceNumber : String(30);
+        requestOrigin   : String(20);
         title           : String(255);
         description     : LargeString;
         processType_code : String(30);

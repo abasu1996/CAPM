@@ -1,0 +1,102 @@
+[
+  {
+    "ID": "3b6e45d5-8a3e-472e-b06e-fd0113010eb5",
+    "CREATEDAT": "2026-10-15T05:46:38.88",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:46:43.034",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-001",
+    "BUDGETCODEDESCRIPTION": "IT Infrastructure and Hardware Budget",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cc2d9fd4-5c6e-4bad-881a-5e7461674cc6",
+    "CREATEDAT": "2026-10-15T05:47:02.694",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:47:06.75",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-002",
+    "BUDGETCODEDESCRIPTION": "Software Licenses and Subscriptions",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ddd350a4-e3e1-42e6-8962-304fc9654fb6",
+    "CREATEDAT": "2026-10-15T05:47:27.713",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:47:40.172",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-003",
+    "BUDGETCODEDESCRIPTION": "Employee Training and Development",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9e052790-a836-40ea-a8fc-6397da9b2204",
+    "CREATEDAT": "2026-10-15T05:47:57.101",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:47:57.101",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-004",
+    "BUDGETCODEDESCRIPTION": "Office Supplies and Consumables",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "61aae7f2-4bfd-45bb-8ea2-040b0c516713",
+    "CREATEDAT": "2026-10-15T05:48:16.218",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:48:21.171",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-005",
+    "BUDGETCODEDESCRIPTION": "Travel and Business Expenses",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3434a7f5-33cc-4fe4-967c-39ee48b2deef",
+    "CREATEDAT": "2026-10-15T05:48:39.234",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:48:43.358",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-006",
+    "BUDGETCODEDESCRIPTION": "SAP Implementation and Integration",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9706bbac-124f-4d81-8391-50083f9b3f6d",
+    "CREATEDAT": "2026-10-15T05:49:20.229",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:49:24.521",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-008",
+    "BUDGETCODEDESCRIPTION": "Maintenance and Support Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "23ed6948-6fee-4279-b2b8-7642ee05ccc6",
+    "CREATEDAT": "2026-10-15T05:49:01.815",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:49:28.132",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-007",
+    "BUDGETCODEDESCRIPTION": "Cloud Services and Hosting",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2cdbfe58-5a8d-4bf4-bff7-2748cefce7a6",
+    "CREATEDAT": "2026-10-15T05:49:45.539",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:49:49.978",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-009",
+    "BUDGETCODEDESCRIPTION": "Project Development and Testing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "045c70cc-1e69-46b6-ae8e-65680992aa91",
+    "CREATEDAT": "2026-10-15T05:50:09.466",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-15T05:50:14.067",
+    "MODIFIEDBY": "system",
+    "BUDGETCODE": "BUD-2026-010",
+    "BUDGETCODEDESCRIPTION": "Procurement and Vendor Management",
+    "ISACTIVE": 1
+  }
+]

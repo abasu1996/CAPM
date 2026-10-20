@@ -122,6 +122,23 @@ service FlowmateService {
         isLoaApproval : Boolean;
         decision    : String(100);
     }
+    type LoaApproverPreviewItem {
+        ID          : UUID;
+        displayName : String(150);
+        email       : String(255);
+        roleCode    : String(40);
+    }
+    type GuidedLoaPreview {
+        requiresConfirmation : Boolean;
+        stepNo               : Integer;
+        stepName             : String(100);
+        amount               : Decimal(18, 2);
+        currencyCode         : String(10);
+        ruleCode             : String(40);
+        ruleDescription      : String(255);
+        requireAllApprovers  : Boolean;
+        approvers            : many LoaApproverPreviewItem;
+    }
 
     entity ProcessTypes as projection on fldb.ProcessTypes;
     entity ProcessSubTypes as projection on fldb.ProcessSubTypes;
@@ -205,6 +222,8 @@ service FlowmateService {
     @cds.redirection.target
     entity ProcessRequests as projection on fldb.ProcessRequests {
         *,
+        @Core.Computed: false
+        virtual selectedLoaApproverIds : String(2000),
         paymentCategory : redirected to PaymentCategories,
         businessEntity  : redirected to FtkEntities,
         priorityConfig  : redirected to Priorities,
@@ -278,6 +297,7 @@ service FlowmateService {
     @readonly
     entity MyTeamTasks as projection on fldb.ProcessTasks {
         *,
+        virtual canAssignToMe : Boolean,
         request : redirected to ProcessRequests,
         teamMembers : redirected to ProcessTaskTeamMembers,
         treasuryEntries : redirected to TreasuryEntries,
@@ -286,6 +306,7 @@ service FlowmateService {
     @readonly
     entity RequestDetailTasks as projection on fldb.ProcessTasks {
         *,
+        virtual canAssignToMe : Boolean,
         request : redirected to ProcessRequests,
         teamMembers : redirected to ProcessTaskTeamMembers,
         treasuryEntries : redirected to TreasuryEntries,
@@ -338,6 +359,7 @@ service FlowmateService {
         email: String(255),
         department: String(100),
         roleCode: String(40),
+        userType: String(20),
         managerId: UUID,
         teamIds: many UUID,
         isActive: Boolean
@@ -363,6 +385,7 @@ service FlowmateService {
         incompleteStepNo   : Integer;
         incompleteStepName : String(100);
     };
+    action previewGuidedLoa(requestId: UUID, stepNo: Integer, progressionMode: String(30)) returns GuidedLoaPreview;
     action completeGuidedStep(requestId: UUID, stepNo: Integer, remarks: String, progressionMode: String(30)) returns Boolean;
     action getGuidedProcessTasks(requestId: UUID) returns many GuidedProcessTask;
     action rejectTask(taskId: UUID, remarks: String) returns Boolean;
@@ -425,6 +448,7 @@ service FlowmateService {
         email             : String(255);
         userPrincipalName : String(255);
         department        : String(100);
+        userType          : String(20);
     };
     action resolveNotificationRecipient(userId: String(100)) returns {
         originalRecipient : String(100);

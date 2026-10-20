@@ -153,7 +153,8 @@
                                                 icon="sap-icon://employee-approvals"
                                                 type="Transparent"
                                                 tooltip="{i18n>assignTeamTaskToMeButton}"
-                                                visible="{taskView>/teamMode}"
+                                                visible="{= ${taskView>/teamMode} &amp;&amp; ${canAssignToMe} }"
+                                                enabled="{= (${status_code} === 'OPEN' || ${status_code} === 'SENT_BACK') &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                                 press=".onAssignTeamTaskToMe" />
                                             <Button
                                                 icon="sap-icon://delete"
@@ -203,7 +204,8 @@
                                 icon="sap-icon://employee-approvals"
                                 text="{i18n>assignTeamTaskToMeButton}"
                                 type="Emphasized"
-                                visible="{taskView>/teamMode}"
+                                visible="{= ${taskView>/teamMode} &amp;&amp; ${canAssignToMe} }"
+                                enabled="{= (${status_code} === 'OPEN' || ${status_code} === 'SENT_BACK') &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
                                 press=".onAssignTeamTaskToMe" />
                              <Button
                                 text="{i18n>approveButton}"

@@ -1,0 +1,2032 @@
+[
+  {
+    "ID": "e7f1a823-3d66-5928-b029-548101fb1667",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "001",
+    "PURCHASINGGROUPNAME": "Capex-Tech-Nat.Ops",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "187cba08-3dd6-57cd-9481-0067e4d23323",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "002",
+    "PURCHASINGGROUPNAME": "Capex - Tech-C.Net",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7f338b1e-234d-505d-8a22-a9a8e84de16b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "003",
+    "PURCHASINGGROUPNAME": "Capex-Tech-Acc",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "06272323-084b-5b02-a51a-2042f9d58cc4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "004",
+    "PURCHASINGGROUPNAME": "Capex-Tech-VAS/Tec",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fa2107b3-1bb7-5340-a7b0-24b9dc7dd8dd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "005",
+    "PURCHASINGGROUPNAME": "Capex-CPE-TV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cae42bab-71b3-5c1b-9335-35f85703587b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "006",
+    "PURCHASINGGROUPNAME": "Fixed-BU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f23d333d-5454-5760-bc47-59255589d079",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "007",
+    "PURCHASINGGROUPNAME": "Capex-Mobile-Mktng",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1c3b45f1-cbce-509e-8cd0-39b7121bc892",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "008",
+    "PURCHASINGGROUPNAME": "Capex-IT-Mobile",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9dea0c76-228e-5233-8f5b-7abeeb552cac",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "009",
+    "PURCHASINGGROUPNAME": "Capex-IT-TV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cdd2dea4-8a9d-52ba-be3f-85756400ab07",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "010",
+    "PURCHASINGGROUPNAME": "Capex-IT-Fixed",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4caa55cb-d28a-5c62-9cd2-197141991cba",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "011",
+    "PURCHASINGGROUPNAME": "Capex-IT-DTI",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e13a92d8-9a1e-54f8-8af3-885df52a576e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "012",
+    "PURCHASINGGROUPNAME": "Capex-Facil-Mobile",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2f312aa8-c450-56fb-a1f5-5a0b942318e1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "013",
+    "PURCHASINGGROUPNAME": "Capex-Facility-TV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d16fc1f9-87b0-52d2-a3b0-a0fabaadc05d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "014",
+    "PURCHASINGGROUPNAME": "Capex-Facil-Fixed",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d0aefc46-c659-5c17-bde8-27fb39560e44",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "015",
+    "PURCHASINGGROUPNAME": "Capex-Facility-DTI",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cf93f225-f324-5428-943a-f1dabf4fc77f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "016",
+    "PURCHASINGGROUPNAME": "Capex- DE - Eng",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b9378f75-6b0c-5dd8-a014-d9a930d21141",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "017",
+    "PURCHASINGGROUPNAME": "Capex-Tech-Turnkey",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7efd3294-8528-5161-b83a-559d6696bc06",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "018",
+    "PURCHASINGGROUPNAME": "Capex - DTI- Opt F",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0a717fba-f370-59ff-9f0d-09bdae89c70d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "019",
+    "PURCHASINGGROUPNAME": "Capex- DTI- Transm",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a6c4271e-c43e-5454-b482-1460a6ea0e56",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "020",
+    "PURCHASINGGROUPNAME": "Civil dvpt_CAPEX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "610f42bc-005b-5f70-93d1-eee325d17147",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "021",
+    "PURCHASINGGROUPNAME": "E&E dvpt _CAPEX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f7eeb5f7-0f89-56e9-8566-aab164f46ace",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "022",
+    "PURCHASINGGROUPNAME": "Network Ins_CAPEX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "71fee1fb-600c-567d-84cb-e9cfe995f79b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "023",
+    "PURCHASINGGROUPNAME": "Capex- Tech - DVB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c59ecf34-dac5-5c36-b96f-a92cbc52c146",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "024",
+    "PURCHASINGGROUPNAME": "Capex-Tech- DNS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7a8fd90b-4613-5804-9426-830e69fe5890",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "025",
+    "PURCHASINGGROUPNAME": "Capex-DS M Com",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d85496f3-6a14-53c1-a782-4557141bdc0f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "026",
+    "PURCHASINGGROUPNAME": "Capex-DS Common",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3f9cd457-7671-5112-b03a-b1bcb0555a53",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "027",
+    "PURCHASINGGROUPNAME": "Capex_TV_DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "86a6fca3-4511-56e1-ae22-c4ca4f7ffca5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "028",
+    "PURCHASINGGROUPNAME": "Towerco FTK",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "13170f77-b117-5196-8079-5dd2d66b8085",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "029",
+    "PURCHASINGGROUPNAME": "Capex-Warehouse",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a084b8ed-7e27-5df4-ad52-d65966707b6d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "030",
+    "PURCHASINGGROUPNAME": "Capex-Ser-Net-Plan",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "34ab2270-4613-5478-87bb-5cdd27f6fcf6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "031",
+    "PURCHASINGGROUPNAME": "Capex-Ser-Net-Assu",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9a98329f-8b28-5c99-bfd1-ff5e1dcd7e66",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "032",
+    "PURCHASINGGROUPNAME": "Capex-Ser-Net-Op",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "68ee7713-3eec-5243-8d76-b9d4902ea805",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "033",
+    "PURCHASINGGROUPNAME": "Capex-tec-sup-cen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dbd6db34-456c-51fc-ad68-b79eba0df05a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "034",
+    "PURCHASINGGROUPNAME": "CAPEX-Tec_Delivery",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "829d6b9a-0098-5315-b64f-b3f122dc109a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "035",
+    "PURCHASINGGROUPNAME": "Tech-DNS-SSU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "caf80c88-d8f4-5112-aa90-f945bc6ec4ee",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "036",
+    "PURCHASINGGROUPNAME": "Capex_Bus_Intel_An",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "180a8d86-cb76-54dd-91cd-9873e33ea09a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "037",
+    "PURCHASINGGROUPNAME": "DTI-Pwr/Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3cd50360-1659-5547-859b-59a18b10d36c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "038",
+    "PURCHASINGGROUPNAME": "DTCivil-Do Not Use",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "92bd0a86-a33e-5c2d-8454-1e128a86792b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "039",
+    "PURCHASINGGROUPNAME": "CAPEX-Corp-CSR",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "462ba5d1-75b9-57c1-8e2b-632e0270f082",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "040",
+    "PURCHASINGGROUPNAME": "CAPEX- IDC Serv",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0d38bfbb-9556-54f0-b953-858ba3365966",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "041",
+    "PURCHASINGGROUPNAME": "CapEx-Digi_Trans",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3f27812f-328c-51c1-801b-11ee8e1d980d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "042",
+    "PURCHASINGGROUPNAME": "BU-Global/Cont",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6feafaec-5f46-584e-a353-27aabb6bf563",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "043",
+    "PURCHASINGGROUPNAME": "Retail",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bab0b7a7-2659-562a-b70b-e40864a7a218",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "044",
+    "PURCHASINGGROUPNAME": "Capex_EBU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0334fe2e-475b-59e4-871e-6d02828abf56",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "045",
+    "PURCHASINGGROUPNAME": "Capex_Cybersecurit",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4246b069-3fd1-579b-b850-4592ce3d4914",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "046",
+    "PURCHASINGGROUPNAME": "Capex – Lesi pay",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "92c9b14b-6d53-539b-b2b0-229f5d84915a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "047",
+    "PURCHASINGGROUPNAME": "Capex_HOne",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "84a1f640-933e-5674-bed7-7c40f0c8619d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "048",
+    "PURCHASINGGROUPNAME": "Trading_HOne",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b4179d8-9496-5c26-af0d-13bc6bb8fb72",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "049",
+    "PURCHASINGGROUPNAME": "Capex_NSA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "56a32e28-4469-585a-9682-48b830b5c0cd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "050",
+    "PURCHASINGGROUPNAME": "Cpx-Tech-DC Infra",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ca79c03-6991-5e83-b9fe-fe5363f35314",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "051",
+    "PURCHASINGGROUPNAME": "Cpx-Tech-Media Ser",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b2571a88-3030-5857-8c92-23a6cc353632",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "052",
+    "PURCHASINGGROUPNAME": "Cpx-Tch-Anl&Aut Su",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c87825f3-5cdb-5189-b729-60585c2d6352",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "053",
+    "PURCHASINGGROUPNAME": "Cpx-Tech-Cx Tch Su",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e47e7ac1-b5ce-529d-b4f0-c747d0b18a83",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "054",
+    "PURCHASINGGROUPNAME": "Cpx-Tech-Strgy&Pla",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "166170b9-ff5c-5718-8bd6-73901b3cb009",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "055",
+    "PURCHASINGGROUPNAME": "Cpx-Tech-Serv Ops",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d892f946-5c9e-52dd-a82d-d6d9f185bb8d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "056",
+    "PURCHASINGGROUPNAME": "Cpx-Tech-Telco Ser",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8c3cc7e3-6be8-5e0e-94a6-4f2800cd92f9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "057",
+    "PURCHASINGGROUPNAME": "Cpx-Tech-TX NW Dev",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c92f253b-2627-5318-ac86-eec8957006b8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "058",
+    "PURCHASINGGROUPNAME": "Capex_Risk&complia",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7acf0b9e-23c8-523d-9f91-1a1fc2aa8a66",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "059",
+    "PURCHASINGGROUPNAME": "CapEx_DP & Prtnrsh",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0271f434-0aa7-515c-97e1-35c317f34742",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "060",
+    "PURCHASINGGROUPNAME": "Capx-DTV -Advertis",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fc17dac9-d156-5e3e-8d96-b8cf9822709c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "061",
+    "PURCHASINGGROUPNAME": "Capex-Ideamart",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a0c84f1e-fddb-5794-83cb-0cebaf000586",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "062",
+    "PURCHASINGGROUPNAME": "Cpx-Cus-field-sup",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5a79f8c7-df31-58ca-a5be-ace8530c3a24",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "063",
+    "PURCHASINGGROUPNAME": "Cpx-Tech-sup-Cen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cf350274-d1ec-5cd2-9b09-d0b03dce35ce",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "064",
+    "PURCHASINGGROUPNAME": "Cpx-Cus-Reso-Cen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "473cd7d3-9ad3-5bf8-a0fc-2db81a3df830",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "065",
+    "PURCHASINGGROUPNAME": "CPX Ntwk plan&Qlty",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e219e862-dd15-5831-aed2-26ff1e76c980",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "066",
+    "PURCHASINGGROUPNAME": "OPX Ntwk plan&Qlty",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4467e288-cb1f-5dad-b9ea-a892a8bfa1e8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "067",
+    "PURCHASINGGROUPNAME": "CAPEX-IT-Sys & Ser",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6a98a4e8-e18c-5548-9dac-922397999ed0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "068",
+    "PURCHASINGGROUPNAME": "CPX-Power Planning",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "26fc499e-49bc-5c31-8628-1aa63ab7c312",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "069",
+    "PURCHASINGGROUPNAME": "Capex_Finance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2d531617-66e0-5fb8-b8d8-e78fe215b625",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "070",
+    "PURCHASINGGROUPNAME": "HBB CPE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "70c3e97c-d939-510a-a6a2-08042173b225",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "071",
+    "PURCHASINGGROUPNAME": "DE CPE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "de27f284-40cd-5706-93b3-4724cfbf4c05",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "072",
+    "PURCHASINGGROUPNAME": "DAP SIM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1ff3ed88-0c42-50c0-aeaa-d88bb52cb97e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "073",
+    "PURCHASINGGROUPNAME": "DTV CPE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "06d66da7-792e-51fd-bb88-6a468eca5cb8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "A01",
+    "PURCHASINGGROUPNAME": "Arcade STO Request",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9bbe0428-c892-52b0-bca1-ea6182a698f7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "A02",
+    "PURCHASINGGROUPNAME": "Distribution",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9c46dd74-f0ee-5871-a08e-8b044964eb21",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "A03",
+    "PURCHASINGGROUPNAME": "Franchisee STO",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a5dc2252-f311-5fdc-be1b-6a416604f9e4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "A04",
+    "PURCHASINGGROUPNAME": "DDTL STO Purchasin",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5670245c-356d-5d7b-84c3-fdac04f4329a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "A05",
+    "PURCHASINGGROUPNAME": "Opx-Analytics",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2630a864-0d0f-57f2-b558-cfc1df9a6b0b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "AM1",
+    "PURCHASINGGROUPNAME": "AM ATL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e41185a3-c9dc-562b-9348-a862cbcaad0f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "AM2",
+    "PURCHASINGGROUPNAME": "AM BTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2c2f80f7-5ac4-57ca-a50a-19bbd428ff51",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "AM3",
+    "PURCHASINGGROUPNAME": "AM Digital",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5f8bc6be-c500-559d-8b95-f08a83cc1abe",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "AR1",
+    "PURCHASINGGROUPNAME": "Airtel-Retail",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d26a6b4f-d4b9-5aa4-a1ec-c8351741785b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "AR2",
+    "PURCHASINGGROUPNAME": "Airtel-NextSales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2a1e8314-5ddc-5049-b3ff-89fe6e10f70c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B01",
+    "PURCHASINGGROUPNAME": "Mobile & MBB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cc239159-c479-5c8c-b04a-108de8588f9b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B02",
+    "PURCHASINGGROUPNAME": "BU- Mobile - N B.D",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d3ea6d36-0e57-568c-86e7-9a82a407488e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B03",
+    "PURCHASINGGROUPNAME": "BU- Mobile Money",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6849738c-43b5-54aa-b7ec-22f6490acdfd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B04",
+    "PURCHASINGGROUPNAME": "BU- Global",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3075a396-55ad-5a21-a551-2444cf5a4a24",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B05",
+    "PURCHASINGGROUPNAME": "BU-DTI- Opt Fib Ne",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b27ccabd-5551-5d62-8f6c-2f517dc5e2f5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B06",
+    "PURCHASINGGROUPNAME": "BU-DTI- Transmiss",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b6d02887-140d-5187-b0ab-a8952b9aa8c1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B07",
+    "PURCHASINGGROUPNAME": "BU- DTI-Civil",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "63e6ec5e-e49d-5bb3-805c-1fae72888aed",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B08",
+    "PURCHASINGGROUPNAME": "BU- Fixed Tel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "73206038-a596-5ae2-9497-4d71ebc14efb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B09",
+    "PURCHASINGGROUPNAME": "BU- TV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "600a8ee5-7a75-564a-9859-ce44741851d3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B10",
+    "PURCHASINGGROUPNAME": "Pd/Serv Inovati",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "31709397-b768-5a39-b45e-f4831f40cb5b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B11",
+    "PURCHASINGGROUPNAME": "Mobile Postpaid",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c201d042-6c7a-53e4-86f3-bd3e93e2358e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B12",
+    "PURCHASINGGROUPNAME": "Corp Plan/Op.St",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "64abb15c-a827-5da7-ba35-9c65fa537bf4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B13",
+    "PURCHASINGGROUPNAME": "Credit Cont.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b9e7350c-d9d9-57b4-94fe-a654464c19c6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B14",
+    "PURCHASINGGROUPNAME": "Billing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1c382c97-af59-5077-81b7-ab70df71abee",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B15",
+    "PURCHASINGGROUPNAME": "BU-DTI-Power",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "62385136-38e2-5761-8bbd-ce57ba37149b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B16",
+    "PURCHASINGGROUPNAME": "Opex-DNS-SAQ",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e3d64956-cd87-5a6d-ab31-5f4a1f59df0d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B17",
+    "PURCHASINGGROUPNAME": "BU_TV_DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "688693d3-0d14-519e-b5a7-2ee0e9f71229",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B18",
+    "PURCHASINGGROUPNAME": "Business Operatio",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "41cdbd62-eeba-5e08-9239-4a2f2b5fd19c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B19",
+    "PURCHASINGGROUPNAME": "IDC Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8eb16b7a-a55b-5be1-841e-cc3ab6e787f7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B20",
+    "PURCHASINGGROUPNAME": "Growth Ops & Dev",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "00196f72-0798-53c9-bd29-62b64ac0bbd6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "B21",
+    "PURCHASINGGROUPNAME": "Group Loyalty",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fab4dd64-a240-5a30-9c13-b0842ae0603b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C01",
+    "PURCHASINGGROUPNAME": "Corp-CSR",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7df2911c-2d52-5b87-a333-735874a26688",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C02",
+    "PURCHASINGGROUPNAME": "Corp-HR",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "839d929f-1025-562a-bdbc-e420497da677",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C03",
+    "PURCHASINGGROUPNAME": "Corp-Legal",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "970c2351-5237-532a-9a8a-8cb20e10569a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C04",
+    "PURCHASINGGROUPNAME": "Corp-CoSec",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3a4a124e-75bc-5054-864c-29708d5be4a5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C05",
+    "PURCHASINGGROUPNAME": "Opex_Risk&complia",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7e1398f5-6763-5e27-87bf-285842a2246d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C06",
+    "PURCHASINGGROUPNAME": "OpEx_DP & Prtnrsh",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f9f08b54-126d-5bb4-8cfc-4645316e8d53",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C07",
+    "PURCHASINGGROUPNAME": "Opx-Tech-CRC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1a4bd92-5b95-52b6-bac0-74352c593181",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C08",
+    "PURCHASINGGROUPNAME": "Opx-DTV -Advertis",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a6413b1d-34ca-53a3-a05e-cc6d83bed715",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "C09",
+    "PURCHASINGGROUPNAME": "Opx-DTV-Content",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4590d120-8a51-57ca-abba-d0fb707b99e9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "CH1",
+    "PURCHASINGGROUPNAME": "Channel Planning",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bbdde8de-9a57-5ade-afdc-4f0810814f16",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "D01",
+    "PURCHASINGGROUPNAME": "DS-MCom & Srv/DAd",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "74413538-321c-5d6d-a82a-13441fe84f4d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "D02",
+    "PURCHASINGGROUPNAME": "DS-Common",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c8096789-d6d3-51a1-bc79-5935ce7d8726",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "D03",
+    "PURCHASINGGROUPNAME": "Mobile Money",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c16f67bb-7a9a-58e3-9eee-7bfb133204bd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "D04",
+    "PURCHASINGGROUPNAME": "OpEx-Digi_Trans",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4e5ff484-2e3e-5cf7-9047-032088995e26",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "D05",
+    "PURCHASINGGROUPNAME": "Opx-DBS-HRADMIN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6d0416d8-4e26-59eb-b12f-6af650e9975b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "D06",
+    "PURCHASINGGROUPNAME": "Opx-DBS-LND",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "41cb1cd6-df04-5985-b28b-6cfa99b289a1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DB1",
+    "PURCHASINGGROUPNAME": "Opx-Cus-field-sup",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "040b5ecc-59da-55e7-abf5-c340c29e787a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DB2",
+    "PURCHASINGGROUPNAME": "Opx-Tech-sup-Cen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ef858b7d-4105-5344-87dd-39b8fa4099e7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DB3",
+    "PURCHASINGGROUPNAME": "Opx-Cus-Reso-Cen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "406ea2c5-34b0-5188-9cd5-25989a0f7ad6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DB4",
+    "PURCHASINGGROUPNAME": "OPEX-PSI",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fc627ee9-02eb-5dd8-a5c8-2e5e6d7b4f81",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DF1",
+    "PURCHASINGGROUPNAME": "DFP-Purc.Gr Capex1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6674d5c0-9332-5b97-a4cb-5f9f610bb2df",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DF2",
+    "PURCHASINGGROUPNAME": "DFP-Purc.Gr Capex2",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "88668dfd-a692-5e18-85bd-81635ba0c199",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DF3",
+    "PURCHASINGGROUPNAME": "DFP-Purc.Gr Opex1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c423a1c3-5198-5319-afcd-182ab1882538",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DF4",
+    "PURCHASINGGROUPNAME": "DFP-Purc.Gr Opex2",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "07cb73ef-b6be-5d0a-9753-2d0747d4726d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DM1",
+    "PURCHASINGGROUPNAME": "DMS_STO_DAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "58cbc176-f6ce-5c8c-bdcd-dd037ca05e8f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DM2",
+    "PURCHASINGGROUPNAME": "DMS_STO_DBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0a81e375-ccbf-52e2-8475-3a90abcb0f73",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DM3",
+    "PURCHASINGGROUPNAME": "DMS_STO_DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "68926919-0213-550d-afe8-ae1de3ccce5a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DM4",
+    "PURCHASINGGROUPNAME": "DMS_STO_DDTL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2855697e-df51-5126-8cc6-9dffaea84980",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "DM5",
+    "PURCHASINGGROUPNAME": "DMS_STO_DAP_PL5000",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "af8156dd-d320-55bd-bfd6-caefd89bbf15",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "E01",
+    "PURCHASINGGROUPNAME": "DE-Eng",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0eb107b9-9e95-5e85-ab9f-27205a973125",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "E02",
+    "PURCHASINGGROUPNAME": "DE-Non Eng",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ce090bd6-df46-5c70-b023-6f656877742b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "E03",
+    "PURCHASINGGROUPNAME": "SME",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0e2a0064-771e-56d6-b0a0-a30d2f172570",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "F01",
+    "PURCHASINGGROUPNAME": "Fin- Corp.Finance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1d68fc7-f50e-55df-ac16-c583cc175f0b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "F02",
+    "PURCHASINGGROUPNAME": "Fin- Financial Ser",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2d8332a0-fc3a-5331-a8a8-3417a0ba39d5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "F03",
+    "PURCHASINGGROUPNAME": "Fin- Financial Acc",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bdbe1eee-2c30-57b6-9dcf-10abd6bf5ab4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "F04",
+    "PURCHASINGGROUPNAME": "Fin- Fleet Managem",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ccf8c497-62ea-521f-8c75-b4820eee1487",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "F05",
+    "PURCHASINGGROUPNAME": "Fin- Pre. & Facili",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1e74105c-436a-53fe-9f69-ce1ab2d6bd7e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "F06",
+    "PURCHASINGGROUPNAME": "Fin- Pre.D & Fur.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d4b14aa9-66e4-5f55-8aac-f567daacaf61",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "F07",
+    "PURCHASINGGROUPNAME": "Fin- Security",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9587c9a2-d6d3-5807-88c1-7c565b28fee2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "F08",
+    "PURCHASINGGROUPNAME": "Opex_SupportServ",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "463bbeff-7d28-50e5-a8b7-d5e55de849b4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "H01",
+    "PURCHASINGGROUPNAME": "HO- Corp.Costs",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8e544128-f3c7-5afc-aab0-ee2b6f123e43",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "HS1",
+    "PURCHASINGGROUPNAME": "HeadStart Admin",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d41aa483-02e5-54b2-8eeb-c0bb342676c7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "HS2",
+    "PURCHASINGGROUPNAME": "HeadStart-Others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "005df7ab-a49e-5b84-a436-65c8fdcbf7fc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "I02",
+    "PURCHASINGGROUPNAME": "Internal Audit",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1dd82f4-9ac1-591e-833e-b506593b4bc4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "I06",
+    "PURCHASINGGROUPNAME": "IT- Systems/Servic",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "73b60a23-8c1f-54d3-a6d5-f57a48a8a733",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "K01",
+    "PURCHASINGGROUPNAME": "Key client Serv.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4a0a675c-e111-55b8-9f1d-00639a53263b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "M01",
+    "PURCHASINGGROUPNAME": "Mar-Marketing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1de8420f-1031-51bd-8a26-62fac818b48e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "M02",
+    "PURCHASINGGROUPNAME": "Mktg Brands & Medi",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5c5861ba-c8ca-5127-825d-cc48b9c05289",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "M03",
+    "PURCHASINGGROUPNAME": "Marketing Online",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c212b32b-e56f-54db-9413-b9201816a0b1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "M04",
+    "PURCHASINGGROUPNAME": "Trd-marketing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "49dacbb6-1a69-5249-a4a1-18d58d086911",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "MP1",
+    "PURCHASINGGROUPNAME": "Opx-Tech-Manual",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c678a73a-715b-596b-8a98-e4efa78dd742",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "MP2",
+    "PURCHASINGGROUPNAME": "Opx-IT-Manual",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2a813c55-aefd-524a-9762-cbbf7ad3cee2",
+    "CREATEDAT": "2026-10-04T18:32:29.166",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.166",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "P01",
+    "PURCHASINGGROUPNAME": "SCM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "055ff75e-2f48-596b-b904-14305ae6ad45",
+    "CREATEDAT": "2026-10-04T18:32:29.166",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.166",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "P02",
+    "PURCHASINGGROUPNAME": "Program Management",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "384d0f26-408e-5514-8592-72e2203769db",
+    "CREATEDAT": "2026-10-04T18:32:29.166",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.166",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "P03",
+    "PURCHASINGGROUPNAME": "Warehouse",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e1b3a400-b119-583b-85be-301dacbe3c20",
+    "CREATEDAT": "2026-10-04T18:32:29.166",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.166",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "P04",
+    "PURCHASINGGROUPNAME": "TRP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0031697a-6c4a-549f-99f7-988ef9cd14b0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "R01",
+    "PURCHASINGGROUPNAME": "Retail",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "efa98418-d553-5588-acd5-34f6ad28b60c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "R02",
+    "PURCHASINGGROUPNAME": "NextSales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f2a55392-3905-5707-a66b-24c195f64bd9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "S01",
+    "PURCHASINGGROUPNAME": "Service Delivery",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fbae0f61-bb8e-5205-a08a-47c8507d10ef",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "S03",
+    "PURCHASINGGROUPNAME": "SAP Opex",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fec28e37-1f7d-54ec-9333-8726808c050a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T01",
+    "PURCHASINGGROUPNAME": "Tech- Nat.Ops/Mt.S",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5be903b7-4127-56cf-9919-bc30c4bee19b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T02",
+    "PURCHASINGGROUPNAME": "Tech- C.Net.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "799a0fd5-140f-5f1c-95e2-6d961e197b65",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T03",
+    "PURCHASINGGROUPNAME": "Tech- Acc Net. P&O",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e0b0a74f-e03c-5470-b7ff-2b55cd9214c1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T04",
+    "PURCHASINGGROUPNAME": "Tech- VAS/New Tech",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8191bbad-1ac1-5ecb-9132-74b366443155",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T05",
+    "PURCHASINGGROUPNAME": "Tech - DVB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f6301b6b-f591-5657-b706-8f287cb763a3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T06",
+    "PURCHASINGGROUPNAME": "DNS - General",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7bbd245c-fa80-52cd-9b87-75b6c25dd370",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T07",
+    "PURCHASINGGROUPNAME": "Opex-Ser-Net-Plan",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "363b88ae-42a8-5879-9e83-1281ce9e071e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T08",
+    "PURCHASINGGROUPNAME": "Ser-Net-Assu",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2ebb8b63-b21d-5f09-9a61-140fdc622f82",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T09",
+    "PURCHASINGGROUPNAME": "T09_Tech-DNS-SSU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2a3631f4-1d64-5cc7-9fcb-3dafcabb3218",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T10",
+    "PURCHASINGGROUPNAME": "OPEX-Tech_Delivery",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "83d69c9c-2ea9-58bb-88d7-3980c6977e9c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T11",
+    "PURCHASINGGROUPNAME": "Network Ins _OPEX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "654a0ea8-996d-541c-8b16-607a20f77405",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T12",
+    "PURCHASINGGROUPNAME": "Corporate_Li",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3383f3aa-4a8f-5788-a8f9-c0da3ba06748",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T13",
+    "PURCHASINGGROUPNAME": "LTE_PrP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b8931af-cae1-5d7f-b768-4a1ae3d0246a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T14",
+    "PURCHASINGGROUPNAME": "Opex-DNS Operation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "69f067ca-b6df-5f68-9427-202f91859079",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T15",
+    "PURCHASINGGROUPNAME": "BUDTCiv-Do Not Use",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ab0def9d-1978-5a00-8a86-a7f657d82631",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T16",
+    "PURCHASINGGROUPNAME": "BU-DTI-Pwr/Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "94028bd2-151b-5de8-9b44-105d83f4c7b0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T17",
+    "PURCHASINGGROUPNAME": "Opex_EBU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7bf5b72c-722f-52e5-9add-a36deb562205",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T18",
+    "PURCHASINGGROUPNAME": "Opex-DNS- Western",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e0324b07-3ae6-55f0-a99b-58b31cf89528",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T19",
+    "PURCHASINGGROUPNAME": "Opex-DNS- Eastern",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "35532404-5662-5315-926b-e09223970db1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T20",
+    "PURCHASINGGROUPNAME": "Opex-DNS- Northern",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b69e5535-9171-5242-a2a9-7902130e0ef2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T21",
+    "PURCHASINGGROUPNAME": "Opex-DNS- Southern",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6d4d8b9e-bad3-53b7-808d-d71c85b9a712",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T22",
+    "PURCHASINGGROUPNAME": "Opex-DNS-Central",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1aa30277-7d44-5228-8ef5-bc8e93341ea6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T23",
+    "PURCHASINGGROUPNAME": "Opex_Cybersecurity",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9e49ddc1-ec7f-51cb-bae1-361e028b1383",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T24",
+    "PURCHASINGGROUPNAME": "InsureTech",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "418f23e3-fa39-5721-bdb3-05f4528cb9a4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T25",
+    "PURCHASINGGROUPNAME": "Opex -Lesi pay",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7eb32350-2185-5a2e-991a-d4f242431432",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T26",
+    "PURCHASINGGROUPNAME": "VAS Content",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b8b152da-7f08-5c82-8727-03d6cdd47860",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T27",
+    "PURCHASINGGROUPNAME": "Opex_Streaming",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "34e12f98-0bfd-5fba-b617-444f934f2bd0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T28",
+    "PURCHASINGGROUPNAME": "Opex_HOne",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5f625d8b-866b-534c-ada8-8c9c6879acd7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T29",
+    "PURCHASINGGROUPNAME": "Opex_HomeBU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5be4cf92-1f0e-58e8-a68c-e30fd03d4abe",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T30",
+    "PURCHASINGGROUPNAME": "Opex_Anl&Aut Suprt",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "808abc1a-0ba4-596f-a8b4-1880f23bb170",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T31",
+    "PURCHASINGGROUPNAME": "Opex_Cx Tch Suprt",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "58bc52b8-dd92-5a10-9f8c-9eb8c7f2b264",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T32",
+    "PURCHASINGGROUPNAME": "Opex_Strgy&Plan",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "29b0aaed-8cbd-5d9c-823f-019214e653f3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T33",
+    "PURCHASINGGROUPNAME": "Opex_Serv Ops Ctr",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "73ae7697-bc4c-50ca-8eb9-4edbedc650a0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T34",
+    "PURCHASINGGROUPNAME": "Opex_Telco Serv",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3ddb746d-ffb4-5350-a389-fbc0ef2f05a2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T35",
+    "PURCHASINGGROUPNAME": "Opex_TX NW Dev&Op",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c62996ce-a6ac-5e34-a7d8-70a7f7fb800a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T36",
+    "PURCHASINGGROUPNAME": "Opex-HS Admin",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e20f27a2-9083-500a-9398-011997f4de8f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T37",
+    "PURCHASINGGROUPNAME": "Growth Ops",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0af9a9fe-8a5a-51e7-9b2a-848e5a66c952",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T38",
+    "PURCHASINGGROUPNAME": "TDSAQ_OPEX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9366b24b-e16a-5507-94f4-ab73ecbb79ca",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGGROUPCODE": "T39",
+    "PURCHASINGGROUPNAME": "TDSAQ_CAPEX",
+    "ISACTIVE": 1
+  }
+]

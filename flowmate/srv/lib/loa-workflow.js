@@ -43,12 +43,18 @@ module.exports = (amountSources) => ({
 
   _isLoaStep(step) { return step?.stepType === "LOA"; },
 
-  _isRequesterSubmissionStep(step) {
-    return /requester/i.test(step?.role || "")
-      || /request (?:creation|submission|raised)|create request/i.test(step?.stepName || "");
+  _isRequesterSubmissionStep(step, requestOrigin) {
+    const configuredOrigin = String(step?.requestOrigin || "").trim().toUpperCase();
+    const trustedOrigin = String(requestOrigin || "").trim().toUpperCase();
+    const supportedOrigins = new Set(["INTERNAL_USER", "VENDOR", "EXTERNAL_API"]);
+
+    if (!supportedOrigins.has(configuredOrigin)) return false;
+    // Configuration validation has no live request. At runtime an exact match
+    // is required, so Role and Step Name text can never influence this result.
+    return !trustedOrigin || configuredOrigin === trustedOrigin;
   },
 
-  _loaPlan(subtype, steps) {
+  _loaPlan(subtype, steps, requestOrigin) {
     const approvalSteps = steps.filter((step) => this._isLoaStep(step));
     if (approvalSteps.length > 1) throw new Error("Only one LoA approval step is allowed per process subtype");
     if (!subtype?.loaApprovalApplicable) {
@@ -60,7 +66,8 @@ module.exports = (amountSources) => ({
     }
     const step = approvalSteps[0];
     const index = steps.indexOf(step);
-    const upfront = index === 0 || (index === 1 && this._isRequesterSubmissionStep(steps[0]));
+    const upfront = index === 0
+      || (index === 1 && this._isRequesterSubmissionStep(steps[0], requestOrigin));
     return { loaWorkflowMode: "GUIDED", loaStepNo: step.stepNo, loaBeforeProcessing: upfront,
       loaApprovalState: upfront ? "PENDING" : "WAITING" };
   },
@@ -108,7 +115,7 @@ module.exports = (amountSources) => ({
     const steps = await cds.tx(req).run(SELECT.from(this.entities.ProcessStepConfig)
       .where({ subProcessType_code: req.data.subProcessType_code }).orderBy("stepNo"));
     this._clearConfigCache();
-    try { Object.assign(req.data, this._loaPlan(subtype, steps)); }
+    try { Object.assign(req.data, this._loaPlan(subtype, steps, req.data.requestOrigin)); }
     catch (error) { return req.reject(400, error.message); }
     if (req.data.loaWorkflowMode === "GUIDED" && Object.hasOwn(req.data, "tasks")) {
       return req.reject(409, "Tasks are generated from the configured workflow; do not supply inline tasks");
@@ -153,6 +160,7 @@ module.exports = (amountSources) => ({
       req.data.processorTeam_ID = null;
       req.data.processorTeamName = null;
       req.data.role = null;
+      req.data.requestOrigin = null;
       req.data.isVendorNotification = false;
       req.data.isActiveDemandTask = false;
     }
@@ -164,6 +172,85 @@ module.exports = (amountSources) => ({
       .filter((value) => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)))
       .map(Number);
     return values.length ? Math.max(...values) : null;
+  },
+
+  async _resolveConfiguredLoaAtGate(req, request) {
+    const invoiceBasis = amountSources[request.subProcessType_code] === "highestInvoiceValue";
+    let highestInvoiceValue = null;
+    if (invoiceBasis) {
+      const invoices = await cds.tx(req).run(
+        SELECT.from(this.entities.Invoices).columns("amount").where({ request_ID: request.ID })
+      );
+      const amounts = invoices
+        .map((entry) => entry.amount)
+        .filter((value) => value != null && value !== "" && Number.isFinite(Number(value)))
+        .map(Number);
+      highestInvoiceValue = amounts.length ? Math.max(...amounts) : null;
+      request.highestInvoiceValue = highestInvoiceValue;
+    }
+
+    const amount = this._currentLoaAmount(request);
+    if (amount === null) return req.reject(400, "A valid approval amount is required before starting the LoA step");
+    const rule = await this._resolveLoaRule(req, this.entities.LoaApproval, amount, request);
+    if (!rule) return req.reject(400, `No LoA approval rule is configured for amount ${amount}`);
+    const directUsers = this._booleanValue(rule.directUserAssignment);
+    const role = directUsers ? "DIRECT_USER" : (rule.approverRoleCodes || rule.roleCode || "");
+    if (!role) return req.reject(400, `No LoA approver is configured for amount ${amount}`);
+
+    return { amount, rule, role, directUsers, highestInvoiceValue, invoiceBasis };
+  },
+
+  async _approversForLoaRule(req, rule) {
+    const directUsers = this._booleanValue(rule.directUserAssignment);
+    const directUserIds = [...new Set(String(rule.approverUserIds || "")
+      .split(";").map((value) => value.trim()).filter(Boolean))];
+    const roleCodes = [...new Set(String(rule.approverRoleCodes || rule.roleCode || "")
+      .split(";").map((value) => value.trim()).filter(Boolean))];
+    let approvers;
+
+    if (directUsers) {
+      if (!directUserIds.length) return req.reject(409, "The matching LoA rule does not contain a direct approver");
+      approvers = await this.master.run(SELECT.from(this.masterEntities.Users)
+        .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
+        .where({ isActive: true, ID: { in: directUserIds } }));
+      const byId = new Map(approvers.map((user) => [String(user.ID), user]));
+      const missing = directUserIds.filter((id) => !byId.has(String(id)));
+      if (missing.length) return req.reject(409, `Direct approver user(s) are no longer active: ${missing.join(", ")}`);
+      approvers = directUserIds.map((id) => byId.get(String(id)));
+    } else {
+      if (!roleCodes.length) return req.reject(409, "The matching LoA rule does not contain an approver role");
+      approvers = await this.master.run(SELECT.from(this.masterEntities.Users)
+        .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
+        .where({ isActive: true, role_code: { in: roleCodes } }));
+    }
+
+    if (!approvers.length) {
+      return req.reject(409, directUsers
+        ? "No active direct LoA approver is maintained"
+        : `No active user is assigned to the required LoA role(s): ${roleCodes.join(", ")}`);
+    }
+    return approvers;
+  },
+
+  async _buildConfiguredLoaPreview(req, request, step) {
+    const resolved = await this._resolveConfiguredLoaAtGate(req, { ...request });
+    const approvers = await this._approversForLoaRule(req, resolved.rule);
+    return {
+      requiresConfirmation: true,
+      stepNo: step.stepNo,
+      stepName: step.stepName || "LoA Approval",
+      amount: resolved.amount,
+      currencyCode: request.currency_code || "",
+      ruleCode: resolved.rule.ruleCode || "",
+      ruleDescription: resolved.rule.description || "",
+      requireAllApprovers: this._booleanValue(resolved.rule.requireAllApprovers),
+      approvers: approvers.map((user) => ({
+        ID: user.ID,
+        displayName: this._userDisplayName(user),
+        email: this._userEmail(user),
+        roleCode: user.role_code || ""
+      }))
+    };
   },
 
   async _startConfiguredLoa(req, requestId, step) {
@@ -185,18 +272,23 @@ module.exports = (amountSources) => ({
       });
       if (incomplete) return req.reject(409, `Finish step ${incomplete.stepNo} before starting the final LoA approval`);
     }
-    const invoiceBasis = amountSources[request.subProcessType_code] === "highestInvoiceValue";
-    if (invoiceBasis) {
-      const invoices = await tx.run(SELECT.from(this.entities.Invoices).columns("amount").where({ request_ID: requestId }));
-      const amounts = invoices.map((entry) => entry.amount).filter((value) => value != null && value !== "" && Number.isFinite(Number(value))).map(Number);
-      request.highestInvoiceValue = amounts.length ? Math.max(...amounts) : null;
+    const resolved = await this._resolveConfiguredLoaAtGate(req, request);
+    const { amount, rule, role, directUsers, invoiceBasis } = resolved;
+    const isLaterGate = !request.loaBeforeProcessing;
+    if (!isLaterGate && request.loaApproverSource === "USER" && request.loaApproverUserIds) {
+      await this._validateLoaSelectedApprovers(req, request.loaApproverUserIds, rule);
     }
-    const amount = this._currentLoaAmount(request);
-    if (amount === null) return req.reject(400, "A valid approval amount is required before starting the LoA step");
-    const role = await this._resolveLoaRole(req, this.entities.LoaApproval, amount, request);
-    if (!role) return req.reject(400, `No LoA approval rule is configured for amount ${amount}`);
     const deadline = await this._calculateSlaDeadline(req, request.subProcessType_code, step.slaDays);
     const changes = { amount, role, currentStep: step.stepNo, status_code: "PENDING_APPROVAL", loaApprovalState: "PENDING", completedAt: null, ...deadline };
+    if (isLaterGate) {
+      changes.loaRequiresAll = this._booleanValue(rule.requireAllApprovers);
+      changes.loaApproverSource = directUsers ? "USER" : "ROLE";
+      changes.loaApproverUserIds = directUsers ? rule.approverUserIds : null;
+      changes.loaApprovalRuleCode = rule.ruleCode || null;
+    } else if (request.loaApproverSource === "USER" && request.loaApproverUserIds) {
+      changes.loaRequiresAll = this._booleanValue(rule.requireAllApprovers);
+      changes.loaApprovalRuleCode = rule.ruleCode || null;
+    }
     if (invoiceBasis) changes.highestInvoiceValue = amount;
     await tx.run(UPDATE(this.entities.ProcessRequests, requestId).set(changes));
     await this._createLoaApprovalTasks(req, { ...request, ...changes }, this.masterEntities.Users,

@@ -1,0 +1,192 @@
+[
+  {
+    "ID": "f36bb31d-45fd-54c0-80ca-1eaa1e9b3161",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK10",
+    "DESCRIPTION": "Dialog Axiata Plc",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d98bdda5-9264-5b21-ab42-fd5b148ec697",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK20",
+    "DESCRIPTION": "Dialog Broadband Networks",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "501e5d56-89d6-5558-aa86-c7cab5e677a5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK25",
+    "DESCRIPTION": "HeadStart (Pvt) Ltd",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d8dc6b90-6fc3-5237-ae35-357ae963a8ec",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK30",
+    "DESCRIPTION": "Dialog Television Pvt Ltd",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "261ae76c-b0e7-5625-a67a-6693c47981ba",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK31",
+    "DESCRIPTION": "Communiq Broadband Netwok",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "175dd432-0420-58cd-8472-d354cee36fc5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK32",
+    "DESCRIPTION": "Dialog Device Trading",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f524c907-2450-5a43-93d5-6a4fa3b94edb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK35",
+    "DESCRIPTION": "Dialog Foundation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4062756e-b0d4-5ef4-899b-410f8c6bb93a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK40",
+    "DESCRIPTION": "TM International (L) Ltd",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4ae42e07-17dc-5ef1-b94d-78cfd022e276",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK45",
+    "DESCRIPTION": "VSIS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "23099946-321d-54e4-b521-ce56192f59cf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK50",
+    "DESCRIPTION": "Dialog Tower Co",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e54470f7-3ea8-5239-94af-e7921b589d6d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK55",
+    "DESCRIPTION": "Digital Commerce Lanka",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "67fecef3-7230-5a04-9337-fb8effdd9967",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK60",
+    "DESCRIPTION": "Telecard (Pvt) Limited",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0aef66f3-54c5-58e4-86cf-026019bd0528",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK65",
+    "DESCRIPTION": "Dialog Business Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ff0e944-0dfd-5a74-b761-75a983cbbf37",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK70",
+    "DESCRIPTION": "Dialog Network Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1922a5ac-fabf-5ac4-b3f2-543973151be5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK75",
+    "DESCRIPTION": "Digital Holdings Lanka",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eb9cf86b-e448-583c-8981-17e67bea8174",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK80",
+    "DESCRIPTION": "H One Private Limited",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ce2f550d-e2a9-506d-9bbb-e8050824e0b7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK85",
+    "DESCRIPTION": "Dialog Axiata Digital Inn",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b792b2bf-97bb-59b6-9ebb-d94ce73eb14d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK90",
+    "DESCRIPTION": "Dialog Finance PLC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6e1e2e97-7308-5369-b165-72c1fad4f654",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "CODE": "LK95",
+    "DESCRIPTION": "Dialog Finance PLC",
+    "ISACTIVE": 1
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "ID": "e83630b1-d52d-5ede-8b0e-1005e9e28ba3",
+    "CREATEDAT": "2026-10-04T18:32:29.574",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.574",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "1000",
+    "SALESORGNAME": "Dialog Axiata",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1ba36c7-ee07-55c8-a015-9f4474afa1df",
+    "CREATEDAT": "2026-10-04T18:32:29.574",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.574",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "2000",
+    "SALESORGNAME": "Dialog Broadband",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b3fc5c0-391e-5c81-96f7-2c111aea2a06",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "2500",
+    "SALESORGNAME": "Headstart Company",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "350be411-9d23-566d-9c78-35b79edcfb58",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "3000",
+    "SALESORGNAME": "Dialog TV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f527a17e-fa32-558e-bbf2-166dbe3ae4e4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "3001",
+    "SALESORGNAME": "Dialog Device Tradin",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "985c0a2d-4f63-565c-93b5-6457d0d6c992",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "6500",
+    "SALESORGNAME": "Call Center Ops-DBS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6e83b50c-d59f-51d0-9e43-6050a236d44e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "6501",
+    "SALESORGNAME": "Freelance Ops-DBS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bdbb89b2-af24-5b29-a791-3003e8fa758c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "6502",
+    "SALESORGNAME": "Outsource Ops",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "633bb599-f084-5ed2-9402-c244966f3e32",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "7000",
+    "SALESORGNAME": "Dialog Network Serv",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "70f3e283-7abb-536d-b46e-f104cc6bce4f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "8000",
+    "SALESORGNAME": "H One",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "03d6f4bd-d325-5426-a7ca-6e55e8d14260",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SALESORGCODE": "9000",
+    "SALESORGNAME": "Dialog Finance",
+    "ISACTIVE": 1
+  }
+]

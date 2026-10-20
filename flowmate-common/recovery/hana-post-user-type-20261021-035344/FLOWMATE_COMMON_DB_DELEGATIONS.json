@@ -1,0 +1,44 @@
+[
+  {
+    "ID": "7b2c07e8-febf-4148-9072-370c7f0ef194",
+    "CREATEDAT": "2026-08-31T21:41:37.51",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-08-31T21:41:37.51",
+    "MODIFIEDBY": "system",
+    "DELEGATOR_ID": "7420b7b2-27c3-42b7-826f-10375b267138",
+    "DELEGATE_ID": "39f7470a-106b-4efc-a03e-5ed8a681d2f7",
+    "STARTDATE": "2026-09-01",
+    "ENDDATE": "2026-09-03",
+    "FORWARDNOTIFICATIONS": 1,
+    "ENABLED": 1,
+    "CREATEDONBEHALF": 1
+  },
+  {
+    "ID": "09290395-f1ef-4f55-8a8d-8c8d6b7f84f3",
+    "CREATEDAT": "2026-10-13T06:06:33.983",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T06:06:33.983",
+    "MODIFIEDBY": "system",
+    "DELEGATOR_ID": "406f570d-fa2c-44cc-ab3a-af43118b3c20",
+    "DELEGATE_ID": "2e6afa88-d787-40d3-8296-df6cabafbe1d",
+    "STARTDATE": "2026-10-13",
+    "ENDDATE": "2026-10-14",
+    "FORWARDNOTIFICATIONS": 1,
+    "ENABLED": 1,
+    "CREATEDONBEHALF": 1
+  },
+  {
+    "ID": "b2fc43bd-b480-4da9-b777-efd1deffa496",
+    "CREATEDAT": "2026-10-16T05:59:00.389",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-16T05:59:00.389",
+    "MODIFIEDBY": "system",
+    "DELEGATOR_ID": "2d8f390a-7e45-4a48-be0d-c8fe1c35b164",
+    "DELEGATE_ID": "2bc90ced-2def-4998-85f9-596e16fdace0",
+    "STARTDATE": "2026-10-16",
+    "ENDDATE": "2026-10-17",
+    "FORWARDNOTIFICATIONS": 1,
+    "ENABLED": 1,
+    "CREATEDONBEHALF": 1
+  }
+]

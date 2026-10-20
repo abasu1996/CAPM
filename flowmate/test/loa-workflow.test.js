@@ -10,6 +10,7 @@ test("queue API projections are read-only in the compiled service model", async 
     assert.equal(model.definitions[`FlowmateService.${name}`]["@readonly"], true, name);
   }
   assert.equal(model.definitions["flowmate.db.ProcessStepConfig"].elements.stepType.default.val, "PROCESSING");
+  assert.equal(model.definitions["flowmate.db.ProcessStepConfig"].elements.requestOrigin.default.val, "INTERNAL_USER");
 });
 
 // Isolated CQN fixture: no application server, SQLite, HANA or remote master data.
@@ -27,6 +28,7 @@ function fixture(t, { upfront = false, last = false, legacy = false } = {}) {
   };
   const request = { ID: "r1", subProcessType_code: "TEST", processType_code: "MAIN",
     currentStep: 1, status_code: "IN_PROGRESS", amount: 250, role: "MANAGER", currency_code: "LKR",
+    requestOrigin: "INTERNAL_USER",
     reservedBy: "Processor", reservedByUser_ID: "processor", reservedAt: "2026-10-01T00:00:00Z",
     processorUser_ID: "processor", processor: "Processor", processorTeam_ID: "team", ...plan };
   const rows = {
@@ -90,6 +92,10 @@ function fixture(t, { upfront = false, last = false, legacy = false } = {}) {
     _getSteps: async () => structuredClone(steps), _clearConfigCache() {},
     _dbProcessTasksEntity: () => "ProcessTasks",
     _resolveLoaRole: async () => "MANAGER",
+    _resolveLoaRule: async () => ({
+      ruleCode: "RULE-1", description: "Test approval rule", approverRoleCodes: "MANAGER",
+      directUserAssignment: false, requireAllApprovers: false
+    }),
     _calculateSlaDeadline: async () => ({ slaDueAt: "2026-10-10T12:00:00Z" }),
     _nextReferenceNumber: async () => `TSK-${rows.ProcessTasks.length + 1}`,
     _notifyTaskAssignment: async (req, entry) => notifications.push(entry),
@@ -113,7 +119,9 @@ test("planning supports approval-first, submission then approval, later approval
   const normal = { stepNo: 1, stepName: "Validate" };
   const gate = { stepNo: 2, stepType: "LOA" };
   assert.equal(s._loaPlan(enabled, [gate]).loaBeforeProcessing, true);
-  assert.equal(s._loaPlan(enabled, [{ ...normal, role: "Requester" }, gate]).loaBeforeProcessing, true);
+  assert.equal(s._loaPlan(enabled, [{ ...normal, requestOrigin: "INTERNAL_USER" }, gate], "INTERNAL_USER").loaBeforeProcessing, true);
+  assert.equal(s._loaPlan(enabled, [{ ...normal, requestOrigin: "INTERNAL_USER" }, gate], "VENDOR").loaApprovalState, "WAITING");
+  assert.equal(s._loaPlan(enabled, [{ ...normal, role: "Requester", stepName: "Request submission" }, gate], "INTERNAL_USER").loaApprovalState, "WAITING");
   assert.equal(s._loaPlan(enabled, [normal, gate]).loaApprovalState, "WAITING");
   assert.equal(s._loaPlan(enabled, [normal]).loaWorkflowMode, "LEGACY");
   assert.equal(s._loaPlan({}, [normal]).loaWorkflowMode, "NONE");
@@ -164,7 +172,9 @@ test("rejection stops the workflow without generating the next processing task",
 test("multi-level LoA keeps the request pending until every approver approves", async (t) => {
   const f = fixture(t);
   const { service: s, req, request, rows, steps } = f;
-  request.loaRequiresAll = true;
+  s._resolveLoaRule = async () => ({
+    ruleCode: "RULE-ALL", approverRoleCodes: "MANAGER", requireAllApprovers: true
+  });
   await s._startConfiguredLoa(req, "r1", steps[1]);
   const approvals = rows.ProcessTasks.filter((task) => task.isLoaApproval);
   await s._decideLoaApproval(req, approvals[0], "APPROVED", "First approval");
@@ -187,6 +197,62 @@ test("direct-user LoA creates approval tasks for selected users without role mat
   const task = rows.ProcessTasks.find((entry) => entry.isLoaApproval);
   assert.equal(task.assignedUser_ID, "approver2");
   assert.equal(task.role, "DIRECT_USER");
+});
+
+test("selected role-eligible approvers receive guided LoA tasks across teams", async (t) => {
+  const { service: s, req, request, rows, steps } = fixture(t);
+  const ids = ["10000000-0000-4000-8000-000000000001", "10000000-0000-4000-8000-000000000002"];
+  rows.Users[0].ID = ids[0];
+  rows.Users[1].ID = ids[1];
+  request.loaApproverSource = "USER";
+  request.loaApproverUserIds = ids.join(";");
+  s._resolveLoaRule = async () => ({ approverRoleCodes: "MANAGER", directUserAssignment: false });
+  s._activeTeamIdsForUser = async () => { throw new Error("team membership must not be checked"); };
+  await s._startConfiguredLoa(req, "r1", steps[1]);
+  const approvals = rows.ProcessTasks.filter((task) => task.isLoaApproval);
+  assert.deepEqual(approvals.map((task) => task.assignedUser_ID), ids);
+  await s._decideLoaApproval(req, approvals[0], "APPROVED", "Approved");
+  assert.equal(request.loaApprovalState, "APPROVED");
+});
+
+test("selected LoA approvers must be active and eligible under the selected matrix rule", async (t) => {
+  const { service: s, req, rows } = fixture(t);
+  const id = "10000000-0000-4000-8000-000000000001";
+  rows.Users[0].ID = id;
+  const roleRule = { approverRoleCodes: "MANAGER", directUserAssignment: false };
+  assert.equal(await s._validateLoaSelectedApprovers(req, `${id};${id}`, roleRule), id);
+  await assert.rejects(() => s._validateLoaSelectedApprovers(req, "", roleRule), /valid LoA approver/);
+  await assert.rejects(() => s._validateLoaSelectedApprovers(req, id, { approverRoleCodes: "OTHER" }), /no longer eligible/);
+  await assert.rejects(() => s._validateLoaSelectedApprovers(req, id, { directUserAssignment: true, approverUserIds: "10000000-0000-4000-8000-000000000099" }), /no longer eligible/);
+  rows.Users[0].isActive = false;
+  await assert.rejects(() => s._validateLoaSelectedApprovers(req, id, roleRule), /no longer eligible/);
+});
+
+test("later LoA ignores creation-time selections and resolves the current matrix", async (t) => {
+  const { service: s, req, request, rows, steps } = fixture(t);
+  const id = "10000000-0000-4000-8000-000000000001";
+  rows.Users[0].ID = id;
+  request.loaApproverSource = "USER";
+  request.loaApproverUserIds = id;
+  s._resolveLoaRule = async () => ({ ruleCode: "CURRENT", approverRoleCodes: "MANAGER" });
+  await s._startConfiguredLoa(req, "r1", steps[1]);
+  assert.equal(request.loaApproverSource, "ROLE");
+  assert.equal(request.loaApproverUserIds, null);
+  assert.equal(request.loaApprovalRuleCode, "CURRENT");
+  assert.equal(rows.ProcessTasks.filter((task) => task.isLoaApproval).length, 2);
+});
+
+test("assigned approvers without team membership retain pending-approval visibility", async (t) => {
+  const { service: s, req } = fixture(t);
+  s._activeTeamIdsForUser = async () => [];
+  const query = cds.ql.SELECT.from("ProcessTasks");
+  await s._filterTasksByRequestTeams({ ...req, query }, "Users", "TeamMembers");
+  assert.match(JSON.stringify(query.SELECT.where), /PENDING_APPROVAL/);
+  const requestQuery = cds.ql.SELECT.from("ProcessRequests");
+  s._applyVisibleRequestsWhere(requestQuery, { user: { ID: "approver1" } }, []);
+  const where = JSON.stringify(requestQuery.SELECT.where);
+  assert.match(where, /PENDING_APPROVAL/);
+  assert.match(where, /isLoaApproval/);
 });
 
 test("a final LoA step completes the request after approval", async (t) => {
@@ -217,16 +283,19 @@ test("amount is re-evaluated at the gate, including multi-field sources", async 
   request.subProcessType_code = "NON_PO_IDEAMART";
   request.brcHighestTransactionValue = 500;
   request.whtNicHighestTransactionValue = 700;
-  s._resolveLoaRole = async (req, entity, amount) => { assert.equal(amount, 700); return "MANAGER"; };
+  s._resolveLoaRule = async (req, entity, amount) => {
+    assert.equal(amount, 700);
+    return { approverRoleCodes: "MANAGER" };
+  };
   await s._startConfiguredLoa(req, "r1", steps[1]);
   assert.equal(request.amount, 700);
 });
 
 test("missing matrix or missing active approvers fails instead of silently skipping approval", async (t) => {
   const { service: s, req, rows, steps } = fixture(t);
-  s._resolveLoaRole = async () => "";
+  s._resolveLoaRule = async () => null;
   await assert.rejects(() => s._startConfiguredLoa(req, "r1", steps[1]), /No LoA approval rule/);
-  s._resolveLoaRole = async () => "MANAGER";
+  s._resolveLoaRule = async () => ({ approverRoleCodes: "MANAGER" });
   rows.Users.length = 0;
   await assert.rejects(() => s._startConfiguredLoa(req, "r1", steps[1]), /No active user/);
   // CAP supplies transaction rollback in production; the fixture does not simulate rollback.
@@ -294,7 +363,10 @@ test("invoice-based approval uses persisted invoice amounts rather than a stale 
   request.subProcessType_code = "PO_BEFORE_INVOICE_ADVANCE";
   request.highestInvoiceValue = 1;
   rows.Invoices.push({ ID: "i1", request_ID: "r1", amount: 350 }, { ID: "i2", request_ID: "r1", amount: 600 });
-  s._resolveLoaRole = async (req, entity, amount) => { assert.equal(amount, 600); return "MANAGER"; };
+  s._resolveLoaRule = async (req, entity, amount) => {
+    assert.equal(amount, 600);
+    return { approverRoleCodes: "MANAGER" };
+  };
   await s._startConfiguredLoa(req, "r1", steps[1]);
   assert.equal(request.amount, 600);
   assert.equal(request.highestInvoiceValue, 600);
@@ -334,7 +406,7 @@ test("a normal first processing step is not auto-approved for later LoA", async 
 test("caller can keep the requester step open for Pending UAC", async (t) => {
   const { service: s, req, request, rows, steps } = fixture(t);
   rows.ProcessTasks.length = 0;
-  steps[0].role = "Requester";
+  steps[0].requestOrigin = "INTERNAL_USER";
   request.requesterUser_ID = "requester";
   await s._ensureInitialGuidedTask(req, "r1", request, { updateRequest: true, autoCompleteSteps: 0 });
   assert.equal(rows.ProcessTasks.length, 1);
@@ -345,7 +417,7 @@ test("caller can keep the requester step open for Pending UAC", async (t) => {
 test("submission auto-completion cannot overwrite a landing LoA status", async (t) => {
   const { service: s, req, request, rows, steps } = fixture(t);
   rows.ProcessTasks.length = 0;
-  steps[0].role = "Requester";
+  steps[0].requestOrigin = "INTERNAL_USER";
   request.requesterUser_ID = "requester";
   await s._autoCompleteLeadingSteps(req, "r1", request, steps, 1, "Submitted");
   assert.equal(rows.ProcessTasks[0].status_code, "APPROVED");
@@ -353,18 +425,32 @@ test("submission auto-completion cannot overwrite a landing LoA status", async (
   assert.equal(request.currentStep, 2);
 });
 
-test("team authorization is still enforced on LoA decisions", async (t) => {
-  const { service: s, req, rows, steps } = fixture(t);
+test("an assigned guided LoA approver can decide regardless of processor-team membership", async (t) => {
+  const { service: s, req, request, rows, steps } = fixture(t);
   await s._startConfiguredLoa(req, "r1", steps[1]);
   s._activeTeamIdsForUser = async () => ["unrelated-team"];
-  await assert.rejects(() => s._decideLoaApproval(req, rows.ProcessTasks.find((task) => task.isLoaApproval), "APPROVED", ""), /processor team/);
+  await s._decideLoaApproval(req, rows.ProcessTasks.find((task) => task.isLoaApproval), "APPROVED", "");
+  assert.equal(request.loaApprovalState, "APPROVED");
 });
 
-test("a gate fails clearly when no role-matched approver has team access", async (t) => {
+test("a later gate creates tasks for all matrix approvers irrespective of team access", async (t) => {
   const { service: s, req, rows, steps } = fixture(t);
   s._activeTeamIdsForUser = async () => ["unrelated-team"];
-  await assert.rejects(() => s._startConfiguredLoa(req, "r1", steps[1]), /No eligible LoA approver belongs/);
-  assert.equal(rows.ProcessTasks.filter((task) => task.isLoaApproval).length, 0);
+  await s._startConfiguredLoa(req, "r1", steps[1]);
+  assert.equal(rows.ProcessTasks.filter((task) => task.isLoaApproval).length, 2);
+});
+
+test("mid-process LoA preview lists every matrix approver without team filtering", async (t) => {
+  const { service: s, req, request, rows, steps } = fixture(t);
+  s._getStepCompletionContext = async () => ({ request, steps, currentStep: steps[0] });
+  s._rejectUnlessGuidedStepCanComplete = async () => {};
+  s._resolveGuidedNextStep = async () => steps[1];
+  s._activeTeamIdsForUser = async () => { throw new Error("preview must not inspect team membership"); };
+  const preview = await s._previewGuidedLoa(req, "r1", 1, "continue");
+  assert.equal(preview.requiresConfirmation, true);
+  assert.equal(preview.stepNo, 2);
+  assert.equal(preview.amount, 250);
+  assert.deepEqual(preview.approvers.map((user) => user.ID), rows.Users.map((user) => user.ID));
 });
 
 test("UI renders an approved LoA with superseded peers as complete; pending requests cannot edit", () => {

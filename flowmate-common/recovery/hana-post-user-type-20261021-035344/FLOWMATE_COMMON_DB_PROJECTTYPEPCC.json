@@ -1,0 +1,200 @@
+[
+  {
+    "ID": "0a1c919d-f93f-4b6d-89c7-f828b93b53c1",
+    "CREATEDAT": "2026-10-13T20:45:42.054",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:27.383",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "ANO",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cdf3d568-e133-4db4-bdb4-9a20b73362fd",
+    "CREATEDAT": "2026-10-13T20:45:20.602",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:29.868",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "BSC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8303ec3c-8186-4bfd-b86a-6b38fb0bf8e0",
+    "CREATEDAT": "2026-10-13T20:46:24.177",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:32.284",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "CBS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2cd5c54c-f804-4e73-a9cd-4256f096d138",
+    "CREATEDAT": "2026-10-13T20:45:08.416",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:34.575",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "CLD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e68c21ff-af8e-4fd4-81e8-fc1c562c1606",
+    "CREATEDAT": "2026-10-13T20:45:51.226",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:36.973",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "CVL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1acd2195-e358-47d3-86c2-f0362fec888b",
+    "CREATEDAT": "2026-10-13T20:44:37.554",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:39.354",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "DAS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "21cc280b-0775-4da0-9bb5-57e246ebb424",
+    "CREATEDAT": "2026-10-13T20:46:04.485",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:47.669",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "DCI",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "df286734-bad0-46c9-98ec-202321de4200",
+    "CREATEDAT": "2026-10-13T20:42:34.395",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:50.461",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "DGC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1edea26-4faa-40ed-8e78-01dce03c3a2c",
+    "CREATEDAT": "2026-10-13T20:44:12.52",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:53.194",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dd9ea081-e05f-4b9c-a67e-a8bff4dd8ef1",
+    "CREATEDAT": "2026-10-13T20:42:06.652",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:55.931",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "FDD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a82bcac6-e80b-46ac-b894-627dc9c5ea88",
+    "CREATEDAT": "2026-10-13T20:44:52.655",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:46:58.375",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "GIT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7c7d75ba-4f9f-4897-af14-d916d3d17c1a",
+    "CREATEDAT": "2026-10-13T20:43:42.817",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:00.807",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "NCT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0c280a37-7a0e-4f56-ba49-a6f4e50b2937",
+    "CREATEDAT": "2026-10-13T20:45:27.319",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:03.273",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "NMD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8eeeccc0-681e-49ff-ac2e-6b748e20420c",
+    "CREATEDAT": "2026-10-13T20:42:47.877",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:05.7",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "NMS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3aa86b92-7dc1-4030-b386-afd460c163af",
+    "CREATEDAT": "2026-10-13T20:43:49.29",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:08.256",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "OFN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c23f85ac-be54-465d-a9f1-a51d591e43ea",
+    "CREATEDAT": "2026-10-13T20:43:24.277",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:15.333",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "PWR",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "41426af9-70fa-4bdf-b64c-1ffaaf3756d9",
+    "CREATEDAT": "2026-10-13T20:43:04.557",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:17.879",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "SAQ",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8651bdb0-e40d-4e75-941b-d12ee84c6638",
+    "CREATEDAT": "2026-10-13T20:44:25.269",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:20.223",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "SGE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "14118d16-3cd2-41ce-85e2-cae9efca37cd",
+    "CREATEDAT": "2026-10-13T20:42:15.51",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:22.629",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "TDD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e4102fb5-909c-4d7d-9536-ac1508d03a99",
+    "CREATEDAT": "2026-10-13T20:43:11.58",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:25.626",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "TNP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b71acfed-72f6-45b2-9d12-d846015e17b4",
+    "CREATEDAT": "2026-10-13T20:44:05.291",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:27.838",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "TPT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2bb781c5-107b-4fd5-a69e-f0c1ea13dbba",
+    "CREATEDAT": "2026-10-13T20:46:17.731",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:47:32.383",
+    "MODIFIEDBY": "system",
+    "PROJECTTYPE": "VAS",
+    "ISACTIVE": 1
+  }
+]

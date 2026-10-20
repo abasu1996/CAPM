@@ -1,0 +1,30 @@
+[
+  {
+    "CODE": "BLANK",
+    "NAME": "(Empty) - Material",
+    "DESCRIPTION": "Leave empty for a material line",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "K",
+    "NAME": "Consignment",
+    "DESCRIPTION": "Consignment",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "L",
+    "NAME": "Subcontracting",
+    "DESCRIPTION": "Subcontracting",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  },
+  {
+    "CODE": "D",
+    "NAME": "Service",
+    "DESCRIPTION": "Service",
+    "ISACTIVE": 1,
+    "SORTORDER": 40
+  }
+]

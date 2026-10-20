@@ -1,0 +1,58 @@
+[
+  {
+    "CODE": "INSTALL",
+    "NAME": "Installation Services",
+    "DESCRIPTION": "Site and equipment installation",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "MAINT",
+    "NAME": "Maintenance Services",
+    "DESCRIPTION": "Preventive and corrective maintenance",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "CONSULT",
+    "NAME": "Consultancy Services",
+    "DESCRIPTION": "Advisory and consultancy",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  },
+  {
+    "CODE": "TRANSPORT",
+    "NAME": "Transport Services",
+    "DESCRIPTION": "Logistics and transport",
+    "ISACTIVE": 1,
+    "SORTORDER": 40
+  },
+  {
+    "CODE": "CIVIL",
+    "NAME": "Civil Works",
+    "DESCRIPTION": "Civil and construction works",
+    "ISACTIVE": 1,
+    "SORTORDER": 50
+  },
+  {
+    "CODE": "ZGEN",
+    "NAME": "Dialog General",
+    "DESCRIPTION": "Dialog General",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "ZMKT",
+    "NAME": "Dialog Marketing and Promo",
+    "DESCRIPTION": "Dialog Marketing and Promo",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "ZTECH",
+    "NAME": "Dialog Technology",
+    "DESCRIPTION": "Dialog Technology",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  }
+]

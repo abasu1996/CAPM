@@ -168,7 +168,7 @@ entity CAAttachments : Attachments {
 }
 
 annotate CAAttachments with {
-  content @Validation.Maximum: '400MB'
+  content @Validation.Maximum: '50MB'
           @Core.AcceptableMediaTypes: [
             'application/pdf',
             'image/*',

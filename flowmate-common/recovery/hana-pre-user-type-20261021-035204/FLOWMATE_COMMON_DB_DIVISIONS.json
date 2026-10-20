@@ -1,0 +1,422 @@
+[
+  {
+    "ID": "3880e9aa-5c5a-5ac7-ab22-1e8cfe788704",
+    "CREATEDAT": "2026-10-04T18:32:26.904",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.904",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "SCM",
+    "DIVISIONNAME": "SCM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "93727a8a-0523-5141-bc37-fcae59efaea8",
+    "CREATEDAT": "2026-10-04T18:32:26.904",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.904",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "MKT",
+    "DIVISIONNAME": "MKT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "80b99984-43f0-5499-bf21-117e72cb7049",
+    "CREATEDAT": "2026-10-04T18:32:26.904",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.904",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "HR",
+    "DIVISIONNAME": "HR",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "877edd3e-ac92-5975-8d51-ee138f8e4fa2",
+    "CREATEDAT": "2026-10-04T18:32:26.904",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.904",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "FTK",
+    "DIVISIONNAME": "FTK",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0fa13631-da65-5969-8022-3f18e2e36021",
+    "CREATEDAT": "2026-10-04T18:32:26.904",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.904",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "IT",
+    "DIVISIONNAME": "IT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3140d781-98e9-5210-aabd-7581335a85eb",
+    "CREATEDAT": "2026-10-04T18:32:26.904",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.904",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "DBS",
+    "DIVISIONNAME": "DBS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "57bd5e76-6122-5a4c-bd3a-782d5caf93bb",
+    "CREATEDAT": "2026-10-04T18:32:26.904",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.904",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "DNS",
+    "DIVISIONNAME": "DNS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0224f849-6529-5ddb-9fa1-bff0be61ab4b",
+    "CREATEDAT": "2026-10-04T18:32:26.904",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.904",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "FOC",
+    "DIVISIONNAME": "FOC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1f623f05-2bf7-55b6-8be4-497f7d29542a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "00",
+    "DIVISIONNAME": "Common Division",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8b65779d-7af6-5e0b-a092-5c1a137a4ed0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "01",
+    "DIVISIONNAME": "Product Division 01",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "613b565b-711f-5a49-8695-cb2d91a3cb4d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "11",
+    "DIVISIONNAME": "Top Ups",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "984b335b-d9af-5a93-aa17-f104e0fd5b18",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "12",
+    "DIVISIONNAME": "SIM /LCD/ST Packs",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b6b2c8a-93f3-5926-9cd7-d78fe3cd986b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "13",
+    "DIVISIONNAME": "HSPA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eb5cf5e9-cc23-5394-aa68-37f0afb8e433",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "14",
+    "DIVISIONNAME": "Phones & Acc.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f6c06311-cbd6-54cc-bc41-d76a464a116b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "15",
+    "DIVISIONNAME": "OAF Books",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d001de39-75b8-5429-a897-c8ab9ac905c9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "16",
+    "DIVISIONNAME": "CDMA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f15ebf61-cf8d-5893-9739-259dafbd6b0a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "17",
+    "DIVISIONNAME": "Broadband Service",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6d446ae4-3c4f-5711-94c4-eff47754183c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "18",
+    "DIVISIONNAME": "Blackberry",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "98c682e7-9716-5150-97c6-5ec97fa6543f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "19",
+    "DIVISIONNAME": "Sales System",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "277ee31f-2189-5b22-9ad8-65f78daecbd4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "20",
+    "DIVISIONNAME": "Data & ISP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bb4855d2-c7d6-5b2e-80d6-ce3b47b8d349",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "21",
+    "DIVISIONNAME": "Transmission",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0d293a0b-c9da-5f6f-8a1a-6a487735cb15",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "22",
+    "DIVISIONNAME": "Infrastructure",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b6e5a00-a1c5-5f77-b5b2-12762d11e49f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "23",
+    "DIVISIONNAME": "Indoor business -DAS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6c1abe47-a62e-521e-99b5-cd9f3df4e708",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "24",
+    "DIVISIONNAME": "Electricity",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1ac44e42-25d9-50f4-8bff-52f68ceb155e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "25",
+    "DIVISIONNAME": "BPO",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ef85b555-810b-570d-9885-c939d1e7477f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "26",
+    "DIVISIONNAME": "Mobile solutions",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c80df5a5-1920-532f-aa6e-3da074675a87",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "27",
+    "DIVISIONNAME": "Domestic",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0c0dcad3-3389-5148-8884-946f2aaa6de4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "28",
+    "DIVISIONNAME": "International",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "252fce54-bdee-5da2-9ddd-b8aca3096147",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "29",
+    "DIVISIONNAME": "SwiftNet",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8caa2755-d4a3-5589-ac6c-08ba20b76c80",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "30",
+    "DIVISIONNAME": "MTU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f60bb579-aa7c-5a52-8db1-03c3f4a8dffd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "31",
+    "DIVISIONNAME": "International Other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "292cf13d-711c-53ce-86a3-aefc0091b28d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "32",
+    "DIVISIONNAME": "HRIS Products",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "757e5b37-02a9-5025-85f1-835b4ab2e85b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "33",
+    "DIVISIONNAME": "BP Rental",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3601a262-1d2f-537a-90c6-a50c5a25b9b6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "34",
+    "DIVISIONNAME": "eZ Card Pal",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e0b13190-bd7c-55d8-b2cb-473e628adcce",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "35",
+    "DIVISIONNAME": "WebEx",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ddee1dc-9999-5915-b404-166c77ce1407",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "36",
+    "DIVISIONNAME": "Digital Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7dbb97ec-5566-56ca-b820-912e1b81ce47",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "37",
+    "DIVISIONNAME": "DMS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "081eda66-4073-5fdd-8909-e801d85cb404",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "38",
+    "DIVISIONNAME": "Ez_Cash",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d4bb7e26-b617-5af0-af4c-58742d0d01bc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "39",
+    "DIVISIONNAME": "Merchandizing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f4ac5aa0-aaed-5749-a495-3efaa8e62bdd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "70",
+    "DIVISIONNAME": "Per Day TV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1c35ef5b-e5db-5755-ab25-c6902cfa20bb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "71",
+    "DIVISIONNAME": "BoardPac",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ab93e99-5058-5628-ad79-40be8cecb8f9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DIVISIONCODE": "72",
+    "DIVISIONNAME": "WOW",
+    "ISACTIVE": 1
+  }
+]

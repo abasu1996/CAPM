@@ -84,7 +84,8 @@ sap.ui.define([
                 ...this._emptyUser(),
                 ...oUser,
                 managerName: oUser.manager?.displayName || "",
-                role_code: oUser.role_code || ""
+                role_code: oUser.role_code || "",
+                userType: oUser.userType || "INTERNAL"
             };
 
             this.showBusy();
@@ -136,6 +137,7 @@ sap.ui.define([
                     email: oUser.email,
                     department: oUser.department,
                     role_code: oUser.role_code || null,
+                    userType: oUser.userType || "INTERNAL",
                     manager_ID: oUser.manager_ID || null,
                     isActive: oUser.isActive
                 };
@@ -152,6 +154,7 @@ sap.ui.define([
                     email: oPayload.email,
                     department: oPayload.department || null,
                     roleCode: oPayload.role_code,
+                    userType: oPayload.userType,
                     managerId: oPayload.manager_ID,
                     teamIds: aTeamIds,
                     isActive: oPayload.isActive
@@ -500,6 +503,13 @@ sap.ui.define([
             return this.getText(bActive ? "activeStatus" : "inactiveStatus");
         },
 
+        formatUserType(sUserType) {
+            return this.getText({
+                VENDOR: "vendorUserType",
+                TECHNICAL_API: "technicalApiUserType"
+            }[sUserType] || "internalUserType");
+        },
+
         formatOrgTreeStatusVisible(sType) {
             return sType === "team";
         },
@@ -516,6 +526,7 @@ sap.ui.define([
                 email: "",
                 department: "",
                 role_code: "",
+                userType: "INTERNAL",
                 manager_ID: "",
                 managerName: "",
                 team_ID: "",

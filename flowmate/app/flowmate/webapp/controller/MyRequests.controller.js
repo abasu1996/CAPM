@@ -705,6 +705,41 @@ sap.ui.define([
             this._refreshAfterTaskChange();
         },
 
+        async onAssignRequestTaskToMe(oEvent) {
+            oEvent?.cancelBubble?.();
+
+            const oContext = oEvent?.getSource?.().getBindingContext();
+            const sTaskId = oContext?.getProperty("ID") || this._sSelectedTaskId;
+
+            if (!sTaskId) {
+                MessageToast.show(this.getText("selectTaskMessage"));
+                return;
+            }
+
+            this.showBusy();
+
+            try {
+                await this.callAction("assignTeamTaskToMe", { taskId: sTaskId });
+                MessageToast.show(this.getText("teamTaskAssignedToMeMessage"));
+                this._refreshAfterTaskChange();
+
+                if (this._sSelectedTaskId === sTaskId) {
+                    const oTask = await this._readEntry(`/RequestDetailTasks(guid'${sTaskId}')`);
+                    const oProcessorModel = this.getView().getModel("processorEdit");
+
+                    oProcessorModel.setProperty("/taskProcessorUser_ID", oTask.processorUser_ID || "");
+                    oProcessorModel.setProperty("/taskProcessorName", oTask.processor || "");
+                    oProcessorModel.setProperty("/taskTeam_ID", oTask.processorTeam_ID || "");
+                    oProcessorModel.setProperty("/taskTeamName", oTask.processorTeamName || "");
+                    this.byId("requestTaskObjectPage").getElementBinding()?.refresh(true);
+                }
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("teamTaskAssignErrorMessage")));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
         onRefreshInvolvedPartyDetail() {
             this.byId("requestPartyObjectPage").getElementBinding()?.refresh();
             this._refreshPartySection();
@@ -2820,6 +2855,20 @@ async onBudgetCheckConfirm() {
             }
 
             this.showBusy();
+            const oLoaPreviewResponse = await this.callAction("previewGuidedLoa", {
+                requestId: this._sSelectedRequestId,
+                stepNo: iStepNo,
+                progressionMode: sProgressionMode
+            });
+            const oLoaPreview = oLoaPreviewResponse.value || oLoaPreviewResponse;
+            this.hideBusy();
+
+            if (oLoaPreview.requiresConfirmation
+                && !await this._confirmGuidedLoaPreview(oLoaPreview)) {
+                return false;
+            }
+
+            this.showBusy();
             await this.callAction("completeGuidedStep", {
                 requestId: this._sSelectedRequestId,
                 stepNo: iStepNo,
@@ -2828,6 +2877,37 @@ async onBudgetCheckConfirm() {
             });
 
             return true;
+        },
+
+        _confirmGuidedLoaPreview(oPreview) {
+            const aApprovers = Array.isArray(oPreview.approvers)
+                ? oPreview.approvers
+                : (oPreview.approvers?.value || []);
+            const sApprovers = aApprovers.map((oApprover) => {
+                const sName = oApprover.displayName || oApprover.email || oApprover.ID;
+                const sRole = oApprover.roleCode ? ` (${oApprover.roleCode})` : "";
+                return `• ${sName}${sRole}`;
+            }).join("\n");
+            const sMode = this.getText(oPreview.requireAllApprovers
+                ? "guidedLoaAllApproversMode"
+                : "guidedLoaAnyApproverMode");
+            const sConfirm = this.getText("guidedLoaConfirmButton");
+
+            return new Promise((resolve) => {
+                MessageBox.confirm(this.getText("guidedLoaConfirmationMessage", [
+                    oPreview.stepName || oPreview.stepNo,
+                    oPreview.amount,
+                    oPreview.currencyCode || "",
+                    oPreview.ruleDescription || oPreview.ruleCode || "-",
+                    sMode,
+                    sApprovers
+                ]), {
+                    title: this.getText("guidedLoaConfirmationTitle"),
+                    actions: [sConfirm, MessageBox.Action.CANCEL],
+                    emphasizedAction: sConfirm,
+                    onClose: (sAction) => resolve(sAction === sConfirm)
+                });
+            });
         },
 
         async onCompleteGuidedStep(oEvent) {

@@ -1,0 +1,79 @@
+[
+  {
+    "ID": "701fb2e2-04b0-4afe-9bb8-15c30783e00b",
+    "CREATEDAT": "2026-10-13T20:48:12.804",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:51:06.991",
+    "MODIFIEDBY": "system",
+    "SRNO": "1",
+    "VENDOR": "Huawei",
+    "VENDORLETTER": "H",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d7827d5a-860a-403a-bdde-a7fbf8472e9f",
+    "CREATEDAT": "2026-10-13T20:48:44.21",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:51:12.123",
+    "MODIFIEDBY": "system",
+    "SRNO": "2",
+    "VENDOR": "Ericsson",
+    "VENDORLETTER": "E",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "30022026-577c-49d4-9fa7-c9cd31456003",
+    "CREATEDAT": "2026-10-13T20:49:21.753",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:51:15.924",
+    "MODIFIEDBY": "system",
+    "SRNO": "3",
+    "VENDOR": "HS-ENG",
+    "VENDORLETTER": "J",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6fed821f-ee79-4cb4-a815-e54b2f99ab8a",
+    "CREATEDAT": "2026-10-13T20:49:45.778",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:51:18.822",
+    "MODIFIEDBY": "system",
+    "SRNO": "4",
+    "VENDOR": "Venora",
+    "VENDORLETTER": "G",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ad1aa54c-b4e3-4f54-8c48-c0c0a680445a",
+    "CREATEDAT": "2026-10-13T20:50:03.438",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:51:21.949",
+    "MODIFIEDBY": "system",
+    "SRNO": "5",
+    "VENDOR": "PMT",
+    "VENDORLETTER": "P",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f518566b-516c-40e6-955f-ae82a36a916b",
+    "CREATEDAT": "2026-10-13T20:50:33.789",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:51:26.238",
+    "MODIFIEDBY": "system",
+    "SRNO": "6",
+    "VENDOR": "Sierra",
+    "VENDORLETTER": "S",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6b9318f7-fae4-4259-93f2-352990a5e53f",
+    "CREATEDAT": "2026-10-13T20:50:56.708",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:51:28.713",
+    "MODIFIEDBY": "system",
+    "SRNO": "7",
+    "VENDOR": "Other",
+    "VENDORLETTER": "X",
+    "ISACTIVE": 1
+  }
+]

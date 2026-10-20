@@ -1,0 +1,38 @@
+[
+  {
+    "ID": "e1d4e363-03c9-4df8-8bec-004aa19c41de",
+    "CREATEDAT": "2026-10-13T20:40:46.279",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:40:49.553",
+    "MODIFIEDBY": "system",
+    "SCOPE": "ND",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d44cee0c-9f7b-484c-92cf-fb816482a86a",
+    "CREATEDAT": "2026-10-13T20:41:07.578",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:41:10.757",
+    "MODIFIEDBY": "system",
+    "SCOPE": "NU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "36e31b52-32d1-4a53-9c8f-0d1f3d4d14f4",
+    "CREATEDAT": "2026-10-13T20:41:34.793",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:41:38.241",
+    "MODIFIEDBY": "system",
+    "SCOPE": "RU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "855d58d5-35b6-47ad-aa5a-82101f4397d4",
+    "CREATEDAT": "2026-10-13T20:41:17.083",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-13T20:41:41.527",
+    "MODIFIEDBY": "system",
+    "SCOPE": "RC",
+    "ISACTIVE": 1
+  }
+]

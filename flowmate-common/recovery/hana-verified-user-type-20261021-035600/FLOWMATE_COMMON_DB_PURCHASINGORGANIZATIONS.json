@@ -1,0 +1,142 @@
+[
+  {
+    "ID": "455bf9bd-4d9a-5d32-ac0d-6c2287f2a420",
+    "CREATEDAT": "2026-10-04T18:32:29.37",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.37",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "DIALOG",
+    "PURCHASINGORGANIZATIONNAME": "Dialog Purchasing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "15e4dd37-da1c-5db3-bb7d-233b5380c96c",
+    "CREATEDAT": "2026-10-04T18:32:29.37",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.37",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK00",
+    "PURCHASINGORGANIZATIONNAME": "Reference Pur Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "41afe9eb-6f3d-5b6a-b3bf-39b9a0882395",
+    "CREATEDAT": "2026-10-04T18:32:29.37",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.37",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK10",
+    "PURCHASINGORGANIZATIONNAME": "DAP Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "176c4aff-73e7-5671-9b88-2affbd7ac610",
+    "CREATEDAT": "2026-10-04T18:32:29.37",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.37",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK20",
+    "PURCHASINGORGANIZATIONNAME": "DBN Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fbd04f0e-93b1-53ce-917e-2e5a028aca3b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK25",
+    "PURCHASINGORGANIZATIONNAME": "HeadStart LK25",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "76e7dfd2-f4c8-5b45-a6c4-c1e4fafe039b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK30",
+    "PURCHASINGORGANIZATIONNAME": "DTV Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2d8341b2-8c0f-5edf-81f1-4f28ca001217",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK32",
+    "PURCHASINGORGANIZATIONNAME": "DDTL Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "21428f9c-e7ad-5e2a-86d4-2440018b558d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK60",
+    "PURCHASINGORGANIZATIONNAME": "LK60 Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a0e6fcd6-98ca-59bc-b52e-e545589c41f7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK65",
+    "PURCHASINGORGANIZATIONNAME": "DBS Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ef2b2553-2983-594a-b716-14aaf59b86d0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK70",
+    "PURCHASINGORGANIZATIONNAME": "DNS Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "577bcd8f-9f0c-530b-9585-72fb22f17672",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK75",
+    "PURCHASINGORGANIZATIONNAME": "DHL - Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0e3d85f3-ca62-5541-967c-2c6bc05b4347",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK80",
+    "PURCHASINGORGANIZATIONNAME": "H1 Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a6de1e7e-855e-5148-99f4-484c784efd61",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK85",
+    "PURCHASINGORGANIZATIONNAME": "DADIF-Purchasing Org",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6518b8a1-d68b-5b84-8f37-2400676b1fdd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "PURCHASINGORGANIZATIONCODE": "LK90",
+    "PURCHASINGORGANIZATIONNAME": "DFP Purchasing Org",
+    "ISACTIVE": 1
+  }
+]

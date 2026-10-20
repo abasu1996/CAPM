@@ -1,0 +1,1612 @@
+[
+  {
+    "ID": "3a6324c3-1e05-5674-b236-8a03b6dce06a",
+    "CREATEDAT": "2026-10-04T18:32:30.391",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.391",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "SITE-CMB-001",
+    "SITENAME": "Colombo Central Tower",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "70c807b6-a56e-5bd5-8965-05bd4a7b2b7b",
+    "CREATEDAT": "2026-10-04T18:32:30.391",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.391",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "SITE-CMB-002",
+    "SITENAME": "Colombo Fort Rooftop",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c4eb2d9b-04a3-5209-882b-d4a21b4884b8",
+    "CREATEDAT": "2026-10-04T18:32:30.391",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.391",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "SITE-KDY-001",
+    "SITENAME": "Kandy Hill Tower",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d11c0aee-b5cc-5a46-9ab3-39dadbbb20b4",
+    "CREATEDAT": "2026-10-04T18:32:30.391",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.391",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "SITE-GLE-001",
+    "SITENAME": "Galle Coastal Tower",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "289dd8aa-f372-5e23-8eb0-315c04bee5ff",
+    "CREATEDAT": "2026-10-04T18:32:30.391",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.391",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "SITE-JAF-001",
+    "SITENAME": "Jaffna North Tower",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f9cff136-5154-5f9a-a351-41b3feb9a354",
+    "CREATEDAT": "2026-10-04T18:32:30.391",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.391",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "SITE-NEG-001",
+    "SITENAME": "Negombo Beach Tower",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "343e24e2-e6c9-58d3-a439-0b4d6d90a4a5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "2100",
+    "SITENAME": "CM1776",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "69dfe6dc-9d4e-57cd-a999-7d1de1fb61b1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "8041",
+    "SITENAME": "COL_JLA_A",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "13b45a40-e494-5339-acb7-d9c5765fceb8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "CM0175",
+    "SITENAME": "UPL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a903b13f-f349-5756-b991-832921a2ae83",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "CM2083",
+    "SITENAME": "Aramaya_Rd",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "95e6dfcb-5d05-587d-a6ec-c4b214f49c71",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM009",
+    "SITENAME": "Chawakachcheri",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "676eef85-fbb7-5ae3-a48e-2d38b465b024",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GM0139",
+    "SITENAME": "EKALA_NORTH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ec1d61a4-98c1-5c01-b82e-be987a4bd0c4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "HA0108",
+    "SITENAME": "Sooriyawewa_Stadium_Indoor",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fa3e9d42-8b24-5980-9e97-52fd6bcf7d6a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "HA0163",
+    "SITENAME": "Ellagala",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c3aa21c4-5163-57f5-9a6a-a9a18e3cd98b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "MU0052",
+    "SITENAME": "Muthiankattu",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1bfc53ef-a963-533b-bc9f-529f6d6c7989",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN001",
+    "SITENAME": "Nawam_Mawatha",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2c8101de-cf1a-55ea-9ec6-86b62a318f51",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN007",
+    "SITENAME": "Dharmapala_Mawatha",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "79a1fb28-b53f-5a48-ad76-45b0ddfa8dd8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN008",
+    "SITENAME": "Alreferd_house",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e96fd497-2b91-50e4-b54e-38b0b59a6a60",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN010",
+    "SITENAME": "HEAD_OFFICE_Union_Place",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "34b404b9-bd00-5d7c-8cf4-8f5056aa3456",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN011",
+    "SITENAME": "N-Eliya_Bunglow",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "db678240-3f60-5030-b173-c7348dfd552d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN012",
+    "SITENAME": "Bandarawela_Bunglow",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "388bf81f-cf6a-5964-8019-7d347f60a4b4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN016",
+    "SITENAME": "Kandy_Arcade",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bb59e8e3-7390-530e-b183-778a3e4bd8ad",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN017",
+    "SITENAME": "Galle_Arcade",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d7da7950-d8a7-5258-b481-ef56334dac1a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN018",
+    "SITENAME": "Kurunegala_Arcade",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "138f98f8-6126-5adf-b134-5d4ae8ce1099",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN021",
+    "SITENAME": "Kandy_Holiday_Bunglow",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "be15550b-455a-51eb-8687-d346596917d0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN023",
+    "SITENAME": "Nawala_Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b21a128b-1b2f-5828-ae65-135a342e8bd1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN024",
+    "SITENAME": "Panadura_Service_Center",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dc3816a1-f307-5970-8a49-4b93320fadb6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN027",
+    "SITENAME": "Meewella",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "036274dd-a191-5ed2-b42a-c1a0bc677bd2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "PO0123",
+    "SITENAME": "Borawewa_Army_Camp_Temp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "415a8cb2-b710-519f-97fa-76917b256949",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "RA0015",
+    "SITENAME": "Nivithigala",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "add673f0-b2d0-5a4d-9077-f71fbeeac315",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM001",
+    "SITENAME": "Head Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3737612e-82d8-5ad7-8990-f6644d63029c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM002",
+    "SITENAME": "Akbar",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "98830e48-a678-5a93-b592-1a47aeefd41b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM003",
+    "SITENAME": "Ampara",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "19640786-67d4-5653-8da9-a788fea3961f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM004",
+    "SITENAME": "Anuradhapura",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "04eeb68e-ddec-5a6b-a825-b392cdc952b5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM005",
+    "SITENAME": "Badulla",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2885572e-e4bd-52c9-b9cb-6f6cc9807fcd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM006",
+    "SITENAME": "Badulla_RO",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7139d042-cb5a-5371-b461-c40f4eb9e92f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM007",
+    "SITENAME": "Bambalapitiya",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "11b00946-27b0-5c16-b35d-6ee272e29d8d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM008",
+    "SITENAME": "Batticaloa",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d7f7d091-eda3-528c-8432-78a6707a6775",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM010",
+    "SITENAME": "DBN_DMW",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9cd3ee79-b52e-5488-9d76-6f1f843ea9a9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM011",
+    "SITENAME": "Dematagoda",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "035f1e20-409d-525a-bcf8-8b29e5c5fd3c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM012",
+    "SITENAME": "D_Athurugiriya",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "14e7769f-a489-50cc-8954-61d764d10b82",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM013",
+    "SITENAME": "D_Avissawella",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a2506da5-614a-5825-bf3b-6e2db3dc37b3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM014",
+    "SITENAME": "Depot_Balangoda",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b4d63915-778e-5a67-bf01-f60e0550fb58",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM015",
+    "SITENAME": "Depot_Bandarawela",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1adb20ea-0b01-5e9f-bac6-2243a99c6424",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM016",
+    "SITENAME": "Depot_Bibila",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c400c6d2-de07-5b08-9eb5-6e3457509f9d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM017",
+    "SITENAME": "Depot_Dambulla_Sub_depots",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8a9fab00-7304-5944-9114-137acee2023f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM018",
+    "SITENAME": "Depot_Elpitiya",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d860b1ee-d42d-50b2-a97c-9e6d994e2a48",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM019",
+    "SITENAME": "Depot_Embilipitiya",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f3a96e2c-236a-5337-b5b1-1ae50f41f7d4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM020",
+    "SITENAME": "Depot_Embilipitya",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4ca7797b-c28f-5fdd-a8bf-e6924fd5bfcf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM021",
+    "SITENAME": "Depot_Gampaha",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5012612f-c151-5153-a3fe-af38e3cb8377",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM022",
+    "SITENAME": "Depot_Gampola",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "46b43d33-8d3a-5c5d-9f4c-6a52a30c2061",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM023",
+    "SITENAME": "Depot_Hambantota",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "03f34fa1-92e9-5efa-95b6-6a01bf15947e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM024",
+    "SITENAME": "Depot_Hantana",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b59c928f-7454-5407-aa91-b3df1a6b5298",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM025",
+    "SITENAME": "Depot_Horana",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "97aeaca6-9367-5892-ab78-63f6403a2062",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM026",
+    "SITENAME": "Depot_Ja_Ela",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "63f93b23-76bf-54df-87f1-d780756e0e28",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM027",
+    "SITENAME": "Depot_Kegalle",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "604d0cd6-c56a-5acf-8e1f-87aa54866146",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM028",
+    "SITENAME": "Depot_Mahiyanganaya",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7cf7d6ed-b6a3-5b75-ae87-4d08849dfc2e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM029",
+    "SITENAME": "Depot_Mannarama",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "90bb35de-b9e2-5ee9-9117-672f848d1d79",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM031",
+    "SITENAME": "Depot_Matara",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "476f0d51-065f-598d-a712-b432fc3d96b0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM032",
+    "SITENAME": "Depot_Matara",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "190eb198-bd54-58f7-9438-c442d1a7db5c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM033",
+    "SITENAME": "Depot_Monaragala",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b8bb98a5-83e1-5225-942f-80d4ce5d3216",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM034",
+    "SITENAME": "Depot_Monaragala",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "64af17d3-202a-5f0a-b51b-e55443157e59",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM035",
+    "SITENAME": "Depot_Negambo",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "db8cfd9a-d13e-57c0-9f8f-f7f04964876f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM036",
+    "SITENAME": "Depot_Nugegoda",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e7cb335f-08ec-5b1e-9315-a12abd7d1cfd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM037",
+    "SITENAME": "Depot_Polonnaruwa",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4bebcc63-a18e-5bdd-841a-8ed730d0addf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM038",
+    "SITENAME": "Depot_Putthalam",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0cdc007c-7c38-58de-9956-85ed33f3ab29",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM039",
+    "SITENAME": "Depot_Trinco",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b8f9cc18-5d09-508d-95c0-4025cafc9d8f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM041",
+    "SITENAME": "Galle_Regional_Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7b8a9627-bdb4-568f-96d5-ea6af8d0c0a5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM042",
+    "SITENAME": "Galle_WH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f96bc249-f066-5eb8-82c4-eb319a8e2d06",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM043",
+    "SITENAME": "Kaluthara_Regional_Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b8608fe0-9993-5a3b-9f83-6cf05e00b735",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM044",
+    "SITENAME": "Kandy_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "089028d6-9703-5cd5-bfa7-36c693ec999a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM045",
+    "SITENAME": "Kilinochchi_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5a13f2e0-be3e-57ef-8884-cf9332ff27ac",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM047",
+    "SITENAME": "Kotikawatta_CFSS_Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bc8c20bc-5238-5e47-b33a-90d23e5cc1ec",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM048",
+    "SITENAME": "Kurunegala_New_Regional",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d32c8412-0b36-5f16-9b65-096f8353fcb0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM049",
+    "SITENAME": "Kurunegala_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "55480583-d8ef-5e91-9d8d-25f1685a9150",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM052",
+    "SITENAME": "Mega_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7d4a4c1a-ec74-518a-9137-4b2d447c380f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM053",
+    "SITENAME": "Mt.Lavinia",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "80140bf4-539e-573d-b2de-f0a64274fa3c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM054",
+    "SITENAME": "Nawala_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "52ec1d12-68f4-5896-8a58-1ba9e2a60029",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM056",
+    "SITENAME": "Nugegoda_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0710dfef-dc43-5a3d-bc52-88791dd20fdb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM057",
+    "SITENAME": "One_GF_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1273c3a5-211c-5765-bf5c-7dfcf9b973f6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM058",
+    "SITENAME": "Peliyagoda_W/H",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b5f62c1c-b29c-5292-91e5-6e6d70b4295d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM059",
+    "SITENAME": "Piliyandala",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bb7d482a-22a1-51c5-9798-87270c7938c9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM060",
+    "SITENAME": "Rathnapura_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "390defda-1734-5108-af05-537afe5775c0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM061",
+    "SITENAME": "Rathnapura_DNS_Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eb300191-49df-51cb-ad64-71ce9c222918",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM062",
+    "SITENAME": "Rathnapura_RH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d56699bf-0552-5beb-8f0e-f974c607d68c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM063",
+    "SITENAME": "Rathnapura",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "45c5e4ab-15f2-53b6-8dfa-7d4de1219e5c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM064",
+    "SITENAME": "Technical_Center",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "170d1c94-8c92-5917-bfa0-c199666e494b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM065",
+    "SITENAME": "Trincomalee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8228f99a-cab7-56f4-9cbc-3b5dc656b232",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM067",
+    "SITENAME": "Vavuniya",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3b65181e-db5c-5c5c-878c-78bd112ca053",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM069",
+    "SITENAME": "WTC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "616bf9fc-dee2-58a4-8151-00635c30bbb9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM070",
+    "SITENAME": "Jaffna CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0d97cb95-1ba6-5970-9ceb-da6e7a6ceb30",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM071",
+    "SITENAME": "Kandy_City_Centre",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "53e9e619-00b0-56d2-831e-0a159a3867e1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM072",
+    "SITENAME": "Matara_SCLS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "69a792cf-6ffd-54e5-99b7-0c61d1b66358",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM073",
+    "SITENAME": "BIA_Arrival_Walkway",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "50e5c8bc-9485-5fed-aab8-dfd8ab4bfd2f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM074",
+    "SITENAME": "BIA_Transit",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6110e632-6d59-50bc-9828-cfd7bc55f341",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM075",
+    "SITENAME": "Matara_SCLC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "21594c34-0780-5ce4-becc-bc88dc9aa483",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM076",
+    "SITENAME": "Mattala Airport CS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8cd29775-0cca-5282-a437-9b9c20f81587",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM077",
+    "SITENAME": "Mt. Lavinia_SCLS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1f6e3f5-f38e-5ab8-8a28-58b320611cda",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM078",
+    "SITENAME": "Puttalam_DTV_DR",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2cc41287-8b50-592e-a355-f6c3638d0116",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN037",
+    "SITENAME": "Anuradapura_Arcade",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9664f26b-4499-5879-abf1-03c52ddcee33",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN038",
+    "SITENAME": "Rathnapura_Arcade",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2010f022-b1ed-5779-8690-b51efb99d6a7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN039",
+    "SITENAME": "Vavuniya_Service_Centre",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e99e5ae0-7ee3-5551-8f8c-96e262d155e5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN040",
+    "SITENAME": "Ampara_Service_Centre",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7aca3e52-dbed-5f6f-922c-67d37e987777",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN041",
+    "SITENAME": "Dharmapala_Stores",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a4a1c38e-7d76-59e2-b6fd-7a07aefdd5e2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN042",
+    "SITENAME": "Buzz",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8d43bdad-aaba-56c5-8d3e-a7244671ccaa",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN043",
+    "SITENAME": "Mabole_WH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c42e8cd9-5e99-59e9-a09f-b277452a6a1d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN044",
+    "SITENAME": "Kandy_WH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "28830377-e216-5a9c-b232-a05450fd355d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN045",
+    "SITENAME": "Galle_WH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "34e30466-571b-557f-9394-2634860e85d6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN046",
+    "SITENAME": "Kala_WH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "de8fdb06-08cd-58f1-a36f-163bd08c1472",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN047",
+    "SITENAME": "Peliyagoda_WH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6a8faf1a-ad23-543e-a2cf-0e35665197a0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN048",
+    "SITENAME": "Wattala_WH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "98182125-f1ab-5fb2-a4ce-5d15ff0694c8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN049",
+    "SITENAME": "Foster_lane",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "62d3cd59-4cb4-5dae-b98c-01a2e506b30f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN050",
+    "SITENAME": "Batticaloa_Service_Centre",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cddb1adf-124a-534c-a304-adb15b444522",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN052",
+    "SITENAME": "Akbar_Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "71d4d25e-c282-55ea-9817-99c12968bba5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN053",
+    "SITENAME": "Chava_Service_Center",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "01abc14c-637a-59cb-ad62-c86507e0cb37",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN054",
+    "SITENAME": "Kandy_City_Center",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c58bab4b-2390-5fc6-9dcd-94438a359531",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN055",
+    "SITENAME": "Piliyandala_Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b20c2cff-2c03-5c21-9988-8551e6a930f2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN056",
+    "SITENAME": "Kala_WH",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "11e98ba1-dba0-59cb-85c9-088f65836e58",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN057",
+    "SITENAME": "Kadawatha_Msc_Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6fda65ea-009a-5ba6-9d89-cb61b82b624f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN058",
+    "SITENAME": "Galle_Regional_Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7a88997d-e10e-5d4a-ad46-6f3383d2b5e7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN059",
+    "SITENAME": "Kurunegala_Regional_Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1efb5ef4-367f-54c8-815e-39c578aab7e1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN060",
+    "SITENAME": "Kala_MSC_Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3ee96eaf-2f8f-5e39-b100-e62d42e04885",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN061",
+    "SITENAME": "Malambe_MSC_Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "199c9309-498a-51d0-9bbc-f8050d47a0f8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN062",
+    "SITENAME": "Kulugammana_Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d5725f4a-89e2-5209-9497-dc431ad9ee61",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN063",
+    "SITENAME": "Bambalapitiya_Iconic Centre",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b4b0f318-992c-5c54-bce5-c9a42265c503",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN064",
+    "SITENAME": "Park Land Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "170a05be-af8b-5f8b-9a1f-fcb298939984",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN065",
+    "SITENAME": "Airport_Transit",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dc3ae4a6-d19a-5793-8b24-90c5c198b4e2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN066",
+    "SITENAME": "Killinochi Arc",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "17c0408f-4831-5862-b0c9-a41ad1348a13",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN067",
+    "SITENAME": "Liberty Plaza",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "60c65adf-0874-58b2-bee8-ceac89d09746",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN068",
+    "SITENAME": "Indra Office",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d74574d4-e0ce-5a88-b6c9-fdc81269260c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN070",
+    "SITENAME": "Anuradhapura Depot",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "415ce3a2-4b15-5ecc-b43b-c897297a1585",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN071",
+    "SITENAME": "Indra_Building",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c2ce42c2-1147-5704-92fd-a840ee74e9a3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN072",
+    "SITENAME": "Killinochchi Arc",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "75f1ef25-8b15-54a5-9f34-f8a7ba530456",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN073",
+    "SITENAME": "Rathnapura TSC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0d5077f2-2a10-513a-80b0-b54c4281ac6f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN074",
+    "SITENAME": "Ampara TSC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c88e624c-be1d-5942-ab31-26b9f96bee4c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN075",
+    "SITENAME": "Liberty Plaza",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5c51106e-71ee-5c10-816c-cb3a238ca9f0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN076",
+    "SITENAME": "Bambalapitiya SC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "da53f6a0-9c23-5f4f-adc6-6bd5c0bdeaf1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN077",
+    "SITENAME": "Kaluthara Region",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "11a2a02c-a926-5369-9942-56aa59b20038",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN078",
+    "SITENAME": "Anu; pura Region",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "195cc637-28d1-5f84-8e01-b74d3f0b1514",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN079",
+    "SITENAME": "dialog_union_place_technical_cen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cafcd9be-7142-53de-a4f4-065183cd5c4a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN080",
+    "SITENAME": "Biyagama regional",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "826dd465-a1d0-509e-82e5-34de9225f905",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN081",
+    "SITENAME": "Heylex Park",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8f849f71-40ae-5ca4-b69d-c5b882c9e711",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN082",
+    "SITENAME": "CHUNNAKKAM RO",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e791c7a8-71cc-5fd8-95d2-4c6dca332a40",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN083",
+    "SITENAME": "KANDY – PITAKANDA ( MIDLAND ) RO",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2e07649b-4378-590b-a380-5a7499823f8e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "CM0091",
+    "SITENAME": "Piliyandala",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d48c67d7-65e4-5fa7-90f5-a3d47252459c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM040",
+    "SITENAME": "Galle_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "88ebc1d3-5948-5485-b34f-e70f63496f74",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM055",
+    "SITENAME": "Negombo_CEC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "839926a7-c95c-58f5-a09e-a8ce9c0e5659",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "GFM068",
+    "SITENAME": "Wennappuwa",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "031f9023-eb9b-5888-8924-996b681f38d6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN002",
+    "SITENAME": "Access_Towers",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b4a7e170-a335-5edc-94f7-63771b10c094",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN003",
+    "SITENAME": "Hayleys",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f957bee3-c577-5410-a35d-c3b67296f643",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN004",
+    "SITENAME": "HNB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3c7e523e-9055-5d2c-9248-e05a20261e19",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN005",
+    "SITENAME": "Airport_Arrival",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "55d646b7-d8b8-5232-9a91-c087f10b30d0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN006",
+    "SITENAME": "Airport_Departure",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "719dba10-70e5-5da3-840c-7356559af67c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN009",
+    "SITENAME": "Vauxhall_Street",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a370fd98-e45c-5196-b67b-ff611977b77c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SITEID": "NEN013",
+    "SITENAME": "Colombo_Arcade",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1e6bff5-1c41-4ce8-974d-e3bfe34615dd",
+    "CREATEDAT": "2026-10-18T07:31:34.799",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-18T07:31:34.799",
+    "MODIFIEDBY": "system",
+    "SITEID": "0001",
+    "SITENAME": "Werk 0001",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2a2313ce-ad2f-4ed9-9a5e-a15b68d7c4a7",
+    "CREATEDAT": "2026-10-18T07:31:34.823",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-18T07:31:34.823",
+    "MODIFIEDBY": "system",
+    "SITEID": "1000",
+    "SITENAME": "Head Office - DAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "34da588b-a8c3-437e-8b5a-9b6a64fc311d",
+    "CREATEDAT": "2026-10-18T07:51:24.135",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-18T07:51:24.135",
+    "MODIFIEDBY": "system",
+    "SITEID": "1100",
+    "SITENAME": "Head Office - DBN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4536c5df-319b-4f7d-ae87-1edc0a2ee78d",
+    "CREATEDAT": "2026-10-18T14:01:21.641",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-18T14:01:21.641",
+    "MODIFIEDBY": "system",
+    "SITEID": "0001",
+    "SITENAME": "Werk 0001",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0f4edb1f-fe78-4379-a60c-e68fe54846ed",
+    "CREATEDAT": "2026-10-18T14:01:21.656",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-18T14:01:21.656",
+    "MODIFIEDBY": "system",
+    "SITEID": "1000",
+    "SITENAME": "Head Office - DAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "56ccc251-abb2-4f96-a29b-264f246e87e8",
+    "CREATEDAT": "2026-10-18T17:47:24.949",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-18T17:47:24.949",
+    "MODIFIEDBY": "system",
+    "SITEID": "1200",
+    "SITENAME": "Head Office - DTV",
+    "ISACTIVE": 1
+  }
+]

@@ -1,0 +1,146 @@
+[
+  {
+    "NAME": "Supervisor",
+    "DESCR": "Supervisor of I2P Team",
+    "CODE": "ZSUP",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "QC",
+    "DESCR": "QC Role in I2P team",
+    "CODE": "ZQC",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Specialist",
+    "DESCR": "Specialist within the portfolio",
+    "CODE": "SPECIALIST",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Assistant Manager",
+    "DESCR": "Assistant Manager within the portfolio",
+    "CODE": "ASSISTANT_MANAGER",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Unit Manager",
+    "DESCR": "Unit Manager within the portfolio",
+    "CODE": "UNIT_MANAGER",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Manager",
+    "DESCR": "Manager within the portfolio",
+    "CODE": "MANAGER",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Chief Manager",
+    "DESCR": "Chief Manager within the portfolio",
+    "CODE": "CHIEF_MANAGER",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Senior Manager",
+    "DESCR": "Senior Manager within the portfolio",
+    "CODE": "SENIOR_MANAGER",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Senior General Manager",
+    "DESCR": "Senior General Manager within the portfolio",
+    "CODE": "SGM",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "General Manager",
+    "DESCR": "General Manager within the portfolio",
+    "CODE": "GM",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Head",
+    "DESCR": "Head within the portfolio",
+    "CODE": "HEAD",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Chief Officer",
+    "DESCR": "Chief Officer within the portfolio",
+    "CODE": "CHIEF_OFFICER",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Senior Vice President",
+    "DESCR": "Senior Vice President within the portfolio",
+    "CODE": "SVP",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Vice President",
+    "DESCR": "Vice President within the portfolio",
+    "CODE": "VP",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Group Financial Controller",
+    "DESCR": "Group Financial Controller",
+    "CODE": "GFC",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Group Business Controller",
+    "DESCR": "Group Business Controller",
+    "CODE": "GBC",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Group Chief Operating Officer",
+    "DESCR": "Group Chief Operating Officer",
+    "CODE": "GCOO",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Group Chief Financial Officer",
+    "DESCR": "Group Chief Financial Officer",
+    "CODE": "GCFO",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Group Chief Executive Officer",
+    "DESCR": "Group Chief Executive Officer",
+    "CODE": "GCEO",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Head - GFAR",
+    "DESCR": "Head - Group Financial Accounting and Reporting",
+    "CODE": "HEAD_GFAR",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "HoD - Technology Fulfilment and Assurance",
+    "DESCR": "Head of Department - Technology Fulfilment and Assurance",
+    "CODE": "HOD_TECH_FULFILMENT_ASSURANCE",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Manager Imports - SCM",
+    "DESCR": "Manager Imports - Supply Chain Management",
+    "CODE": "MANAGER_IMPORTS_SCM",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Head of SCM",
+    "DESCR": "Head of Supply Chain Management",
+    "CODE": "HEAD_SCM",
+    "ISACTIVE": 1
+  },
+  {
+    "NAME": "Group Chief Procurement Officer",
+    "DESCR": "Group Chief Procurement Officer",
+    "CODE": "GCPO",
+    "ISACTIVE": 1
+  }
+]

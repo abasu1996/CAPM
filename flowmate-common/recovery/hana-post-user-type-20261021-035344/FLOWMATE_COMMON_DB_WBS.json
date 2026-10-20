@@ -1,0 +1,58 @@
+[
+  {
+    "ID": "4f237431-c9f9-57f4-b49f-ba13c76fef4e",
+    "CREATEDAT": "2026-10-04T18:32:31.211",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:31.211",
+    "MODIFIEDBY": "anonymous",
+    "WBSCODE": "WBS-NW-001",
+    "WBSDESCRIPTION": "WBS-NW-001 Network Rollout",
+    "ISACTIVE": 1,
+    "COMPANYCODE": null,
+    "PLANT": null,
+    "PROJECTID": null,
+    "WBSID": null
+  },
+  {
+    "ID": "2ce2c4ea-6c7e-5509-a185-e89a82d04382",
+    "CREATEDAT": "2026-10-04T18:32:31.211",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:31.211",
+    "MODIFIEDBY": "anonymous",
+    "WBSCODE": "WBS-NW-002",
+    "WBSDESCRIPTION": "WBS-NW-002 Capacity Upgrade",
+    "ISACTIVE": 1,
+    "COMPANYCODE": null,
+    "PLANT": null,
+    "PROJECTID": null,
+    "WBSID": null
+  },
+  {
+    "ID": "0d842fe8-9b4c-5bfc-ae50-d7e5db026097",
+    "CREATEDAT": "2026-10-04T18:32:31.211",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:31.211",
+    "MODIFIEDBY": "anonymous",
+    "WBSCODE": "WBS-IT-001",
+    "WBSDESCRIPTION": "WBS-IT-001 IT Platform",
+    "ISACTIVE": 1,
+    "COMPANYCODE": null,
+    "PLANT": null,
+    "PROJECTID": null,
+    "WBSID": null
+  },
+  {
+    "ID": "b31c1da2-cbee-5d0c-b58d-5a0aabbc1920",
+    "CREATEDAT": "2026-10-04T18:32:31.211",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:31.211",
+    "MODIFIEDBY": "anonymous",
+    "WBSCODE": "WBS-MK-001",
+    "WBSDESCRIPTION": "WBS-MK-001 Marketing Campaign",
+    "ISACTIVE": 1,
+    "COMPANYCODE": null,
+    "PLANT": null,
+    "PROJECTID": null,
+    "WBSID": null
+  }
+]

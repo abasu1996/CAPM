@@ -1,0 +1,1969 @@
+[
+  {
+    "CODE": "%",
+    "NAME": "Percentage",
+    "DESCRIPTION": "Percentage",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "%O",
+    "NAME": "Per mille",
+    "DESCRIPTION": "Per mille",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "ONE",
+    "NAME": "One",
+    "DESCRIPTION": "One",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  },
+  {
+    "CODE": "D",
+    "NAME": "Days",
+    "DESCRIPTION": "Days",
+    "ISACTIVE": 1,
+    "SORTORDER": 40
+  },
+  {
+    "CODE": "22S",
+    "NAME": "Square millimeter/second",
+    "DESCRIPTION": "Square millimeter/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 50
+  },
+  {
+    "CODE": "CMS",
+    "NAME": "Centimeter/second",
+    "DESCRIPTION": "Centimeter/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 60
+  },
+  {
+    "CODE": "000",
+    "NAME": "Meter/Minute",
+    "DESCRIPTION": "Meter/Minute",
+    "ISACTIVE": 1,
+    "SORTORDER": 70
+  },
+  {
+    "CODE": "µL",
+    "NAME": "Microliter",
+    "DESCRIPTION": "Microliter",
+    "ISACTIVE": 1,
+    "SORTORDER": 80
+  },
+  {
+    "CODE": "µF",
+    "NAME": "Microfarad",
+    "DESCRIPTION": "Microfarad",
+    "ISACTIVE": 1,
+    "SORTORDER": 90
+  },
+  {
+    "CODE": "IB",
+    "NAME": "Pikofarad",
+    "DESCRIPTION": "Pikofarad",
+    "ISACTIVE": 1,
+    "SORTORDER": 100
+  },
+  {
+    "CODE": "A",
+    "NAME": "Ampere",
+    "DESCRIPTION": "Ampere",
+    "ISACTIVE": 1,
+    "SORTORDER": 110
+  },
+  {
+    "CODE": "GOH",
+    "NAME": "Gigaohm",
+    "DESCRIPTION": "Gigaohm",
+    "ISACTIVE": 1,
+    "SORTORDER": 120
+  },
+  {
+    "CODE": "GM3",
+    "NAME": "Gram/Cubic meter",
+    "DESCRIPTION": "Gram/Cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 130
+  },
+  {
+    "CODE": "ACR",
+    "NAME": "Acre",
+    "DESCRIPTION": "Acre",
+    "ISACTIVE": 1,
+    "SORTORDER": 140
+  },
+  {
+    "CODE": "B",
+    "NAME": "Byte",
+    "DESCRIPTION": "Byte",
+    "ISACTIVE": 1,
+    "SORTORDER": 150
+  },
+  {
+    "CODE": "KD3",
+    "NAME": "Kilogram/cubic decimeter",
+    "DESCRIPTION": "Kilogram/cubic decimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 160
+  },
+  {
+    "CODE": "QML",
+    "NAME": "Kilomol",
+    "DESCRIPTION": "Kilomol",
+    "ISACTIVE": 1,
+    "SORTORDER": 170
+  },
+  {
+    "CODE": "NI",
+    "NAME": "Kilonewton",
+    "DESCRIPTION": "Kilonewton",
+    "ISACTIVE": 1,
+    "SORTORDER": 180
+  },
+  {
+    "CODE": "MN",
+    "NAME": "Meganewton",
+    "DESCRIPTION": "Meganewton",
+    "ISACTIVE": 1,
+    "SORTORDER": 190
+  },
+  {
+    "CODE": "MGO",
+    "NAME": "Megohm",
+    "DESCRIPTION": "Megohm",
+    "ISACTIVE": 1,
+    "SORTORDER": 200
+  },
+  {
+    "CODE": "MHV",
+    "NAME": "Megavolt",
+    "DESCRIPTION": "Megavolt",
+    "ISACTIVE": 1,
+    "SORTORDER": 210
+  },
+  {
+    "CODE": "µA",
+    "NAME": "Microampere",
+    "DESCRIPTION": "Microampere",
+    "ISACTIVE": 1,
+    "SORTORDER": 220
+  },
+  {
+    "CODE": "BAG",
+    "NAME": "Bag",
+    "DESCRIPTION": "Bag",
+    "ISACTIVE": 1,
+    "SORTORDER": 230
+  },
+  {
+    "CODE": "BAR",
+    "NAME": "bar",
+    "DESCRIPTION": "bar",
+    "ISACTIVE": 1,
+    "SORTORDER": 240
+  },
+  {
+    "CODE": "BT",
+    "NAME": "Bottle",
+    "DESCRIPTION": "Bottle",
+    "ISACTIVE": 1,
+    "SORTORDER": 250
+  },
+  {
+    "CODE": "BOX",
+    "NAME": "BOX",
+    "DESCRIPTION": "BOX",
+    "ISACTIVE": 1,
+    "SORTORDER": 260
+  },
+  {
+    "CODE": "BQK",
+    "NAME": "Becquerel/kilogram",
+    "DESCRIPTION": "Becquerel/kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 270
+  },
+  {
+    "CODE": "RF",
+    "NAME": "Millifarad",
+    "DESCRIPTION": "Millifarad",
+    "ISACTIVE": 1,
+    "SORTORDER": 280
+  },
+  {
+    "CODE": "M/M",
+    "NAME": "Mol per cubic meter",
+    "DESCRIPTION": "Mol per cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 290
+  },
+  {
+    "CODE": "M/L",
+    "NAME": "Mol per liter",
+    "DESCRIPTION": "Mol per liter",
+    "ISACTIVE": 1,
+    "SORTORDER": 300
+  },
+  {
+    "CODE": "NA",
+    "NAME": "Nanoampere",
+    "DESCRIPTION": "Nanoampere",
+    "ISACTIVE": 1,
+    "SORTORDER": 310
+  },
+  {
+    "CODE": "C3S",
+    "NAME": "Cubic centimeter/second",
+    "DESCRIPTION": "Cubic centimeter/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 320
+  },
+  {
+    "CODE": "R-U",
+    "NAME": "Nanofarad",
+    "DESCRIPTION": "Nanofarad",
+    "ISACTIVE": 1,
+    "SORTORDER": 330
+  },
+  {
+    "CODE": "NMM",
+    "NAME": "Newton/Square millimeter",
+    "DESCRIPTION": "Newton/Square millimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 340
+  },
+  {
+    "CODE": "CCM",
+    "NAME": "Cubic centimeter",
+    "DESCRIPTION": "Cubic centimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 350
+  },
+  {
+    "CODE": "CD",
+    "NAME": "Candela",
+    "DESCRIPTION": "Candela",
+    "ISACTIVE": 1,
+    "SORTORDER": 360
+  },
+  {
+    "CODE": "CD3",
+    "NAME": "Cubic decimeter",
+    "DESCRIPTION": "Cubic decimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 370
+  },
+  {
+    "CODE": "CLL",
+    "NAME": "Battery Cell",
+    "DESCRIPTION": "Battery Cell",
+    "ISACTIVE": 1,
+    "SORTORDER": 380
+  },
+  {
+    "CODE": "CM",
+    "NAME": "Centimeter",
+    "DESCRIPTION": "Centimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 390
+  },
+  {
+    "CODE": "CM2",
+    "NAME": "Square centimeter",
+    "DESCRIPTION": "Square centimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 400
+  },
+  {
+    "CODE": "CMH",
+    "NAME": "Centimeter/hour",
+    "DESCRIPTION": "Centimeter/hour",
+    "ISACTIVE": 1,
+    "SORTORDER": 410
+  },
+  {
+    "CODE": "CV",
+    "NAME": "Case",
+    "DESCRIPTION": "Case",
+    "ISACTIVE": 1,
+    "SORTORDER": 420
+  },
+  {
+    "CODE": "CL",
+    "NAME": "Centiliter",
+    "DESCRIPTION": "Centiliter",
+    "ISACTIVE": 1,
+    "SORTORDER": 430
+  },
+  {
+    "CODE": "S/M",
+    "NAME": "Siemens per meter",
+    "DESCRIPTION": "Siemens per meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 440
+  },
+  {
+    "CODE": "TOM",
+    "NAME": "Ton/Cubic meter",
+    "DESCRIPTION": "Ton/Cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 450
+  },
+  {
+    "CODE": "VAM",
+    "NAME": "Voltampere",
+    "DESCRIPTION": "Voltampere",
+    "ISACTIVE": 1,
+    "SORTORDER": 460
+  },
+  {
+    "CODE": "dB",
+    "NAME": "Decibel",
+    "DESCRIPTION": "Decibel",
+    "ISACTIVE": 1,
+    "SORTORDER": 470
+  },
+  {
+    "CODE": "DEG",
+    "NAME": "Degree",
+    "DESCRIPTION": "Degree",
+    "ISACTIVE": 1,
+    "SORTORDER": 480
+  },
+  {
+    "CODE": "DM",
+    "NAME": "Decimeter",
+    "DESCRIPTION": "Decimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 490
+  },
+  {
+    "CODE": "DR",
+    "NAME": "Drum",
+    "DESCRIPTION": "Drum",
+    "ISACTIVE": 1,
+    "SORTORDER": 500
+  },
+  {
+    "CODE": "DZ",
+    "NAME": "Dozen",
+    "DESCRIPTION": "Dozen",
+    "ISACTIVE": 1,
+    "SORTORDER": 510
+  },
+  {
+    "CODE": "EA",
+    "NAME": "each",
+    "DESCRIPTION": "each",
+    "ISACTIVE": 1,
+    "SORTORDER": 520
+  },
+  {
+    "CODE": "EU",
+    "NAME": "Enzyme Units",
+    "DESCRIPTION": "Enzyme Units",
+    "ISACTIVE": 1,
+    "SORTORDER": 530
+  },
+  {
+    "CODE": "EML",
+    "NAME": "Enzyme Units / Milliliter",
+    "DESCRIPTION": "Enzyme Units / Milliliter",
+    "ISACTIVE": 1,
+    "SORTORDER": 540
+  },
+  {
+    "CODE": "F",
+    "NAME": "Farad",
+    "DESCRIPTION": "Farad",
+    "ISACTIVE": 1,
+    "SORTORDER": 550
+  },
+  {
+    "CODE": "°F",
+    "NAME": "Fahrenheit",
+    "DESCRIPTION": "Fahrenheit",
+    "ISACTIVE": 1,
+    "SORTORDER": 560
+  },
+  {
+    "CODE": "FT",
+    "NAME": "Foot",
+    "DESCRIPTION": "Foot",
+    "ISACTIVE": 1,
+    "SORTORDER": 570
+  },
+  {
+    "CODE": "FT2",
+    "NAME": "Square foot",
+    "DESCRIPTION": "Square foot",
+    "ISACTIVE": 1,
+    "SORTORDER": 580
+  },
+  {
+    "CODE": "FT3",
+    "NAME": "Cubic foot",
+    "DESCRIPTION": "Cubic foot",
+    "ISACTIVE": 1,
+    "SORTORDER": 590
+  },
+  {
+    "CODE": "G",
+    "NAME": "Gram",
+    "DESCRIPTION": "Gram",
+    "ISACTIVE": 1,
+    "SORTORDER": 600
+  },
+  {
+    "CODE": "G/L",
+    "NAME": "gram act.ingrd / liter",
+    "DESCRIPTION": "gram act.ingrd / liter",
+    "ISACTIVE": 1,
+    "SORTORDER": 610
+  },
+  {
+    "CODE": "GAU",
+    "NAME": "Gram Gold",
+    "DESCRIPTION": "Gram Gold",
+    "ISACTIVE": 1,
+    "SORTORDER": 620
+  },
+  {
+    "CODE": "GB",
+    "NAME": "Giga Byte",
+    "DESCRIPTION": "Giga Byte",
+    "ISACTIVE": 1,
+    "SORTORDER": 630
+  },
+  {
+    "CODE": "°C",
+    "NAME": "Degrees Celsius",
+    "DESCRIPTION": "Degrees Celsius",
+    "ISACTIVE": 1,
+    "SORTORDER": 640
+  },
+  {
+    "CODE": "GHG",
+    "NAME": "Gram/hectogram",
+    "DESCRIPTION": "Gram/hectogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 650
+  },
+  {
+    "CODE": "GJ",
+    "NAME": "Gigajoule",
+    "DESCRIPTION": "Gigajoule",
+    "ISACTIVE": 1,
+    "SORTORDER": 660
+  },
+  {
+    "CODE": "GKG",
+    "NAME": "Gram/kilogram",
+    "DESCRIPTION": "Gram/kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 670
+  },
+  {
+    "CODE": "GLI",
+    "NAME": "Gram/liter",
+    "DESCRIPTION": "Gram/liter",
+    "ISACTIVE": 1,
+    "SORTORDER": 680
+  },
+  {
+    "CODE": "GAL",
+    "NAME": "US gallon",
+    "DESCRIPTION": "US gallon",
+    "ISACTIVE": 1,
+    "SORTORDER": 690
+  },
+  {
+    "CODE": "GPM",
+    "NAME": "Gallons per mile (US)",
+    "DESCRIPTION": "Gallons per mile (US)",
+    "ISACTIVE": 1,
+    "SORTORDER": 700
+  },
+  {
+    "CODE": "GM",
+    "NAME": "Gram/Mol",
+    "DESCRIPTION": "Gram/Mol",
+    "ISACTIVE": 1,
+    "SORTORDER": 710
+  },
+  {
+    "CODE": "GM2",
+    "NAME": "Gram/square meter",
+    "DESCRIPTION": "Gram/square meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 720
+  },
+  {
+    "CODE": "GPH",
+    "NAME": "Gallons per hour (US)",
+    "DESCRIPTION": "Gallons per hour (US)",
+    "ISACTIVE": 1,
+    "SORTORDER": 730
+  },
+  {
+    "CODE": "µGQ",
+    "NAME": "Microgram/cubic meter",
+    "DESCRIPTION": "Microgram/cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 740
+  },
+  {
+    "CODE": "GRO",
+    "NAME": "Gross",
+    "DESCRIPTION": "Gross",
+    "ISACTIVE": 1,
+    "SORTORDER": 750
+  },
+  {
+    "CODE": "GAI",
+    "NAME": "Gram act. ingrd.",
+    "DESCRIPTION": "Gram act. ingrd.",
+    "ISACTIVE": 1,
+    "SORTORDER": 760
+  },
+  {
+    "CODE": "H",
+    "NAME": "Hour",
+    "DESCRIPTION": "Hour",
+    "ISACTIVE": 1,
+    "SORTORDER": 770
+  },
+  {
+    "CODE": "HA",
+    "NAME": "Hectare",
+    "DESCRIPTION": "Hectare",
+    "ISACTIVE": 1,
+    "SORTORDER": 780
+  },
+  {
+    "CODE": "HL",
+    "NAME": "Hectoliter",
+    "DESCRIPTION": "Hectoliter",
+    "ISACTIVE": 1,
+    "SORTORDER": 790
+  },
+  {
+    "CODE": "HPA",
+    "NAME": "Hectopascal",
+    "DESCRIPTION": "Hectopascal",
+    "ISACTIVE": 1,
+    "SORTORDER": 800
+  },
+  {
+    "CODE": "HZ",
+    "NAME": "Hertz (1/second)",
+    "DESCRIPTION": "Hertz (1/second)",
+    "ISACTIVE": 1,
+    "SORTORDER": 810
+  },
+  {
+    "CODE": "\"",
+    "NAME": "Inch",
+    "DESCRIPTION": "Inch",
+    "ISACTIVE": 1,
+    "SORTORDER": 820
+  },
+  {
+    "CODE": "\"2",
+    "NAME": "Square inch",
+    "DESCRIPTION": "Square inch",
+    "ISACTIVE": 1,
+    "SORTORDER": 830
+  },
+  {
+    "CODE": "\"3",
+    "NAME": "Cubic inch",
+    "DESCRIPTION": "Cubic inch",
+    "ISACTIVE": 1,
+    "SORTORDER": 840
+  },
+  {
+    "CODE": "J",
+    "NAME": "Joule",
+    "DESCRIPTION": "Joule",
+    "ISACTIVE": 1,
+    "SORTORDER": 850
+  },
+  {
+    "CODE": "YR",
+    "NAME": "Years",
+    "DESCRIPTION": "Years",
+    "ISACTIVE": 1,
+    "SORTORDER": 860
+  },
+  {
+    "CODE": "JKG",
+    "NAME": "Joule/Kilogram",
+    "DESCRIPTION": "Joule/Kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 870
+  },
+  {
+    "CODE": "JKK",
+    "NAME": "Spec. Heat Capacity",
+    "DESCRIPTION": "Spec. Heat Capacity",
+    "ISACTIVE": 1,
+    "SORTORDER": 880
+  },
+  {
+    "CODE": "JMO",
+    "NAME": "Joule/Mol",
+    "DESCRIPTION": "Joule/Mol",
+    "ISACTIVE": 1,
+    "SORTORDER": 890
+  },
+  {
+    "CODE": "K",
+    "NAME": "Kelvin",
+    "DESCRIPTION": "Kelvin",
+    "ISACTIVE": 1,
+    "SORTORDER": 900
+  },
+  {
+    "CODE": "KA",
+    "NAME": "Kiloampere",
+    "DESCRIPTION": "Kiloampere",
+    "ISACTIVE": 1,
+    "SORTORDER": 910
+  },
+  {
+    "CODE": "CAN",
+    "NAME": "Canister",
+    "DESCRIPTION": "Canister",
+    "ISACTIVE": 1,
+    "SORTORDER": 920
+  },
+  {
+    "CODE": "CAR",
+    "NAME": "Carton",
+    "DESCRIPTION": "Carton",
+    "ISACTIVE": 1,
+    "SORTORDER": 930
+  },
+  {
+    "CODE": "kB",
+    "NAME": "Kilobyte",
+    "DESCRIPTION": "Kilobyte",
+    "ISACTIVE": 1,
+    "SORTORDER": 940
+  },
+  {
+    "CODE": "KBK",
+    "NAME": "Kilobecquerel/kilogram",
+    "DESCRIPTION": "Kilobecquerel/kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 950
+  },
+  {
+    "CODE": "kbs",
+    "NAME": "Kilobits per second",
+    "DESCRIPTION": "Kilobits per second",
+    "ISACTIVE": 1,
+    "SORTORDER": 960
+  },
+  {
+    "CODE": "KG",
+    "NAME": "Kilogram",
+    "DESCRIPTION": "Kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 970
+  },
+  {
+    "CODE": "KGF",
+    "NAME": "Kilogram/Square meter",
+    "DESCRIPTION": "Kilogram/Square meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 980
+  },
+  {
+    "CODE": "KGK",
+    "NAME": "Kilogram/Kilogram",
+    "DESCRIPTION": "Kilogram/Kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 990
+  },
+  {
+    "CODE": "KGM",
+    "NAME": "Kilogram/Mol",
+    "DESCRIPTION": "Kilogram/Mol",
+    "ISACTIVE": 1,
+    "SORTORDER": 1000
+  },
+  {
+    "CODE": "KGS",
+    "NAME": "Kilogram/second",
+    "DESCRIPTION": "Kilogram/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 1010
+  },
+  {
+    "CODE": "KGV",
+    "NAME": "Kilogram/cubic meter",
+    "DESCRIPTION": "Kilogram/cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1020
+  },
+  {
+    "CODE": "KAI",
+    "NAME": "Kilogram act. ingrd.",
+    "DESCRIPTION": "Kilogram act. ingrd.",
+    "ISACTIVE": 1,
+    "SORTORDER": 1030
+  },
+  {
+    "CODE": "KHZ",
+    "NAME": "Kilohertz",
+    "DESCRIPTION": "Kilohertz",
+    "ISACTIVE": 1,
+    "SORTORDER": 1040
+  },
+  {
+    "CODE": "CRT",
+    "NAME": "Crate",
+    "DESCRIPTION": "Crate",
+    "ISACTIVE": 1,
+    "SORTORDER": 1050
+  },
+  {
+    "CODE": "KJ",
+    "NAME": "Kilojoule",
+    "DESCRIPTION": "Kilojoule",
+    "ISACTIVE": 1,
+    "SORTORDER": 1060
+  },
+  {
+    "CODE": "KJK",
+    "NAME": "Kilojoule/kilogram",
+    "DESCRIPTION": "Kilojoule/kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 1070
+  },
+  {
+    "CODE": "KJM",
+    "NAME": "Kilojoule/Mol",
+    "DESCRIPTION": "Kilojoule/Mol",
+    "ISACTIVE": 1,
+    "SORTORDER": 1080
+  },
+  {
+    "CODE": "KM",
+    "NAME": "Kilometer",
+    "DESCRIPTION": "Kilometer",
+    "ISACTIVE": 1,
+    "SORTORDER": 1090
+  },
+  {
+    "CODE": "KM2",
+    "NAME": "Square kilometer",
+    "DESCRIPTION": "Square kilometer",
+    "ISACTIVE": 1,
+    "SORTORDER": 1100
+  },
+  {
+    "CODE": "KMH",
+    "NAME": "Kilometer/hour",
+    "DESCRIPTION": "Kilometer/hour",
+    "ISACTIVE": 1,
+    "SORTORDER": 1110
+  },
+  {
+    "CODE": "KMK",
+    "NAME": "Cubic meter/Cubic meter",
+    "DESCRIPTION": "Cubic meter/Cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1120
+  },
+  {
+    "CODE": "KMN",
+    "NAME": "Kelvin/Minute",
+    "DESCRIPTION": "Kelvin/Minute",
+    "ISACTIVE": 1,
+    "SORTORDER": 1130
+  },
+  {
+    "CODE": "KMS",
+    "NAME": "Kelvin/Second",
+    "DESCRIPTION": "Kelvin/Second",
+    "ISACTIVE": 1,
+    "SORTORDER": 1140
+  },
+  {
+    "CODE": "KOH",
+    "NAME": "Kiloohm",
+    "DESCRIPTION": "Kiloohm",
+    "ISACTIVE": 1,
+    "SORTORDER": 1150
+  },
+  {
+    "CODE": "KPA",
+    "NAME": "Kilopascal",
+    "DESCRIPTION": "Kilopascal",
+    "ISACTIVE": 1,
+    "SORTORDER": 1160
+  },
+  {
+    "CODE": "KT",
+    "NAME": "Kilotonne",
+    "DESCRIPTION": "Kilotonne",
+    "ISACTIVE": 1,
+    "SORTORDER": 1170
+  },
+  {
+    "CODE": "KV",
+    "NAME": "Kilovolt",
+    "DESCRIPTION": "Kilovolt",
+    "ISACTIVE": 1,
+    "SORTORDER": 1180
+  },
+  {
+    "CODE": "KVA",
+    "NAME": "Kilovoltampere",
+    "DESCRIPTION": "Kilovoltampere",
+    "ISACTIVE": 1,
+    "SORTORDER": 1190
+  },
+  {
+    "CODE": "KW",
+    "NAME": "Kilowatt",
+    "DESCRIPTION": "Kilowatt",
+    "ISACTIVE": 1,
+    "SORTORDER": 1200
+  },
+  {
+    "CODE": "KWH",
+    "NAME": "Kilowatt hours",
+    "DESCRIPTION": "Kilowatt hours",
+    "ISACTIVE": 1,
+    "SORTORDER": 1210
+  },
+  {
+    "CODE": "KIK",
+    "NAME": "kg act.ingrd. / kg",
+    "DESCRIPTION": "kg act.ingrd. / kg",
+    "ISACTIVE": 1,
+    "SORTORDER": 1220
+  },
+  {
+    "CODE": "L",
+    "NAME": "Liter",
+    "DESCRIPTION": "Liter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1230
+  },
+  {
+    "CODE": "LMI",
+    "NAME": "Liter/Minute",
+    "DESCRIPTION": "Liter/Minute",
+    "ISACTIVE": 1,
+    "SORTORDER": 1240
+  },
+  {
+    "CODE": "LB",
+    "NAME": "US pound",
+    "DESCRIPTION": "US pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 1250
+  },
+  {
+    "CODE": "AU",
+    "NAME": "Activity unit",
+    "DESCRIPTION": "Activity unit",
+    "ISACTIVE": 1,
+    "SORTORDER": 1260
+  },
+  {
+    "CODE": "LF",
+    "NAME": "Leaf",
+    "DESCRIPTION": "Leaf",
+    "ISACTIVE": 1,
+    "SORTORDER": 1270
+  },
+  {
+    "CODE": "LHK",
+    "NAME": "Liter per 100 km",
+    "DESCRIPTION": "Liter per 100 km",
+    "ISACTIVE": 1,
+    "SORTORDER": 1280
+  },
+  {
+    "CODE": "LKR",
+    "NAME": "Cost for Unit",
+    "DESCRIPTION": "Cost for Unit",
+    "ISACTIVE": 1,
+    "SORTORDER": 1290
+  },
+  {
+    "CODE": "LMS",
+    "NAME": "Liter/Molsecond",
+    "DESCRIPTION": "Liter/Molsecond",
+    "ISACTIVE": 1,
+    "SORTORDER": 1300
+  },
+  {
+    "CODE": "LPH",
+    "NAME": "Liter per hour",
+    "DESCRIPTION": "Liter per hour",
+    "ISACTIVE": 1,
+    "SORTORDER": 1310
+  },
+  {
+    "CODE": "M",
+    "NAME": "Meter",
+    "DESCRIPTION": "Meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1320
+  },
+  {
+    "CODE": "M%",
+    "NAME": "Percent mass",
+    "DESCRIPTION": "Percent mass",
+    "ISACTIVE": 1,
+    "SORTORDER": 1330
+  },
+  {
+    "CODE": "M%O",
+    "NAME": "Permille mass",
+    "DESCRIPTION": "Permille mass",
+    "ISACTIVE": 1,
+    "SORTORDER": 1340
+  },
+  {
+    "CODE": "M/S",
+    "NAME": "Meter/second",
+    "DESCRIPTION": "Meter/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 1350
+  },
+  {
+    "CODE": "M2",
+    "NAME": "Square meter",
+    "DESCRIPTION": "Square meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1360
+  },
+  {
+    "CODE": "M-2",
+    "NAME": "1 / square meter",
+    "DESCRIPTION": "1 / square meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1370
+  },
+  {
+    "CODE": "M2S",
+    "NAME": "Square meter/second",
+    "DESCRIPTION": "Square meter/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 1380
+  },
+  {
+    "CODE": "M3",
+    "NAME": "Cubic meter",
+    "DESCRIPTION": "Cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1390
+  },
+  {
+    "CODE": "M3S",
+    "NAME": "Cubic meter/second",
+    "DESCRIPTION": "Cubic meter/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 1400
+  },
+  {
+    "CODE": "MA",
+    "NAME": "Milliampere",
+    "DESCRIPTION": "Milliampere",
+    "ISACTIVE": 1,
+    "SORTORDER": 1410
+  },
+  {
+    "CODE": "MBA",
+    "NAME": "Millibar",
+    "DESCRIPTION": "Millibar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1420
+  },
+  {
+    "CODE": "Mbs",
+    "NAME": "Megabits per second",
+    "DESCRIPTION": "Megabits per second",
+    "ISACTIVE": 1,
+    "SORTORDER": 1430
+  },
+  {
+    "CODE": "MBZ",
+    "NAME": "Meterbar/second",
+    "DESCRIPTION": "Meterbar/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 1440
+  },
+  {
+    "CODE": "MEJ",
+    "NAME": "Megajoule",
+    "DESCRIPTION": "Megajoule",
+    "ISACTIVE": 1,
+    "SORTORDER": 1450
+  },
+  {
+    "CODE": "MG",
+    "NAME": "Milligram",
+    "DESCRIPTION": "Milligram",
+    "ISACTIVE": 1,
+    "SORTORDER": 1460
+  },
+  {
+    "CODE": "MGE",
+    "NAME": "Milligram/Square centimeter",
+    "DESCRIPTION": "Milligram/Square centimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1470
+  },
+  {
+    "CODE": "MGG",
+    "NAME": "Milligram/gram",
+    "DESCRIPTION": "Milligram/gram",
+    "ISACTIVE": 1,
+    "SORTORDER": 1480
+  },
+  {
+    "CODE": "MGK",
+    "NAME": "Milligram/kilogram",
+    "DESCRIPTION": "Milligram/kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 1490
+  },
+  {
+    "CODE": "MGL",
+    "NAME": "Milligram/liter",
+    "DESCRIPTION": "Milligram/liter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1500
+  },
+  {
+    "CODE": "MGQ",
+    "NAME": "Milligram/cubic meter",
+    "DESCRIPTION": "Milligram/cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1510
+  },
+  {
+    "CODE": "MGW",
+    "NAME": "Megawatt",
+    "DESCRIPTION": "Megawatt",
+    "ISACTIVE": 1,
+    "SORTORDER": 1520
+  },
+  {
+    "CODE": "MHZ",
+    "NAME": "Megahertz",
+    "DESCRIPTION": "Megahertz",
+    "ISACTIVE": 1,
+    "SORTORDER": 1530
+  },
+  {
+    "CODE": "MI",
+    "NAME": "Mile",
+    "DESCRIPTION": "Mile",
+    "ISACTIVE": 1,
+    "SORTORDER": 1540
+  },
+  {
+    "CODE": "MI2",
+    "NAME": "Square mile",
+    "DESCRIPTION": "Square mile",
+    "ISACTIVE": 1,
+    "SORTORDER": 1550
+  },
+  {
+    "CODE": "µM",
+    "NAME": "Micrometer",
+    "DESCRIPTION": "Micrometer",
+    "ISACTIVE": 1,
+    "SORTORDER": 1560
+  },
+  {
+    "CODE": "MIN",
+    "NAME": "Minute",
+    "DESCRIPTION": "Minute",
+    "ISACTIVE": 1,
+    "SORTORDER": 1570
+  },
+  {
+    "CODE": "MIS",
+    "NAME": "Microsecond",
+    "DESCRIPTION": "Microsecond",
+    "ISACTIVE": 1,
+    "SORTORDER": 1580
+  },
+  {
+    "CODE": "MIJ",
+    "NAME": "Millijoule",
+    "DESCRIPTION": "Millijoule",
+    "ISACTIVE": 1,
+    "SORTORDER": 1590
+  },
+  {
+    "CODE": "ML",
+    "NAME": "Milliliter",
+    "DESCRIPTION": "Milliliter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1600
+  },
+  {
+    "CODE": "MLK",
+    "NAME": "Milliliter/cubic meter",
+    "DESCRIPTION": "Milliliter/cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1610
+  },
+  {
+    "CODE": "MLI",
+    "NAME": "Milliliter act. ingr.",
+    "DESCRIPTION": "Milliliter act. ingr.",
+    "ISACTIVE": 1,
+    "SORTORDER": 1620
+  },
+  {
+    "CODE": "MM",
+    "NAME": "Millimeter",
+    "DESCRIPTION": "Millimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1630
+  },
+  {
+    "CODE": "MM2",
+    "NAME": "Square millimeter",
+    "DESCRIPTION": "Square millimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1640
+  },
+  {
+    "CODE": "MMA",
+    "NAME": "Millimeter/year",
+    "DESCRIPTION": "Millimeter/year",
+    "ISACTIVE": 1,
+    "SORTORDER": 1650
+  },
+  {
+    "CODE": "MMG",
+    "NAME": "Millimol/gram",
+    "DESCRIPTION": "Millimol/gram",
+    "ISACTIVE": 1,
+    "SORTORDER": 1660
+  },
+  {
+    "CODE": "MMH",
+    "NAME": "Millimeter/hour",
+    "DESCRIPTION": "Millimeter/hour",
+    "ISACTIVE": 1,
+    "SORTORDER": 1670
+  },
+  {
+    "CODE": "MMK",
+    "NAME": "Millimol/kilogram",
+    "DESCRIPTION": "Millimol/kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 1680
+  },
+  {
+    "CODE": "MMO",
+    "NAME": "Millimol",
+    "DESCRIPTION": "Millimol",
+    "ISACTIVE": 1,
+    "SORTORDER": 1690
+  },
+  {
+    "CODE": "MM3",
+    "NAME": "Cubic millimeter",
+    "DESCRIPTION": "Cubic millimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1700
+  },
+  {
+    "CODE": "MMS",
+    "NAME": "Multimedia Message Service",
+    "DESCRIPTION": "Multimedia Message Service",
+    "ISACTIVE": 1,
+    "SORTORDER": 1710
+  },
+  {
+    "CODE": "MNM",
+    "NAME": "Millinewton/meter",
+    "DESCRIPTION": "Millinewton/meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1720
+  },
+  {
+    "CODE": "MOK",
+    "NAME": "Mol/kilogram",
+    "DESCRIPTION": "Mol/kilogram",
+    "ISACTIVE": 1,
+    "SORTORDER": 1730
+  },
+  {
+    "CODE": "MOL",
+    "NAME": "Mol",
+    "DESCRIPTION": "Mol",
+    "ISACTIVE": 1,
+    "SORTORDER": 1740
+  },
+  {
+    "CODE": "MON",
+    "NAME": "Months",
+    "DESCRIPTION": "Months",
+    "ISACTIVE": 1,
+    "SORTORDER": 1750
+  },
+  {
+    "CODE": "MPA",
+    "NAME": "Megapascal",
+    "DESCRIPTION": "Megapascal",
+    "ISACTIVE": 1,
+    "SORTORDER": 1760
+  },
+  {
+    "CODE": "MPB",
+    "NAME": "Mass parts per billion",
+    "DESCRIPTION": "Mass parts per billion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1770
+  },
+  {
+    "CODE": "MPG",
+    "NAME": "Miles per gallon (US)",
+    "DESCRIPTION": "Miles per gallon (US)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1780
+  },
+  {
+    "CODE": "MPM",
+    "NAME": "Mass parts per million",
+    "DESCRIPTION": "Mass parts per million",
+    "ISACTIVE": 1,
+    "SORTORDER": 1790
+  },
+  {
+    "CODE": "MPS",
+    "NAME": "Millipascal seconds",
+    "DESCRIPTION": "Millipascal seconds",
+    "ISACTIVE": 1,
+    "SORTORDER": 1800
+  },
+  {
+    "CODE": "MPT",
+    "NAME": "Mass parts per trillion",
+    "DESCRIPTION": "Mass parts per trillion",
+    "ISACTIVE": 1,
+    "SORTORDER": 1810
+  },
+  {
+    "CODE": "MPZ",
+    "NAME": "Meterpascal/second",
+    "DESCRIPTION": "Meterpascal/second",
+    "ISACTIVE": 1,
+    "SORTORDER": 1820
+  },
+  {
+    "CODE": "M3H",
+    "NAME": "Cubic meter/Hour",
+    "DESCRIPTION": "Cubic meter/Hour",
+    "ISACTIVE": 1,
+    "SORTORDER": 1830
+  },
+  {
+    "CODE": "MSE",
+    "NAME": "Millisecond",
+    "DESCRIPTION": "Millisecond",
+    "ISACTIVE": 1,
+    "SORTORDER": 1840
+  },
+  {
+    "CODE": "MS2",
+    "NAME": "Meter/second squared",
+    "DESCRIPTION": "Meter/second squared",
+    "ISACTIVE": 1,
+    "SORTORDER": 1850
+  },
+  {
+    "CODE": "MTE",
+    "NAME": "Millitesla",
+    "DESCRIPTION": "Millitesla",
+    "ISACTIVE": 1,
+    "SORTORDER": 1860
+  },
+  {
+    "CODE": "M/H",
+    "NAME": "Meter/Hour",
+    "DESCRIPTION": "Meter/Hour",
+    "ISACTIVE": 1,
+    "SORTORDER": 1870
+  },
+  {
+    "CODE": "MV",
+    "NAME": "Millivolt",
+    "DESCRIPTION": "Millivolt",
+    "ISACTIVE": 1,
+    "SORTORDER": 1880
+  },
+  {
+    "CODE": "MVA",
+    "NAME": "Megavoltampere",
+    "DESCRIPTION": "Megavoltampere",
+    "ISACTIVE": 1,
+    "SORTORDER": 1890
+  },
+  {
+    "CODE": "MW",
+    "NAME": "Milliwatt",
+    "DESCRIPTION": "Milliwatt",
+    "ISACTIVE": 1,
+    "SORTORDER": 1900
+  },
+  {
+    "CODE": "MWH",
+    "NAME": "Megawatt hour",
+    "DESCRIPTION": "Megawatt hour",
+    "ISACTIVE": 1,
+    "SORTORDER": 1910
+  },
+  {
+    "CODE": "N",
+    "NAME": "Newton",
+    "DESCRIPTION": "Newton",
+    "ISACTIVE": 1,
+    "SORTORDER": 1920
+  },
+  {
+    "CODE": "NAM",
+    "NAME": "Nanometer",
+    "DESCRIPTION": "Nanometer",
+    "ISACTIVE": 1,
+    "SORTORDER": 1930
+  },
+  {
+    "CODE": "NM",
+    "NAME": "Newton/meter",
+    "DESCRIPTION": "Newton/meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 1940
+  },
+  {
+    "CODE": "NS",
+    "NAME": "Nanosecond",
+    "DESCRIPTION": "Nanosecond",
+    "ISACTIVE": 1,
+    "SORTORDER": 1950
+  },
+  {
+    "CODE": "OCM",
+    "NAME": "Spec. Elec. Resistance",
+    "DESCRIPTION": "Spec. Elec. Resistance",
+    "ISACTIVE": 1,
+    "SORTORDER": 1960
+  },
+  {
+    "CODE": "OHM",
+    "NAME": "Ohm",
+    "DESCRIPTION": "Ohm",
+    "ISACTIVE": 1,
+    "SORTORDER": 1970
+  },
+  {
+    "CODE": "OM",
+    "NAME": "Spec. Elec. Resistance",
+    "DESCRIPTION": "Spec. Elec. Resistance",
+    "ISACTIVE": 1,
+    "SORTORDER": 1980
+  },
+  {
+    "CODE": "OZ",
+    "NAME": "Ounce",
+    "DESCRIPTION": "Ounce",
+    "ISACTIVE": 1,
+    "SORTORDER": 1990
+  },
+  {
+    "CODE": "FOZ",
+    "NAME": "Fluid Ounce US",
+    "DESCRIPTION": "Fluid Ounce US",
+    "ISACTIVE": 1,
+    "SORTORDER": 2000
+  },
+  {
+    "CODE": "P",
+    "NAME": "Points",
+    "DESCRIPTION": "Points",
+    "ISACTIVE": 1,
+    "SORTORDER": 2010
+  },
+  {
+    "CODE": "PA",
+    "NAME": "Pascal",
+    "DESCRIPTION": "Pascal",
+    "ISACTIVE": 1,
+    "SORTORDER": 2020
+  },
+  {
+    "CODE": "PAA",
+    "NAME": "Pair",
+    "DESCRIPTION": "Pair",
+    "ISACTIVE": 1,
+    "SORTORDER": 2030
+  },
+  {
+    "CODE": "PAC",
+    "NAME": "Pack",
+    "DESCRIPTION": "Pack",
+    "ISACTIVE": 1,
+    "SORTORDER": 2040
+  },
+  {
+    "CODE": "PAL",
+    "NAME": "Pallet",
+    "DESCRIPTION": "Pallet",
+    "ISACTIVE": 1,
+    "SORTORDER": 2050
+  },
+  {
+    "CODE": "PAS",
+    "NAME": "Pascal second",
+    "DESCRIPTION": "Pascal second",
+    "ISACTIVE": 1,
+    "SORTORDER": 2060
+  },
+  {
+    "CODE": "PRC",
+    "NAME": "Group proportion",
+    "DESCRIPTION": "Group proportion",
+    "ISACTIVE": 1,
+    "SORTORDER": 2070
+  },
+  {
+    "CODE": "PKT",
+    "NAME": "Packet",
+    "DESCRIPTION": "Packet",
+    "ISACTIVE": 1,
+    "SORTORDER": 2080
+  },
+  {
+    "CODE": "PMI",
+    "NAME": "1/minute",
+    "DESCRIPTION": "1/minute",
+    "ISACTIVE": 1,
+    "SORTORDER": 2090
+  },
+  {
+    "CODE": "PMR",
+    "NAME": "Permeation Rate SI",
+    "DESCRIPTION": "Permeation Rate SI",
+    "ISACTIVE": 1,
+    "SORTORDER": 2100
+  },
+  {
+    "CODE": "PPB",
+    "NAME": "Parts per billion",
+    "DESCRIPTION": "Parts per billion",
+    "ISACTIVE": 1,
+    "SORTORDER": 2110
+  },
+  {
+    "CODE": "PPM",
+    "NAME": "Parts per million",
+    "DESCRIPTION": "Parts per million",
+    "ISACTIVE": 1,
+    "SORTORDER": 2120
+  },
+  {
+    "CODE": "PPT",
+    "NAME": "Parts per trillion",
+    "DESCRIPTION": "Parts per trillion",
+    "ISACTIVE": 1,
+    "SORTORDER": 2130
+  },
+  {
+    "CODE": "PRM",
+    "NAME": "Permeation Rate",
+    "DESCRIPTION": "Permeation Rate",
+    "ISACTIVE": 1,
+    "SORTORDER": 2140
+  },
+  {
+    "CODE": "PRS",
+    "NAME": "Number of Persons",
+    "DESCRIPTION": "Number of Persons",
+    "ISACTIVE": 1,
+    "SORTORDER": 2150
+  },
+  {
+    "CODE": "PS",
+    "NAME": "Picosecond",
+    "DESCRIPTION": "Picosecond",
+    "ISACTIVE": 1,
+    "SORTORDER": 2160
+  },
+  {
+    "CODE": "PT",
+    "NAME": "Pint, US liquid",
+    "DESCRIPTION": "Pint, US liquid",
+    "ISACTIVE": 1,
+    "SORTORDER": 2170
+  },
+  {
+    "CODE": "QT",
+    "NAME": "Quart, US liquid",
+    "DESCRIPTION": "Quart, US liquid",
+    "ISACTIVE": 1,
+    "SORTORDER": 2180
+  },
+  {
+    "CODE": "RHO",
+    "NAME": "Gram/cubic centimeter",
+    "DESCRIPTION": "Gram/cubic centimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 2190
+  },
+  {
+    "CODE": "ROL",
+    "NAME": "Role",
+    "DESCRIPTION": "Role",
+    "ISACTIVE": 1,
+    "SORTORDER": 2200
+  },
+  {
+    "CODE": "RU",
+    "NAME": "Routing Unit",
+    "DESCRIPTION": "Routing Unit",
+    "ISACTIVE": 1,
+    "SORTORDER": 2210
+  },
+  {
+    "CODE": "S",
+    "NAME": "Second",
+    "DESCRIPTION": "Second",
+    "ISACTIVE": 1,
+    "SORTORDER": 2220
+  },
+  {
+    "CODE": "SET",
+    "NAME": "SET",
+    "DESCRIPTION": "SET",
+    "ISACTIVE": 1,
+    "SORTORDER": 2230
+  },
+  {
+    "CODE": "SMS",
+    "NAME": "Short Message Service",
+    "DESCRIPTION": "Short Message Service",
+    "ISACTIVE": 1,
+    "SORTORDER": 2240
+  },
+  {
+    "CODE": "PC",
+    "NAME": "Piece(s)",
+    "DESCRIPTION": "Piece(s)",
+    "ISACTIVE": 1,
+    "SORTORDER": 2250
+  },
+  {
+    "CODE": "HR",
+    "NAME": "Hours",
+    "DESCRIPTION": "Hours",
+    "ISACTIVE": 1,
+    "SORTORDER": 2260
+  },
+  {
+    "CODE": "DAY",
+    "NAME": "Days",
+    "DESCRIPTION": "Days",
+    "ISACTIVE": 1,
+    "SORTORDER": 2270
+  },
+  {
+    "CODE": "TC3",
+    "NAME": "1/cubic centimeter",
+    "DESCRIPTION": "1/cubic centimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 2280
+  },
+  {
+    "CODE": "TES",
+    "NAME": "Tesla",
+    "DESCRIPTION": "Tesla",
+    "ISACTIVE": 1,
+    "SORTORDER": 2290
+  },
+  {
+    "CODE": "TS",
+    "NAME": "Thousands",
+    "DESCRIPTION": "Thousands",
+    "ISACTIVE": 1,
+    "SORTORDER": 2300
+  },
+  {
+    "CODE": "TM3",
+    "NAME": "1/cubic meter",
+    "DESCRIPTION": "1/cubic meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 2310
+  },
+  {
+    "CODE": "TO",
+    "NAME": "Tonne",
+    "DESCRIPTION": "Tonne",
+    "ISACTIVE": 1,
+    "SORTORDER": 2320
+  },
+  {
+    "CODE": "TON",
+    "NAME": "US ton",
+    "DESCRIPTION": "US ton",
+    "ISACTIVE": 1,
+    "SORTORDER": 2330
+  },
+  {
+    "CODE": "µGL",
+    "NAME": "Microgram/liter",
+    "DESCRIPTION": "Microgram/liter",
+    "ISACTIVE": 1,
+    "SORTORDER": 2340
+  },
+  {
+    "CODE": "V",
+    "NAME": "Volt",
+    "DESCRIPTION": "Volt",
+    "ISACTIVE": 1,
+    "SORTORDER": 2350
+  },
+  {
+    "CODE": "V%",
+    "NAME": "Percent volume",
+    "DESCRIPTION": "Percent volume",
+    "ISACTIVE": 1,
+    "SORTORDER": 2360
+  },
+  {
+    "CODE": "V%O",
+    "NAME": "Permille volume",
+    "DESCRIPTION": "Permille volume",
+    "ISACTIVE": 1,
+    "SORTORDER": 2370
+  },
+  {
+    "CODE": "MSC",
+    "NAME": "Microsiemens per centimeter",
+    "DESCRIPTION": "Microsiemens per centimeter",
+    "ISACTIVE": 1,
+    "SORTORDER": 2380
+  },
+  {
+    "CODE": "MPL",
+    "NAME": "Millimol per liter",
+    "DESCRIPTION": "Millimol per liter",
+    "ISACTIVE": 1,
+    "SORTORDER": 2390
+  },
+  {
+    "CODE": "VAL",
+    "NAME": "Value-only material",
+    "DESCRIPTION": "Value-only material",
+    "ISACTIVE": 1,
+    "SORTORDER": 2400
+  },
+  {
+    "CODE": "VPB",
+    "NAME": "Volume parts per billion",
+    "DESCRIPTION": "Volume parts per billion",
+    "ISACTIVE": 1,
+    "SORTORDER": 2410
+  },
+  {
+    "CODE": "VPM",
+    "NAME": "Volume parts per million",
+    "DESCRIPTION": "Volume parts per million",
+    "ISACTIVE": 1,
+    "SORTORDER": 2420
+  },
+  {
+    "CODE": "VPT",
+    "NAME": "Volume parts per trillion",
+    "DESCRIPTION": "Volume parts per trillion",
+    "ISACTIVE": 1,
+    "SORTORDER": 2430
+  },
+  {
+    "CODE": "W",
+    "NAME": "Watt",
+    "DESCRIPTION": "Watt",
+    "ISACTIVE": 1,
+    "SORTORDER": 2440
+  },
+  {
+    "CODE": "WK",
+    "NAME": "Weeks",
+    "DESCRIPTION": "Weeks",
+    "ISACTIVE": 1,
+    "SORTORDER": 2450
+  },
+  {
+    "CODE": "WdB",
+    "NAME": "Watts /dB",
+    "DESCRIPTION": "Watts /dB",
+    "ISACTIVE": 1,
+    "SORTORDER": 2460
+  },
+  {
+    "CODE": "WMK",
+    "NAME": "Heat Conductivity",
+    "DESCRIPTION": "Heat Conductivity",
+    "ISACTIVE": 1,
+    "SORTORDER": 2470
+  },
+  {
+    "CODE": "WKY",
+    "NAME": "Evaporation Rate",
+    "DESCRIPTION": "Evaporation Rate",
+    "ISACTIVE": 1,
+    "SORTORDER": 2480
+  },
+  {
+    "CODE": "YD",
+    "NAME": "Yards",
+    "DESCRIPTION": "Yards",
+    "ISACTIVE": 1,
+    "SORTORDER": 2490
+  },
+  {
+    "CODE": "YD2",
+    "NAME": "Square Yard",
+    "DESCRIPTION": "Square Yard",
+    "ISACTIVE": 1,
+    "SORTORDER": 2500
+  },
+  {
+    "CODE": "YD3",
+    "NAME": "Cubic yard",
+    "DESCRIPTION": "Cubic yard",
+    "ISACTIVE": 1,
+    "SORTORDER": 2510
+  },
+  {
+    "CODE": "Z%",
+    "NAME": "Percentage",
+    "DESCRIPTION": "Percentage",
+    "ISACTIVE": 1,
+    "SORTORDER": 2520
+  },
+  {
+    "CODE": "bbl",
+    "NAME": "British Thermal Unit/US Barrel",
+    "DESCRIPTION": "British Thermal Unit/US Barrel",
+    "ISACTIVE": 1,
+    "SORTORDER": 2530
+  },
+  {
+    "CODE": "bft",
+    "NAME": "British Thermal Unit/Cubic Ft",
+    "DESCRIPTION": "British Thermal Unit/Cubic Ft",
+    "ISACTIVE": 1,
+    "SORTORDER": 2540
+  },
+  {
+    "CODE": "bgl",
+    "NAME": "British Thermal Unit/US Gallon",
+    "DESCRIPTION": "British Thermal Unit/US Gallon",
+    "ISACTIVE": 1,
+    "SORTORDER": 2550
+  },
+  {
+    "CODE": "btl",
+    "NAME": "British Thermal Unit/US Pound",
+    "DESCRIPTION": "British Thermal Unit/US Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 2560
+  },
+  {
+    "CODE": "gj3",
+    "NAME": "Gigajoule/1000 Cubic Meters",
+    "DESCRIPTION": "Gigajoule/1000 Cubic Meters",
+    "ISACTIVE": 1,
+    "SORTORDER": 2570
+  },
+  {
+    "CODE": "gjm",
+    "NAME": "Gigajoule/Cubic Meter",
+    "DESCRIPTION": "Gigajoule/Cubic Meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 2580
+  },
+  {
+    "CODE": "gjt",
+    "NAME": "Gigajoule/US Tonne",
+    "DESCRIPTION": "Gigajoule/US Tonne",
+    "ISACTIVE": 1,
+    "SORTORDER": 2590
+  },
+  {
+    "CODE": "jm3",
+    "NAME": "Joule/Cubic Meter",
+    "DESCRIPTION": "Joule/Cubic Meter",
+    "ISACTIVE": 1,
+    "SORTORDER": 2600
+  },
+  {
+    "CODE": "kgb",
+    "NAME": "Kilogram/US Barrel",
+    "DESCRIPTION": "Kilogram/US Barrel",
+    "ISACTIVE": 1,
+    "SORTORDER": 2610
+  },
+  {
+    "CODE": "kgj",
+    "NAME": "Kilogram/Joule",
+    "DESCRIPTION": "Kilogram/Joule",
+    "ISACTIVE": 1,
+    "SORTORDER": 2620
+  },
+  {
+    "CODE": "kgm",
+    "NAME": "Kilogram/Million BTU",
+    "DESCRIPTION": "Kilogram/Million BTU",
+    "ISACTIVE": 1,
+    "SORTORDER": 2630
+  },
+  {
+    "CODE": "kgs",
+    "NAME": "Kilogram/Standard Cubic Foot",
+    "DESCRIPTION": "Kilogram/Standard Cubic Foot",
+    "ISACTIVE": 1,
+    "SORTORDER": 2640
+  },
+  {
+    "CODE": "kgt",
+    "NAME": "Kilogram/US Tonne",
+    "DESCRIPTION": "Kilogram/US Tonne",
+    "ISACTIVE": 1,
+    "SORTORDER": 2650
+  },
+  {
+    "CODE": "kml",
+    "NAME": "Kilogram/Kilogram Mole",
+    "DESCRIPTION": "Kilogram/Kilogram Mole",
+    "ISACTIVE": 1,
+    "SORTORDER": 2660
+  },
+  {
+    "CODE": "lbb",
+    "NAME": "US Pound/British Thermal Unit",
+    "DESCRIPTION": "US Pound/British Thermal Unit",
+    "ISACTIVE": 1,
+    "SORTORDER": 2670
+  },
+  {
+    "CODE": "lbg",
+    "NAME": "US Pound/US Gallon",
+    "DESCRIPTION": "US Pound/US Gallon",
+    "ISACTIVE": 1,
+    "SORTORDER": 2680
+  },
+  {
+    "CODE": "lbl",
+    "NAME": "US Pound/US Pound Mole",
+    "DESCRIPTION": "US Pound/US Pound Mole",
+    "ISACTIVE": 1,
+    "SORTORDER": 2690
+  },
+  {
+    "CODE": "lbm",
+    "NAME": "US Pound/Million BTU",
+    "DESCRIPTION": "US Pound/Million BTU",
+    "ISACTIVE": 1,
+    "SORTORDER": 2700
+  },
+  {
+    "CODE": "lbs",
+    "NAME": "US Pound/Standard Cubic Foot",
+    "DESCRIPTION": "US Pound/Standard Cubic Foot",
+    "ISACTIVE": 1,
+    "SORTORDER": 2710
+  },
+  {
+    "CODE": "lbt",
+    "NAME": "US Pound/US Tonne",
+    "DESCRIPTION": "US Pound/US Tonne",
+    "ISACTIVE": 1,
+    "SORTORDER": 2720
+  },
+  {
+    "CODE": "mbb",
+    "NAME": "Million BTU/US Barrel",
+    "DESCRIPTION": "Million BTU/US Barrel",
+    "ISACTIVE": 1,
+    "SORTORDER": 2730
+  },
+  {
+    "CODE": "mbt",
+    "NAME": "Million BTU/US Tonne",
+    "DESCRIPTION": "Million BTU/US Tonne",
+    "ISACTIVE": 1,
+    "SORTORDER": 2740
+  },
+  {
+    "CODE": "tbl",
+    "NAME": "Tonne/US Barrel",
+    "DESCRIPTION": "Tonne/US Barrel",
+    "ISACTIVE": 1,
+    "SORTORDER": 2750
+  },
+  {
+    "CODE": "tbt",
+    "NAME": "Tonne/British Thermal Unit",
+    "DESCRIPTION": "Tonne/British Thermal Unit",
+    "ISACTIVE": 1,
+    "SORTORDER": 2760
+  },
+  {
+    "CODE": "tgl",
+    "NAME": "US Tonne/US Gallon",
+    "DESCRIPTION": "US Tonne/US Gallon",
+    "ISACTIVE": 1,
+    "SORTORDER": 2770
+  },
+  {
+    "CODE": "tjl",
+    "NAME": "Tonne/Joule",
+    "DESCRIPTION": "Tonne/Joule",
+    "ISACTIVE": 1,
+    "SORTORDER": 2780
+  },
+  {
+    "CODE": "tm3",
+    "NAME": "Tonne/1000 Cubic Meters",
+    "DESCRIPTION": "Tonne/1000 Cubic Meters",
+    "ISACTIVE": 1,
+    "SORTORDER": 2790
+  },
+  {
+    "CODE": "tt",
+    "NAME": "Tonne/Tonne",
+    "DESCRIPTION": "Tonne/Tonne",
+    "ISACTIVE": 1,
+    "SORTORDER": 2800
+  },
+  {
+    "CODE": "ttj",
+    "NAME": "Tonne/Terajoule",
+    "DESCRIPTION": "Tonne/Terajoule",
+    "ISACTIVE": 1,
+    "SORTORDER": 2810
+  }
+]

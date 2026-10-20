@@ -60,6 +60,7 @@
                                     <Column><Text text="{i18n>emailLabel}" /></Column>
                                     <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>managerLabel}" /></Column>
                                     <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>roleLabel}" /></Column>
+                                    <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>userTypeLabel}" /></Column>
                                     <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>userPrincipalNameLabel}" /></Column>
                                     <Column><Text text="{i18n>statusLabel}" /></Column>
                                     <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
@@ -72,6 +73,7 @@
                                             <Text text="{email}" />
                                             <Text text="{manager/displayName}" />
                                             <Text text="{role/name}" />
+                                            <Text text="{path: 'userType', formatter: '.formatUserType'}" />
                                             <Text text="{userPrincipalName}" />
                                             <ObjectStatus
                                                 class="flowmateSemanticStatus"
@@ -171,6 +173,12 @@
                     <Label text="{i18n>roleLabel}" />
                     <Select selectedKey="{userEdit>/role_code}" items="{path: '/Roles', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}" forceSelection="false">
                         <core:Item key="{code}" text="{name}" />
+                    </Select>
+                    <Label text="{i18n>userTypeLabel}" required="true" />
+                    <Select selectedKey="{userEdit>/userType}" forceSelection="true">
+                        <core:Item key="INTERNAL" text="{i18n>internalUserType}" />
+                        <core:Item key="VENDOR" text="{i18n>vendorUserType}" />
+                        <core:Item key="TECHNICAL_API" text="{i18n>technicalApiUserType}" />
                     </Select>
                     <Label text="{i18n>managerLabel}" />
                     <HBox renderType="Bare">

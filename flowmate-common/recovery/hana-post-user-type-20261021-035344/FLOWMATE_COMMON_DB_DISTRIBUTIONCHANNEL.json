@@ -1,0 +1,332 @@
+[
+  {
+    "ID": "21058bca-8d00-5bc9-bd9f-2b545820b903",
+    "CREATEDAT": "2026-10-04T18:32:26.701",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.701",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "10",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "10 - Direct Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d4d84953-6e6b-5521-891b-3f39d8976325",
+    "CREATEDAT": "2026-10-04T18:32:26.701",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.701",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "30",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "30 - Retail",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1cb5eb6c-f3aa-5164-bec7-a3bc34547ab8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "11",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Distributor Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "abad4fd9-564f-59c6-90bf-ae89ec9f77bb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "12",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Dealer Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "95b5452c-c711-502e-a04f-bb5d889887be",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "13",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Franchisee sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "40157011-6e5c-5e05-86d0-022fbd94bbba",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "14",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Institution Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ab028e40-13e5-522b-bebe-07b96fcd2ac0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "15",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Service Centers",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "214cdc03-b77a-5b96-8a5e-8eb578944844",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "16",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "KCR",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3a7610df-9d92-56cc-bf1b-d6f9f86b6956",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "17",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "SME Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e6182c44-3697-5b90-8f98-ffc2520bbfde",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "18",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Dialog Enterprise",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f8ad07f5-d3e6-5c4e-b4fb-a66ad02a2d02",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "19",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "DTI Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a550f39d-7a48-5bc0-8b5c-449d3b6b96ce",
+    "CREATEDAT": "2026-10-04T18:32:26.701",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:26.701",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "20",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "NBD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5a50bac1-83e9-5024-bc6a-af71301f5814",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "21",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "International sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e5d15a1f-dac1-5963-b188-d7b4a7c88e84",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "22",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "BPO Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0b2f3b63-cbdc-56ec-b153-fd4191d23309",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "23",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Scrap Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "23c01097-429e-5645-a510-ce83efb9c78b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "25",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Intergroup",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "953aef7c-0a79-5044-80d5-92dc1a08f594",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "26",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "HNR Modern Channel",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0c6647cf-9d0f-5844-bf52-7f73afc9531c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "27",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Modern Chnel Grp Sal",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "81099c9f-9518-5ddd-ab88-6ed1a465d58d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "28",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "CFSS Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "db30d257-383f-5e11-bde4-edb723438deb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "29",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Airtel Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8cdc670c-5c5c-5c2c-bfd2-e5fcd7353303",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "35",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Smart Space",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "50a26bfb-4612-5bd2-b5f0-98b06c89bbb3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "40",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "LMS / AMC / Hosting",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9a3e5c75-0ef3-5ec1-9932-81786b549df7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "41",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Content / Other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "00f46e70-7683-5796-a339-050198320ac7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "42",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Mass Market",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f44b951f-ae9a-50d8-b2a0-887a54a347b9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "24",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Ads & Carriage",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "12a5b6d8-ab91-504d-8686-0f6ccfbdaad4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "43",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Retail",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6d58a9aa-b83e-589f-b3e5-dfe8a6f2f82e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "31",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "DNS Sales",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6fd74c54-40fd-5fcc-9827-c19c157703d6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "36",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "H One EPG/CA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "15d8fced-4975-514e-8823-79326529c1d9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "37",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "H One SMB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fcd34f68-fc3c-59c4-8f0b-e5e8a03b1b2e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "38",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "H One Top SMB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "48223098-2501-5c13-bdbf-12a0a40d0aaf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "39",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "H One International",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9506719a-e1c0-5025-8aa6-2cada97d54ef",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "45",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Financial services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cb831b92-8170-5f8b-aa31-2f8d4fb69c37",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DISTRIBUTIONCHANNELCODE": "46",
+    "DISTRIBUTIONCHANNELDESCRIPTION": "Other revenues",
+    "ISACTIVE": 1
+  }
+]

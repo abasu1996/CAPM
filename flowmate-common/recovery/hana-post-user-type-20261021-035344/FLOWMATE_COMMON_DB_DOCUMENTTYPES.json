@@ -1,0 +1,162 @@
+[
+  {
+    "ID": "6d5953c3-7d72-55be-87c5-e931bf525e7d",
+    "CREATEDAT": "2026-10-04T18:32:27.112",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.112",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "NB",
+    "DOCUMENTTYPEDESCRIPTION": "NB - Standard PO",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "978f6af3-64fa-55db-bbe3-6048b5618594",
+    "CREATEDAT": "2026-10-04T18:32:27.112",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.112",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "FO",
+    "DOCUMENTTYPEDESCRIPTION": "FO - Framework Order",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ae5d2263-a5ea-5f31-9225-4e66355d0ab3",
+    "CREATEDAT": "2026-10-04T18:32:27.112",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.112",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZCTR",
+    "DOCUMENTTYPEDESCRIPTION": "ZCTR - Contract Release",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1705efc4-3030-5666-b05a-225b50b18be1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZSAL",
+    "DOCUMENTTYPEDESCRIPTION": "Standalone Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "08782be7-7046-5505-bab2-4554bc19a173",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZMAN",
+    "DOCUMENTTYPEDESCRIPTION": "Contracct Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "61070c49-3a74-5b93-9f9f-21b45570a46d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZCOC",
+    "DOCUMENTTYPEDESCRIPTION": "Consumed Contract Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "afe01b51-9e16-52ca-839d-bb7996f49048",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZDPO",
+    "DOCUMENTTYPEDESCRIPTION": "Direct Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "614604ea-bf7a-5a4e-b9fc-f2d1dccad1d0",
+    "CREATEDAT": "2026-10-04T18:32:27.112",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.112",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZFOC",
+    "DOCUMENTTYPEDESCRIPTION": "FOC Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4eb48b15-231f-5d7c-9f9f-c60c67838e59",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZSUB",
+    "DOCUMENTTYPEDESCRIPTION": "Subcontracting Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7b4640b2-baea-54ef-be14-5211baaaf398",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZH01",
+    "DOCUMENTTYPEDESCRIPTION": "Document type for H1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6367ba59-3f11-542d-a64b-cb8585e246a3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZRTO",
+    "DOCUMENTTYPEDESCRIPTION": "Consumed Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7dbdcf9c-6a57-5d4c-8284-8a347bcc18ec",
+    "CREATEDAT": "2026-10-04T18:32:27.112",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.112",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZCON",
+    "DOCUMENTTYPEDESCRIPTION": "Consignment Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8b56a408-e4df-5cd5-a0e0-1f34504f775e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZMPO",
+    "DOCUMENTTYPEDESCRIPTION": "Manual Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a6304f25-f0e4-5503-aa57-b7b0baafda90",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZDFP",
+    "DOCUMENTTYPEDESCRIPTION": "DF Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c644df13-2641-5bea-afda-d6e9d9234047",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "ZRET",
+    "DOCUMENTTYPEDESCRIPTION": "Return Purchase Orders",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b6390e53-77da-5bf4-9f0a-1f908d5d292b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "DOCUMENTTYPECODE": "UB",
+    "DOCUMENTTYPEDESCRIPTION": "Stock Transfer Orders",
+    "ISACTIVE": 1
+  }
+]

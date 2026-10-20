@@ -55,7 +55,7 @@
                                     <Column width="8rem" importance="Medium" demandPopin="true"><Text text="{i18n>stepTypeLabel}" /></Column>
                                     <Column width="13rem" importance="Low" demandPopin="true"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
                                     <Column width="10rem" importance="Medium" demandPopin="true"><Text text="{i18n>processorTeamLabel}" wrapping="true" /></Column>
-                                    <Column width="7rem" importance="Low" demandPopin="true"><Text text="{i18n>roleLabel}" wrapping="true" /></Column>
+                                    <Column width="9rem" importance="Low" demandPopin="true"><Text text="{i18n>requestOriginLabel}" wrapping="true" /></Column>
                                     <Column width="5rem" importance="Low" demandPopin="true"><Text text="{i18n>slaDaysLabel}" wrapping="true" /></Column>
                                     <Column width="4rem" hAlign="Center" importance="High"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
@@ -69,7 +69,7 @@
                                             <ObjectStatus text="{= ${stepType} === 'LOA' ? ${i18n>loaStepTypeLabel} : ${i18n>processingStepTypeLabel} }" state="{= ${stepType} === 'LOA' ? 'Information' : 'None' }" />
                                             <Text text="{activityDescription}" wrapping="true" />
                                             <Text text="{processorTeamName}" wrapping="true" />
-                                            <Text text="{role}" />
+                                            <Text text="{path: 'requestOrigin', formatter: '.formatRequestOrigin'}" />
                                             <Text text="{slaDays}" />
                                             <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editProcessStepButton}" press=".onEditProcessStep" />
                                         </cells>
@@ -438,6 +438,7 @@
                                     <Column width="12rem"><Text text="{i18n>vendorCodeLabel}" wrapping="true" /></Column>
                                     <Column><Text text="{i18n>vendorNameLabel}" wrapping="true" /></Column>
                                     <Column width="20rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>vendorEmailLabel}" wrapping="true" /></Column>
+                                    <Column width="12rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>accountGroupLabel}" wrapping="true" /></Column>
                                     <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
                                 </columns>
                                 <items>
@@ -446,6 +447,7 @@
                                             <ObjectIdentifier title="{vendorCode}" />
                                             <Text text="{vendorName}" wrapping="true" />
                                             <Link text="{vendorEmail}" href="{= ${vendorEmail} ? 'mailto:' + ${vendorEmail} : '' }" />
+                                            <Text text="{AccountGroup}" />
                                             <Button
                                                 icon="sap-icon://edit"
                                                 type="Transparent"
@@ -950,6 +952,8 @@
                         type="Email"
                         maxLength="255"
                         placeholder="{i18n>vendorEmailPlaceholder}" />
+                    <Label text="{i18n>accountGroupLabel}" />
+                    <Input value="{vendorEdit>/AccountGroup}" maxLength="80" />
                 </form:SimpleForm>
             </content>
             <beginButton>
@@ -1138,8 +1142,15 @@
                             enabled="{= !!${stepEdit>/processorTeam_ID} &amp;&amp; !${stepEdit>/isVendorNotification} }"
                             press=".onClearStepProcessorTeam" />
                     </HBox>
-                    <Label text="{i18n>roleLabel}" />
-                    <Input value="{stepEdit>/role}" maxLength="100" enabled="{= ${stepEdit>/stepType} !== 'LOA' }" />
+                    <Label text="{i18n>requestOriginLabel}" required="{= ${stepEdit>/stepType} !== 'LOA' }" />
+                    <Select
+                        selectedKey="{stepEdit>/requestOrigin}"
+                        enabled="{= ${stepEdit>/stepType} !== 'LOA' }"
+                        forceSelection="true">
+                        <core:Item key="INTERNAL_USER" text="{i18n>internalUserType}" />
+                        <core:Item key="VENDOR" text="{i18n>vendorUserType}" />
+                        <core:Item key="EXTERNAL_API" text="{i18n>technicalApiUserType}" />
+                    </Select>
                     <Label text="{i18n>slaDaysLabel}" />
                     <Input value="{stepEdit>/slaDays}" type="Number" />
                     <Label text="{i18n>activeDemandTaskLabel}" />

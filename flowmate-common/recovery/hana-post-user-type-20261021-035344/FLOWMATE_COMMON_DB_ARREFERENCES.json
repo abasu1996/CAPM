@@ -1,0 +1,32 @@
+[
+  {
+    "ID": "aa538d65-582f-5b8e-80a9-a170d07e92b7",
+    "CREATEDAT": "2026-10-04T18:32:25.694",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:25.694",
+    "MODIFIEDBY": "anonymous",
+    "ARREFERENCECODE": "AR-2026-001",
+    "ARREFERENCEDESCRIPTION": "AR-2026-001 Network Expansion",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1842da57-9603-5ad9-8f08-bf46e5e30a56",
+    "CREATEDAT": "2026-10-04T18:32:25.694",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:25.694",
+    "MODIFIEDBY": "anonymous",
+    "ARREFERENCECODE": "AR-2026-002",
+    "ARREFERENCEDESCRIPTION": "AR-2026-002 IT Modernisation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "03a1d6e4-2974-5edc-a3f6-c5dc5de8d093",
+    "CREATEDAT": "2026-10-04T18:32:25.694",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:25.694",
+    "MODIFIEDBY": "anonymous",
+    "ARREFERENCECODE": "AR-2026-003",
+    "ARREFERENCEDESCRIPTION": "AR-2026-003 Retail Rollout",
+    "ISACTIVE": 1
+  }
+]

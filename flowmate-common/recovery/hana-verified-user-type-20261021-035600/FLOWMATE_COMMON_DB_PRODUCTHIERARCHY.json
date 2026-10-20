@@ -1,0 +1,22 @@
+[
+  {
+    "ID": "f86ef362-10c2-4b64-9bb9-69f931dad2d1",
+    "CREATEDAT": "2026-10-14T07:24:05.412",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-14T07:27:29.255",
+    "MODIFIEDBY": "system",
+    "PRODUCTHIERARCHYCODE": "PH001",
+    "PRODUCTHIERARCHYDESCRIPTION": "Telecom Products",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "05115676-9f10-4037-91bb-60e47c4a467b",
+    "CREATEDAT": "2026-10-14T07:24:55.703",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-14T07:27:32.119",
+    "MODIFIEDBY": "system",
+    "PRODUCTHIERARCHYCODE": "PH002",
+    "PRODUCTHIERARCHYDESCRIPTION": "Network Equipment",
+    "ISACTIVE": 1
+  }
+]

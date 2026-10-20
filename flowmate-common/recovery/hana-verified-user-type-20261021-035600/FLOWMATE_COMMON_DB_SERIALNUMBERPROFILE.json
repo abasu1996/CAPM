@@ -1,0 +1,492 @@
+[
+  {
+    "ID": "0c9b6e44-de7f-5ed8-b036-db518cf5c016",
+    "CREATEDAT": "2026-10-04T18:32:29.779",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.779",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "0001",
+    "SERIALNUMBERPROFILEDESCRIPTION": "Integrated serial no",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ec72d7ae-8cec-5b0b-98e8-73bc34d0cd69",
+    "CREATEDAT": "2026-10-04T18:32:29.779",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.779",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "0002",
+    "SERIALNUMBERPROFILEDESCRIPTION": "Serial numbers in SD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "50a47ed8-ae54-5406-b959-22c94ae73546",
+    "CREATEDAT": "2026-10-04T18:32:29.779",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:29.779",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "0003",
+    "SERIALNUMBERPROFILEDESCRIPTION": "Stock check",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cd8860c1-b366-5dad-b461-f7f7cd215239",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "0004",
+    "SERIALNUMBERPROFILEDESCRIPTION": "HU processing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dabc7d56-9ded-5705-a3ed-b11ab18bc44e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "NTC1",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NTC CME Ser. Prof",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "43e108b3-f15f-57d1-bf0f-c99f540da935",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "NTC2",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NTC OTHERS Ser. Prof",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8ad2b2ed-e655-5d24-9c9f-c396b18326a5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "NTC3",
+    "SERIALNUMBERPROFILEDESCRIPTION": "cust equip Ser.no pf",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d865f300-057f-5241-9f9f-c4aca1b47788",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "NTC4",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NTC PRT Ser.no pfle",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9ea3f6c6-aedb-59ea-a721-b42e3650ebfc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "SPL",
+    "SERIALNUMBERPROFILEDESCRIPTION": "HU processing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ad2b1a9f-8cc8-5bb4-b204-fd61cf2bfbdc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Y001",
+    "SERIALNUMBERPROFILEDESCRIPTION": "Dialog Admin",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f7c275bd-4ca0-59f2-b6cc-bf3df00ecf08",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Y002",
+    "SERIALNUMBERPROFILEDESCRIPTION": "Dialog Trading & SIM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7a656232-c76b-52e8-83c1-53ccc62400d9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Y003",
+    "SERIALNUMBERPROFILEDESCRIPTION": "Dialog CPE -Others",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c62187d2-1f1f-5989-9780-1d7bdd0e6ff3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Y004",
+    "SERIALNUMBERPROFILEDESCRIPTION": "Dialog NCA-Non Equps",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "51d5a249-dee0-501a-a75f-3305a864ed3b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00-",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_TRN Lines DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cc790a24-4d6c-5c3b-809f-68684a8a4039",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00*",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_RF Equipments DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1f25c27a-5f2b-50c8-a963-8ad0eb99961f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00#",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Baseband Eq DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f0e47266-8a4e-5214-a818-e5a94627a6a8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00+",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Processin Eq DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5a6fe4a4-bacb-57c1-bc4c-9c6e3ac36676",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z001",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Access : Alvarion",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d2fca3c3-2f74-54e9-9d34-4da34fffd4fd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z002",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Reptr & Accssoris",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2c3e75f5-de06-5745-8d6b-5c4291a9ceeb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z003",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Microwave Antenna",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2a0dd76c-e230-59ee-8b4b-6d7fc37fd982",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z004",
+    "SERIALNUMBERPROFILEDESCRIPTION": "CI_Infrastrct Towers",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "496e6857-e2bc-5747-873d-fea72a4dbb54",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z005",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_IP Core,ISP & ICT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f8dacf2c-f6e6-51de-b3f2-50c7dd206777",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z006",
+    "SERIALNUMBERPROFILEDESCRIPTION": "CP_WIMAX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bdffaf78-c00a-51ab-9feb-6d152e4d2ea6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z007",
+    "SERIALNUMBERPROFILEDESCRIPTION": "CP_Alvarn/WIPL&other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b896e61c-047c-53be-a4da-3cfea9457bc3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z008",
+    "SERIALNUMBERPROFILEDESCRIPTION": "IT_Ad Server & other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "66967066-8ea9-5f49-9666-756fe154c4e4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z009",
+    "SERIALNUMBERPROFILEDESCRIPTION": "IT_Network support",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "31acc657-e015-50c4-a26e-47b1d4ddd164",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00A",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_IB Gateway&Satelt",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2e4fbbd3-1494-5dac-8568-c72c19d6ea83",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00B",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_IB Assets-Server",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a3ec8534-7ab1-563e-99a1-1795d5896b63",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00C",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_VAS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e344e2bf-a943-5b4a-ae8a-f4e197ed5858",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00D",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Packet Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "48020474-18e7-5e74-8f97-a726fb6b868c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00E",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_MSC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d11c825a-276c-5675-ac07-1a376cf3784c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00F",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Core NSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "113109bd-d452-53e3-8c2f-ff54d3eb5c98",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00G",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_CDMA Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e183b223-6940-5d91-864a-67792f7fd423",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00H",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_CDMA BS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3ac4d735-0944-588c-ad5a-ce38b6c93155",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00I",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_BSC,RNC TC,MFS HW",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "be88e8ba-cb60-5e15-8d03-6e275b6ec4b3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00J",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Opten Sys OSS,OMC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "11d75e12-e4e8-512a-b765-41ceafe5207b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00K",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_DVBT Equipments",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f6e84dd6-99ac-55d5-bf7e-12e19d33efc4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00L",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Access : Wimax",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2733b4be-0882-50d8-b9c0-3e9f413be088",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00N",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_RBS/BTS&node B HW",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a3717050-7649-572e-bc12-fd45eebdd376",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00O",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_GSM&3G Ante&acces",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cf9388a5-c36b-52cb-9b73-cc22956a9960",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00Q",
+    "SERIALNUMBERPROFILEDESCRIPTION": "TM_Test/Measurement",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6e21bd07-720e-5d78-833b-1fd3fa1ad39a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00R",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Microwav ODU IDU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a523cfc7-8a46-5e4b-b4e5-fe5eea703711",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00T",
+    "SERIALNUMBERPROFILEDESCRIPTION": "CI_Cabin&Civil Infra",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fb184b85-00d1-5e09-b60a-f4d8e57afb8d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00U",
+    "SERIALNUMBERPROFILEDESCRIPTION": "PW_Gens & Pwr plants",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f4ceb786-84ed-58c7-8fcc-c228d5bb6410",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00V",
+    "SERIALNUMBERPROFILEDESCRIPTION": "PW_Airconditioners",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6c2cac9a-88b5-5423-9539-4f31b36b9857",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00W",
+    "SERIALNUMBERPROFILEDESCRIPTION": "PW_UPS,BattBank,Prot",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a7a5037a-16d0-5822-99ce-3254405207ba",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00X",
+    "SERIALNUMBERPROFILEDESCRIPTION": "PW_Pwr Sys&Rectifier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c0abaaf8-d6f5-57a8-a466-bf4e3ada2722",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00Y",
+    "SERIALNUMBERPROFILEDESCRIPTION": "NW_Optical Fiber",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2857ddb2-f309-5de9-9bf7-28b154928aa1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERIALNUMBERPROFILECODE": "Z00Z",
+    "SERIALNUMBERPROFILEDESCRIPTION": "CI_OpticlFiber Infra",
+    "ISACTIVE": 1
+  }
+]

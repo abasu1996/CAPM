@@ -1,0 +1,182 @@
+[
+  {
+    "ID": "8efbcb2a-d156-57ac-bd55-686adea79f0b",
+    "CREATEDAT": "2026-10-04T18:32:27.317",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.317",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "CFR",
+    "INCOTERMSDESCRIPTION": "Costs and freight",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7ee457eb-2f79-5828-9b52-9081f1dd448d",
+    "CREATEDAT": "2026-10-04T18:32:27.317",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.317",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "CIF",
+    "INCOTERMSDESCRIPTION": "Costs, insurance & freight",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6e55dd5c-c4f9-51ce-a7ec-74596d13fbb5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "CIP",
+    "INCOTERMSDESCRIPTION": "Carriage and insurance paid to",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d7a73e05-b904-5235-86f8-6a32f8bd70de",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "CPT",
+    "INCOTERMSDESCRIPTION": "Carriage paid to",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "005307ee-baa6-546c-8cec-b583df4202f8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "DAF",
+    "INCOTERMSDESCRIPTION": "Delivered at frontier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f7816597-ac4c-5e71-85ff-a2d09479f3d8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "DAP",
+    "INCOTERMSDESCRIPTION": "Delivery at Place",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a45cdd52-fc9c-5930-9b1e-49cef62ac03b",
+    "CREATEDAT": "2026-10-04T18:32:27.317",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.317",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "DDP",
+    "INCOTERMSDESCRIPTION": "Delivered Duty Paid",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7feb0ad4-e213-5376-9a24-c5effcdf7c7a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "DDU",
+    "INCOTERMSDESCRIPTION": "Delivered Duty Unpaid",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "26ef8b53-bf65-5bba-ab7a-5e7e60a46f0c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "DEQ",
+    "INCOTERMSDESCRIPTION": "Delivered ex quay (duty paid)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f40bc0b6-40b4-569f-99a1-be68e5f59842",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "DES",
+    "INCOTERMSDESCRIPTION": "Delivered ex ship",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "473741d3-e99a-580d-9d60-2b8bdc6dfa8a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "DPU",
+    "INCOTERMSDESCRIPTION": "Delivered at Place Unloaded",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a8f18e7f-63f2-555a-95a3-ac6e77d73ce3",
+    "CREATEDAT": "2026-10-04T18:32:27.317",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.317",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "EXW",
+    "INCOTERMSDESCRIPTION": "Ex Works",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6d023c6b-b7e2-5977-b885-765feac46455",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "FAS",
+    "INCOTERMSDESCRIPTION": "Free Alongside Ship",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b9cf6bd5-3778-57be-b3f8-c597af082968",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "FCA",
+    "INCOTERMSDESCRIPTION": "Free Carrier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b383e832-06d6-50a9-8a21-54691e4b8d56",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "FH",
+    "INCOTERMSDESCRIPTION": "Free house",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "47033726-6438-5b6d-b8e1-6bfcb402bd38",
+    "CREATEDAT": "2026-10-04T18:32:27.317",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:27.317",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "FOB",
+    "INCOTERMSDESCRIPTION": "Free on board",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f4668bfb-630c-5683-8e70-d72e479f876d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "INA",
+    "INCOTERMSDESCRIPTION": "Incoterm Not Applicable",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6e14d102-afca-5a11-9c74-1627fb5f06cb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "INCOTERMSCODE": "UN",
+    "INCOTERMSDESCRIPTION": "Not Free",
+    "ISACTIVE": 1
+  }
+]

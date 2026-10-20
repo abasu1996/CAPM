@@ -1,0 +1,1472 @@
+[
+  {
+    "ID": "8a95c68b-6a64-5395-af7e-0fe819940422",
+    "CREATEDAT": "2026-10-04T18:32:30.187",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.187",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "SG100",
+    "SERVICEGROUPDESCRIPTION": "Technical Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b5cd662f-8874-5ac4-b1fa-2df677899020",
+    "CREATEDAT": "2026-10-04T18:32:30.187",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.187",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "SG200",
+    "SERVICEGROUPDESCRIPTION": "Professional Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e798a1b7-5baa-56ae-8598-a31a55db442f",
+    "CREATEDAT": "2026-10-04T18:32:30.187",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:30.187",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "SG300",
+    "SERVICEGROUPDESCRIPTION": "Maintenance Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "041f4427-e8ca-5b39-9031-b168b75c0158",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "001",
+    "SERVICEGROUPDESCRIPTION": "Material group 1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "80573231-c266-57ad-b2b5-fc8fbf99e1d2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "002",
+    "SERVICEGROUPDESCRIPTION": "Material group 2",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ccbb8dd2-1f8d-5c58-b21a-eb3d56c9c5d8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A001",
+    "SERVICEGROUPDESCRIPTION": "Adm Assets",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a9084e93-53f1-5f57-88a7-1f237e71a84e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A002",
+    "SERVICEGROUPDESCRIPTION": "Bldg/Elec Items",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e17a3e59-a29a-5fc7-bf0c-cf5584a8be40",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A003",
+    "SERVICEGROUPDESCRIPTION": "Adm Equipment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1aa04586-980a-508b-9a8f-ca4efd8d63b2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A004",
+    "SERVICEGROUPDESCRIPTION": "Food /Bev Catering",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b64dcceb-0a72-54f9-b1a1-37ec38ed5fd7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A005",
+    "SERVICEGROUPDESCRIPTION": "Furniture",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3392b498-624b-56e6-a99b-195c2f03961c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A006",
+    "SERVICEGROUPDESCRIPTION": "General Materials",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a4a08e84-ff3a-53ba-a492-8fd7345c14d1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A007",
+    "SERVICEGROUPDESCRIPTION": "Int/Ext Fittings",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "23e53fe7-7e93-5c0f-9ba3-00372131e16f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A008",
+    "SERVICEGROUPDESCRIPTION": "Publications",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1ae064f-7c78-5aa2-bb6b-6b7d695a28be",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A009",
+    "SERVICEGROUPDESCRIPTION": "Pest Control",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d71cca27-f27b-5ced-b74b-e126389cd283",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A010",
+    "SERVICEGROUPDESCRIPTION": "Safety Systems/Equip",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "55ef040d-bde2-512f-9514-5a8632121c84",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A011",
+    "SERVICEGROUPDESCRIPTION": "Adm Spare Parts",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "548103b0-54bc-5a7a-9e19-e273c28f4327",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A012",
+    "SERVICEGROUPDESCRIPTION": "Stationery/Off.Supp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5beb7aed-ee1e-53e4-a817-cd7e872f5639",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A013",
+    "SERVICEGROUPDESCRIPTION": "Adm Tools",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "50f37c3c-6b97-5e58-9cfa-514538cfc609",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A014",
+    "SERVICEGROUPDESCRIPTION": "Vehicles",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6ae39f92-0658-5d94-8ebb-f1baf6d75c12",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A015",
+    "SERVICEGROUPDESCRIPTION": "Civil Work",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ff40f7f5-cc72-5752-809f-dbaf0f238162",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A016",
+    "SERVICEGROUPDESCRIPTION": "Document Management",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7e683558-6361-5a42-a9ec-9f22f6a09995",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A017",
+    "SERVICEGROUPDESCRIPTION": "Electrical/AC/UPS/Ge",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eaead259-7055-5645-aff3-3ce9e886e200",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A018",
+    "SERVICEGROUPDESCRIPTION": "Equipment & Furnitur",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "914a4fe0-6e15-5e4c-8a97-14ff9bdc18c0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A019",
+    "SERVICEGROUPDESCRIPTION": "F&B/T&C",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d0687568-2699-57ac-b0aa-7a4aa5ddd2c0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A020",
+    "SERVICEGROUPDESCRIPTION": "Floral Arrangements/",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1446ab55-66d5-508f-bcb0-529e5c55433c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A021",
+    "SERVICEGROUPDESCRIPTION": "Gift/Donations/Hampe",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "02db3aeb-8a8a-5607-91e7-51a78019514d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A022",
+    "SERVICEGROUPDESCRIPTION": "Interior & Project M",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7c49ee93-853b-5f64-9b0f-875d7ed0d176",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A023",
+    "SERVICEGROUPDESCRIPTION": "Postage & Courier",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "89bfbc7b-1622-5a9a-a806-f0be48745b8c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A024",
+    "SERVICEGROUPDESCRIPTION": "Printing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dd2d93d3-8cd9-51f8-acce-36d9162c5da4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A025",
+    "SERVICEGROUPDESCRIPTION": "RM & RM Incidental",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "00c81078-4db2-5493-8775-a6feb4d8ad6c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A026",
+    "SERVICEGROUPDESCRIPTION": "Security",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "45870018-5461-540e-a631-69aeccd17281",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A027",
+    "SERVICEGROUPDESCRIPTION": "Sub Contractor Servi",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "12b91461-fc42-5f36-91e9-20ccf41be882",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A028",
+    "SERVICEGROUPDESCRIPTION": "Transport & Travelli",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0baf2e29-7059-5295-aa7b-a686aa89e727",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A029",
+    "SERVICEGROUPDESCRIPTION": "Freight",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ffb5b4bd-207d-5677-ab59-61b35b8de2af",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A030",
+    "SERVICEGROUPDESCRIPTION": "CPE repair",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "57b9df32-beac-5722-9090-f3e083c12421",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A031",
+    "SERVICEGROUPDESCRIPTION": "Content Management",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "faaebc1d-a347-5512-aac0-a50594e667dc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A032",
+    "SERVICEGROUPDESCRIPTION": "Company related",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "83257690-4c4b-59c0-b3ea-16322ecfc5cb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A033",
+    "SERVICEGROUPDESCRIPTION": "Staff Welfare and ot",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0661374d-44ae-5831-91e0-ff47f1f7cee5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A034",
+    "SERVICEGROUPDESCRIPTION": "Insurance",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dde3807c-edb1-5383-b1bc-5b9fe0f16e15",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A035",
+    "SERVICEGROUPDESCRIPTION": "Billing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4ab65959-7dac-523e-b4cb-a8b6b932efbd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A036",
+    "SERVICEGROUPDESCRIPTION": "Consultancy",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e4c5ecd7-7782-513e-be44-13e1a839763a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "A037",
+    "SERVICEGROUPDESCRIPTION": "Phone repair",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "429b7dcb-65dc-5af0-b7f3-f416173d48bc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "C001",
+    "SERVICEGROUPDESCRIPTION": "CPE-DTV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dbcc8a0a-8263-556c-a8fb-2033e017eaba",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "C002",
+    "SERVICEGROUPDESCRIPTION": "CPE-DTV Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "de59a683-2f6c-5c2e-b2d8-1cb998b7a325",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "C003",
+    "SERVICEGROUPDESCRIPTION": "CPE-DTV Installation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "43cefaea-0549-5f0a-a867-f2a04cea529c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "C004",
+    "SERVICEGROUPDESCRIPTION": "Biz Pack Connection",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5401fb26-76fa-5371-ab16-bb37f2fb1932",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "C006",
+    "SERVICEGROUPDESCRIPTION": "CPE-CDMA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2f0ce100-b4a2-531f-b061-e65f515d164a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "C007",
+    "SERVICEGROUPDESCRIPTION": "CPE-LTE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4f6ff135-3c42-5dc8-8389-521bb904cc58",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "C008",
+    "SERVICEGROUPDESCRIPTION": "CPE-DE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "012e62a7-13e6-5975-90cf-a8803ca7023e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E001",
+    "SERVICEGROUPDESCRIPTION": "BSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4f209420-9ab0-5a33-bfd4-9f5f0a063b38",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E002",
+    "SERVICEGROUPDESCRIPTION": "NSS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "42e98cda-cc23-5ea6-8563-8f505bb8ba06",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E003",
+    "SERVICEGROUPDESCRIPTION": "Transmission",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "13f54652-bb4a-5ab7-874e-dd0f1d805f00",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E004",
+    "SERVICEGROUPDESCRIPTION": "Power & Electrical",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fc652ad7-9363-5384-a284-95c090c9772c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E005",
+    "SERVICEGROUPDESCRIPTION": "Civil",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aa888e4d-27c5-51a2-9df8-8513c77e2f19",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E006",
+    "SERVICEGROUPDESCRIPTION": "Core Pkt Switching",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b60ce0aa-b361-54d1-a4e2-0286d2a8513e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E007",
+    "SERVICEGROUPDESCRIPTION": "VAS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bca3391a-1069-545e-8178-70680a80e69f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E008",
+    "SERVICEGROUPDESCRIPTION": "IP Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bbed226a-c9f3-551b-8bf4-a033cbf324b8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E009",
+    "SERVICEGROUPDESCRIPTION": "RF Eqp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e55be0ea-58a4-59ac-b20e-03eae9b019e8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E010",
+    "SERVICEGROUPDESCRIPTION": "Accessory",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "09cf7a6e-f192-5388-a554-79edf5b0d785",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E011",
+    "SERVICEGROUPDESCRIPTION": "BB Equip",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fb2ad41c-0c68-51a6-89ef-de951ef95ede",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E012",
+    "SERVICEGROUPDESCRIPTION": "DATA Eqp",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8d605a95-1ff8-5868-8ed8-44bdb495b591",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E013",
+    "SERVICEGROUPDESCRIPTION": "DTV IT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3d4f7a40-b86b-5673-9ad0-a3cdebfda169",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E014",
+    "SERVICEGROUPDESCRIPTION": "Tools",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bae14041-8282-5a4f-86f8-e6fe6c5bc7a8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E015",
+    "SERVICEGROUPDESCRIPTION": "Transport Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "de6611a0-0251-5bc7-8176-cc9dbd180cd8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E016",
+    "SERVICEGROUPDESCRIPTION": "Labour Hire Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "68726393-b26a-5d37-a6b8-efb458ec139d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E017",
+    "SERVICEGROUPDESCRIPTION": "SAQ Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "61be7c1b-dc98-5448-aef2-85abb7fb4be0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E018",
+    "SERVICEGROUPDESCRIPTION": "Channel Fee",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a3b95ccb-55fb-5ff2-86bb-a79f9093335a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E019",
+    "SERVICEGROUPDESCRIPTION": "Processing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9e3b4f11-8b6e-59ec-aa2a-53a6fb196181",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E020",
+    "SERVICEGROUPDESCRIPTION": "Transmission lines",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "938f53e4-a7c7-5ca7-8a00-99458883f098",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "E021",
+    "SERVICEGROUPDESCRIPTION": "DNS Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "26a80f40-469f-54f3-bd35-c9d4da32116d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "H101",
+    "SERVICEGROUPDESCRIPTION": "Modern Apps",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "de3ce3e2-e7b2-5bce-a078-9501971fb974",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "H102",
+    "SERVICEGROUPDESCRIPTION": "MS Mod Wrkplace(MWP)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a228d63d-5333-5f96-b1a7-9531bb82751f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "H103",
+    "SERVICEGROUPDESCRIPTION": "Microsoft Azure",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6ccae51f-0d82-5368-8be1-7cd5f2432212",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "H104",
+    "SERVICEGROUPDESCRIPTION": "Microsoft Security",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "91cb1588-84a8-5765-8fa8-2755b3750592",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "H105",
+    "SERVICEGROUPDESCRIPTION": "Data & AI",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "392a3a46-5dff-534d-8c29-e8cf5601115d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "H107",
+    "SERVICEGROUPDESCRIPTION": "Bus Solu (BS)-D365",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c064d845-bda1-5c1a-b610-239c09c264bb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "H109",
+    "SERVICEGROUPDESCRIPTION": "Bus Solu (BS)-Other",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "70753030-c70b-5ea9-b33b-1386e7e55585",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "H110",
+    "SERVICEGROUPDESCRIPTION": "On-premise",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9155b157-d0a0-594f-82c6-2891e21cc823",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I001",
+    "SERVICEGROUPDESCRIPTION": "Network Equipment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5c3547ce-0875-510d-937e-71fd4e987f60",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I002",
+    "SERVICEGROUPDESCRIPTION": "Computers/Laptops",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2c5034f3-bc54-51a0-85f7-006e705f210c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I003",
+    "SERVICEGROUPDESCRIPTION": "Voice Equipment",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1262398a-bfc9-598c-b03d-1bada5fdf872",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I004",
+    "SERVICEGROUPDESCRIPTION": "Cables and Racks",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "86165a5e-51ed-551e-96ec-90634bfda51b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I005",
+    "SERVICEGROUPDESCRIPTION": "Servers/Storage",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "27df56e0-9de4-579a-ae98-3dbd7f9b90c4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I006",
+    "SERVICEGROUPDESCRIPTION": "IT Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "147d4b58-9539-53f5-a9b3-d1a75ef3d425",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I007",
+    "SERVICEGROUPDESCRIPTION": "Printers/Scanners",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e666e189-be56-514b-a000-f6677f3ad94b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I008",
+    "SERVICEGROUPDESCRIPTION": "IT Repair Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "abce07ab-16cc-5272-8566-5a77143a9f63",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I009",
+    "SERVICEGROUPDESCRIPTION": "IT Rental Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f3f179da-d603-59fb-9cc0-a8f2ef63843d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I010",
+    "SERVICEGROUPDESCRIPTION": "IT AMC Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e92334fc-efac-5ec1-bef5-c3ca8d32cb79",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I011",
+    "SERVICEGROUPDESCRIPTION": "IT Training Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8b23bd42-8fcb-5ebb-a1ba-ead5e25d9605",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I012",
+    "SERVICEGROUPDESCRIPTION": "IT Consultancy Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9b1a4882-eb1f-5cb1-95da-85e70027e889",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I013",
+    "SERVICEGROUPDESCRIPTION": "IT Testing Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "52201627-3bcf-5e6c-b3a7-7ed6c736ef75",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I014",
+    "SERVICEGROUPDESCRIPTION": "IT Labour Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "62d43248-6a6f-5c5d-8638-d09a3d653380",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I015",
+    "SERVICEGROUPDESCRIPTION": "IT Implementation Se",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "46b90088-e3a3-5cd3-91df-51a2d9410f5a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I016",
+    "SERVICEGROUPDESCRIPTION": "IT Software Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f49105e1-2076-5f85-91df-0289a8e5c96c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "I017",
+    "SERVICEGROUPDESCRIPTION": "IT Licensing Fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3a8c400b-32cc-536c-802e-8c47845b74ee",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M001",
+    "SERVICEGROUPDESCRIPTION": "Merchandising",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "473526f9-7782-50b0-841a-045917db70c6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M002",
+    "SERVICEGROUPDESCRIPTION": "POSM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "57dc3b9c-1ee6-5c6f-9b7e-70da2e951e0b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M003",
+    "SERVICEGROUPDESCRIPTION": "Scheduling",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f066f5ea-bc55-5221-8315-a5f0a283baeb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M004",
+    "SERVICEGROUPDESCRIPTION": "Production",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eb6d18e0-586c-55d6-b69d-0c1d350dd028",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M005",
+    "SERVICEGROUPDESCRIPTION": "Outdoor",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d507caa2-079e-5680-a1c6-d2ed7dbc353e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M006",
+    "SERVICEGROUPDESCRIPTION": "Marketing Research",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eb82deac-29dc-51b5-a114-058fa61da4f9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M007",
+    "SERVICEGROUPDESCRIPTION": "CAG",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d2f5a8d7-9b77-5f60-8dc9-510be0c0c7e7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M008",
+    "SERVICEGROUPDESCRIPTION": "Marketing Event Mana",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a4371806-b167-521e-ba0a-84678df95666",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M009",
+    "SERVICEGROUPDESCRIPTION": "Marketing General",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fa18fc79-550f-5ebd-8db1-99c0ca585341",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M010",
+    "SERVICEGROUPDESCRIPTION": "Promotion",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b9ee148e-eb73-5dca-9d66-707a3a34b1df",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M011",
+    "SERVICEGROUPDESCRIPTION": "Marketing Sponsorshi",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5a373cb0-950f-5afb-a7c1-6db5b6105dd4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M012",
+    "SERVICEGROUPDESCRIPTION": "Marketing Model Expe",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c6efd1a7-3910-5c24-96ce-8597c313bc46",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M013",
+    "SERVICEGROUPDESCRIPTION": "Revenue Share",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a3d4957b-08d9-5650-9b9d-8350b4e6ad5b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M014",
+    "SERVICEGROUPDESCRIPTION": "Marketing Printing",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2c21999c-2bef-5b9c-83e9-8f7a631aeb7d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "M015",
+    "SERVICEGROUPDESCRIPTION": "Loyalty Promotions",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "302db368-0526-53a4-b0dc-d6567adb6ac4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T001",
+    "SERVICEGROUPDESCRIPTION": "Phones",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d9ad14f5-8ee3-5743-b857-63d5ac483705",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T002",
+    "SERVICEGROUPDESCRIPTION": "Data Card/USB Modem",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8000e197-9e10-57cb-9c18-94c73ea919b1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T003",
+    "SERVICEGROUPDESCRIPTION": "Laptop",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1712387d-fbe3-541f-a608-93066648ccec",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T004",
+    "SERVICEGROUPDESCRIPTION": "Starterpack",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c40aa7f0-ef9f-53f2-8a6c-7ddd1cc3a1da",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T005",
+    "SERVICEGROUPDESCRIPTION": "SIM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "16903715-4ae7-5fe9-b927-d39175724397",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T006",
+    "SERVICEGROUPDESCRIPTION": "Trading Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e4d88e7b-54d0-5ac1-8ca0-613abd7e7f16",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T007",
+    "SERVICEGROUPDESCRIPTION": "LCD Books",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e175c9fb-e53c-5c1a-b7d2-5fec2dcee973",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T008",
+    "SERVICEGROUPDESCRIPTION": "Bundle/Compl. Items",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "09620691-75d8-5656-9d7f-1abeb00b19cd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T009",
+    "SERVICEGROUPDESCRIPTION": "Booklet/Packing Mats",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5aba8553-d4a4-5da2-b24c-181673311316",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T010",
+    "SERVICEGROUPDESCRIPTION": "Blackberry Ent Soln",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7f17313c-98fd-56eb-8fce-54d95d9ed074",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T011",
+    "SERVICEGROUPDESCRIPTION": "Gift Vouchers",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3f720961-946c-5298-aee5-edb2bc2d9b03",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T012",
+    "SERVICEGROUPDESCRIPTION": "Scratch Cards",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0aebdc62-7e60-5152-8ce8-1405ae6d6881",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T013",
+    "SERVICEGROUPDESCRIPTION": "Reload",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "58325cb2-16bd-5127-831a-63732389a8ac",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T014",
+    "SERVICEGROUPDESCRIPTION": "Navigators",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "44a9bf2b-2a11-546c-9508-147a88d5683b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T015",
+    "SERVICEGROUPDESCRIPTION": "Connection fees",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ac200dbb-ccd9-5952-9872-ba0eec21d13e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T016",
+    "SERVICEGROUPDESCRIPTION": "Books",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "29baf5c5-3cb7-59c7-8bce-494f250e908d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T017",
+    "SERVICEGROUPDESCRIPTION": "Testing Devices",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7fd54ecd-b1e6-5086-b565-0c438efc65d5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T018",
+    "SERVICEGROUPDESCRIPTION": "Spare parts",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ad16efe7-f0a0-5fb9-b1ec-1c506e8c7708",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T019",
+    "SERVICEGROUPDESCRIPTION": "OAF Books",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c03be11e-371b-5923-bab9-5dfa7855124b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T020",
+    "SERVICEGROUPDESCRIPTION": "IT Items",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c4ec9b96-18c0-536b-a860-5de405c2ea1a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T021",
+    "SERVICEGROUPDESCRIPTION": "DDTL CPE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0c84e980-4ba9-5308-b75e-59c2abd8973b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T022",
+    "SERVICEGROUPDESCRIPTION": "DDTL Accessories",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d95d5112-8a2a-5f52-bf66-a6eefa931c20",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T023",
+    "SERVICEGROUPDESCRIPTION": "DDTL STB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d0ec727c-a819-57cf-88cd-662223383ff1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T024",
+    "SERVICEGROUPDESCRIPTION": "DDTL SIM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9b1a98fa-d663-556b-9f04-49ffa9f58e5d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T025",
+    "SERVICEGROUPDESCRIPTION": "DDTL RCU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ae9f80f4-c279-5623-abcf-b71df820e164",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T026",
+    "SERVICEGROUPDESCRIPTION": "DDTL LNB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b0539574-6a31-5119-85bc-0784febeba79",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T027",
+    "SERVICEGROUPDESCRIPTION": "DDTL Power Supply",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1c15240-f304-5294-8c18-d9914ccc0222",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T028",
+    "SERVICEGROUPDESCRIPTION": "DDTL Accessory Pack",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "52048388-bf67-504a-9c9c-0d5d9e1df01d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T029",
+    "SERVICEGROUPDESCRIPTION": "DDTL Services",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5fd240ca-6ded-5e02-9f8d-a6bee609b7be",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T030",
+    "SERVICEGROUPDESCRIPTION": "WOW Product",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f91f251f-545c-5587-9bd6-9fd2fc90a81d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T031",
+    "SERVICEGROUPDESCRIPTION": "LTE Prepaid",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "08ee5690-302f-52fb-8dce-552d57f5f519",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T032",
+    "SERVICEGROUPDESCRIPTION": "IOT Products",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b1550ebd-e195-5c1e-be82-0f061917425b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T033",
+    "SERVICEGROUPDESCRIPTION": "WIFI AP TRD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7e813360-06ac-5ba8-9016-3a5fd7633552",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T034",
+    "SERVICEGROUPDESCRIPTION": "DTV Dish",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "508e75ac-6105-5246-a57a-c4718a766a18",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T035",
+    "SERVICEGROUPDESCRIPTION": "DTV Cable",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dc8d87d2-67b3-5fe1-8f3a-3b856e69bb46",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "T036",
+    "SERVICEGROUPDESCRIPTION": "DTV Installation",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1f3f594e-85aa-586b-ae56-bf1a7a8deea1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "SERVICEGROUPCODE": "Z001",
+    "SERVICEGROUPDESCRIPTION": "Service Materials",
+    "ISACTIVE": 1
+  }
+]

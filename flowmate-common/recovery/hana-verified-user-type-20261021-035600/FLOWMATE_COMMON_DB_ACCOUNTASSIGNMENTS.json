@@ -1,0 +1,114 @@
+[
+  {
+    "CODE": "A",
+    "NAME": "Asset",
+    "DESCRIPTION": "Asset",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "B",
+    "NAME": "MTS prod./sales ord.",
+    "DESCRIPTION": "MTS prod./sales ord.",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "C",
+    "NAME": "Sales order",
+    "DESCRIPTION": "Sales order",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  },
+  {
+    "CODE": "D",
+    "NAME": "Indiv.cust./project",
+    "DESCRIPTION": "Indiv.cust./project",
+    "ISACTIVE": 1,
+    "SORTORDER": 40
+  },
+  {
+    "CODE": "E",
+    "NAME": "Ind. cust. w. KD-CO",
+    "DESCRIPTION": "Ind. cust. w. KD-CO",
+    "ISACTIVE": 1,
+    "SORTORDER": 50
+  },
+  {
+    "CODE": "F",
+    "NAME": "Order",
+    "DESCRIPTION": "Order",
+    "ISACTIVE": 1,
+    "SORTORDER": 60
+  },
+  {
+    "CODE": "G",
+    "NAME": "MTS prod./project",
+    "DESCRIPTION": "MTS prod./project",
+    "ISACTIVE": 1,
+    "SORTORDER": 70
+  },
+  {
+    "CODE": "K",
+    "NAME": "Cost center",
+    "DESCRIPTION": "Cost center",
+    "ISACTIVE": 1,
+    "SORTORDER": 80
+  },
+  {
+    "CODE": "M",
+    "NAME": "Ind. cust. w/o KD-CO",
+    "DESCRIPTION": "Ind. cust. w/o KD-CO",
+    "ISACTIVE": 1,
+    "SORTORDER": 90
+  },
+  {
+    "CODE": "N",
+    "NAME": "Network",
+    "DESCRIPTION": "Network",
+    "ISACTIVE": 1,
+    "SORTORDER": 100
+  },
+  {
+    "CODE": "P",
+    "NAME": "Project",
+    "DESCRIPTION": "Project",
+    "ISACTIVE": 1,
+    "SORTORDER": 110
+  },
+  {
+    "CODE": "Q",
+    "NAME": "Proj. make-to-order",
+    "DESCRIPTION": "Proj. make-to-order",
+    "ISACTIVE": 1,
+    "SORTORDER": 120
+  },
+  {
+    "CODE": "T",
+    "NAME": "All new aux.acc.ass.",
+    "DESCRIPTION": "All new aux.acc.ass.",
+    "ISACTIVE": 1,
+    "SORTORDER": 130
+  },
+  {
+    "CODE": "U",
+    "NAME": "Unknown",
+    "DESCRIPTION": "Unknown",
+    "ISACTIVE": 1,
+    "SORTORDER": 140
+  },
+  {
+    "CODE": "X",
+    "NAME": "All aux.acct.assgts.",
+    "DESCRIPTION": "All aux.acct.assgts.",
+    "ISACTIVE": 1,
+    "SORTORDER": 150
+  },
+  {
+    "CODE": "Z",
+    "NAME": "Returnable Packaging",
+    "DESCRIPTION": "Returnable Packaging",
+    "ISACTIVE": 1,
+    "SORTORDER": 160
+  }
+]

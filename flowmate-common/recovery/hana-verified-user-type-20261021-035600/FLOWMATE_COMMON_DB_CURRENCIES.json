@@ -1,0 +1,1388 @@
+[
+  {
+    "CODE": "ACU",
+    "NAME": "ACU",
+    "DESCRIPTION": "ACU",
+    "ISACTIVE": 1,
+    "SORTORDER": 10
+  },
+  {
+    "CODE": "ADP",
+    "NAME": "Andoran peseta",
+    "DESCRIPTION": "Andoran peseta",
+    "ISACTIVE": 1,
+    "SORTORDER": 20
+  },
+  {
+    "CODE": "AED",
+    "NAME": "United Arab Emirates Dirham",
+    "DESCRIPTION": "United Arab Emirates Dirham",
+    "ISACTIVE": 1,
+    "SORTORDER": 30
+  },
+  {
+    "CODE": "AFA",
+    "NAME": "Afghani (Old)",
+    "DESCRIPTION": "Afghani (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 40
+  },
+  {
+    "CODE": "AFN",
+    "NAME": "Afghani",
+    "DESCRIPTION": "Afghani",
+    "ISACTIVE": 1,
+    "SORTORDER": 50
+  },
+  {
+    "CODE": "ALL",
+    "NAME": "Albanian Lek",
+    "DESCRIPTION": "Albanian Lek",
+    "ISACTIVE": 1,
+    "SORTORDER": 60
+  },
+  {
+    "CODE": "AMD",
+    "NAME": "Armenian Dram",
+    "DESCRIPTION": "Armenian Dram",
+    "ISACTIVE": 1,
+    "SORTORDER": 70
+  },
+  {
+    "CODE": "ANG",
+    "NAME": "West Indian Guilder",
+    "DESCRIPTION": "West Indian Guilder",
+    "ISACTIVE": 1,
+    "SORTORDER": 80
+  },
+  {
+    "CODE": "AOA",
+    "NAME": "Angolanische Kwanza",
+    "DESCRIPTION": "Angolanische Kwanza",
+    "ISACTIVE": 1,
+    "SORTORDER": 90
+  },
+  {
+    "CODE": "AON",
+    "NAME": "Angolan New Kwanza (Old)",
+    "DESCRIPTION": "Angolan New Kwanza (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 100
+  },
+  {
+    "CODE": "AOR",
+    "NAME": "Angolan Kwanza Reajustado (Old)",
+    "DESCRIPTION": "Angolan Kwanza Reajustado (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 110
+  },
+  {
+    "CODE": "ARS",
+    "NAME": "Argentine Peso",
+    "DESCRIPTION": "Argentine Peso",
+    "ISACTIVE": 1,
+    "SORTORDER": 120
+  },
+  {
+    "CODE": "ATS",
+    "NAME": "Austrian Schilling",
+    "DESCRIPTION": "Austrian Schilling",
+    "ISACTIVE": 1,
+    "SORTORDER": 130
+  },
+  {
+    "CODE": "AUD",
+    "NAME": "Australian Dollar",
+    "DESCRIPTION": "Australian Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 140
+  },
+  {
+    "CODE": "AWG",
+    "NAME": "Aruban Guilder",
+    "DESCRIPTION": "Aruban Guilder",
+    "ISACTIVE": 1,
+    "SORTORDER": 150
+  },
+  {
+    "CODE": "AZM",
+    "NAME": "Azerbaijan Manat",
+    "DESCRIPTION": "Azerbaijan Manat",
+    "ISACTIVE": 1,
+    "SORTORDER": 160
+  },
+  {
+    "CODE": "BAM",
+    "NAME": "Bosnia and Herzegovina Convertible Mark",
+    "DESCRIPTION": "Bosnia and Herzegovina Convertible Mark",
+    "ISACTIVE": 1,
+    "SORTORDER": 170
+  },
+  {
+    "CODE": "BBD",
+    "NAME": "Barbados Dollar",
+    "DESCRIPTION": "Barbados Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 180
+  },
+  {
+    "CODE": "BDT",
+    "NAME": "Bangladesh Taka",
+    "DESCRIPTION": "Bangladesh Taka",
+    "ISACTIVE": 1,
+    "SORTORDER": 190
+  },
+  {
+    "CODE": "BEF",
+    "NAME": "Belgian Franc",
+    "DESCRIPTION": "Belgian Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 200
+  },
+  {
+    "CODE": "BGN",
+    "NAME": "Bulgarian Lev",
+    "DESCRIPTION": "Bulgarian Lev",
+    "ISACTIVE": 1,
+    "SORTORDER": 210
+  },
+  {
+    "CODE": "BHD",
+    "NAME": "Bahrain Dinar",
+    "DESCRIPTION": "Bahrain Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 220
+  },
+  {
+    "CODE": "BIF",
+    "NAME": "Burundi Franc",
+    "DESCRIPTION": "Burundi Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 230
+  },
+  {
+    "CODE": "BMD",
+    "NAME": "Bermudan Dollar",
+    "DESCRIPTION": "Bermudan Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 240
+  },
+  {
+    "CODE": "BND",
+    "NAME": "Brunei Dollar",
+    "DESCRIPTION": "Brunei Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 250
+  },
+  {
+    "CODE": "BOB",
+    "NAME": "Boliviano",
+    "DESCRIPTION": "Boliviano",
+    "ISACTIVE": 1,
+    "SORTORDER": 260
+  },
+  {
+    "CODE": "BRL",
+    "NAME": "Brazilian Real",
+    "DESCRIPTION": "Brazilian Real",
+    "ISACTIVE": 1,
+    "SORTORDER": 270
+  },
+  {
+    "CODE": "BSD",
+    "NAME": "Bahaman Dollar",
+    "DESCRIPTION": "Bahaman Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 280
+  },
+  {
+    "CODE": "BTN",
+    "NAME": "Bhutan Ngultrum",
+    "DESCRIPTION": "Bhutan Ngultrum",
+    "ISACTIVE": 1,
+    "SORTORDER": 290
+  },
+  {
+    "CODE": "BWP",
+    "NAME": "Botswana Pula",
+    "DESCRIPTION": "Botswana Pula",
+    "ISACTIVE": 1,
+    "SORTORDER": 300
+  },
+  {
+    "CODE": "BYB",
+    "NAME": "Belorussian Ruble (Old)",
+    "DESCRIPTION": "Belorussian Ruble (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 310
+  },
+  {
+    "CODE": "BYR",
+    "NAME": "Belorussian Ruble",
+    "DESCRIPTION": "Belorussian Ruble",
+    "ISACTIVE": 1,
+    "SORTORDER": 320
+  },
+  {
+    "CODE": "BZD",
+    "NAME": "Belize Dollar",
+    "DESCRIPTION": "Belize Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 330
+  },
+  {
+    "CODE": "CAD",
+    "NAME": "Canadian Dollar",
+    "DESCRIPTION": "Canadian Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 340
+  },
+  {
+    "CODE": "CDF",
+    "NAME": "Congolese Franc",
+    "DESCRIPTION": "Congolese Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 350
+  },
+  {
+    "CODE": "CFP",
+    "NAME": "(Pacific Islands)",
+    "DESCRIPTION": "(Pacific Islands)",
+    "ISACTIVE": 1,
+    "SORTORDER": 360
+  },
+  {
+    "CODE": "CHF",
+    "NAME": "Swiss Franc",
+    "DESCRIPTION": "Swiss Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 370
+  },
+  {
+    "CODE": "CLP",
+    "NAME": "Chilean Peso",
+    "DESCRIPTION": "Chilean Peso",
+    "ISACTIVE": 1,
+    "SORTORDER": 380
+  },
+  {
+    "CODE": "CNY",
+    "NAME": "Chinese Yuan",
+    "DESCRIPTION": "Chinese Yuan",
+    "ISACTIVE": 1,
+    "SORTORDER": 390
+  },
+  {
+    "CODE": "COP",
+    "NAME": "Colombian Peso",
+    "DESCRIPTION": "Colombian Peso",
+    "ISACTIVE": 1,
+    "SORTORDER": 400
+  },
+  {
+    "CODE": "CRC",
+    "NAME": "Costa Rica Colon",
+    "DESCRIPTION": "Costa Rica Colon",
+    "ISACTIVE": 1,
+    "SORTORDER": 410
+  },
+  {
+    "CODE": "CSD",
+    "NAME": "Serbian Dinar",
+    "DESCRIPTION": "Serbian Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 420
+  },
+  {
+    "CODE": "CUP",
+    "NAME": "Cuban Peso",
+    "DESCRIPTION": "Cuban Peso",
+    "ISACTIVE": 1,
+    "SORTORDER": 430
+  },
+  {
+    "CODE": "CVE",
+    "NAME": "Cape Verde Escudo",
+    "DESCRIPTION": "Cape Verde Escudo",
+    "ISACTIVE": 1,
+    "SORTORDER": 440
+  },
+  {
+    "CODE": "CYP",
+    "NAME": "Cyprus Pound",
+    "DESCRIPTION": "Cyprus Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 450
+  },
+  {
+    "CODE": "CZK",
+    "NAME": "Czech Krona",
+    "DESCRIPTION": "Czech Krona",
+    "ISACTIVE": 1,
+    "SORTORDER": 460
+  },
+  {
+    "CODE": "DEM",
+    "NAME": "German Mark",
+    "DESCRIPTION": "German Mark",
+    "ISACTIVE": 1,
+    "SORTORDER": 470
+  },
+  {
+    "CODE": "DJF",
+    "NAME": "Djibouti Franc",
+    "DESCRIPTION": "Djibouti Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 480
+  },
+  {
+    "CODE": "DKK",
+    "NAME": "Danish Krone",
+    "DESCRIPTION": "Danish Krone",
+    "ISACTIVE": 1,
+    "SORTORDER": 490
+  },
+  {
+    "CODE": "DOP",
+    "NAME": "Dominican Peso",
+    "DESCRIPTION": "Dominican Peso",
+    "ISACTIVE": 1,
+    "SORTORDER": 500
+  },
+  {
+    "CODE": "DZD",
+    "NAME": "Algerian Dinar",
+    "DESCRIPTION": "Algerian Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 510
+  },
+  {
+    "CODE": "ECS",
+    "NAME": "Ecuadorian Sucre ( > USD)",
+    "DESCRIPTION": "Ecuadorian Sucre ( > USD)",
+    "ISACTIVE": 1,
+    "SORTORDER": 520
+  },
+  {
+    "CODE": "EEK",
+    "NAME": "Estonian Krone",
+    "DESCRIPTION": "Estonian Krone",
+    "ISACTIVE": 1,
+    "SORTORDER": 530
+  },
+  {
+    "CODE": "EGP",
+    "NAME": "Egyptian Pound",
+    "DESCRIPTION": "Egyptian Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 540
+  },
+  {
+    "CODE": "ERN",
+    "NAME": "Eritrean Nafka",
+    "DESCRIPTION": "Eritrean Nafka",
+    "ISACTIVE": 1,
+    "SORTORDER": 550
+  },
+  {
+    "CODE": "ESP",
+    "NAME": "Spanish Peseta",
+    "DESCRIPTION": "Spanish Peseta",
+    "ISACTIVE": 1,
+    "SORTORDER": 560
+  },
+  {
+    "CODE": "ETB",
+    "NAME": "Ethiopian Birr",
+    "DESCRIPTION": "Ethiopian Birr",
+    "ISACTIVE": 1,
+    "SORTORDER": 570
+  },
+  {
+    "CODE": "EUR",
+    "NAME": "European Euro",
+    "DESCRIPTION": "European Euro",
+    "ISACTIVE": 1,
+    "SORTORDER": 580
+  },
+  {
+    "CODE": "FIM",
+    "NAME": "Finnish markka",
+    "DESCRIPTION": "Finnish markka",
+    "ISACTIVE": 1,
+    "SORTORDER": 590
+  },
+  {
+    "CODE": "FJD",
+    "NAME": "Fiji Dollar",
+    "DESCRIPTION": "Fiji Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 600
+  },
+  {
+    "CODE": "FKP",
+    "NAME": "Falkland Pound",
+    "DESCRIPTION": "Falkland Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 610
+  },
+  {
+    "CODE": "FRF",
+    "NAME": "French Franc",
+    "DESCRIPTION": "French Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 620
+  },
+  {
+    "CODE": "GBP",
+    "NAME": "British Pound",
+    "DESCRIPTION": "British Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 630
+  },
+  {
+    "CODE": "GEL",
+    "NAME": "Georgian Lari",
+    "DESCRIPTION": "Georgian Lari",
+    "ISACTIVE": 1,
+    "SORTORDER": 640
+  },
+  {
+    "CODE": "GHC",
+    "NAME": "Ghanian Cedi",
+    "DESCRIPTION": "Ghanian Cedi",
+    "ISACTIVE": 1,
+    "SORTORDER": 650
+  },
+  {
+    "CODE": "GIP",
+    "NAME": "Gibraltar Pound",
+    "DESCRIPTION": "Gibraltar Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 660
+  },
+  {
+    "CODE": "GMD",
+    "NAME": "Gambian Dalasi",
+    "DESCRIPTION": "Gambian Dalasi",
+    "ISACTIVE": 1,
+    "SORTORDER": 670
+  },
+  {
+    "CODE": "GNF",
+    "NAME": "Guinean Franc",
+    "DESCRIPTION": "Guinean Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 680
+  },
+  {
+    "CODE": "GRD",
+    "NAME": "Greek Drachma",
+    "DESCRIPTION": "Greek Drachma",
+    "ISACTIVE": 1,
+    "SORTORDER": 690
+  },
+  {
+    "CODE": "GTQ",
+    "NAME": "Guatemalan Quetzal",
+    "DESCRIPTION": "Guatemalan Quetzal",
+    "ISACTIVE": 1,
+    "SORTORDER": 700
+  },
+  {
+    "CODE": "GWP",
+    "NAME": "Guinea Peso",
+    "DESCRIPTION": "Guinea Peso",
+    "ISACTIVE": 1,
+    "SORTORDER": 710
+  },
+  {
+    "CODE": "GYD",
+    "NAME": "Guyana Dollar",
+    "DESCRIPTION": "Guyana Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 720
+  },
+  {
+    "CODE": "HKD",
+    "NAME": "Hong Kong Dollar",
+    "DESCRIPTION": "Hong Kong Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 730
+  },
+  {
+    "CODE": "HNL",
+    "NAME": "Honduran Lempira",
+    "DESCRIPTION": "Honduran Lempira",
+    "ISACTIVE": 1,
+    "SORTORDER": 740
+  },
+  {
+    "CODE": "HRK",
+    "NAME": "Croatian Kuna",
+    "DESCRIPTION": "Croatian Kuna",
+    "ISACTIVE": 1,
+    "SORTORDER": 750
+  },
+  {
+    "CODE": "HTG",
+    "NAME": "Haitian Gourde",
+    "DESCRIPTION": "Haitian Gourde",
+    "ISACTIVE": 1,
+    "SORTORDER": 760
+  },
+  {
+    "CODE": "HUF",
+    "NAME": "Hungarian Forint",
+    "DESCRIPTION": "Hungarian Forint",
+    "ISACTIVE": 1,
+    "SORTORDER": 770
+  },
+  {
+    "CODE": "IDR",
+    "NAME": "Indonesian Rupiah",
+    "DESCRIPTION": "Indonesian Rupiah",
+    "ISACTIVE": 1,
+    "SORTORDER": 780
+  },
+  {
+    "CODE": "IEP",
+    "NAME": "Irish Punt",
+    "DESCRIPTION": "Irish Punt",
+    "ISACTIVE": 1,
+    "SORTORDER": 790
+  },
+  {
+    "CODE": "ILS",
+    "NAME": "Israeli Scheckel",
+    "DESCRIPTION": "Israeli Scheckel",
+    "ISACTIVE": 1,
+    "SORTORDER": 800
+  },
+  {
+    "CODE": "INR",
+    "NAME": "Indian Rupee",
+    "DESCRIPTION": "Indian Rupee",
+    "ISACTIVE": 1,
+    "SORTORDER": 810
+  },
+  {
+    "CODE": "IQD",
+    "NAME": "Iraqui Dinar",
+    "DESCRIPTION": "Iraqui Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 820
+  },
+  {
+    "CODE": "IRR",
+    "NAME": "Iranian Rial",
+    "DESCRIPTION": "Iranian Rial",
+    "ISACTIVE": 1,
+    "SORTORDER": 830
+  },
+  {
+    "CODE": "ISK",
+    "NAME": "Iceland Krona",
+    "DESCRIPTION": "Iceland Krona",
+    "ISACTIVE": 1,
+    "SORTORDER": 840
+  },
+  {
+    "CODE": "ITL",
+    "NAME": "Italian Lira",
+    "DESCRIPTION": "Italian Lira",
+    "ISACTIVE": 1,
+    "SORTORDER": 850
+  },
+  {
+    "CODE": "JMD",
+    "NAME": "Jamaican Dollar",
+    "DESCRIPTION": "Jamaican Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 860
+  },
+  {
+    "CODE": "JOD",
+    "NAME": "Jordanian Dinar",
+    "DESCRIPTION": "Jordanian Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 870
+  },
+  {
+    "CODE": "JPY",
+    "NAME": "Japanese Yen",
+    "DESCRIPTION": "Japanese Yen",
+    "ISACTIVE": 1,
+    "SORTORDER": 880
+  },
+  {
+    "CODE": "KES",
+    "NAME": "Kenyan Shilling",
+    "DESCRIPTION": "Kenyan Shilling",
+    "ISACTIVE": 1,
+    "SORTORDER": 890
+  },
+  {
+    "CODE": "KGS",
+    "NAME": "Kyrgyzstan Som",
+    "DESCRIPTION": "Kyrgyzstan Som",
+    "ISACTIVE": 1,
+    "SORTORDER": 900
+  },
+  {
+    "CODE": "KHR",
+    "NAME": "Cambodian Riel",
+    "DESCRIPTION": "Cambodian Riel",
+    "ISACTIVE": 1,
+    "SORTORDER": 910
+  },
+  {
+    "CODE": "KMF",
+    "NAME": "Comoros Franc",
+    "DESCRIPTION": "Comoros Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 920
+  },
+  {
+    "CODE": "KPW",
+    "NAME": "North Korean Won",
+    "DESCRIPTION": "North Korean Won",
+    "ISACTIVE": 1,
+    "SORTORDER": 930
+  },
+  {
+    "CODE": "KRW",
+    "NAME": "South Korean Won",
+    "DESCRIPTION": "South Korean Won",
+    "ISACTIVE": 1,
+    "SORTORDER": 940
+  },
+  {
+    "CODE": "KWD",
+    "NAME": "Kuwaiti Dinar",
+    "DESCRIPTION": "Kuwaiti Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 950
+  },
+  {
+    "CODE": "KYD",
+    "NAME": "Cayman Dollar",
+    "DESCRIPTION": "Cayman Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 960
+  },
+  {
+    "CODE": "KZT",
+    "NAME": "Kazakstanian Tenge",
+    "DESCRIPTION": "Kazakstanian Tenge",
+    "ISACTIVE": 1,
+    "SORTORDER": 970
+  },
+  {
+    "CODE": "LAK",
+    "NAME": "Laotian Kip",
+    "DESCRIPTION": "Laotian Kip",
+    "ISACTIVE": 1,
+    "SORTORDER": 980
+  },
+  {
+    "CODE": "LBP",
+    "NAME": "Lebanese Pound",
+    "DESCRIPTION": "Lebanese Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 990
+  },
+  {
+    "CODE": "LKR",
+    "NAME": "Sri Lankan Rupee",
+    "DESCRIPTION": "Sri Lankan Rupee",
+    "ISACTIVE": 1,
+    "SORTORDER": 1000
+  },
+  {
+    "CODE": "LRD",
+    "NAME": "Liberian Dollar",
+    "DESCRIPTION": "Liberian Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1010
+  },
+  {
+    "CODE": "LSL",
+    "NAME": "Lesotho Loti",
+    "DESCRIPTION": "Lesotho Loti",
+    "ISACTIVE": 1,
+    "SORTORDER": 1020
+  },
+  {
+    "CODE": "LTL",
+    "NAME": "Lithuanian Lita",
+    "DESCRIPTION": "Lithuanian Lita",
+    "ISACTIVE": 1,
+    "SORTORDER": 1030
+  },
+  {
+    "CODE": "LUF",
+    "NAME": "Luxembourg Franc",
+    "DESCRIPTION": "Luxembourg Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 1040
+  },
+  {
+    "CODE": "LVL",
+    "NAME": "Latvian Lat",
+    "DESCRIPTION": "Latvian Lat",
+    "ISACTIVE": 1,
+    "SORTORDER": 1050
+  },
+  {
+    "CODE": "LYD",
+    "NAME": "Libyan Dinar",
+    "DESCRIPTION": "Libyan Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1060
+  },
+  {
+    "CODE": "MAD",
+    "NAME": "Moroccan Dirham",
+    "DESCRIPTION": "Moroccan Dirham",
+    "ISACTIVE": 1,
+    "SORTORDER": 1070
+  },
+  {
+    "CODE": "MDL",
+    "NAME": "Moldavian Leu",
+    "DESCRIPTION": "Moldavian Leu",
+    "ISACTIVE": 1,
+    "SORTORDER": 1080
+  },
+  {
+    "CODE": "MGA",
+    "NAME": "Madagascan Ariary (New)",
+    "DESCRIPTION": "Madagascan Ariary (New)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1090
+  },
+  {
+    "CODE": "MGF",
+    "NAME": "Madagascan Franc (Old",
+    "DESCRIPTION": "Madagascan Franc (Old",
+    "ISACTIVE": 1,
+    "SORTORDER": 1100
+  },
+  {
+    "CODE": "MKD",
+    "NAME": "Macedonian Denar",
+    "DESCRIPTION": "Macedonian Denar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1110
+  },
+  {
+    "CODE": "MMK",
+    "NAME": "Myanmar Kyat",
+    "DESCRIPTION": "Myanmar Kyat",
+    "ISACTIVE": 1,
+    "SORTORDER": 1120
+  },
+  {
+    "CODE": "MNT",
+    "NAME": "Mongolian Tugrik",
+    "DESCRIPTION": "Mongolian Tugrik",
+    "ISACTIVE": 1,
+    "SORTORDER": 1130
+  },
+  {
+    "CODE": "MOP",
+    "NAME": "Macao Pataca",
+    "DESCRIPTION": "Macao Pataca",
+    "ISACTIVE": 1,
+    "SORTORDER": 1140
+  },
+  {
+    "CODE": "MRO",
+    "NAME": "Mauritanian Ouguiya",
+    "DESCRIPTION": "Mauritanian Ouguiya",
+    "ISACTIVE": 1,
+    "SORTORDER": 1150
+  },
+  {
+    "CODE": "MTL",
+    "NAME": "Maltese Lira",
+    "DESCRIPTION": "Maltese Lira",
+    "ISACTIVE": 1,
+    "SORTORDER": 1160
+  },
+  {
+    "CODE": "MUR",
+    "NAME": "Mauritian Rupee",
+    "DESCRIPTION": "Mauritian Rupee",
+    "ISACTIVE": 1,
+    "SORTORDER": 1170
+  },
+  {
+    "CODE": "MVR",
+    "NAME": "Maldive Rufiyaa",
+    "DESCRIPTION": "Maldive Rufiyaa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1180
+  },
+  {
+    "CODE": "MWK",
+    "NAME": "Malawi Kwacha",
+    "DESCRIPTION": "Malawi Kwacha",
+    "ISACTIVE": 1,
+    "SORTORDER": 1190
+  },
+  {
+    "CODE": "MXN",
+    "NAME": "Mexican Pesos",
+    "DESCRIPTION": "Mexican Pesos",
+    "ISACTIVE": 1,
+    "SORTORDER": 1200
+  },
+  {
+    "CODE": "MYR",
+    "NAME": "Malaysian Ringgit",
+    "DESCRIPTION": "Malaysian Ringgit",
+    "ISACTIVE": 1,
+    "SORTORDER": 1210
+  },
+  {
+    "CODE": "MZM",
+    "NAME": "Mozambique Metical",
+    "DESCRIPTION": "Mozambique Metical",
+    "ISACTIVE": 1,
+    "SORTORDER": 1220
+  },
+  {
+    "CODE": "NAD",
+    "NAME": "Namibian Dollar",
+    "DESCRIPTION": "Namibian Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1230
+  },
+  {
+    "CODE": "NGN",
+    "NAME": "Nigerian Naira",
+    "DESCRIPTION": "Nigerian Naira",
+    "ISACTIVE": 1,
+    "SORTORDER": 1240
+  },
+  {
+    "CODE": "NIO",
+    "NAME": "Nicaraguan Cordoba Oro",
+    "DESCRIPTION": "Nicaraguan Cordoba Oro",
+    "ISACTIVE": 1,
+    "SORTORDER": 1250
+  },
+  {
+    "CODE": "NLG",
+    "NAME": "Dutch Guilder",
+    "DESCRIPTION": "Dutch Guilder",
+    "ISACTIVE": 1,
+    "SORTORDER": 1260
+  },
+  {
+    "CODE": "NOK",
+    "NAME": "Norwegian Krone",
+    "DESCRIPTION": "Norwegian Krone",
+    "ISACTIVE": 1,
+    "SORTORDER": 1270
+  },
+  {
+    "CODE": "NPR",
+    "NAME": "Nepalese Rupee",
+    "DESCRIPTION": "Nepalese Rupee",
+    "ISACTIVE": 1,
+    "SORTORDER": 1280
+  },
+  {
+    "CODE": "NZD",
+    "NAME": "New Zealand Dollars",
+    "DESCRIPTION": "New Zealand Dollars",
+    "ISACTIVE": 1,
+    "SORTORDER": 1290
+  },
+  {
+    "CODE": "OMR",
+    "NAME": "Omani Rial",
+    "DESCRIPTION": "Omani Rial",
+    "ISACTIVE": 1,
+    "SORTORDER": 1300
+  },
+  {
+    "CODE": "PAB",
+    "NAME": "Panamanian Balboa",
+    "DESCRIPTION": "Panamanian Balboa",
+    "ISACTIVE": 1,
+    "SORTORDER": 1310
+  },
+  {
+    "CODE": "PEN",
+    "NAME": "Peruvian New Sol",
+    "DESCRIPTION": "Peruvian New Sol",
+    "ISACTIVE": 1,
+    "SORTORDER": 1320
+  },
+  {
+    "CODE": "PGK",
+    "NAME": "Papua New Guinea Kina",
+    "DESCRIPTION": "Papua New Guinea Kina",
+    "ISACTIVE": 1,
+    "SORTORDER": 1330
+  },
+  {
+    "CODE": "PHP",
+    "NAME": "Philippine Peso",
+    "DESCRIPTION": "Philippine Peso",
+    "ISACTIVE": 1,
+    "SORTORDER": 1340
+  },
+  {
+    "CODE": "PKR",
+    "NAME": "Pakistani Rupee",
+    "DESCRIPTION": "Pakistani Rupee",
+    "ISACTIVE": 1,
+    "SORTORDER": 1350
+  },
+  {
+    "CODE": "PLN",
+    "NAME": "Polish Zloty (new)",
+    "DESCRIPTION": "Polish Zloty (new)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1360
+  },
+  {
+    "CODE": "PTE",
+    "NAME": "Portuguese Escudo",
+    "DESCRIPTION": "Portuguese Escudo",
+    "ISACTIVE": 1,
+    "SORTORDER": 1370
+  },
+  {
+    "CODE": "PYG",
+    "NAME": "Paraguayan Guarani",
+    "DESCRIPTION": "Paraguayan Guarani",
+    "ISACTIVE": 1,
+    "SORTORDER": 1380
+  },
+  {
+    "CODE": "QAR",
+    "NAME": "Qatar Rial",
+    "DESCRIPTION": "Qatar Rial",
+    "ISACTIVE": 1,
+    "SORTORDER": 1390
+  },
+  {
+    "CODE": "RMB",
+    "NAME": "Chinesische Renminbi (national)",
+    "DESCRIPTION": "Chinesische Renminbi (national)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1400
+  },
+  {
+    "CODE": "ROL",
+    "NAME": "Romanian Leu",
+    "DESCRIPTION": "Romanian Leu",
+    "ISACTIVE": 1,
+    "SORTORDER": 1410
+  },
+  {
+    "CODE": "RUB",
+    "NAME": "Russian Ruble",
+    "DESCRIPTION": "Russian Ruble",
+    "ISACTIVE": 1,
+    "SORTORDER": 1420
+  },
+  {
+    "CODE": "RWF",
+    "NAME": "Rwandan Franc",
+    "DESCRIPTION": "Rwandan Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 1430
+  },
+  {
+    "CODE": "SAR",
+    "NAME": "Saudi Riyal",
+    "DESCRIPTION": "Saudi Riyal",
+    "ISACTIVE": 1,
+    "SORTORDER": 1440
+  },
+  {
+    "CODE": "SBD",
+    "NAME": "Solomon Islands Dollar",
+    "DESCRIPTION": "Solomon Islands Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1450
+  },
+  {
+    "CODE": "SCR",
+    "NAME": "Seychelles Rupee",
+    "DESCRIPTION": "Seychelles Rupee",
+    "ISACTIVE": 1,
+    "SORTORDER": 1460
+  },
+  {
+    "CODE": "SDD",
+    "NAME": "Sudanese Dinar",
+    "DESCRIPTION": "Sudanese Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1470
+  },
+  {
+    "CODE": "SDP",
+    "NAME": "Sudanese Pound",
+    "DESCRIPTION": "Sudanese Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 1480
+  },
+  {
+    "CODE": "SDR",
+    "NAME": "Special Drawing Rights",
+    "DESCRIPTION": "Special Drawing Rights",
+    "ISACTIVE": 1,
+    "SORTORDER": 1490
+  },
+  {
+    "CODE": "SEK",
+    "NAME": "Swedish Krona",
+    "DESCRIPTION": "Swedish Krona",
+    "ISACTIVE": 1,
+    "SORTORDER": 1500
+  },
+  {
+    "CODE": "SGD",
+    "NAME": "Singapore Dollar",
+    "DESCRIPTION": "Singapore Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1510
+  },
+  {
+    "CODE": "SHP",
+    "NAME": "St.Helena Pound",
+    "DESCRIPTION": "St.Helena Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 1520
+  },
+  {
+    "CODE": "SIT",
+    "NAME": "Slovenian Tolar",
+    "DESCRIPTION": "Slovenian Tolar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1530
+  },
+  {
+    "CODE": "SKK",
+    "NAME": "Slovakian Krona",
+    "DESCRIPTION": "Slovakian Krona",
+    "ISACTIVE": 1,
+    "SORTORDER": 1540
+  },
+  {
+    "CODE": "SLL",
+    "NAME": "Sierra Leone Leone",
+    "DESCRIPTION": "Sierra Leone Leone",
+    "ISACTIVE": 1,
+    "SORTORDER": 1550
+  },
+  {
+    "CODE": "SOS",
+    "NAME": "Somalian Shilling",
+    "DESCRIPTION": "Somalian Shilling",
+    "ISACTIVE": 1,
+    "SORTORDER": 1560
+  },
+  {
+    "CODE": "SRD",
+    "NAME": "Surinam Dollar",
+    "DESCRIPTION": "Surinam Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1570
+  },
+  {
+    "CODE": "SRG",
+    "NAME": "Surinam Guilder (Old)",
+    "DESCRIPTION": "Surinam Guilder (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1580
+  },
+  {
+    "CODE": "STD",
+    "NAME": "Sao Tome / Principe Dobra",
+    "DESCRIPTION": "Sao Tome / Principe Dobra",
+    "ISACTIVE": 1,
+    "SORTORDER": 1590
+  },
+  {
+    "CODE": "SVC",
+    "NAME": "El Salvador Colon",
+    "DESCRIPTION": "El Salvador Colon",
+    "ISACTIVE": 1,
+    "SORTORDER": 1600
+  },
+  {
+    "CODE": "SYP",
+    "NAME": "Syrian Pound",
+    "DESCRIPTION": "Syrian Pound",
+    "ISACTIVE": 1,
+    "SORTORDER": 1610
+  },
+  {
+    "CODE": "SZL",
+    "NAME": "Swaziland Lilangeni",
+    "DESCRIPTION": "Swaziland Lilangeni",
+    "ISACTIVE": 1,
+    "SORTORDER": 1620
+  },
+  {
+    "CODE": "THB",
+    "NAME": "Thailand Baht",
+    "DESCRIPTION": "Thailand Baht",
+    "ISACTIVE": 1,
+    "SORTORDER": 1630
+  },
+  {
+    "CODE": "TJR",
+    "NAME": "Tajikistani Ruble (Old)",
+    "DESCRIPTION": "Tajikistani Ruble (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1640
+  },
+  {
+    "CODE": "TJS",
+    "NAME": "Tajikistani Somoni",
+    "DESCRIPTION": "Tajikistani Somoni",
+    "ISACTIVE": 1,
+    "SORTORDER": 1650
+  },
+  {
+    "CODE": "TMM",
+    "NAME": "Turkmenistani Manat",
+    "DESCRIPTION": "Turkmenistani Manat",
+    "ISACTIVE": 1,
+    "SORTORDER": 1660
+  },
+  {
+    "CODE": "TND",
+    "NAME": "Tunisian Dinar",
+    "DESCRIPTION": "Tunisian Dinar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1670
+  },
+  {
+    "CODE": "TOP",
+    "NAME": "Tongan Pa'anga",
+    "DESCRIPTION": "Tongan Pa'anga",
+    "ISACTIVE": 1,
+    "SORTORDER": 1680
+  },
+  {
+    "CODE": "TPE",
+    "NAME": "Timor Escudo",
+    "DESCRIPTION": "Timor Escudo",
+    "ISACTIVE": 1,
+    "SORTORDER": 1690
+  },
+  {
+    "CODE": "TRL",
+    "NAME": "Turkish Lira (Old)",
+    "DESCRIPTION": "Turkish Lira (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1700
+  },
+  {
+    "CODE": "TRY",
+    "NAME": "Turkish Lira",
+    "DESCRIPTION": "Turkish Lira",
+    "ISACTIVE": 1,
+    "SORTORDER": 1710
+  },
+  {
+    "CODE": "TTD",
+    "NAME": "Trinidad and Tobago Dollar",
+    "DESCRIPTION": "Trinidad and Tobago Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1720
+  },
+  {
+    "CODE": "TWD",
+    "NAME": "New Taiwan Dollar",
+    "DESCRIPTION": "New Taiwan Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1730
+  },
+  {
+    "CODE": "TZS",
+    "NAME": "Tanzanian Shilling",
+    "DESCRIPTION": "Tanzanian Shilling",
+    "ISACTIVE": 1,
+    "SORTORDER": 1740
+  },
+  {
+    "CODE": "UAH",
+    "NAME": "Ukraine Hryvnia",
+    "DESCRIPTION": "Ukraine Hryvnia",
+    "ISACTIVE": 1,
+    "SORTORDER": 1750
+  },
+  {
+    "CODE": "UGX",
+    "NAME": "Ugandan Shilling",
+    "DESCRIPTION": "Ugandan Shilling",
+    "ISACTIVE": 1,
+    "SORTORDER": 1760
+  },
+  {
+    "CODE": "USD",
+    "NAME": "United States Dollar",
+    "DESCRIPTION": "United States Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1770
+  },
+  {
+    "CODE": "USDN",
+    "NAME": "(Internal) United States Dollar (5 Dec.)",
+    "DESCRIPTION": "(Internal) United States Dollar (5 Dec.)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1780
+  },
+  {
+    "CODE": "UYU",
+    "NAME": "Uruguayan Peso (new)",
+    "DESCRIPTION": "Uruguayan Peso (new)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1790
+  },
+  {
+    "CODE": "UZS",
+    "NAME": "Uzbekistan Som",
+    "DESCRIPTION": "Uzbekistan Som",
+    "ISACTIVE": 1,
+    "SORTORDER": 1800
+  },
+  {
+    "CODE": "VEB",
+    "NAME": "Venezuelan Bolivar",
+    "DESCRIPTION": "Venezuelan Bolivar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1810
+  },
+  {
+    "CODE": "VEF",
+    "NAME": "Venezuelan Bolivar Hard",
+    "DESCRIPTION": "Venezuelan Bolivar Hard",
+    "ISACTIVE": 1,
+    "SORTORDER": 1820
+  },
+  {
+    "CODE": "VND",
+    "NAME": "Vietnamese Dong",
+    "DESCRIPTION": "Vietnamese Dong",
+    "ISACTIVE": 1,
+    "SORTORDER": 1830
+  },
+  {
+    "CODE": "VUV",
+    "NAME": "Vanuatu Vatu",
+    "DESCRIPTION": "Vanuatu Vatu",
+    "ISACTIVE": 1,
+    "SORTORDER": 1840
+  },
+  {
+    "CODE": "WST",
+    "NAME": "Samoan Tala",
+    "DESCRIPTION": "Samoan Tala",
+    "ISACTIVE": 1,
+    "SORTORDER": 1850
+  },
+  {
+    "CODE": "XAF",
+    "NAME": "Gabon CFA Franc BEAC",
+    "DESCRIPTION": "Gabon CFA Franc BEAC",
+    "ISACTIVE": 1,
+    "SORTORDER": 1860
+  },
+  {
+    "CODE": "XCD",
+    "NAME": "East Carribean Dollar",
+    "DESCRIPTION": "East Carribean Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1870
+  },
+  {
+    "CODE": "XDR",
+    "NAME": "Special Drawing rights",
+    "DESCRIPTION": "Special Drawing rights",
+    "ISACTIVE": 1,
+    "SORTORDER": 1880
+  },
+  {
+    "CODE": "XDS",
+    "NAME": "St. Christopher Dollar",
+    "DESCRIPTION": "St. Christopher Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1890
+  },
+  {
+    "CODE": "XEU",
+    "NAME": "European Currency Unit (E.C.U.)",
+    "DESCRIPTION": "European Currency Unit (E.C.U.)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1900
+  },
+  {
+    "CODE": "XOF",
+    "NAME": "Benin CFA Franc BCEAO",
+    "DESCRIPTION": "Benin CFA Franc BCEAO",
+    "ISACTIVE": 1,
+    "SORTORDER": 1910
+  },
+  {
+    "CODE": "XPF",
+    "NAME": "CFP Franc",
+    "DESCRIPTION": "CFP Franc",
+    "ISACTIVE": 1,
+    "SORTORDER": 1920
+  },
+  {
+    "CODE": "YER",
+    "NAME": "Yemeni Ryal",
+    "DESCRIPTION": "Yemeni Ryal",
+    "ISACTIVE": 1,
+    "SORTORDER": 1930
+  },
+  {
+    "CODE": "YUM",
+    "NAME": "New Yugoslavian Dinar (Old)",
+    "DESCRIPTION": "New Yugoslavian Dinar (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1940
+  },
+  {
+    "CODE": "ZAR",
+    "NAME": "South African Rand",
+    "DESCRIPTION": "South African Rand",
+    "ISACTIVE": 1,
+    "SORTORDER": 1950
+  },
+  {
+    "CODE": "ZMK",
+    "NAME": "Zambian Kwacha",
+    "DESCRIPTION": "Zambian Kwacha",
+    "ISACTIVE": 1,
+    "SORTORDER": 1960
+  },
+  {
+    "CODE": "ZRN",
+    "NAME": "Zaire (Old)",
+    "DESCRIPTION": "Zaire (Old)",
+    "ISACTIVE": 1,
+    "SORTORDER": 1970
+  },
+  {
+    "CODE": "ZWD",
+    "NAME": "Zimbabwean Dollar",
+    "DESCRIPTION": "Zimbabwean Dollar",
+    "ISACTIVE": 1,
+    "SORTORDER": 1980
+  }
+]

@@ -1,0 +1,1562 @@
+[
+  {
+    "ID": "a873a029-ce48-5228-9776-db733db6f640",
+    "CREATEDAT": "2026-10-04T18:32:28.139",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:28.139",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "MAT-100001",
+    "MATERIALDESCRIPTION": "Outdoor Antenna Unit 900MHz",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f6c74def-6606-5d0d-a2a3-69a36cb9035c",
+    "CREATEDAT": "2026-10-04T18:32:28.139",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:28.139",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "MAT-100002",
+    "MATERIALDESCRIPTION": "Baseband Processing Unit",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c922a19c-3cad-53bc-bf6c-24f26a818951",
+    "CREATEDAT": "2026-10-04T18:32:28.139",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:28.139",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "MAT-100003",
+    "MATERIALDESCRIPTION": "Fibre Optic Cable 24-Core",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "39eb5708-d90f-5464-b13c-5af38bc06109",
+    "CREATEDAT": "2026-10-04T18:32:28.139",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:28.139",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "MAT-100004",
+    "MATERIALDESCRIPTION": "Rectifier Module 48V",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a77306fd-5a7e-55c1-a2ca-b292c2aa4a89",
+    "CREATEDAT": "2026-10-04T18:32:28.139",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:28.139",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "MAT-100005",
+    "MATERIALDESCRIPTION": "Battery Bank 48V 200Ah",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a3733b34-2ffa-5f7f-be58-c368515616f4",
+    "CREATEDAT": "2026-10-04T18:32:28.139",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-04T18:32:28.139",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "MAT-100006",
+    "MATERIALDESCRIPTION": "Microwave Radio Link Unit",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "edbe8f95-87f5-5a3e-b5f4-9288f9869a13",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1",
+    "MATERIALDESCRIPTION": "146GB 15K SAS 3.5 Hotplug HDD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "80294f97-2d54-5772-916a-904062a9f93a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "2",
+    "MATERIALDESCRIPTION": "Uniforms - Ladies Blouse",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5201608e-70a4-5ae8-943e-8059b494de56",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000000",
+    "MATERIALDESCRIPTION": "BLOCK-Cable 7/8 Andrew, Cable Cutting",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "27c6f838-14ea-5833-9a77-a75d4a2a6a96",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000001",
+    "MATERIALDESCRIPTION": "BLOCK-BTS Tools Wrist Strap",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "87ed04f9-475c-5946-b6ac-31e89091ec76",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000002",
+    "MATERIALDESCRIPTION": "BLOCK-BULKHEAD -3 HOLE PLATE(7/8)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1b85699d-883e-5a4b-9d7e-90b9f1db4e0b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000003",
+    "MATERIALDESCRIPTION": "BLOCK-BTS 1/2 Cable Stapping, Eupen",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5231d690-c7d7-5bb0-ba4c-24bec6b0b7dd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000004",
+    "MATERIALDESCRIPTION": "BLOCK-CONN. CABLE EXRANG2-Alarm Device",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6cfce3cb-1b3d-547b-9ce6-8b0b5a8eda14",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000005",
+    "MATERIALDESCRIPTION": "BLOCK-CONN. CABLE 8-POS RJ45 WITH FERRIT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6edbe9f7-839e-5e75-9aa2-1e4234932dae",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000006",
+    "MATERIALDESCRIPTION": "BLOCK-CONN. CABLE SOFIX 8PIN-4X2-SOFIX 8",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "917fdcc8-9772-5090-b804-325f308485cc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000007",
+    "MATERIALDESCRIPTION": "BLOCK-CONN. CABLE RS485",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "46cd31ab-8794-5725-ba15-6293445b2798",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000008",
+    "MATERIALDESCRIPTION": "BLOCK-Precision Cutter Olfa Knife (Selle",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "18e3f29e-eb55-5e72-a446-9181801fcfc5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000009",
+    "MATERIALDESCRIPTION": "BLOCK-Tape C0881X Acome, Rubber Mastic T",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "853860ab-ee97-5989-aa87-35bca722446f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000010",
+    "MATERIALDESCRIPTION": "BLOCK-Cable Fixing Clip 3 cable D9.8-12.",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3f090cd9-2b24-5396-a0b2-2908927845ec",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000011",
+    "MATERIALDESCRIPTION": "BLOCK-CDMA Base Terminal",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "0577b1db-648c-5c15-8caf-180f6339d571",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000012",
+    "MATERIALDESCRIPTION": "BLOCK-Cable adapt DB25 male to MB34F",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aea09324-c063-5604-972d-f0f699126370",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000013",
+    "MATERIALDESCRIPTION": "BLOCK-Lighting Protection Unit for ZX B8",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9f5cd1df-cd5f-57b6-8984-2691dc9fa625",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000014",
+    "MATERIALDESCRIPTION": "BLOCK-ZTE CCS cable",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4a2217a6-49c6-522d-8e0c-138687e5e884",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000015",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 SYS CPRC spares",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c0a18480-cedd-5f7a-ae42-69320930a0f8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000016",
+    "MATERIALDESCRIPTION": "BLOCK- TC A9125 A925TC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b106b44b-311c-5e57-9feb-27ebebbb9c8b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000017",
+    "MATERIALDESCRIPTION": "BLOCK- MFS A9135 GPU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5e747654-7425-5b1f-9db4-bd8070a2e359",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000018",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 IPNA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "867d9498-43a5-5458-819e-00870af553a4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000019",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 RPP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9de5cf5c-5415-5d74-96ad-3ada12340def",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000020",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 EPS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a2dbc099-bab6-593f-aa20-c55b9ea83ee2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000021",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 XDB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "285c905b-e8b4-50ad-9612-4f34d32b621f",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000022",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 DLEB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5ff99ca2-1742-5a59-9c8a-94bc9b0a0095",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000023",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 CDB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "67340002-3a62-58a5-ae70-6ba757a3a45b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000024",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 IRB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fda3568f-9aa6-5c19-8b39-8b38e85128b0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000025",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 SCB-",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eab2cb8f-f866-56c4-86d6-e59e685bee5a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000026",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE810 IPU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "cdb11c3d-916e-5c33-b379-f736a98a656e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000027",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC AXE810 RBSC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "737435a6-701b-586d-ae58-7774f31299bd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000028",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC BSC32 BSC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5bd8c639-c46d-50e1-888f-b01193ef26c6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000029",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC BSC32 TCSM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9e702d76-fd72-572f-97a8-d6a56c56c6f2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000030",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC BSC32 PCU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7ad6d2c5-634d-5087-ae26-a7dedf7e7abb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000031",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC BSC32 CBC Service",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b362b359-c6cd-51b2-a7c3-d0d73ce475e4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000032",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson Multiplexer ET-4-1 Subrac",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9d96f1a3-11b9-523b-98f8-2793e2419959",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000033",
+    "MATERIALDESCRIPTION": "BLOCK- BSC A9130 BSC Cabinet",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "13e50c6b-fa34-516e-ac2f-6e782c89bcf2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000034",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC AXE810 SA-TRC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bc9a7286-4527-5545-b424-1a4990090616",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000035",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC AXE810 ODF",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b4dbebe1-3644-5347-bc87-e8d96606ee72",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000036",
+    "MATERIALDESCRIPTION": "BLOCK-BSC Transcoder Unit",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "93f8f6e4-1f6a-554f-bb94-1d335bdab609",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000037",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_BSC6000_EIUa",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "53268db2-6f3b-54ca-a0b1-746836b07e19",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000038",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_BSC6000_OIUa",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c1645010-363d-538a-8b5d-c9f748e00ab3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000039",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_BSC6000_SCUa",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2b7d5ad9-dfc2-5786-a510-77e84db6abef",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000040",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_BSC6000_TNUa",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ba6fdfd1-c598-517e-9527-a581364e9941",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000041",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_BSC6000_MDMC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "db8a630b-eed7-5f4f-8159-649c3d794038",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000042",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_BSC6000_PAMC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f68aa3ef-1f26-548f-864c-6d03025565fc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000043",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_BSC6000_PFCU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8ade0e9a-7072-576c-9063-97db76e6c46a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000044",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_BSC6000_WOPB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "05062159-572a-596c-ab51-48c027a0f020",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000045",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_POMU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "073b2f1f-016d-5f47-bcce-177771302af2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000046",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_RPPU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "af0ef0f3-b50b-5e6e-9ffd-55b0b8d6d154",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000047",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_L2PU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "899f50f5-0987-521f-877d-a14cc2abe64e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000048",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_HSC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fbe68d95-5ba1-5f96-8c6f-909c9e470088",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000049",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_BSU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f0fad917-b2a6-5859-b7d2-28fbd73f9567",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000050",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_E1TMb",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bc04afa8-62a1-5ac8-add7-fe329e2941cd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000051",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_UPWRb",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "24ebd582-81c0-53bb-b08c-f59d84642179",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000052",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_Cabinet",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "39e8aaa3-c20c-55e2-afc0-c1c238ae1cd0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000053",
+    "MATERIALDESCRIPTION": "BLOCK-HUA_PCU6000_SubRack",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8fc7a013-bb58-5573-bb03-ba7bad230193",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000054",
+    "MATERIALDESCRIPTION": "BLOCK-CDMA BSC inter equipment (CBIE)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a1b18786-f835-50ce-b32f-3914ca164e76",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000055",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE 810 RPP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7dd682f0-303e-5a93-981d-6aba2ad78fcf",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000056",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GM-MSM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "943bd26f-8741-5143-bf18-4ad2c6cebeb2",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000057",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC Spares AXE 810 MAU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "44ed1944-84b7-56e5-a129-ad850741d261",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000058",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 ASMB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "094548c0-88f8-5add-93fb-0ac48883fb35",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000059",
+    "MATERIALDESCRIPTION": "BLOCK- BSC A9135 JBETI",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8dc00478-923a-515a-8ff3-0e7e12b56d58",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000060",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC AXE810 PCU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6900e220-68d7-55c2-8281-ff9001f45cc6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000061",
+    "MATERIALDESCRIPTION": "BLOCK-Hua Acc 32 Conductor XSection",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f1da6d07-084c-566e-bdcf-bedefc7b180c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000062",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson Cable AXE810 Twisted Pair",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f1c745dd-9ba2-515e-9519-b60bfe2375ee",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000063",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei Cable CAT 5E Xover Cable, 3",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3504f03a-72ba-51c4-850b-50397984aed1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000064",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 128 TRX/24AITF/24ABIS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c434113b-85e9-557b-a425-62151ef92e02",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000065",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 EXT-128/24/24",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "990e487d-e736-5bb4-9dd1-a94aeee7c958",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000066",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 EXT-288/48/54",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f4f5e723-777b-5720-a992-57f677059388",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000067",
+    "MATERIALDESCRIPTION": "BLOCK-DDF KRONE 10 E1 ( KRONE FRAME)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bea3a32d-ba77-50d3-8591-e74aa6de4b0d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000068",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 LMT 15M/ V24X",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2b4c0e47-e4bd-5369-a670-de2c02fab20b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000069",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 MT 120 MODULE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ef9ccec5-a144-5a21-ad8e-22801650f711",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000070",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 CPRC-OSI - PBA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "04be9015-2579-5c3b-ace8-d15cbdc493e7",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000071",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 PBA-CPRC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e6c23d9a-1e7d-50cb-8f97-31a685e0b180",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000072",
+    "MATERIALDESCRIPTION": "BLOCK- MFS A9135 JAHPS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d549a593-9b6d-5b23-b711-c230f37ce861",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000073",
+    "MATERIALDESCRIPTION": "BLOCK- MFS A9135 BE35B2",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c5048888-e68d-5332-9e48-9eced8f5217b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000074",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 SWCH GS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d037d730-3649-5ba7-a947-630761036116",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000075",
+    "MATERIALDESCRIPTION": "BLOCK- MFS DS10 E1 Cable 3BK08496JL",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bf3db2e4-b6dc-55e1-8699-cb39ff7610f3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000076",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 ASMC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b4ce8ba5-5f35-50f4-b32f-93c3e92eb7fe",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000077",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 ATBX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "12ef5aab-7be8-5a44-acb6-f0f587d9e3dc",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000078",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 BBAT",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fe22c02e-88c3-559a-aa77-00374c6e2154",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000079",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 BCDC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "aeff645c-673a-5c81-9e76-48d0a82c2e29",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000080",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 BCLA -ACAC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8c365820-f271-5181-b832-95cd2b532aa8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000081",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 CPRA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7169f290-4650-545f-8333-ee5d6618e30d",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000082",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 BC CPRC spares",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8a8fb022-3c4c-5dc5-bed9-f08ccb74552c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000083",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 CPRC -AAAF",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "16fe6f65-6af7-5618-9183-51d7acfaf12e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000084",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 CPRC -AAAG",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ba584e44-4836-5173-919c-d39b763da238",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000085",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 OSI CPRC spares",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "050f26ca-2901-5641-baca-e0294c2a64d9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000086",
+    "MATERIALDESCRIPTION": "BLOCK- TC G2 DB 2M",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5e870103-971d-5f7d-b5e0-0dcc2ff70fb9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000087",
+    "MATERIALDESCRIPTION": "BLOCK- TC G2 DT 16",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1ee37b4f-897c-5615-a0e8-90544aaa200b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000088",
+    "MATERIALDESCRIPTION": "BLOCK- TC G2 DX2M",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b717d2b6-cf2e-5a6c-a4b8-56aa3c7a1633",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000089",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC AXE810 IBEN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b8a71fe9-8e49-5b19-8171-4bff8273d3b9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000090",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC AXE810 IOLAN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7858964a-2bc5-5414-bc92-4fcadcdfda07",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000091",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 JBFAN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "93bc84c1-4e51-54d9-aa42-967ce98ecadd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000092",
+    "MATERIALDESCRIPTION": "BLOCK- TC G2 JBMTE 2 (MT 120)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3d02d45d-e184-5418-9160-e401e946eabd",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000093",
+    "MATERIALDESCRIPTION": "BLOCK- BSC SWCH Card",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "429c4299-cd12-58c0-a5f6-33aee4f68975",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000094",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 AAAA - Access Switch",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "eefff508-e63b-5227-98e6-d03409036b68",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000095",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 ABAA - Group Switch",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4b6b1bba-15ac-5d33-8308-095cc6a5c283",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000096",
+    "MATERIALDESCRIPTION": "BLOCK- TC G2 TC16",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "76ec451b-cc3e-56c3-a0b0-00ea64ed4a53",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000097",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson TC AXE810 TRA R 5 B",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "df3f1d4c-9aea-559f-8d6d-c54157bba0d4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000098",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 TSCA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8c165445-0f00-56c6-8e57-0a9878c666a0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000099",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC AXE810 TTA-1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4439cdaf-3198-571f-8b38-a1b62851f160",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000100",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC AXE810 DSU 2GW",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4bfdaabe-908b-5a72-96c8-a5e2bfe86333",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000101",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 CPRC -SYS - BCAA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "46ffe9f4-d882-593d-aad8-af79bbc42c90",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000102",
+    "MATERIALDESCRIPTION": "BLOCK- MFS A9135 Standard unit",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "474080ec-802b-54a1-89c8-81aa2389dbd6",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000103",
+    "MATERIALDESCRIPTION": "BLOCK- MFS A9135 BATTU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f6ea18c8-a813-5402-8984-7fd1094fabee",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000104",
+    "MATERIALDESCRIPTION": "BLOCK- MFS A9135 BDAFU3",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "a260dfa6-e197-59ea-a793-96c5dcb95d50",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000105",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 BCLA SYS 120 OHM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "3e06f9db-936a-555a-b9bc-44e74f2f26b0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000106",
+    "MATERIALDESCRIPTION": "BLOCK- BSC/TC G2 Spare",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5fce11b0-0fad-5ffd-88ee-5aa6f6b4ed09",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000107",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC BSC32 Spare",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "6bd7c3c2-bea6-5ee3-b795-dcc19723eafa",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000108",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson PDF AXE10 Spares FOR EBSC",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d50f9e2a-70bc-552a-84c7-30d30e57135a",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000109",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GPWS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "5e552b07-164b-53b4-9e16-af0ba7d0b66c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000110",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GALM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "29c32152-d6dd-533d-8e99-830d6096f012",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000111",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GMC 2",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "e3077aae-dc8f-536d-adc1-fb205dc7eb7b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000112",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GMEM",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "10076c7a-9a76-5aad-a8fb-cb1b65024fee",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000113",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GMPU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2abbfb1d-a449-5a5d-8b91-b1dfdb63be24",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000114",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GEMA",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "26b13042-f1b9-5dfa-b7cc-0c7a99b585e0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000115",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GLAP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "25caf097-1af9-5764-b46d-76717c0ce5e0",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000116",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GNET",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7122ebbd-dd47-5ba2-b56d-6844694c27e4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000117",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 CKV",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "28ff82c2-b286-51d0-a819-d4e71fb610f9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000118",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GMAE1DBX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c7183061-3ae2-5609-b47f-106e1dba2f7b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000119",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GMAE1SFBX",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "fddec7df-7bc6-5c74-875b-53a949ae65d4",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000120",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 PMU-1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c8cb76ca-9c36-5334-96fb-bb6c16c43c93",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000121",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 MMI-1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "266423b7-fbf1-5008-9c8d-737e82b4fa0b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000122",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 PCU RACK",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "d46cb86e-0703-5d9e-bc50-1f6e63e1e492",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000123",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 FUMO",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "41454875-9923-5d87-9a49-8829fbbbb41c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000124",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 M4MG",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9984dcb7-f614-539d-a9fb-fa0b46adf135",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000125",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 ANSP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "f89ddd94-e556-5453-af1e-83f8241ae0e1",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000126",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GCKS",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b538523b-e5b0-573c-893c-17f30229a8b5",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000127",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 E3M",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8e0f9e6f-fa53-521c-a886-d599cb77bc62",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000128",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GCTN",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bd49d9d0-096d-5c89-892b-5e6806909deb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000129",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 GFBI",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2508b210-7185-5cfa-83d6-b59780ad8899",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000130",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 MM1",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "7f838f5c-edc2-5d46-a916-f5d4b6c1f9d9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000131",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 PMU",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "9f70dfa0-8cf3-5434-83c4-c8dceb683c5b",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000132",
+    "MATERIALDESCRIPTION": "BLOCK-Huawei BSC/TC BSC32 FRQPAE",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "dec3fcf4-c033-5a63-a769-a596c169c5af",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000133",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 Back Panel,3BK06450AAAA01",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c01c4d14-0c19-5d5e-871e-3b8190fea309",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000134",
+    "MATERIALDESCRIPTION": "BLOCK- MFS A9135 BAREDC 2",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "c01f97e5-45a9-5b21-9f26-d859b2658ab9",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000135",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 CPRC - OSI -ABAD",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "004378dd-8f23-5093-bafd-da64d2bbbcfa",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000136",
+    "MATERIALDESCRIPTION": "BLOCK-Eri ODF NCD518 32SC Inst. material",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "8fd6a8cc-977e-5f00-9fe8-3808ca5b440c",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000137",
+    "MATERIALDESCRIPTION": "BLOCK-Eric ODFPM919231/5000 Coax(BSC-ODF",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ba414068-a815-5ccd-8456-05dd8b8e5791",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000138",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson ODF LTT50206 DDF Tool Box",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "41d1ac20-ad4b-53e4-a420-7303ba6d5fe8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000139",
+    "MATERIALDESCRIPTION": "BLOCK-Hua BSC 32 Base Unit with Acc",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "87195aed-42ca-5208-8fb2-86fb7152dc2e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000140",
+    "MATERIALDESCRIPTION": "BLOCK-Sigos Um functional interface GSM/",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "1f63dd13-7c77-58e4-9e65-770e32c28c1e",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000141",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 WSCM2GB",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "bbcf0a4c-62a1-501d-8e74-ba3e2d225785",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000142",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 WIOM 2- 3BK26780ABAA01",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "62317a7e-658e-5e63-93f8-30a060816011",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000143",
+    "MATERIALDESCRIPTION": "BLOCK- BSC G2 WIOM 2- 3BK26780ABAB01",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "774e7b49-3e35-5c87-94aa-fc9d1eb32bf8",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000144",
+    "MATERIALDESCRIPTION": "BLOCK-Eri BSC/TC AXE810 RIC-E1/48/UTP/IP",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "4f8ef62b-d684-563a-b5ce-f54abb437717",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000145",
+    "MATERIALDESCRIPTION": "BLOCK-Eri BSC/TC AXE810 IP/RIC-E1T1(A)",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "ce733c30-7228-555d-afdd-c107a90dc7d3",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000146",
+    "MATERIALDESCRIPTION": "BLOCK-Ericsson BSC/TC AXE810 Spare",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "2f7d270a-3a96-55e2-bca9-17e30a1ae0eb",
+    "CREATEDAT": "2026-10-13T21:30:29.017",
+    "CREATEDBY": "anonymous",
+    "MODIFIEDAT": "2026-10-13T21:30:29.017",
+    "MODIFIEDBY": "anonymous",
+    "MATERIALCODE": "1000000147",
+    "MATERIALDESCRIPTION": "BLOCK-Polycom TGD108 8port digital GW",
+    "ISACTIVE": 1
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "ID": "dfce6829-8a77-48dc-b2bd-ff5cc1a534fe",
+    "CREATEDAT": "2026-10-07T16:23:08.683",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-07T16:23:12.487",
+    "MODIFIEDBY": "system",
+    "CONTRACTTYPECODE": "MK",
+    "CONTRACTTYPEDESCRIPTION": "Quantity Contract",
+    "ISACTIVE": 1
+  },
+  {
+    "ID": "b4e8d2e3-68dc-4477-b92c-f946cdbef212",
+    "CREATEDAT": "2026-10-07T16:23:38.09",
+    "CREATEDBY": "system",
+    "MODIFIEDAT": "2026-10-07T16:23:42.212",
+    "MODIFIEDBY": "system",
+    "CONTRACTTYPECODE": "WK",
+    "CONTRACTTYPEDESCRIPTION": "Value Contract",
+    "ISACTIVE": 1
+  }
+]
