@@ -43,6 +43,10 @@ module.exports = (amountSources) => ({
 
   _isLoaStep(step) { return step?.stepType === "LOA"; },
 
+  _useSuppliedLoaApprovers(event, selectionSupplied, loaBeforeProcessing) {
+    return Boolean(selectionSupplied && (event !== "CREATE" || loaBeforeProcessing));
+  },
+
   _isRequesterSubmissionStep(step, requestOrigin) {
     const configuredOrigin = String(step?.requestOrigin || "").trim().toUpperCase();
     const trustedOrigin = String(requestOrigin || "").trim().toUpperCase();
@@ -70,6 +74,91 @@ module.exports = (amountSources) => ({
       || (index === 1 && this._isRequesterSubmissionStep(steps[0], requestOrigin));
     return { loaWorkflowMode: "GUIDED", loaStepNo: step.stepNo, loaBeforeProcessing: upfront,
       loaApprovalState: upfront ? "PENDING" : "WAITING" };
+  },
+
+  async _getRequestCreationLoaContext(req, subProcessTypeCode) {
+    const code = String(subProcessTypeCode || "").trim();
+    if (!code) return req.reject(400, "Select a process subtype");
+
+    const subtype = await cds.tx(req).run(
+      SELECT.one.from(this.entities.ProcessSubTypes)
+        .columns("code", "loaApprovalApplicable")
+        .where({ code })
+    );
+    if (!subtype) return req.reject(404, "Selected process subtype was not found");
+
+    const requestOrigin = await this._deriveTrustedRequestOrigin(req, this.masterEntities.Users);
+    const steps = await this._getSteps(req, code);
+    let plan;
+    try {
+      plan = this._loaPlan(subtype, steps, requestOrigin);
+    } catch (error) {
+      return req.reject(400, error.message);
+    }
+
+    const approvalStep = plan.loaWorkflowMode === "GUIDED"
+      ? this._findStepByNo(steps, plan.loaStepNo)
+      : null;
+    return {
+      loaApprovalApplicable: Boolean(subtype.loaApprovalApplicable),
+      selectionRequired: Boolean(subtype.loaApprovalApplicable && plan.loaBeforeProcessing),
+      requestOrigin,
+      workflowMode: plan.loaWorkflowMode,
+      stepNo: plan.loaStepNo,
+      stepName: approvalStep?.stepName || (plan.loaBeforeProcessing ? "LoA Approval" : "")
+    };
+  },
+
+  async _buildRequestCreationLoaPreview(req, subProcessTypeCode, amount) {
+    const context = await this._getRequestCreationLoaContext(req, subProcessTypeCode);
+    if (!context.loaApprovalApplicable || !context.selectionRequired) {
+      return {
+        requiresConfirmation: false,
+        stepNo: context.stepNo,
+        stepName: context.stepName,
+        amount: null,
+        currencyCode: "",
+        ruleCode: "",
+        ruleDescription: "",
+        approvalMode: "",
+        approverRoleCodes: "",
+        directUserAssignment: false,
+        requireAllApprovers: false,
+        approvers: []
+      };
+    }
+
+    const numericAmount = Number(amount);
+    if (amount === null || amount === undefined || amount === "" || !Number.isFinite(numericAmount)) {
+      return req.reject(400, "A valid approval amount is required to preview LoA approvers");
+    }
+    const rule = await this._resolveLoaRule(req, this.entities.LoaApproval, numericAmount, {
+      subProcessType_code: String(subProcessTypeCode || "").trim()
+    });
+    if (!rule) return req.reject(400, `No LoA approval rule is configured for amount ${numericAmount}`);
+
+    const approvers = await this._approversForLoaRule(req, rule);
+    const directUserAssignment = this._booleanValue(rule.directUserAssignment);
+    return {
+      requiresConfirmation: true,
+      stepNo: context.stepNo,
+      stepName: context.stepName,
+      amount: numericAmount,
+      currencyCode: "",
+      ruleCode: rule.ruleCode || "",
+      ruleDescription: rule.description || "",
+      approvalMode: rule.approvalMode || (this._booleanValue(rule.requireAllApprovers) ? "MULTI" : "SINGLE"),
+      approverRoleCodes: directUserAssignment ? "" : (rule.approverRoleCodes || rule.roleCode || ""),
+      directUserAssignment,
+      requireAllApprovers: this._booleanValue(rule.requireAllApprovers),
+      approvers: approvers.map((user) => ({
+        ID: user.ID,
+        displayName: this._userDisplayName(user),
+        email: this._userEmail(user),
+        department: user.department || "",
+        roleCode: user.role_code || ""
+      }))
+    };
   },
 
   async _prepareLoaSnapshot(req, existing, subtype) {
@@ -211,7 +300,7 @@ module.exports = (amountSources) => ({
     if (directUsers) {
       if (!directUserIds.length) return req.reject(409, "The matching LoA rule does not contain a direct approver");
       approvers = await this.master.run(SELECT.from(this.masterEntities.Users)
-        .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
+        .columns("ID", "displayName", "email", "userPrincipalName", "department", "role_code")
         .where({ isActive: true, ID: { in: directUserIds } }));
       const byId = new Map(approvers.map((user) => [String(user.ID), user]));
       const missing = directUserIds.filter((id) => !byId.has(String(id)));
@@ -220,7 +309,7 @@ module.exports = (amountSources) => ({
     } else {
       if (!roleCodes.length) return req.reject(409, "The matching LoA rule does not contain an approver role");
       approvers = await this.master.run(SELECT.from(this.masterEntities.Users)
-        .columns("ID", "displayName", "email", "userPrincipalName", "role_code")
+        .columns("ID", "displayName", "email", "userPrincipalName", "department", "role_code")
         .where({ isActive: true, role_code: { in: roleCodes } }));
     }
 
@@ -243,11 +332,15 @@ module.exports = (amountSources) => ({
       currencyCode: request.currency_code || "",
       ruleCode: resolved.rule.ruleCode || "",
       ruleDescription: resolved.rule.description || "",
+      approvalMode: resolved.rule.approvalMode || (this._booleanValue(resolved.rule.requireAllApprovers) ? "MULTI" : "SINGLE"),
+      approverRoleCodes: resolved.directUsers ? "" : (resolved.rule.approverRoleCodes || resolved.rule.roleCode || ""),
+      directUserAssignment: resolved.directUsers,
       requireAllApprovers: this._booleanValue(resolved.rule.requireAllApprovers),
       approvers: approvers.map((user) => ({
         ID: user.ID,
         displayName: this._userDisplayName(user),
         email: this._userEmail(user),
+        department: user.department || "",
         roleCode: user.role_code || ""
       }))
     };

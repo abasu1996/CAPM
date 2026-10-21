@@ -11,6 +11,8 @@ test("queue API projections are read-only in the compiled service model", async 
   }
   assert.equal(model.definitions["flowmate.db.ProcessStepConfig"].elements.stepType.default.val, "PROCESSING");
   assert.equal(model.definitions["flowmate.db.ProcessStepConfig"].elements.requestOrigin.default.val, "INTERNAL_USER");
+  assert.ok(model.definitions["FlowmateService.getRequestCreationLoaContext"]);
+  assert.ok(model.definitions["FlowmateService.previewRequestCreationLoa"]);
 });
 
 // Isolated CQN fixture: no application server, SQLite, HANA or remote master data.
@@ -127,6 +129,29 @@ test("planning supports approval-first, submission then approval, later approval
   assert.equal(s._loaPlan({}, [normal]).loaWorkflowMode, "NONE");
   assert.throws(() => s._loaPlan(enabled, [gate, gate]), /Only one/);
   assert.throws(() => s._loaPlan({}, [gate]), /Enable LoA/);
+});
+
+test("creation context and approver preview use the backend workflow plan", async (t) => {
+  const { service: s, req, rows, steps } = fixture(t);
+  steps[0].requestOrigin = "INTERNAL_USER";
+
+  const context = await s._getRequestCreationLoaContext(req, "TEST");
+  assert.equal(context.requestOrigin, "INTERNAL_USER");
+  assert.equal(context.selectionRequired, true);
+  assert.equal(context.stepNo, 2);
+
+  const preview = await s._buildRequestCreationLoaPreview(req, "TEST", 250);
+  assert.equal(preview.requiresConfirmation, true);
+  assert.equal(preview.ruleCode, "RULE-1");
+  assert.equal(preview.approverRoleCodes, "MANAGER");
+  assert.deepEqual(preview.approvers.map((user) => user.ID), rows.Users.map((user) => user.ID));
+});
+
+test("later LoA never consumes stale creation-time approver selections", (t) => {
+  const { service: s } = fixture(t);
+  assert.equal(s._useSuppliedLoaApprovers("CREATE", true, false), false);
+  assert.equal(s._useSuppliedLoaApprovers("CREATE", true, true), true);
+  assert.equal(s._useSuppliedLoaApprovers("UPDATE", true, false), true);
 });
 
 for (const upfront of [true, false]) {

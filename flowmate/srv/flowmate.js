@@ -1592,10 +1592,15 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       const bDirectUsers = this._booleanValue(oLoaRule.directUserAssignment);
-      if (req.event === "CREATE" && !req.data.loaBeforeProcessing && bSelectionSupplied) {
-        return req.reject(400, "Approvers for a later LoA step are resolved from the current matrix when that step is reached");
-      }
-      const sSelectedIds = bSelectionSupplied
+      // The backend plan is authoritative. If the UI has stale step data and
+      // submits approvers for a later LoA gate, ignore that obsolete selection.
+      // The current matrix will be resolved when the workflow reaches the gate.
+      const bUseCreationSelection = this._useSuppliedLoaApprovers(
+        req.event,
+        bSelectionSupplied,
+        req.data.loaBeforeProcessing
+      );
+      const sSelectedIds = bUseCreationSelection
         ? await this._validateLoaSelectedApprovers(req, sSelectedApprovers, oLoaRule, Users)
         : (oExisting?.loaApproverSource === "USER" ? oExisting.loaApproverUserIds : null);
       if (oExisting?.loaApproverSource === "USER" && sSelectedIds) {
@@ -2412,6 +2417,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
     this.on("analyzeGuidedStepCompletion", async (req) => {
       return this._analyzeGuidedStepCompletion(req, req.data.requestId, req.data.stepNo, Users);
+    });
+
+    this.on("getRequestCreationLoaContext", async (req) => {
+      return this._getRequestCreationLoaContext(req, req.data.subProcessTypeCode);
+    });
+
+    this.on("previewRequestCreationLoa", async (req) => {
+      return this._buildRequestCreationLoaPreview(
+        req,
+        req.data.subProcessTypeCode,
+        req.data.amount
+      );
     });
 
     this.on("previewGuidedLoa", async (req) => {
@@ -5480,15 +5497,23 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   _isTechnicalApiIdentity(req) {
     const oAuthInfo = req?.user?.authInfo;
+    const oTokenPayload = oAuthInfo?.token?.getPayload?.()
+      || oAuthInfo?.token?.payload
+      || {};
     const sGrantType = oAuthInfo?.getGrantType?.()
       || oAuthInfo?.token?.grantType
-      || oAuthInfo?.token?.payload?.grant_type
+      || oTokenPayload.grant_type
       || req?.user?.attr?.grant_type
       || "";
+    const sNormalizedGrantType = String(sGrantType).trim().toLowerCase();
 
     return Boolean(
-      req?.user?.is?.("system-user")
-      || String(sGrantType).trim().toLowerCase() === "client_credentials"
+      sNormalizedGrantType === "client_credentials"
+      || sNormalizedGrantType === "client_x509"
+      || (
+        String(req?.user?.id || "").trim().toLowerCase() === "system"
+        && req?.user?.is?.("system-user")
+      )
     );
   }
 
@@ -5961,7 +5986,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
   async _resolveLoaRule(req, LoaApproval, amount, request = {}) {
     const aRules = await cds.tx(req).run(
       SELECT.from(LoaApproval).columns(
-        "ruleCode", "minimumAmount", "maximumAmount", "minimumInclusive", "maximumInclusive",
+        "ruleCode", "description", "minimumAmount", "maximumAmount", "minimumInclusive", "maximumInclusive",
         "approvalMode", "approverRoleCodes", "requireAllApprovers", "directUserAssignment", "approverUserIds",
         "subProcessType_code", "conditionCode", "priority", "isActive",
         "amount", "operator_code", "roleCode"

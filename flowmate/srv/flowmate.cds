@@ -126,7 +126,16 @@ service FlowmateService {
         ID          : UUID;
         displayName : String(150);
         email       : String(255);
+        department  : String(100);
         roleCode    : String(40);
+    }
+    type RequestCreationLoaContext {
+        loaApprovalApplicable : Boolean;
+        selectionRequired     : Boolean;
+        requestOrigin         : String(30);
+        workflowMode          : String(20);
+        stepNo                : Integer;
+        stepName              : String(100);
     }
     type GuidedLoaPreview {
         requiresConfirmation : Boolean;
@@ -136,6 +145,9 @@ service FlowmateService {
         currencyCode         : String(10);
         ruleCode             : String(40);
         ruleDescription      : String(255);
+        approvalMode         : String(20);
+        approverRoleCodes    : String(1000);
+        directUserAssignment : Boolean;
         requireAllApprovers  : Boolean;
         approvers            : many LoaApproverPreviewItem;
     }
@@ -385,6 +397,8 @@ service FlowmateService {
         incompleteStepNo   : Integer;
         incompleteStepName : String(100);
     };
+    action getRequestCreationLoaContext(subProcessTypeCode: String(100)) returns RequestCreationLoaContext;
+    action previewRequestCreationLoa(subProcessTypeCode: String(100), amount: Decimal(18, 2)) returns GuidedLoaPreview;
     action previewGuidedLoa(requestId: UUID, stepNo: Integer, progressionMode: String(30)) returns GuidedLoaPreview;
     action completeGuidedStep(requestId: UUID, stepNo: Integer, remarks: String, progressionMode: String(30)) returns Boolean;
     action getGuidedProcessTasks(requestId: UUID) returns many GuidedProcessTask;

@@ -2780,6 +2780,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "role_code",
                   "manager_ID",
                   "isActive"
@@ -2864,6 +2865,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "role_code",
                   "manager_ID",
                   "isActive"
@@ -3402,6 +3404,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -3577,7 +3580,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -5659,6 +5663,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -5834,7 +5839,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -6857,6 +6863,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -7032,7 +7039,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -8180,6 +8188,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -8355,7 +8364,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -8753,6 +8763,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -8928,7 +8939,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -10004,6 +10016,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -10179,7 +10192,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -11018,7 +11032,9 @@
                   "remarks",
                   "remarks desc",
                   "completedAt",
-                  "completedAt desc"
+                  "completedAt desc",
+                  "canAssignToMe",
+                  "canAssignToMe desc"
                 ]
               }
             }
@@ -11058,7 +11074,8 @@
                   "decision",
                   "purpose",
                   "remarks",
-                  "completedAt"
+                  "completedAt",
+                  "canAssignToMe"
                 ]
               }
             }
@@ -11171,7 +11188,8 @@
                   "decision",
                   "purpose",
                   "remarks",
-                  "completedAt"
+                  "completedAt",
+                  "canAssignToMe"
                 ]
               }
             }
@@ -11255,6 +11273,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -11430,7 +11449,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -15612,6 +15632,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -15787,7 +15808,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -16268,6 +16290,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -16443,7 +16466,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -17538,6 +17562,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -17713,7 +17738,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -18132,6 +18158,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -18307,7 +18334,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -18730,6 +18758,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -18905,7 +18934,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -19029,6 +19059,8 @@
                   "modifiedBy desc",
                   "referenceNumber",
                   "referenceNumber desc",
+                  "requestOrigin",
+                  "requestOrigin desc",
                   "processType_code",
                   "processType_code desc",
                   "subProcessType_code",
@@ -19380,7 +19412,9 @@
                   "bankStatus",
                   "bankStatus desc",
                   "voucherNumber",
-                  "voucherNumber desc"
+                  "voucherNumber desc",
+                  "selectedLoaApproverIds",
+                  "selectedLoaApproverIds desc"
                 ]
               }
             }
@@ -19402,6 +19436,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -19577,7 +19612,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -19734,6 +19770,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -19909,7 +19946,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -22394,6 +22432,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -22569,7 +22608,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -23318,6 +23358,8 @@
                   "modifiedBy desc",
                   "referenceNumber",
                   "referenceNumber desc",
+                  "requestOrigin",
+                  "requestOrigin desc",
                   "processType_code",
                   "processType_code desc",
                   "subProcessType_code",
@@ -23669,7 +23711,9 @@
                   "bankStatus",
                   "bankStatus desc",
                   "voucherNumber",
-                  "voucherNumber desc"
+                  "voucherNumber desc",
+                  "selectedLoaApproverIds",
+                  "selectedLoaApproverIds desc"
                 ]
               }
             }
@@ -23691,6 +23735,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -23866,7 +23911,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -25886,6 +25932,8 @@
                   "activityDescription desc",
                   "role",
                   "role desc",
+                  "requestOrigin",
+                  "requestOrigin desc",
                   "slaDays",
                   "slaDays desc",
                   "isActiveDemandTask",
@@ -25922,6 +25970,7 @@
                   "stepType",
                   "activityDescription",
                   "role",
+                  "requestOrigin",
                   "slaDays",
                   "isActiveDemandTask",
                   "isVendorNotification"
@@ -26059,6 +26108,7 @@
                   "stepType",
                   "activityDescription",
                   "role",
+                  "requestOrigin",
                   "slaDays",
                   "isActiveDemandTask",
                   "isVendorNotification"
@@ -27903,6 +27953,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -28078,7 +28129,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -29519,7 +29571,9 @@
                   "remarks",
                   "remarks desc",
                   "completedAt",
-                  "completedAt desc"
+                  "completedAt desc",
+                  "canAssignToMe",
+                  "canAssignToMe desc"
                 ]
               }
             }
@@ -29559,7 +29613,8 @@
                   "decision",
                   "purpose",
                   "remarks",
-                  "completedAt"
+                  "completedAt",
+                  "canAssignToMe"
                 ]
               }
             }
@@ -29672,7 +29727,8 @@
                   "decision",
                   "purpose",
                   "remarks",
-                  "completedAt"
+                  "completedAt",
+                  "canAssignToMe"
                 ]
               }
             }
@@ -29756,6 +29812,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -29931,7 +29988,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -33838,6 +33896,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -34013,7 +34072,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -34125,6 +34185,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -34300,7 +34361,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -35383,6 +35445,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "role_code",
                   "manager_ID",
                   "isActive"
@@ -35478,6 +35541,8 @@
                   "modifiedBy desc",
                   "referenceNumber",
                   "referenceNumber desc",
+                  "requestOrigin",
+                  "requestOrigin desc",
                   "processType_code",
                   "processType_code desc",
                   "subProcessType_code",
@@ -35851,6 +35916,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -36149,6 +36215,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -38766,6 +38833,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -39690,6 +39758,8 @@
                   "modifiedBy desc",
                   "referenceNumber",
                   "referenceNumber desc",
+                  "requestOrigin",
+                  "requestOrigin desc",
                   "processType_code",
                   "processType_code desc",
                   "subProcessType_code",
@@ -40063,6 +40133,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -42358,6 +42429,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -42533,7 +42605,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -43138,6 +43211,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -43313,7 +43387,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -44143,6 +44218,8 @@
                   "azureObjectId desc",
                   "department",
                   "department desc",
+                  "userType",
+                  "userType desc",
                   "role_code",
                   "role_code desc",
                   "manager_ID",
@@ -44171,6 +44248,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "role_code",
                   "manager_ID",
                   "isActive"
@@ -44300,6 +44378,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "role_code",
                   "manager_ID",
                   "isActive"
@@ -44426,6 +44505,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "role_code",
                   "manager_ID",
                   "isActive"
@@ -45298,6 +45378,7 @@
                   "modifiedAt",
                   "modifiedBy",
                   "referenceNumber",
+                  "requestOrigin",
                   "processType_code",
                   "subProcessType_code",
                   "paymentCategory_code",
@@ -45473,7 +45554,8 @@
                   "whtUserDivisionRep",
                   "ivConfirmationValue",
                   "bankStatus",
-                  "voucherNumber"
+                  "voucherNumber",
+                  "selectedLoaApproverIds"
                 ]
               }
             }
@@ -48411,6 +48493,11 @@
                     "maxLength": 40,
                     "nullable": true
                   },
+                  "userType": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "nullable": true
+                  },
                   "managerId": {
                     "type": "string",
                     "format": "uuid",
@@ -49172,6 +49259,53 @@
                   "pageSize": {
                     "type": "integer",
                     "format": "int32",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/getRequestCreationLoaContext": {
+      "post": {
+        "summary": "Invokes action getRequestCreationLoaContext",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.RequestCreationLoaContext"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subProcessTypeCode": {
+                    "type": "string",
+                    "maxLength": 100,
                     "nullable": true
                   }
                 }
@@ -50569,6 +50703,127 @@
           },
           "4XX": {
             "$ref": "#/components/responses/error"
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/previewGuidedLoa": {
+      "post": {
+        "summary": "Invokes action previewGuidedLoa",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.GuidedLoaPreview"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "01234567-89ab-cdef-0123-456789abcdef",
+                    "nullable": true
+                  },
+                  "stepNo": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true
+                  },
+                  "progressionMode": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-flowmate-project": "flowmate",
+        "x-cap-service": "FlowmateService"
+      }
+    },
+    "/odata/v4/flowmate/previewRequestCreationLoa": {
+      "post": {
+        "summary": "Invokes action previewRequestCreationLoa",
+        "tags": [
+          "Flowmate — Service Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/FlowmateService.GuidedLoaPreview"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "4XX": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "requestBody": {
+          "description": "Action parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subProcessTypeCode": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "nullable": true
+                  },
+                  "amount": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "format": "decimal",
+                        "multipleOf": 0.01
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "example": 0,
+                    "x-sap-precision": 18,
+                    "x-sap-scale": 2,
+                    "nullable": true
+                  }
+                }
+              }
+            }
           }
         },
         "x-flowmate-project": "flowmate",
@@ -54835,6 +55090,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -54917,6 +55173,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -55579,6 +55836,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -56350,6 +56608,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -57616,6 +57875,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -60497,6 +60757,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -63350,6 +63611,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -64069,6 +64331,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -65731,6 +65994,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -66643,6 +66907,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -73077,6 +73342,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -73159,6 +73425,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -76090,6 +76357,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -76809,6 +77077,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -81427,6 +81696,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -82146,6 +82416,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -86326,6 +86597,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -86408,6 +86680,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -86899,6 +87172,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -88654,6 +88928,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -89470,6 +89745,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -89810,6 +90086,8 @@
                   "azureObjectId desc",
                   "department",
                   "department desc",
+                  "userType",
+                  "userType desc",
                   "manager_ID",
                   "manager_ID desc",
                   "isActive",
@@ -89836,6 +90114,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -89963,6 +90242,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -90087,6 +90367,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -95329,6 +95610,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -95411,6 +95693,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -103315,6 +103598,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -103895,6 +104179,8 @@
                   "azureObjectId desc",
                   "department",
                   "department desc",
+                  "userType",
+                  "userType desc",
                   "manager_ID",
                   "manager_ID desc",
                   "isActive",
@@ -103921,6 +104207,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -104048,6 +104335,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -104172,6 +104460,7 @@
                   "email",
                   "azureObjectId",
                   "department",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -108902,6 +109191,7 @@
                   "azureObjectId",
                   "department",
                   "role_code",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -108990,6 +109280,7 @@
                   "azureObjectId",
                   "department",
                   "role_code",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -117340,6 +117631,7 @@
                   "azureObjectId",
                   "department",
                   "role_code",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -118173,6 +118465,8 @@
                   "department desc",
                   "role_code",
                   "role_code desc",
+                  "userType",
+                  "userType desc",
                   "manager_ID",
                   "manager_ID desc",
                   "isActive",
@@ -118204,6 +118498,7 @@
                   "azureObjectId",
                   "department",
                   "role_code",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -118337,6 +118632,7 @@
                   "azureObjectId",
                   "department",
                   "role_code",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -118467,6 +118763,7 @@
                   "azureObjectId",
                   "department",
                   "role_code",
+                  "userType",
                   "manager_ID",
                   "isActive"
                 ]
@@ -119696,6 +119993,11 @@
                   "roleCode": {
                     "type": "string",
                     "maxLength": 40,
+                    "nullable": true
+                  },
+                  "userType": {
+                    "type": "string",
+                    "maxLength": 20,
                     "nullable": true
                   },
                   "managerId": {
@@ -122096,6 +122398,86 @@
           }
         }
       },
+      "FlowmateService.GuidedLoaPreview": {
+        "title": "GuidedLoaPreview",
+        "type": "object",
+        "properties": {
+          "requiresConfirmation": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "stepNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "stepName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "format": "decimal",
+                "multipleOf": 0.01
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 0,
+            "x-sap-precision": 18,
+            "x-sap-scale": 2,
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true
+          },
+          "ruleCode": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "ruleDescription": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "approvalMode": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "approverRoleCodes": {
+            "type": "string",
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "directUserAssignment": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "requireAllApprovers": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "approvers": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FlowmateService.LoaApproverPreviewItem"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        }
+      },
       "FlowmateService.GuidedProcessTask": {
         "title": "GuidedProcessTask",
         "type": "object",
@@ -122899,6 +123281,38 @@
           }
         }
       },
+      "FlowmateService.LoaApproverPreviewItem": {
+        "title": "LoaApproverPreviewItem",
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "format": "uuid",
+            "example": "01234567-89ab-cdef-0123-456789abcdef",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "maxLength": 150,
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "department": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "roleCode": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          }
+        }
+      },
       "FlowmateService.MerchantEntityValues": {
         "title": "MerchantEntityValues",
         "type": "object",
@@ -123594,6 +124008,10 @@
           },
           "whtEntries@count": {
             "$ref": "#/components/schemas/count"
+          },
+          "canAssignToMe": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -125699,6 +126117,16 @@
             "maxLength": 30,
             "nullable": true
           },
+          "requestOrigin": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "INTERNAL_USER",
+              "VENDOR",
+              "EXTERNAL_API"
+            ],
+            "default": "INTERNAL_USER"
+          },
           "processType": {
             "allOf": [
               {
@@ -127477,6 +127905,11 @@
           },
           "history@count": {
             "$ref": "#/components/schemas/count"
+          },
+          "selectedLoaApproverIds": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
           }
         }
       },
@@ -129077,6 +129510,11 @@
             "items": {
               "$ref": "#/components/schemas/FlowmateService.ProcessHistory-create"
             }
+          },
+          "selectedLoaApproverIds": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
           }
         }
       },
@@ -130672,6 +131110,11 @@
             "items": {
               "$ref": "#/components/schemas/FlowmateService.ProcessHistory-create"
             }
+          },
+          "selectedLoaApproverIds": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
           }
         }
       },
@@ -130951,6 +131394,17 @@
             "maxLength": 100,
             "nullable": true
           },
+          "requestOrigin": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "INTERNAL_USER",
+              "VENDOR",
+              "EXTERNAL_API"
+            ],
+            "nullable": true,
+            "default": "INTERNAL_USER"
+          },
           "slaDays": {
             "type": "integer",
             "format": "int32",
@@ -131033,6 +131487,17 @@
             "maxLength": 100,
             "nullable": true
           },
+          "requestOrigin": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "INTERNAL_USER",
+              "VENDOR",
+              "EXTERNAL_API"
+            ],
+            "nullable": true,
+            "default": "INTERNAL_USER"
+          },
           "slaDays": {
             "type": "integer",
             "format": "int32",
@@ -131109,6 +131574,17 @@
             "type": "string",
             "maxLength": 100,
             "nullable": true
+          },
+          "requestOrigin": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "INTERNAL_USER",
+              "VENDOR",
+              "EXTERNAL_API"
+            ],
+            "nullable": true,
+            "default": "INTERNAL_USER"
           },
           "slaDays": {
             "type": "integer",
@@ -132744,6 +133220,40 @@
           }
         }
       },
+      "FlowmateService.RequestCreationLoaContext": {
+        "title": "RequestCreationLoaContext",
+        "type": "object",
+        "properties": {
+          "loaApprovalApplicable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "selectionRequired": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "requestOrigin": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "workflowMode": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "stepNo": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "stepName": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          }
+        }
+      },
       "FlowmateService.RequestDetailTasks": {
         "title": "RequestDetailTasks",
         "type": "object",
@@ -132922,6 +133432,10 @@
           },
           "whtEntries@count": {
             "$ref": "#/components/schemas/count"
+          },
+          "canAssignToMe": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -134499,6 +135013,16 @@
             "type": "string",
             "maxLength": 30,
             "nullable": true
+          },
+          "requestOrigin": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "INTERNAL_USER",
+              "VENDOR",
+              "EXTERNAL_API"
+            ],
+            "default": "INTERNAL_USER"
           },
           "processType": {
             "allOf": [
@@ -137521,6 +138045,11 @@
             "maxLength": 100,
             "nullable": true
           },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
           "role": {
             "allOf": [
               {
@@ -137593,6 +138122,11 @@
             "maxLength": 100,
             "nullable": true
           },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
           "role_code": {
             "type": "string",
             "maxLength": 40,
@@ -137642,6 +138176,11 @@
           "department": {
             "type": "string",
             "maxLength": 100,
+            "nullable": true
+          },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
             "nullable": true
           },
           "role_code": {
@@ -139219,6 +139758,11 @@
           "department": {
             "type": "string",
             "maxLength": 100,
+            "nullable": true
+          },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
             "nullable": true
           }
         }
@@ -157105,6 +157649,11 @@
             "maxLength": 100,
             "nullable": true
           },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
           "manager": {
             "allOf": [
               {
@@ -157164,6 +157713,11 @@
             "maxLength": 100,
             "nullable": true
           },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
           "manager_ID": {
             "type": "string",
             "format": "uuid",
@@ -157208,6 +157762,11 @@
           "department": {
             "type": "string",
             "maxLength": 100,
+            "nullable": true
+          },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
             "nullable": true
           },
           "manager_ID": {
@@ -161548,6 +162107,11 @@
             "maxLength": 100,
             "nullable": true
           },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
           "manager": {
             "allOf": [
               {
@@ -161607,6 +162171,11 @@
             "maxLength": 100,
             "nullable": true
           },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
           "manager_ID": {
             "type": "string",
             "format": "uuid",
@@ -161651,6 +162220,11 @@
           "department": {
             "type": "string",
             "maxLength": 100,
+            "nullable": true
+          },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
             "nullable": true
           },
           "manager_ID": {
@@ -166921,6 +167495,17 @@
             "maxLength": 40,
             "nullable": true
           },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "INTERNAL",
+              "VENDOR",
+              "TECHNICAL_API"
+            ],
+            "nullable": true,
+            "default": "INTERNAL"
+          },
           "manager": {
             "allOf": [
               {
@@ -166984,6 +167569,17 @@
             "maxLength": 40,
             "nullable": true
           },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "INTERNAL",
+              "VENDOR",
+              "TECHNICAL_API"
+            ],
+            "nullable": true,
+            "default": "INTERNAL"
+          },
           "manager_ID": {
             "type": "string",
             "format": "uuid",
@@ -167033,6 +167629,17 @@
             "type": "string",
             "maxLength": 40,
             "nullable": true
+          },
+          "userType": {
+            "type": "string",
+            "maxLength": 20,
+            "enum": [
+              "INTERNAL",
+              "VENDOR",
+              "TECHNICAL_API"
+            ],
+            "nullable": true,
+            "default": "INTERNAL"
           },
           "manager_ID": {
             "type": "string",

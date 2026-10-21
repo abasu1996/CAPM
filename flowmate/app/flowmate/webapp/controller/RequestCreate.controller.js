@@ -4,9 +4,8 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "sap/ui/model/Sorter",
     "sap/ui/model/json/JSONModel"
-], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, Sorter, JSONModel) => {
+], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
@@ -546,6 +545,7 @@ sap.ui.define([
                 hasSubProcessTypes: false,
                 loaApprovalApplicable: false,
                 loaSelectionRequired: false,
+                loaTimingReady: true,
                 selectedLoaApproverIds: "",
                 loaSelectionKey: "",
                 loaAmountDerived: false,
@@ -703,9 +703,7 @@ sap.ui.define([
                 collectorNic: "",
                 collectorContactNumber: "",
                 specificBgFormatAvailable: false,
-                costCentre: "",
                 glAccount: "",
-                profitCentre: "",
                 ivDocNumber: "",
                 documentArchiveUrl: "",
                 vendor_ID: "",
@@ -822,6 +820,11 @@ sap.ui.define([
             await this._pLoaTiming;
             const oPayload = this.getView().getModel("create").getData();
 
+            if (oPayload.loaApprovalApplicable && !oPayload.loaTimingReady) {
+                MessageBox.error(this.getText("loaTimingLoadErrorMessage"));
+                return;
+            }
+
             // if (!oPayload.title || !oPayload.processType_code) {
             //     MessageBox.warning(this.getText("createRequiredMessage"));
             //     return;
@@ -843,7 +846,16 @@ sap.ui.define([
 
             if (oPayload.loaSelectionRequired && (!oPayload.selectedLoaApproverIds
                 || oPayload.loaSelectionKey !== this._loaSelectionKey(oPayload.amount, oPayload.subProcessType_code))) {
-                MessageBox.warning(this.getText("loaSelectionRequiredMessage"));
+                if (oPayload.amount === "" || oPayload.amount === null || oPayload.amount === undefined
+                    || !Number.isFinite(Number(oPayload.amount))) {
+                    MessageBox.warning(this.getText("amountRequiredMessage"));
+                    return;
+                }
+                try {
+                    await this._loadRequestCreationLoaPreview(Number(oPayload.amount));
+                } catch (oError) {
+                    MessageBox.error(this.getErrorMessage(oError, this.getText("loaPreviewLoadErrorMessage")));
+                }
                 return;
             }
 
@@ -1413,6 +1425,7 @@ sap.ui.define([
             oCreateModel.setProperty("/subProcessType_code", "");
             oCreateModel.setProperty("/loaApprovalApplicable", false);
             oCreateModel.setProperty("/loaSelectionRequired", false);
+            oCreateModel.setProperty("/loaTimingReady", true);
             oCreateModel.setProperty("/isPaymentRequest", false);
             oCreateModel.setProperty("/amount", null);
             oCreateModel.setProperty("/role", "");
@@ -2652,6 +2665,7 @@ sap.ui.define([
             const bLoaApplicable = Boolean(oContext.getProperty("loaApprovalApplicable"));
             oCreateModel.setProperty("/loaApprovalApplicable", bLoaApplicable);
             oCreateModel.setProperty("/loaSelectionRequired", false);
+            oCreateModel.setProperty("/loaTimingReady", !bLoaApplicable);
             oCreateModel.setProperty("/isPaymentRequest", bLoaApplicable);
 
             if (!bLoaApplicable) {
@@ -2681,7 +2695,7 @@ sap.ui.define([
             if(
                 sCode === "DIRECT_NON_PO_REIMB_PAYMENT" || sCode === "DIRECT_NON_PO_REIMB_LIAB"
             ){
-                oCreateModel.setProperty("/paymentCategory_code", "LOCAL")
+                oCreateModel.setProperty("/paymentCategory_code", "LOCAL");
             }
         },
 
@@ -2689,39 +2703,36 @@ sap.ui.define([
             const oCreateModel = this.getView().getModel("create");
             if (!bLoaApplicable || !sSubProcessTypeCode) {
                 oCreateModel.setProperty("/loaSelectionRequired", false);
+                oCreateModel.setProperty("/loaTimingReady", true);
                 return;
             }
 
+            oCreateModel.setProperty("/loaTimingReady", false);
             try {
-                const aSteps = await this._readList("/ProcessStepConfig", {
-                    filters: [new Filter("subProcessType_code", FilterOperator.EQ, sSubProcessTypeCode)],
-                    sorters: [new Sorter("stepNo")]
+                const oResponse = await this.callAction("getRequestCreationLoaContext", {
+                    subProcessTypeCode: sSubProcessTypeCode
                 });
                 if (oCreateModel.getProperty("/subProcessType_code") !== sSubProcessTypeCode) {
                     return;
                 }
-                const iLoaIndex = aSteps.findIndex((oStep) => oStep.stepType === "LOA");
-                const oFirstStep = aSteps[0];
-                const mOriginByUserType = {
-                    INTERNAL: "INTERNAL_USER",
-                    VENDOR: "VENDOR",
-                    TECHNICAL_API: "EXTERNAL_API"
-                };
-                const sTrustedOrigin = mOriginByUserType[
-                    String(oCreateModel.getProperty("/requesterUserType") || "INTERNAL").toUpperCase()
-                ] || "INTERNAL_USER";
-                const bRequesterSubmission = String(oFirstStep?.requestOrigin || "").toUpperCase() === sTrustedOrigin;
-                const bUpfront = iLoaIndex < 0 || iLoaIndex === 0 || (iLoaIndex === 1 && bRequesterSubmission);
+                const oContext = oResponse.value || oResponse;
+                const bUpfront = Boolean(oContext.selectionRequired);
 
                 oCreateModel.setProperty("/loaSelectionRequired", bUpfront);
+                oCreateModel.setProperty("/loaTimingReady", true);
                 if (!bUpfront) {
                     oCreateModel.setProperty("/selectedLoaApproverIds", "");
                     oCreateModel.setProperty("/loaSelectionKey", "");
                     this.byId("loaApprovalPreviewDialog")?.close();
                 }
-            } catch (oError) {
-
-                oCreateModel.setProperty("/loaSelectionRequired", true);
+            } catch {
+                if (oCreateModel.getProperty("/subProcessType_code") === sSubProcessTypeCode) {
+                    oCreateModel.setProperty("/loaSelectionRequired", false);
+                    oCreateModel.setProperty("/loaTimingReady", false);
+                    oCreateModel.setProperty("/selectedLoaApproverIds", "");
+                    oCreateModel.setProperty("/loaSelectionKey", "");
+                    this.byId("loaApprovalPreviewDialog")?.close();
+                }
             }
         },
 
@@ -3685,14 +3696,8 @@ sap.ui.define([
             }
 
             try {
-                const oRule = await this._resolveLoaRule(
-                    fAmount,
-                    oCreateModel.getProperty("/subProcessType_code")
-                );
-                oCreateModel.setProperty("/role", oRule?.approverRoleCodes || oRule?.roleCode || "");
-
-                if (oRule && oCreateModel.getProperty("/loaSelectionRequired")) {
-                    await this._showLoaApprovalPreview(fAmount, oRule);
+                if (oCreateModel.getProperty("/loaSelectionRequired")) {
+                    await this._loadRequestCreationLoaPreview(fAmount);
                 }
             } catch (oError) {
                 oCreateModel.setProperty("/role", "");
@@ -3752,134 +3757,62 @@ sap.ui.define([
 
 
 
-        async _resolveLoaRole(fAmount, sSubProcessTypeCode) {
-            const oRule = await this._resolveLoaRule(fAmount, sSubProcessTypeCode);
-            return oRule?.approverRoleCodes || oRule?.roleCode || "";
-        },
-
-        async _resolveLoaRule(fAmount, sSubProcessTypeCode) {
-            const aRules = await this._readList("/LoaApproval", { sorters: [] });
-            let oWinner = null;
-
-            aRules.forEach((oRule) => {
-                if (oRule.isActive === false
-                    || (oRule.subProcessType_code && oRule.subProcessType_code !== sSubProcessTypeCode)
-                    || !this._matchesLoaCondition(oRule.conditionCode, sSubProcessTypeCode)) {
-                    return;
-                }
-
-                const bStructuredRule = Boolean(oRule.ruleCode);
-                let bMatches = false;
-
-                if (bStructuredRule) {
-                    const bAboveMinimum = oRule.minimumAmount === null || oRule.minimumAmount === undefined
-                        || (oRule.minimumInclusive === false ? fAmount > Number(oRule.minimumAmount) : fAmount >= Number(oRule.minimumAmount));
-                    const bBelowMaximum = oRule.maximumAmount === null || oRule.maximumAmount === undefined
-                        || (oRule.maximumInclusive === false ? fAmount < Number(oRule.maximumAmount) : fAmount <= Number(oRule.maximumAmount));
-                    bMatches = bAboveMinimum && bBelowMaximum;
-                } else {
-                    const fThreshold = Number(oRule.amount);
-                    bMatches = Number.isFinite(fThreshold) && this._evaluateOperator(fAmount, oRule.operator_code, fThreshold);
-                }
-
-                if (!bMatches) {
-                    return;
-                }
-
-                if (!oWinner || this._loaRuleRank(oRule) > this._loaRuleRank(oWinner)) {
-                    oWinner = oRule;
-                }
+        async _loadRequestCreationLoaPreview(fAmount) {
+            const oCreateModel = this.getView().getModel("create");
+            const sSubProcessTypeCode = oCreateModel.getProperty("/subProcessType_code");
+            const oResponse = await this.callAction("previewRequestCreationLoa", {
+                subProcessTypeCode: sSubProcessTypeCode,
+                amount: Number(fAmount)
             });
+            const oPreview = oResponse.value || oResponse;
 
-            return oWinner;
-        },
-
-        async _showLoaApprovalPreview(fAmount, oRule) {
-            const bDirectUsers = Boolean(oRule.directUserAssignment);
-            const aRoleCodes = String(oRule.approverRoleCodes || oRule.roleCode || "")
-                .split(";")
-                .map((sRoleCode) => sRoleCode.trim())
-                .filter(Boolean);
-            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
-
-            if (bDirectUsers) {
-                const aUserIds = String(oRule.approverUserIds || "")
-                    .split(";")
-                    .map((sUserId) => sUserId.trim())
-                    .filter(Boolean);
-                if (aUserIds.length) {
-                    aFilters.push(new Filter({
-                        filters: aUserIds.map((sUserId) => new Filter("ID", FilterOperator.EQ, sUserId)),
-                        and: false
-                    }));
-                }
-            } else {
-                const aRoleFilters = aRoleCodes.map((sRoleCode) =>
-                    new Filter("role_code", FilterOperator.EQ, sRoleCode)
-                );
-                if (aRoleFilters.length) {
-                    aFilters.push(new Filter({ filters: aRoleFilters, and: false }));
-                }
+            if (!oPreview.requiresConfirmation) {
+                oCreateModel.setProperty("/loaSelectionRequired", false);
+                oCreateModel.setProperty("/loaTimingReady", true);
+                oCreateModel.setProperty("/selectedLoaApproverIds", "");
+                oCreateModel.setProperty("/loaSelectionKey", "");
+                oCreateModel.setProperty("/role", "");
+                this.byId("loaApprovalPreviewDialog")?.close();
+                return;
             }
 
-            const aApprovers = bDirectUsers || aRoleCodes.length
-                ? await this._readAllLoaApprovers(new Filter({ filters: aFilters, and: true }))
-                : [];
+            const aApprovers = oPreview.approvers || [];
             const oPreviewModel = this.getView().getModel("loaPreview");
             oPreviewModel.setSizeLimit(Math.max(100, aApprovers.length));
-            const oCreateModel = this.getView().getModel("create");
-            const sKey = this._loaSelectionKey(fAmount, oCreateModel.getProperty("/subProcessType_code"));
+            const sKey = this._loaSelectionKey(fAmount, sSubProcessTypeCode);
             const aSelected = oCreateModel.getProperty("/loaSelectionKey") === sKey
                 ? String(oCreateModel.getProperty("/selectedLoaApproverIds") || "").split(";") : [];
+            const sApproverRoles = oPreview.directUserAssignment
+                ? this.getText("loaDirectUsersLabel")
+                : (oPreview.approverRoleCodes || "");
 
             oPreviewModel.setData({
                 amount: fAmount,
-                ruleCode: oRule.ruleCode || "",
-                description: oRule.description || "",
-                approvalMode: oRule.approvalMode || "SINGLE",
-                approvalModeText: oRule.requireAllApprovers
+                ruleCode: oPreview.ruleCode || "",
+                description: oPreview.ruleDescription || "",
+                approvalMode: oPreview.approvalMode || "SINGLE",
+                approvalModeText: oPreview.requireAllApprovers
                     ? this.getText("loaAllApproversText")
                     : this.getText("loaAnyApproverText"),
-                approverRoleCodes: bDirectUsers
-                    ? this.getText("loaDirectUsersLabel")
-                    : aRoleCodes.join(", "),
+                approverRoleCodes: sApproverRoles,
                 approvers: aApprovers
                     .map((oUser) => ({
                         ...oUser,
+                        role_code: oUser.roleCode || "",
                         selected: aSelected.includes(oUser.ID),
                         department: oUser.department || this.getText("loaDepartmentNotMaintainedText")
                     }))
                     .sort((a, b) => String(a.displayName || "").localeCompare(String(b.displayName || ""))),
                 hasApprovers: aApprovers.length > 0
             });
+            oCreateModel.setProperty("/role", oPreview.directUserAssignment
+                ? "DIRECT_USER"
+                : (oPreview.approverRoleCodes || ""));
             this.byId("loaApprovalPreviewDialog").open();
         },
 
         onCloseLoaApprovalPreview() {
             this.byId("loaApprovalPreviewDialog").close();
-        },
-
-        async _readAllLoaApprovers(oFilter) {
-            const aUsers = [];
-            const aSeen = new Set();
-            const iPageSize = 200;
-            for (let iSkip = 0; ; iSkip += iPageSize) {
-                const aPage = await this._readList("/Users", {
-                    filters: [oFilter],
-                    urlParameters: {
-                        "$select": "ID,displayName,email,department,role_code",
-                        "$orderby": "ID asc",
-                        "$top": iPageSize,
-                        "$skip": iSkip
-                    }
-                });
-                for (const user of aPage) {
-                    if (aSeen.has(user.ID)) throw new Error(this.getText("loaPreviewLoadErrorMessage"));
-                    aSeen.add(user.ID);
-                    aUsers.push(user);
-                }
-                if (aPage.length < iPageSize) return aUsers;
-            }
         },
 
         _loaSelectionKey(vAmount, sSubtype) {
@@ -3911,45 +3844,10 @@ sap.ui.define([
                 return;
             }
             try {
-                const rule = await this._resolveLoaRule(Number(amount), oCreate.getProperty("/subProcessType_code"));
-                if (!rule) throw new Error(this.getText("loaNoMatchingRuleMessage"));
-                await this._showLoaApprovalPreview(Number(amount), rule);
+                await this._loadRequestCreationLoaPreview(Number(amount));
             } catch (error) {
                 MessageBox.error(this.getErrorMessage(error, this.getText("loaPreviewLoadErrorMessage")));
             }
-        },
-
-        _matchesLoaCondition(sConditionCode, sSubProcessTypeCode) {
-            if (!sConditionCode) {
-                return true;
-            }
-            return sConditionCode === "NOTE_36" && [
-                "NON_PO_IMPORT_TRC",
-                "NON_PO_IMPORT_ICL",
-                "NON_PO_IMPORT_DGC_ADV",
-                "NON_PO_IMPORT_DGC_DIRECT"
-            ].includes(sSubProcessTypeCode);
-        },
-
-        _loaRuleRank(oRule) {
-            const iPriority = Number(oRule.priority || 0);
-            const iStructured = oRule.ruleCode ? 1 : 0;
-            const iSubtypeSpecific = oRule.subProcessType_code ? 1 : 0;
-            const fUpper = oRule.maximumAmount === null || oRule.maximumAmount === undefined
-                ? Number.MAX_SAFE_INTEGER
-                : Number(oRule.maximumAmount);
-            return iSubtypeSpecific * 1e20 + iPriority * 1e18 + iStructured * 1e17 - fUpper;
-        },
-
-        _evaluateOperator(fAmount, sOperator, fThreshold) {
-            return {
-                "=": fAmount === fThreshold,
-                "!=": fAmount !== fThreshold,
-                "<": fAmount < fThreshold,
-                "<=": fAmount <= fThreshold,
-                ">": fAmount > fThreshold,
-                ">=": fAmount >= fThreshold
-            }[sOperator] || false;
         },
 
         _setVendor(oContext) {
@@ -4003,6 +3901,7 @@ sap.ui.define([
 
             oCreateModel.setProperty("/loaApprovalApplicable", false);
             oCreateModel.setProperty("/loaSelectionRequired", false);
+            oCreateModel.setProperty("/loaTimingReady", true);
             oCreateModel.setProperty("/isPaymentRequest", false);
             oCreateModel.setProperty("/amount", null);
             oCreateModel.setProperty("/role", "");
@@ -4052,6 +3951,7 @@ sap.ui.define([
                 oCreateModel.setProperty("/processType_code", oPredecessor.processType_code || "");
                 const bLoaApplicable = Boolean(oPredecessor.subProcessType?.loaApprovalApplicable);
                 oCreateModel.setProperty("/loaApprovalApplicable", bLoaApplicable);
+                oCreateModel.setProperty("/loaTimingReady", !bLoaApplicable);
                 oCreateModel.setProperty("/isPaymentRequest", bLoaApplicable);
                 oCreateModel.setProperty("/amount", oPredecessor.amount ?? null);
                 oCreateModel.setProperty("/role", oPredecessor.role || "");
