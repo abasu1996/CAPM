@@ -2559,16 +2559,22 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       
-      let oAssignee = null;
+    let oAssignee = null;
       if (processorUserId) {
         oAssignee = await this._getUser(req, processorUserId, Users);
         if (!oAssignee) {
           return req.reject(400, "Select an active user to assign the sent back task to");
         }
-        const sTargetTeamId = sendBackStep.processorTeam_ID || request.processorTeam_ID;
-        const aTeamIds = await this._activeTeamIdsForUser(oAssignee.ID);
-        if (!sTargetTeamId || !aTeamIds.includes(sTargetTeamId)) {
-          return req.reject(400, `The selected processor must be an active member of the team responsible for step ${sendBackStep.stepNo}`);
+
+        const sTargetTeamId = sendBackStep.processorTeam_ID
+
+        // Enforce team membership only when a responsible team exists.
+        // With no team, any active user can be selected.
+        if (sTargetTeamId) {
+          const aTeamIds = await this._activeTeamIdsForUser(oAssignee.ID);
+          if (!aTeamIds.includes(sTargetTeamId)) {
+            return req.reject(400, `The selected processor must be an active member of the team responsible for step ${sendBackStep.stepNo}`);
+          }
         }
       }
       

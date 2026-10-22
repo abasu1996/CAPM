@@ -13,8 +13,11 @@ sap.ui.define([
     "sap/ui/model/Sorter",
     "sap/ui/model/json/JSONModel",
     "sap/m/Label",
-    "sap/ui/core/ListItem"
-], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, Sorter, JSONModel, Label, ListItem) => {
+    "sap/ui/core/ListItem",
+    "sap/m/Input",
+    "sap/m/SelectDialog",
+    "sap/m/StandardListItem"
+], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, Sorter, JSONModel, Label, ListItem, Input, SelectDialog, StandardListItem) => {
     "use strict";
 
     return BaseController.extend("flowmate.controller.MyTasks", {
@@ -638,7 +641,6 @@ sap.ui.define([
         _chooseSendBackStep() {
             const oTaskActionModel = this.getView().getModel("taskAction");
             const aSteps = oTaskActionModel.getProperty("/steps") || [];
-            const sRequestTeamId = oTaskActionModel.getProperty("/requestTeamId") || "";
 
             if (!aSteps.length) {
                 MessageBox.warning(this.getText("noPreviousSendBackStepsMessage"));
@@ -646,51 +648,135 @@ sap.ui.define([
             }
 
             return new Promise((resolve) => {
-                const oMemberTemplate = new ListItem({
-                    key: "{user_ID}",
-                    text: "{displayName}",
-                    additionalText: "{email}"
-                });
-                const oProcessorSelect = new Select({
-                    width: "100%",
-                    forceSelection: false,
-                    showSecondaryValues: true
-                });
+                let sTeamId = "";
+                let sSelectedUserId = "";
+                let iSearchTimer;
+                let oPickerDialog = null;
+
                 const oHint = new Text({ wrapping: true }).addStyleClass("sapUiTinyMarginTop");
 
-                // Reload the processor list for the team that owns the selected step
-                const fnLoadTeamMembers = () => {
-                    const oStep = aSteps.find((oItem) => String(oItem.stepNo) === String(oStepSelect.getSelectedKey()));
-                    const sTeamId = oStep?.teamId || sRequestTeamId;
+                // Backend filters: active users, optional team, optional typed text
+                const fnBuildFilters = (sQuery) => {
+                    const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
 
-                    oProcessorSelect.setSelectedKey("");
-                    oProcessorSelect.unbindItems();
-
-                    if (!sTeamId) {
-                        oProcessorSelect.setEnabled(false);
-                        oHint.setText(this.getText("sendBackNoTeamForStepText"));
-                        return;
+                    if (sTeamId) {
+                        aFilters.push(new Filter("team_ID", FilterOperator.EQ, sTeamId));
                     }
+                    if (sQuery) {
+                        aFilters.push(new Filter({
+                            filters: [
+                                new Filter("displayName", FilterOperator.Contains, sQuery),
+                                new Filter("email", FilterOperator.Contains, sQuery)
+                            ],
+                            and: false
+                        }));
+                    }
+                    return aFilters;
+                };
 
-                    oProcessorSelect.setEnabled(true);
-                    // oHint.setText(this.getText("sendBackProcessorHintText"));
-                    oProcessorSelect.bindItems({
-                        path: "/TeamMembers",
-                        filters: [
-                            new Filter("team_ID", FilterOperator.EQ, sTeamId),
-                            new Filter("isActive", FilterOperator.EQ, true)
-                        ],
+                const sUserPath = () => (sTeamId ? "/TeamMembers" : "/Users");
+                const sUserKeyField = () => (sTeamId ? "user_ID" : "ID");
+
+                const oProcessorInput = new Input({
+                    width: "100%",
+                    placeholder: this.getText("selectProcessorPlaceholder"),
+                    showSuggestion: true,
+                    startSuggestion: 1,
+                    filterSuggests: false,
+                    maxSuggestionWidth: "28rem",
+                    showValueHelp: true,
+                    valueHelpIconSrc: "sap-icon://slim-arrow-down",
+                    // Typing clears the previous pick, then asks the backend (debounced)
+                    liveChange: (oEvent) => {
+                        sSelectedUserId = "";
+                        const sQuery = (oEvent.getParameter("value") || "").trim();
+
+                        clearTimeout(iSearchTimer);
+                        iSearchTimer = setTimeout(() => {
+                            oProcessorInput.getBinding("suggestionItems")?.filter(fnBuildFilters(sQuery));
+                        }, 300);
+                    },
+                    suggestionItemSelected: (oEvent) => {
+                        const oItem = oEvent.getParameter("selectedItem");
+
+                        sSelectedUserId = oItem?.getKey() || "";
+                        oProcessorInput.setValue(oItem?.getText() || "");
+                    },
+                    // Arrow icon: full list with its own backend search
+                    valueHelpRequest: () => {
+                        if (!oPickerDialog) {
+                            oPickerDialog = new SelectDialog({
+                                title: this.getText("sendBackProcessorLabel"),
+                                growing: true,
+                                growingThreshold: 50,
+                                noDataText: this.getText("noUsersFoundText"),
+                                search: (oEvt) => {
+                                    oEvt.getSource().getBinding("items")
+                                        ?.filter(fnBuildFilters((oEvt.getParameter("value") || "").trim()));
+                                },
+                                liveChange: (oEvt) => {
+                                    oEvt.getSource().getBinding("items")
+                                        ?.filter(fnBuildFilters((oEvt.getParameter("value") || "").trim()));
+                                },
+                                confirm: (oEvt) => {
+                                    const oContext = oEvt.getParameter("selectedItem")?.getBindingContext();
+
+                                    if (oContext) {
+                                        sSelectedUserId = oContext.getProperty(sUserKeyField());
+                                        oProcessorInput.setValue(oContext.getProperty("displayName"));
+                                    }
+                                }
+                            });
+                            this.getView().addDependent(oPickerDialog);
+                        }
+
+                        oPickerDialog.unbindAggregation("items");
+                        oPickerDialog.bindAggregation("items", {
+                            path: sUserPath(),
+                            filters: fnBuildFilters(""),
+                            sorter: new Sorter("displayName"),
+                            templateShareable: false,
+                            template: new StandardListItem({
+                                title: "{displayName}",
+                                description: "{email}",
+                                type: "Active"
+                            })
+                        });
+                        oPickerDialog.open();
+                    }
+                });
+
+                // Step with a team -> its members; no team -> all active users
+                const fnBindItems = () => {
+                    const oStep = aSteps.find((oItem) =>
+                        String(oItem.stepNo) === String(oStepSelect.getSelectedKey())
+                    );
+
+                    sTeamId = oStep?.teamId || "";
+                    sSelectedUserId = "";
+                    oProcessorInput.setValue("");
+                    oProcessorInput.unbindAggregation("suggestionItems");
+                    oProcessorInput.bindAggregation("suggestionItems", {
+                        path: sUserPath(),
+                        filters: fnBuildFilters(""),
                         sorter: new Sorter("displayName"),
-                        template: oMemberTemplate,
-                        templateShareable: true
+                        templateShareable: false,
+                        template: new ListItem({
+                            key: sTeamId ? "{user_ID}" : "{ID}",
+                            text: "{displayName}",
+                            additionalText: "{email}"
+                        })
                     });
+                    oHint.setText(sTeamId
+                        ? this.getText("sendBackProcessorHintText")
+                        : this.getText("sendBackAllUsersHintText"));
                 };
 
                 const oStepSelect = new Select({
                     width: "100%",
                     selectedKey: aSteps[0].stepNo,
                     items: aSteps.map((oStep) => new Item({ key: oStep.stepNo, text: oStep.text })),
-                    change: fnLoadTeamMembers
+                    change: fnBindItems
                 });
 
                 const oDialog = new Dialog({
@@ -701,18 +787,24 @@ sap.ui.define([
                         oStepSelect,
                         new Label({
                             text: this.getText("sendBackProcessorLabel"),
-                            labelFor: oProcessorSelect
+                            labelFor: oProcessorInput
                         }).addStyleClass("sapUiSmallMarginTop"),
-                        oProcessorSelect,
+                        oProcessorInput,
                         oHint
                     ],
                     beginButton: new Button({
                         text: this.getText("sendBackButton"),
                         type: "Emphasized",
                         press: () => {
+                            // Text typed but no user picked
+                            if (oProcessorInput.getValue().trim() && !sSelectedUserId) {
+                                MessageToast.show(this.getText("selectProcessorFromListMessage"));
+                                return;
+                            }
+
                             resolve({
                                 stepNo: Number(oStepSelect.getSelectedKey()),
-                                processorUserId: oProcessorSelect.getSelectedKey() || null
+                                processorUserId: sSelectedUserId || null
                             });
                             oDialog.close();
                         }
@@ -728,11 +820,14 @@ sap.ui.define([
 
                 oDialog.addStyleClass("sapUiContentPadding");
                 oDialog.attachAfterClose(() => {
-                    resolve(null); // no-op if already resolved; covers Esc
+                    clearTimeout(iSearchTimer);
+                    resolve(null); // no-op if already resolved (covers Esc)
+                    oPickerDialog?.destroy();
                     oDialog.destroy();
                 });
+
                 this.getView().addDependent(oDialog);
-                fnLoadTeamMembers();
+                fnBindItems();
                 oDialog.open();
             });
         },

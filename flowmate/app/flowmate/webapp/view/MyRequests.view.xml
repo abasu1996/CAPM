@@ -469,7 +469,7 @@
                                         suggest=".onTeamSuggest"
                                         suggestionItemSelected=".onRequestTeamSuggestionSelected"
                                         liveChange=".onRequestTeamLiveChange"
-                                        enabled="{requestEdit>/editable}"
+                                        enabled="{= !!${reservedByUser_ID} &amp;&amp; ${reservedByUser_ID} === ${requestAccess>/currentUserId} &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' }"
                                         valueHelpRequest=".onRequestTeamValueHelpRequest"
                                         suggestionItems="{/Teams}">
                                         <suggestionItems>
@@ -491,7 +491,7 @@
                                     width="100%"
                                     selectedKey="{processorEdit>/requestPriority_code}"
                                     placeholder="{i18n>selectPriorityPlaceholder}"
-                                    enabled="{requestEdit>/editable}"
+                                    enabled="{= !!${reservedByUser_ID} &amp;&amp; ${reservedByUser_ID} === ${requestAccess>/currentUserId} &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' }"
                                     items="{path: '/Priorities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
                                     <core:Item key="{code}" text="{name}" />
                                 </ComboBox>
@@ -3604,9 +3604,9 @@
                         <items><ColumnListItem>
                             <DatePicker value="{ path: 'treasuryConfirmation>paymentReceivedDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' } }" />
                             <DatePicker value="{ path: 'treasuryConfirmation>treasuryRequestDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' } }" />
-                            <ComboBox selectedKey="{treasuryConfirmation>entity_code}" items="{/FtkEntities}"><core:Item key="{code}" text="{name}" /></ComboBox>
+                            <ComboBox selectedKey="{treasuryConfirmation>entity_code}" items="{path: '/FtkEntities',templateShareable: false}"><core:Item key="{code}" text="{name}" /></ComboBox>
                             <Input value="{treasuryConfirmation>bankName}" /><Input value="{treasuryConfirmation>debitAccount}" /><Input value="{treasuryConfirmation>beneficiary}" />
-                            <ComboBox selectedKey="{treasuryConfirmation>currency_code}" items="{/Currencies}"><core:Item key="{code}" text="{name}" /></ComboBox>
+                            <ComboBox selectedKey="{treasuryConfirmation>currency_code}" items="{path: '/Currencies',templateShareable: false}"><core:Item key="{code}" text="{name}" /></ComboBox>
                             <Input value="{treasuryConfirmation>amount}" type="Number" />
                             <DatePicker value="{ path: 'treasuryConfirmation>dueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' } }" />
                             <Input value="{treasuryConfirmation>paymentMode}" /><Input value="{treasuryConfirmation>userDivisionRepresentative}" /><Input value="{treasuryConfirmation>i2pTeamMember}" />
@@ -3707,8 +3707,8 @@
                         <columns>
                             <Column><Text text="{i18n>entityLabel}" /></Column><Column><Text text="{i18n>vendorLabel}" /></Column><Column><Text text="{i18n>currencyLabel}" /></Column><Column><Text text="{i18n>amountLabel}" /></Column><Column><Text text="{i18n>dueDateLabel}" /></Column><Column><Text text="{i18n>userDivisionRepresentativeNameLabel}" /></Column><Column /></columns>
                         <items><ColumnListItem>
-                            <ComboBox selectedKey="{whtClearance>entity_code}" items="{/FtkEntities}"><core:Item key="{code}" text="{name}" /></ComboBox>
-                            <Input value="{whtClearance>vendor}" /><ComboBox selectedKey="{whtClearance>currency_code}" items="{/Currencies}"><core:Item key="{code}" text="{name}" /></ComboBox>
+                            <ComboBox selectedKey="{whtClearance>entity_code}"  items="{path: '/FtkEntities',templateShareable: false}"><core:Item key="{code}" text="{name}" /></ComboBox>
+                            <Input value="{whtClearance>vendor}" /><ComboBox selectedKey="{whtClearance>currency_code}" items="{path: '/Currencies',templateShareable: false}"><core:Item key="{code}" text="{name}" /></ComboBox>
                             <Input value="{whtClearance>amount}" type="Number" /><DatePicker value="{ path: 'whtClearance>dueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' } }" />
                             <Input value="{whtClearance>userDivisionRepresentative}" />
                             <Button icon="sap-icon://delete" type="Transparent" press=".onRemoveWhtRow" />
