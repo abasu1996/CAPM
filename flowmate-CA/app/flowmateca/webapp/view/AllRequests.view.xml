@@ -45,30 +45,42 @@
           updateFinished=".onUpdateFinished" itemPress=".onItemPress" sticky="ColumnHeaders" class="caWorklistTable"
           items="{
             path: '/Requests',
-            parameters: {$count: true, $expand: 'requestType,status'},
+            parameters: {$count: true, $expand: 'requestType,requestVariant,status'},
             sorter: [{path: 'createdAt', descending: true}, {path: 'ID', descending: true}],
             events: {dataReceived: '.onDataReceived'}
           }">
           <columns>
-            <Column width="13rem"><Text text="Request ID"/></Column>
-            <Column><Text text="{i18n>requestType}"/></Column>
-            <Column width="9rem"><Text text="Requester"/></Column>
+            <Column width="12.5rem"><Text text="Request ID"/></Column>
+            <Column width="9.5rem"><Text text="{i18n>requestType}"/></Column>
+            <Column width="8rem"><Text text="Requester"/></Column>
+            <Column width="8rem"><Text text="{i18n>requestVariant}"/></Column>
             <Column><Text text="{i18n>title}"/></Column>
-            <Column width="9rem"><Text text="{i18n>status}"/></Column>
-            <Column><Text text="{i18n>processorTeam}"/></Column>
-            <Column width="9rem"><Text text="{i18n>createdOn}"/></Column>
+            <Column width="11.5rem"><Text text="{i18n>status}"/></Column>
+            <Column width="8rem"><Text text="{i18n>requesterTeam}"/></Column>
+            <Column width="6.5rem"><Text text="{i18n>dueDate}"/></Column>
+            <Column width="8rem"><Text text="Created"/></Column>
           </columns>
           <items>
-            <ColumnListItem type="Navigation">
+            <ColumnListItem
+              type="Navigation"
+              highlight="{parts: ['slaDueAt', 'status_code', 'completedAt'], formatter: '.formatRequestSlaHighlight'}">
               <cells>
                 <ObjectIdentifier title="{referenceNumber}"/>
                 <Text text="{requestType/name}"/>
                 <Text text="{requesterName}"/>
+                <Text text="{requestVariant/name}"/>
                 <Text text="{title}" tooltip="{title}" class="caTitleCell"/>
-                <ObjectStatus text="{parts: ['status/name', 'status_code'], formatter: '.statusName'}"
-                  state="{path: 'status_code', formatter: '.statusState'}"/>
-                <Text text="{ownerTeamName}"/>
-                <Text text="{path: 'createdAt', formatter: '.formatDate'}"/>
+                <HBox alignItems="Center" wrap="NoWrap">
+                  <ObjectStatus text="{parts: ['status/name', 'status_code'], formatter: '.statusName'}"
+                    state="{path: 'status_code', formatter: '.statusState'}"/>
+                  <ObjectStatus
+                    text="{parts: ['slaDueAt', 'status_code', 'completedAt'], formatter: '.formatRequestSla'}"
+                    state="{parts: ['slaDueAt', 'status_code', 'completedAt'], formatter: '.formatRequestSlaHighlight'}"
+                    class="sapUiTinyMarginBegin"/>
+                </HBox>
+                <Text text="{ownerTeamName}" tooltip="{ownerTeamName}" wrapping="false"/>
+                <Text text="{path: 'dueDate', formatter: '.formatDate'}"/>
+                <Text text="{path: 'createdAt', formatter: '.formatDateTimeShort'}" tooltip="{path: 'createdAt', formatter: '.formatDateTime'}" wrapping="false"/>
               </cells>
             </ColumnListItem>
           </items>

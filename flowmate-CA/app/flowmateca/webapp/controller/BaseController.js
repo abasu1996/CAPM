@@ -373,6 +373,10 @@ sap.ui.define([
     // Downloads rows as an .xlsx. columns: [{ label, value: row => text }]; the values are written
     // as text, exactly as the list shows them.
     exportToExcel: function (fileName, columns, rows) {
+      if (!rows.length) {
+        MessageToast.show("There are no rows to export.");
+        return Promise.resolve();
+      }
       return new Promise(function (resolve, reject) {
         sap.ui.require(["sap/ui/export/Spreadsheet"], function (Spreadsheet) {
           const data = rows.map(function (row) {
@@ -457,22 +461,30 @@ sap.ui.define([
       return `SLA ${slaDays} ${Number(slaDays) === 1 ? "day" : "days"}`;
     },
 
-    // "Uploaded by Name · 16 Oct 2026, 15:40", with "Remarks screenshot" marked as such.
-    formatUploadInfo: function (uploadedByName, createdBy, createdAt, category) {
+    // "Uploaded by Name · 16 Oct 2026, 15:40"
+    formatUploadInfo: function (uploadedByName, createdBy, createdAt) {
       const who = uploadedByName || createdBy || "";
-      const parts = [who && `Uploaded by ${who}`, this.formatDateTime(createdAt)].filter(Boolean);
-      const text = parts.join(" · ");
-      return category === "REMARKS_SCREENSHOT" ? `Remarks screenshot · ${text}` : text;
+      return [who && `Uploaded by ${who}`, this.formatDateTime(createdAt)].filter(Boolean).join(" · ");
     },
 
-    // A request is past its SLA while still running after its (projected) due date.
-    isRequestOverdue: function (slaDueAt, statusCode) {
-      return !!slaDueAt && statusCode !== "COMPLETED" && statusCode !== "REJECTED"
-        && new Date(slaDueAt) < new Date();
+    // A request's SLA, for every request list: "BREACHED", "WITHIN" or "" (nothing to judge).
+    // Open requests are judged against their due date now (it follows the open task); completed
+    // ones by whether they finished before it; terminated requests and requests from before SLAs
+    // existed (no due date) have none.
+    _requestSlaResult: function (slaDueAt, statusCode, completedAt) {
+      if (!slaDueAt || statusCode === "REJECTED") {
+        return "";
+      }
+      const judgedAt = statusCode === "COMPLETED" && completedAt ? new Date(completedAt) : new Date();
+      return judgedAt > new Date(slaDueAt) ? "BREACHED" : "WITHIN";
     },
 
-    formatRequestSlaHighlight: function (slaDueAt, statusCode) {
-      return this.isRequestOverdue(slaDueAt, statusCode) ? "Error" : "None";
+    formatRequestSla: function (slaDueAt, statusCode, completedAt) {
+      return { BREACHED: "SLA Breached", WITHIN: "Within SLA" }[this._requestSlaResult(slaDueAt, statusCode, completedAt)] || "";
+    },
+
+    formatRequestSlaHighlight: function (slaDueAt, statusCode, completedAt) {
+      return { BREACHED: "Error", WITHIN: "Success" }[this._requestSlaResult(slaDueAt, statusCode, completedAt)] || "None";
     },
 
     formatSlaBreachMessage: function (slaDueAt, statusCode) {
@@ -788,9 +800,11 @@ ${reasons.join("\n")}`);
     // A field's display text ("" when empty): Yes/No for flags, the option text for selects.
     // Request-level fields (source "request") are read from the request instead of details.
     formatDetailValue: function (definition, request, details) {
-      let value = definition.source === "request"
-        ? (definition.name === "requestDateTime" ? request.createdAt : request[definition.name])
-        : details[definition.name];
+      // Request Date & Time: when the request was submitted, as a readable date and time.
+      if (definition.name === "requestDateTime") {
+        return request.createdAt ? this.formatDateTime(request.createdAt) : "";
+      }
+      let value = definition.source === "request" ? request[definition.name] : details[definition.name];
       if (typeof value === "boolean") {
         value = value ? "Yes" : "No";
       }
@@ -815,12 +829,8 @@ ${reasons.join("\n")}`);
           label: definition.label,
           value: value === "" ? "Not provided" : value
         };
-      }.bind(this)).concat(request.requestType?.code === "PURCHASE_ORDER" && details.purchaseOrderNumber
-        // Recorded at S/4 Data Validation; appended last so resolveIdLabels' indexes still match.
-        ? [{ label: "PO Number", value: String(details.purchaseOrderNumber) }]
-        : []).concat(request.requestType?.code === "SERVICE_ENTRY_SHEET" && details.sesNumber
-        ? [{ label: "SES Number", value: String(details.sesNumber) }]
-        : []);
+      }.bind(this));
+      // PO Number / SES Number (recorded at S/4 Data Validation) follow through appendApproverFields.
     },
 
     // Combos keyed by a UUID (users, vendor, purchasing organization) store the ID; swap it for
@@ -1048,6 +1058,9 @@ ${reasons.join("\n")}`);
       if (definition.type === "readonly") {
         control = new Input({
           editable: false,
+          // Request Date & Time on the create page: the moment the form was opened, greyed out
+          // until the request is submitted (the request then shows its submitted time).
+          enabled: definition.name !== "requestDateTime",
           placeholder: definition.placeholder || ""
         }).bindValue(path);
       } else if (definition.type === "textarea") {

@@ -997,8 +997,7 @@ sap.ui.define([], function () {
       text: "displayName",
       secondaryText: "email"
     }),
-    field("paymentRequestRequired", "Available Invoices", "checkbox"),
-    field("flowmateSesRequest", "Create Flowmate Service Entry Sheet Request", "checkbox", { onSelect: "onFlowmateServiceEntrySheetSelect" }),
+    field("flowmateSesRequest", "Payment Run", "checkbox", { onSelect: "onFlowmateServiceEntrySheetSelect" }),
     // Mandatory in both variants: on the form (Single Line) and in each Header Creation row (Multiple).
     field("remarks", "Remarks", "textarea", { required: true }),
     field("sesPaymentOption", "SES / Payment Option", "select", {
@@ -1010,13 +1009,13 @@ sap.ui.define([], function () {
       ]
     }),
     field("sesRecipientEmail", "SES Recipient Email", "input", { required: true }),
-    field("specialPersonArea", "Special Person Area", "select", {
+    field("specialPersonArea", "Special Area", "select", {
       options: [
         { key: "DBS", text: "DBS" },
         { key: "MARKETING", text: "Marketing" }
       ]
     }),
-    field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file"),
+    field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file", { required: true }),
     field("division", "Division", "combo", { required: true, entity: "Divisions", key: "divisionCode", text: "divisionName" }),
     field("divisionalUser_ID", "Divisional User", "combo", {
       required: true,
@@ -1033,7 +1032,6 @@ sap.ui.define([], function () {
       secondaryText: "email"
     }),
     field("taxInvoiceAttachment", "Tax Invoice Attachment", "file", { required: true }),
-    field("additionalAttachment", "Additional Attachment", "file"),
     field("comment", "Comment", "textarea")
   ];
   sesFields.push(...requesterFields);
@@ -1564,6 +1562,10 @@ sap.ui.define([], function () {
       const existing = new Set(columns.map(function (col) { return col.name; }));
       return columns.concat(approverColumns.filter(function (col) { return !existing.has(col.name); }));
     },
+    // Request types whose line items table may stay empty (a row that is entered is still checked).
+    lineItemsOptional: function (requestTypeCode) {
+      return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";
+    },
     alwaysHasItems: function (requestTypeCode) {
       return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";
     },
@@ -1605,8 +1607,7 @@ sap.ui.define([], function () {
       const fixed = {
         SUPPORTING_DOCUMENT: "Supporting Documents",
         PAYMENT_RUN: "Payment Run",
-        FLOWMATE_SES: "Flowmate Service Entry Sheet",
-        REMARKS_SCREENSHOT: "Remarks Screenshots"
+        FLOWMATE_SES: "Flowmate Service Entry Sheet"
       };
       const successor = code.indexOf("SES_") === 0 && variantCode !== "SES_NEW" && variantCode !== "SES_MOD";
       const own = successor ? code.slice(4) : code;

@@ -621,10 +621,6 @@ sap.ui.define([
           label,
           control
         });
-        if (definition.name === "remarks") {
-          formsBySection.get(section).addContent(new Label({ text: "Remarks Screenshot" }));
-          formsBySection.get(section).addContent(this._remarksScreenshotUploader());
-        }
       }.bind(this));
       this._applyConditionalVisibility();
     },
@@ -671,33 +667,6 @@ sap.ui.define([
       } catch (error) {
         // The preview is a convenience; the server still generates the values on submit.
       }
-    },
-
-    // Remarks may carry one screenshot. Images only - PDFs and other documents go to the attachment
-    // fields; the server refuses anything else for this category too.
-    _remarksScreenshotUploader: function () {
-      return new FileUploader({
-        width: "100%",
-        buttonText: "Attach Screenshot",
-        icon: "sap-icon://add-photo",
-        fileType: ["png", "jpg", "jpeg", "gif", "webp"],
-        mimeType: ["image/png", "image/jpeg", "image/gif", "image/webp"],
-        placeholder: "PNG, JPG, GIF or WebP image",
-        typeMissmatch: function (event) {
-          event.getSource().clear();
-          delete this._dynamicFileUploads.remarksScreenshot;
-          MessageBox.warning("Only an image can be attached to the remarks (PNG, JPG, GIF or WebP).");
-        }.bind(this),
-        change: function (event) {
-          const files = event.getParameter("files");
-          const file = files && files.length ? files[0] : null;
-          if (file) {
-            this._dynamicFileUploads.remarksScreenshot = file;
-          } else {
-            delete this._dynamicFileUploads.remarksScreenshot;
-          }
-        }.bind(this)
-      });
     },
 
     // Due Date: the step SLAs of the chosen workflow added up from now, as the server calculates
@@ -895,10 +864,7 @@ sap.ui.define([
         MessageBox.warning(sesDateProblem);
         return;
       }
-      if (!(draft.items || []).length) {
-        MessageBox.warning("Add at least one SES line item.");
-        return;
-      }
+      // SES line items are optional; a row that is entered still needs its required cells.
       const missingCell = this._firstMissingItemCell(draft.items, GRIDS.sesItems.columns);
       if (missingCell) {
         MessageBox.warning(`SES Line Items - ${missingCell}`);
@@ -1704,10 +1670,11 @@ sap.ui.define([
           || typeCode === "MATERIAL_RESERVATION"
           || FormDefinitions.alwaysHasItems(typeCode)));
       // "Contract Creation Details" is an Outline Contract title; every other type calls the
-      // second table its line items, header table or not (optional ones for a Purchase Order).
+      // second table its line items, header table or not (optional ones for a Purchase Order and a
+      // Service Entry Sheet).
       formModel.setProperty("/itemsTableTitle", this.getView().getModel("i18n").getResourceBundle()
         .getText(typeCode === "OUTLINE_CONTRACT" ? "contractItemsTableTitle"
-          : typeCode === "PURCHASE_ORDER" ? "optionalItemsTableTitle" : "itemsTableTitle"));
+          : FormDefinitions.lineItemsOptional(typeCode) ? "optionalItemsTableTitle" : "itemsTableTitle"));
       this._renderGrid("items");
       this._renderGrid("headers");
       this._renderConditionalGrids(typeCode, variantCode);
@@ -2109,8 +2076,9 @@ sap.ui.define([
         }
       }
       if (form.showsItemsTable) {
-        // Purchase Order line items are optional; a row that is entered still needs its required cells.
-        if (!itemRows.length && form.requestTypeCode !== "PURCHASE_ORDER") {
+        // Purchase Order and Service Entry Sheet line items are optional; a row that is entered
+        // still needs its required cells.
+        if (!itemRows.length && !FormDefinitions.lineItemsOptional(form.requestTypeCode)) {
           MessageBox.warning(`Add at least one row to the ${itemsTitle} table.`);
           return;
         }

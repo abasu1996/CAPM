@@ -21,8 +21,6 @@ sap.ui.define([
     _onRouteMatched: async function (event) {
       this._query = event.getParameter("arguments")["?query"] || {};
       this.byId("requestStatusFilter").setSelectedKey(this._query.status || "");
-      // The Sent Back / Terminated / Completed tiles open this list with a status: Request Type only.
-      this.getView().getModel("list").setProperty("/showRequester", !this._query.status);
       this.getView().getModel("sortView").setProperty("/key", "asc");
       await this._loadCatalog();
       await this.onRefresh();
@@ -115,7 +113,8 @@ sap.ui.define([
         { label: "Process Variant", value: (r) => r.requestVariant && r.requestVariant.name },
         { label: "Title", value: (r) => r.title },
         { label: "Status", value: (r) => r.status && this.statusName(r.status.name, r.status.code) },
-        { label: "SLA", value: (r) => (this.isRequestOverdue(r.slaDueAt, r.status && r.status.code) ? "SLA Breached" : "") },
+        { label: "SLA", value: (r) => this.formatRequestSla(r.slaDueAt, r.status && r.status.code, r.completedAt) },
+        { label: "Requester Team", value: (r) => r.ownerTeamName },
         { label: "Due Date", value: (r) => this.formatDate(r.dueDate) },
         { label: "Created", value: (r) => this.formatDateTime(r.createdAt) }
       ], this.getView().getModel("list").getProperty("/items") || []).catch(this.showError.bind(this));

@@ -63,36 +63,34 @@
           itemPress=".onItemPress"
           sticky="ColumnHeaders" class="caWorklistTable">
           <columns>
-            <Column width="13rem"><Text text="Request ID"/></Column>
-            <Column width="11rem"><Text text="{i18n>requestType}"/></Column>
-            <!-- Hidden on the Sent Back / Terminated / Completed tile lists (opened with a status). -->
-            <Column width="9rem" visible="{list>/showRequester}"><Text text="Requester"/></Column>
-            <Column width="9rem"><Text text="{i18n>requestVariant}"/></Column>
+            <Column width="12.5rem"><Text text="Request ID"/></Column>
+            <Column width="9.5rem"><Text text="{i18n>requestType}"/></Column>
+            <Column width="8rem"><Text text="Requester"/></Column>
+            <Column width="8rem"><Text text="{i18n>requestVariant}"/></Column>
             <Column><Text text="{i18n>title}"/></Column>
-            <Column width="9rem"><Text text="{i18n>status}"/></Column>
-            <Column width="8rem"><Text text="{i18n>dueDate}"/></Column>
-            <Column width="8.5rem"><Text text="Created"/></Column>
+            <Column width="11.5rem"><Text text="{i18n>status}"/></Column>
+            <Column width="8rem"><Text text="{i18n>requesterTeam}"/></Column>
+            <Column width="6.5rem"><Text text="{i18n>dueDate}"/></Column>
+            <Column width="8rem"><Text text="Created"/></Column>
           </columns>
           <items>
             <ColumnListItem
               type="Navigation"
-              highlight="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.formatRequestSlaHighlight'}">
+              highlight="{parts: ['list>slaDueAt', 'list>status/code', 'list>completedAt'], formatter: '.formatRequestSlaHighlight'}">
               <cells>
                 <ObjectIdentifier title="{list>referenceNumber}"/>
                 <Text text="{list>requestType/name}"/>
                 <Text text="{list>requesterName}"/>
                 <Text text="{list>requestVariant/name}"/>
                 <Text text="{list>title}" tooltip="{list>title}" class="caTitleCell"/>
-                <VBox>
+                <HBox alignItems="Center" wrap="NoWrap">
                   <ObjectStatus text="{parts: ['list>status/name', 'list>status/code'], formatter: '.statusName'}" state="{path: 'list>status/code', formatter: '.statusState'}"/>
                   <ObjectStatus
-                    text="{i18n>slaBreachedLabel}"
-                    icon="sap-icon://lateness"
-                    state="Error"
-                    inverted="true"
-                    class="sapUiTinyMarginTop"
-                    visible="{parts: ['list>slaDueAt', 'list>status/code'], formatter: '.isRequestOverdue'}"/>
-                </VBox>
+                    text="{parts: ['list>slaDueAt', 'list>status/code', 'list>completedAt'], formatter: '.formatRequestSla'}"
+                    state="{parts: ['list>slaDueAt', 'list>status/code', 'list>completedAt'], formatter: '.formatRequestSlaHighlight'}"
+                    class="sapUiTinyMarginBegin"/>
+                </HBox>
+                <Text text="{list>ownerTeamName}" tooltip="{list>ownerTeamName}" wrapping="false"/>
                 <Text text="{path: 'list>dueDate', formatter: '.formatDate'}"/>
                 <Text text="{path: 'list>createdAt', formatter: '.formatDateTimeShort'}" tooltip="{path: 'list>createdAt', formatter: '.formatDateTime'}" wrapping="false"/>
               </cells>

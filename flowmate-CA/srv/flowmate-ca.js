@@ -169,14 +169,14 @@ function sentBackStatus({ sentBackBy, fromStepNo, fromStepName, remarks } = {}) 
   return remarks ? `${text}: ${remarks}` : text;
 }
 
-// The approval data of a completed request as e-mail lines: [[label, value], ...] ->
-// "<b>Approval data:</b><br>Service Code: SC-100<br>GL Account: 400100". Blank values are left
-// out; "" when there are none.
+// The approval data of a completed request for the e-mail's "Approval Data:" line: [[label, value],
+// ...] -> "<br>Service Code: SC-100<br>GL Account: 400100", one value per line under the label.
+// Blank values are left out; "" when there are none.
 function approvalDataText(entries) {
   const lines = (entries || [])
     .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== "")
     .map(([label, value]) => `${label}: ${String(value).trim()}`);
-  return lines.length ? `<b>Approval data:</b><br>${lines.join("<br>")}` : "";
+  return lines.length ? `<br>${lines.join("<br>")}` : "";
 }
 
 const REQUEST_STATUS = {
@@ -2202,7 +2202,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         completedAt: now
       }).where({ ID: request.ID }));
       await this._writeHistory(tx, request.ID, step.stepNo, "REQUEST_COMPLETED", user, request.status_code, REQUEST_STATUS.COMPLETED, remarks);
-      await this._notifyRequestOutcome(tx, request.ID, REQUEST_OUTCOME.COMPLETED);
+      // The Completed e-mail carries the remarks of the final approval.
+      await this._notifyRequestOutcome(tx, request.ID, REQUEST_OUTCOME.COMPLETED, remarks);
       await this._createSesSuccessor(tx, request, user);
       await this._triggerFlowmateIntegrationIfRequired(req, request.ID);
       return true;
@@ -2767,10 +2768,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     const requestType = await tx.run(SELECT.one.from(this.db.RequestTypes)
       .columns("name").where({ code: request.requestType_code }));
-    // A completed request's e-mail lists the approval data in its Remarks.
-    const text = status === REQUEST_OUTCOME.COMPLETED
-      ? [remarks, await this._approvalDataSummary(tx, request.requestType_code, requestId)].filter(Boolean).join("<br><br>")
-      : remarks || "";
+    // A completed request's e-mail lists the approval data on its own "Approval Data:" line.
+    const approvalData = status === REQUEST_OUTCOME.COMPLETED
+      ? (await this._approvalDataSummary(tx, request.requestType_code, requestId)) || "None"
+      : "";
     // A completed request also goes to the addresses named on it (see completionRecipients).
     const recipients = status === REQUEST_OUTCOME.COMPLETED
       ? completionRecipients(request.requesterEmail, await this._completionAddresses(tx, request.requestType_code, requestId))
@@ -2785,7 +2786,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           requesttype: requestType?.name || request.requestType_code || "",
           requestid: request.referenceNumber || requestId,
           status,
-          remarks: text,
+          remarks: remarks || "",
+          approvaldata: approvalData,
           requestername: request.requesterName || "",
           rejectedby: status === REQUEST_OUTCOME.REJECTED ? decision.actorName || "" : "",
           sendbackby: status === REQUEST_OUTCOME.SENT_BACK ? decision.actorName || "" : "",
@@ -2812,13 +2814,17 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     if (requestTypeCode === "SERVICE_ENTRY_SHEET") {
       const ses = await tx.run(SELECT.one.from(this.db.ServiceEntrySheetDetails)
-        .columns("ID", "sesRecipientEmail").where({ request_ID: requestId }));
+        .columns("ID", "sesRecipientEmail", "divisionalUser_ID").where({ request_ID: requestId }));
       if (!ses) {
         return [];
       }
       const rows = await tx.run(SELECT.from(this.db.ServiceEntrySheetHeaders)
         .columns("sesRecipientEmail").where({ details_ID: ses.ID }).orderBy("itemNo"));
-      return [ses.sesRecipientEmail, ...rows.map((row) => row.sesRecipientEmail)];
+      // ... and the Divisional User named on the request.
+      const divisionalUser = ses.divisionalUser_ID
+        ? await this.master.run(SELECT.one.from(this.masterEntities.Users).columns("email").where({ ID: ses.divisionalUser_ID }))
+        : null;
+      return [ses.sesRecipientEmail, ...rows.map((row) => row.sesRecipientEmail), divisionalUser?.email];
     }
     return [];
   }
@@ -2947,10 +2953,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       && Date.now() - Date.parse(request.createdAt) < 15 * 60 * 1000;
     if (!creating && !await this._canContribute(req, request, user)) {
       return req.reject(403, "Only the person working on the open task can upload attachments");
-    }
-    // The media type comes from the file name, so the name decides what counts as a screenshot.
-    if (req.data.category === "REMARKS_SCREENSHOT" && !/\.(png|jpe?g|gif|webp)$/i.test(req.data.filename || "")) {
-      return req.reject(400, "A remarks screenshot must be an image (PNG, JPG, GIF or WebP)");
     }
     req.data.uploadedByName = user.displayName;
   };

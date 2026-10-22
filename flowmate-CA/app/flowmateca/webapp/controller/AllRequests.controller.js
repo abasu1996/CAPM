@@ -26,11 +26,14 @@ sap.ui.define([
         const contexts = await binding.requestContexts(0, binding.getCount() || binding.getLength());
         await this.exportToExcel("All Requests", [
           { label: "Request ID", value: (r) => r.referenceNumber },
-          { label: "Title", value: (r) => r.title },
           { label: "Request Type", value: (r) => r.requestType && r.requestType.name },
           { label: "Requester", value: (r) => r.requesterName },
+          { label: "Process Variant", value: (r) => r.requestVariant && r.requestVariant.name },
+          { label: "Title", value: (r) => r.title },
           { label: "Status", value: (r) => r.status && this.statusName(r.status.name, r.status_code) },
-          { label: "Processor Team", value: (r) => r.ownerTeamName },
+          { label: "SLA", value: (r) => this.formatRequestSla(r.slaDueAt, r.status_code, r.completedAt) },
+          { label: "Requester Team", value: (r) => r.ownerTeamName },
+          { label: "Due Date", value: (r) => this.formatDate(r.dueDate) },
           { label: "Created", value: (r) => this.formatDateTime(r.createdAt) }
         ], contexts.map((context) => context.getObject()));
       } catch (error) {
