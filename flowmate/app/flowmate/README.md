@@ -35,6 +35,11 @@ The Flowmate OData V4 service is available through an interactive Swagger UI.
 - Deployed Swagger UI: `<approuter-base-url>/api-docs`
 - Shareable OpenAPI file: `docs/flowmate-openapi.json`
 
+The deployed Swagger UI and OpenAPI JSON require the `ApiDocumentationViewer` role (or an
+existing `Admin`, `UserProvisioning`, or `VendorProvisioning` authority). For documentation-only
+human access, assign the `ApiDocumentationViewer` role through a BTP role collection; the user
+does not need to be provisioned in the Flowmate Common user table.
+
 Start it locally with `npm run swagger`. Use `npm run swagger:hybrid` or
 `npm run swagger:dialog` when the corresponding HANA binding is required.
 Regenerate the checked-in OpenAPI file after service-model changes with

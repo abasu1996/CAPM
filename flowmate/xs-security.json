@@ -5,6 +5,10 @@
       "description": "Administer Flowmate configuration, users, and delegate assignments"
     },
     {
+      "name": "$XSAPPNAME.ApiDocumentationViewer",
+      "description": "View and download the Flowmate API documentation"
+    },
+    {
       "name": "$XSAPPNAME.UserProvisioning",
       "description": "Create and update Flowmate users, managers, and team memberships through the integration API",
       "grant-as-authority-to-apps": [
@@ -54,6 +58,13 @@
       "description": "Administer Flowmate configuration, users, and delegate assignments",
       "scope-references": [
         "$XSAPPNAME.Admin"
+      ]
+    },
+    {
+      "name": "ApiDocumentationViewer",
+      "description": "View and download the Flowmate API documentation",
+      "scope-references": [
+        "$XSAPPNAME.ApiDocumentationViewer"
       ]
     }
   ],

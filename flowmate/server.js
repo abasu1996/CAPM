@@ -1,6 +1,7 @@
 const cds = require("@sap/cds");
 const swaggerUi = require("swagger-ui-express");
 const oOpenApiDocument = require("./docs/flowmate-openapi.json");
+const { canViewApiDocumentation } = require("./srv/lib/api-docs-authorization");
 
 const DOCS_PATH = "/api-docs";
 
@@ -10,18 +11,14 @@ cds.on("served", () => {
   const fnAuthorize = (req, res, next) => {
     const oUser = cds.context?.user || req.user;
 
-    if (
-      oUser?.is?.("Admin")
-      || oUser?.is?.("UserProvisioning")
-      || oUser?.is?.("VendorProvisioning")
-    ) {
+    if (canViewApiDocumentation(oUser)) {
       return next();
     }
 
     return res.status(403).json({
       error: {
         code: "403",
-        message: "Administrator or provisioning authority is required to access API documentation"
+        message: "API documentation viewer authority is required to access API documentation"
       }
     });
   };
