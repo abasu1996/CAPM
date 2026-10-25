@@ -133,6 +133,11 @@
           "target": "dashboard"
         },
         {
+          "name": "reports",
+          "pattern": "reports",
+          "target": "reports"
+        },
+        {
           "name": "requests",
           "pattern": "requests:?query:",
           "target": "requests"
@@ -176,6 +181,10 @@
         "dashboard": {
           "id": "Dashboard",
           "name": "Dashboard"
+        },
+        "reports": {
+          "id": "Reports",
+          "name": "Reports"
         },
         "requests": {
           "id": "Requests",

@@ -14,7 +14,8 @@ sap.ui.define([
         sentBackRequests: 0,
         rejectedRequests: 0,
         pendingApproval: 0,
-        completedRequests: 0
+        completedRequests: 0,
+        reportingRequests: 0
       }), "dashboard");
       this.getRouter().getRoute("dashboard").attachPatternMatched(this.onRefresh, this);
     },
@@ -23,6 +24,7 @@ sap.ui.define([
       this.setBusy(true);
       try {
         const counts = await this.request("getDashboardCounts()");
+        counts.reportingRequests = counts.allRequests || 0;
         this.getView().getModel("dashboard").setData(counts);
         this.getView().getModel().refresh();
       } catch (error) {
@@ -59,6 +61,10 @@ sap.ui.define([
 
     onAllRequests: function () {
       this.navTo("allRequests");
+    },
+
+    onReports: function () {
+      this.navTo("reports");
     },
 
     onSentBack: function () {

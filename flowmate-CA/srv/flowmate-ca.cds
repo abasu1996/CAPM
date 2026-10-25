@@ -177,6 +177,11 @@ service FlowmateCAService {
     referenceNumbers : LargeString;
     requestIds       : LargeString; // JSON array of created request IDs, in row order
   };
+  /**
+   * Reporting payload for the CA dashboards. The service returns a JSON document so the
+   * dashboard can add report sections without changing the transactional entity projections.
+   */
+  action getReportingDashboard(periodStart: Date, periodEnd: Date, poType: String(40)) returns LargeString;
   action submitRequest(requestId: UUID) returns Boolean;
   action addTask(
     requestId: UUID,

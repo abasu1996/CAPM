@@ -1,0 +1,110 @@
+<mvc:View
+  controllerName="flowmateca.controller.Reports"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:core="sap.ui.core"
+  xmlns="sap.m">
+  <Page class="caPage reportsPage" showHeader="true" busy="{reports>/loading}" busyIndicatorDelay="0">
+    <customHeader>
+      <OverflowToolbar class="caTopBar">
+        <Button icon="sap-icon://nav-back" type="Transparent" tooltip="Dashboard" press=".onDashboard"/>
+        <Title text="Reports and Dashboard" level="H2"/>
+        <ToolbarSpacer/>
+        <Button icon="sap-icon://home" type="Transparent" tooltip="Workspace" press=".onDashboard"/>
+        <Button icon="sap-icon://documents" type="Transparent" tooltip="Requests" press=".onRequests"/>
+        <Button icon="sap-icon://task" type="Transparent" tooltip="Tasks" press=".onTasks"/>
+        <Button icon="sap-icon://action-settings" type="Transparent" tooltip="Administration" visible="{app>/currentUser/isAdmin}" press=".onAdmin"/>
+      </OverflowToolbar>
+    </customHeader>
+    <content>
+      <VBox class="reportsShell sapUiResponsiveContentPadding">
+        <HBox class="reportsHero" alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap">
+          <HBox alignItems="Center" class="reportsHeroTitle">
+            <core:Icon src="sap-icon://business-objects-experience" class="reportsHeroIcon"/>
+            <VBox>
+              <Title text="Operations intelligence" level="H1"/>
+              <Text text="A clear view of volume, value and service-level performance across Commerce Automation."/>
+            </VBox>
+          </HBox>
+          <VBox class="reportsPeriodBox">
+            <Label text="Reporting period"/>
+            <DateRangeSelection id="reportPeriod" displayFormat="dd MMM yyyy" change=".onPeriodChange"/>
+          </VBox>
+        </HBox>
+
+        <Toolbar class="reportsToolbar">
+          <Title text="Reports" level="H3"/>
+          <ToolbarSpacer/>
+          <Label text="View" labelFor="reportScope"/>
+          <Select id="reportScope" selectedKey="{reports>/scope}" change=".onScopeChange" width="13rem">
+            <items>
+              <core:Item key="ALL" text="All reports"/>
+              <core:Item key="PO_SPEND" text="PO Spend Analysis"/>
+              <core:Item key="PO_LIFECYCLE" text="PO Lifecycle"/>
+              <core:Item key="SES_LIFECYCLE" text="SES Lifecycle"/>
+              <core:Item key="SCM" text="SCM Operations"/>
+              <core:Item key="SOURCE_TO_PAY" text="Source-to-Pay visibility"/>
+            </items>
+          </Select>
+          <Label text="PO type" labelFor="poType" class="sapUiSmallMarginBegin"/>
+          <Select id="poType" selectedKey="{reports>/poType}" change=".onPoTypeChange" width="10rem">
+            <items>
+              <core:Item key="ALL" text="All PO types"/>
+              <core:Item key="GENERAL" text="General"/>
+              <core:Item key="DNS" text="DNS"/>
+              <core:Item key="FTK" text="FTK"/>
+            </items>
+          </Select>
+        </Toolbar>
+
+        <HBox class="reportsKpiRow" wrap="Wrap" visible="{reports>/visible/all}">
+          <VBox class="reportKpi reportKpiBlue"><Text text="Requests received"/><ObjectNumber number="{reports>/summary/totalRequests}"/></VBox>
+          <VBox class="reportKpi reportKpiGreen"><Text text="Completed"/><ObjectNumber number="{reports>/summary/completed}" state="Success"/></VBox>
+          <VBox class="reportKpi reportKpiAmber"><Text text="In progress"/><ObjectNumber number="{reports>/summary/inProgress}" state="Warning"/></VBox>
+          <VBox class="reportKpi reportKpiRed"><Text text="SLA exceeded"/><ObjectNumber number="{reports>/summary/slaBreached}" state="Error"/></VBox>
+        </HBox>
+
+        <VBox class="reportSection" visible="{reports>/visible/poSpend}">
+          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://money-bills"/><VBox><Title text="PO Spend Analysis" level="H2"/><Text text="Spend is based on the PO request value before tax."/></VBox></HBox>
+          <HBox class="reportCardRow" wrap="Wrap">
+            <VBox class="reportCard reportMetricCard"><Text text="Total spend"/><ObjectNumber number="{path:'reports>/poSpend/totalSpend', formatter:'.formatNumber'}"/><Text text="{reports>/poSpend/reportingCurrency}" class="reportMutedText"/></VBox>
+            <VBox class="reportCard reportMetricCard"><Text text="Active suppliers"/><ObjectNumber number="{reports>/poSpend/activeSuppliers}"/><Text text="Distinct suppliers in period" class="reportMutedText"/></VBox>
+            <VBox class="reportCard reportMetricCard"><Text text="YoY variance"/><ObjectNumber number="{path:'reports>/poSpend/yoyVariance', formatter:'.formatVariance'}" state="{= ${reports>/poSpend/yoyVariance} &gt;= 0 ? 'Error' : 'Success'}"/><Text text="{path:'reports>/poSpend/yoyVariancePercent', formatter:'.formatPercent'}" class="reportMutedText"/></VBox>
+            <VBox class="reportCard reportMetricCard reportWarningCard"><Text text="Data readiness"/><Text text="{reports>/poSpend/conversionNote}" wrapping="true"/><Text text="{reports>/poSpend/mappingNote}" wrapping="true" class="reportMutedText sapUiTinyMarginTop"/></VBox>
+          </HBox>
+          <HBox class="reportCardRow" wrap="Wrap">
+            <VBox class="reportCard reportWideCard"><Title text="Top supplier spend" level="H3"/><List items="{reports>/poSpend/topSuppliers}" noDataText="No PO spend in this period" class="reportList"><CustomListItem><HBox alignItems="Center" class="reportBarRow"><Text text="{reports>supplier}" class="reportBarLabel"/><ProgressIndicator percentValue="{reports>sharePercent}" displayValue="{path:'reports>sharePercent', formatter:'.formatPercent'}" state="Information"/><Text text="{path:'reports>spend', formatter:'.formatNumber'}" class="reportBarValue"/></HBox></CustomListItem></List></VBox>
+            <VBox class="reportCard reportCardNarrow"><Title text="Capex / Opex" level="H3"/><List items="{reports>/poSpend/categorySplit}" noDataText="No category data" class="reportList"><CustomListItem><HBox alignItems="Center" class="reportBarRow"><Text text="{reports>label}" class="reportBarLabel"/><ProgressIndicator percentValue="{reports>sharePercent}" displayValue="{path:'reports>sharePercent', formatter:'.formatPercent'}" state="Success"/></HBox></CustomListItem></List></VBox>
+          </HBox>
+          <Table class="reportTable" items="{reports>/recentTransactions}" growing="true" growingThreshold="25" noDataText="No PO transactions in this period"><headerToolbar><Toolbar><Title text="Recent PO transactions" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Request"/></Column><Column><Text text="Supplier"/></Column><Column><Text text="PO number"/></Column><Column><Text text="Value"/></Column><Column><Text text="Type"/></Column><Column><Text text="Status"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>requestId}"/><Text text="{reports>supplier}"/><Text text="{reports>poNumber}"/><ObjectNumber number="{path:'reports>amount', formatter:'.formatNumber'}" unit="{reports>currency}"/><Text text="{reports>variant}"/><ObjectStatus text="{reports>status}" state="{path:'reports>status', formatter:'.statusState'}"/></cells></ColumnListItem></items></Table>
+          <Table class="reportTable" items="{reports>/poSpend/supplierYoY}" growing="true" noDataText="No prior-year supplier data"><headerToolbar><Toolbar><Title text="Supplier year-over-year comparison" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Supplier"/></Column><Column><Text text="Current spend"/></Column><Column><Text text="Previous year"/></Column><Column><Text text="Variance"/></Column><Column><Text text="Variance %"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>supplier}"/><Text text="{path:'reports>currentSpend', formatter:'.formatNumber'}"/><Text text="{path:'reports>previousSpend', formatter:'.formatNumber'}"/><ObjectNumber number="{path:'reports>variance', formatter:'.formatVariance'}"/><ObjectStatus text="{path:'reports>variancePercent', formatter:'.formatPercent'}" state="{= ${reports>variance} &gt; 0 ? 'Error' : 'Success'}"/></cells></ColumnListItem></items></Table>
+        </VBox>
+
+        <VBox class="reportSection" visible="{reports>/visible/poLifecycle}">
+          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://process"/><VBox><Title text="PO Lifecycle" level="H2"/><Text text="Volume, outcome and configured SLA performance for purchase orders."/></VBox></HBox>
+          <HBox class="reportCardRow" wrap="Wrap"><VBox class="reportCard reportMetricCard"><Text text="Received"/><ObjectNumber number="{reports>/poLifecycle/totalReceived}"/></VBox><VBox class="reportCard reportMetricCard"><Text text="PO created"/><ObjectNumber number="{reports>/poLifecycle/completed}" state="Success"/></VBox><VBox class="reportCard reportMetricCard"><Text text="Rejected"/><ObjectNumber number="{reports>/poLifecycle/rejected}" state="Error"/></VBox><VBox class="reportCard reportMetricCard"><Text text="SLA compliance"/><ObjectNumber number="{path:'reports>/poLifecycle/slaCompliancePercent', formatter:'.formatPercent'}"/></VBox></HBox>
+          <HBox class="reportCardRow" wrap="Wrap"><VBox class="reportCard reportWideCard"><Title text="PO type distribution and SLA" level="H3"/><List items="{reports>/poLifecycle/typeBreakdown}" class="reportList"><CustomListItem><HBox alignItems="Center" class="reportBarRow"><Text text="{reports>label}" class="reportBarLabel"/><ProgressIndicator percentValue="{= ${reports>received} / ${reports>/poLifecycle/totalReceived} * 100 }" displayValue="{reports>received}" state="Information"/><Text text="{= ${reports>withinSla} + ' within / ' + ${reports>breached} + ' breached' }" class="reportBarValue"/></HBox></CustomListItem></List></VBox><VBox class="reportCard reportCardNarrow"><Title text="SLA target" level="H3"/><Text text="General: 2 days"/><Text text="DNS: 5 days"/><Text text="FTK: 5 days"/><Text text="These targets are configurable in the reporting service." class="reportMutedText" wrapping="true"/></VBox></HBox>
+          <Table class="reportTable" items="{reports>/procurementView}" growing="true" growingThreshold="25" noDataText="No purchasing-group data"><headerToolbar><Toolbar><Title text="Purchasing group / company / contract view" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Purchasing group"/></Column><Column><Text text="Company code"/></Column><Column><Text text="Contract"/></Column><Column><Text text="PO type"/></Column><Column><Text text="Requests"/></Column><Column><Text text="Spend"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>purchasingGroup}"/><Text text="{reports>companyCode}"/><Text text="{reports>contractStatus}"/><Text text="{reports>poType}"/><Text text="{reports>requests}"/><Text text="{path:'reports>spend', formatter:'.formatNumber'}"/></cells></ColumnListItem></items></Table>
+          <Table class="reportTable" items="{reports>/poLifecycle/slaFailures}" growing="true" growingThreshold="25" noDataText="No SLA failures in this period"><headerToolbar><Toolbar><Title text="SLA failure reasons" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Request"/></Column><Column><Text text="Supplier"/></Column><Column><Text text="Status"/></Column><Column><Text text="Duration (days)"/></Column><Column><Text text="Breach (days)"/></Column><Column><Text text="Reason"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>requestId}"/><Text text="{reports>supplier}"/><Text text="{reports>status}"/><Text text="{reports>durationDays}"/><ObjectStatus text="{reports>breachDays}" state="Error"/><Text text="{reports>reason}"/></cells></ColumnListItem></items></Table>
+          <Table class="reportTable" items="{reports>/poLifecycle/divisionBreakdown}" growing="true" noDataText="No division data"><headerToolbar><Toolbar><Title text="Division-wise SLA" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Division"/></Column><Column><Text text="Requests"/></Column><Column><Text text="Within SLA"/></Column><Column><Text text="Breached"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>label}"/><Text text="{reports>received}"/><ObjectStatus text="{reports>withinSla}" state="Success"/><ObjectStatus text="{reports>breached}" state="{path:'reports>breached', formatter:'.slaState'}"/></cells></ColumnListItem></items></Table>
+        </VBox>
+
+        <VBox class="reportSection" visible="{reports>/visible/sesLifecycle}">
+          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://receipt"/><VBox><Title text="SES Lifecycle" level="H2"/><Text text="Service Entry Sheet requests with General/DNS operational views."/></VBox></HBox>
+          <HBox class="reportCardRow" wrap="Wrap"><VBox class="reportCard reportMetricCard"><Text text="Received"/><ObjectNumber number="{reports>/sesLifecycle/totalReceived}"/></VBox><VBox class="reportCard reportMetricCard"><Text text="SES created"/><ObjectNumber number="{reports>/sesLifecycle/completed}" state="Success"/></VBox><VBox class="reportCard reportMetricCard"><Text text="Rejected"/><ObjectNumber number="{reports>/sesLifecycle/rejected}" state="Error"/></VBox><VBox class="reportCard reportMetricCard"><Text text="SLA exceeded"/><ObjectNumber number="{reports>/sesLifecycle/slaBreached}" state="Error"/></VBox></HBox>
+          <Table class="reportTable" items="{reports>/sesLifecycle/monthlySummary}" noDataText="No SES transactions in this period"><headerToolbar><Toolbar><Title text="Monthly SES SLA summary" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Month"/></Column><Column><Text text="Received"/></Column><Column><Text text="Completed"/></Column><Column><Text text="Rejected"/></Column><Column><Text text="Within SLA"/></Column><Column><Text text="Breached"/></Column></columns><items><ColumnListItem><cells><Text text="{path:'reports>month', formatter:'.formatMonth'}"/><Text text="{reports>received}"/><Text text="{reports>completed}"/><Text text="{reports>rejected}"/><ObjectStatus text="{reports>withinSla}" state="Success"/><ObjectStatus text="{reports>breached}" state="{path:'reports>breached', formatter:'.slaState'}"/></cells></ColumnListItem></items></Table>
+        </VBox>
+
+        <VBox class="reportSection" visible="{reports>/visible/scm}">
+          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://workflow-tasks"/><VBox><Title text="SCM Commerce Automation" level="H2"/><Text text="A single operational view across the six master-data and supply-chain flows."/></VBox></HBox>
+          <Table class="reportTable" items="{reports>/scmFlows}" noDataText="No SCM requests in this period"><columns><Column><Text text="Flow"/></Column><Column><Text text="Received"/></Column><Column><Text text="Completed"/></Column><Column><Text text="Rejected"/></Column><Column><Text text="In progress"/></Column><Column><Text text="Within SLA"/></Column><Column><Text text="Breached"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>label}"/><Text text="{reports>totalReceived}"/><ObjectStatus text="{reports>completed}" state="Success"/><ObjectStatus text="{reports>rejected}" state="Error"/><Text text="{reports>inProgress}"/><Text text="{reports>withinSla}"/><ObjectStatus text="{reports>slaBreached}" state="{path:'reports>slaBreached', formatter:'.slaState'}"/></cells></ColumnListItem></items></Table>
+        </VBox>
+
+        <VBox class="reportSection" visible="{reports>/visible/sourceToPay}">
+          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://chain-link"/><VBox><Title text="Source-to-Pay visibility" level="H2"/><Text text="The CA slice of the end-to-end chain; external source and payment fields are reserved for integration data."/></VBox></HBox>
+          <MessageStrip text="Sourcing event, award, invoice and payment values are not currently stored in Flowmate CA. They will appear after the S/4HANA, Ariba or I2P integration is connected." type="Information" showIcon="true" class="reportInfoStrip"/>
+          <Table class="reportTable" items="{reports>/sourceToPay}" growing="true" growingThreshold="25" noDataText="No PO records in this period"><columns><Column><Text text="Vendor"/></Column><Column><Text text="PO number"/></Column><Column><Text text="PO value"/></Column><Column><Text text="SES number"/></Column><Column><Text text="SES value"/></Column><Column><Text text="Invoice value"/></Column><Column><Text text="Paid value"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>vendor}"/><Text text="{reports>poNumber}"/><ObjectNumber number="{path:'reports>poRaisedValue', formatter:'.formatNumber'}" unit="{reports>currency}"/><Text text="{reports>sesNumber}"/><Text text="{path:'reports>sesValue', formatter:'.formatNumber'}"/><Text text="—"/><Text text="—"/></cells></ColumnListItem></items></Table>
+        </VBox>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

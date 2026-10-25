@@ -197,6 +197,89 @@ const TASK_STATUS = {
   REJECTED: "REJECTED"
 };
 
+const REPORTING_REQUEST_TYPES = [
+  "MATERIAL_CODE",
+  "SERVICE_CODE",
+  "EQUIPMENT_CODE",
+  "PROJECT_CODE",
+  "MATERIAL_RESERVATION",
+  "OUTLINE_CONTRACT"
+];
+
+const REPORTING_TYPE_NAMES = {
+  MATERIAL_CODE: "Material Code",
+  SERVICE_CODE: "Service Code",
+  EQUIPMENT_CODE: "Equipment Code",
+  PROJECT_CODE: "Project Code",
+  MATERIAL_RESERVATION: "Material Reservation",
+  OUTLINE_CONTRACT: "Outline Contract"
+};
+
+const reportNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const reportDate = (value) => {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const reportDateKey = (value) => {
+  const date = reportDate(value);
+  return date ? date.toISOString().slice(0, 10) : null;
+};
+
+const reportMonthKey = (value) => {
+  const date = reportDate(value);
+  return date ? date.toISOString().slice(0, 7) : null;
+};
+
+const reportInRange = (value, start, end) => {
+  const date = reportDate(value);
+  return Boolean(date && date >= start && date <= end);
+};
+
+const reportPercent = (part, whole) => whole ? Math.round((part / whole) * 1000) / 10 : 0;
+
+const reportSlaDays = (requestType, poType) => {
+  if (requestType === "PURCHASE_ORDER") {
+    if (poType === "GENERAL" || poType === "CENTRALIZED") return 2;
+    return 5;
+  }
+  if (requestType === "SERVICE_ENTRY_SHEET") return 5;
+  return 5;
+};
+
+const reportSlaState = (request, detail, requestType) => {
+  const completed = request.status_code === REQUEST_STATUS.COMPLETED;
+  const rejected = request.status_code === REQUEST_STATUS.REJECTED;
+  const finishedAt = reportDate(request.completedAt) || (rejected ? reportDate(request.modifiedAt) : null);
+  const startedAt = reportDate(request.submittedAt) || reportDate(request.createdAt);
+  const poType = detail?.purchaseOrderType_code || "";
+  const targetDays = reportSlaDays(requestType, poType);
+  const configuredDue = reportDate(request.slaDueAt);
+  const calculatedDue = startedAt ? new Date(startedAt.getTime() + targetDays * DAY_MS) : null;
+  const due = configuredDue || calculatedDue;
+  const comparison = finishedAt || new Date();
+  const breached = Boolean(due && comparison > due);
+  return {
+    targetDays,
+    dueAt: due?.toISOString() || null,
+    breached,
+    within: !breached,
+    durationDays: startedAt ? Math.max(0, Math.round(((finishedAt || new Date()) - startedAt) / DAY_MS * 10) / 10) : 0,
+    state: completed ? "COMPLETED" : rejected ? "REJECTED" : "IN_PROGRESS"
+  };
+};
+
+const reportCount = (rows, predicate) => rows.reduce((count, row) => count + (predicate(row) ? 1 : 0), 0);
+
+const reportSortedRows = (map, valueKey = "value") => Array.from(map.entries())
+  .map(([key, value]) => ({ key, [valueKey]: Math.round(value * 100) / 100 }))
+  .sort((a, b) => b[valueKey] - a[valueKey]);
+
 // SLA days are calendar days; due dates are shown and compared in Sri Lankan time.
 const SLA_TIME_ZONE = process.env.SLA_TIME_ZONE || "Asia/Colombo";
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -336,6 +419,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getCurrentUser", this._getCurrentUser);
     this.on("getFlowmateRequestFormCatalog", this._getFlowmateRequestFormCatalog);
     this.on("getDashboardCounts", this._getDashboardCounts);
+    this.on("getReportingDashboard", this._getReportingDashboard);
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
     this.on("previewProjectCode", this._previewProjectCode);
@@ -983,6 +1067,288 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       pendingApproval,
       completedRequests
     };
+  };
+
+  _getReportingDashboard = async (req) => {
+    const now = new Date();
+    const requestedStart = reportDate(req.data.periodStart);
+    const requestedEnd = reportDate(req.data.periodEnd);
+    const start = requestedStart || new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    start.setUTCHours(0, 0, 0, 0);
+    const end = requestedEnd || new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0));
+    end.setUTCHours(23, 59, 59, 999);
+    const poTypeFilter = String(req.data.poType || "ALL").toUpperCase();
+
+    // Keep the read set deliberately narrow. Detail JSON and attachments are not part of a
+    // report and should never be transferred while a dashboard is loading.
+    const [requests, purchaseOrders, serviceSheets, requestTypes, variants] = await Promise.all([
+      SELECT.from(this.db.CARequests).columns(
+        "ID", "referenceNumber", "title", "requestType_code", "requestVariant_code",
+        "status_code", "createdAt", "modifiedAt", "submittedAt", "completedAt", "slaDueAt",
+        "currentStep"
+      ),
+      SELECT.from(this.db.PurchaseOrderDetails).columns(
+        "ID", "request_ID", "purchaseOrderType_code", "procurementCategory_code", "division",
+        "vendorCode", "companyCode", "purchasingGroup", "purchasingOrganization_ID",
+        "currency_code", "totalValue", "procurementValue", "poValueWithTaxes", "purchaseOrderNumber"
+      ),
+      SELECT.from(this.db.ServiceEntrySheetDetails).columns(
+        "ID", "request_ID", "transactionType", "sourceMode", "currency_code", "totalValue",
+        "division", "sesNumber", "purchaseOrderNo"
+      ),
+      SELECT.from(this.db.RequestTypes).columns("code", "name"),
+      SELECT.from(this.db.RequestVariants).columns("code", "name")
+    ]);
+
+    const requestTypeNames = new Map((requestTypes || []).map((row) => [row.code, row.name]));
+    const variantNames = new Map((variants || []).map((row) => [row.code, row.name]));
+    const poByRequest = new Map((purchaseOrders || []).map((row) => [row.request_ID, row]));
+    const sesByRequest = new Map((serviceSheets || []).map((row) => [row.request_ID, row]));
+    const allRows = (requests || []).filter((row) => reportInRange(row.submittedAt || row.createdAt, start, end));
+    const previousStart = new Date(start);
+    previousStart.setUTCFullYear(previousStart.getUTCFullYear() - 1);
+    const previousEnd = new Date(end);
+    previousEnd.setUTCFullYear(previousEnd.getUTCFullYear() - 1);
+    const previousRows = (requests || []).filter((row) => reportInRange(row.submittedAt || row.createdAt, previousStart, previousEnd));
+
+    const statusLabel = (status) => ({
+      DRAFT: "Draft",
+      SUBMITTED: "Submitted",
+      IN_PROGRESS: "In Progress",
+      SENT_BACK: "Sent Back",
+      COMPLETED: "Completed",
+      REJECTED: "Rejected"
+    }[status] || status || "Unknown");
+
+    const lifecycleFor = (rows, detailMap, typeCode) => {
+      const enriched = rows.filter((row) => row.requestType_code === typeCode).map((row) => ({
+        row,
+        detail: detailMap.get(row.ID) || {},
+        sla: reportSlaState(row, detailMap.get(row.ID) || {}, typeCode)
+      }));
+      const statusMap = new Map();
+      const typeMap = new Map();
+      const monthMap = new Map();
+      const divisionMap = new Map();
+      const failures = [];
+      enriched.forEach(({ row, detail, sla }) => {
+        const label = statusLabel(row.status_code);
+        statusMap.set(label, (statusMap.get(label) || 0) + 1);
+        const type = detail.purchaseOrderType_code || detail.transactionType || "Unclassified";
+        const typeSummary = typeMap.get(type) || {
+          label: type, received: 0, completed: 0, rejected: 0, inProgress: 0, withinSla: 0, breached: 0
+        };
+        typeSummary.received += 1;
+        if (row.status_code === REQUEST_STATUS.COMPLETED) typeSummary.completed += 1;
+        else if (row.status_code === REQUEST_STATUS.REJECTED) typeSummary.rejected += 1;
+        else typeSummary.inProgress += 1;
+        if (sla.breached) typeSummary.breached += 1;
+        else typeSummary.withinSla += 1;
+        typeMap.set(type, typeSummary);
+        const division = detail.division || "Unassigned";
+        const divisionSummary = divisionMap.get(division) || { label: division, received: 0, withinSla: 0, breached: 0 };
+        divisionSummary.received += 1;
+        if (sla.breached) divisionSummary.breached += 1;
+        else divisionSummary.withinSla += 1;
+        divisionMap.set(division, divisionSummary);
+        if (sla.breached) failures.push({
+          requestId: row.referenceNumber || row.ID,
+          supplier: detail.vendorCode || "—",
+          status: statusLabel(row.status_code),
+          durationDays: sla.durationDays,
+          breachDays: Math.max(0, Math.round((sla.durationDays - sla.targetDays) * 10) / 10),
+          reason: row.status_code === REQUEST_STATUS.REJECTED
+            ? "Rejected after the configured SLA"
+            : row.status_code === REQUEST_STATUS.COMPLETED
+              ? "Completed after the configured SLA"
+              : "Open past the configured SLA"
+        });
+        const month = reportMonthKey(row.submittedAt || row.createdAt);
+        if (month) {
+          const current = monthMap.get(month) || { month, received: 0, completed: 0, rejected: 0, withinSla: 0, breached: 0 };
+          current.received += 1;
+          if (row.status_code === REQUEST_STATUS.COMPLETED) current.completed += 1;
+          if (row.status_code === REQUEST_STATUS.REJECTED) current.rejected += 1;
+          if (sla.breached) current.breached += 1;
+          else current.withinSla += 1;
+          monthMap.set(month, current);
+        }
+      });
+      const completed = reportCount(enriched, ({ row }) => row.status_code === REQUEST_STATUS.COMPLETED);
+      const rejected = reportCount(enriched, ({ row }) => row.status_code === REQUEST_STATUS.REJECTED);
+      const inProgress = enriched.length - completed - rejected;
+      const breached = reportCount(enriched, ({ sla }) => sla.breached);
+      return {
+        totalReceived: enriched.length,
+        completed,
+        rejected,
+        inProgress,
+        withinSla: enriched.length - breached,
+        slaBreached: breached,
+        slaCompliancePercent: reportPercent(enriched.length - breached, enriched.length),
+        statusBreakdown: Array.from(statusMap.entries()).map(([label, count]) => ({ label, count })),
+        typeBreakdown: Array.from(typeMap.values()),
+        divisionBreakdown: Array.from(divisionMap.values()),
+        slaFailures: failures.sort((a, b) => b.breachDays - a.breachDays).slice(0, 100),
+        monthlySummary: Array.from(monthMap.values()).sort((a, b) => a.month.localeCompare(b.month)),
+        configuredSlaDays: typeCode === "PURCHASE_ORDER"
+          ? { GENERAL: 2, DNS: 5, FTK: 5 }
+          : { GENERAL: 5, DNS: 5 }
+      };
+    };
+
+    const poRows = allRows.filter((row) => row.requestType_code === "PURCHASE_ORDER"
+      && (poTypeFilter === "ALL" || poByRequest.get(row.ID)?.purchaseOrderType_code === poTypeFilter));
+    const previousPoRows = previousRows.filter((row) => row.requestType_code === "PURCHASE_ORDER"
+      && (poTypeFilter === "ALL" || poByRequest.get(row.ID)?.purchaseOrderType_code === poTypeFilter));
+    const spendFor = (row) => {
+      const detail = poByRequest.get(row.ID) || {};
+      return reportNumber(detail.procurementValue ?? detail.totalValue);
+    };
+    const currentSpend = poRows.reduce((sum, row) => sum + spendFor(row), 0);
+    const previousSpend = previousPoRows.reduce((sum, row) => sum + spendFor(row), 0);
+    const supplierSpend = new Map();
+    const previousSupplierSpend = new Map();
+    const categorySpend = new Map();
+    const monthlySpend = new Map();
+    const supplierCurrencies = new Map();
+    poRows.forEach((row) => {
+      const detail = poByRequest.get(row.ID) || {};
+      const supplier = detail.vendorCode || "Unassigned supplier";
+      const amount = spendFor(row);
+      supplierSpend.set(supplier, (supplierSpend.get(supplier) || 0) + amount);
+      supplierCurrencies.set(supplier, detail.currency_code || "");
+      const category = String(detail.procurementCategory_code || "").toUpperCase().startsWith("CAPEX") ? "Capex" : "Opex";
+      categorySpend.set(category, (categorySpend.get(category) || 0) + amount);
+      const month = reportMonthKey(row.submittedAt || row.createdAt);
+      if (month) monthlySpend.set(month, (monthlySpend.get(month) || 0) + amount);
+    });
+    previousPoRows.forEach((row) => {
+      const detail = poByRequest.get(row.ID) || {};
+      const supplier = detail.vendorCode || "Unassigned supplier";
+      previousSupplierSpend.set(supplier, (previousSupplierSpend.get(supplier) || 0) + spendFor(row));
+    });
+    const rankedSuppliers = reportSortedRows(supplierSpend).map((entry) => ({
+      supplier: entry.key,
+      spend: entry.value,
+      currency: supplierCurrencies.get(entry.key) || "",
+      sharePercent: reportPercent(entry.value, currentSpend)
+    }));
+    const supplierYoY = rankedSuppliers.slice(0, 10).map((entry) => {
+      const previous = previousSupplierSpend.get(entry.supplier) || 0;
+      return {
+        supplier: entry.supplier,
+        currentSpend: entry.spend,
+        previousSpend: Math.round(previous * 100) / 100,
+        variance: Math.round((entry.spend - previous) * 100) / 100,
+        variancePercent: reportPercent(entry.spend - previous, previous)
+      };
+    });
+    const poLifecycle = lifecycleFor(poRows, poByRequest, "PURCHASE_ORDER");
+    const sesLifecycle = lifecycleFor(allRows, sesByRequest, "SERVICE_ENTRY_SHEET");
+    const procurementViewMap = new Map();
+    poRows.forEach((row) => {
+      const detail = poByRequest.get(row.ID) || {};
+      const key = [detail.purchasingGroup || "Unassigned", detail.companyCode || "Unassigned", detail.contractBased ? "Contracted" : "Non-contracted"];
+      const mapKey = key.join("|");
+      const current = procurementViewMap.get(mapKey) || {
+        purchasingGroup: key[0], companyCode: key[1], contractStatus: key[2], poType: detail.purchaseOrderType_code || "Unclassified",
+        requests: 0, spend: 0
+      };
+      current.requests += 1;
+      current.spend += spendFor(row);
+      procurementViewMap.set(mapKey, current);
+    });
+
+    const scmFlows = REPORTING_REQUEST_TYPES.map((typeCode) => {
+      const flowRows = allRows.filter((row) => row.requestType_code === typeCode);
+      const breached = reportCount(flowRows, (row) => reportSlaState(row, {}, typeCode).breached);
+      return {
+        code: typeCode,
+        label: REPORTING_TYPE_NAMES[typeCode] || requestTypeNames.get(typeCode) || typeCode,
+        totalReceived: flowRows.length,
+        completed: reportCount(flowRows, (row) => row.status_code === REQUEST_STATUS.COMPLETED),
+        rejected: reportCount(flowRows, (row) => row.status_code === REQUEST_STATUS.REJECTED),
+        inProgress: reportCount(flowRows, (row) => ![REQUEST_STATUS.COMPLETED, REQUEST_STATUS.REJECTED].includes(row.status_code)),
+        withinSla: flowRows.length - breached,
+        slaBreached: breached
+      };
+    });
+
+    const recentTransactions = poRows
+      .slice()
+      .sort((a, b) => String(b.submittedAt || b.createdAt).localeCompare(String(a.submittedAt || a.createdAt)))
+      .slice(0, 100)
+      .map((row) => {
+        const detail = poByRequest.get(row.ID) || {};
+        return {
+          requestId: row.referenceNumber || row.ID,
+          requestDate: reportDateKey(row.submittedAt || row.createdAt),
+          supplier: detail.vendorCode || "Unassigned supplier",
+          poNumber: detail.purchaseOrderNumber || "—",
+          amount: spendFor(row),
+          currency: detail.currency_code || "—",
+          purchasingGroup: detail.purchasingGroup || "—",
+          division: detail.division || "—",
+          category: String(detail.procurementCategory_code || "").toUpperCase().startsWith("CAPEX") ? "Capex" : "Opex",
+          status: statusLabel(row.status_code),
+          variant: variantNames.get(row.requestVariant_code) || row.requestVariant_code || "—"
+        };
+      });
+
+    const sourceToPay = poRows.slice(0, 100).map((row) => {
+      const po = poByRequest.get(row.ID) || {};
+      const ses = sesByRequest.get(row.ID) || {};
+      return {
+        vendor: po.vendorCode || "—",
+        sourcingEventDate: null,
+        sourcingEventNumber: null,
+        awardValue: null,
+        currency: po.currency_code || "—",
+        poNumber: po.purchaseOrderNumber || "—",
+        poRaisedValue: spendFor(row),
+        sesNumber: ses.sesNumber || "—",
+        sesValue: reportNumber(ses.totalValue) || null,
+        invoiceNumber: null,
+        invoicedValue: null,
+        paidValue: null
+      };
+    });
+
+    return JSON.stringify({
+      period: { start: reportDateKey(start), end: reportDateKey(end), poType: poTypeFilter },
+      summary: {
+        totalRequests: allRows.length,
+        completed: reportCount(allRows, (row) => row.status_code === REQUEST_STATUS.COMPLETED),
+        rejected: reportCount(allRows, (row) => row.status_code === REQUEST_STATUS.REJECTED),
+        inProgress: reportCount(allRows, (row) => ![REQUEST_STATUS.COMPLETED, REQUEST_STATUS.REJECTED].includes(row.status_code)),
+        slaBreached: reportCount(allRows, (row) => reportSlaState(row, poByRequest.get(row.ID) || sesByRequest.get(row.ID) || {}, row.requestType_code).breached)
+      },
+      poSpend: {
+        totalSpend: Math.round(currentSpend * 100) / 100,
+        previousYearSpend: Math.round(previousSpend * 100) / 100,
+        yoyVariance: Math.round((currentSpend - previousSpend) * 100) / 100,
+        yoyVariancePercent: reportPercent(currentSpend - previousSpend, previousSpend),
+        activeSuppliers: new Set(poRows.map((row) => poByRequest.get(row.ID)?.vendorCode).filter(Boolean)).size,
+        reportingCurrency: "Source currencies",
+        conversionNote: "Spend is shown in the source currency. A reporting-currency rate table is required for a cross-currency total.",
+        topSuppliers: rankedSuppliers.slice(0, 10),
+        supplierYoY,
+        mappingNote: "Business Unit and CXO require a maintained Purchasing Group mapping table; CA currently stores the purchasing group but not that mapping.",
+        categorySplit: Array.from(categorySpend.entries()).map(([label, value]) => ({ label, value: Math.round(value * 100) / 100, sharePercent: reportPercent(value, currentSpend) })),
+        monthlySpend: Array.from(monthlySpend.entries()).map(([month, value]) => ({ month, value: Math.round(value * 100) / 100 })).sort((a, b) => a.month.localeCompare(b.month))
+      },
+      poLifecycle,
+      procurementView: Array.from(procurementViewMap.values()).sort((a, b) => b.requests - a.requests),
+      sesLifecycle,
+      scmFlows,
+      recentTransactions,
+      sourceToPay,
+      sourceToPayLimitations: [
+        "Sourcing event, award, invoice and payment fields are not stored in Flowmate CA.",
+        "These columns remain blank until an S/4HANA, Ariba or I2P integration supplies them."
+      ]
+    });
   };
 
   _createRequest = async (req) => {
