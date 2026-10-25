@@ -143,8 +143,13 @@
           "target": "requests"
         },
         {
+          "name": "drafts",
+          "pattern": "drafts",
+          "target": "drafts"
+        },
+        {
           "name": "requestCreate",
-          "pattern": "requests/create",
+          "pattern": "requests/create:?query:",
           "target": "requestCreate"
         },
         {
@@ -189,6 +194,10 @@
         "requests": {
           "id": "Requests",
           "name": "Requests"
+        },
+        "drafts": {
+          "id": "Drafts",
+          "name": "Drafts"
         },
         "requestCreate": {
           "id": "RequestCreate",

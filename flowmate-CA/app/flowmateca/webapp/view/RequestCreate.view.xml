@@ -9,6 +9,7 @@
   <Page class="caPage" title="{i18n>createRequest}" showNavButton="true" navButtonPress=".onCancel">
     <headerContent>
       <Button text="{i18n>cancel}" type="Transparent" press=".onCancel"/>
+      <Button text="Save Draft" icon="sap-icon://save" type="Transparent" press=".onSaveDraft" visible="false"/>
       <Button text="{i18n>submit}" icon="sap-icon://paper-plane" type="Emphasized" press=".onSubmit"/>
     </headerContent>
     <content>
@@ -17,6 +18,12 @@
           text="Fields are shown based on the selected Request Type. The Process Variant controls the guided workflow that will be created."
           type="Information"
           showIcon="true"
+          class="sapUiSmallMarginBottom"/>
+        <MessageStrip
+          text="Drafts save form fields and table rows without submitting. Selected files must be reattached when you resume."
+          type="Information"
+          showIcon="true"
+          visible="false"
           class="sapUiSmallMarginBottom"/>
 
         <Panel headerText="Request Classification" expandable="false" class="caFormSection">
@@ -114,6 +121,18 @@
           class="caFormSection">
           <content>
             <VBox id="dynamicFormHost"/>
+            <Button
+              text="Review Payment Run / Reattach Files"
+              icon="sap-icon://attachment"
+              press=".onReopenPaymentRun"
+              visible="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' &amp;&amp; ${form>/details/paymentRun} === true }"
+              class="sapUiSmallMarginBottom"/>
+            <Button
+              text="Review Flowmate SES / Reattach Files"
+              icon="sap-icon://attachment"
+              press=".onReopenFlowmateSes"
+              visible="{= ${form>/requestTypeCode} === 'SERVICE_ENTRY_SHEET' &amp;&amp; ${form>/details/flowmateSesRequest} === true }"
+              class="sapUiSmallMarginBottom"/>
             <Button
               text="Edit SES Successor Details"
               icon="sap-icon://edit"
@@ -215,6 +234,7 @@
       <OverflowToolbar>
         <ToolbarSpacer/>
         <Button text="{i18n>cancel}" press=".onCancel"/>
+        <Button text="Save Draft" icon="sap-icon://save" press=".onSaveDraft" visible="false"/>
         <Button text="{i18n>submit}" icon="sap-icon://paper-plane" type="Emphasized" press=".onSubmit"/>
       </OverflowToolbar>
     </footer>

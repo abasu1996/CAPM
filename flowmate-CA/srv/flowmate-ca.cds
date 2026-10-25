@@ -7,6 +7,7 @@ service FlowmateCAService {
   type DashboardCounts {
     allRequests     : Integer;
     myRequests       : Integer;
+    myDrafts         : Integer;
     myOpenTasks      : Integer;
     myTeamTasks      : Integer;
     sentBackRequests : Integer;
@@ -26,6 +27,7 @@ service FlowmateCAService {
   }
 
   type NewRequestInput {
+    draftId            : UUID;
     requestTypeCode    : String(40);
     requestVariantCode : String(40);
     title              : String(255);
@@ -41,6 +43,7 @@ service FlowmateCAService {
     }
 
   type BulkRequestInput {
+    draftId            : UUID;
     requestTypeCode    : String(40);
     requestVariantCode : String(40);
     processorTeamCode  : String(40);
@@ -85,6 +88,7 @@ service FlowmateCAService {
   entity Requests as projection on db.CARequests;
   entity MyRequests as projection on db.CARequests;
   entity RequestQueue as projection on db.CARequests;
+  @readonly entity Drafts as projection on db.CARequestDrafts;
 
   @cds.redirection.target
   entity Tasks as projection on db.CATasks;
@@ -133,6 +137,9 @@ service FlowmateCAService {
 
   @description: 'Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and input.requesterUser_ID identifying an active shared user. No client-to-user environment mapping is required. Human users use their active signed-in identity. Workflow initialization runs during creation.'
   action createRequest(input: NewRequestInput) returns Requests;
+  @description: 'Save an incomplete CA request form without validation, workflow tasks, LoA approval or integrations.'
+  action saveDraft(draftId: UUID, formData: LargeString) returns { ID: UUID; };
+  action deleteDraft(draftId: UUID) returns Boolean;
   // Project Code (New / Modification), Single line: the Project ID / Category / Description the
   // server would generate for these details (JSON in, JSON out). Nothing is saved.
   function previewProjectCode(details: LargeString) returns LargeString;

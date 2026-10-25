@@ -76,7 +76,7 @@ test("search is an OR group combined with the other filters", () => {
 
 test("dashboard counts include requests created or owned by the current user or active delegators", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
-  service.db = { CARequests: "requests", CATasks: "tasks" };
+  service.db = { CARequests: "requests", CARequestDrafts: "drafts", CATasks: "tasks" };
   service._ensureCurrentUser = async () => ({ ID: "alice" });
   service._effectiveTaskUserIds = async () => ["alice", "bob"];
   service._teamIdsOf = async () => [];
@@ -86,7 +86,7 @@ test("dashboard counts include requests created or owned by the current user or 
     { requester_ID: "integration", owner_ID: "alice", ownerTeam_ID: "team-c", status_code: "COMPLETED" },
     { requester_ID: "bob", ownerTeam_ID: null, status_code: "DRAFT" }
   ];
-  service._count = async (entity, where) => entity === "tasks" ? 0 : requests.filter((row) => {
+  service._count = async (entity, where) => entity === "tasks" || entity === "drafts" ? 0 : requests.filter((row) => {
     if (!Array.isArray(where)) return true;
     const ids = where[0].xpr[2].list.map((item) => item.val);
     return (ids.includes(row.requester_ID) || ids.includes(row.owner_ID))
@@ -95,6 +95,7 @@ test("dashboard counts include requests created or owned by the current user or 
   const counts = await service._getDashboardCounts({ user: { is: () => false } });
   assert.equal(counts.allRequests, 4);
   assert.equal(counts.myRequests, 4);
+  assert.equal(counts.myDrafts, 0);
   assert.equal(counts.rejectedRequests, 1);
   assert.equal(counts.completedRequests, 1);
 });

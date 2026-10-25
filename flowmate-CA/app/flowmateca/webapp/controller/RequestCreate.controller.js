@@ -309,6 +309,7 @@ sap.ui.define([
     },
 
     _onRouteMatched: async function (event) {
+      this._draftId = null;
       this.getView().getModel("form").setData(this._emptyForm());
       this.getView().getModel("files").setData({ items: [] });
       this.getView().getModel("paymentRunFiles").setData({ items: [] });
@@ -333,13 +334,57 @@ sap.ui.define([
       ]);
       
       const query = event.getParameter("arguments")["?query"] || {};
-      if (query.requestType) {
+      if (query.draftId) {
+        try {
+          const result = await this.request(`Drafts(${query.draftId})?$select=ID,formData`);
+          const saved = JSON.parse(result.formData);
+          this._draftId = result.ID;
+          const current = this.getView().getModel("form");
+          // Saved browser values never determine the authenticated requester.
+          saved.requesterId = current.getProperty("/requesterId");
+          saved.requesterName = current.getProperty("/requesterName");
+          saved.requesterEmail = current.getProperty("/requesterEmail");
+          saved.sesDraft = saved.sesDraft || this._emptySesDraft();
+          saved.sesDraft.files = [];
+          current.setData(Object.assign(this._emptyForm(), saved));
+          this._filterVariants(saved.requestTypeCode);
+          this._paymentRunSaved = Boolean(saved.details && (saved.details.paymentRunDetails || saved.details.flowmateSesRequestDetails));
+        } catch (error) {
+          this.showError(error);
+          this.navTo("drafts", {}, true);
+          return;
+        }
+      } else if (query.requestType) {
         this.getView().getModel("form").setProperty("/requestTypeCode", query.requestType);
         this._filterVariants(query.requestType);
       }
-      this._renderDynamicForm();
+      await this._renderDynamicForm();
       this._renderItemsTable();
-      this._refreshTitlePreview();
+      if (!this._draftId) this._refreshTitlePreview();
+      if (this._draftId) {
+        // A stored file name is not a File object and cannot be uploaded.
+        (this._fieldControls || []).filter((entry) => entry.definition.type === "file")
+          .forEach((entry) => this.getView().getModel("form").setProperty(`/details/${entry.definition.name}`, ""));
+      }
+    },
+
+    onSaveDraft: async function () {
+      const saved = JSON.parse(JSON.stringify(this.getView().getModel("form").getData()));
+      if (saved.sesDraft) saved.sesDraft.files = [];
+      this.setBusy(true);
+      try {
+        const result = await this.request("saveDraft", {
+          method: "POST",
+          body: { draftId: this._draftId, formData: JSON.stringify(saved) }
+        });
+        this._draftId = result.ID;
+        this.showSuccess("Draft saved. Reattach selected files when you resume.");
+        this.navTo("drafts");
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        this.setBusy(false);
+      }
     },
     onProcessorTeamChange: function (event) {
 
@@ -499,6 +544,7 @@ sap.ui.define([
           method: "POST",
           body: {
             input: {
+              draftId: this._draftId,
               requestTypeCode: form.requestTypeCode,
               requestVariantCode: form.requestVariantCode,
               processorTeamCode: form.processorTeamCode,
@@ -1524,7 +1570,10 @@ sap.ui.define([
       }
       try {
         await this._loadFlowmateRequestFormCatalog();
-        this.getView().getModel("paymentRun").setData(this._paymentRunContext());
+        const previous = formModel.getProperty(`/details/${config.detailsField}`);
+        let saved = null;
+        try { saved = previous ? JSON.parse(previous) : null; } catch (_error) { saved = null; }
+        this.getView().getModel("paymentRun").setData(Object.assign(this._paymentRunContext(), saved || {}));
         const paymentRun = this.getView().getModel("paymentRun");
         const catalog = this.getView().getModel("catalog");
         const subtypes = catalog.getProperty("/flowmateProcessSubTypes") || [];
@@ -1532,7 +1581,7 @@ sap.ui.define([
           return entry.processType_code === paymentRun.getProperty("/processType_code");
         }));
         this._renderPaymentRunDialogForm();
-        this._paymentRunSaved = false;
+        this._paymentRunSaved = Boolean(saved);
         this.byId("paymentRunDialog").open();
       } catch (error) {
         formModel.setProperty(`/details/${config.flag}`, false);
@@ -1546,6 +1595,14 @@ sap.ui.define([
 
     onFlowmateServiceEntrySheetSelect: async function (event) {
       return this._openFlowmateIntegrationDialog("serviceEntrySheet", event.getParameter("selected"));
+    },
+
+    onReopenPaymentRun: function () {
+      return this._openFlowmateIntegrationDialog("paymentRun", true);
+    },
+
+    onReopenFlowmateSes: function () {
+      return this._openFlowmateIntegrationDialog("serviceEntrySheet", true);
     },
 
     onPaymentRunDialogSave: function () {
@@ -2008,6 +2065,10 @@ sap.ui.define([
       }
       const paymentRunSelected = Boolean(form.details && form.details.paymentRun);
       const serviceEntrySheetSelected = Boolean(form.details && form.details.flowmateSesRequest);
+      if ((paymentRunSelected || serviceEntrySheetSelected) && !this._paymentRunFiles.length) {
+        MessageBox.warning("Select the Flowmate integration attachment again before submitting this request.");
+        return;
+      }
       if (paymentRunSelected && !form.details.paymentRunDetails) {
         MessageBox.warning("Save the Payment Run details before submitting the purchase order.");
         return;
@@ -2136,6 +2197,7 @@ sap.ui.define([
           method: "POST",
           body: {
             input: {
+              draftId: this._draftId,
               requestTypeCode: form.requestTypeCode,
               requestVariantCode: form.requestVariantCode,
               title: form.title.trim(),
@@ -2301,6 +2363,7 @@ sap.ui.define([
           method: "POST",
           body: {
             input: {
+              draftId: this._draftId,
               requestTypeCode: form.requestTypeCode,
               requestVariantCode: form.requestVariantCode,
               processorTeamCode: form.processorTeamCode,

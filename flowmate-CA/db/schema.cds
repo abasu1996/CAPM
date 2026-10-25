@@ -116,6 +116,17 @@ entity CARequests : cuid, managed {
                          on serviceEntrySheet.request = $self;
 }
 
+// Incomplete forms live outside CARequests: saving a draft must not allocate a
+// reference number, initialize workflow tasks, or start downstream integrations.
+entity CARequestDrafts : cuid, managed {
+  creator_ID         : UUID not null;
+  creatorName        : String(160);
+  requestTypeCode    : String(40);
+  requestVariantCode : String(40);
+  title              : String(255);
+  formData           : LargeString not null;
+}
+
 entity RequestStepInstances : cuid, managed {
   request             : Association to CARequests not null;
   config              : Association to WorkflowStepConfigs;

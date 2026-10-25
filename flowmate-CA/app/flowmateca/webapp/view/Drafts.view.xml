@@ -1,0 +1,35 @@
+<mvc:View controllerName="flowmateca.controller.Drafts" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">
+  <Page class="caPage" title="Draft Requests" showNavButton="true" navButtonPress=".onNavHome">
+    <headerContent>
+      <Button text="New Request" icon="sap-icon://add" type="Emphasized" press=".onCreate"/>
+      <Button icon="sap-icon://refresh" tooltip="Refresh" press=".onRefresh"/>
+    </headerContent>
+    <content>
+      <VBox class="sapUiResponsiveContentPadding">
+        <MessageStrip text="Drafts are private to their creator and CA administrators. They have no workflow tasks or integrations until submitted." type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+        <Table items="{drafts>/items}" growing="true" itemPress=".onOpen" noDataText="No saved drafts">
+          <columns>
+            <Column><Text text="Draft"/></Column>
+            <Column width="12rem"><Text text="Request Type"/></Column>
+            <Column width="12rem"><Text text="Process Variant"/></Column>
+            <Column width="12rem"><Text text="Creator"/></Column>
+            <Column width="12rem"><Text text="Last Saved"/></Column>
+            <Column width="7rem"><Text text="Actions"/></Column>
+          </columns>
+          <items>
+            <ColumnListItem type="Navigation">
+              <cells>
+                <Text text="{drafts>title}"/>
+                <Text text="{drafts>requestTypeCode}"/>
+                <Text text="{drafts>requestVariantCode}"/>
+                <Text text="{drafts>creatorName}"/>
+                <Text text="{path: 'drafts>modifiedAt', formatter: '.formatDateTimeShort'}"/>
+                <Button icon="sap-icon://delete" type="Transparent" tooltip="Delete draft" press=".onDelete"/>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

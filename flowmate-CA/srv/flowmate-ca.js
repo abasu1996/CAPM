@@ -2,7 +2,7 @@ const cds = require("@sap/cds");
 const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails } = require("./lib/po-integration");
 const { sendPoNumbersToWorkhub } = require("./lib/workhub");
-const { SELECT, INSERT, UPDATE } = cds.ql;
+const { SELECT, INSERT, UPDATE, DELETE } = cds.ql;
 // Only the server's completion path can mark a request as an automatic handoff.
 const INTERNAL_FLOWMATE_HANDOFF = Symbol("internalFlowmateHandoff");
 
@@ -414,6 +414,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     });
 
     this.before("READ", "MyRequests", this._filterMyRequests);
+    this.before("READ", "Drafts", this._filterDrafts);
     this.before("READ", "MyTasks", this._filterMyTasks);
     this.before("READ", "MyTeamTasks", this._filterMyTeamTasks);
     this.before("UPDATE", ["Requests", "MyRequests", "RequestQueue"], this._protectRequestAssignment);
@@ -425,6 +426,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getReportingDashboard", this._getReportingDashboard);
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
+    this.on("saveDraft", this._saveDraft);
+    this.on("deleteDraft", this._deleteDraft);
     this.on("previewProjectCode", this._previewProjectCode);
     this.on("previewRequestTitle", this._previewRequestTitle);
     this.on("slaPreview", this._slaPreview);
@@ -971,6 +974,68 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     req.query.where(this._myRequestWhere(effectiveUserIds));
   };
 
+  _filterDrafts = async (req) => {
+    const user = await this._ensureCurrentUser(req);
+    if (!req.user.is("CAAdmin")) {
+      req.query.where({ creator_ID: user.ID });
+    }
+  };
+
+  async _accessibleDraft(req, tx, draftId, user) {
+    if (!draftId) return req.reject(400, "Select a draft");
+    const draft = await tx.run(SELECT.one.from(this.db.CARequestDrafts).where({ ID: draftId }));
+    if (!draft || (draft.creator_ID !== user.ID && !req.user.is("CAAdmin"))) {
+      return req.reject(404, "Draft not found");
+    }
+    return draft;
+  }
+
+  _saveDraft = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req);
+    const raw = req.data.formData;
+    if (typeof raw !== "string" || Buffer.byteLength(raw, "utf8") > 2_000_000) {
+      return req.reject(400, "The draft form must be JSON and no larger than 2 MB");
+    }
+    let form;
+    try { form = JSON.parse(raw); } catch (_error) {
+      return req.reject(400, "The draft form contains invalid JSON");
+    }
+    if (!form || typeof form !== "object" || Array.isArray(form)) {
+      return req.reject(400, "The draft form must be a JSON object");
+    }
+    const values = {
+      requestTypeCode: String(form.requestTypeCode || "").slice(0, 40),
+      requestVariantCode: String(form.requestVariantCode || "").slice(0, 40),
+      title: String(form.title || form.requestVariantCode || form.requestTypeCode || "Untitled draft").slice(0, 255),
+      formData: raw
+    };
+    if (req.data.draftId) {
+      const draft = await this._accessibleDraft(req, tx, req.data.draftId, user);
+      await tx.run(UPDATE(this.db.CARequestDrafts).set(values).where({ ID: draft.ID }));
+      return { ID: draft.ID };
+    }
+    const ID = cds.utils.uuid();
+    await tx.run(INSERT.into(this.db.CARequestDrafts).entries({
+      ID, creator_ID: user.ID, creatorName: user.displayName, ...values
+    }));
+    return { ID };
+  };
+
+  _deleteDraft = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req);
+    const draft = await this._accessibleDraft(req, tx, req.data.draftId, user);
+    await tx.run(DELETE.from(this.db.CARequestDrafts).where({ ID: draft.ID }));
+    return true;
+  };
+
+  async _consumeDraft(req, tx, draftId, user) {
+    if (!draftId) return;
+    const draft = await this._accessibleDraft(req, tx, draftId, user);
+    await tx.run(DELETE.from(this.db.CARequestDrafts).where({ ID: draft.ID }));
+  }
+
   _myRequestWhere(ids, status) {
     const list = { list: ids.map((val) => ({ val })) };
     const where = [{ xpr: [{ ref: ["requester_ID"] }, "in", list, "or", { ref: ["owner_ID"] }, "in", list] }];
@@ -1031,6 +1096,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const [
       allRequests,
       myRequests,
+      myDrafts,
       myOpenTasks,
       sentBackRequests,
       rejectedRequests,
@@ -1039,6 +1105,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     ] = await Promise.all([
       this._count(this.db.CARequests, {}),
       this._count(this.db.CARequests, requestedBy),
+      this._count(this.db.CARequestDrafts, isAdmin ? {} : { creator_ID: user.ID }),
       this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }),
       this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.SENT_BACK)),
       this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED)),
@@ -1064,6 +1131,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return {
       allRequests,
       myRequests,
+      myDrafts,
       myOpenTasks,
       myTeamTasks,
       sentBackRequests,
@@ -1362,6 +1430,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const user = integration
       ? await this._getPORequester(req, integration.userId)
       : await this._ensureCurrentUser(req, tx);
+    if (integration && input.draftId) {
+      return req.reject(403, "Technical clients cannot submit browser drafts");
+    }
+    if (input.draftId) {
+      await this._accessibleDraft(req, tx, input.draftId, user);
+    }
     if (!integration && input.requesterUser_ID
       && String(input.requesterUser_ID).toLowerCase() !== String(user.ID).toLowerCase()) {
       return req.reject(403, "Browser requests must use the signed-in user as requester");
@@ -1404,6 +1478,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       input,
       integration
     });
+
+    await this._consumeDraft(req, tx, input.draftId, user);
 
     return tx.run(SELECT.one.from(this.db.CARequests).where({ ID: requestId }));
   };
@@ -1520,6 +1596,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const input = req.data.input || {};
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req, tx);
+    if (input.draftId) {
+      await this._accessibleDraft(req, tx, input.draftId, user);
+    }
 
     let rows;
     try {
@@ -1595,6 +1674,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         return req.reject(400, `Row ${index + 1}: ${error.message}`);
       }
     }
+
+    await this._consumeDraft(req, tx, input.draftId, user);
 
     return {
       created: referenceNumbers.length,

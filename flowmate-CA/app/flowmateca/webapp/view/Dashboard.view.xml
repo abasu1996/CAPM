@@ -59,6 +59,13 @@
               </TileContent>
             </tileContent>
           </GenericTile>
+          <GenericTile class="caTile caTileIndigo" header="Draft Requests" subheader="Saved forms awaiting submission" press=".onDrafts" visible="false">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{dashboard>/myDrafts}" icon="sap-icon://save" valueColor="Neutral"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
           <GenericTile class="caTile caTileTeal" header="{i18n>myTasks}" subheader="Tasks assigned to you" press=".onMyTasks">
             <tileContent>
               <TileContent>

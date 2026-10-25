@@ -9,6 +9,7 @@ sap.ui.define([
       this.getView().setModel(new ListModel({
         allRequests: 0,
         myRequests: 0,
+        myDrafts: 0,
         myOpenTasks: 0,
         myTeamTasks: 0,
         sentBackRequests: 0,
@@ -57,6 +58,10 @@ sap.ui.define([
           mode: "mine"
         }
       });
+    },
+
+    onDrafts: function () {
+      this.navTo("drafts");
     },
 
     onAllRequests: function () {
