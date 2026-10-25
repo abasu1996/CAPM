@@ -21,7 +21,8 @@ sap.ui.define([
 ], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, SelectDialog, StandardListItem, Text, Item, Sorter, Filter, FilterOperator, JSONModel, ComboBox,
     ListItem, Label, Input) => {
     "use strict";
-
+    const GFA_CONFIRMATION_STEP_NO = 2;
+    const PAYMENT_COMPLETION_STEP_NO = 6;    
     const MAX_ATTACHMENT_SIZE_MB = 400;
     const MAX_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
     const DEMAND_TASK_MODELS = {
@@ -111,12 +112,22 @@ sap.ui.define([
                  showBudgetCheck: false
             }), "viewDemandTasks");
             this.getView().setModel(new JSONModel(this._createEmptyDemandAssignee()), "budgetCheck");
+            this.getView().setModel(new JSONModel({
+                currentUserId: "",
+                canEditIvArchivalUrl: false,
+                canEditRevisedDueDate: false
+            }), "requestAccess");
+
+            this.getView().setModel(new JSONModel({ url: "" }), "ivArchivalEdit");
+            this.getView().setModel(new JSONModel({ date: "" }), "revisedDueDateEdit");
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
+            this.getRouter().getRoute("RouteRequestDetail").attachPatternMatched(this.onRouteMatched, this);
         },
 
         async onRouteMatched(oEvent) {
-            const oQuery = oEvent.getParameter("arguments")["?query"];
-            const sRequestId = oQuery && oQuery.requestId;
+            const oArgs = oEvent.getParameter("arguments") || {};
+            const oQuery = oArgs["?query"];
+            const sRequestId = oArgs.requestId || (oQuery && oQuery.requestId);
 
             this._iPendingDataRequests = 0;
             this._updateBusyState();
@@ -147,7 +158,7 @@ sap.ui.define([
             }
             this.setOneColumnLayout();
             this._rebindRequestsTable();
-
+            await this._loadIvArchivalPermission(this._sCurrentReservationUserId);
             if (sRequestId) {
                 this._showRequestDetailById(sRequestId);
                 return;
@@ -680,6 +691,84 @@ sap.ui.define([
             }
         },
 
+        async _loadIvArchivalPermission(sUserId) {
+            const oAccessModel = this.getView().getModel("requestAccess");
+            oAccessModel.setProperty("/canEditIvArchivalUrl", false);
+            oAccessModel.setProperty("/canEditRevisedDueDate", false);
+
+            if (!sUserId) {
+                return;
+            }
+
+            try {
+                const aIvTeams = await this._readList("/Teams", {
+                    filters: [
+                        new Filter("teamCode", FilterOperator.EQ, "IV"),
+                        new Filter("isActive", FilterOperator.EQ, true)
+                    ]
+                });
+                const oIvTeam = aIvTeams[0];
+
+                if (!oIvTeam?.ID) {
+                    return;
+                }
+
+                const aMemberships = await this._readList("/TeamMembers", {
+                    filters: [
+                        new Filter("team_ID", FilterOperator.EQ, oIvTeam.ID),
+                        new Filter("user_ID", FilterOperator.EQ, sUserId),
+                        new Filter("isActive", FilterOperator.EQ, true)
+                    ]
+                });
+
+                const bIsActiveIvTeamMember = aMemberships.length > 0;
+                oAccessModel.setProperty("/canEditIvArchivalUrl", bIsActiveIvTeamMember);
+                oAccessModel.setProperty("/canEditRevisedDueDate", bIsActiveIvTeamMember);
+            } catch {
+                oAccessModel.setProperty("/canEditIvArchivalUrl", false);
+                oAccessModel.setProperty("/canEditRevisedDueDate", false);
+            }
+        },
+
+        async onSaveIvArchivalUrl() {
+            const sUrl = String(
+                this.getView().getModel("ivArchivalEdit").getProperty("/url") || ""
+            ).trim();
+
+            this.showBusy();
+            try {
+                await this.updateEntry(
+                    `/ProcessRequests(guid'${this._sSelectedRequestId}')`,
+                    { ivArchivalUrl: sUrl || null }
+                );
+                this._refreshRequestHeader();
+                MessageToast.show("IV archival link saved");
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, "Unable to save IV archival link"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onSaveRevisedDueDate() {
+            const sDate = String(
+                this.getView().getModel("revisedDueDateEdit").getProperty("/date") || ""
+            ).trim();
+
+            this.showBusy();
+            try {
+                await this.updateEntry(
+                    `/ProcessRequests(guid'${this._sSelectedRequestId}')`,
+                    { revisedDueDate: sDate || null }
+                );
+                this._refreshRequestHeader();
+                MessageToast.show("Revised due date saved");
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, "Unable to save revised due date"));
+            } finally {
+                this.hideBusy();
+            }
+        },
         onCloseRequestDetail() {
             this._resetRequestSelection();
             this.navTo("RouteMyRequests", this._getRequestListRouteParameters(), true);
@@ -1104,10 +1193,11 @@ sap.ui.define([
         async onApproveRequestTask() {
             const oContext = this.byId("requestTaskObjectPage").getBindingContext();
             const sTaskName = oContext?.getProperty("taskName");
+            const iStepNo = Number(oContext?.getProperty("stepNo") || 0);
             const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
             const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
 
-            if (sTaskName === "GFA Team Confirmation" && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
+            if (iStepNo === GFA_CONFIRMATION_STEP_NO && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
                 const sDebitGL = (this.byId("requestGfaDebitGLInput").getValue() || "").trim();
 
                 if (!sDebitGL) {
@@ -1134,7 +1224,7 @@ sap.ui.define([
 
                 this.hideBusy();
             }
-             if (sTaskName === "IV Confirmation and Document Archiving" && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
+             if (iStepNo === PAYMENT_COMPLETION_STEP_NO && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
                 const sVoucherNumber = (this.byId("requestIvVoucherNumberInput").getValue() || "").trim();
                 const sConfirmationValue = (this.byId("requestIvConfirmationValueInput").getValue() || "").trim();
                 const sBankStatus = (this.byId("requestIvBankStatusInput").getValue() || "").trim();
@@ -1591,6 +1681,13 @@ sap.ui.define([
                 // referenceNumber, processorTeamName, isTeamTask, team-member sync,
                 // team notification, and the parent request's SLA/currentStep refresh
                 // all happen automatically via the ProcessTasks before/after CREATE hooks
+                const oUserResponse = await this.callAction("getCurrentUserDetails");
+                const oTaskCreator = oUserResponse.value || oUserResponse;
+                const sTaskCreatorName = oTaskCreator.displayName
+                    || oTaskCreator.email
+                    || oTaskCreator.userPrincipalName
+                    || "";
+                
                 const oCreatedTask = await this.createEntry("/ProcessTasks", {
                     request_ID: this._sSelectedRequestId,
                     stepNo: iStepNo,
@@ -1599,10 +1696,24 @@ sap.ui.define([
                     ...this._demandTaskAssignment(oData), purpose: oData.purpose,
                     status_code: "OPEN"
                 });
+                const oTaskDetails = oCreatedTask.createdAt
+                    ? oCreatedTask
+                    : await this._readEntry(`/ProcessTasks(guid'${oCreatedTask.ID}')`);
+
+                const oTaskCreatedAt = oTaskDetails.createdAt instanceof Date
+                    ? oTaskDetails.createdAt
+                    : new Date(oTaskDetails.createdAt);
+
+                if (Number.isNaN(oTaskCreatedAt.getTime())) {
+                    throw new Error("Could not read the Treasury task creation date");
+                }
+
+                const sTreasuryRequestDate = oTaskCreatedAt.toISOString().slice(0, 10);    
                await Promise.all(aEntries.map((oEntry) => this.createEntry("/TreasuryEntries", {
                     ...oEntry,
-                    request_ID: this._sSelectedRequestId,
                     task_ID: oCreatedTask.ID,
+                    treasuryRequestDate: sTreasuryRequestDate,
+                    i2pTeamMember: sTaskCreatorName,
                     amount: oEntry.amount === null ? null : Number(oEntry.amount)
                 })));
 
@@ -1767,7 +1878,6 @@ sap.ui.define([
                 });
                await Promise.all(aEntries.map((oEntry) => this.createEntry("/WhtEntries", {
                     ...oEntry,
-                    request_ID: this._sSelectedRequestId,
                     task_ID: oCreatedTask.ID,
                     amount: oEntry.amount === null ? null : Number(oEntry.amount)
                 })));
@@ -2556,7 +2666,7 @@ async onBudgetCheckConfirm() {
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,paymentMethod,typeOfPayment,guaranteeType,paymentSubCategory,treasuryEntries,whtEntries"
+                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,paymentMethod,typeOfPayment,guaranteeType,paymentSubCategory"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -2596,6 +2706,14 @@ async onBudgetCheckConfirm() {
                         this.getView().getModel("processorEdit").setProperty(
                             "/requestPriority_code",
                             oRequest?.priorityConfig_code || ""
+                        );
+                        this.getView().getModel("ivArchivalEdit").setProperty(
+                            "/url",
+                            oRequest?.ivArchivalUrl || ""
+                        );
+                        this.getView().getModel("revisedDueDateEdit").setProperty(
+                            "/date",
+                            oRequest?.revisedDueDate || ""
                         );
                         this._updateDemandTaskVisibility(oRequest);
                     }

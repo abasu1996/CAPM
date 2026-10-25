@@ -7,6 +7,8 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel"
 ], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
     "use strict";
+    const GFA_CONFIRMATION_STEP_NO = 2;
+    const PAYMENT_COMPLETION_STEP_NO = 6;
 
     return BaseController.extend("flowmate.controller.ApprovalDetail", {
         onInit() {
@@ -149,10 +151,11 @@ sap.ui.define([
         async onApprove() {
             const oContext = this.getView().getBindingContext();
             const sTaskName = oContext?.getProperty("taskName");
+            const iStepNo = Number(oContext?.getProperty("stepNo") || 0);
             const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
             const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
 
-            if (sTaskName === "GFA Team Confirmation" && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
+            if (iStepNo === GFA_CONFIRMATION_STEP_NO && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
                 const sDebitGL = (this.byId("gfaDebitGL").getValue() || "").trim();
 
                 if (!sDebitGL) {
@@ -179,7 +182,7 @@ sap.ui.define([
 
                 this.hideBusy();
             }
-            if (sTaskName === "IV Confirmation and Document Archiving" && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
+            if (iStepNo === PAYMENT_COMPLETION_STEP_NO && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
                 const sVoucherNumber = (this.byId("ivVoucherNumberInput").getValue() || "").trim();
                 const sConfirmationValue = (this.byId("ivConfirmationValueInput").getValue() || "").trim();
                 const sBankStatus = (this.byId("ivBankStatusInput").getValue() || "").trim();

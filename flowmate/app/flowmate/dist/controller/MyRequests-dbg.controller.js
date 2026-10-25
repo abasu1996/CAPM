@@ -16,11 +16,13 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/ComboBox",
     "sap/ui/core/ListItem",
-    "sap/m/Label"
+    "sap/m/Label",
+    "sap/m/Input"
 ], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, SelectDialog, StandardListItem, Text, Item, Sorter, Filter, FilterOperator, JSONModel, ComboBox,
-    ListItem, Label) => {
+    ListItem, Label, Input) => {
     "use strict";
-
+    const GFA_CONFIRMATION_STEP_NO = 2;
+    const PAYMENT_COMPLETION_STEP_NO = 6;    
     const MAX_ATTACHMENT_SIZE_MB = 400;
     const MAX_ATTACHMENT_SIZE_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
     const DEMAND_TASK_MODELS = {
@@ -110,12 +112,22 @@ sap.ui.define([
                  showBudgetCheck: false
             }), "viewDemandTasks");
             this.getView().setModel(new JSONModel(this._createEmptyDemandAssignee()), "budgetCheck");
+            this.getView().setModel(new JSONModel({
+                currentUserId: "",
+                canEditIvArchivalUrl: false,
+                canEditRevisedDueDate: false
+            }), "requestAccess");
+
+            this.getView().setModel(new JSONModel({ url: "" }), "ivArchivalEdit");
+            this.getView().setModel(new JSONModel({ date: "" }), "revisedDueDateEdit");
             this.getRouter().getRoute("RouteMyRequests").attachPatternMatched(this.onRouteMatched, this);
+            this.getRouter().getRoute("RouteRequestDetail").attachPatternMatched(this.onRouteMatched, this);
         },
 
         async onRouteMatched(oEvent) {
-            const oQuery = oEvent.getParameter("arguments")["?query"];
-            const sRequestId = oQuery && oQuery.requestId;
+            const oArgs = oEvent.getParameter("arguments") || {};
+            const oQuery = oArgs["?query"];
+            const sRequestId = oArgs.requestId || (oQuery && oQuery.requestId);
 
             this._iPendingDataRequests = 0;
             this._updateBusyState();
@@ -146,7 +158,7 @@ sap.ui.define([
             }
             this.setOneColumnLayout();
             this._rebindRequestsTable();
-
+            await this._loadIvArchivalPermission(this._sCurrentReservationUserId);
             if (sRequestId) {
                 this._showRequestDetailById(sRequestId);
                 return;
@@ -679,6 +691,84 @@ sap.ui.define([
             }
         },
 
+        async _loadIvArchivalPermission(sUserId) {
+            const oAccessModel = this.getView().getModel("requestAccess");
+            oAccessModel.setProperty("/canEditIvArchivalUrl", false);
+            oAccessModel.setProperty("/canEditRevisedDueDate", false);
+
+            if (!sUserId) {
+                return;
+            }
+
+            try {
+                const aIvTeams = await this._readList("/Teams", {
+                    filters: [
+                        new Filter("teamCode", FilterOperator.EQ, "IV"),
+                        new Filter("isActive", FilterOperator.EQ, true)
+                    ]
+                });
+                const oIvTeam = aIvTeams[0];
+
+                if (!oIvTeam?.ID) {
+                    return;
+                }
+
+                const aMemberships = await this._readList("/TeamMembers", {
+                    filters: [
+                        new Filter("team_ID", FilterOperator.EQ, oIvTeam.ID),
+                        new Filter("user_ID", FilterOperator.EQ, sUserId),
+                        new Filter("isActive", FilterOperator.EQ, true)
+                    ]
+                });
+
+                const bIsActiveIvTeamMember = aMemberships.length > 0;
+                oAccessModel.setProperty("/canEditIvArchivalUrl", bIsActiveIvTeamMember);
+                oAccessModel.setProperty("/canEditRevisedDueDate", bIsActiveIvTeamMember);
+            } catch {
+                oAccessModel.setProperty("/canEditIvArchivalUrl", false);
+                oAccessModel.setProperty("/canEditRevisedDueDate", false);
+            }
+        },
+
+        async onSaveIvArchivalUrl() {
+            const sUrl = String(
+                this.getView().getModel("ivArchivalEdit").getProperty("/url") || ""
+            ).trim();
+
+            this.showBusy();
+            try {
+                await this.updateEntry(
+                    `/ProcessRequests(guid'${this._sSelectedRequestId}')`,
+                    { ivArchivalUrl: sUrl || null }
+                );
+                this._refreshRequestHeader();
+                MessageToast.show("IV archival link saved");
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, "Unable to save IV archival link"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+
+        async onSaveRevisedDueDate() {
+            const sDate = String(
+                this.getView().getModel("revisedDueDateEdit").getProperty("/date") || ""
+            ).trim();
+
+            this.showBusy();
+            try {
+                await this.updateEntry(
+                    `/ProcessRequests(guid'${this._sSelectedRequestId}')`,
+                    { revisedDueDate: sDate || null }
+                );
+                this._refreshRequestHeader();
+                MessageToast.show("Revised due date saved");
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, "Unable to save revised due date"));
+            } finally {
+                this.hideBusy();
+            }
+        },
         onCloseRequestDetail() {
             this._resetRequestSelection();
             this.navTo("RouteMyRequests", this._getRequestListRouteParameters(), true);
@@ -1103,10 +1193,11 @@ sap.ui.define([
         async onApproveRequestTask() {
             const oContext = this.byId("requestTaskObjectPage").getBindingContext();
             const sTaskName = oContext?.getProperty("taskName");
+            const iStepNo = Number(oContext?.getProperty("stepNo") || 0);
             const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
             const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
 
-            if (sTaskName === "GFA Team Confirmation" && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
+            if (iStepNo === GFA_CONFIRMATION_STEP_NO && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
                 const sDebitGL = (this.byId("requestGfaDebitGLInput").getValue() || "").trim();
 
                 if (!sDebitGL) {
@@ -1133,7 +1224,7 @@ sap.ui.define([
 
                 this.hideBusy();
             }
-             if (sTaskName === "IV Confirmation and Document Archiving" && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
+             if (iStepNo === PAYMENT_COMPLETION_STEP_NO && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
                 const sVoucherNumber = (this.byId("requestIvVoucherNumberInput").getValue() || "").trim();
                 const sConfirmationValue = (this.byId("requestIvConfirmationValueInput").getValue() || "").trim();
                 const sBankStatus = (this.byId("requestIvBankStatusInput").getValue() || "").trim();
@@ -1590,6 +1681,13 @@ sap.ui.define([
                 // referenceNumber, processorTeamName, isTeamTask, team-member sync,
                 // team notification, and the parent request's SLA/currentStep refresh
                 // all happen automatically via the ProcessTasks before/after CREATE hooks
+                const oUserResponse = await this.callAction("getCurrentUserDetails");
+                const oTaskCreator = oUserResponse.value || oUserResponse;
+                const sTaskCreatorName = oTaskCreator.displayName
+                    || oTaskCreator.email
+                    || oTaskCreator.userPrincipalName
+                    || "";
+                
                 const oCreatedTask = await this.createEntry("/ProcessTasks", {
                     request_ID: this._sSelectedRequestId,
                     stepNo: iStepNo,
@@ -1598,10 +1696,24 @@ sap.ui.define([
                     ...this._demandTaskAssignment(oData), purpose: oData.purpose,
                     status_code: "OPEN"
                 });
+                const oTaskDetails = oCreatedTask.createdAt
+                    ? oCreatedTask
+                    : await this._readEntry(`/ProcessTasks(guid'${oCreatedTask.ID}')`);
+
+                const oTaskCreatedAt = oTaskDetails.createdAt instanceof Date
+                    ? oTaskDetails.createdAt
+                    : new Date(oTaskDetails.createdAt);
+
+                if (Number.isNaN(oTaskCreatedAt.getTime())) {
+                    throw new Error("Could not read the Treasury task creation date");
+                }
+
+                const sTreasuryRequestDate = oTaskCreatedAt.toISOString().slice(0, 10);    
                await Promise.all(aEntries.map((oEntry) => this.createEntry("/TreasuryEntries", {
                     ...oEntry,
-                    request_ID: this._sSelectedRequestId,
                     task_ID: oCreatedTask.ID,
+                    treasuryRequestDate: sTreasuryRequestDate,
+                    i2pTeamMember: sTaskCreatorName,
                     amount: oEntry.amount === null ? null : Number(oEntry.amount)
                 })));
 
@@ -1766,7 +1878,6 @@ sap.ui.define([
                 });
                await Promise.all(aEntries.map((oEntry) => this.createEntry("/WhtEntries", {
                     ...oEntry,
-                    request_ID: this._sSelectedRequestId,
                     task_ID: oCreatedTask.ID,
                     amount: oEntry.amount === null ? null : Number(oEntry.amount)
                 })));
@@ -2555,7 +2666,7 @@ async onBudgetCheckConfirm() {
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,paymentMethod,typeOfPayment,guaranteeType,paymentSubCategory,treasuryEntries,whtEntries"
+                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,paymentMethod,typeOfPayment,guaranteeType,paymentSubCategory"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -2596,6 +2707,14 @@ async onBudgetCheckConfirm() {
                             "/requestPriority_code",
                             oRequest?.priorityConfig_code || ""
                         );
+                        this.getView().getModel("ivArchivalEdit").setProperty(
+                            "/url",
+                            oRequest?.ivArchivalUrl || ""
+                        );
+                        this.getView().getModel("revisedDueDateEdit").setProperty(
+                            "/date",
+                            oRequest?.revisedDueDate || ""
+                        );
                         this._updateDemandTaskVisibility(oRequest);
                     }
                 }
@@ -2620,7 +2739,11 @@ async onBudgetCheckConfirm() {
             this._bindRequestSectionTable("requestTasksTable", "/RequestDetailTasks", sRequestId, {
                 parameters: {
                     expand: "request,treasuryEntries,whtEntries"
-                }
+                },
+                 sorter: [
+                    new Sorter("stepNo", true),            // true = descending
+                    new Sorter("referenceNumber", true)    // tie-break within the same step
+                ]
             });
             this._bindRequestSectionTable("requestPartiesTable", "/ProcessInvolvedParties", sRequestId);
             this._bindRequestSectionTable("requestAttachmentsTable", "/ProcessAttachments", sRequestId);
@@ -2735,7 +2858,8 @@ async onBudgetCheckConfirm() {
                 this.getView().getModel("processorEdit").setProperty("/taskProcessorName", oTask.processor || "");
                 this.getView().getModel("processorEdit").setProperty("/taskTeam_ID", oTask.processorTeam_ID || "");
                 this.getView().getModel("processorEdit").setProperty("/taskTeamName", oTask.processorTeamName || "");
-                this._loadTaskStepOptions("requestTaskObjectPage");
+                // this._loadTaskStepOptions("requestTaskObjectPage");
+                this._loadTaskStepOptions(oTask);
             } catch (oError) {
                 if (this._sTaskDetailLoadToken === sLoadToken) {
                     MessageBox.error(this.getErrorMessage(oError, this.getText("actionFailedMessage")));
@@ -3452,11 +3576,10 @@ async onBudgetCheckConfirm() {
             return ["OPEN", "SENT_BACK"].includes(this._taskStatusCode(oTask));
         },
 
-        async _loadTaskStepOptions(sObjectPageId) {
+        async _loadTaskStepOptions(oTask) {
             const oTaskActionModel = this.getView().getModel("taskAction");
-            const oContext = this.byId(sObjectPageId)?.getBindingContext();
-            const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
-            const iCurrentStepNo = Number(oContext?.getProperty("stepNo") || 0);
+            const sSubProcessTypeCode = oTask?.request?.subProcessType_code;
+            const iCurrentStepNo = Number(oTask?.stepNo || 0);
 
             oTaskActionModel.setData({ sendBackStepNo: "", steps: [], requestTeamId: "" });
 
@@ -3480,7 +3603,7 @@ async onBudgetCheckConfirm() {
                 oTaskActionModel.setData({
                     sendBackStepNo: aStepItems[0]?.stepNo || "",
                     steps: aStepItems,
-                    requestTeamId: oContext?.getProperty("request/processorTeam_ID") || ""
+                    requestTeamId: ""
                 });
             } catch (oError) {
                 MessageToast.show(this.getText("sendBackStepsLoadErrorMessage"));
@@ -3490,7 +3613,6 @@ async onBudgetCheckConfirm() {
         _chooseSendBackStep() {
             const oTaskActionModel = this.getView().getModel("taskAction");
             const aSteps = oTaskActionModel.getProperty("/steps") || [];
-            const sRequestTeamId = oTaskActionModel.getProperty("/requestTeamId") || "";
 
             if (!aSteps.length) {
                 MessageBox.warning(this.getText("noPreviousSendBackStepsMessage"));
@@ -3498,51 +3620,135 @@ async onBudgetCheckConfirm() {
             }
 
             return new Promise((resolve) => {
-                const oMemberTemplate = new ListItem({
-                    key: "{user_ID}",
-                    text: "{displayName}",
-                    additionalText: "{email}"
-                });
-                const oProcessorSelect = new Select({
-                    width: "100%",
-                    forceSelection: false,
-                    showSecondaryValues: true
-                });
+                let sTeamId = "";
+                let sSelectedUserId = "";
+                let iSearchTimer;
+                let oPickerDialog = null;
+
                 const oHint = new Text({ wrapping: true }).addStyleClass("sapUiTinyMarginTop");
 
-                // Reload the processor list for the team that owns the selected step
-                const fnLoadTeamMembers = () => {
-                    const oStep = aSteps.find((oItem) => String(oItem.stepNo) === String(oStepSelect.getSelectedKey()));
-                    const sTeamId = oStep?.teamId || sRequestTeamId;
+                // Backend filters: active users, optional team, optional typed text
+                const fnBuildFilters = (sQuery) => {
+                    const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
 
-                    oProcessorSelect.setSelectedKey("");
-                    oProcessorSelect.unbindItems();
-
-                    if (!sTeamId) {
-                        oProcessorSelect.setEnabled(false);
-                        oHint.setText(this.getText("sendBackNoTeamForStepText"));
-                        return;
+                    if (sTeamId) {
+                        aFilters.push(new Filter("team_ID", FilterOperator.EQ, sTeamId));
                     }
+                    if (sQuery) {
+                        aFilters.push(new Filter({
+                            filters: [
+                                new Filter("displayName", FilterOperator.Contains, sQuery),
+                                new Filter("email", FilterOperator.Contains, sQuery)
+                            ],
+                            and: false
+                        }));
+                    }
+                    return aFilters;
+                };
 
-                    oProcessorSelect.setEnabled(true);
-                    // oHint.setText(this.getText("sendBackProcessorHintText"));
-                    oProcessorSelect.bindItems({
-                        path: "/TeamMembers",
-                        filters: [
-                            new Filter("team_ID", FilterOperator.EQ, sTeamId),
-                            new Filter("isActive", FilterOperator.EQ, true)
-                        ],
+                const sUserPath = () => (sTeamId ? "/TeamMembers" : "/Users");
+                const sUserKeyField = () => (sTeamId ? "user_ID" : "ID");
+
+                const oProcessorInput = new Input({
+                    width: "100%",
+                    placeholder: this.getText("selectProcessorPlaceholder"),
+                    showSuggestion: true,
+                    startSuggestion: 1,
+                    filterSuggests: false,
+                    maxSuggestionWidth: "28rem",
+                    showValueHelp: true,
+                    valueHelpIconSrc: "sap-icon://slim-arrow-down",
+                    // Typing clears the previous pick, then asks the backend (debounced)
+                    liveChange: (oEvent) => {
+                        sSelectedUserId = "";
+                        const sQuery = (oEvent.getParameter("value") || "").trim();
+
+                        clearTimeout(iSearchTimer);
+                        iSearchTimer = setTimeout(() => {
+                            oProcessorInput.getBinding("suggestionItems")?.filter(fnBuildFilters(sQuery));
+                        }, 300);
+                    },
+                    suggestionItemSelected: (oEvent) => {
+                        const oItem = oEvent.getParameter("selectedItem");
+
+                        sSelectedUserId = oItem?.getKey() || "";
+                        oProcessorInput.setValue(oItem?.getText() || "");
+                    },
+                    // Arrow icon: full list with its own backend search
+                    valueHelpRequest: () => {
+                        if (!oPickerDialog) {
+                            oPickerDialog = new SelectDialog({
+                                title: this.getText("sendBackProcessorLabel"),
+                                growing: true,
+                                growingThreshold: 50,
+                                noDataText: this.getText("noUsersFoundText"),
+                                search: (oEvt) => {
+                                    oEvt.getSource().getBinding("items")
+                                        ?.filter(fnBuildFilters((oEvt.getParameter("value") || "").trim()));
+                                },
+                                liveChange: (oEvt) => {
+                                    oEvt.getSource().getBinding("items")
+                                        ?.filter(fnBuildFilters((oEvt.getParameter("value") || "").trim()));
+                                },
+                                confirm: (oEvt) => {
+                                    const oContext = oEvt.getParameter("selectedItem")?.getBindingContext();
+
+                                    if (oContext) {
+                                        sSelectedUserId = oContext.getProperty(sUserKeyField());
+                                        oProcessorInput.setValue(oContext.getProperty("displayName"));
+                                    }
+                                }
+                            });
+                            this.getView().addDependent(oPickerDialog);
+                        }
+
+                        oPickerDialog.unbindAggregation("items");
+                        oPickerDialog.bindAggregation("items", {
+                            path: sUserPath(),
+                            filters: fnBuildFilters(""),
+                            sorter: new Sorter("displayName"),
+                            templateShareable: false,
+                            template: new StandardListItem({
+                                title: "{displayName}",
+                                description: "{email}",
+                                type: "Active"
+                            })
+                        });
+                        oPickerDialog.open();
+                    }
+                });
+
+                // Step with a team -> its members; no team -> all active users
+                const fnBindItems = () => {
+                    const oStep = aSteps.find((oItem) =>
+                        String(oItem.stepNo) === String(oStepSelect.getSelectedKey())
+                    );
+
+                    sTeamId = oStep?.teamId || "";
+                    sSelectedUserId = "";
+                    oProcessorInput.setValue("");
+                    oProcessorInput.unbindAggregation("suggestionItems");
+                    oProcessorInput.bindAggregation("suggestionItems", {
+                        path: sUserPath(),
+                        filters: fnBuildFilters(""),
                         sorter: new Sorter("displayName"),
-                        template: oMemberTemplate,
-                        templateShareable: true
+                        templateShareable: false,
+                        template: new ListItem({
+                            key: sTeamId ? "{user_ID}" : "{ID}",
+                            text: "{displayName}",
+                            additionalText: "{email}"
+                        })
                     });
+                    oHint.setText(sTeamId
+                        ? this.getText("sendBackProcessorHintText")
+                        : this.getText("sendBackAllUsersHintText"));
                 };
 
                 const oStepSelect = new Select({
                     width: "100%",
                     selectedKey: aSteps[0].stepNo,
                     items: aSteps.map((oStep) => new Item({ key: oStep.stepNo, text: oStep.text })),
-                    change: fnLoadTeamMembers
+                    change: fnBindItems
                 });
 
                 const oDialog = new Dialog({
@@ -3553,18 +3759,24 @@ async onBudgetCheckConfirm() {
                         oStepSelect,
                         new Label({
                             text: this.getText("sendBackProcessorLabel"),
-                            labelFor: oProcessorSelect
+                            labelFor: oProcessorInput
                         }).addStyleClass("sapUiSmallMarginTop"),
-                        oProcessorSelect,
+                        oProcessorInput,
                         oHint
                     ],
                     beginButton: new Button({
                         text: this.getText("sendBackButton"),
                         type: "Emphasized",
                         press: () => {
+                            // Text typed but no user picked
+                            if (oProcessorInput.getValue().trim() && !sSelectedUserId) {
+                                MessageToast.show(this.getText("selectProcessorFromListMessage"));
+                                return;
+                            }
+
                             resolve({
                                 stepNo: Number(oStepSelect.getSelectedKey()),
-                                processorUserId: oProcessorSelect.getSelectedKey() || null
+                                processorUserId: sSelectedUserId || null
                             });
                             oDialog.close();
                         }
@@ -3580,11 +3792,14 @@ async onBudgetCheckConfirm() {
 
                 oDialog.addStyleClass("sapUiContentPadding");
                 oDialog.attachAfterClose(() => {
-                    resolve(null); // no-op if already resolved; covers Esc
+                    clearTimeout(iSearchTimer);
+                    resolve(null); // no-op if already resolved (covers Esc)
+                    oPickerDialog?.destroy();
                     oDialog.destroy();
                 });
+
                 this.getView().addDependent(oDialog);
-                fnLoadTeamMembers();
+                fnBindItems();
                 oDialog.open();
             });
         },

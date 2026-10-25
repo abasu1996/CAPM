@@ -218,11 +218,11 @@ service FlowmateService {
     businessEntity : redirected to FtkEntities
     };
     entity TreasuryEntries as projection on fldb.TreasuryEntries {
-        *, request : redirected to ProcessRequests, task : redirected to ProcessTasks, entity : redirected to FtkEntities,
+        *,task : redirected to ProcessTasks, entity : redirected to FtkEntities,
         currency : redirected to Currencies
     };
     entity WhtEntries as projection on fldb.WhtEntries {
-        *, request : redirected to ProcessRequests, task : redirected to ProcessTasks, entity : redirected to FtkEntities,
+        *,task : redirected to ProcessTasks, entity : redirected to FtkEntities,
         currency : redirected to Currencies
     };
     entity SettlementEntries as projection on fldb.SettlementEntries {
@@ -253,8 +253,6 @@ service FlowmateService {
         glBreakups: redirected to GLBreakups,
         settlementEntries : redirected to SettlementEntries,
         merchantEntityValues : redirected to MerchantEntityValues,
-        treasuryEntries : redirected to TreasuryEntries,
-        whtEntries : redirected to WhtEntries,
         attachments : redirected to ProcessAttachments,
         emailMessages : redirected to ProcessEmailMessages,
         treasuryEntity : redirected to FtkEntities,

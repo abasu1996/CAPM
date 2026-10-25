@@ -289,9 +289,9 @@
                 <VBox
                     class="sapUiSmallMarginTop flowmateDetailBlock"
                     width="24rem"
-                    visible="{= ${request/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER' &amp;&amp; ${taskName} === 'IV Confirmation and Document Archiving' }">
+                    visible="{= ${request/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER' &amp;&amp;  ${stepNo} === 6 }">
                     <Title
-                        text="{i18n>ivConfirmationSectionTitle}"
+                        text="{i18n>paymentCompletionSectionTitle}"
                         level="H3"
                         class="sapUiSmallMarginBottom" />
                     <Label text="{i18n>entityLabel}" />

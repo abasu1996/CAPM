@@ -452,10 +452,38 @@
                                 <Text text="{dueDate}" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
+                                <Label text="{i18n>revisedDueDateLabel}" />
+                                <HBox
+                                    class="flowmateHeaderInputRow"
+                                    width="100%"
+                                    alignItems="Center"
+                                    visible="{requestAccess>/canEditRevisedDueDate}">
+                                    <DatePicker
+                                        width="100%"
+                                        value="{revisedDueDateEdit>/date}"
+                                        valueFormat="yyyy-MM-dd"
+                                        displayFormat="yyyy-MM-dd" />
+                                    <Button
+                                        class="sapUiTinyMarginBegin"
+                                        icon="sap-icon://save"
+                                        tooltip="{i18n>saveButton}"
+                                        press=".onSaveRevisedDueDate" />
+                                </HBox>
+                                <Text
+                                    text="{= ${revisedDueDate} || ${i18n>revisedDueDateNotSet} }"
+                                    visible="{= !${requestAccess>/canEditRevisedDueDate} }" />
+                            </VBox>
+                            <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>processorLabel}" />
                                 <Text text="{= ${processor} || ${i18n>unassignedProcessorText} }" />
                             </VBox>
-                            <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
+                        </HBox>
+                        <HBox
+                        class="flowmateHeaderRow flowmateHeaderActionRow"
+                        width="100%"
+                        wrap="Wrap"
+                        alignItems="Start">
+                        <VBox class="flowmateHeaderCell flowmateHeaderActionCell flowmateStatusEditor">
                                 <Label text="{i18n>processorTeamLabel}" />
                                 <HBox class="flowmateHeaderInputRow" width="100%" alignItems="Center">
                                     <Input
@@ -479,7 +507,7 @@
                                     <Button
                                         class="sapUiTinyMarginBegin"
                                         icon="sap-icon://save"
-                                        enabled="{requestEdit>/editable}"
+                                        enabled="{= !!${reservedByUser_ID} &amp;&amp; ${reservedByUser_ID} === ${requestAccess>/currentUserId} &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' }"
                                         tooltip="{i18n>saveTeamButton}"
                                         press=".onSaveRequestTeam" />
                                 </HBox>
@@ -498,12 +526,12 @@
                                 <Button
                                     class="sapUiTinyMarginBegin"
                                     icon="sap-icon://save"
-                                    enabled="{requestEdit>/editable}"
+                                    enabled="{= !!${reservedByUser_ID} &amp;&amp; ${reservedByUser_ID} === ${requestAccess>/currentUserId} &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' }"
                                     tooltip="{i18n>savePriorityButton}"
                                     press=".onSaveRequestPriority" />
                             </HBox>
                         </VBox>
-                        </HBox>
+                    </HBox>                       
                         <VBox
                             class="flowmateProcessGuide"
                             busy="{processFlow>/loading}"
@@ -648,6 +676,40 @@
                             </uxap:ObjectPageSubSection>
                         </uxap:subSections>
                     </uxap:ObjectPageSection>
+                    <uxap:ObjectPageSection title="IV Document Archival">
+                    <uxap:subSections>
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <VBox class="flowmateDetailBlock">
+                                    <Label text="IV Archival Link" />
+                                    <HBox
+                                        width="100%"
+                                        alignItems="Center"
+                                        visible="{requestAccess>/canEditIvArchivalUrl}">
+                                        <Input
+                                            width="100%"
+                                            value="{ivArchivalEdit>/url}"
+                                            placeholder="Enter IV archival URL" />
+                                        <Button
+                                            class="sapUiTinyMarginBegin"
+                                            icon="sap-icon://save"
+                                            tooltip="{i18n>saveButton}"
+                                            press=".onSaveIvArchivalUrl" />
+                                    </HBox>
+                                    <Link
+                                        text="{ivArchivalUrl}"
+                                        href="{ivArchivalUrl}"
+                                        target="_blank"
+                                        wrapping="true"
+                                        visible="{= !!${ivArchivalUrl} }" />
+                                    <Text
+                                        text="No IV archival link provided"
+                                        visible="{= !${ivArchivalUrl} }" />
+                                </VBox>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:subSections>
+                </uxap:ObjectPageSection>
                     <!-- <uxap:ObjectPageSection
                         title="{i18n>ftkFactoringDetailsTitle}"
                         visible="{= ${subProcessType_code} === 'FTK_FACTORING_PO_VALIDATION' || ${subProcessType_code} === 'FTK_FACTORING_BASED_ON_UAC' || ${subProcessType_code} === 'FTK_FACTORING_PENDING_UAC' }">
@@ -3050,8 +3112,8 @@
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                             <uxap:ObjectPageSubSection
-                                title="{i18n>ivConfirmationSectionTitle}"
-                                visible="{= ${request/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER' &amp;&amp; ${taskName} === 'IV Confirmation and Document Archiving' }">
+                                title="{i18n>paymentCompletionSectionTitle}"
+                                visible="{= ${request/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER' &amp;&amp; ${stepNo} === 6 }">
                                 <uxap:blocks>
                                     <VBox class="flowmateDetailBlock" width="24rem">
                                         <Label text="{i18n>entityLabel}" />
@@ -3603,13 +3665,13 @@
                             <Column><Text text="{i18n>paymentReceivedDateLabel}" /></Column><Column><Text text="{i18n>treasuryRequestDateLabel}" /></Column><Column><Text text="{i18n>entityLabel}" /></Column><Column><Text text="{i18n>bankNameLabel}" /></Column><Column><Text text="{i18n>debitAccountLabel}" /></Column><Column><Text text="{i18n>beneficiaryLabel}" /></Column><Column><Text text="{i18n>currencyLabel}" /></Column><Column><Text text="{i18n>amountLabel}" /></Column><Column><Text text="{i18n>dueDateLabel}" /></Column><Column><Text text="{i18n>paymentModeLabel}" /></Column><Column><Text text="{i18n>userDivisionRepresentativeNameLabel}" /></Column><Column><Text text="{i18n>i2pTeamMemberLabel}" /></Column><Column /></columns>
                         <items><ColumnListItem>
                             <DatePicker value="{ path: 'treasuryConfirmation>paymentReceivedDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' } }" />
-                            <DatePicker value="{ path: 'treasuryConfirmation>treasuryRequestDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' } }" />
+                            <DatePicker value="{ path: 'treasuryConfirmation>treasuryRequestDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' } }" editable="false" />
                             <ComboBox selectedKey="{treasuryConfirmation>entity_code}" items="{path: '/FtkEntities',templateShareable: false}"><core:Item key="{code}" text="{name}" /></ComboBox>
                             <Input value="{treasuryConfirmation>bankName}" /><Input value="{treasuryConfirmation>debitAccount}" /><Input value="{treasuryConfirmation>beneficiary}" />
                             <ComboBox selectedKey="{treasuryConfirmation>currency_code}" items="{path: '/Currencies',templateShareable: false}"><core:Item key="{code}" text="{name}" /></ComboBox>
                             <Input value="{treasuryConfirmation>amount}" type="Number" />
                             <DatePicker value="{ path: 'treasuryConfirmation>dueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'yyyy-MM-dd' } }" />
-                            <Input value="{treasuryConfirmation>paymentMode}" /><Input value="{treasuryConfirmation>userDivisionRepresentative}" /><Input value="{treasuryConfirmation>i2pTeamMember}" />
+                            <Input value="{treasuryConfirmation>paymentMode}" /><Input value="{treasuryConfirmation>userDivisionRepresentative}" /><Input value="{treasuryConfirmation>i2pTeamMember}" editable="false" />
                             <Button icon="sap-icon://delete" type="Transparent" press=".onRemoveTreasuryRow" />
                         </ColumnListItem></items>
                     </Table>

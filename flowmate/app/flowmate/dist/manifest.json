@@ -176,7 +176,7 @@
 					"name": "RouteRequestDetail",
 					"pattern": "requests/{requestId}:?query:",
 					"target": [
-						"TargetRequestDetail"
+						"TargetMyRequests"
 					]
 				},
 				{

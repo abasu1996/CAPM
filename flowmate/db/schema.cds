@@ -367,6 +367,7 @@ entity ProcessRequests : cuid, managed {
     vendorName       : String(150);
     remarks          : LargeString;
     documentArchiveUrl : String(2048);
+    ivArchivalUrl : String(2048);
     requester   : String(100);
     processor   : String(255);
     processorEmail : String(255);
@@ -389,6 +390,7 @@ entity ProcessRequests : cuid, managed {
     priority    : String(20);
     currentStep : Integer;
     dueDate     : Date;
+    revisedDueDate : Date;
     slaStartedAt : DateTime;
     slaDueAt    : DateTime;
     slaCalendarCode : String(30);
@@ -426,10 +428,6 @@ entity ProcessRequests : cuid, managed {
                     on settlementEntries.request = $self;
     merchantEntityValues : Composition of many MerchantEntityValues
                     on merchantEntityValues.request = $self;
-    treasuryEntries : Composition of many TreasuryEntries
-                    on treasuryEntries.request = $self;
-    whtEntries : Composition of many WhtEntries
-                    on whtEntries.request = $self;
     tasks       : Composition of many ProcessTasks
                     on tasks.request = $self;
     involvedParties : Composition of many ProcessInvolvedParties
@@ -444,7 +442,6 @@ entity ProcessRequests : cuid, managed {
                     on history.request = $self;
 }
 entity TreasuryEntries : cuid, managed {
-    request : Association to ProcessRequests;
     task : Association to ProcessTasks;
     paymentReceivedDate : Date;
     treasuryRequestDate : Date;
@@ -460,7 +457,6 @@ entity TreasuryEntries : cuid, managed {
     i2pTeamMember : String(100);
 }
 entity WhtEntries : cuid, managed {
-    request : Association to ProcessRequests;
     task : Association to ProcessTasks;
     entity : Association to FtkEntities @assert.target;
     vendor : String(150);

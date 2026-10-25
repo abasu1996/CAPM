@@ -543,7 +543,11 @@ const BPA_TECHNICAL_DESTINATION = "bpa_workflow_technical";
 const BPA_WORKFLOW_PATH = "/workflow/rest/v1/workflow-instances";
 const BPA_EMAIL_DEFINITION_ID = "ap11.arize-qas-9339ozek.emailprocess.emailProcess";
 const BPA_TASK_ASSIGNMENT_DEFINITION_ID = "ap11.arize-qas-9339ozek.taskassignmentnotificationprocess.taskAssignmentNotificationProcess";
-
+const BPA_REQUEST_STATUS_DEFINITION_ID = "ap11.arize-qas-9339ozek.requeststatusnotificationprocessi2p.requestStatusNotificationProcess";
+const REQUEST_FINAL_STATUS_LABELS = {
+  [PROCESS_STATUS.COMPLETED]: "Completed",
+  [PROCESS_STATUS.REJECTED]: "Rejected"
+};
 module.exports = class FlowmateService extends cds.ApplicationService {
   async init() {
     this._configCache = new Map();
@@ -1647,7 +1651,23 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       if (Object.prototype.hasOwnProperty.call(req.data, "title")) {
         req.data.title = sTitle;
       }
+      // Vendor document archival link: optional, but must be http(s) when provided
+      if (Object.prototype.hasOwnProperty.call(req.data, "documentArchiveUrl")) {
+        const sArchiveUrl = String(req.data.documentArchiveUrl || "").trim();
 
+        if (sArchiveUrl) {
+          try {
+            const oUrl = new URL(sArchiveUrl);
+            if (!["http:", "https:"].includes(oUrl.protocol)) {
+              throw new Error();
+            }
+          } catch {
+            return req.reject(400, "Document archival link must be a valid HTTP or HTTPS URL");
+          }
+        }
+
+        req.data.documentArchiveUrl = sArchiveUrl || null;
+      }
       const sSubProcessTypeCode = valueOf("subProcessType_code");
       // if (sSubProcessTypeCode === "FTK_FACTORING_PENDING_UAC") {
       //   return;
@@ -1935,6 +1955,59 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           this._setCustomerSnapshot(req.data, oCustomer);
         }
       }
+    });
+    
+    this.before("UPDATE", ProcessRequests, async (req) => {
+      const bUpdatesIvArchivalUrl = Object.hasOwn(req.data, "ivArchivalUrl");
+      const bUpdatesRevisedDueDate = Object.hasOwn(req.data, "revisedDueDate");
+
+      if (!bUpdatesIvArchivalUrl && !bUpdatesRevisedDueDate) {
+        return;
+      }
+
+      const oCurrentUser = await this._currentReservationUser(req, Users);
+      const oIvTeam = await this.master.run(
+        SELECT.one.from(Teams)
+          .columns("ID")
+          .where({ teamCode: "IV", isActive: true })
+      );
+
+      if (!oIvTeam) {
+        return req.reject(403, "The IV team is not configured");
+      }
+
+      const oMembership = await this.master.run(
+        SELECT.one.from(TeamMembers)
+          .columns("ID")
+          .where({
+            team_ID: oIvTeam.ID,
+            user_ID: oCurrentUser.user.ID,
+            isActive: true
+          })
+      );
+
+      if (!oMembership) {
+        return req.reject(403, "Only active IV team members can edit the IV archival link");
+      }
+
+      if (!bUpdatesIvArchivalUrl) {
+        return;
+      }
+
+      const sUrl = String(req.data.ivArchivalUrl || "").trim();
+
+      if (sUrl) {
+        try {
+          const oUrl = new URL(sUrl);
+          if (!["http:", "https:"].includes(oUrl.protocol)) {
+            throw new Error();
+          }
+        } catch {
+          return req.reject(400, "IV archival link must be a valid HTTP or HTTPS URL");
+        }
+      }
+
+      req.data.ivArchivalUrl = sUrl || null;
     });
 
     this.before(["CREATE", "UPDATE", "DELETE"], this.entities.Invoices, (req) => this._validateLoaInvoiceWrite(req));
@@ -2516,6 +2589,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         newStatus: PROCESS_STATUS.REJECTED,
         remarks
       });
+      await this._notifyRequestFinalStatus(req, task.request_ID, remarks);
 
       return true;
     });
@@ -2787,6 +2861,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         newStatus: statusCode,
         remarks: "Request status changed manually"
       });
+      await this._notifyRequestFinalStatus(req, requestId, "Request status changed manually");
 
       return true;
     });
@@ -5958,7 +6033,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       newStatus: sNewRequestStatus,
       remarks
     });
-
+    await this._notifyRequestFinalStatus(req, requestId, remarks);
     return true;
   }
 
@@ -6295,6 +6370,7 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
       remarks: `Completed automatically because settlement request ${sSettlementRef} was completed`
     });
   }
+  await this._notifyRequestFinalStatus(req, oPayment.ID, `Completed with settlement request ${sSettlementRef}`);
 }
 
   _getTaskProgressionError(task, request, currentStep) {
@@ -6757,6 +6833,7 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
       newStatus: configuredStatus || (bApproved ? PROCESS_STATUS.IN_PROGRESS : PROCESS_STATUS.REJECTED),
       remarks
     });
+    await this._notifyRequestFinalStatus(req, task.request_ID, remarks);
     return true;
   }
   async _afterProcessRequestCreate(req, request, Users = this.masterEntities.Users) {
@@ -7034,7 +7111,7 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
       newStatus: PROCESS_STATUS.IN_PROGRESS,
       remarks: `Step(s) ${sStepList} auto-completed; moved to step ${oLandingStep.stepNo}. ${sReason}`
     });
-
+    await this._notifyRequestFinalStatus(req, requestId, sReason);
     return true;
   }
     async _closeLeadingStepsOnLoaRejection(req, requestId, request, remarks, oOwner = null) {
@@ -7821,6 +7898,136 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
       }
       throw error;
     }
+  }
+    async _notifyRequestFinalStatus(req, requestId, remarks = "") {
+    const oLog = cds.log("request-status-notifications");
+
+    try {
+      const oRequest = await this._getRequest(req, requestId);
+      const sStatusLabel = REQUEST_FINAL_STATUS_LABELS[oRequest?.status_code];
+
+      if (!sStatusLabel) {
+        return; // not completed or rejected
+      }
+
+      // Recipients: the requester and the person holding the reservation
+      const aRecipients = [];
+      const fnAddRecipient = async (sUserId) => {
+        if (!sUserId) return;
+        const oUser = await this._getUser(req, sUserId, this.masterEntities.Users);
+        const sEmail = String(oUser ? this._userEmail(oUser) : "").trim().toLowerCase();
+
+        if (sEmail && !aRecipients.some((oItem) => oItem.email === sEmail)) {
+          aRecipients.push({ email: sEmail, displayName: this._userDisplayName(oUser) || sEmail });
+        }
+      };
+
+      await fnAddRecipient(oRequest.requesterUser_ID);
+      await fnAddRecipient(oRequest.reservedByUser_ID || oRequest.processorUser_ID);
+
+      if (!aRecipients.length) {
+        oLog.warn(`No requester or reserver email is maintained for request ${requestId}`);
+        return;
+      }
+
+      const [oProcessType, oSubType] = await Promise.all([
+        oRequest.processType_code
+          ? cds.tx(req).run(SELECT.one.from(this.entities.ProcessTypes).columns("name").where({ code: oRequest.processType_code }))
+          : null,
+        oRequest.subProcessType_code
+          ? cds.tx(req).run(SELECT.one.from(this.entities.ProcessSubTypes).columns("name").where({ code: oRequest.subProcessType_code }))
+          : null
+      ]);
+      const sSubject = `Flowmate request ${oRequest.referenceNumber || requestId} ${sStatusLabel.toLowerCase()}`;
+
+      for (const oRecipient of aRecipients) {
+        try {
+          // Never send the same final-status mail to the same person twice
+          const oAlreadySent = await cds.tx(req).run(
+            SELECT.one.from(this.entities.ProcessEmailMessages).columns("ID").where({
+              request_ID: requestId,
+              interfaceSystem: "BPA_REQUEST_STATUS_WORKFLOW",
+              subject: sSubject,
+              toRecipients: oRecipient.email,
+              status: "SENT"
+            })
+          );
+          if (oAlreadySent) continue;
+
+          await this._startBpaRequestStatusWorkflow(req, {
+            request: oRequest,
+            recipient: oRecipient,
+            statusLabel: sStatusLabel,
+            remarks,
+            processTypeName: oProcessType?.name || oRequest.processType_code || "",
+            subProcessTypeName: oSubType?.name || oRequest.subProcessType_code || "",
+            subject: sSubject
+          });
+        } catch (error) {
+          oLog.error(`Request status notification to ${oRecipient.email} failed for request ${requestId}`, error);
+        }
+      }
+    } catch (error) {
+      // The request transition has already succeeded; a BPA outage must not undo it
+      oLog.error(`Request status notification failed for request ${requestId}`, error);
+    }
+  }
+
+  async _startBpaRequestStatusWorkflow(req, { request, recipient, statusLabel, remarks, processTypeName, subProcessTypeName, subject }) {
+    const sJwt = this._requestJwt(req);
+    const bUseUserDestination = this._hasBusinessUserJwt(req, sJwt);
+    const sDestinationName = bUseUserDestination ? BPA_USER_DESTINATION : BPA_TECHNICAL_DESTINATION;
+    const oPayload = {
+      definitionId: BPA_REQUEST_STATUS_DEFINITION_ID,
+      context: {
+        requestermail: recipient.email,
+        requesttitle: request.title || "",
+        requestid: request.referenceNumber || request.ID || "",
+        status: statusLabel,
+        remarks: remarks || "",
+        requestername: recipient.displayName,
+        processtype: processTypeName,
+        subprocesstype: subProcessTypeName,
+        requesturl: this._requestUrl(req, request.ID)
+      }
+    };
+
+    try {
+      await executeHttpRequest(
+        {
+          destinationName: sDestinationName,
+          ...(bUseUserDestination ? { jwt: sJwt } : {})
+        },
+        {
+          method: "POST",
+          url: BPA_WORKFLOW_PATH,
+          data: oPayload,
+          headers: { "content-type": "application/json" }
+        }
+      );
+      await this._recordTeamNotification(req, {
+        requestId: request.ID,
+        recipient: recipient.email,
+        subject,
+        status: "SENT",
+        interfaceSystem: "BPA_REQUEST_STATUS_WORKFLOW"
+      });
+    } catch (error) {
+      await this._recordTeamNotification(req, {
+        requestId: request.ID,
+        recipient: recipient.email,
+        subject,
+        status: "FAILED",
+        errorMessage: error.message,
+        interfaceSystem: "BPA_REQUEST_STATUS_WORKFLOW"
+      });
+      throw error;
+    }
+  }
+
+  // Request-page link, same format the app already uses: #/requests?requestId=<id>
+  _requestUrl(req, requestId) {
+    return this._assignmentUrl(req, requestId);
   }
 
   async _startBpaEmailWorkflow(req, notification) {

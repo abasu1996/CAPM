@@ -61,8 +61,18 @@
                         <OverflowToolbar class="flowmateToolbar">
                             <Title text="{taskView>/tableHeader}" />
                             <ToolbarSpacer />
+                            <ComboBox
+                                width="14rem"
+                                visible="{= !${taskView>/approvalMode} }"
+                                selectedKey="{taskView>/statusCode}"
+                                placeholder="{i18n>taskStatusFilterPlaceholder}"
+                                change=".onTaskStatusFilterChange"
+                                items="{path: '/TaskStatus', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
+                                <core:Item key="{code}" text="{name}" />
+                            </ComboBox>
                             <SearchField
                                 width="18rem"
+                                value="{taskView>/searchQuery}"
                                 search=".onSearch"
                                 liveChange=".onSearch" />
                             <Button
@@ -84,6 +94,9 @@
                             <columns>
                                 <Column><Text text="{i18n>referenceNumberLabel}" /></Column>
                                 <Column><Text text="{i18n>taskNameLabel}" /></Column>
+                                <Column width="12rem" demandPopin="true" minScreenWidth="Tablet">
+                                    <Text text="{i18n>taskReceivedAtLabel}" />
+                                </Column>
                                 <Column><Text text="{i18n>stepLabel}" /></Column>
                                 <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>mandatoryLabel}" /></Column>
                                 <Column><Text text="{i18n>processorLabel}" /></Column>
@@ -110,6 +123,8 @@
                                                 text="{request/referenceNumber}"
                                                 press=".onRelatedRequestPress" />
                                         </VBox>
+                                        <Text
+                                            text="{path: 'createdAt', type: 'sap.ui.model.type.DateTime', formatOptions: {pattern: 'yyyy-MM-dd HH:mm'}}" />
                                         <Text text="{stepNo}" />
                                         <ObjectStatus
                                             text="{= ${isMandatory} ? ${i18n>mandatoryLabel} : ${i18n>optionalLabel} }"
@@ -446,8 +461,8 @@
                                 </uxap:blocks>
                             </uxap:ObjectPageSubSection>
                             <uxap:ObjectPageSubSection
-        title="{i18n>ivConfirmationSectionTitle}"
-        visible="{= ${request/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER' &amp;&amp; ${taskName} === 'IV Confirmation and Document Archiving' }">
+        title="{i18n>paymentCompletionSectionTitle}"
+        visible="{= ${request/subProcessType_code} === 'NON_PO_TAX_LIAB_PAY_PAYORDER' &amp;&amp;  ${stepNo} === 6 }">
         <uxap:blocks>
             <VBox class="flowmateDetailBlock" width="24rem">
                 <Label text="{i18n>entityLabel}" />

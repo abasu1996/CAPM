@@ -19,7 +19,8 @@ sap.ui.define([
     "sap/m/StandardListItem"
 ], (BaseController, fLibrary, Button, Dialog, MessageBox, MessageToast, Select, Text, Item, Filter, FilterOperator, Sorter, JSONModel, Label, ListItem, Input, SelectDialog, StandardListItem) => {
     "use strict";
-
+    const GFA_CONFIRMATION_STEP_NO = 2;     
+    const PAYMENT_COMPLETION_STEP_NO = 6;
     return BaseController.extend("flowmate.controller.MyTasks", {
         onInit() {
             this.getView().setModel(new JSONModel({
@@ -36,6 +37,9 @@ sap.ui.define([
             }), "processorEdit");
             this.getView().setModel(new JSONModel({
                 teamMode: false,
+                approvalMode: false,
+                statusCode: "",
+                searchQuery: "",
                 title: this.getText("myTasksTitle"),
                 tableHeader: this.getText("tasksTableHeader")
             }), "taskView");
@@ -52,9 +56,12 @@ sap.ui.define([
             this._updateBusyState();
             this._bTeamMode = bTeamMode;
             this._bApprovalMode = bApprovalMode;
+            this._sTaskSearchQuery = "";
             this.getView().getModel("taskView").setData({
                 teamMode: bTeamMode,
                 approvalMode: bApprovalMode,
+                statusCode: "",
+                searchQuery: "",
                 title: this.getText(bApprovalMode ? "pendingApprovalsTitle" : (bTeamMode ? "myTeamTasksTitle" : "myTasksTitle")),
                 tableHeader: this.getText(bApprovalMode ? "pendingApprovalsTableHeader" : (bTeamMode ? "myTeamTasksTableHeader" : "tasksTableHeader"))
             });
@@ -120,26 +127,48 @@ sap.ui.define([
 
         onSearch(oEvent) {
             const sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue") || "";
+            this._sTaskSearchQuery = sQuery;
+            this.getView().getModel("taskView").setProperty("/searchQuery", sQuery);
+            this._applyTaskFilters();
+        },
+
+        onTaskStatusFilterChange() {
+            this._applyTaskFilters();
+        },
+
+        _applyTaskFilters() {
             const oBinding = this.byId("tasksTable").getBinding("items");
 
-            if (!sQuery) {
-                oBinding.filter([]);
+            if (!oBinding) {
                 return;
             }
 
-            oBinding.filter([
-                new Filter({
+            const aFilters = [new Filter("isLoaApproval", FilterOperator.EQ, this._bApprovalMode)];
+
+            if (this._bApprovalMode) {
+                aFilters.push(new Filter("status_code", FilterOperator.EQ, "OPEN"));
+            } else {
+                const sStatusCode = this.getView().getModel("taskView").getProperty("/statusCode");
+                if (sStatusCode) {
+                    aFilters.push(new Filter("status_code", FilterOperator.EQ, sStatusCode));
+                }
+            }
+
+            if (this._sTaskSearchQuery) {
+                aFilters.push(new Filter({
                     filters: [
-                        new Filter("referenceNumber", FilterOperator.Contains, sQuery),
-                        new Filter("taskName", FilterOperator.Contains, sQuery),
-                        new Filter("processor", FilterOperator.Contains, sQuery),
-                        new Filter("role", FilterOperator.Contains, sQuery),
-                        new Filter("status_code", FilterOperator.Contains, sQuery),
-                        new Filter("decision", FilterOperator.Contains, sQuery)
+                        new Filter("referenceNumber", FilterOperator.Contains, this._sTaskSearchQuery),
+                        new Filter("taskName", FilterOperator.Contains, this._sTaskSearchQuery),
+                        new Filter("processor", FilterOperator.Contains, this._sTaskSearchQuery),
+                        new Filter("role", FilterOperator.Contains, this._sTaskSearchQuery),
+                        new Filter("status_code", FilterOperator.Contains, this._sTaskSearchQuery),
+                        new Filter("decision", FilterOperator.Contains, this._sTaskSearchQuery)
                     ],
                     and: false
-                })
-            ]);
+                }));
+            }
+
+            oBinding.filter(aFilters);
         },
 
         onCloseTaskDetail() {
@@ -276,10 +305,11 @@ sap.ui.define([
         async onApprove() {
             const oContext = this.byId("taskObjectPage").getBindingContext();
             const sTaskName = oContext?.getProperty("taskName");
+            const iStepNo = Number(oContext?.getProperty("stepNo") || 0);
             const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
             const sRequestId = oContext?.getProperty("request/ID") || oContext?.getProperty("request_ID");
 
-            if (sTaskName === "GFA Team Confirmation" && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
+            if (iStepNo === GFA_CONFIRMATION_STEP_NO && sSubProcessTypeCode === "NON_PO_MISC_RECEIPTS") {
                 const sDebitGL = (this.byId("gfaDebitGLInput").getValue() || "").trim();
 
                 if (!sDebitGL) {
@@ -306,7 +336,7 @@ sap.ui.define([
 
                 this.hideBusy();
             }
-            if (sTaskName === "IV Confirmation and Document Archiving" && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
+            if (iStepNo === PAYMENT_COMPLETION_STEP_NO && sSubProcessTypeCode === "NON_PO_TAX_LIAB_PAY_PAYORDER") {
                 const sVoucherNumber = (this.byId("taskIvVoucherNumberInput").getValue() || "").trim();
                 const sConfirmationValue = (this.byId("taskIvConfirmationValueInput").getValue() || "").trim();
                 const sBankStatus = (this.byId("taskIvBankStatusInput").getValue() || "").trim();
@@ -500,12 +530,6 @@ sap.ui.define([
 
             oTable.bindItems({
                 path: this._taskCollectionPath(),
-                filters: this._bApprovalMode
-                    ? [
-                        new Filter("isLoaApproval", FilterOperator.EQ, true),
-                        new Filter("status_code", FilterOperator.EQ, "OPEN")
-                    ]
-                    : [new Filter("isLoaApproval", FilterOperator.EQ, false)],
                 sorter: new Sorter("referenceNumber", true),
                 parameters: {
                     expand: "request,treasuryEntries,whtEntries"
@@ -517,6 +541,7 @@ sap.ui.define([
                     dataReceived: this.onDataReceived.bind(this)
                 }
             });
+            this._applyTaskFilters();
         },
 
         _filterUsers(oDialog, sQuery) {
