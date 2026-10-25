@@ -270,12 +270,16 @@
             <TextArea value="{decision>/remarks}" rows="4" width="100%"/>
           </VBox>
         </content>
-        <beginButton>
+        <buttons>
+          <Button
+            text="{i18n>sendToWorkhub}"
+            icon="sap-icon://paper-plane"
+            visible="{= ${decision>/action} === 'approve' &amp;&amp; ${decision>/canSendToWorkhub} === true }"
+            enabled="{= !${decision>/workhubSent} }"
+            press=".onSendPoNumbersToWorkhub"/>
           <Button text="Confirm" type="Emphasized" press=".onConfirmDecision"/>
-        </beginButton>
-        <endButton>
           <Button text="{i18n>cancel}" press=".onCloseDecision"/>
-        </endButton>
+        </buttons>
       </Dialog>
 
       <Dialog id="sendBackDialog" title="Send Task Back" contentWidth="38rem">

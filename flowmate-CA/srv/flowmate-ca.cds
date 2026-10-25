@@ -219,6 +219,19 @@ service FlowmateCAService {
     // G/L Account Enrichment, Valuation Class or S/4 Data Validation step.
     lineValues: LargeString
   ) returns Boolean;
+  /** Sends all PO numbers entered in the S/4 Data Validation dialog to Workhub and completes the
+   * corresponding Workhub task. Workhub credentials and workflow/view IDs are server settings. */
+  action sendPoNumbersToWorkhub(
+    taskId: UUID,
+    pONumber1: LargeString,
+    approvalComment: LargeString
+  ) returns {
+    sent          : Boolean;
+    applicationID : String(100);
+    cardID        : Integer;
+    taskID        : String(255);
+    pONumber1     : LargeString;
+  };
   action rejectTask(taskId: UUID, remarks: LargeString) returns Boolean;
   action sendBackTask(taskId: UUID, targetStepNo: Integer, remarks: LargeString) returns Boolean;
   action completeStep(requestId: UUID, stepNo: Integer, remarks: LargeString) returns Boolean;

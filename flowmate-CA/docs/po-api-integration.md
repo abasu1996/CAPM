@@ -111,3 +111,37 @@ npm run test:po-integration
 These tests use fake persistence and run the actual creation/workflow/history
 handlers. They do not start an application server, connect to HANA, or load CSVs.
 Live token issuance and database integration must be verified after deployment.
+
+## Sending PO numbers to Workhub from S/4 Data Validation
+
+The PO approval dialog exposes **Send to Workhub** for the assigned Purchase
+Order task at the S/4 Data Validation step. It is separate from **Confirm**:
+the Workhub transmission does not approve the Flowmate CA task.
+
+All PO numbers entered in the dialog table are trimmed and sent as one value in
+`pONumber1`, separated by commas. `pONumber2` and `pONumber3` are sent empty.
+The server obtains `WorkHUBID` and `WorkHubAppID` from the request details, so
+the browser cannot spoof the Workhub card or application.
+
+The server follows the Workhub sequence documented in the Workhub API document:
+
+1. `POST /api/auth/token`
+2. `PUT /api/workflows/{workflowId}/{applicationID}/cards/{cardID}`
+3. `GET /api/view/{workflowId}/{viewId}?Card_ID={cardID}`
+4. `POST /api/tasks/{workflowId}/tasks/{taskID}` with `action: DONE`
+
+Configure these server settings in the Flowmate CA service. Do not put the
+client secret in source code or in the UI:
+
+| Setting | Purpose |
+| --- | --- |
+| `WORKHUB_DESTINATION` | BTP destination name; defaults to `workhub-api` |
+| `WORKHUB_WORKFLOW_ID` | Workhub workflow identifier from the integration configuration |
+| `WORKHUB_VIEW_ID` | Workhub view identifier used to find the card task |
+| `WORKHUB_CLIENT_ID` | Workhub client ID, stored as a deployment secret |
+| `WORKHUB_CLIENT_SECRET` | Workhub client secret, stored as a deployment secret |
+
+Create the `workhub-api` HTTP destination with base URL
+`https://dialog.workhub24.com`. The destination supplies connectivity; the
+client credentials remain server-side environment secrets because Workhub's
+token API expects them in a JSON request body.

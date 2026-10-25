@@ -63,10 +63,10 @@
           }
         },
         "auth": {
-          "kind": "xsuaa",
+          "kind": "dummy",
           "users": {
             "*": true,
-            "ca.admin@flowmate.demo": {
+            "anim.basu@ext.dialog.lk": {
               "password": "FlowmateCAAdmin1!",
               "roles": [
                 "CAAdmin",

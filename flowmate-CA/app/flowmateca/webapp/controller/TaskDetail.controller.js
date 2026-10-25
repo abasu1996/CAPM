@@ -81,6 +81,11 @@ sap.ui.define([
         const currentStep = (request.stepInstances || []).find(function (step) {
           return step.stepNo === task.stepNo;
         });
+        // Workhub transmission is available only on an assigned PO S/4 Data Validation task.
+        // The server repeats this check; this flag only controls the dialog button visibility.
+        task.canSendToWorkhub = task.canProcess
+          && request.requestType?.code === "PURCHASE_ORDER"
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
         // Budget Check (Purchase Order, New SES; srv _requestBudgetCheck): optional; the S/4 Data
         // Validation task may run it, and cannot be approved while it is running. Step names as in
         // srv/flowmate-ca.js (Budget Check).
@@ -730,12 +735,45 @@ sap.ui.define([
         projectValue: "",
         needsSesNumber: !!this.getView().getModel("task").getProperty("/needsSesNumber"),
         sesNumber: this.getView().getModel("task").getProperty("/sesNumberPrefill") || "",
+        canSendToWorkhub: !!this.getView().getModel("task").getProperty("/canSendToWorkhub"),
+        workhubSent: false,
         lineEntry: this.getView().getModel("task").getProperty("/lineEntry"),
         lineEntryRows: (this.getView().getModel("task").getProperty("/lineEntryRows") || []).map(function (row) {
           return Object.assign({}, row);
         })
       });
       this.byId("decisionDialog").open();
+    },
+
+    onSendPoNumbersToWorkhub: async function () {
+      const decision = this.getView().getModel("decision").getData();
+      const rows = decision.lineEntryRows || [];
+      const values = rows.map(function (row) { return String(row.value || "").trim(); });
+      if (!values.length || values.some(function (value) { return !value; })) {
+        const missing = values.findIndex(function (value) { return !value; });
+        MessageBox.warning(missing >= 0
+          ? `Row ${missing + 1}: enter the Purchase Order number before sending to Workhub.`
+          : "Enter at least one Purchase Order number before sending to Workhub.");
+        return;
+      }
+
+      this.setBusy(true);
+      try {
+        await this.request("sendPoNumbersToWorkhub", {
+          method: "POST",
+          body: {
+            taskId: this._taskId,
+            pONumber1: values.join(", "),
+            approvalComment: decision.remarks || ""
+          }
+        });
+        this.getView().getModel("decision").setProperty("/workhubSent", true);
+        this.showSuccess("PO numbers sent to Workhub");
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        this.setBusy(false);
+      }
     },
 
     onReject: function () {

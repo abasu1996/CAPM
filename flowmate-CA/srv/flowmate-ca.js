@@ -1,6 +1,7 @@
 const cds = require("@sap/cds");
 const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails } = require("./lib/po-integration");
+const { sendPoNumbersToWorkhub } = require("./lib/workhub");
 const { SELECT, INSERT, UPDATE } = cds.ql;
 // Only the server's completion path can mark a request as an automatic handoff.
 const INTERNAL_FLOWMATE_HANDOFF = Symbol("internalFlowmateHandoff");
@@ -388,6 +389,8 @@ const readAttachmentContent = async (content) => {
 };
 
 module.exports = class FlowmateCAService extends cds.ApplicationService {
+  _workhubClient = sendPoNumbersToWorkhub;
+
   async init() {
     this.db = cds.entities("flowmate.ca.db");
     this.master = await cds.connect.to("CommonMasterDataService");
@@ -438,6 +441,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("reassignTask", this._reassignTask);
     this.on("requestBudgetCheck", this._requestBudgetCheck);
     this.on("approveTask", this._approveTask);
+    this.on("sendPoNumbersToWorkhub", this._sendPoNumbersToWorkhub);
     this.on("rejectTask", this._rejectTask);
     this.on("sendBackTask", this._sendBackTask);
     this.on("completeStep", this._completeStep);
@@ -2119,6 +2123,85 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       { approverStep: { stepNo: task.stepNo, stepName: step?.stepName || task.taskName } });
     await this._autoCompleteStepIfDone(req, tx, task, user);
     return true;
+  };
+
+  // Sends the PO numbers entered in the S/4 Data Validation approval dialog to Workhub. This is
+  // deliberately separate from approveTask: the user can transmit the PO numbers first and then
+  // confirm the Flowmate CA approval. Workhub credentials are resolved only on the server.
+  _sendPoNumbersToWorkhub = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req, tx);
+    const task = await SELECT.one.from(this.db.CATasks).where({ ID: req.data.taskId });
+    if (!task) {
+      return req.reject(404, "Task not found");
+    }
+    await this._assertTaskAccess(req, task, user);
+    if (task.status_code !== TASK_STATUS.OPEN || task.isSuperseded) {
+      return req.reject(409, "Only the current open task can send PO numbers to Workhub");
+    }
+
+    const request = await SELECT.one.from(this.db.CARequests).where({ ID: task.request_ID });
+    if (!request || request.requestType_code !== "PURCHASE_ORDER") {
+      return req.reject(400, "Workhub PO transmission is available only for purchase order requests");
+    }
+    const step = await SELECT.one.from(this.db.RequestStepInstances).where({
+      request_ID: task.request_ID,
+      stepNo: task.stepNo
+    });
+    if (!isS4ValidationStep(step?.stepName)) {
+      return req.reject(400, "PO numbers can be sent to Workhub only from the S/4 Data Validation step");
+    }
+
+    const rawPoNumbers = String(req.data.pONumber1 || "").trim();
+    if (!rawPoNumbers) {
+      return req.reject(400, "Enter at least one Purchase Order number before sending to Workhub");
+    }
+    const poNumbers = rawPoNumbers.split(",").map((value) => value.trim());
+    if (poNumbers.some((value) => !value)) {
+      return req.reject(400, "Enter valid Purchase Order numbers separated by commas");
+    }
+    const pONumber1 = poNumbers.join(", ");
+    if (pONumber1.length > 5000) {
+      return req.reject(400, "The combined Purchase Order numbers must be 5000 characters or fewer");
+    }
+
+    const details = await SELECT.one.from(this.db.PurchaseOrderDetails)
+      .columns("WorkHUBID", "WorkHubAppID")
+      .where({ request_ID: task.request_ID });
+    if (!details) {
+      return req.reject(404, "Purchase order details were not found");
+    }
+    if (!String(details.WorkHUBID || "").trim()) {
+      return req.reject(400, "WorkHUBID is not maintained for this purchase order request");
+    }
+    if (!String(details.WorkHubAppID || "").trim()) {
+      return req.reject(400, "WorkHubAppID is not maintained for this purchase order request");
+    }
+
+    let result;
+    try {
+      result = await this._workhubClient({
+        applicationId: details.WorkHubAppID,
+        cardId: details.WorkHUBID,
+        poNumber1: pONumber1,
+        approvalComment: req.data.approvalComment || ""
+      });
+    } catch (error) {
+      cds.log("workhub-integration").error(`PO transmission failed for task ${task.ID}: ${error.message}`);
+      return req.reject(error.workhubStatus ? 502 : 503, error.message);
+    }
+
+    await this._writeHistory(
+      tx,
+      task.request_ID,
+      task.stepNo,
+      "PO_SENT_TO_WORKHUB",
+      user,
+      task.status_code,
+      task.status_code,
+      `PO numbers sent to Workhub: ${pONumber1}`
+    );
+    return { sent: true, ...result };
   };
 
   // A step completes on its own once nothing is left to do in it: no task of the step is still
