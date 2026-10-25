@@ -2,14 +2,14 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const cds = require("@sap/cds");
 const FlowmateCAService = require("../srv/flowmate-ca");
-const { cardNumber, sendPoNumbersToWorkhub, taskIdFromResponse } = require("../srv/lib/workhub");
+const { cardNumber, sendPoNumbersToWorkhub } = require("../srv/lib/workhub");
 
 test("cardNumber accepts the Workhub card ID and rejects non-numeric values", () => {
   assert.equal(cardNumber("4"), 4);
   assert.throws(() => cardNumber("card-4"), /numeric Workhub card ID/);
 });
 
-test("Workhub integration sends all PO numbers in pONumber1 and completes the task", async () => {
+test("Workhub integration sends all PO numbers in pONumber1 without submitting a task", async () => {
   const calls = [];
   const httpRequest = async (destination, config, options) => {
     calls.push({ destination, config, options });
@@ -19,10 +19,7 @@ test("Workhub integration sends all PO numbers in pONumber1 and completes the ta
     if (config.method === "put") {
       return { data: { success: true } };
     }
-    if (config.method === "get") {
-      return { data: [{ iD: "task-123" }] };
-    }
-    return { data: { success: true } };
+    throw new Error(`Unexpected Workhub request: ${config.method} ${config.url}`);
   };
 
   const result = await sendPoNumbersToWorkhub({
@@ -31,7 +28,6 @@ test("Workhub integration sends all PO numbers in pONumber1 and completes the ta
     poNumber1: "4500001234, 4500001235",
     approvalComment: "Validated",
     workflowId: "workflow-1",
-    viewId: "view-1",
     clientId: "client-1",
     clientSecret: "secret-1",
     httpRequest
@@ -40,30 +36,22 @@ test("Workhub integration sends all PO numbers in pONumber1 and completes the ta
   assert.deepEqual(result, {
     applicationID: "w71cbe15a5a",
     cardID: 4,
-    taskID: "task-123",
     pONumber1: "4500001234, 4500001235"
   });
-  assert.equal(calls.length, 4);
+  assert.equal(calls.length, 2);
   assert.equal(calls[0].config.url, "/api/auth/token");
   assert.deepEqual(calls[0].config.data, {
     client_id: "client-1",
     client_secret: "secret-1",
     grant_type: "client_credentials"
   });
+  assert.match(calls[0].config.headers["user-agent"], /^Mozilla\/5\.0/);
+  assert.equal(calls[1].config.headers["user-agent"], calls[0].config.headers["user-agent"]);
   assert.equal(calls[1].config.url, "/api/workflows/workflow-1/w71cbe15a5a/cards/4");
   assert.equal(calls[1].config.data.pONumber1, "4500001234, 4500001235");
   assert.equal(calls[1].config.data.pONumber2, "");
   assert.equal(calls[1].config.data.pONumber3, "");
-  assert.equal(calls[2].config.url, "/api/view/workflow-1/view-1?Card_ID=4");
-  assert.equal(calls[3].config.url, "/api/tasks/workflow-1/tasks/task-123");
-  assert.deepEqual(calls[3].config.data, { action: "DONE", comment: "Validated" });
   assert.equal(calls.every((call) => call.destination.destinationName === "workhub-api"), true);
-});
-
-test("taskIdFromResponse accepts Workhub's iD response property", () => {
-  assert.equal(taskIdFromResponse({ data: [{ iD: "task-1" }] }), "task-1");
-  assert.equal(taskIdFromResponse({ data: { value: [{ ID: "task-2" }] } }), "task-2");
-  assert.equal(taskIdFromResponse({ data: [] }), "");
 });
 
 test("service action maps WorkHUBID to cardID and WorkHubAppID to applicationID", async (t) => {
@@ -99,7 +87,7 @@ test("service action maps WorkHUBID to cardID and WorkHubAppID to applicationID"
   let received;
   service._workhubClient = async (input) => {
     received = input;
-    return { applicationID: input.applicationId, cardID: 4, taskID: "wh-task-1", pONumber1: input.poNumber1 };
+    return { applicationID: input.applicationId, cardID: 4, pONumber1: input.poNumber1 };
   };
 
   const result = await service._sendPoNumbersToWorkhub({

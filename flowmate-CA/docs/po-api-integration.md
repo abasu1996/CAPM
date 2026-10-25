@@ -123,12 +123,13 @@ All PO numbers entered in the dialog table are trimmed and sent as one value in
 The server obtains `WorkHUBID` and `WorkHubAppID` from the request details, so
 the browser cannot spoof the Workhub card or application.
 
-The server follows the Workhub sequence documented in the Workhub API document:
+The server performs the first two steps of the Workhub sequence:
 
 1. `POST /api/auth/token`
 2. `PUT /api/workflows/{workflowId}/{applicationID}/cards/{cardID}`
-3. `GET /api/view/{workflowId}/{viewId}?Card_ID={cardID}`
-4. `POST /api/tasks/{workflowId}/tasks/{taskID}` with `action: DONE`
+
+It does not look up or submit a Workhub workflow task. A successful card update
+is enough for **Send to Workhub** to report success.
 
 Configure these server settings in the Flowmate CA service. Do not put the
 client secret in source code or in the UI:
@@ -137,9 +138,9 @@ client secret in source code or in the UI:
 | --- | --- |
 | `WORKHUB_DESTINATION` | BTP destination name; defaults to `workhub-api` |
 | `WORKHUB_WORKFLOW_ID` | Workhub workflow identifier from the integration configuration |
-| `WORKHUB_VIEW_ID` | Workhub view identifier used to find the card task |
 | `WORKHUB_CLIENT_ID` | Workhub client ID, stored as a deployment secret |
 | `WORKHUB_CLIENT_SECRET` | Workhub client secret, stored as a deployment secret |
+| `WORKHUB_USER_AGENT` | Optional override for the browser-style User-Agent from Workhub's cURL example; the service uses that value by default because the token endpoint returns 403 for the Cloud SDK's default agent |
 
 Create the `workhub-api` HTTP destination with base URL
 `https://dialog.workhub24.com`. The destination supplies connectivity; the
