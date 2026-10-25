@@ -200,11 +200,6 @@ modules:
               TokenServiceInstanceName: flowmate-api-auth
               TokenServiceKeyName: flowmate-api-auth-key
               URL: https://dialog-axiata-plc-arize-qas-9339ozek-org-a-qas-org-b-te48c9fbef.cfapps.ap11.hana.ondemand.com/odata/v4/flowmate
-            - Name: workhub-api
-              Authentication: NoAuthentication
-              ProxyType: Internet
-              Type: HTTP
-              URL: https://dialog.workhub24.com
             - Name: flowmate-ca-html5-host
               ServiceInstanceName: flowmate-ca-html5-host
               ServiceKeyName: flowmate-ca-html5-host-key
@@ -245,6 +240,11 @@ resources:
                 ProxyType: Internet
                 Type: HTTP
                 URL: https://ui5.sap.com
+              - Name: workhub-api
+                Authentication: NoAuthentication
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://dialog.workhub24.com
             existing_destinations_policy: update
 
   - name: flowmate-ca-html5-host
