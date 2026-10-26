@@ -1,8 +1,12 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const cds = require("@sap/cds");
+const fs = require("node:fs/promises");
+const os = require("node:os");
+const path = require("node:path");
+const crypto = require("node:crypto");
 const FlowmateCAService = require("../srv/flowmate-ca");
-const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails } = require("../srv/lib/po-integration");
+const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails, normalizeAttachmentManifest } = require("../srv/lib/po-integration");
 
 const CLIENT = "sb-test-po-client";
 const USER_ID = "ad5d68d0-d527-4f88-97a9-3d40a866781e";
@@ -92,7 +96,7 @@ function serviceHarness(t, { masterUser = REQUESTER } = {}) {
     cds.db = previousDb;
   });
 
-  const names = ["RequestTypes", "RequestVariants", "CARequests", "PurchaseOrderDetails", "PurchaseOrderItems", "WorkflowStepConfigs", "RequestStepInstances", "CATasks", "CAHistory"];
+  const names = ["RequestTypes", "RequestVariants", "CARequests", "PurchaseOrderDetails", "PurchaseOrderItems", "WorkflowStepConfigs", "RequestStepInstances", "CATasks", "CAHistory", "CAAttachments", "RequestTitleCounters", "RequestVersions"];
   const tables = Object.fromEntries(names.map((name) => [name, []]));
   tables.RequestTypes.push({ code: "PURCHASE_ORDER", isActive: true });
   tables.RequestVariants.push({ code: "PO_OPEX", requestType_code: "PURCHASE_ORDER", isActive: true });
@@ -110,6 +114,7 @@ function serviceHarness(t, { masterUser = REQUESTER } = {}) {
   const fakeDb = {
     tx() { return this; },
     async run(query) {
+      if (typeof query === "function") return query(this);
       if (query.INSERT) {
         const { into, entries } = query.INSERT;
         tables[into.ref[0]].push(...structuredClone(entries));
@@ -174,6 +179,60 @@ test("PO creation uses the payload requester, initializes workflow and records t
   assert.deepEqual(masterQueries[0].SELECT.where, [
     { ref: ["ID"] }, "=", { val: USER_ID }, "and", { ref: ["isActive"] }, "=", { val: true }
   ]);
+});
+
+test("a non-empty manifest leaves a technical PO upload-pending without workflow records", async (t) => {
+  const { service, tables } = serviceHarness(t);
+  const manifest = [{
+    clientFileId: "invoice-1",
+    filename: "invoice.pdf",
+    category: "INVOICE_BOQ_ATTACHMENT",
+    mimeType: "application/pdf"
+  }];
+  const created = await service._createRequest(request({ input: { requestVariantCode: "PO_OPEX", attachmentManifest: manifest } }));
+  assert.equal(created.status_code, "UPLOAD_PENDING");
+  assert.equal(created.attachmentUploadStatus, "PENDING");
+  assert.equal(created.integrationClientId, CLIENT);
+  assert.deepEqual(JSON.parse(created.attachmentManifest), manifest);
+  assert.equal(tables.RequestStepInstances.length, 0);
+  assert.equal(tables.CATasks.length, 0);
+  assert.equal(JSON.parse(tables.CAHistory[0].remarks).expectedAttachmentCount, 1);
+});
+
+test("manifest validation rejects duplicate IDs, unsafe names and browser manifests", () => {
+  const technical = request();
+  const integration = resolveTechnicalCreator(technical);
+  const valid = { clientFileId: "invoice-1", filename: "invoice.pdf", category: "INVOICE_BOQ_ATTACHMENT", mimeType: "application/pdf" };
+  assert.throws(() => normalizeAttachmentManifest(technical, [valid, valid], integration), { status: 400 });
+  assert.throws(() => normalizeAttachmentManifest(technical, [{ ...valid, filename: "../invoice.pdf" }], integration), { status: 400 });
+  assert.throws(() => normalizeAttachmentManifest(request({ technical: false }), [valid], null), { status: 403 });
+});
+
+test("matching multipart files are stored and start the workflow exactly once", async (t) => {
+  const { service, tables } = serviceHarness(t);
+  const manifest = [{ clientFileId: "invoice-1", filename: "invoice.pdf", category: "INVOICE_BOQ_ATTACHMENT", mimeType: "application/pdf" }];
+  const created = await service._createRequest(request({ input: { requestVariantCode: "PO_OPEX", attachmentManifest: manifest } }));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "flowmate-ca-upload-test-"));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const filePath = path.join(directory, "payload");
+  const content = Buffer.from("sample pdf content");
+  await fs.writeFile(filePath, content);
+  const file = {
+    ...manifest[0], path: filePath, size: content.length,
+    checksum: crypto.createHash("sha256").update(content).digest("hex"), truncated: false
+  };
+  const first = await service.uploadTechnicalPOAttachments({ requestId: created.ID, files: [file], user: request().user });
+  assert.equal(first.workflowStarted, true);
+  assert.equal(first.alreadyCompleted, false);
+  assert.equal(first.statusCode, "IN_PROGRESS");
+  assert.equal(tables.CAAttachments.length, 1);
+  assert.deepEqual(Buffer.from(tables.CAAttachments[0].content), content);
+  assert.equal(tables.CATasks.length, 2);
+
+  const retry = await service.uploadTechnicalPOAttachments({ requestId: created.ID, files: [file], user: request().user });
+  assert.equal(retry.alreadyCompleted, true);
+  assert.equal(tables.CAAttachments.length, 1);
+  assert.equal(tables.CATasks.length, 2);
 });
 
 for (const [label, masterUser] of [["missing", null], ["inactive", { ...REQUESTER, isActive: false }]]) {
@@ -268,6 +327,7 @@ function approveHarness(t, variantCode) {
   service.db = Object.fromEntries(Object.keys(tables).map((name) => [name, name]));
   Object.assign(service, {
     _ensureCurrentUser: async () => REQUESTER,
+    _recordVersion: async () => {},
     _assertTaskAccess: async () => {},
     _poDetailsNeedingNumber: async () => null,
     _writeHistory: async () => {},

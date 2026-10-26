@@ -71,6 +71,58 @@ the intended active team. WorkHUB fields belong inside the `details` string.
 - Human users retain the existing active-user lookup and workflow access checks.
   They can omit `requesterUser_ID`; if supplied, it must match the signed-in user.
 
+## Optional two-step attachment upload
+
+Technical PO clients can declare the files they intend to upload in the same
+`createRequest` call. `clientFileId` is a caller-generated correlation key: it
+is not a database ID or a filename. The caller chooses a stable, unique value
+and then uses that exact value as the multipart field name in step 2.
+
+```json
+"attachmentManifest": [
+  {
+    "clientFileId": "invoice-1",
+    "filename": "invoice.pdf",
+    "category": "INVOICE_BOQ_ATTACHMENT",
+    "mimeType": "application/pdf"
+  },
+  {
+    "clientFileId": "approval-mail-1",
+    "filename": "approval.msg.pdf",
+    "category": "EMAIL_APPROVAL_ATTACHMENT",
+    "mimeType": "application/pdf"
+  }
+]
+```
+
+- Omit `attachmentManifest`, or send `[]`, when the PO has no initial files.
+  Creation then starts the workflow immediately, exactly as before.
+- A non-empty manifest returns the request UUID with status `UPLOAD_PENDING`.
+  No workflow steps, tasks, notifications or downstream integrations start yet.
+- Upload every declared file in one multipart request to
+  `POST /api/flowmate-ca/po-requests/{request-uuid}/attachments`.
+- Each multipart field name must equal its manifest `clientFileId`; the received
+  filename and MIME type must also match. Missing, extra, duplicate, oversized
+  or mismatched files reject the complete upload.
+- The same Bearer token/client must create and upload the request. After every
+  file is stored atomically, the backend starts the normal workflow itself.
+- Repeating the same completed upload is idempotent when every checksum matches;
+  different content receives HTTP 409 and never starts the workflow again.
+
+Example curl (do not manually set the multipart boundary):
+
+```sh
+curl --request POST \
+  --url "https://<flowmate-ca-srv>/api/flowmate-ca/po-requests/<request-uuid>/attachments" \
+  --header "Authorization: Bearer <token>" \
+  --form "invoice-1=@invoice.pdf;type=application/pdf" \
+  --form "approval-mail-1=@approval.msg.pdf;type=application/pdf"
+```
+
+The endpoint accepts at most 20 files, 50 MB per file and 200 MB in total.
+Normal UI and lifecycle uploads continue to use the existing `Attachments`
+OData entity and are not affected by this technical integration endpoint.
+
 `History` records with `action = REQUEST_CREATED` include JSON in `remarks`:
 
 ```json

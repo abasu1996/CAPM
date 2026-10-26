@@ -79,6 +79,10 @@ entity CARequests : cuid, managed {
   completedAt     : DateTime;
   externalObjectId: String(120);
   externalStatus  : String(80);
+  attachmentManifest         : LargeString;
+  attachmentUploadStatus     : String(30);
+  attachmentUploadCompletedAt: DateTime;
+  integrationClientId        : String(255);
 
   predecessor     : Association to CARequests;
   successors      : Association to many CARequests
@@ -176,6 +180,9 @@ entity CAAttachments : Attachments {
   request : Association to CARequests not null;
   category: String(60);
   uploadedByName: String(160);
+  clientFileId   : String(100);
+  contentChecksum: String(64);
+  source         : String(30);
 }
 
 annotate CAAttachments with {

@@ -4,6 +4,13 @@ using { CommonMasterDataService as common } from './external/common-master';
 @path: '/odata/v4/flowmate-ca'
 @requires: 'authenticated-user'
 service FlowmateCAService {
+  type AttachmentManifestInput {
+    clientFileId : String(100);
+    filename     : String(255);
+    category     : String(60);
+    mimeType     : String(128);
+  }
+
   type DashboardCounts {
     allRequests     : Integer;
     myRequests       : Integer;
@@ -39,7 +46,8 @@ service FlowmateCAService {
     @description: 'Active shared Users.ID of the business requester. Required for technical PO creation; browser requests use the signed-in user.'
     requesterUser_ID   : UUID;
     details            : LargeString;
-
+    @description: 'Optional technical-API attachment declaration. When non-empty, the request remains UPLOAD_PENDING until the matching multipart upload succeeds.'
+    attachmentManifest : many AttachmentManifestInput;
     }
 
   type BulkRequestInput {
@@ -135,7 +143,7 @@ service FlowmateCAService {
     message       : String(500);
   };
 
-  @description: 'Create a request. Technical clients require PORequestCreate, requestTypeCode PURCHASE_ORDER, and input.requesterUser_ID identifying an active shared user. No client-to-user environment mapping is required. Human users use their active signed-in identity. Workflow initialization runs during creation.'
+  @description: 'Create a request. Technical PO clients may declare attachmentManifest. A non-empty manifest creates the request as UPLOAD_PENDING; workflow initialization starts only after the dedicated multipart upload succeeds. Omitted or empty manifests retain immediate workflow initialization.'
   action createRequest(input: NewRequestInput) returns Requests;
   @description: 'Save an incomplete CA request form without validation, workflow tasks, LoA approval or integrations.'
   action saveDraft(draftId: UUID, formData: LargeString) returns { ID: UUID; };

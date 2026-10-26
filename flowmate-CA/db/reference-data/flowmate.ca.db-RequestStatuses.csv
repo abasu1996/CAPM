@@ -1,5 +1,6 @@
 code,name,description,isActive,sortOrder
 DRAFT,Draft,Request is being prepared,1,10
+UPLOAD_PENDING,Upload Pending,Waiting for technical API attachments,1,15
 SUBMITTED,Submitted,Request has entered the workflow,1,20
 IN_PROGRESS,In Progress,Request is actively being processed,1,30
 SENT_BACK,Sent Back,Request requires correction,1,40

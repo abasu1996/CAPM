@@ -1,6 +1,13 @@
 const cds = require("@sap/cds");
+const fs = require("node:fs/promises");
 const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
-const { resolveTechnicalCreator, guardTechnicalOperation, assertTechnicalDetails } = require("./lib/po-integration");
+const {
+  resolveTechnicalCreator,
+  guardTechnicalOperation,
+  assertTechnicalDetails,
+  authenticatedTechnicalClient,
+  normalizeAttachmentManifest
+} = require("./lib/po-integration");
 const { sendPoNumbersToWorkhub } = require("./lib/workhub");
 const { SELECT, INSERT, UPDATE, DELETE } = cds.ql;
 // Only the server's completion path can mark a request as an automatic handoff.
@@ -182,6 +189,7 @@ function approvalDataText(entries) {
 
 const REQUEST_STATUS = {
   DRAFT: "DRAFT",
+  UPLOAD_PENDING: "UPLOAD_PENDING",
   SUBMITTED: "SUBMITTED",
   IN_PROGRESS: "IN_PROGRESS",
   SENT_BACK: "SENT_BACK",
@@ -1486,6 +1494,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   async _insertOneRequest(req, tx, user, { requestType, requestVariant, processorTeam, input, integration }) {
     const requestId = cds.utils.uuid();
+    const attachmentManifest = normalizeAttachmentManifest(req, input.attachmentManifest, integration);
+    const waitsForAttachments = attachmentManifest.length > 0;
     let details = this._parseDetails(req, input.details);
     if (details.paymentRun && requestType.code !== "PURCHASE_ORDER") {
       return req.reject(400, "Payment Run is only supported for purchase order requests");
@@ -1574,22 +1584,142 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       owner_ID: user.ID,
       ownerTeam_ID: processorTeam?.ID || null,
       ownerTeamName: processorTeam?.name || null,
-      status_code: REQUEST_STATUS.DRAFT,
+      status_code: waitsForAttachments ? REQUEST_STATUS.UPLOAD_PENDING : REQUEST_STATUS.DRAFT,
       priority_code: input.priorityCode || "MEDIUM",
       predecessor_ID: input.predecessorId || null,
-      currentStep: 0
+      currentStep: 0,
+      attachmentManifest: waitsForAttachments ? JSON.stringify(attachmentManifest) : null,
+      attachmentUploadStatus: waitsForAttachments ? "PENDING" : null,
+      integrationClientId: waitsForAttachments ? integration.clientId : null
     }));
 
     await this._insertDetails(tx, requestType.code, requestId, details);
     await this._recordVersion(tx, requestId, requestType.code, user);
-    await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, details, user, req);
     const creationRemarks = integration ? JSON.stringify({
       source: "TECHNICAL_API",
       clientId: integration.clientId,
-      requesterUserId: user.ID
+      requesterUserId: user.ID,
+      ...(waitsForAttachments ? { expectedAttachmentCount: attachmentManifest.length } : {})
     }) : undefined;
+    if (waitsForAttachments) {
+      await this._writeHistory(tx, requestId, 0, "REQUEST_CREATED", user, null, REQUEST_STATUS.UPLOAD_PENDING, creationRemarks);
+      return requestId;
+    }
+    await this._initializeWorkflow(tx, requestId, requestType.code, requestVariant?.code, details, user, req);
     await this._writeHistory(tx, requestId, 0, "REQUEST_CREATED", user, null, REQUEST_STATUS.SUBMITTED, creationRemarks);
     return requestId;
+  }
+
+  async uploadTechnicalPOAttachments({ requestId, files, user }) {
+    const clientId = authenticatedTechnicalClient(user);
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId || "")) {
+      throw Object.assign(new Error("requestId must be a valid UUID"), { status: 400 });
+    }
+    return cds.db.run(async (tx) => {
+      const request = await tx.run(SELECT.one.from(this.db.CARequests).where({ ID: requestId }));
+      if (!request) throw Object.assign(new Error("Request not found"), { status: 404 });
+      if (request.requestType_code !== "PURCHASE_ORDER" || !request.attachmentManifest) {
+        throw Object.assign(new Error("This request is not awaiting a technical PO attachment upload"), { status: 409 });
+      }
+      if (request.integrationClientId !== clientId) {
+        throw Object.assign(new Error("Only the API client that created this request may upload its declared attachments"), { status: 403 });
+      }
+      let manifest;
+      try {
+        manifest = JSON.parse(request.attachmentManifest);
+      } catch (_error) {
+        throw Object.assign(new Error("The stored attachment manifest is invalid; contact support"), { status: 500 });
+      }
+      this._assertManifestUpload(manifest, files);
+
+      if (request.attachmentUploadStatus === "COMPLETE") {
+        const existing = await tx.run(SELECT.from(this.db.CAAttachments).where({ request_ID: requestId }));
+        this._assertCompletedUploadMatches(manifest, files, existing);
+        return this._attachmentUploadResult(request, manifest.length, true);
+      }
+      if (request.status_code !== REQUEST_STATUS.UPLOAD_PENDING || request.attachmentUploadStatus !== "PENDING") {
+        throw Object.assign(new Error("The attachment upload is already in progress or the request is no longer upload-pending"), { status: 409 });
+      }
+      const claimed = await tx.run(UPDATE(this.db.CARequests).set({ attachmentUploadStatus: "UPLOADING" }).where({
+        ID: requestId,
+        status_code: REQUEST_STATUS.UPLOAD_PENDING,
+        attachmentUploadStatus: "PENDING"
+      }));
+      if (!claimed) throw Object.assign(new Error("Another attachment upload is already processing this request"), { status: 409 });
+
+      for (const file of files) {
+        const declaration = manifest.find((entry) => entry.clientFileId === file.clientFileId);
+        await tx.run(INSERT.into(this.db.CAAttachments).entries({
+          ID: cds.utils.uuid(),
+          request_ID: requestId,
+          filename: declaration.filename,
+          mimeType: declaration.mimeType,
+          content: await fs.readFile(file.path),
+          category: declaration.category,
+          uploadedByName: request.requesterName,
+          clientFileId: declaration.clientFileId,
+          contentChecksum: file.checksum,
+          source: "TECHNICAL_API"
+        }));
+      }
+
+      const completedAt = new Date().toISOString();
+      await tx.run(UPDATE(this.db.CARequests).set({
+        attachmentUploadStatus: "COMPLETE",
+        attachmentUploadCompletedAt: completedAt
+      }).where({ ID: requestId }));
+      const details = await this._loadDetails(tx, request.requestType_code, requestId);
+      const actor = { ID: request.requester_ID, displayName: request.requesterName, email: request.requesterEmail };
+      const workflowReq = { data: {}, user, reject(status, message) { throw Object.assign(new Error(message), { status }); } };
+      await this._initializeWorkflow(tx, requestId, request.requestType_code, request.requestVariant_code, details, actor, workflowReq);
+      const finalRequest = await tx.run(SELECT.one.from(this.db.CARequests).where({ ID: requestId }));
+      await this._writeHistory(tx, requestId, finalRequest.currentStep || 0, "ATTACHMENTS_UPLOADED", actor,
+        REQUEST_STATUS.UPLOAD_PENDING, finalRequest.status_code,
+        JSON.stringify({ source: "TECHNICAL_API", clientId, attachmentCount: manifest.length }));
+      return this._attachmentUploadResult(finalRequest, manifest.length, false);
+    });
+  }
+
+  _assertManifestUpload(manifest, files) {
+    if (!Array.isArray(files)) throw Object.assign(new Error("No multipart files were received"), { status: 400 });
+    const received = new Map();
+    for (const file of files) {
+      if (received.has(file.clientFileId)) throw Object.assign(new Error(`Duplicate multipart field '${file.clientFileId}'`), { status: 400 });
+      received.set(file.clientFileId, file);
+    }
+    const declared = new Set(manifest.map((entry) => entry.clientFileId));
+    const extra = [...received.keys()].filter((id) => !declared.has(id));
+    const missing = [...declared].filter((id) => !received.has(id));
+    if (extra.length) throw Object.assign(new Error(`Undeclared attachment field(s): ${extra.join(", ")}`), { status: 400 });
+    if (missing.length) throw Object.assign(new Error(`Missing attachment field(s): ${missing.join(", ")}`), { status: 400 });
+    for (const entry of manifest) {
+      const file = received.get(entry.clientFileId);
+      if (file.filename !== entry.filename) throw Object.assign(new Error(`Filename does not match the manifest for '${entry.clientFileId}'`), { status: 400 });
+      if (String(file.mimeType).toLowerCase() !== entry.mimeType) throw Object.assign(new Error(`MIME type does not match the manifest for '${entry.clientFileId}'`), { status: 400 });
+      if (file.truncated) throw Object.assign(new Error(`Attachment '${entry.filename}' exceeds the 50 MB limit`), { status: 413 });
+    }
+  }
+
+  _assertCompletedUploadMatches(manifest, files, existing) {
+    this._assertManifestUpload(manifest, files);
+    const stored = new Map(existing.filter((entry) => entry.clientFileId).map((entry) => [entry.clientFileId, entry]));
+    for (const file of files) {
+      const entry = stored.get(file.clientFileId);
+      if (!entry || entry.contentChecksum !== file.checksum) {
+        throw Object.assign(new Error("The request was already submitted with different attachment content"), { status: 409 });
+      }
+    }
+  }
+
+  _attachmentUploadResult(request, attachmentCount, alreadyCompleted) {
+    return {
+      requestId: request.ID,
+      referenceNumber: request.referenceNumber,
+      statusCode: request.status_code,
+      attachmentCount,
+      workflowStarted: true,
+      alreadyCompleted
+    };
   }
 
   _createBulkRequests = async (req) => {
