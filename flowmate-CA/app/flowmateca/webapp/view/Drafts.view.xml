@@ -6,7 +6,7 @@
     </headerContent>
     <content>
       <VBox class="sapUiResponsiveContentPadding">
-        <MessageStrip text="Drafts are private to their creator and CA administrators. They have no workflow tasks or integrations until submitted." type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+        <MessageStrip text="Drafts are private to their creator. They have no workflow tasks or integrations until submitted." type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
         <Table items="{drafts>/items}" growing="true" itemPress=".onOpen" noDataText="No saved drafts">
           <columns>
             <Column><Text text="Draft"/></Column>

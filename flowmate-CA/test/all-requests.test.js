@@ -96,9 +96,25 @@ test("dashboard counts include requests created or owned by the current user or 
       && (where.length === 1 || row.status_code === where[4].val);
   }).length;
   const counts = await service._getDashboardCounts({ user: { is: (role) => role === "CARequester" } });
-  assert.equal(counts.allRequests, 0);
+  assert.equal(counts.allRequests, 4);
   assert.equal(counts.myRequests, 4);
   assert.equal(counts.myDrafts, 0);
   assert.equal(counts.rejectedRequests, 1);
   assert.equal(counts.completedRequests, 1);
+});
+
+test("administrator draft tile count includes only the logged-in administrator's drafts", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service.db = { CARequests: "requests", CARequestDrafts: "drafts", CATasks: "tasks" };
+  service._ensureCurrentUser = async () => ({ ID: "admin-user" });
+  service._effectiveTaskUserIds = async () => ["admin-user"];
+  service._count = async (entity, where) => {
+    if (entity === "drafts") {
+      assert.deepEqual(where, { creator_ID: "admin-user" });
+      return 3;
+    }
+    return 0;
+  };
+  const counts = await service._getDashboardCounts({ user: { is: (role) => role === "CAAdmin" } });
+  assert.equal(counts.myDrafts, 3);
 });

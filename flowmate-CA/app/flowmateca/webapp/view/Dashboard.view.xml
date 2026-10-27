@@ -46,7 +46,7 @@
         </HBox>
 
         <FlexBox wrap="Wrap" class="caTileGrid" renderType="Div">
-          <GenericTile class="caTile caTileIndigo" header="{i18n>allRequests}" subheader="{i18n>allRequestsSubtitle}" visible="{app>/currentUser/canAssign}" press=".onAllRequests">
+          <GenericTile class="caTile caTileIndigo" header="{i18n>allRequests}" subheader="{i18n>allRequestsSubtitle}" visible="{app>/currentUser/canViewAllRequests}" press=".onAllRequests">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/allRequests}" icon="sap-icon://overview-chart" valueColor="Neutral"/>
@@ -109,7 +109,7 @@
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTilePurple" header="{i18n>reportsDashboard}" subheader="PO, SES and SCM performance" visible="{app>/currentUser/isAdmin}" press=".onReports">
+          <GenericTile class="caTile caTilePurple" header="{i18n>reportsDashboard}" subheader="PO, SES and SCM performance" visible="{app>/currentUser/canViewReports}" press=".onReports">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/reportingRequests}" icon="sap-icon://business-objects-experience" valueColor="Neutral"/>

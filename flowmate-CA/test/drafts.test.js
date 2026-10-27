@@ -101,14 +101,25 @@ test("another user cannot view, overwrite, delete, or consume a draft", async (t
   assert.ok(rows.has(id));
 });
 
-test("a CA administrator can access and remove a saved draft", async (t) => {
+test("a CA administrator sees and maintains only drafts they created", async (t) => {
   const { service, rows, req } = harness(t, OTHER, true);
   const id = "33333333-3333-4333-8333-333333333333";
   rows.set(id, { ID: id, creator_ID: CREATOR, formData: "{}" });
-  const query = { where() { throw new Error("Admin must not be filtered"); } };
+  const query = { where(value) { this.filter = value; } };
   await service._filterDrafts({ ...req(), query });
-  assert.equal(await service._deleteDraft(req({ draftId: id })), true);
-  assert.equal(rows.has(id), false);
+  assert.deepEqual(query.filter, { creator_ID: OTHER });
+  await assert.rejects(service._deleteDraft(req({ draftId: id })), { status: 404 });
+  assert.equal(rows.has(id), true);
+});
+
+test("draft attachment reads are scoped to the logged-in creator even for administrators", async (t) => {
+  const { service, req } = harness(t, OTHER, true);
+  const filters = [];
+  await service._filterDraftAttachments({ ...req(), query: { where(value) { filters.push(value); } } });
+  assert.deepEqual(filters, [
+    [{ ref: ["draft", "creator_ID"] }, "=", { val: OTHER }],
+    { request_ID: null }
+  ]);
 });
 
 test("final submission can consume the creator's draft in its request transaction", async (t) => {

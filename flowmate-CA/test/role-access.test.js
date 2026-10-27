@@ -18,6 +18,8 @@ test("creator can create and monitor but cannot validate, assign, or terminate",
   assert.equal(access.canCreate, true);
   assert.equal(access.canValidate, false);
   assert.equal(access.canAssign, false);
+  assert.equal(access.canViewAllRequests, true);
+  assert.equal(access.canViewReports, false);
   assert.equal(access.canTerminate, false);
   assert.doesNotThrow(() => service._requireCreator(req));
   assert.throws(() => service._requireValidator(req), { status: 403 });
@@ -31,6 +33,8 @@ test("validator can process tasks but cannot create, assign, or terminate", () =
   assert.equal(access.canCreate, false);
   assert.equal(access.canValidate, true);
   assert.equal(access.canAssign, false);
+  assert.equal(access.canViewAllRequests, true);
+  assert.equal(access.canViewReports, false);
   assert.equal(access.canTerminate, false);
   assert.doesNotThrow(() => service._requireValidator(req));
   assert.throws(() => service._requireCreator(req), { status: 403 });
@@ -44,6 +48,8 @@ test("supervisor can validate, assign, and maintain delegation but cannot create
   assert.equal(access.canValidate, true);
   assert.equal(access.canAssign, true);
   assert.equal(access.canManageDelegation, true);
+  assert.equal(access.canViewAllRequests, true);
+  assert.equal(access.canViewReports, true);
   assert.equal(access.canTerminate, false);
   assert.doesNotThrow(() => service._requireSupervisor(req));
   assert.throws(() => service._requireAdmin(req), { status: 403 });
@@ -61,6 +67,8 @@ test("administrator has every business capability", () => {
     canValidate: true,
     canAssign: true,
     canManageDelegation: true,
+    canViewAllRequests: true,
+    canViewReports: true,
     canTerminate: true,
     canAdminister: true
   });
@@ -70,7 +78,20 @@ test("technical PO client retains createRequest access only", () => {
   const service = new FlowmateCAService("FlowmateCAService");
   const req = requestFor("system-user", "PORequestCreate");
   assert.doesNotThrow(() => service._requireCreateAccess(req));
+  assert.equal(service._roleCapabilities(req).canViewAllRequests, false);
   assert.throws(() => service._requireValidator(req), { status: 403 });
+});
+
+test("all business roles can read the all-requests catalogue without receiving mutation capability", () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  for (const role of ["CARequester", "CAProcessor", "CASupervisor", "CAAdmin"]) {
+    const req = requestFor(role);
+    const query = { where() { throw new Error(`${role} must not be filtered`); } };
+    assert.doesNotThrow(() => service._filterRequestsByRole({ ...req, query }));
+  }
+  const query = { where(value) { this.filter = value; } };
+  service._filterRequestsByRole({ ...requestFor(), query });
+  assert.deepEqual(query.filter, { ID: null });
 });
 
 test("supervisor must own a task before processing; administrator may override ownership", async () => {

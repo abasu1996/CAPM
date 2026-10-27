@@ -736,7 +736,7 @@ ${reasons.join("\n")}`);
     },
 
     // Persists browser-selected files against an incomplete request. The server restricts
-    // these rows to the draft creator (or a CA administrator) and reparents them atomically
+    // these rows to the draft creator and reparents them atomically
     // when the single request is finally submitted.
     uploadDraftAttachments: async function (draftId, uploads) {
       const results = await Promise.allSettled(uploads.map(async function (upload) {

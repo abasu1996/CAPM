@@ -6,8 +6,8 @@ workflow steps or tasks, trigger LoA approval, or call Flowmate/Workhub.
 
 The UI offers **Save Draft** on every request-creation form. **Draft Requests** lists
 saved forms; selecting one restores the entered fields, table rows and, for a
-single request, its saved attachments. The
-creator or a CA administrator can read and maintain a draft. Other users and
+single request, its saved attachments. Only the creator can read and maintain
+a draft, including when another user has the CA administrator role. Other users and
 technical API clients cannot access drafts. A final **Submit** uses the
 existing create action and validation path, then deletes the draft in the
 same database transaction as request creation.
@@ -17,8 +17,7 @@ They can be opened or removed after the draft is resumed. On final submission,
 the server reparents the same attachment rows to the new request before it
 initialises workflow tasks; it does not copy or re-upload the binary content.
 The two parent fields are mutually controlled by separate service endpoints,
-and draft attachment reads and writes are limited to the creator or a CA
-administrator.
+and draft attachment reads and writes are limited to the creator.
 
 Draft attachments are intentionally not supported yet for multiple-request PO
 or material-reservation submissions. Saving such a form remains supported, but

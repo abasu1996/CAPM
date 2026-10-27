@@ -42,11 +42,14 @@ sap.ui.define([
           canValidate: false,
           canAssign: false,
           canManageDelegation: false,
+          canViewAllRequests: false,
+          canViewReports: false,
           canTerminate: false,
           canAdminister: false,
           canDelegateOnBehalf: false,
           canReassign: false,
-          activeDelegatorUserIds: []
+          activeDelegatorUserIds: [],
+          teamIds: []
         }
       }), "app");
       this.getRouter().initialize();

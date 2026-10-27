@@ -47,8 +47,10 @@ sap.ui.define([
         // person who sent the request back: their step has been rolled back, so the task
         // lies dormant until that step is reached again, and is reopened then.
         const processableStatus = task.status?.code === "OPEN";
-        task.canClaim = processableStatus && Boolean(user?.canValidate) && !user?.isSupervisor
-          && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID;
+        const belongsToAssignedTeam = Boolean(user?.isAdmin)
+          || (user?.teamIds || []).includes(task.assignedTeam_ID);
+        task.canClaim = processableStatus && Boolean(user?.canValidate)
+          && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID && belongsToAssignedTeam;
         task.canReassign = Boolean(user?.canReassign) && ["OPEN", "IN_PROGRESS"].includes(task.status?.code) && !task.isSuperseded
           && !["COMPLETED", "REJECTED"].includes(task.request?.status?.code || task.request?.status_code);
         task.canProcess = processableStatus && Boolean(user?.canValidate)

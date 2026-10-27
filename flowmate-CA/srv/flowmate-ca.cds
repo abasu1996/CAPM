@@ -35,11 +35,14 @@ service FlowmateCAService {
     canValidate            : Boolean;
     canAssign              : Boolean;
     canManageDelegation    : Boolean;
+    canViewAllRequests     : Boolean;
+    canViewReports         : Boolean;
     canTerminate           : Boolean;
     canAdminister          : Boolean;
     canDelegateOnBehalf    : Boolean;
     canReassign            : Boolean;
     activeDelegatorUserIds : many UUID;
+    teamIds                : many UUID;
   }
 
   type NewRequestInput {
@@ -211,7 +214,7 @@ service FlowmateCAService {
    * Reporting payload for the CA dashboards. The service returns a JSON document so the
    * dashboard can add report sections without changing the transactional entity projections.
    */
-  @requires: 'CAAdmin'
+  @requires: ['CASupervisor', 'CAAdmin']
   action getReportingDashboard(periodStart: Date, periodEnd: Date, poType: String(40)) returns LargeString;
   @requires: ['CARequester', 'CAAdmin']
   action submitRequest(requestId: UUID) returns Boolean;
