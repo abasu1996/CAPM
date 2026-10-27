@@ -39,10 +39,10 @@
     </subHeader>
     <content>
       <!-- Columns keep their full width; the card scrolls sideways and down, headers stay in view. -->
-      <ScrollContainer horizontal="false" vertical="false" width="100%" class="caWorklistScroll">
+      <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
         <Table id="allRequestsTable" mode="None" growing="true" growingThreshold="50"
           growingScrollToLoad="false" noDataText="{i18n>noMatchingRequests}"
-          updateFinished=".onUpdateFinished" itemPress=".onItemPress" sticky="ColumnHeaders" class="caWorklistTable"
+          updateFinished=".onUpdateFinished" itemPress=".onItemPress" fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable"
           items="{
             path: '/Requests',
             parameters: {$count: true, $expand: 'requestType,requestVariant,status'},

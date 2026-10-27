@@ -219,7 +219,8 @@ service FlowmateCAService {
   action approveTask(
     taskId: UUID,
     remarks: LargeString,
-    purchaseOrderNo: String(80),
+    // One or more PO Numbers separated by ";" (Purchase Order, S/4 Data Validation).
+    purchaseOrderNo: String(1000),
     glAccount: String(80),
     valuationClass: String(40),
     serviceCode: String(80),
@@ -230,6 +231,8 @@ service FlowmateCAService {
     // New SES at S/4 Data Validation, Single Line Items: the created SES Number (Multiple Line
     // Items send one per Header Creation row in lineValues).
     sesNumber: String(80),
+    // Purchase Order, PO Approval Completion: the date the PO was released (mandatory there).
+    poReleasedDate: Date,
     // Service Code with multiple line items: JSON [{ itemId, value }], one per line item, for the
     // G/L Account Enrichment, Valuation Class or S/4 Data Validation step.
     lineValues: LargeString
@@ -311,6 +314,8 @@ service CAMasterDataService {
   entity WorkflowStepConfigs as projection on db.WorkflowStepConfigs;
    entity Sites as projection on common.Sites;
    entity Materials as projection on common.Materials;
+   entity ServiceCodes as projection on common.ServiceCodes;
+   entity PoNumbers as projection on common.PoNumbers;
    entity PurchasingOrganizations as projection on common.PurchasingOrganizations;
    entity Currencies as projection on common.Currencies;
    entity Wbs as projection on common.Wbs;

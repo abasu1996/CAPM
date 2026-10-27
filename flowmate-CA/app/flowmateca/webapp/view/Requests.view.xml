@@ -52,7 +52,7 @@
     </subHeader>
     <content>
       <!-- Fits the page width; the page scrolls and the column headers stay in view. -->
-      <ScrollContainer horizontal="false" vertical="false" width="100%" class="caWorklistScroll">
+      <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
         <Table
           id="requestsTable"
           items="{list>/items}"
@@ -61,7 +61,7 @@
           growingScrollToLoad="true"
           noDataText="No requests match the selected filters"
           itemPress=".onItemPress"
-          sticky="ColumnHeaders" class="caWorklistTable">
+          fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable">
           <columns>
             <Column width="12.5rem"><Text text="Request ID"/></Column>
             <Column width="9.5rem"><Text text="{i18n>requestType}"/></Column>

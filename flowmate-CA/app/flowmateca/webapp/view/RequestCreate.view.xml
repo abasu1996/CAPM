@@ -9,7 +9,7 @@
   <Page class="caPage" title="{i18n>createRequest}" showNavButton="true" navButtonPress=".onCancel">
     <headerContent>
       <Button text="{i18n>cancel}" type="Transparent" press=".onCancel"/>
-      <Button text="Save Draft" icon="sap-icon://save" type="Transparent" press=".onSaveDraft" visible="false"/>
+      <Button text="Save Draft" icon="sap-icon://save" type="Transparent" press=".onSaveDraft"/>
       <Button text="{i18n>submit}" icon="sap-icon://paper-plane" type="Emphasized" press=".onSubmit"/>
     </headerContent>
     <content>
@@ -23,7 +23,6 @@
           text="Drafts save form fields and table rows without submitting. Selected files must be reattached when you resume."
           type="Information"
           showIcon="true"
-          visible="false"
           class="sapUiSmallMarginBottom"/>
 
         <Panel headerText="Request Classification" expandable="false" class="caFormSection">
@@ -234,7 +233,7 @@
       <OverflowToolbar>
         <ToolbarSpacer/>
         <Button text="{i18n>cancel}" press=".onCancel"/>
-        <Button text="Save Draft" icon="sap-icon://save" press=".onSaveDraft" visible="false"/>
+        <Button text="Save Draft" icon="sap-icon://save" press=".onSaveDraft"/>
         <Button text="{i18n>submit}" icon="sap-icon://paper-plane" type="Emphasized" press=".onSubmit"/>
       </OverflowToolbar>
     </footer>

@@ -72,6 +72,21 @@ service CommonMasterDataService {
         materialDescription : String(180);
         isActive : Boolean;
   }
+
+   @cds.persistence.skip
+  entity ServiceCodes {
+    key ID                 : UUID;
+        serviceCode        : String(40);
+        serviceDescription : String(180);
+        isActive           : Boolean;
+  }
+
+   @cds.persistence.skip
+  entity PoNumbers {
+    key ID       : UUID;
+        poNumber : String(40);
+        isActive : Boolean;
+  }
   @cds.persistence.skip
   entity PurchasingOrganizations {
     key ID      : UUID;

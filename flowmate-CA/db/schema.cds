@@ -749,7 +749,10 @@ entity PurchaseOrderDetails : cuid, managed {
   // turned into a real SES request when the PO workflow completes.
   sesDraft                : LargeString;
   // Entered by the approver of the last PO step; copied into the SES successor.
-  purchaseOrderNumber     : String(80);
+  // One or more ("4500000001; 4500000002"); the first is the PO the SES successor uses.
+  purchaseOrderNumber     : String(1000);
+  // Entered at PO Approval Completion (mandatory there).
+  poReleasedDate          : Date;
   // Budget Check (PO step "Budget Check", auto-completed on submit): null = no budget gating
   // (older requests), NOT_REQUESTED, REQUESTED (S/4 task on hold) or COMPLETED. The S/4 Data
   // Validation approver cannot approve until it is COMPLETED.
@@ -853,4 +856,6 @@ entity ServiceEntrySheetItems : cuid, managed {
   value      : Decimal(17,2);
   poNumber     : String(80);
   poLineItemNo : String(40);
+  // New SES: recorded per line item at S/4 Data Validation.
+  sesNumber    : String(80);
 }

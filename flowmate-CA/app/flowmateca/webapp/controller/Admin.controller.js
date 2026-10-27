@@ -1,8 +1,11 @@
 sap.ui.define([
   "flowmateca/controller/BaseController",
   "flowmateca/model/ListModel",
-  "sap/m/MessageBox"
-], function (BaseController, ListModel, MessageBox) {
+  "sap/m/MessageBox",
+  "sap/ui/model/Filter",
+  "sap/ui/model/FilterOperator",
+  "sap/ui/model/FilterType"
+], function (BaseController, ListModel, MessageBox, Filter, FilterOperator, FilterType) {
   "use strict";
 
   // Simple masters with one Admin tab each (the Project Code Creation (PCC) tables and Product
@@ -71,9 +74,10 @@ sap.ui.define([
         teams: [],
         teamMembers: [],
         teamTree: [],
-        vendors: [],
         sites: [],
         materials: [],
+        serviceCodes: [],
+        poNumbers: [],
         wbs: [],
         documentTypes: [],
         purchasingOrganizations: [],
@@ -118,7 +122,8 @@ sap.ui.define([
     onRefresh: async function () {
       this.setBusy(true);
       try {
-        const [steps, requestTypes, variants, users, teams, teamMembers, vendors, sites, materials,
+        const [steps, requestTypes, variants, users, teams, teamMembers, sites, materials,
+          serviceCodes, poNumbers,
           purchasingOrganizations, wbs, documentTypes, companyCodes, purchasingGroups, divisions,
           applicableTaxes, plant, serviceGroups, valuationClasses, storageLocations, salesOrgs,
           incoterms, costCenters, currencies, paymentTerms, systemContractBasePO,
@@ -132,9 +137,10 @@ sap.ui.define([
           this.requestMaster("Users?$expand=manager&$orderby=displayName"),
           this.requestMaster("Teams?$orderby=name"),
           this.requestMaster("TeamMembers?$expand=user,team"),
-          this.requestMaster("Vendors?$orderby=vendorName"),
           this.requestMaster("Sites?$orderby=siteName"),
           this.requestMaster("Materials?$orderby=materialDescription"),
+          this.requestMaster("ServiceCodes?$orderby=serviceCode"),
+          this.requestMaster("PoNumbers?$orderby=poNumber"),
           this.requestMaster("PurchasingOrganizations?$orderby=purchasingOrganizationCode"),
           this.requestMaster("Wbs?$orderby=wbsDescription"),
           this.requestMaster("DocumentTypes?$orderby=documentTypeCode"),
@@ -177,9 +183,10 @@ sap.ui.define([
         model.setProperty("/users", users.value || []);
         model.setProperty("/teams", teams.value || []);
         model.setProperty("/teamMembers", teamMembers.value || []);
-        model.setProperty("/vendors", vendors.value || []);
         model.setProperty("/sites", sites.value || []);
         model.setProperty("/materials", materials.value || []);
+        model.setProperty("/serviceCodes", serviceCodes.value || []);
+        model.setProperty("/poNumbers", poNumbers.value || []);
         model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || []);
         model.setProperty("/wbs", wbs.value || []);
         model.setProperty("/documentTypes", documentTypes.value || []);
@@ -216,11 +223,33 @@ sap.ui.define([
         model.setProperty("/budgetCodes", budgetCodes.value || []);
         model.setProperty("/pcc", await this._loadPccMasters());
         model.setProperty("/teamTree", this._teamTree(teams.value || [], teamMembers.value || []));
+        this._refreshVendors();
       } catch (error) {
         this.showError(error);
       } finally {
         this.setBusy(false);
       }
+    },
+
+    // The vendor master (tens of thousands of rows) is read page by page from the OData entity
+    // through the "master" model, not loaded into the admin JSON model like the small masters.
+    // A refresh would throw away unsaved edits, so it waits until they are saved.
+    _refreshVendors: function () {
+      const binding = this.byId("vendorTable")?.getBinding("items");
+      if (binding && !binding.hasPendingChanges()) {
+        binding.refresh();
+      }
+    },
+
+    onVendorSearch: function (event) {
+      const query = (event.getParameter("query") || "").trim();
+      const filter = query ? new Filter({
+        filters: ["vendorCode", "vendorName", "vendorEmail"].map(function (path) {
+          return new Filter({ path, operator: FilterOperator.Contains, value1: query, caseSensitive: false });
+        }),
+        and: false
+      }) : [];
+      this.byId("vendorTable").getBinding("items").filter(filter, FilterType.Application);
     },
 
     _teamTree: function (teams, memberships) {
@@ -363,6 +392,14 @@ sap.ui.define([
 
     onAddMaterial: function(){
       this._openAddDialog("material", "Add Material");
+    },
+
+    onAddServiceCode: function () {
+      this._openAddDialog("serviceCode", "Add Service Code");
+    },
+
+    onAddPoNumber: function () {
+      this._openAddDialog("poNumber", "Add PO Number");
     },
 
     onAddWBS: function(){
@@ -602,6 +639,8 @@ onAddBudgetCode: function () {
         isVendor: type === "vendor",
         isSite: type === "site",
         isMaterial: type === "material",
+        isServiceCode: type === "serviceCode",
+        isPoNumber: type === "poNumber",
         isWBS: type === "wbs",
         isDocumentType: type === "documentType",
         isPurchasingOrganization: type === "purchasingOrganization",
@@ -813,6 +852,29 @@ onAddBudgetCode: function () {
             body: {
               materialCode: item.materialCode,
               materialDescription: item.materialDescription,
+              isActive: true
+            }
+          });
+        } else if (item.type === "serviceCode") {
+          if (!item.serviceCode) {
+            throw new Error("Service Code is required.");
+          }
+          await this.requestMaster("ServiceCodes", {
+            method: "POST",
+            body: {
+              serviceCode: item.serviceCode,
+              serviceDescription: item.serviceDescription || null,
+              isActive: true
+            }
+          });
+        } else if (item.type === "poNumber") {
+          if (!item.poNumber) {
+            throw new Error("PO Number is required.");
+          }
+          await this.requestMaster("PoNumbers", {
+            method: "POST",
+            body: {
+              poNumber: item.poNumber,
               isActive: true
             }
           });
@@ -1647,18 +1709,22 @@ else if (item.type === "mrpType") {
       return this._delete("Teams", event.getSource().getBindingContext("admin").getObject());
     },
 
-    onSaveVendor: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("Vendors", row.ID, {
-        vendorName: row.vendorName,
-        vendorEmail: row.vendorEmail,
-        AccountGroup: row.AccountGroup || null,
-        isActive: row.isActive
-      });
+    // Edits to the listed vendors are held in the "vendorEdits" group until Save sends them.
+    onSaveVendor: async function () {
+      const model = this.getView().getModel("master");
+      try {
+        await model.submitBatch("vendorEdits");
+        if (model.hasPendingChanges("vendorEdits")) {
+          throw new Error("The vendor changes could not be saved. Check the values and try again.");
+        }
+        this.showSuccess("Changes saved");
+      } catch (error) {
+        this.showError(error);
+      }
     },
 
     onDeleteVendor: function (event) {
-      return this._delete("Vendors", event.getSource().getBindingContext("admin").getObject());
+      return this._delete("Vendors", event.getSource().getBindingContext("master").getObject());
     },
 
     onSaveSite: function (event) {
@@ -1687,6 +1753,31 @@ onSaveMaterial: function (event) {
 
 onDeleteMaterial: function (event) {
       return this._delete("Materials", event.getSource().getBindingContext("admin").getObject());
+    },
+
+    onSaveServiceCode: function (event) {
+      const row = event.getSource().getBindingContext("admin").getObject();
+      return this._patch("ServiceCodes", row.ID, {
+        serviceCode: row.serviceCode,
+        serviceDescription: row.serviceDescription || null,
+        isActive: row.isActive
+      });
+    },
+
+    onDeleteServiceCode: function (event) {
+      return this._delete("ServiceCodes", event.getSource().getBindingContext("admin").getObject());
+    },
+
+    onSavePoNumber: function (event) {
+      const row = event.getSource().getBindingContext("admin").getObject();
+      return this._patch("PoNumbers", row.ID, {
+        poNumber: row.poNumber,
+        isActive: row.isActive
+      });
+    },
+
+    onDeletePoNumber: function (event) {
+      return this._delete("PoNumbers", event.getSource().getBindingContext("admin").getObject());
     },
 
 onSaveWBS: function (event) {

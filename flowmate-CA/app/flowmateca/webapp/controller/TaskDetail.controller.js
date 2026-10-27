@@ -86,10 +86,10 @@ sap.ui.define([
         task.canSendToWorkhub = task.canProcess
           && request.requestType?.code === "PURCHASE_ORDER"
           && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
-        // Budget Check (Purchase Order, New SES; srv _requestBudgetCheck): optional; the S/4 Data
+        // Budget Check (Purchase Order only; srv _requestBudgetCheck): optional; the S/4 Data
         // Validation task may run it, and cannot be approved while it is running. Step names as in
         // srv/flowmate-ca.js (Budget Check).
-        const budgetStatus = ["PURCHASE_ORDER", "SERVICE_ENTRY_SHEET"].indexOf(request.requestType?.code) >= 0
+        const budgetStatus = request.requestType?.code === "PURCHASE_ORDER"
           ? (details.budgetCheckStatus || null) : null;
         const onS4Step = /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
         const onBudgetStep = /budget\s+(check|confirmation)/i.test(currentStep?.stepName || "");
@@ -236,26 +236,34 @@ sap.ui.define([
             });
         }
 
-        // New SES at S/4 Data Validation: the SES Number, one field (Single Line Items) or one per
-        // Header Creation row, each row being one SES (Multiple Line Items). Mirrors _approveTask.
+        // Purchase Order, PO Approval Completion: the PO Released Date (mandatory). Mirrors _approveTask.
+        task.needsPoReleasedDate = request.requestType?.code === "PURCHASE_ORDER"
+          && /po\s+approval\s+completion/i.test(currentStep?.stepName || "");
+        task.poReleasedDatePrefill = details.poReleasedDate || "";
+
+        // New SES at S/4 Data Validation: an SES Number per line item (Single and Multiple Line), next to
+        // the line's PO Number, PO Line Item Number and Amount; Export / Import come with the dialog
+        // table. A request without line items (older ones) keeps one field. Mirrors _approveTask.
         task.needsSesNumber = false;
         if (request.requestType?.code === "SERVICE_ENTRY_SHEET" && request.requestVariant?.code === "SES_NEW"
           && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "")) {
-          if ((details.headers || []).length) {
-            const paymentOptions = { SES_REQUIRED: "SES Required", PAYMENT_REQUIRED: "Payment Required", PAYMENT_REQUIRED_GRN_PO: "Payment Required for GRN PO" };
+          if ((details.items || []).length) {
             task.lineEntry = {
-              field: "sesNumber", label: "SES Number", title: "SES Number per Header Creation row", maxLength: 80,
-              info1Label: "Purchase Order Number", info2Label: "SES / Payment Option"
+              field: "sesNumber", label: "SES Number", title: "SES Number per line item", maxLength: 80,
+              info1Label: "PO Number", info2Label: "PO Line Item Number", info3Label: "Amount"
             };
-            task.lineEntryRows = this.sortedDetailHeaders(details).map(function (header) {
-              return {
-                itemId: header.ID,
-                itemNo: header.itemNo,
-                info1: header.purchaseOrderNo || "",
-                info2: paymentOptions[header.sesPaymentOption] || header.sesPaymentOption || "",
-                value: header.sesNumber || ""
-              };
-            });
+            task.lineEntryRows = details.items.slice()
+              .sort(function (left, right) { return left.itemNo - right.itemNo; })
+              .map(function (item) {
+                return {
+                  itemId: item.ID,
+                  itemNo: item.itemNo,
+                  info1: item.poNumber || "",
+                  info2: item.poLineItemNo || "",
+                  info3: item.value === null || item.value === undefined ? "" : String(item.value),
+                  value: item.sesNumber || ""
+                };
+              });
           } else {
             task.needsSesNumber = true;
             task.sesNumberPrefill = details.sesNumber || "";
@@ -282,31 +290,13 @@ sap.ui.define([
           });
         }
 
-        // Purchase Order at S/4 Data Validation: the PO Number (mandatory), next to the PO's
-        // Procurement Category and Vendor Name. One row: each PO is its own request and task.
-        if (request.requestType?.code === "PURCHASE_ORDER"
-          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "")) {
-          const [vendor, category] = await Promise.all([
-            details.vendor_ID
-              ? this.request(`Vendors(${details.vendor_ID})?$select=vendorCode,vendorName`).catch(function () { return null; })
-              : null,
-            details.procurementCategory_code
-              ? this.requestMaster(`ProcurementCategories('${encodeURIComponent(details.procurementCategory_code)}')?$select=code,name`)
-                .catch(function () { return null; })
-              : null
-          ]);
-          task.lineEntry = {
-            field: "purchaseOrderNumber", label: "PO Number", title: "PO Number", maxLength: 80,
-            info1Label: "Procurement Category", info2Label: "Vendor Name", sendAs: "purchaseOrderNo"
-          };
-          task.lineEntryRows = [{
-            itemId: details.ID,
-            itemNo: 1,
-            info1: this.codeAndText(details.procurementCategory_code, category && category.name) || "",
-            info2: this.codeAndText(vendor && vendor.vendorCode, vendor && vendor.vendorName) || "",
-            value: details.purchaseOrderNumber || ""
-          }];
-        }
+        // Purchase Order at S/4 Data Validation: one or more PO Numbers; the first is mandatory.
+        // With Create SES Successor only one (the SES uses it), so + is disabled. Mirrors _approveTask.
+        task.needsPoNumberList = request.requestType?.code === "PURCHASE_ORDER"
+          && /s\s*\/?\s*4\s+data\s+validation/i.test(currentStep?.stepName || "");
+        task.poNumberListLocked = details.sesRequired === true;
+        task.poNumberListPrefill = String(details.purchaseOrderNumber || "").split(";")
+          .map(function (number) { return number.trim(); }).filter(Boolean);
 
         // Step 1 is the requester's own: they correct the details here and send the
         // request on, rather than approving it.
@@ -719,6 +709,12 @@ sap.ui.define([
         action: "approve",
         remarks: "",
         needsPoNumber: !!this.getView().getModel("task").getProperty("/needsPoNumber"),
+        needsPoNumberList: !!this.getView().getModel("task").getProperty("/needsPoNumberList"),
+        poNumberListLocked: !!this.getView().getModel("task").getProperty("/poNumberListLocked"),
+        poNumberList: (function (prefill) {
+          const numbers = prefill && prefill.length ? prefill : [""];
+          return numbers.map(function (value, index) { return { value: value, first: index === 0 }; });
+        })(this.getView().getModel("task").getProperty("/poNumberListPrefill")),
         purchaseOrderNo: "",
         needsGlAccount: !!this.getView().getModel("task").getProperty("/needsGlAccount"),
         glAccount: prefill.glAccount || "",
@@ -733,6 +729,8 @@ sap.ui.define([
         needsProjectValue: !!this.getView().getModel("task").getProperty("/needsProjectValue"),
         projectValueLabel: this.getView().getModel("task").getProperty("/projectValueLabel") || "",
         projectValue: "",
+        needsPoReleasedDate: !!this.getView().getModel("task").getProperty("/needsPoReleasedDate"),
+        poReleasedDate: this.getView().getModel("task").getProperty("/poReleasedDatePrefill") || "",
         needsSesNumber: !!this.getView().getModel("task").getProperty("/needsSesNumber"),
         sesNumber: this.getView().getModel("task").getProperty("/sesNumberPrefill") || "",
         canSendToWorkhub: !!this.getView().getModel("task").getProperty("/canSendToWorkhub"),
@@ -797,6 +795,12 @@ sap.ui.define([
         MessageBox.warning("Enter the Purchase Order number to approve this task.");
         return;
       }
+      // Purchase Order, S/4 Data Validation: the first PO Number is mandatory, the others optional.
+      const poNumbers = (decision.poNumberList || []).map(function (row) { return String(row.value || "").trim(); });
+      if (!rejecting && decision.needsPoNumberList && !poNumbers[0]) {
+        MessageBox.warning("Enter the Purchase Order Number to approve this task.");
+        return;
+      }
       const glAccount = String(decision.glAccount || "").trim();
       if (!rejecting && decision.needsGlAccount && !glAccount) {
         MessageBox.warning("Enter the GL Account to approve this task.");
@@ -832,12 +836,23 @@ sap.ui.define([
         MessageBox.warning("Enter the SES Number to approve this task.");
         return;
       }
+      const poReleasedDate = String(decision.poReleasedDate || "").trim();
+      if (!rejecting && decision.needsPoReleasedDate && !poReleasedDate) {
+        MessageBox.warning("Enter the PO Released Date to approve this task.");
+        return;
+      }
       const body = { taskId: this._taskId, remarks: decision.remarks };
+      if (!rejecting && decision.needsPoReleasedDate) {
+        body.poReleasedDate = poReleasedDate;
+      }
       if (!rejecting && decision.needsSesNumber) {
         body.sesNumber = sesNumber;
       }
       if (!rejecting && decision.needsPoNumber) {
         body.purchaseOrderNo = purchaseOrderNo;
+      }
+      if (!rejecting && decision.needsPoNumberList) {
+        body.purchaseOrderNo = poNumbers.filter(Boolean).join("; ");
       }
       if (!rejecting && decision.needsGlAccount) {
         body.glAccount = glAccount;
@@ -891,6 +906,23 @@ sap.ui.define([
       } finally {
         this.setBusy(false);
       }
+    },
+
+    // Purchase Order Numbers at S/4 Data Validation: + adds a row, the cross removes an added one.
+    onAddPoNumber: function () {
+      const model = this.getView().getModel("decision");
+      if (model.getProperty("/poNumberListLocked")) {
+        return;
+      }
+      model.setProperty("/poNumberList", (model.getProperty("/poNumberList") || []).concat([{ value: "", first: false }]));
+    },
+
+    onRemovePoNumber: function (event) {
+      const model = this.getView().getModel("decision");
+      const index = Number(event.getSource().getBindingContext("decision").getPath().split("/").pop());
+      model.setProperty("/poNumberList", (model.getProperty("/poNumberList") || []).filter(function (_row, n) {
+        return n !== index;
+      }));
     },
 
     onCloseDecision: function () {

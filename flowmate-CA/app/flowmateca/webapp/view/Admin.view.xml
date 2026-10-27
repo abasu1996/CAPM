@@ -163,10 +163,11 @@
             <IconTabFilter key="vendors" text="Vendors" icon="sap-icon://supplier">
               <Toolbar class="caSectionToolbar">
                 <Title text="Vendor Master" level="H3"/>
+                <SearchField width="22rem" placeholder="Search by code, name or e-mail" search=".onVendorSearch"/>
                 <ToolbarSpacer/>
                 <Button text="Add Vendor" icon="sap-icon://add" type="Emphasized" press=".onAddVendor"/>
               </Toolbar>
-              <Table items="{admin>/vendors}" growing="true" class="caAdminTable">
+              <Table id="vendorTable" items="{path: 'master>/Vendors', parameters: {$orderby: 'vendorName', $count: true, $$updateGroupId: 'vendorEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
                 <columns>
                   <Column width="12rem"><Text text="Vendor Code"/></Column>
                   <Column><Text text="Vendor Name"/></Column>
@@ -178,11 +179,11 @@
                 <items>
                   <ColumnListItem>
                     <cells>
-                      <Text text="{admin>vendorCode}"/>
-                      <Input value="{admin>vendorName}"/>
-                      <Input value="{admin>vendorEmail}" type="Email"/>
-                      <Input value="{admin>AccountGroup}"/>
-                      <Switch state="{admin>isActive}"/>
+                      <Text text="{master>vendorCode}"/>
+                      <Input value="{master>vendorName}"/>
+                      <Input value="{master>vendorEmail}" type="Email"/>
+                      <Input value="{master>AccountGroup}"/>
+                      <Switch state="{master>isActive}"/>
                       <HBox>
                         <Button icon="sap-icon://save" type="Transparent" press=".onSaveVendor"/>
                         <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteVendor"/>
@@ -320,6 +321,134 @@
                             type="Transparent"
                             tooltip="{i18n>delete}"
                             press=".onDeleteMaterial"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="serviceCodes" text="Service Codes" icon="sap-icon://wrench">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Service Code Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Service Code"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddServiceCode"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/serviceCodes}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Service Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>serviceCode}"/>
+
+                    <Input value="{admin>serviceDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveServiceCode"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteServiceCode"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
+
+<IconTabFilter key="poNumbers" text="PO Numbers" icon="sap-icon://sales-order">
+    <Toolbar class="caSectionToolbar">
+        <Title text="PO Number Master" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add PO Number"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddPoNumber"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/poNumbers}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column>
+                <Text text="PO Number"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>poNumber}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSavePoNumber"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeletePoNumber"/>
                     </HBox>
 
                 </cells>
@@ -3359,6 +3488,18 @@
             <Input value="{newItem>/materialCode}"  placeholder="Enter Material Code"/>
             <Label text="Material Description" required="true" class="sapUiSmallMarginTop"/>
             <Input value="{newItem>/materialDescription}" placeholder="Enter Material Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isServiceCode}">
+            <Label text="Service Code" required="true"/>
+            <Input value="{newItem>/serviceCode}" placeholder="Enter Service Code"/>
+            <Label text="Description" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/serviceDescription}" placeholder="Enter Service Description"/>
+            </VBox>
+
+            <VBox visible="{newItem>/isPoNumber}">
+            <Label text="PO Number" required="true"/>
+            <Input value="{newItem>/poNumber}" placeholder="Enter PO Number"/>
             </VBox>
 
              <VBox visible="{newItem>/isWBS}">

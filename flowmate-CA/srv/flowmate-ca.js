@@ -27,11 +27,17 @@ const BUDGET_CHECK = {
 };
 
 // The details entity that holds budgetCheckStatus, per request type.
+// Purchase Orders only: the Service Entry Sheet flow has no Budget Check.
 const BUDGET_CHECK_DETAILS = {
-  PURCHASE_ORDER: "PurchaseOrderDetails",
-  SERVICE_ENTRY_SHEET: "ServiceEntrySheetDetails"
+  PURCHASE_ORDER: "PurchaseOrderDetails"
 };
 const budgetDetailsEntity = (requestTypeCode) => BUDGET_CHECK_DETAILS[requestTypeCode] || null;
+
+// "4500000001; 4500000002" -> ["4500000001", "4500000002"]: trimmed, blanks and repeats dropped.
+const poNumberList = (value) => [...new Set(String(value || "").split(";").map((n) => n.trim()).filter(Boolean))];
+
+// Purchase Order step 4: the approver records the PO Released Date; no SLA of its own.
+const isPoApprovalCompletionStep = (stepName) => /po\s+approval\s+completion/i.test(stepName || "");
 
 // Existing Capex-FM / Opex configs still call the step "Budget Confirmation".
 const isBudgetCheckStep = (stepName) => /budget\s+(check|confirmation)/i.test(stepName || "");
@@ -326,7 +332,7 @@ const APPROVAL_DATA_FIELDS = {
   MATERIAL_CODE: [["glAccount", "GL Account"], ["valuationClass_code", "Valuation Class"], ["materialCode", "Material Code"]],
   EQUIPMENT_CODE: [["equipmentCode", "Equipment Code"]],
   PROJECT_CODE: [["projectCode", "Project Code"], ["functionLocation", "Function Location"], ["activityNumber", "Activity"]],
-  PURCHASE_ORDER: [["purchaseOrderNumber", "PO Number"]],
+  PURCHASE_ORDER: [["purchaseOrderNumber", "PO Number"], ["poReleasedDate", "PO Released Date"]],
   SERVICE_ENTRY_SHEET: [["sesNumber", "SES Number"]]
 };
 
@@ -2117,18 +2123,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       if (budget && isS4ValidationStep(step?.stepName) && approvalBlockedByBudgetCheck(budget.budgetCheckStatus)) {
         return req.reject(409, "Complete the Budget Check before approving this task");
       }
-      // Purchase Order: the S/4 Data Validation approver records the PO Number (the SES successor
-      // reuses it).
+      // Purchase Order: the S/4 Data Validation approver records one or more PO Numbers ("a; b").
+      // The first is mandatory; with Create SES Successor only one is allowed, and the SES uses it.
       if (budget && request.requestType_code === "PURCHASE_ORDER" && isS4ValidationStep(step?.stepName)) {
-        const poNumber = String(req.data.purchaseOrderNo || "").trim();
-        if (!poNumber) {
+        const poNumbers = poNumberList(req.data.purchaseOrderNo);
+        if (!poNumbers.length) {
           return req.reject(400, "Enter the PO Number to approve this task");
         }
-        if (poNumber.length > 80) {
-          return req.reject(400, "PO Number must be 80 characters or fewer");
+        if (poNumbers.some((number) => number.length > 80)) {
+          return req.reject(400, "Each PO Number must be 80 characters or fewer");
+        }
+        const po = await SELECT.one.from(this.db.PurchaseOrderDetails).columns("sesRequired").where({ ID: budget.ID });
+        if (po?.sesRequired && poNumbers.length > 1) {
+          return req.reject(400, "With Create SES Successor only one PO Number can be entered");
         }
         await tx.run(UPDATE(this.db.PurchaseOrderDetails)
-          .set({ purchaseOrderNumber: poNumber }).where({ ID: budget.ID }));
+          .set({ purchaseOrderNumber: poNumbers.join("; ") }).where({ ID: budget.ID }));
       }
       if (budget?.budgetCheckStatus && isBudgetCheckStep(step?.stepName)) {
         await tx.run(UPDATE(this.db[budgetEntity])
@@ -2251,17 +2261,24 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
 
-    // New SES: the S/4 Data Validation approver records the created SES Number, once (Single Line
-    // Items) or per Header Creation row (Multiple Line Items, one SES per row).
+    // New SES: the S/4 Data Validation approver records an SES Number per line item (Single and
+    // Multiple Line alike). The distinct numbers are also kept on the SES, so the overview, versions
+    // and the Completed e-mail show them once. A request without line items (older ones) keeps a
+    // single SES Number.
     if (serviceCodeStep && request?.requestType_code === "SERVICE_ENTRY_SHEET" && request.requestVariant_code === "SES_NEW") {
       const sesDetails = await SELECT.one.from(this.db.ServiceEntrySheetDetails)
         .where({ request_ID: task.request_ID });
-      const hasHeaderRows = sesDetails && await SELECT.one.from(this.db.ServiceEntrySheetHeaders)
+      const hasItems = sesDetails && await SELECT.one.from(this.db.ServiceEntrySheetItems)
         .where({ details_ID: sesDetails.ID });
-      if (sesDetails && hasHeaderRows) {
-        const failure = await this._applyLineValues(tx, req, this.db.ServiceEntrySheetHeaders, sesDetails.ID,
+      if (sesDetails && hasItems) {
+        const failure = await this._applyLineValues(tx, req, this.db.ServiceEntrySheetItems, sesDetails.ID,
           { column: "sesNumber", label: "SES Number", maxLength: 80 });
         if (failure) return failure;
+        const numbers = (await tx.run(SELECT.from(this.db.ServiceEntrySheetItems).columns("sesNumber")
+          .where({ details_ID: sesDetails.ID }).orderBy("itemNo"))).map((item) => item.sesNumber);
+        await tx.run(UPDATE(this.db.ServiceEntrySheetDetails)
+          .set({ sesNumber: [...new Set(numbers.filter(Boolean))].join(", ").slice(0, 80) })
+          .where({ ID: sesDetails.ID }));
       } else if (sesDetails) {
         const sesNumber = String(req.data.sesNumber || "").trim();
         if (!sesNumber) {
@@ -2299,6 +2316,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           { column: "reservationNumber", label: "Material Reservation Number", maxLength: 40 });
         if (failure) return failure;
       }
+    }
+
+    // PO Approval Completion records the date the PO was released (mandatory).
+    if (request?.requestType_code === "PURCHASE_ORDER" && isPoApprovalCompletionStep(step?.stepName)) {
+      const poReleasedDate = String(req.data.poReleasedDate || "").trim();
+      if (!poReleasedDate) {
+        return req.reject(400, "Enter the PO Released Date to approve this task");
+      }
+      await tx.run(UPDATE(this.db.PurchaseOrderDetails)
+        .set({ poReleasedDate }).where({ request_ID: task.request_ID }));
     }
 
     // The last step of a PO with "Create SES Successor" captures the PO number for the SES.
@@ -2523,6 +2550,36 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   // Warehouse Material: the Vendor Allocation step goes to the Vendor Allocation Owner picked on
   // the request. Matched by name, like the S/4 step.
+  // A step's SLA days. PO Approval Completion has no SLA whatever days its config holds (the Admin
+  // Console only accepts 1-30): its task gets no deadline and the request is due at the end of the
+  // steps before it.
+  _slaDaysForConfig(config) {
+    return this._isPoApprovalCompletionStep(config) ? 0 : config?.slaDays;
+  }
+
+  // Purchase Order: PO Approval Completion goes to whoever handled S/4 Data Validation.
+  _isPoApprovalCompletionStep(config) {
+    return config?.requestType_code === "PURCHASE_ORDER" && isPoApprovalCompletionStep(config?.stepName);
+  }
+
+  // The user of the request's latest approved S/4 Data Validation task, or {} (the step's team).
+  async _s4ApproverAssignment(tx, requestId) {
+    const steps = await tx.run(SELECT.from(this.db.RequestStepInstances)
+      .columns("stepNo", "stepName").where({ request_ID: requestId }));
+    const s4 = steps.find((step) => isS4ValidationStep(step.stepName));
+    if (!s4) {
+      return {};
+    }
+    const handled = (await tx.run(SELECT.from(this.db.CATasks)
+      .columns("assignedUser_ID", "assignedName", "assignedEmail", "completedAt", "isSuperseded")
+      .where({ request_ID: requestId, stepNo: s4.stepNo, status_code: TASK_STATUS.APPROVED })))
+      .filter((task) => !task.isSuperseded && task.assignedUser_ID)
+      .sort((left, right) => String(right.completedAt || "").localeCompare(String(left.completedAt || "")))[0];
+    return handled
+      ? { assignedUser_ID: handled.assignedUser_ID, assignedName: handled.assignedName, assignedEmail: handled.assignedEmail }
+      : {};
+  }
+
   _isVendorAllocationStep(config) {
     return config?.requestType_code === "MATERIAL_RESERVATION"
       && config?.requestVariant_code === "RES_WAREHOUSE"
@@ -3034,7 +3091,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       processorTeam_ID: config.processorTeam_ID,
       processorTeamName: teamsById.get(config.processorTeam_ID)?.name || null,
       status: index === 0 ? "OPEN" : "PENDING",
-      slaDays: config.slaDays,
+      slaDays: this._slaDaysForConfig(config),
       startedAt: index === 0 ? submittedAt : null,
       completedAt: null
     }));
@@ -3156,7 +3213,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
 
     const draft = this._parseDetails(req, poDetails.sesDraft);
-    const poNumber = poDetails.purchaseOrderNumber || null;
+    // The SES belongs to the first PO Number recorded at S/4 Data Validation.
+    const poNumber = poNumberList(poDetails.purchaseOrderNumber)[0] || null;
     const details = {
       ...draft,
       sourceMode: "PO_SUCCESSOR",
@@ -3255,7 +3313,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const instance = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
       .columns("slaDays").where({ ID: step.ID }));
     const startedAt = new Date().toISOString();
-    const deadline = this._slaDeadline(startedAt, instance?.slaDays ?? config?.slaDays ?? 2);
+    // A step with 0 SLA days, and PO Approval Completion whatever its configured days, has no SLA:
+    // no deadline, so no breach, and the request's due date stays the one of the steps before it.
+    const slaDays = this._isPoApprovalCompletionStep(config) ? 0 : (instance?.slaDays ?? config?.slaDays ?? 2);
+    const deadline = Number(slaDays) === 0
+      ? { slaDueAt: null, dueDate: null }
+      : this._slaDeadline(startedAt, slaDays);
     const sla = { ...deadline, slaStartedAt: startedAt };
     await tx.run(UPDATE(this.db.RequestStepInstances).set(deadline).where({ ID: step.ID }));
 
@@ -3640,7 +3703,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!selected.length) {
       return { dueDate: null, slaDueAt: null, totalDays: 0, stepCount: 0 };
     }
-    const totalDays = selected.slice(1).reduce((sum, config) => sum + Number(config.slaDays || 0), 0);
+    const totalDays = selected.slice(1).reduce((sum, config) => sum + Number(this._slaDaysForConfig(config) || 0), 0);
     return { ...this._slaDeadline(new Date(), totalDays), totalDays, stepCount: selected.length };
   };
 
@@ -3888,6 +3951,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // An APPROVER or SCM step goes to the user named on the form; every other step stays in
   // its processor team's queue.
   async _resolveStepAssignment(tx, requestId, config) {
+    if (this._isPoApprovalCompletionStep(config)) {
+      return this._s4ApproverAssignment(tx, requestId);
+    }
     if (!["APPROVER", "SCM"].includes(config?.roleCode) && !this._isVendorAllocationStep(config)) {
       return {};
     }
@@ -3905,7 +3971,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   // E-mail list fields ("a@x.com; b@y.com") that take a limited number of addresses.
   _assertEmailLimits(req, requestTypeCode, details) {
-    const limits = { PURCHASE_ORDER: [["approvedPoRecipientEmail", "Approved PO Recipient Email", 4]] }[requestTypeCode] || [];
+    const limits = { PURCHASE_ORDER: [["approvedPoRecipientEmail", "Approved PO Recipient Email", 5]] }[requestTypeCode] || [];
     for (const [name, label, max] of limits) {
       const count = String(details?.[name] || "").split(";").filter((email) => email.trim()).length;
       if (count > max) {
@@ -4216,6 +4282,7 @@ module.exports.REQUEST_OUTCOME = REQUEST_OUTCOME;
 module.exports.formatTaskReference = formatTaskReference;
 // Rules and texts used by the service, exported for the unit tests.
 Object.assign(module.exports, {
+  isPoApprovalCompletionStep,
   procurementCategoryForVariant,
   withVariantProcurementCategory,
   BUDGET_CHECK,

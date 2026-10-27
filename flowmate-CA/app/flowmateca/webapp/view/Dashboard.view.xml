@@ -59,7 +59,7 @@
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTileIndigo" header="Draft Requests" subheader="Saved forms awaiting submission" press=".onDrafts" visible="false">
+          <GenericTile class="caTile caTileIndigo" header="Draft Requests" subheader="Saved forms awaiting submission" press=".onDrafts">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/myDrafts}" icon="sap-icon://save" valueColor="Neutral"/>
@@ -108,7 +108,7 @@
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile visible="false" class="caTile caTilePurple" header="{i18n>reportsDashboard}" subheader="PO, SES and SCM performance" press=".onReports">
+          <GenericTile class="caTile caTilePurple" header="{i18n>reportsDashboard}" subheader="PO, SES and SCM performance" press=".onReports">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/reportingRequests}" icon="sap-icon://business-objects-experience" valueColor="Neutral"/>

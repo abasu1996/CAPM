@@ -623,6 +623,11 @@ sap.ui.define([
           formModel.setProperty(path, definition.defaultValue);
         }
       });
+      // A Purchase Order's Approved PO Recipient Email starts with the requester's e-mail.
+      if (typeCode === "PURCHASE_ORDER" && fields.some(function (definition) { return definition.name === "approvedPoRecipientEmail"; })
+        && !formModel.getProperty("/details/approvedPoRecipientEmail") && formModel.getProperty("/requesterEmail")) {
+        formModel.setProperty("/details/approvedPoRecipientEmail", formModel.getProperty("/requesterEmail"));
+      }
       // A Purchase Order's Procurement Category is its Process Variant.
       const variantCategory = FormDefinitions.procurementCategoryForVariant(variantCode);
       fields.forEach(function (definition) {
@@ -824,7 +829,10 @@ sap.ui.define([
         return;
       }
       const fields = this._sesDialogFields();
-      const columns = FormDefinitions.getItemColumns("SERVICE_ENTRY_SHEET", "SES_NEW");
+      // PO Number is filled from the PO when the SES is created, so it is not asked for here.
+      const columns = FormDefinitions.getItemColumns("SERVICE_ENTRY_SHEET", "SES_NEW").map(function (col) {
+        return col.name === "poNumber" ? Object.assign({}, col, { required: false }) : col;
+      });
       await this._loadFieldCatalogs(fields.concat(columns));
 
       const formHost = this.byId("sesFormHost");
@@ -910,7 +918,10 @@ sap.ui.define([
         MessageBox.warning(sesDateProblem);
         return;
       }
-      // SES line items are optional; a row that is entered still needs its required cells.
+      if (!(draft.items || []).length) {
+        MessageBox.warning("Add at least one SES line item.");
+        return;
+      }
       const missingCell = this._firstMissingItemCell(draft.items, GRIDS.sesItems.columns);
       if (missingCell) {
         MessageBox.warning(`SES Line Items - ${missingCell}`);

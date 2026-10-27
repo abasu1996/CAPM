@@ -1091,20 +1091,20 @@
   font-weight: 600;
 }
 
-/* Tile lists: the table sits in a card that fits the page width. The page scrolls (the column
-   headers stay in view), so the card ends at the last row; long values end in "…" with the full
-   value as the tooltip. */
+/* Tile lists: every column shows its full value. The card scrolls sideways when the columns are
+   wider than the page and down when the rows are taller than the screen; the column headers stay
+   at the top of the card. */
 .caWorklistScroll.sapMScrollCont {
   box-sizing: border-box;
   width: calc(100% - 3rem) !important;
   max-width: 92rem;
+  max-height: calc(100vh - 11rem);
   margin: 1.25rem auto 1.5rem;
   border: 1px solid var(--ca-border);
   border-radius: 0.65rem;
   background: #fff;
   box-shadow: var(--ca-shadow);
-  /* sticky column headers need every box around the table to let it overflow */
-  overflow: visible !important;
+  overflow: auto !important;
 }
 
 .sapUiResponsiveContentPadding > .caWorklistScroll.sapMScrollCont {
@@ -1113,19 +1113,21 @@
 }
 
 .caWorklistScroll .caWorklistTable.sapMList {
-  width: 100% !important;
+  width: max-content !important;
+  min-width: 100%;
   max-width: none;
   margin: 0;
   border: 0;
-  border-radius: 0.65rem;
+  border-radius: 0;
   box-shadow: none;
   animation: none;
   overflow: visible;
 }
 
 .caWorklistScroll .sapMListTbl {
-  width: 100%;
-  table-layout: fixed;
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
 }
 
 .caWorklistScroll .sapMListTblHeaderCell .sapMText,
@@ -1134,12 +1136,17 @@
 .caWorklistScroll .sapMListTblCell .sapMObjectIdentifierTitle,
 .caWorklistScroll .sapMListTblCell .sapMObjStatusText {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
 }
 
-.caWorklistScroll .caTitleCell {
+/* Titles can be long: up to 22rem wide, wrapping onto further lines rather than being cut. */
+.caWorklistScroll .sapMListTblCell .sapMText.caTitleCell {
   display: block;
+  min-width: 12rem;
+  max-width: 22rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* UI5's off-screen screen-reader helper sits past the table's edge; keep it from adding scroll. */

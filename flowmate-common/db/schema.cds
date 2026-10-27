@@ -96,6 +96,17 @@ entity Materials: cuid, managed {
   isActive     : Boolean default true;
 }
 
+entity ServiceCodes : cuid, managed {
+  serviceCode        : String(40) not null;
+  serviceDescription : String(180);
+  isActive           : Boolean default true;
+}
+
+entity PoNumbers : cuid, managed {
+  poNumber : String(40) not null;
+  isActive : Boolean default true;
+}
+
 entity Wbs: cuid, managed {
   wbsCode        : String(40) not null;
   wbsDescription : String(180) not null;

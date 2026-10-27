@@ -58,7 +58,7 @@
     </subHeader>
     <content>
       <!-- Columns keep their full width; the card scrolls sideways and down, headers stay in view. -->
-      <ScrollContainer horizontal="false" vertical="false" width="100%" class="caWorklistScroll">
+      <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
         <Table
           id="tasksTable"
           items="{tasks>/items}"
@@ -67,12 +67,13 @@
           popinLayout="GridSmall"
           noDataText="No tasks are available in this queue"
           itemPress=".onItemPress"
-          sticky="ColumnHeaders" class="caWorklistTable">
+          fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable">
           <columns>
             <Column width="12.5rem"><Text text="Task ID"/></Column>
             <Column width="11.5rem"><Text text="Request ID"/></Column>
             <Column><Text text="Task"/></Column>
             <Column><Text text="Title"/></Column>
+            <Column><Text text="{i18n>requester}"/></Column>
             <Column width="3rem" hAlign="Center"><Text text="Step"/></Column>
             <Column width="12rem"><Text text="{i18n>status}"/></Column>
             <Column width="8rem"><Text text="{i18n>slaDue}"/></Column>
@@ -91,6 +92,7 @@
                 <Link text="{tasks>request/referenceNumber}" wrapping="false" press=".onRequestLinkPress"/>
                 <Text text="{tasks>taskName}" tooltip="{tasks>description}" wrapping="false"/>
                 <Text text="{tasks>request/title}" tooltip="{= ${tasks>request/requestType/name} + ' · ' + ${tasks>request/requesterName} }" class="caTitleCell"/>
+                <Text text="{tasks>request/requesterName}" wrapping="false"/>
                 <Text text="{tasks>stepNo}" wrapping="false"/>
                 <HBox alignItems="Center" wrap="NoWrap">
                   <ObjectStatus text="{parts: ['tasks>status/name', 'tasks>status/code'], formatter: '.statusName'}" state="{path: 'tasks>status/code', formatter: '.statusState'}"/>

@@ -451,9 +451,9 @@ sap.ui.define([], function () {
     ],
     SVC_NEW: serviceNewBase,
     SVC_NEW_REF: [
-      field("referenceServiceCode", "Reference Service Code", "input", {
+      field("referenceServiceCode", "Reference Service Code", "valueHelp", {
         required: true,
-        maxLength: 40,
+        entity: "ServiceCodes", key: "serviceCode", text: "serviceCode", secondaryText: "serviceDescription",
         placeholder: "Existing service code to copy from"
       }),
       // Category, Unit of Measure and Group are inherited from the reference service code.
@@ -464,8 +464,9 @@ sap.ui.define([], function () {
       })
     ],
     SVC_EXISTING: [
-      field("referenceServiceCode", "Existing Service Code", "input", {
-        required: true
+      field("referenceServiceCode", "Existing Service Code", "valueHelp", {
+        required: true,
+        entity: "ServiceCodes", key: "serviceCode", text: "serviceCode", secondaryText: "serviceDescription"
       }),
       field("serviceDescription", "Requested Description", "input", {
         maxLength: 40,
@@ -660,7 +661,9 @@ sap.ui.define([], function () {
           { key: "DIRECT", text: "Direct Delivery" }
         ]
       }),
-      field("poNumber", "PO Number", "input"),
+      field("poNumber", "PO Number", "valueHelp", {
+        entity: "PoNumbers", key: "poNumber", text: "poNumber"
+      }),
       field("warehouse_code", "Warehouse Location", "combo", {
         entity: "Warehouses"
       }),
@@ -958,10 +961,11 @@ sap.ui.define([], function () {
     field("termsOfDelivery", "Terms of Delivery", "textarea", { required: true }),
     field("warranty", "Warranty", "textarea", { required: true }),
     field("paymentMilestone", "Payment Milestone", "input"),
-    // One e-mail is mandatory; the + button adds more, up to 4 (stored "a@x.com; b@y.com").
+    // The requester's e-mail first (pre-filled on the create page); the + button adds up to 4 more,
+    // 5 in all (stored "a@x.com; b@y.com").
     field("approvedPoRecipientEmail", "Approved PO Recipient Email", "emailList", {
       required: true,
-      maxEmails: 4
+      maxEmails: 5
     }),
     field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file", {
       required: true
@@ -988,7 +992,10 @@ sap.ui.define([], function () {
   definitions.PO_OPEX = poFields;
 
   const sesFields = [
-    field("purchaseOrderNo", "Purchase Order Number", "input", { required: true }),
+    field("purchaseOrderNo", "Purchase Order Number", "valueHelp", {
+      required: true,
+      entity: "PoNumbers", key: "poNumber", text: "poNumber"
+    }),
     field("existingSesNo", "Existing SES Number", "input"),
     field("loaApprover_ID", "LOA Approver", "combo", {
       required: true,
@@ -1202,10 +1209,13 @@ sap.ui.define([], function () {
     // Shown for Single and Multiple Line Items alike (see alwaysHasItems).
     SERVICE_ENTRY_SHEET: [
       column("itemNo", "ID", "readonly"),
-      // PO Number stays optional: an SES captured as a PO successor only gets its PO number on the
-      // PO's last approval.
-      column("poNumber", "PO Number"),
-      column("poLineItemNo", "PO Line Item Number"),
+      // Mandatory. Only a PO's SES Successor pop-up leaves PO Number open: the server fills it
+      // from the PO (see RequestCreate._openSesDialog).
+      column("poNumber", "PO Number", "valueHelp", {
+        required: true,
+        entity: "PoNumbers", key: "poNumber", text: "poNumber"
+      }),
+      column("poLineItemNo", "PO Line Item Number", "input", { required: true }),
       column("value", "SES Amount", "number", { required: true }),
       column("quantity", "Quantity", "number")
     ],
@@ -1519,6 +1529,10 @@ sap.ui.define([], function () {
     // approvers enter per line. Editing tables keep using getItemColumns.
     getItemDisplayColumns: function (requestTypeCode, variantCode, categoryCode) {
       const columns = this.getItemColumns(requestTypeCode, variantCode, categoryCode);
+      // New SES: the S/4 Data Validation approver records the SES Number per line item.
+      if (requestTypeCode === "SERVICE_ENTRY_SHEET") {
+        return variantCode === "SES_NEW" ? columns.concat([column("sesNumber", "SES Number")]) : columns;
+      }
       // The S/4 Data Validation approver records the Equipment Code per line (New only; Existing
       // already names its code in Existing Equipment Code).
       if (requestTypeCode === "EQUIPMENT_CODE") {
@@ -1564,7 +1578,7 @@ sap.ui.define([], function () {
     },
     // Request types whose line items table may stay empty (a row that is entered is still checked).
     lineItemsOptional: function (requestTypeCode) {
-      return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";
+      return requestTypeCode === "PURCHASE_ORDER";
     },
     alwaysHasItems: function (requestTypeCode) {
       return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";

@@ -30,8 +30,11 @@ sap.ui.define([
   "sap/m/ToolbarSpacer",
   "sap/m/SelectDialog",
   "sap/m/StandardListItem",
-  "sap/ui/model/json/JSONModel"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel) {
+  "sap/ui/model/json/JSONModel",
+  "sap/m/TableSelectDialog",
+  "sap/ui/model/Filter",
+  "sap/ui/model/FilterOperator"
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel, TableSelectDialog, Filter, FilterOperator) {
   "use strict";
 
   // A VBox that a SimpleForm accepts as a field (forms only take IFormContent controls); it holds
@@ -61,7 +64,7 @@ sap.ui.define([
     MATERIAL_CODE: [["glAccount", "GL Account"], ["valuationClass_code", "Valuation Class"], ["materialCode", "Material Code"]],
     EQUIPMENT_CODE: [["equipmentCode", "Equipment Code"]],
     PROJECT_CODE: [["projectCode", "Project Code"], ["functionLocation", "Function Location"], ["activityNumber", "Activity"]],
-    PURCHASE_ORDER: [["purchaseOrderNumber", "PO Number"]],
+    PURCHASE_ORDER: [["purchaseOrderNumber", "PO Number"], ["poReleasedDate", "PO Released Date"]],
     SERVICE_ENTRY_SHEET: [["sesNumber", "SES Number"]]
   };
 
@@ -71,7 +74,7 @@ sap.ui.define([
   // Pick lists maintained by admins in flowmate-common; served by CAMasterDataService,
   // not FlowmateCAService, and they carry no sortOrder column.
   const MASTER_PICK_LISTS = new Set([
-    "Plant", "Sites", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
+    "Plant", "Sites", "ServiceCodes", "PoNumbers", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
     "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
     "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
@@ -112,7 +115,7 @@ sap.ui.define([
   }
 
   // Master data whose fields show only the code once picked (the drop-down lists code and name).
-  const CODE_ONLY_ENTITIES = new Set(["Sites", "Materials"]);
+  const CODE_ONLY_ENTITIES = new Set(["Sites", "Materials", "ServiceCodes"]);
 
   return Controller.extend("flowmateca.controller.BaseController", {
     getRouter: function () {
@@ -1139,6 +1142,19 @@ ${reasons.join("\n")}`);
           templateShareable: true,
           template: this._comboListItem(definition, key, text, secondaryText)
         });
+      } else if (definition.type === "valueHelp") {
+        // Value help (OVS): the value is picked from the master in a searchable dialog.
+        control = new Input({
+          width: "100%",
+          showValueHelp: true,
+          valueHelpOnly: true,
+          showClearIcon: true,
+          placeholder: definition.placeholder || `Select ${definition.label}`,
+          valueHelpRequest: function (event) {
+            this._openValueHelp(definition, event.getSource());
+          }.bind(this),
+          change: this._applyConditionalVisibility.bind(this)
+        }).bindValue(path);
       } else if (definition.type === "emailList") {
         control = this._createEmailListControl(definition, dataPath);
       } else {
@@ -1153,6 +1169,59 @@ ${reasons.join("\n")}`);
         control.setEditable(false);
       }
       return control;
+    },
+
+    // Value-help dialog of a "valueHelp" field: the active rows of definition.entity (already in
+    // the catalog model) with the code and, when the definition has one, the description; the
+    // search matches either. Confirming writes the code into the input, which is bound two-way.
+    _openValueHelp: function (definition, input) {
+      const key = definition.key || "code";
+      const description = definition.secondaryText && definition.secondaryText !== key ? definition.secondaryText : null;
+      const fields = [key].concat(description ? [description] : []);
+      const current = input.getValue();
+      const dialog = new TableSelectDialog({
+        title: `Select ${definition.label}`,
+        noDataText: `No ${definition.label} found`,
+        contentWidth: description ? "40rem" : "24rem",
+        columns: [new Column({ header: new Text({ text: definition.label }) })].concat(description
+          ? [new Column({ header: new Text({ text: "Description" }) })]
+          : []),
+        items: {
+          path: `catalog>/${definition.entity}`,
+          templateShareable: false,
+          template: new ColumnListItem({
+            selected: { path: `catalog>${key}`, formatter: function (value) { return Boolean(current) && value === current; } },
+            cells: fields.map(function (field) { return new Text({ text: `{catalog>${field}}` }); })
+          })
+        },
+        search: function (event) {
+          const value = String(event.getParameter("value") || "").trim();
+          const filters = value
+            ? [new Filter({
+              filters: fields.map(function (field) {
+                return new Filter({ path: field, operator: FilterOperator.Contains, value1: value, caseSensitive: false });
+              }),
+              and: false
+            })]
+            : [];
+          event.getSource().getBinding("items").filter(filters);
+        },
+        confirm: function (event) {
+          const item = event.getParameter("selectedItem");
+          const row = item && item.getBindingContext("catalog").getObject();
+          if (row) {
+            input.setValue(row[key]);
+            const context = input.getBindingContext("form");
+            this._applyAutoFill(definition, row[key], context ? context.getPath() : null, row);
+            this._applyConditionalVisibility();
+          }
+        }.bind(this),
+        afterClose: function () {
+          dialog.destroy();
+        }
+      });
+      this.getView().addDependent(dialog);
+      dialog.open("");
     },
 
     // "CODE - Name" for master-data dropdowns, or whichever of the two is present.

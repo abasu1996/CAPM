@@ -80,6 +80,18 @@ entity Customers as projection on db.Customers;
     { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
     { grant: '*', to: 'MasterDataAdmin' }
   ]
+  entity ServiceCodes as projection on db.ServiceCodes;
+
+   @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity PoNumbers as projection on db.PoNumbers;
+
+   @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
   entity Wbs as projection on db.Wbs;
 
 

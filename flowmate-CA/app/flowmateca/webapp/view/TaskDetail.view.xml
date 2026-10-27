@@ -206,6 +206,23 @@
       <Dialog id="decisionDialog" title="{decision>/title}" contentWidth="{= ${decision>/lineEntry} ? '52rem' : '34rem' }">
         <content>
           <VBox class="sapUiSmallMargin">
+            <!-- Purchase Order, S/4 Data Validation: one or more PO Numbers; the first is mandatory. With
+                 Create SES Successor only one, used for the SES (+ disabled). -->
+            <Label text="Purchase Order Number" required="true" visible="{= ${decision>/needsPoNumberList} === true }"/>
+            <VBox items="{path: 'decision>/poNumberList', templateShareable: false}" visible="{= ${decision>/needsPoNumberList} === true }">
+              <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                <Input value="{decision>value}" maxLength="80" width="22rem"
+                  placeholder="{= ${decision>first} ? 'Enter the Purchase Order Number' : 'Another Purchase Order Number (optional)' }"/>
+                <Button icon="sap-icon://decline" type="Transparent" tooltip="Remove this PO Number"
+                  visible="{= !${decision>first} }" press=".onRemovePoNumber"/>
+              </HBox>
+            </VBox>
+            <HBox alignItems="Center" class="sapUiSmallMarginBottom" visible="{= ${decision>/needsPoNumberList} === true }">
+              <Button icon="sap-icon://add" text="Add PO Number" type="Transparent" press=".onAddPoNumber"
+                enabled="{= !${decision>/poNumberListLocked} }"/>
+              <Text text="Create SES Successor: one PO Number, used for the SES" class="caMuted sapUiTinyMarginBegin"
+                visible="{= ${decision>/poNumberListLocked} === true }"/>
+            </HBox>
             <!-- Last step of a PO with "Create SES Successor": the PO number goes to the SES. -->
             <Label text="Purchase Order Number" required="true" visible="{= ${decision>/needsPoNumber} === true }"/>
             <Input value="{decision>/purchaseOrderNo}" placeholder="Enter the created Purchase Order number"
@@ -266,6 +283,11 @@
                 </ColumnListItem>
               </items>
             </Table>
+            <!-- Purchase Order, PO Approval Completion: mandatory, just above Remarks. -->
+            <Label text="PO Released Date" required="true" visible="{= ${decision>/needsPoReleasedDate} === true }"/>
+            <DatePicker value="{decision>/poReleasedDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%"
+              placeholder="Select the PO released date"
+              visible="{= ${decision>/needsPoReleasedDate} === true }" class="sapUiSmallMarginBottom"/>
             <Label text="Remarks" required="{= ${decision>/action} === 'reject' }"/>
             <TextArea value="{decision>/remarks}" rows="4" width="100%"/>
           </VBox>
