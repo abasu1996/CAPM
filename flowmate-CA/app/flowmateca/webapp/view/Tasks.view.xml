@@ -114,7 +114,7 @@
                   text="Assign to Me"
                   icon="sap-icon://employee-approvals"
                   type="Emphasized"
-                  visible="{taskView>/isTeamMode}"
+                  visible="{= ${taskView>/isTeamMode} &amp;&amp; ${app>/currentUser/canValidate} }"
                   press=".onClaimTask"/>
               </cells>
             </ColumnListItem>

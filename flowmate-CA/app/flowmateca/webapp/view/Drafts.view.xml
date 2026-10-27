@@ -1,7 +1,7 @@
 <mvc:View controllerName="flowmateca.controller.Drafts" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">
   <Page class="caPage" title="Draft Requests" showNavButton="true" navButtonPress=".onNavHome">
     <headerContent>
-      <Button text="New Request" icon="sap-icon://add" type="Emphasized" press=".onCreate"/>
+      <Button text="New Request" icon="sap-icon://add" type="Emphasized" visible="{app>/currentUser/canCreate}" press=".onCreate"/>
       <Button icon="sap-icon://refresh" tooltip="Refresh" press=".onRefresh"/>
     </headerContent>
     <content>

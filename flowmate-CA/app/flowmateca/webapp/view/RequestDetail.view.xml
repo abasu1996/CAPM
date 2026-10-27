@@ -177,7 +177,7 @@
                 <Toolbar class="caSectionToolbar">
                   <Title text="Request Tasks" level="H3"/>
                   <ToolbarSpacer/>
-                  <Button text="Add Task" icon="sap-icon://add" type="Emphasized" press=".onOpenAddTaskDialog"/>
+                  <Button text="Add Task" icon="sap-icon://add" type="Emphasized" visible="{detail>/canAddTask}" press=".onOpenAddTaskDialog"/>
                 </Toolbar>
                 <!-- One line per task: a send-back adds a new task (tagged Sent Back) under the one it replaces. -->
                 <Table id="requestTasksTable" items="{detail>/tasks}" itemPress=".onTaskPress" class="caWorklistTable caCompactTasks sapUiSizeCompact">

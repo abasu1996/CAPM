@@ -12,15 +12,15 @@
     },
     {
       "name": "$XSAPPNAME.CARequester",
-      "description": "Create and track Commerce Automation requests"
+      "description": "Creator: create and monitor own Commerce Automation requests"
     },
     {
       "name": "$XSAPPNAME.CAProcessor",
-      "description": "Process Commerce Automation tasks"
+      "description": "Validator: claim and process tasks for assigned teams"
     },
     {
       "name": "$XSAPPNAME.CASupervisor",
-      "description": "Supervise queues and maintain delegations"
+      "description": "Supervisor: assign requests and tasks, maintain delegations, approve and send back"
     },
     {
       "name": "$XSAPPNAME.SlaScheduler",
@@ -31,7 +31,7 @@
     },
     {
       "name": "$XSAPPNAME.CAAdmin",
-      "description": "Maintain Flowmate CA configuration and master data",
+      "description": "Administrator: full Flowmate CA access including termination",
       "grant-as-authority-to-apps": [
         "$XSAPPNAME(application,flowmate-api-client)"
       ]

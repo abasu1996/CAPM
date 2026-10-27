@@ -136,11 +136,11 @@ sap.ui.define([
         return task.isMandatory && task.status?.code !== "APPROVED";
       });
       const currentUser = this.getAppModel().getProperty("/currentUser") || {};
-      const isOwner = this.canActForAssignedUser(request.owner_ID || request.requester_ID, currentUser);
       request.canReassign = Boolean(currentUser.canReassign) && !["COMPLETED", "REJECTED"].includes(request.status?.code || request.status_code);
+      request.canAddTask = Boolean(currentUser.isAdmin) && !["COMPLETED", "REJECTED"].includes(request.status?.code || request.status_code);
       request.canCompleteCurrentStep = !["COMPLETED", "REJECTED"].includes(request.status?.code)
         && !blockingTask
-        && (isOwner || currentUser.isAdmin);
+        && Boolean(currentUser.isAdmin);
       request.processStatusText = request.status?.code === "COMPLETED"
         ? "Workflow completed"
         : `Step ${request.currentStep} of ${request.stepInstances.length}`;
@@ -148,7 +148,8 @@ sap.ui.define([
       // looking at it needs a way through - otherwise a send-back looks like a dead end.
       const myTask = currentTasks.find(function (task) {
         return task.status?.code === "OPEN"
-          && (this.canActForAssignedUser(task.assignedUser_ID, currentUser) || (!task.assignedUser_ID && isOwner));
+          && Boolean(currentUser.canValidate)
+          && (Boolean(currentUser.isAdmin) || this.canActForAssignedUser(task.assignedUser_ID, currentUser));
       }.bind(this));
       request.myOpenTaskId = myTask ? myTask.ID : null;
       request.myOpenTaskName = myTask ? (myTask.taskName || "Open My Task") : "";

@@ -76,7 +76,7 @@ test("delegated notification replaces the original recipient", async () => {
   ]), ["delegate@example.test"]);
 });
 
-test("regular users can create their own delegation but not one for someone else", async () => {
+test("regular users cannot maintain delegations", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   service._ensureCurrentUser = async () => ({ ID: "current" });
   const req = {
@@ -90,14 +90,8 @@ test("regular users can create their own delegation but not one for someone else
     reject
   };
   await assert.rejects(service._prepareDelegationCreate(req), { status: 403 });
-  service.masterEntities = { Users: "Users" };
-  service.master = { run: async () => [{ ID: "current", isActive: true }, { ID: "delegate", isActive: true }] };
   req.data.delegator_ID = "current";
-  await assert.doesNotReject(service._prepareDelegationCreate(req));
-  assert.equal(req.data.createdOnBehalf, false);
-  delete req.data.delegator_ID;
-  await assert.doesNotReject(service._prepareDelegationCreate(req));
-  assert.equal(req.data.delegator_ID, "current");
+  await assert.rejects(service._prepareDelegationCreate(req), { status: 403 });
 });
 
 test("administrators and supervisors may create and delete delegations for others", async () => {
@@ -116,15 +110,11 @@ test("administrators and supervisors may create and delete delegations for other
   }
 });
 
-test("regular users may delete only their own delegation", async () => {
+test("regular users cannot delete delegations", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   service._ensureCurrentUser = async () => ({ ID: "current" });
   service.masterEntities = { Delegations: "Delegations" };
-  let owner = "current";
-  service.master = { run: async () => ({ delegator_ID: owner }) };
   const req = { user: { is: () => false }, data: { ID: "delegation" }, reject };
-  await assert.doesNotReject(service._authorizeDelegationDelete(req));
-  owner = "other-user";
   await assert.rejects(service._authorizeDelegationDelete(req), { status: 403 });
 });
 
@@ -133,6 +123,9 @@ test("My Requests includes active delegators using the same scope as the dashboa
   service._ensureCurrentUser = async () => ({ ID: "delegate" });
   service._effectiveTaskUserIds = async () => ["delegate", "owner"];
   let applied;
-  await service._filterMyRequests({ query: { where: (filter) => { applied = filter; } } });
+  await service._filterMyRequests({
+    user: { is: (role) => role === "CARequester" },
+    query: { where: (filter) => { applied = filter; } }
+  });
   assert.deepEqual(applied, service._myRequestWhere(["delegate", "owner"]));
 });

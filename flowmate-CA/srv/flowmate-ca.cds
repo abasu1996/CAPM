@@ -28,6 +28,15 @@ service FlowmateCAService {
     displayName            : String(160);
     email                  : String(255);
     isAdmin                : Boolean;
+    isSupervisor           : Boolean;
+    isValidator            : Boolean;
+    isCreator              : Boolean;
+    canCreate              : Boolean;
+    canValidate            : Boolean;
+    canAssign              : Boolean;
+    canManageDelegation    : Boolean;
+    canTerminate           : Boolean;
+    canAdminister          : Boolean;
     canDelegateOnBehalf    : Boolean;
     canReassign            : Boolean;
     activeDelegatorUserIds : many UUID;
@@ -93,25 +102,25 @@ service FlowmateCAService {
   entity MaterialCategories as projection on db.MaterialCategories;
 
   @cds.redirection.target
-  entity Requests as projection on db.CARequests;
-  entity MyRequests as projection on db.CARequests;
-  entity RequestQueue as projection on db.CARequests;
+  @readonly entity Requests as projection on db.CARequests;
+  @readonly entity MyRequests as projection on db.CARequests;
+  @readonly entity RequestQueue as projection on db.CARequests;
   @readonly entity Drafts as projection on db.CARequestDrafts excluding { attachments };
 
   @cds.redirection.target
-  entity Tasks as projection on db.CATasks;
-  entity MyTasks as projection on db.CATasks;
-  entity MyTeamTasks as projection on db.CATasks;
+  @readonly entity Tasks as projection on db.CATasks;
+  @readonly entity MyTasks as projection on db.CATasks;
+  @readonly entity MyTeamTasks as projection on db.CATasks;
 
-  entity RequestSteps as projection on db.RequestStepInstances;
+  @readonly entity RequestSteps as projection on db.RequestStepInstances;
   @cds.redirection.target
   entity Attachments as projection on db.CAAttachments;
   entity DraftAttachments as projection on db.CAAttachments;
-  entity Comments as projection on db.CAComments;
-  entity InvolvedParties as projection on db.CAInvolvedParties;
-  entity History as projection on db.CAHistory;
+  @readonly entity Comments as projection on db.CAComments;
+  @readonly entity InvolvedParties as projection on db.CAInvolvedParties;
+  @readonly entity History as projection on db.CAHistory;
   @readonly entity RequestVersions as projection on db.RequestVersions;
-  entity WorkflowStepConfigs as projection on db.WorkflowStepConfigs;
+  @readonly entity WorkflowStepConfigs as projection on db.WorkflowStepConfigs;
 
   entity MaterialCodeDetails as projection on db.MaterialCodeDetails;
   entity MaterialCodeItems as projection on db.MaterialCodeItems;
@@ -146,9 +155,12 @@ service FlowmateCAService {
   };
 
   @description: 'Create a request. Technical PO clients may declare attachmentManifest. A non-empty manifest creates the request as UPLOAD_PENDING; workflow initialization starts only after the dedicated multipart upload succeeds. Omitted or empty manifests retain immediate workflow initialization.'
+  @requires: ['CARequester', 'CAAdmin', 'PORequestCreate']
   action createRequest(input: NewRequestInput) returns Requests;
   @description: 'Save an incomplete CA request form without validation, workflow tasks, LoA approval or integrations.'
+  @requires: ['CARequester', 'CAAdmin']
   action saveDraft(draftId: UUID, formData: LargeString) returns { ID: UUID; };
+  @requires: ['CARequester', 'CAAdmin']
   action deleteDraft(draftId: UUID) returns Boolean;
   // Project Code (New / Modification), Single line: the Project ID / Category / Description the
   // server would generate for these details (JSON in, JSON out). Nothing is saved.
@@ -189,6 +201,7 @@ service FlowmateCAService {
     referenceNumber  : String(30);
     attachmentCount  : Integer;
   };
+  @requires: ['CARequester', 'CAAdmin']
   action createBulkRequests(input: BulkRequestInput) returns {
     created          : Integer;
     referenceNumbers : LargeString;
@@ -198,8 +211,11 @@ service FlowmateCAService {
    * Reporting payload for the CA dashboards. The service returns a JSON document so the
    * dashboard can add report sections without changing the transactional entity projections.
    */
+  @requires: 'CAAdmin'
   action getReportingDashboard(periodStart: Date, periodEnd: Date, poType: String(40)) returns LargeString;
+  @requires: ['CARequester', 'CAAdmin']
   action submitRequest(requestId: UUID) returns Boolean;
+  @requires: 'CAAdmin'
   action addTask(
     requestId: UUID,
     stepNo: Integer,
@@ -211,13 +227,18 @@ service FlowmateCAService {
     isApproval: Boolean,
     dueDate: Date
   ) returns Tasks;
+  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
   action claimTeamTask(taskId: UUID) returns Boolean;
+  @requires: ['CASupervisor', 'CAAdmin']
   action reassignRequest(requestId: UUID, userId: UUID) returns Boolean;
+  @requires: ['CASupervisor', 'CAAdmin']
   action reassignTask(taskId: UUID, userId: UUID) returns Boolean;
   // Purchase Order S/4 Data Validation: opens the (auto-completed) Budget Check step's task and
   // puts this task In Progress until the Budget Check is approved.
+  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
   action requestBudgetCheck(taskId: UUID) returns Boolean;
   // purchaseOrderNo is required only on the last step of a PO that has "Create SES Successor".
+  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
   action approveTask(
     taskId: UUID,
     remarks: LargeString,
@@ -241,6 +262,7 @@ service FlowmateCAService {
   ) returns Boolean;
   /** Sends all PO numbers entered in the S/4 Data Validation dialog to the Workhub card.
    * Workhub credentials and workflow ID are server settings. */
+  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
   action sendPoNumbersToWorkhub(
     taskId: UUID,
     pONumber1: LargeString,
@@ -251,12 +273,19 @@ service FlowmateCAService {
     cardID        : Integer;
     pONumber1     : LargeString;
   };
+  @requires: 'CAAdmin'
   action rejectTask(taskId: UUID, remarks: LargeString) returns Boolean;
+  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
   action sendBackTask(taskId: UUID, targetStepNo: Integer, remarks: LargeString) returns Boolean;
+  @requires: 'CAAdmin'
   action completeStep(requestId: UUID, stepNo: Integer, remarks: LargeString) returns Boolean;
+  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
   action saveRequesterDetails(requestId: UUID, details: LargeString) returns Boolean;
+  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
   action addComment(requestId: UUID, comment: LargeString) returns Comments;
+  @requires: ['CARequester', 'CAAdmin']
   action createSuccessorRequest(requestId: UUID, requestTypeCode: String(40), title: String(255)) returns Requests;
+  @requires: 'CAAdmin'
   action sendToS4(requestId: UUID) returns {
     accepted        : Boolean;
     integrationState: String(80);

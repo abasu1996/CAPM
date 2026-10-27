@@ -413,6 +413,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     this.before("*", guardTechnicalOperation);
 
+    this.before("createRequest", this._requireCreateAccess);
+    this.before(["saveDraft", "deleteDraft", "createBulkRequests", "submitRequest", "createSuccessorRequest"], this._requireCreator);
+    this.before(["claimTeamTask", "requestBudgetCheck", "approveTask", "sendPoNumbersToWorkhub", "sendBackTask", "saveRequesterDetails", "addComment"], this._requireValidator);
+    this.before(["reassignRequest", "reassignTask"], this._requireSupervisor);
+    this.before(["rejectTask", "addTask", "completeStep", "sendToS4", "getReportingDashboard"], this._requireAdmin);
+
     this.on("READ", ["Users", "Teams", "TeamMembers", "Vendors"], (req) => {
       return this.master.run(req.query);
     });
@@ -427,9 +433,13 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return this.master.run(req.query);
     });
 
+    this.before("READ", "Requests", this._filterRequestsByRole);
+    this.before("READ", "RequestQueue", this._filterRequestQueue);
+    this.before("READ", "Tasks", this._filterTasksByRole);
     this.before("READ", "MyRequests", this._filterMyRequests);
     this.before("READ", "Drafts", this._filterDrafts);
     this.before("READ", "Attachments", this._filterRequestAttachments);
+    this.before("READ", ["RequestSteps", "Comments", "InvolvedParties", "History", "RequestVersions"], this._filterRequestChildrenByRole);
     this.before("READ", "DraftAttachments", this._filterDraftAttachments);
     this.before("READ", "MyTasks", this._filterMyTasks);
     this.before("READ", "MyTeamTasks", this._filterMyTeamTasks);
@@ -887,16 +897,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   _prepareDelegationCreate = async (req) => {
+    if (!this._canMaintainDelegations(req)) {
+      return req.reject(403, "Only an administrator or supervisor can create delegations");
+    }
     const delegation = req.data;
     const currentUser = await this._ensureCurrentUser(req);
-    const privileged = this._canMaintainDelegations(req);
     const requestedDelegatorId = delegation.delegator_ID || delegation.delegator?.ID;
     const delegateId = delegation.delegate_ID || delegation.delegate?.ID;
     const delegatorId = requestedDelegatorId || currentUser.ID;
 
-    if (requestedDelegatorId && requestedDelegatorId !== currentUser.ID && !privileged) {
-      return req.reject(403, "Only an administrator or supervisor can create a delegation for another user");
-    }
     if (!delegateId) {
       return req.reject(400, "Select a delegate from the user list");
     }
@@ -933,30 +942,55 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   _filterDelegations = async (req) => {
-    if (this._canMaintainDelegations(req)) {
-      return;
+    if (!this._canMaintainDelegations(req)) {
+      return req.reject(403, "Only an administrator or supervisor can view delegations");
     }
-    const currentUser = await this._ensureCurrentUser(req);
-    req.query.where({ delegator_ID: currentUser.ID });
   };
 
   _authorizeDelegationDelete = async (req) => {
-    if (this._canMaintainDelegations(req)) {
-      return;
-    }
-    const delegationId = req.data.ID || req.params?.[0]?.ID;
-    const [delegation, currentUser] = await Promise.all([
-      this.master.run(SELECT.one.from(this.masterEntities.Delegations).columns("delegator_ID").where({ ID: delegationId })),
-      this._ensureCurrentUser(req)
-    ]);
-    if (!delegation || delegation.delegator_ID !== currentUser.ID) {
-      return req.reject(403, "Only the delegation owner, an administrator, or a supervisor can delete this assignment");
+    if (!this._canMaintainDelegations(req)) {
+      return req.reject(403, "Only an administrator or supervisor can delete delegations");
     }
   };
 
   _canMaintainDelegations(req) {
     return Boolean(req.user.is("CAAdmin") || req.user.is("CASupervisor"));
   }
+
+  _roleCapabilities(req) {
+    const isAdmin = Boolean(req.user.is("CAAdmin"));
+    const isSupervisor = isAdmin || Boolean(req.user.is("CASupervisor"));
+    const isValidator = isSupervisor || Boolean(req.user.is("CAProcessor"));
+    const isCreator = isAdmin || Boolean(req.user.is("CARequester"));
+    return {
+      isAdmin,
+      isSupervisor,
+      isValidator,
+      isCreator,
+      canCreate: isCreator,
+      canValidate: isValidator,
+      canAssign: isSupervisor,
+      canManageDelegation: isSupervisor,
+      canTerminate: isAdmin,
+      canAdminister: isAdmin
+    };
+  }
+
+  _requireCapability(req, capability, message) {
+    if (!this._roleCapabilities(req)[capability]) {
+      return req.reject(403, message);
+    }
+  }
+
+  _requireCreateAccess = (req) => {
+    if (req.user.is("system-user") && req.user.is("PORequestCreate")) return;
+    return this._requireCapability(req, "canCreate", "Only a creator or administrator can create requests");
+  };
+
+  _requireCreator = (req) => this._requireCapability(req, "canCreate", "Only a creator or administrator can perform this action");
+  _requireValidator = (req) => this._requireCapability(req, "canValidate", "Only a validator, supervisor, or administrator can process requests and tasks");
+  _requireSupervisor = (req) => this._requireCapability(req, "canAssign", "Only a supervisor or administrator can assign requests and tasks");
+  _requireAdmin = (req) => this._requireCapability(req, "isAdmin", "Only an administrator can perform this action");
 
   async _activeDelegatorIds(req, delegateUserId) {
     if (!delegateUserId) {
@@ -988,25 +1022,139 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   _filterMyRequests = async (req) => {
+    if (!this._roleCapabilities(req).canCreate) {
+      req.query.where({ ID: null });
+      return;
+    }
     const user = await this._ensureCurrentUser(req);
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
     req.query.where(this._myRequestWhere(effectiveUserIds));
   };
 
   _filterDrafts = async (req) => {
+    if (!this._roleCapabilities(req).canCreate) {
+      return req.reject(403, "Only a creator or administrator can view drafts");
+    }
     const user = await this._ensureCurrentUser(req);
     if (!req.user.is("CAAdmin")) {
       req.query.where({ creator_ID: user.ID });
     }
   };
 
-  _filterRequestAttachments = (req) => {
+  _filterRequestAttachments = async (req) => {
     // Draft binaries are exposed only through DraftAttachments, where creator/admin
     // ownership is enforced. They must never leak through the normal request endpoint.
     req.query.where({ draft_ID: null });
+    await this._filterRequestChildrenByRole(req);
+  };
+
+  async _validatorRequestIds(req, user) {
+    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    const teamIds = await this._teamIdsOf(user);
+    const assigned = await cds.tx(req).run(
+      SELECT.from(this.db.CATasks).columns("request_ID").where({ assignedUser_ID: { in: effectiveUserIds } })
+    );
+    const team = teamIds.length
+      ? await cds.tx(req).run(SELECT.from(this.db.CATasks).columns("request_ID").where({ assignedTeam_ID: { in: teamIds } }))
+      : [];
+    return [...new Set([...assigned, ...team].map((task) => task.request_ID).filter(Boolean))];
+  }
+
+  async _accessibleRequestIds(req, user) {
+    const capabilities = this._roleCapabilities(req);
+    if (capabilities.canAssign) return null;
+    const requestIds = new Set();
+    if (capabilities.canCreate) {
+      const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+      const [requested, owned] = await Promise.all([
+        cds.tx(req).run(SELECT.from(this.db.CARequests).columns("ID").where({ requester_ID: { in: effectiveUserIds } })),
+        cds.tx(req).run(SELECT.from(this.db.CARequests).columns("ID").where({ owner_ID: { in: effectiveUserIds } }))
+      ]);
+      [...requested, ...owned].forEach((request) => requestIds.add(request.ID));
+    }
+    if (capabilities.canValidate) {
+      (await this._validatorRequestIds(req, user)).forEach((ID) => requestIds.add(ID));
+    }
+    return [...requestIds];
+  }
+
+  _filterRequestChildrenByRole = async (req) => {
+    const user = await this._ensureCurrentUser(req);
+    const requestIds = await this._accessibleRequestIds(req, user);
+    if (requestIds === null) return;
+    req.query.where(requestIds.length
+      ? { request_ID: { in: requestIds } }
+      : { request_ID: null });
+  };
+
+  _filterRequestQueue = (req) => {
+    if (!this._roleCapabilities(req).canAssign) {
+      return req.reject(403, "Only a supervisor or administrator can view all requests");
+    }
+  };
+
+  _filterTasksByRole = async (req) => {
+    const capabilities = this._roleCapabilities(req);
+    if (capabilities.canAssign) return;
+    if (!capabilities.canValidate) {
+      req.query.where({ ID: null });
+      return;
+    }
+    const user = await this._ensureCurrentUser(req);
+    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    const teamIds = await this._teamIdsOf(user);
+    const assigned = [{ ref: ["assignedUser_ID"] }, "in", { list: effectiveUserIds.map((ID) => ({ val: ID })) }];
+    if (!teamIds.length) {
+      req.query.where(assigned);
+      return;
+    }
+    req.query.where([{
+      xpr: [
+        ...assigned,
+        "or",
+        {
+          xpr: [
+            { ref: ["assignedUser_ID"] }, "=", { val: null },
+            "and",
+            { ref: ["assignedTeam_ID"] }, "in", { list: teamIds.map((ID) => ({ val: ID })) }
+          ]
+        }
+      ]
+    }]);
+  };
+
+  _filterRequestsByRole = async (req) => {
+    const capabilities = this._roleCapabilities(req);
+    if (capabilities.canAssign) return;
+    const user = await this._ensureCurrentUser(req);
+    const alternatives = [];
+    if (capabilities.canCreate) {
+      const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+      alternatives.push(this._myRequestWhere(effectiveUserIds)[0]);
+    }
+    if (capabilities.canValidate) {
+      const requestIds = await this._validatorRequestIds(req, user);
+      if (requestIds.length) {
+        alternatives.push({
+          xpr: [{ ref: ["ID"] }, "in", { list: requestIds.map((ID) => ({ val: ID })) }]
+        });
+      }
+    }
+    if (!alternatives.length) {
+      req.query.where({ ID: null });
+      return;
+    }
+    if (alternatives.length === 1) {
+      req.query.where([alternatives[0]]);
+      return;
+    }
+    req.query.where([{ xpr: [alternatives[0], "or", ...alternatives.slice(1)] }]);
   };
 
   _filterDraftAttachments = async (req) => {
+    if (!this._roleCapabilities(req).canCreate) {
+      return req.reject(403, "Only a creator or administrator can view draft attachments");
+    }
     const user = await this._ensureCurrentUser(req);
     if (!req.user.is("CAAdmin")) {
       req.query.where([
@@ -1111,12 +1259,20 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   _filterMyTasks = async (req) => {
+    if (!this._roleCapabilities(req).canValidate) {
+      req.query.where({ ID: null });
+      return;
+    }
     const user = await this._ensureCurrentUser(req);
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
     req.query.where({ assignedUser_ID: { in: effectiveUserIds } });
   };
 
   _filterMyTeamTasks = async (req) => {
+    if (!this._roleCapabilities(req).canValidate) {
+      req.query.where({ ID: null });
+      return;
+    }
     if (req.user.is("CAAdmin")) {
       req.query.where({ assignedUser_ID: null });
       return;
@@ -1138,20 +1294,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _getCurrentUser = async (req) => {
     const user = await this._ensureCurrentUser(req);
     const activeDelegatorUserIds = await this._activeDelegatorIds(req, user.ID);
+    const capabilities = this._roleCapabilities(req);
     return {
       ID: user.ID,
       displayName: user.displayName,
       email: user.email,
-      isAdmin: req.user.is("CAAdmin"),
-      canDelegateOnBehalf: this._canMaintainDelegations(req),
-      canReassign: this._canMaintainDelegations(req),
+      ...capabilities,
+      canDelegateOnBehalf: capabilities.canManageDelegation,
+      canReassign: capabilities.canAssign,
       activeDelegatorUserIds
     };
   };
 
   _getDashboardCounts = async (req) => {
     const user = await this._ensureCurrentUser(req);
-    const isAdmin = req.user.is("CAAdmin");
+    const capabilities = this._roleCapabilities(req);
+    const { isAdmin, canCreate, canValidate, canAssign } = capabilities;
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
     const requestedBy = this._myRequestWhere(effectiveUserIds);
     const assignedToMe = { assignedUser_ID: { in: effectiveUserIds } };
@@ -1170,22 +1328,24 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       pendingApproval,
       completedRequests
     ] = await Promise.all([
-      this._count(this.db.CARequests, {}),
-      this._count(this.db.CARequests, requestedBy),
-      this._count(this.db.CARequestDrafts, isAdmin ? {} : { creator_ID: user.ID }),
-      this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }),
-      this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.SENT_BACK)),
-      this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED)),
-      this._count(this.db.CATasks, {
+      canAssign ? this._count(this.db.CARequests, {}) : 0,
+      canCreate ? this._count(this.db.CARequests, requestedBy) : 0,
+      canCreate ? this._count(this.db.CARequestDrafts, isAdmin ? {} : { creator_ID: user.ID }) : 0,
+      canValidate ? this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }) : 0,
+      canCreate ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.SENT_BACK)) : 0,
+      canCreate ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED)) : 0,
+      canValidate ? this._count(this.db.CATasks, {
         ...assignedToMe,
         ...openStatus,
         isApproval: true
-      }),
-      this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.COMPLETED))
+      }) : 0,
+      canCreate ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.COMPLETED)) : 0
     ]);
 
     let myTeamTasks = 0;
-    if (isAdmin) {
+    if (!canValidate) {
+      myTeamTasks = 0;
+    } else if (isAdmin) {
       myTeamTasks = await this._count(this.db.CATasks, { assignedUser_ID: null, ...openStatus });
     } else if (teamIds.length) {
       myTeamTasks = await this._count(this.db.CATasks, {
@@ -1884,6 +2044,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     if (!request) {
       return req.reject(404, "Request not found");
+    }
+    if (!req.user.is("CAAdmin") && request.requester_ID !== user.ID && request.owner_ID !== user.ID) {
+      return req.reject(403, "Only the draft request creator or an administrator can submit this request");
     }
     if (request.status_code !== REQUEST_STATUS.DRAFT) {
       return req.reject(409, "Only draft requests can be submitted");
@@ -3115,6 +3278,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!source) {
       return req.reject(404, "Source request not found");
     }
+    const user = await this._ensureCurrentUser(req);
+    if (!req.user.is("CAAdmin") && source.requester_ID !== user.ID && source.owner_ID !== user.ID) {
+      return req.reject(403, "Only the request creator, current owner, or an administrator can create a successor request");
+    }
 
     req.data.input = {
       requestTypeCode: req.data.requestTypeCode,
@@ -3719,9 +3886,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // ---- Comments and attachments ----
   // Only the person holding an open task of the request (or their active delegate) may add
   // attachments and comments to it. An unclaimed team task lets nobody add anything until someone
-  // takes it; administrators have no override. The requester may also attach files while creating
+  // takes it; administrators retain their explicit all-access override. The requester may also attach files while creating
   // the request (the create page uploads right after creating, see _beforeCreateAttachment).
   async _canContribute(req, request, user) {
+    if (this._roleCapabilities(req).isAdmin) return true;
+    if (!this._roleCapabilities(req).canValidate) return false;
     const openTasks = (await SELECT.from(this.db.CATasks)
       .columns("assignedUser_ID", "isSuperseded")
       .where({ request_ID: request.ID, status_code: TASK_STATUS.OPEN }))
@@ -3749,7 +3918,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!request) {
       return req.reject(404, "Request not found");
     }
-    const creating = request.requester_ID === user.ID
+    const capabilities = this._roleCapabilities(req);
+    const creating = capabilities.canCreate && request.requester_ID === user.ID
       && Date.now() - Date.parse(request.createdAt) < 15 * 60 * 1000;
     if (!creating && !await this._canContribute(req, request, user)) {
       return req.reject(403, "Only the person working on the open task can upload attachments");
@@ -3765,7 +3935,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const ID = this._attachmentId(req);
     if (!ID) return;
     const attachment = await cds.tx(req).run(
-      SELECT.one.from(this.db.CAAttachments).columns("ID", "draft_ID").where({ ID })
+      SELECT.one.from(this.db.CAAttachments).columns("ID", "draft_ID", "request_ID").where({ ID })
     );
     if (!attachment || attachment.draft_ID) {
       return req.reject(404, "Attachment not found");
@@ -3773,9 +3943,17 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (Object.hasOwn(req.data || {}, "draft_ID") || Object.hasOwn(req.data || {}, "request_ID")) {
       return req.reject(400, "Attachment ownership cannot be changed through this endpoint");
     }
+    const user = await this._ensureCurrentUser(req, cds.tx(req));
+    const request = await cds.tx(req).run(SELECT.one.from(this.db.CARequests).where({ ID: attachment.request_ID }));
+    const creating = this._roleCapabilities(req).canCreate && request?.requester_ID === user.ID
+      && Date.now() - Date.parse(request.createdAt) < 15 * 60 * 1000;
+    if (!creating && (!request || !await this._canContribute(req, request, user))) {
+      return req.reject(403, "Only an administrator or the person working on the open task can change attachments");
+    }
   };
 
   _beforeCreateDraftAttachment = async (req) => {
+    this._requireCreator(req);
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req, tx);
     if (req.data.request_ID) {
@@ -3787,6 +3965,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   _protectDraftAttachment = async (req) => {
+    this._requireCreator(req);
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req, tx);
     const ID = this._attachmentId(req);
@@ -4249,7 +4428,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   async _assertTaskAccess(req, task, user) {
-    if (req.user.is("CAAdmin") || req.user.is("CASupervisor")) {
+    if (req.user.is("CAAdmin")) {
       return;
     }
     if (task.assignedUser_ID) {
@@ -4266,7 +4445,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         isActive: true
       }));
       if (membership) {
-        return;
+        return req.reject(409, "Assign this team task to yourself before taking action");
       }
     }
     req.reject(403, "This task is not assigned to you or your team");

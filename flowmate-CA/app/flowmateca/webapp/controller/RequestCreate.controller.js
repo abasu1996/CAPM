@@ -335,6 +335,11 @@ sap.ui.define([
         this._loadCatalog(),
         this._loadCurrentUser()
       ]);
+      if (!this.getAppModel().getProperty("/currentUser/canCreate")) {
+        MessageBox.error("Only a creator or administrator can create Commerce Automation requests.");
+        this.navTo("dashboard", {}, true);
+        return;
+      }
       
       const query = event.getParameter("arguments")["?query"] || {};
       if (query.draftId) {
@@ -538,6 +543,11 @@ sap.ui.define([
             "getCurrentUser"
         );
 
+        this.getAppModel().setProperty(
+            "/currentUser",
+            user
+        );
+
         const formModel =
             this.getView().getModel("form");
 
@@ -555,6 +565,8 @@ sap.ui.define([
             "/requesterEmail",
             user.email
         );
+
+        return user;
 
     } catch (error) {
 

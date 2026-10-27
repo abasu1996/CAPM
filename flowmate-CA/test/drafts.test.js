@@ -73,7 +73,7 @@ function harness(t, actor = CREATOR, admin = false) {
   service._ensureCurrentUser = async () => ({ ID: actor, displayName: "Draft Creator" });
   const req = (data = {}) => ({
     data,
-    user: { is: (role) => admin && role === "CAAdmin" },
+    user: { is: (role) => admin ? role === "CAAdmin" : role === "CARequester" },
     reject(status, message) { throw Object.assign(new Error(message), { status }); }
   });
   return { service, rows, attachmentRows, touched, req, tx };

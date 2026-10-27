@@ -43,7 +43,7 @@
         icon="sap-icon://decline"
         type="Reject"
         press=".onReject"
-        visible="{= ${task>/canProcess} &amp;&amp; !${task>/isRequesterStep} }"/>
+        visible="{task>/canTerminate}"/>
     </headerContent>
     <content>
       <VBox>

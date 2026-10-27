@@ -47,10 +47,13 @@ sap.ui.define([
         // person who sent the request back: their step has been rolled back, so the task
         // lies dormant until that step is reached again, and is reopened then.
         const processableStatus = task.status?.code === "OPEN";
-        task.canClaim = processableStatus && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID;
+        task.canClaim = processableStatus && Boolean(user?.canValidate) && !user?.isSupervisor
+          && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID;
         task.canReassign = Boolean(user?.canReassign) && ["OPEN", "IN_PROGRESS"].includes(task.status?.code) && !task.isSuperseded
           && !["COMPLETED", "REJECTED"].includes(task.request?.status?.code || task.request?.status_code);
-        task.canProcess = processableStatus && this.canActForAssignedUser(task.assignedUser_ID, user);
+        task.canProcess = processableStatus && Boolean(user?.canValidate)
+          && (Boolean(user?.isAdmin) || this.canActForAssignedUser(task.assignedUser_ID, user));
+        task.canTerminate = processableStatus && Boolean(user?.canTerminate) && !task.isRequesterStep;
         // Line-item exports are for the approver the task is assigned to (once claimed), also after deciding it.
         task.isAssignedToMe = this.canActForAssignedUser(task.assignedUser_ID, user);
         task.canSendBack = task.canProcess && task.stepNo > 1;
@@ -304,6 +307,7 @@ sap.ui.define([
         // Step 1 is the requester's own: they correct the details here and send the
         // request on, rather than approving it.
         task.isRequesterStep = task.stepNo === 1 && task.canProcess;
+        task.canTerminate = processableStatus && Boolean(user?.canTerminate) && !task.isRequesterStep;
         this.getView().getModel("task").setData(task);
         // User/vendor fields are stored as IDs; show their names.
         this.resolveIdLabels(request, details, "task", "/detailFields");

@@ -92,8 +92,8 @@ test("dashboard counts include requests created or owned by the current user or 
     return (ids.includes(row.requester_ID) || ids.includes(row.owner_ID))
       && (where.length === 1 || row.status_code === where[4].val);
   }).length;
-  const counts = await service._getDashboardCounts({ user: { is: () => false } });
-  assert.equal(counts.allRequests, 4);
+  const counts = await service._getDashboardCounts({ user: { is: (role) => role === "CARequester" } });
+  assert.equal(counts.allRequests, 0);
   assert.equal(counts.myRequests, 4);
   assert.equal(counts.myDrafts, 0);
   assert.equal(counts.rejectedRequests, 1);

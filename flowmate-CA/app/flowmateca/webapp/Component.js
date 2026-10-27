@@ -35,7 +35,17 @@ sap.ui.define([
           displayName: "",
           email: "",
           isAdmin: false,
+          isSupervisor: false,
+          isValidator: false,
+          isCreator: false,
+          canCreate: false,
+          canValidate: false,
+          canAssign: false,
+          canManageDelegation: false,
+          canTerminate: false,
+          canAdminister: false,
           canDelegateOnBehalf: false,
+          canReassign: false,
           activeDelegatorUserIds: []
         }
       }), "app");
