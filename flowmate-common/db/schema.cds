@@ -174,7 +174,15 @@ entity ServiceGroups : cuid, managed {
   isActive  : Boolean default true;
 }
 
+// Valuation Class for Material Code creation (MCC).
 entity ValuationClass : cuid, managed{
+  valuationclassCode : String(40) not null;
+  valuationclassDescription : String(180) not null;
+  isActive : Boolean default true;
+}
+
+// Valuation Class for Service Code creation (SCC).
+entity ValuationClassScc : cuid, managed {
   valuationclassCode : String(40) not null;
   valuationclassDescription : String(180) not null;
   isActive : Boolean default true;

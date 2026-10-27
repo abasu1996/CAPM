@@ -358,6 +358,7 @@ service CAMasterDataService {
    entity Plant as projection on common.Plant;
    entity ServiceGroups as projection on common.ServiceGroups;
    entity ValuationClass as projection on common.ValuationClass;
+   entity ValuationClassScc as projection on common.ValuationClassScc;
    entity StorageLocation as projection on common.StorageLocation;
    entity SalesOrg as projection on common.SalesOrg;
    entity Incoterms as projection on common.Incoterms;

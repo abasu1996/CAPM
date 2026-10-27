@@ -76,7 +76,7 @@ sap.ui.define([
   // Pick lists maintained by admins in flowmate-common; served by CAMasterDataService,
   // not FlowmateCAService, and they carry no sortOrder column.
   const MASTER_PICK_LISTS = new Set([
-    "Plant", "Sites", "ServiceCodes", "PoNumbers", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
+    "Plant", "Sites", "ServiceCodes", "PoNumbers", "StorageLocation", "SalesOrg", "ValuationClass", "ValuationClassScc", "ServiceGroups",
     "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
     "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
@@ -120,8 +120,8 @@ sap.ui.define([
   const CODE_ONLY_ENTITIES = new Set(["Sites", "Materials", "ServiceCodes"]);
 
   // Pick lists too big to load whole (the vendor master holds tens of thousands of rows, and the
-  // server returns at most 1000 per request) are searched on the server as the user types, and
-  // browsed page by page in a value-help dialog. "columns" are the dialog's [field, header] pairs.
+  // server returns at most 1000 per request) are picked in a value-help dialog that searches on
+  // the server and loads page by page. "columns" are the dialog's [field, header] pairs.
   const SEARCHED_ENTITIES = {
     Vendors: {
       fields: ["vendorCode", "vendorName", "vendorEmail"], orderBy: "vendorName",
@@ -138,9 +138,6 @@ sap.ui.define([
     PoNumbers: { fields: ["poNumber"], orderBy: "poNumber", columns: [["poNumber", "PO Number"]] }
   };
   const SEARCH_PAGE_SIZE = 50;
-  const SEARCH_DELAY_MS = 300;
-  const RENDER_DELAY_MS = 100;
-  const SEARCH_MIN_CHARS = 2;
 
   return Controller.extend("flowmateca.controller.BaseController", {
     getRouter: function () {
@@ -1204,6 +1201,8 @@ ${reasons.join("\n")}`);
             }
           }.bind(this)
         });
+      } else if (definition.type === "combo" && SEARCHED_ENTITIES[definition.entity]) {
+        control = this._createBrowseInput(definition, path);
       } else if (definition.type === "combo") {
         const key = definition.key || "code";
         const text = definition.text || "name";
@@ -1227,10 +1226,6 @@ ${reasons.join("\n")}`);
           templateShareable: true,
           template: this._comboListItem(definition, key, text, secondaryText)
         });
-        if (SEARCHED_ENTITIES[definition.entity]) {
-          this._enableServerSearch(control, definition, key);
-          control = this._withValueHelp(control, definition, key);
-        }
       } else if (definition.type === "valueHelp") {
         // Value help (OVS): the value is picked from the master in a searchable dialog.
         control = new Input({
@@ -1260,26 +1255,68 @@ ${reasons.join("\n")}`);
       return control;
     },
 
-    // A searched combo gets a button beside it that browses the whole list.
-    _withValueHelp: function (combo, definition, key) {
+    // A pick list too big for a dropdown (Vendors, Materials): a box that shows what was picked,
+    // with a button beside it that opens the dialog to browse and search the whole list. The form
+    // holds the key (the vendor's ID, the material code); the box displays its label, taken from
+    // the catalog row, which the formatter also asks for when a saved key has no row yet.
+    _createBrowseInput: function (definition, path) {
       const controller = this;
-      combo.setLayoutData(new FlexItemData({ growFactor: 1, minWidth: "0" }));
+      const entity = definition.entity;
+      const key = definition.key || "code";
+      const fields = this._comboFields(definition);
+      const keyPath = path.split(">")[1];
+      const label = function (row) {
+        return CODE_ONLY_ENTITIES.has(entity) ? row[fields.code] : controller.codeAndText(row[fields.code], row[fields.text]);
+      };
+      const input = new Input({
+        showClearIcon: true,
+        placeholder: definition.placeholder || `Select ${definition.label}`,
+        layoutData: new FlexItemData({ growFactor: 1, minWidth: "0" }),
+        change: function (event) {
+          const field = event.getSource();
+          if (event.getParameter("value")) {
+            // A value is chosen in the dialog, not typed: put back what was picked.
+            field.getBinding("value").checkUpdate(true);
+          } else {
+            controller._setBrowsedKey(field, keyPath, definition, "", null);
+          }
+        }
+      });
       const button = new Button({
         icon: "sap-icon://value-help",
         type: "Transparent",
         tooltip: `Browse all ${definition.label}`,
         press: function (event) {
-          const box = event.getSource().getParent().getItems()[0];
+          const field = event.getSource().getParent().getItems()[0];
           controller._openSearchDialog(definition, function (row) {
-            controller._mergeCatalogRows(definition.entity, [row]);
-            box.setSelectedKey(row[key]);
-            const context = box.getBindingContext("form");
-            controller._applyAutoFill(definition, row[key], context ? context.getPath() : null, row);
-            controller._applyConditionalVisibility();
+            controller._mergeCatalogRows(entity, [row]);
+            controller._setBrowsedKey(field, keyPath, definition, row[key], row);
           });
         }
       });
-      return new FormHBox({ width: "100%", alignItems: "Center", items: [combo, button] });
+      input.bindValue({
+        parts: [{ path: keyPath, model: "form" }, { path: `/${entity}`, model: "catalog" }],
+        mode: "OneWay",
+        formatter: function (value, rows) {
+          if (!value) {
+            return "";
+          }
+          controller._ensureCatalogRow(entity, key, value);
+          const row = (rows || []).find(function (entry) { return String(entry[key]) === String(value); });
+          return row ? label(row) : (CODE_ONLY_ENTITIES.has(entity) ? String(value) : "");
+        }
+      });
+      return new FormHBox({ width: "100%", alignItems: "Center", items: [input, button] });
+    },
+
+    // Writes the picked (or cleared) key into the form, in a table row's own row, then fills the
+    // fields that follow from it.
+    _setBrowsedKey: function (field, keyPath, definition, value, row) {
+      const context = field.getBindingContext("form");
+      const fullPath = keyPath.charAt(0) === "/" ? keyPath : `${context.getPath()}/${keyPath}`;
+      field.getModel("form").setProperty(fullPath, value);
+      this._applyAutoFill(definition, value, context ? context.getPath() : null, row);
+      this._applyConditionalVisibility();
     },
 
     // The value-help dialog of a large pick list. Its table is bound to the entity of the master
@@ -1427,77 +1464,8 @@ ${reasons.join("\n")}`);
       return { code: code, text: name };
     },
 
-
-    // The combo starts empty and fills from the server as the user types. A value that is already
-    // set (a draft, an edit step, an import) has its row fetched, so the field shows the name and
-    // not a bare key. In a table the cell is cloned for every row, so the handlers work on `this`,
-    // the control that received the event, and never on `combo`, the unrendered template.
-    _enableServerSearch: function (combo, definition, key) {
-      const controller = this;
-      const entity = definition.entity;
-      combo.setPlaceholder(`Type to search ${definition.label}`);
-      // A ComboBox has no event per keystroke, so the typed text is read from its native input.
-      combo.addEventDelegate({
-        oninput: function (event) {
-          const box = this;
-          clearTimeout(box._searchTimer);
-          const text = (event.target.value || "").trim();
-          if (!box._replaying && text.length >= SEARCH_MIN_CHARS) {
-            box._searchTimer = setTimeout(function () {
-              controller._searchCatalog(entity, text).then(function () {
-                setTimeout(controller._showSearchResults.bind(controller, box, text), RENDER_DELAY_MS);
-              });
-            }, SEARCH_DELAY_MS);
-          }
-        },
-        onBeforeRendering: function () {
-          controller._ensureCatalogRow(entity, key, this.getSelectedKey());
-        }
-      }, combo);
-    },
-
-    // The ComboBox neither opens nor re-filters when rows arrive later. Once they have, the typed
-    // text is replayed (one character short, then in full, as the same text again counts as no
-    // change) so the ComboBox runs its normal filter-and-open path.
-    _showSearchResults: function (box, text) {
-      const field = box.bIsDestroyed ? null : box.getFocusDomRef();
-      // Focus may sit on the page body for a moment when the row re-rendered; another field
-      // holding it means the user has moved on.
-      const active = document.activeElement;
-      if (!field || (active !== field && active !== document.body) || field.value.trim() !== text) {
-        return;
-      }
-      field.focus();
-      box._replaying = true;
-      [text.slice(0, -1), text].forEach(function (value) {
-        field.value = value;
-        field.dispatchEvent(new Event("input", { bubbles: true }));
-      });
-      box._replaying = false;
-      // Inside a table row the ComboBox can stay closed after the replay.
-      if (!box.isOpen() && box.getVisibleItems().length) {
-        box.open();
-      }
-    },
-
     _readPickList: function (entity, path) {
       return MASTER_PICK_LISTS.has(entity) ? this.requestMaster(path) : this.request(path);
-    },
-
-    _searchCatalog: function (entity, text) {
-      const config = SEARCHED_ENTITIES[entity];
-      const term = text.toLowerCase().replace(/'/g, "''");
-      const match = config.fields.map(function (field) {
-        return `contains(tolower(${field}),'${term}')`;
-      }).join(" or ");
-      const filter = encodeURIComponent(`isActive eq true and (${match})`);
-      return this._readPickList(entity, `${entity}?$filter=${filter}&$orderby=${config.orderBy}&$top=${SEARCH_PAGE_SIZE}`)
-        .then(function (result) {
-          this._mergeCatalogRows(entity, result.value || []);
-        }.bind(this))
-        .catch(function (error) {
-          Log.error(`Could not search the ${entity} list`, error);
-        });
     },
 
     _ensureCatalogRow: function (entity, key, value) {

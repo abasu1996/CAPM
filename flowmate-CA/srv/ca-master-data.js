@@ -21,6 +21,7 @@ const SHARED_ENTITIES = [
   "Plant",
   "ServiceGroups",
   "ValuationClass",
+  "ValuationClassScc",
   "StorageLocation",
   "SalesOrg",
   "Incoterms",

@@ -35,7 +35,7 @@
                   <Column minScreenWidth="Desktop" demandPopin="true"><Text text="Processor Team"/></Column>
                   <Column width="8rem"><Text text="Mandatory"/></Column>
                   <Column width="7rem"><Text text="SLA (Days)"/></Column>
-                  <Column width="6rem"><Text text="Actions"/></Column>
+                  <Column width="8rem"><Text text="Actions"/></Column>
                 </columns>
                 <items>
                   <ColumnListItem>
@@ -50,6 +50,7 @@
                       <Switch state="{admin>isMandatory}" customTextOn="Yes" customTextOff="No"/>
                       <StepInput value="{admin>slaDays}" min="1" max="30" width="5rem"/>
                       <HBox>
+                        <Button icon="sap-icon://edit" type="Transparent" tooltip="Edit" press=".onEditStep"/>
                         <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveStep"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeleteStep"/>
                       </HBox>
@@ -2165,10 +2166,10 @@
 
 </IconTabFilter>
 
-<IconTabFilter key="valuationClass" text="Valuation Class" icon="sap-icon://money-bills">
+<IconTabFilter key="valuationClass" text="Valuation Class (MCC)" icon="sap-icon://money-bills">
 
     <Toolbar class="caSectionToolbar">
-        <Title text="Valuation Class Master" level="H3"/>
+        <Title text="Valuation Class Master - Material Code Creation (MCC)" level="H3"/>
         <ToolbarSpacer/>
         <Button
             text="Add Valuation Class"
@@ -2179,6 +2180,76 @@
 
     <Table
         items="{admin>/valuationClasses}"
+        growing="true"
+        class="caAdminTable">
+
+        <columns>
+            <Column width="12rem">
+                <Text text="Valuation Class Code"/>
+            </Column>
+
+            <Column>
+                <Text text="Valuation Class Description"/>
+            </Column>
+
+            <Column width="7rem">
+                <Text text="Active"/>
+            </Column>
+
+            <Column width="6rem">
+                <Text text="Actions"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem>
+                <cells>
+
+                    <Text text="{admin>valuationclassCode}"/>
+
+                    <Input value="{admin>valuationclassDescription}"/>
+
+                    <Switch
+                        state="{admin>isActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+
+                    <HBox>
+                        <Button
+                            icon="sap-icon://save"
+                            type="Transparent"
+                            tooltip="{i18n>save}"
+                            press=".onSaveValuationClass"/>
+
+                        <Button
+                            icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete}"
+                            press=".onDeleteValuationClass"/>
+                    </HBox>
+
+                </cells>
+            </ColumnListItem>
+        </items>
+
+    </Table>
+
+</IconTabFilter>
+
+<IconTabFilter key="valuationClassScc" text="Valuation Class (SCC)" icon="sap-icon://money-bills">
+
+    <Toolbar class="caSectionToolbar">
+        <Title text="Valuation Class Master - Service Code Creation (SCC)" level="H3"/>
+        <ToolbarSpacer/>
+        <Button
+            text="Add Valuation Class"
+            icon="sap-icon://add"
+            type="Emphasized"
+            press=".onAddValuationClassScc"/>
+    </Toolbar>
+
+    <Table
+        items="{admin>/valuationClassesScc}"
         growing="true"
         class="caAdminTable">
 
@@ -4007,6 +4078,42 @@
         </beginButton>
         <endButton>
           <Button text="{i18n>cancel}" press=".onCloseConfigDialog"/>
+        </endButton>
+      </Dialog>
+
+      <!-- Process Steps: edit one step (works on a copy; Cancel leaves the row unchanged). -->
+      <Dialog id="editStepDialog" title="Edit Workflow Step" contentWidth="38rem">
+        <content>
+          <VBox class="sapUiSmallMargin">
+            <Label text="{i18n>requestType}"/>
+            <Text text="{editStep>/requestTypeName}"/>
+            <Label text="{i18n>requestVariant}" class="sapUiSmallMarginTop"/>
+            <Text text="{editStep>/requestVariantName}"/>
+            <Label text="Step Number" required="true" class="sapUiSmallMarginTop"/>
+            <StepInput value="{editStep>/stepNo}" min="1" max="50" width="8rem"/>
+            <Label text="Step Name" required="true" class="sapUiSmallMarginTop"/>
+            <Input value="{editStep>/stepName}" maxLength="160"/>
+            <Label text="Activity Description" class="sapUiSmallMarginTop"/>
+            <TextArea value="{editStep>/activityDescription}" rows="3" maxLength="1000" width="100%"/>
+            <Label text="Processor Team" class="sapUiSmallMarginTop"/>
+            <ComboBox selectedKey="{editStep>/processorTeam_ID}" items="{admin>/teams}" width="100%">
+              <core:Item key="{admin>ID}" text="{admin>name}"/>
+            </ComboBox>
+            <Label text="Task Name" class="sapUiSmallMarginTop"/>
+            <Input value="{editStep>/taskName}" maxLength="180"/>
+            <Label text="SLA (Days)" required="true" class="sapUiSmallMarginTop"/>
+            <StepInput value="{editStep>/slaDays}" min="1" max="30" width="8rem"/>
+            <Label text="Mandatory" class="sapUiSmallMarginTop"/>
+            <Switch state="{editStep>/isMandatory}" customTextOn="Yes" customTextOff="No"/>
+            <Label text="Active" class="sapUiSmallMarginTop"/>
+            <Switch state="{editStep>/isActive}" customTextOn="Yes" customTextOff="No"/>
+          </VBox>
+        </content>
+        <beginButton>
+          <Button text="{i18n>save}" type="Emphasized" press=".onSaveEditStep"/>
+        </beginButton>
+        <endButton>
+          <Button text="{i18n>cancel}" press=".onCancelEditStep"/>
         </endButton>
       </Dialog>
     </dependents>

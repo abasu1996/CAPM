@@ -68,7 +68,7 @@ sap.ui.define([
   // Pick lists maintained by admins in flowmate-common; served by CAMasterDataService,
   // not FlowmateCAService, and they carry no sortOrder column.
   const MASTER_PICK_LISTS = new Set([
-    "Plant", "Sites", "StorageLocation", "SalesOrg", "ValuationClass", "ServiceGroups",
+    "Plant", "Sites", "StorageLocation", "SalesOrg", "ValuationClass", "ValuationClassScc", "ServiceGroups",
     "DocumentTypes", "Divisions", "PurchasingGroups", "Wbs", "Materials", "MatGroup",
     "ProfitCenter", "MRPType", "AvailabilityCheck", "SerialNumberProfile", "DistributionChannel",
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
@@ -989,10 +989,17 @@ sap.ui.define([
     },
 
     onSesFilesSelected: function (event) {
-      this._sesFiles = Array.from(event.getParameter("files") || []);
-      this.getView().getModel("form").setProperty("/sesDraft/files", this._sesFiles.map(function (file) {
-        return { name: file.name, sizeText: `${(file.size / 1024 / 1024).toFixed(2)} MB` };
-      }));
+      this._sesFiles = this._addFiles(this._sesFiles || [], event);
+      this.getView().getModel("form").setProperty("/sesDraft/files", this._fileItems(this._sesFiles));
+      event.getSource().clear();
+    },
+
+    onRemoveSesFile: function (event) {
+      const path = event.getParameter("listItem")?.getBindingContext("form")?.getPath();
+      if (path) {
+        this._sesFiles.splice(Number(path.split("/").pop()), 1);
+        this.getView().getModel("form").setProperty("/sesDraft/files", this._fileItems(this._sesFiles));
+      }
     },
 
     onSaveSesDraft: function () {
@@ -2149,14 +2156,13 @@ sap.ui.define([
       return tableFile.parseCsv(text);
     },
 
-    onFilesSelected: function (event) {
-      const files = Array.from(event.getParameter("files") || []);
-      this._selectedFiles = files;
-      this.getView().getModel("files").setProperty("/items", files.map(function (file) {
-        return {
-          name: file.name,
-          sizeText: `${(file.size / 1024 / 1024).toFixed(2)} MB`
-        };
+    // The files the picker returned, added to the ones already chosen: picking again must add to
+    // the list, not replace it. The same file picked twice is kept once.
+    _addFiles: function (chosen, event) {
+      const keyOf = function (file) { return [file.name, file.size, file.lastModified].join("|"); };
+      const known = new Set(chosen.map(keyOf));
+      return chosen.concat(Array.from(event.getParameter("files") || []).filter(function (file) {
+        return !known.has(keyOf(file)) && known.add(keyOf(file));
       }));
     },
 
@@ -2194,6 +2200,26 @@ sap.ui.define([
         }.bind(this));
       }
       return uploads;
+    },
+
+    _fileItems: function (files) {
+      return files.map(function (file) {
+        return { name: file.name, sizeText: `${(file.size / 1024 / 1024).toFixed(2)} MB` };
+      });
+    },
+
+    onFilesSelected: function (event) {
+      this._selectedFiles = this._addFiles(this._selectedFiles || [], event);
+      this.getView().getModel("files").setProperty("/items", this._fileItems(this._selectedFiles));
+      event.getSource().clear();
+    },
+
+    onRemoveFile: function (event) {
+      const path = event.getParameter("listItem")?.getBindingContext("files")?.getPath();
+      if (path) {
+        this._selectedFiles.splice(Number(path.split("/").pop()), 1);
+        this.getView().getModel("files").setProperty("/items", this._fileItems(this._selectedFiles));
+      }
     },
 
     onSubmit: async function () {

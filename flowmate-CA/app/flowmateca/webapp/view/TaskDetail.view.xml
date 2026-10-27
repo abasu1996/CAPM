@@ -8,6 +8,7 @@
   xmlns="sap.m">
   <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{task>/taskName}">
     <headerContent>
+      <Button icon="sap-icon://home" type="Transparent" tooltip="Dashboard" press=".onNavHome"/>
       <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
       <Button text="Assign Task" icon="sap-icon://employee" visible="{task>/canReassign}" press=".onReassignTask"/>
       <Button
@@ -231,7 +232,8 @@
             <Input value="{decision>/glAccount}" placeholder="Enter the GL Account" maxLength="80"
               visible="{= ${decision>/needsGlAccount} === true }" class="sapUiSmallMarginBottom"/>
             <Label text="Valuation Class" required="true" visible="{= ${decision>/needsValuationClass} === true }"/>
-            <Input value="{decision>/valuationClass}" placeholder="Enter the Valuation Class" maxLength="40"
+            <Input value="{decision>/valuationClass}" placeholder="Select the Valuation Class" maxLength="40"
+              showValueHelp="true" valueHelpOnly="true" valueHelpRequest=".onValuationClassHelp"
               visible="{= ${decision>/needsValuationClass} === true }" class="sapUiSmallMarginBottom"/>
             <Label text="Service Code" required="true" visible="{= ${decision>/needsServiceCode} === true }"/>
             <Input value="{decision>/serviceCode}" placeholder="Enter the Service Code" maxLength="80"
@@ -277,8 +279,11 @@
                     <Text text="{decision>info1}"/>
                     <Text text="{decision>info2}"/>
                     <Text text="{decision>info3}"/>
+                    <!-- Valuation Class: value help on its master (lineEntry/lookup). -->
                     <Input value="{decision>value}" maxLength="{decision>/lineEntry/maxLength}"
-                      placeholder="{= 'Enter the ' + ${decision>/lineEntry/label} }"/>
+                      placeholder="{= (${decision>/lineEntry/lookup} ? 'Select the ' : 'Enter the ') + ${decision>/lineEntry/label} }"
+                      showValueHelp="{= !!${decision>/lineEntry/lookup} }" valueHelpOnly="{= !!${decision>/lineEntry/lookup} }"
+                      valueHelpRequest=".onValuationClassHelp"/>
                   </cells>
                 </ColumnListItem>
               </items>

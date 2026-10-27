@@ -32,6 +32,8 @@ sap.ui.define([
           { label: "Title", value: (r) => r.title },
           { label: "Status", value: (r) => r.status && this.statusName(r.status.name, r.status_code) },
           { label: "SLA", value: (r) => this.formatRequestSla(r.slaDueAt, r.status_code, r.completedAt) },
+          { label: "Pending With", value: (r) => r.pendingWith },
+          { label: "Task", value: (r) => r.pendingStep },
           { label: "Requester Team", value: (r) => r.ownerTeamName },
           { label: "Due Date", value: (r) => this.formatDate(r.dueDate) },
           { label: "Created", value: (r) => this.formatDateTime(r.createdAt) }

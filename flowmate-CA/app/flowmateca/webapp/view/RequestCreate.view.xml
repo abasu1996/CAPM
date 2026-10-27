@@ -212,7 +212,7 @@
                 change=".onFilesSelected"
                 buttonText="Select Files"
                 icon="sap-icon://attachment"/>
-              <List items="{files>/items}" noDataText="No supporting documents selected" class="sapUiSmallMarginTop">
+              <List items="{files>/items}" mode="Delete" delete=".onRemoveFile" noDataText="No supporting documents selected" class="sapUiSmallMarginTop">
                 <StandardListItem
                   title="{files>name}"
                   description="{files>sizeText}"
@@ -330,7 +330,7 @@
               change=".onSesFilesSelected"
               buttonText="Select Files"
               icon="sap-icon://attachment"/>
-            <List items="{form>/sesDraft/files}" noDataText="No SES supporting documents selected">
+            <List items="{form>/sesDraft/files}" mode="Delete" delete=".onRemoveSesFile" noDataText="No SES supporting documents selected">
               <StandardListItem title="{form>name}" description="{form>sizeText}" icon="sap-icon://document"/>
             </List>
           </VBox>

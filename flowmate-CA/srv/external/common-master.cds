@@ -177,6 +177,13 @@ service CommonMasterDataService {
 
   }
   @cds.persistence.skip
+  entity ValuationClassScc {
+    key ID    :UUID;
+    valuationclassCode : String(40) not null;
+    valuationclassDescription : String(180) not null;
+    isActive : Boolean default true;
+  }
+  @cds.persistence.skip
   entity StorageLocation {
     key ID  :UUID;
   storageLocationCode : String(40) not null;

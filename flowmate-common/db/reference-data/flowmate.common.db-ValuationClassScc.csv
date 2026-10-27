@@ -1,0 +1,249 @@
+ID,valuationclassCode,valuationclassDescription,isActive
+70bf246a-7807-532c-b069-b5a49cceaa89,S001,"Freight,Clearing,Insrnce",true
+24d74cd6-7f63-584d-b200-3704cf06d6d8,S002,Royalty Fee,true
+616aff46-b92a-578a-9210-bb8322ecccd8,S003,Phone Repairs Charges,true
+70344cc8-ef17-5376-b071-ad5c47850755,S004,TRC Cess Fee,true
+711789df-7d78-50f6-852c-2d603a012b56,S005,Frequency Fees,true
+5778f655-42e6-5e63-a151-937bab249838,S006,NW Insurance Fee,true
+7a0026ec-e9f9-5402-a31f-a1ea434451cc,S007,NW Lease Line Cost,true
+41d60790-708c-5172-951a-839cb1b6afe0,S008,NW Equip: & labour hiring,true
+8bab0414-7c36-56e7-ab7a-767703541742,S009,NW Security Expenses,true
+d0435395-d67d-503b-ad94-fe90876f2646,S010,NW Generator Fuel,true
+4df58487-11e4-58da-b661-bedb65700f78,S011,NW Rates & taxes,true
+3bd9780c-d73f-5e8a-a0f4-abfbdd59be86,S012,Site abandonment cost,true
+9c96d9d2-ced0-568d-ae00-dd0665aee218,S013,NW AMC,true
+5be302dc-f7c0-55b2-93b5-49d071b17b4e,S014,IT Billing AMC,true
+07e4a9c3-8d8a-5779-afb7-b658fde2d41b,S015,NW Repaire & maintenance,true
+6dd195c1-c387-5db2-8324-514afbb638a5,S016,IBU Field Service,true
+78582255-3456-525d-8ef2-e7f751a2cfe4,S017,NW Audit and Testing,true
+9e7872c3-c867-506b-bd4a-7ee447638041,S018,NW Warehouse Rent,true
+cc287469-33f3-5db6-8167-de7998b13e52,S019,NW Project Services,true
+373d755a-6a45-50d8-8f81-75ff85781de4,S020,NW Engineering Expenses,true
+b0d33404-2145-5961-a192-80c25e6fafc7,S021,OLAC - Other PSTN,true
+a2a85574-1eee-5b73-b697-5e36e119705a,S022,ILAC - Other PSTN,true
+7d17bd2a-a428-5550-8af2-288f51fbc828,S023,ILAC - Dialog,true
+7f11be21-7e5e-575e-92fb-fc45fb82b65b,S024,Market devp Expenses,true
+31818074-6c3d-56f9-bd1b-d63e62d22b89,S025,Interconnection Charges,true
+d95d98e1-69a8-5800-9f43-d23f18dad5dc,S026,VGF Fund Operating Exp:,true
+c2419957-9334-5ec7-bc31-22fd118e3275,S027,Satellite Charges Voice,true
+762c5375-2509-55be-9cbc-66634e8ae1af,S028,Landing Charge Voice,true
+9bb1f731-f16d-55d7-a51c-80daa21f9eb1,S029,Port/Internet Chgs Voice,true
+c6e85154-2f2a-5569-9094-375758d808bc,S030,Last Mile Expenses,true
+ad82a553-745d-5f4a-b004-f1bf49317b3e,S031,Lease circuit rental,true
+59d61cea-8684-57a1-87d0-32d290a97eb6,S034,SMS Domain Registration,true
+2a62ff71-4be7-5284-8a52-398b8b5d710d,S035,SMW3 Bulk Landing,true
+965cd33e-d939-5dc5-a803-80b03a4d6fdc,S036,Dialog Int'l Serv Faclty,true
+c4221ab4-16d3-52fa-ac3b-c2418154001b,S037,SMW4 E1 Link Rental,true
+996e3c5b-474c-53e7-8d2c-2230cc7b37e1,S038,O&M for S&T,true
+1d904517-ba86-53f3-bd29-448177650b57,S039,Port & Internet Chgs Data,true
+f0be1126-ae32-5acf-939f-108b83671f54,S040,Restoration chgs,true
+758e37f0-ac3a-5d8d-b3ea-b3ed02b5e1b3,S041,Co Locan. Housing Fee/PoP,true
+eeeb04f4-fa24-5341-8627-d571ac13c497,S042,Interconnection & pop chg,true
+895dea85-8273-5ca3-b877-b42615dc8c1d,S043,Roaming Signal Charges,true
+6b24c56e-d2a4-53b5-8431-89c76d90147c,S044,CPE Repaire & maintenace,true
+c023d1ec-01fe-5e3e-bee6-f80efe452719,S045,CPE Installation & Hiring,true
+0d7f6070-dd4b-5fce-b7a6-52db73102f17,S046,Content Manag't Exp:,true
+a1ecc635-48c4-58ba-afa7-f899376bea8f,S047,Channel Fees,true
+8ba99850-b03a-55a9-80a6-ee5f00d99433,S048,Transponder Expenses,true
+0445af7c-33b9-57d7-90ff-d0ebeb76093d,S049,Revenue Share Expenses,true
+bcde40ba-f113-57a9-abca-7b931089a342,S050,Statutory Audit fees,true
+3233e22e-364f-568c-8286-98628d4fef60,S051,Legal/Professional Chrges,true
+47a9b3cd-3358-50c6-bdc6-2ec3c2257238,S052,Consultancy Fee,true
+40c7dabf-4a59-5997-8c79-2a478fe62560,S053,Late payment/penalty fee,true
+e11dcef6-8120-5b21-a343-0d10d6ef4ace,S054,Insurance expense Staff,true
+56626ef4-8e2e-5a70-92fb-c9f2d507782d,S055,Staff Welfare Expenses,true
+8269b259-0955-5373-ad0a-ad992337d66f,S056,Staff Recruitment & O/S,true
+bff13411-cd65-591b-b22c-c67eff1d7e40,S057,Staff Training Exp:,true
+5f7087fd-914d-5100-808b-0b11fe080a67,S058,Venue Hiring Expenses,true
+91d65d31-b7c2-5497-a14e-8be4f7c3636b,S059,Office Equipment AMC,true
+1ce83a90-70f2-50e7-91f3-a087270c70a8,S060,IT AMC,true
+d5649ac1-5e89-5779-af8c-217cb249e24f,S061,Technical Support SAP,true
+5c805598-1ca0-5486-84d5-61f1bf4d26a7,S062,Printing Expenses,true
+6d9e9c97-a817-5189-9e7c-74efde86cfbe,S063,Postage & Courier,true
+3def8561-cf91-5182-962a-2a9a295deee3,S064,Office Equip: Maintenance,true
+f2925ba6-3c11-5347-9495-4773cb56055d,S065,Building maintenance,true
+e293e62b-994b-599d-8c5e-f398ba03e2d1,S066,Vehicle maintenanc,true
+6669063c-189b-5a2b-ac25-cf04f4f587c7,S067,Janitorial expenses,true
+d83ecff8-4dda-5bf8-8fef-f7ca022caf90,S068,Document Archiving,true
+39dc87b0-bc48-5675-a428-55a730b39d3a,S069,Hiring O/E & furtniture,true
+f1ab03c5-6614-5ade-a20e-20445cd62b6e,S070,Office Security Charges,true
+424c8800-215c-5ca0-8b9c-6b9cf69b3eda,S071,Labour/Hiring Admin Exp:,true
+898f854b-6685-59f7-bd4d-7f9fda82643c,S072,IT Storage & other Exp:,true
+0860d6aa-4d68-5ad5-b58f-38879f0d212b,S073,Insurance expense Other,true
+9598a078-31c3-58fb-bf39-015ce866f0d9,S074,News Papers Exp:,true
+a3b74b55-8482-5f91-8d82-fc8c8a179778,S075,Charity & Donation,true
+63818df7-8154-546f-a470-88d43bfa487a,S076,AGM Expenses,true
+1eab07e3-6a84-5695-a239-1b593ac8b791,S077,Stock Exchange Expenses,true
+660a2bd0-71a3-5097-8a03-db6f9fa52d2a,S078,Annual License Fees,true
+079b0413-37b7-5b09-9462-32e9d3b0a8a7,S079,Parent Company support,true
+45c43a4a-1300-51a8-a2fe-8ded872eb6f9,S080,Membership & Subscription,true
+4453f151-28c6-5589-afc0-af5e3d265cc6,S081,Other Promotion Cost,true
+8867fcfc-8e31-5b47-aaed-7feba6f05669,S082,DTV Sale Promotion Cost,true
+4b18b7cf-5bcc-5779-bf54-2cbab835a81e,S083,Bill Recovery Charge,true
+1eeff546-91f9-5e02-8865-116eadb567cb,S084,Bill Printing & Postage,true
+c4f6ddbe-93d6-5e08-9f8b-090178881fce,S085,Production -TV,true
+521d5675-ee4c-59a4-b758-d9f511d493bc,S086,Production -Radio,true
+f534be72-83f1-5d40-85a3-c90e8e6ad69b,S087,Production-Print,true
+9dffe04d-f4b5-517f-a64c-8e90fc1663b2,S088,Production-others,true
+bb59986e-a1fc-5f54-82dd-e39bb8af766f,S089,Scheduling-Radio,true
+a338da6d-68ad-5211-8156-b87cdd45e1e8,S090,Scheduling-TV,true
+8fe8bf63-1743-5e55-9cae-68b853861cde,S091,Scheduling-Print,true
+2e5f4b16-71f8-531c-abc9-1ce74ca25019,S092,Scheduling-Other,true
+46dda176-9dd9-562f-a976-0bb8e92e7ad2,S093,Scheduling-Web,true
+0d2bad9c-3dd9-59ee-ba5b-96a2fba71039,S094,Agency Commission,true
+f47fb274-8a17-5289-a1ba-7295db4161e4,S095,Sponsorship,true
+e160b3c0-61ae-5a7a-8b4d-be1ab938aef1,S096,Events,true
+5d57c4c3-eea9-573b-a18d-66576af181f5,S097,Regional Events,true
+a3597a64-4485-5d69-9d0f-a9e926ce35a0,S098,Printing Marketing,true
+857dcd42-b975-5a2e-b6e4-3fbe8b51c29e,S099,Outdoor Advertising,true
+3084eec0-f6d7-5512-a47e-65a91de6dbda,S100,Merchandising,true
+1a0a0f27-0361-5e1f-9362-5b87ce8c5b36,S101,Brand promotion,true
+e53cbacf-125c-5384-a767-e668a8109c43,S102,Reserch & Servey Charges,true
+e71fe5a9-6c24-5214-a3d6-b2c79328a2b6,S103,Entertainment Expenses,true
+685c7033-c42a-59c7-8a4a-a1649c5f7f5c,S104,FT Air Fees & Other Charg,true
+4fb36362-5e91-5cc9-9e63-c2f96c1894b9,S105,Loyalty Promotional cost,true
+af09baf9-0f2f-520c-b386-c0e51108db2f,S106,CPE Removal Cost,true
+fbe7086a-b2a3-5e57-8795-fb8e5addc042,S107,Thuraya Expenses,true
+3c537181-534c-53dc-98fb-ca42e78e524a,S108,NW Eq Hiring and Trnsprt,true
+ad7ed42b-e349-56cf-9099-3ef27ce20c35,S109,Billing Courier,true
+79b57de4-2bf1-5034-8ca7-f13f6b58a532,S110,Billing Postage,true
+8691f997-2a49-54d0-bea2-b2473955c3f2,S111,Casual Wages,true
+81723608-219d-5a1c-8a16-e082889c8769,S112,Billing letter printing,true
+9a7a486f-8c37-5e19-86c6-784c573b1134,S113,Car Rental_ Snr Mgt,true
+005e51c3-c7e2-5343-872f-cb436f87a36a,S114,Staff Welfare,true
+70b3286e-adf3-5130-84d3-639e25852c36,S115,Advertising-General,true
+5c38492f-c149-5b3b-ab7b-751d36ff02b7,S116,Revenue Share - Alerts,true
+73ee7a28-2a32-52f5-b049-57f51ed6a36f,S117,Revenue Share - VAS Other,true
+8a7ddb81-2e84-5ba6-82ca-57b6eaee84fa,S118,Revenue Share - PRBT,true
+a655f6c7-97cd-59f3-bb4a-224511c85e61,S119,Call center Services,true
+4cb49a30-4232-5ec0-8472-abe257e197b5,S120,Interconnect - Voice,true
+08e8a0cd-fa7d-5105-81e9-3aee939c376e,S121,Interconnect - SMS,true
+618d2d7f-695c-50ee-9a7c-12f08871beae,S122,Interconnect - MMS,true
+64a07c26-8978-5034-982a-799919f0e637,S123,Company Vehicle- Fuel,true
+59e7552c-9ad0-5d48-9213-a183e4ec80db,S124,Staff Allowances-Fuel,true
+9fd94032-542f-5241-ab4d-3eb2bda94776,S125,Staff Uniforms & Others,true
+26dd4553-2ca1-55bb-89aa-a3055fa2b700,S126,Outsourced services,true
+68cd2634-d488-5624-902a-8714a3fdc261,S127,Local Channel Fee's,true
+c40381b5-138a-5a59-9ccc-593490430231,S128,Commission - Aviation,true
+8277b0a3-e23c-53f9-8ca3-f103538424e0,S129,Retail Branding,true
+f3b0abc4-7e69-57df-bfa5-b20c24e63428,S130,Vehicle Parking Fee-Offic,true
+29e9beb8-993e-55dc-a171-c8b0c0c1db9c,S131,Repair- IT assets,true
+a6fe3fe2-d488-530a-a8a1-9b56d1a7fae2,S132,Franchise Refurbishment,true
+9a645961-5c9e-571f-8bd2-4b8c8aa922a1,S133,Commission -Application,true
+361a5d68-c4f8-5215-850b-0aac25391e9d,S134,Out Sourced IT & Others,true
+829f4fae-09e5-572d-8013-bcd37a2da053,S135,Expert Salaries/Benefits,true
+b45ebbb0-17a6-5b42-abe6-0054712ca706,S136,Infra Channel Expenses,true
+f9d638a6-64d5-5eb6-a3a3-86ea867bea59,S137,Exp Corporate Solution,true
+576d40e8-ad05-5500-a976-de9915be6a20,S138,Sales Commission Others,true
+1466a426-ba8b-5611-8551-f9989634621a,S139,Pre acquisition Expenses,true
+66a69916-41dc-5d47-afe5-088cf45fc670,S140,EZ Cash Expenses,true
+84d48d7d-590d-5306-898f-ce1ea6c75f51,S141,DF Charity & Donation,true
+25633cb1-eee4-5960-968b-471aeb24de94,S142,IDC Expense,true
+24b340ec-b37f-56df-b7a2-057ca05400a0,S155,Warranty & Quality Exp,true
+fa02ecd8-06c6-501a-ac6e-14ba1026f9fd,S156,Letter Postage,true
+608b9cae-a3b9-5f8c-8560-53da7dff6433,S157,Letter Courier,true
+e032d7c6-e356-5473-8c39-6d6c4244120c,S158,Packing Expense,true
+1d01879f-d6de-5019-b295-177390567dff,S159,AMC Others,true
+a7c54812-a35d-539b-ae47-00ea40ebe8e6,S160,Retention Payments,true
+0bf1bf77-2f3e-5a7f-ba3a-deb4a8f44748,S161,SAP Support Service,true
+72f0c65c-c3d3-5dd8-9477-cf0298eb0d01,S162,Foreign Wet,true
+ce12e228-0c5e-5aef-a08d-e8743d66be47,S163,Foreign Backhaul,true
+4ec64d98-1116-5039-9060-ea973f782a37,S164,Foreign Last Mile,true
+681ffc6b-a722-50e5-b3c3-b0642c83cf93,S165,Internet Port Charges,true
+b0a4b77a-72a4-5eba-a2af-19563a861e1e,S166,Colocation Expenses,true
+be98a38f-239f-5606-85e4-5387a7b52e22,S167,Sri Lanka Last Mile,true
+4fdd9349-da5d-5dbe-89d0-2be289d2a234,S168,Sri Lanka Landing,true
+a2c2f24e-e43d-5e99-96f9-e78ba65bea98,S169,IB Operating other Cost,true
+b3373bb6-b02d-5e20-86a9-ea9066d6e9cc,S170,Intercon PSTNs,true
+2d390de8-7ce8-506e-a504-ddee68f53fcb,S171,SMS Gateway Expenses,true
+e20d4c73-3468-58f7-93a1-6d93a9c0fa88,S172,Marketing - others,true
+8d677d78-581e-51f4-a575-75dee9fc9c7f,S173,Cx promo others,true
+6c3ddf4d-d34b-5fc2-a36e-e5dc298fb986,S174,DS - Other Expenses,true
+612dd1eb-23dd-5c23-872b-d24043b3303c,S175,Agri Challenge Fund,true
+a58db6e6-2113-5a9e-853a-725f742b5e38,S176,Network sharing rent,true
+c4bfeb85-39ea-5564-802c-d5aaf7a529be,S177,Food and General Supplier,true
+ac8e35a2-a91c-579c-bcf6-7beda7e84e24,S178,Staff Commission (OS),true
+0927ccdd-bfbe-5d61-bb4c-3c40657c485e,S179,Handling Fees,true
+c4215c05-5e3f-5b80-8304-4230310558a8,S180,Content- VAS Others,true
+40926f13-23a3-5813-ab0c-4cb7b39ec92f,S181,Floodrelief- Donation,true
+c2041890-c629-5c02-808e-2e9ef7186770,S182,Pre sales and Marketing,true
+a58736ec-66e1-51fe-b186-439edadc315c,S183,Resource augment,true
+fddf848c-86d6-53c9-acbc-d836734d5527,S184,Productizing,true
+03bb51f0-9767-5570-ad69-8b012c8f4b41,S185,DTV CCA Cost,true
+f70662ee-61c2-50c3-b83b-3c4bd8a1b4a0,S186,Subscription Fees,true
+c5afd7e7-78ea-5ede-87b5-c02227c551d5,S187,Call center cost-outboud,true
+9aedc295-9c91-59d8-9f54-a608d111de45,S188,Medical claim,true
+9854aaec-ac89-5153-9dec-7bfa4a5e3699,S189,Installation Service,true
+6352c43c-4b63-55d8-a287-930d2f1b2b0f,S191,DNS Gen Hiring,true
+9b4afe4c-148b-5170-a15b-c0df26210625,S192,DNS Site Caretaker cost,true
+3bfa3c37-afb9-5b8e-8b3d-67ce1cfcd432,S193,DNS SAQ Cost,true
+5bb60188-5b06-5607-964e-043165af210d,S194,DNS E & E Repair,true
+870a2193-47c4-5ae2-9f9e-e6a9bce21719,S195,DNS AC Repair & Maintenan,true
+a7dc54a0-3b75-5677-a48b-66a6260eb2e3,S196,DNS Energy repair & Maint,true
+366f61ac-c812-5c8f-b13a-ee04964955bd,S197,DNS Civil Routine Mainten,true
+ba525c7e-6bd4-5467-882a-88dc9bdacabc,S198,DNS Cabin & Tower Mainten,true
+d650c3e9-51cc-5f81-980b-2e87ac58a30c,S199,DNS Gen Repair & Maintena,true
+9162e7d1-a5e1-56f8-8b4e-526657f121b3,S200,DNS Passive Infra Service,true
+3a963fd7-ee4b-540e-a07e-5a0502065c79,S201,Sustainability Expense,true
+9f1fc910-7c84-50b0-ac3d-5ba4d62492a4,S202,DNS O&M and Other expense,true
+5b807fc1-dd45-5d71-b9ca-653311b8de1a,S203,Donation for Disaster,true
+cba24de1-7c89-53e3-9dbd-a22c576f0e25,S204,Retail promotional expens,true
+feb40c00-2ffb-5115-b73b-6a71eac37836,S205,Product & solution dlvry.,true
+c321d948-100a-5514-b9ea-82023afb15fd,S206,CX Maintainance Cost,true
+05dace6d-9374-5866-a7ab-28aae099006b,S207,Cloud Hosting Charge,true
+968dae53-43bf-5c6a-9ba5-acb31d47b285,S209,Revn Shr-Data Sci Ac,true
+6f4b9d80-e73a-5ddd-8eb5-d9b9f787515c,S210,Revn Shr-Daas Data Sci Ac,true
+586d3ef3-efaa-5a07-a317-c8a26441f5f4,S213,Device Purchase STC,true
+06279455-92a8-5c24-8c49-42b822661a24,S214,VRS Expenses,true
+d41e4702-afa0-5b07-a751-3e7dbb6d3e1b,S215,Franchise Admin Fee,true
+f94fe321-0164-5f1e-bf55-593f6c05560a,S216,Taxes & Rates,true
+4b1bd1b5-df26-5d35-9db1-166c74c5c64d,S217,Contractual Employe,true
+57cc3036-60e1-58c6-b967-2c4925641a32,S218,Staff Trave Reimbur,true
+25b5ba8c-6592-54f0-abee-da83f4399d54,S219,Staff & Other Refre,true
+e6730950-38db-57cf-9ccf-387fd44323ac,S220,Emp Recog Scheme,true
+a1d59b24-35c8-5056-bbf7-f9ef543eebea,S221,Meals & other Expens,true
+e301d883-e54b-560d-905a-c63dffb84236,S222,Stationery,true
+11054d50-a9e5-5f7d-93a6-bc16561166dd,S223,Generator maint Exp,true
+e57936d8-a61f-5294-9267-d827553ed1e9,S224,Running Water,true
+5d15e760-d33a-52c8-b120-5c5fb3f2a69b,S225,AR & Paper Publising,true
+eeba08be-3509-5f71-97c5-cad1d287648e,S226,HR Consultancy Fee,true
+4d5f32cc-5366-56cb-b7c8-f8331ab562bb,S227,Credit Card Expenses,true
+5919b191-b301-571e-8725-c27dbb6b1d3b,S228,CRIB Charges,true
+473da785-81f5-55d9-8729-fdbeac581445,S229,Deposit Insurance,true
+d730b521-2c08-5546-accb-57995208a6b4,S230,Funeral Endowment,true
+76f87720-5035-5503-ad47-2e89ab0622a3,S231,Internal Audit Fee,true
+477a408d-703b-5924-b7d5-0deed566772c,S232,Membership Fee,true
+8ca82ae3-95a5-552c-9248-1159517c13d6,S233,Professional Fee,true
+85a67a83-3c16-56a9-be68-6cf28f6ec8b6,S234,Secretarial Fees,true
+ac2985c7-d83b-588b-837d-41ddd43f3952,S235,Shifting Charges,true
+bc69eb50-edc9-5cdd-bfda-cefe35a29f0e,S236,Office Travel & Tran,true
+8c668f1c-c8a5-5c49-b110-b90746e98c5f,S237,Comm - eZ Cash,true
+6a6c8b11-6427-58c1-8c1e-85e646829e04,S238,Collection Charges,true
+966006c5-2d25-55f4-b1a5-0e951c677e23,S239,Recovery Expense,true
+84e2d4a1-475a-5094-b04e-99995f4da1ab,S240,Business Promotion,true
+bd00b55b-dd8d-55d8-af48-87ff38d2babf,S241,Debit Card -MC Fee,true
+6054376c-9256-57de-b51a-bad79d942067,S242,Document charges,true
+6485452e-b168-5073-957a-11c149132990,S243,Leasing Intro Comm,true
+c5e07651-1b20-5b97-b227-b6d9cb1be966,S244,Lanka Clear CEFT Fee,true
+b3f3493a-3c0b-5599-9288-09a31b9590d1,S245,Lanka Clear CAS,true
+3c0ab756-8e4e-5e3b-b03e-7b52c3a11a82,S246,LC SLIP Chrg,true
+743e4d86-95f5-5aff-b357-b5def3f86bea,S247,NIC Verifi Chrg,true
+3480bcca-a75f-5514-b660-9ef78d06ca75,S248,Generator Fuel-Office,true
+91ae7d80-3dac-5ec3-ae91-2c41bca73678,S249,VAT Expense,true
+9684efad-f80c-5d65-b57b-6b92bc9ef668,S250,ABC Collection Expense,true
+26cd13de-fdc6-5a1d-9a1e-8d6fea39e0f6,S251,Exp.software expenses,true
+e70369fb-c610-5a00-b502-cf7f00b5f2ed,S252,Outsourced Resources Cost,true
+3e01b05c-823b-5548-afda-9e91ae54d466,S253,SIM Consumption,true
+5370a91a-5c93-5d2a-af9f-a570ee0fb110,S254,IT consumables,true
+62ee055e-cfdf-5dbc-a462-a84b36081653,S255,Exp.Activation commission,true
+b58dc8e0-ce4e-55a6-9193-df88ac23c66b,S256,Bill Collection Commi.,true
+755e2bd0-20a2-5441-9a05-054e2521fe14,S257,OFN maintenance,true
+075cb365-5ad8-53be-9c09-b00e1b0f5820,S258,Site Sharing rent exp,true
+9f69d3a8-e773-5b6b-af53-d743dc8dc969,S259,Outsource ITsup service,true
+9a6cbbed-876e-523c-aaaa-c2a6ef1c1214,S260,MSP Management Fee,true
+51886103-f42a-5fc4-b5f2-1057dee2171a,S261,MSP Resource Cost,true
+004a112c-c8ca-5742-8aba-bbab4b241b88,S262,Frontline oper handl cost,true
+0279631c-d60a-5f7e-ae57-c9b0176010a5,S263,Frontline acqui comm cost,true
+2a14968a-3a85-525b-9aac-c8ce461ad855,S264,CRC handling cost,true
+58daa60f-d317-5c29-a5aa-e97d02a23296,S265,POS/MPOS maint exp,true
+6a5cb11a-e144-5250-bfc8-a0893cc69de3,S266,PayDD support ser.charge,true

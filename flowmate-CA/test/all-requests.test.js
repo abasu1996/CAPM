@@ -71,7 +71,10 @@ test("search is an OR group combined with the other filters", () => {
   assert.equal(filters.length, 2);
   assert.equal(filters[1].and, false);
   assert.equal(filters[1].filters.length, 3);
-  for (const filter of filters[1].filters) assert.equal(filter.value, "O'Brien");
+  for (const filter of filters[1].filters) {
+    assert.equal(filter.value1, "O'Brien");
+    assert.equal(filter.caseSensitive, false);
+  }
 });
 
 test("dashboard counts include requests created or owned by the current user or active delegators", async () => {

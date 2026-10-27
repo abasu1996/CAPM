@@ -103,6 +103,7 @@ sap.ui.define([
         unitsOfMeasure: [],
         serviceGroups: [],
         valuationClasses: [],
+        valuationClassesScc: [],
         entities: [],
         projects: [],
         matGroups: [],
@@ -122,6 +123,7 @@ sap.ui.define([
         pcc: {}
       }), "admin");
       this.getView().setModel(new ListModel({}), "newItem");
+      this.getView().setModel(new ListModel({}), "editStep");
       this.getView().setModel(new ListModel({ members: [], availableUsers: [], selectedUserIds: [] }), "teamManage");
       this.getRouter().getRoute("admin").attachPatternMatched(this.onRefresh, this);
     },
@@ -132,8 +134,8 @@ sap.ui.define([
         const [steps, requestTypes, variants, users, teams, teamMembers, sites, materials,
           serviceCodes, poNumbers,
           purchasingOrganizations, wbs, documentTypes, companyCodes, purchasingGroups, divisions,
-          applicableTaxes, plant, serviceGroups, valuationClasses, storageLocations, salesOrgs,
-          incoterms, costCenters, currencies, paymentTerms, systemContractBasePO,
+          applicableTaxes, plant, serviceGroups, valuationClasses, valuationClassesScc, storageLocations,
+          salesOrgs, incoterms, costCenters, currencies, paymentTerms, systemContractBasePO,
           procurementCategories, itemCategories, accountAssignments, serviceCategories,
           unitsOfMeasure, entities, projects, matGroups, extensionMaterialGroups, profitCenters,
           mrpTypes, availabilityChecks, serialNumberProfiles, distributionChannels, arReferences,
@@ -158,6 +160,7 @@ sap.ui.define([
           this.requestMaster("Plant?$orderby=plantCode"),
           this.requestMaster("ServiceGroups?$orderby=servicegroupCode"),
           this.requestMaster("ValuationClass?$orderby=valuationclassCode"),
+          this.requestMaster("ValuationClassScc?$orderby=valuationclassCode"),
           this.requestMaster("StorageLocation?$orderby=storageLocationCode"),
           this.requestMaster("SalesOrg?$orderby=salesOrgCode"),
           this.requestMaster("Incoterms?$orderby=incotermsCode"),
@@ -204,6 +207,7 @@ sap.ui.define([
         model.setProperty("/plant", plant.value || []);
         model.setProperty("/serviceGroups", serviceGroups.value || []);
         model.setProperty("/valuationClasses", valuationClasses.value || []);
+        model.setProperty("/valuationClassesScc", valuationClassesScc.value || []);
         model.setProperty("/storageLocations", storageLocations.value || []);
         model.setProperty("/salesOrgs", salesOrgs.value || []);
         model.setProperty("/incoterms", incoterms.value || []);
@@ -474,7 +478,15 @@ sap.ui.define([
     this._openAddDialog("serviceGroup", "Add Service Group");
     },
     onAddValuationClass: function () {
-      this._openAddDialog("valuationClass","Add Valuation Class");
+      this._openAddDialog("valuationClass","Add Valuation Class (MCC)");
+},
+    onAddValuationClassScc: function () {
+      this._openAddDialog("valuationClassScc", "Add Valuation Class (SCC)");
+},
+    // Valuation Class has two masters: MCC (Material Code creation) and SCC (Service Code
+    // creation). Both tabs share the save and delete handlers; the row's path picks the entity.
+    _valuationClassEntity: function (context) {
+      return context.getPath().indexOf("/valuationClassesScc/") === 0 ? "ValuationClassScc" : "ValuationClass";
 },
 
 onAddEntity: function () {
@@ -665,7 +677,7 @@ onAddBudgetCode: function () {
         isServiceCategory: type === "serviceCategory",
         isUnitOfMeasure: type === "unitOfMeasure",
         isServiceGroup: type === "serviceGroup",
-        isValuationClass: type === "valuationClass",
+        isValuationClass: type === "valuationClass" || type === "valuationClassScc",
         isEntity: type === "entity",
         isProject: type === "project",
         isMatGroup: type === "matGroup",
@@ -1216,7 +1228,7 @@ else if (item.type === "purchasingOrganization") {
             }
         }
     );
-} else if (item.type === "valuationClass") {
+} else if (item.type === "valuationClass" || item.type === "valuationClassScc") {
 
     const code = item.valuationClassCode?.trim();
     const description =
@@ -1229,7 +1241,7 @@ else if (item.type === "purchasingOrganization") {
     }
 
     await this.requestMaster(
-        "ValuationClass",
+        item.type === "valuationClassScc" ? "ValuationClassScc" : "ValuationClass",
         {
             method: "POST",
             body: {
@@ -1669,6 +1681,49 @@ else if (item.type === "mrpType") {
         slaDays: Number(row.slaDays),
         isActive: row.isActive
       }, false);
+    },
+
+    // Edit pop-up for one step: works on a copy of the row, so Cancel leaves the table unchanged.
+    onEditStep: function (event) {
+      const row = event.getSource().getBindingContext("admin").getObject();
+      this.getView().getModel("editStep").setData({
+        ID: row.ID,
+        requestTypeName: row.requestType?.name || row.requestType_code || "",
+        requestVariantName: row.requestVariant?.name || row.requestVariant_code || "",
+        stepNo: Number(row.stepNo),
+        stepName: row.stepName || "",
+        activityDescription: row.activityDescription || "",
+        processorTeam_ID: row.processorTeam_ID || "",
+        taskName: row.taskName || "",
+        isMandatory: row.isMandatory !== false,
+        slaDays: Number(row.slaDays) || 1,
+        isActive: row.isActive !== false
+      });
+      this.byId("editStepDialog").open();
+    },
+
+    onSaveEditStep: async function () {
+      const step = this.getView().getModel("editStep").getData();
+      const stepName = String(step.stepName || "").trim();
+      if (!stepName || !Number(step.stepNo)) {
+        MessageBox.warning("Step Number and Step Name are required.");
+        return;
+      }
+      this.byId("editStepDialog").close();
+      await this._patch("WorkflowStepConfigs", step.ID, {
+        stepNo: Number(step.stepNo),
+        stepName: stepName,
+        activityDescription: step.activityDescription,
+        processorTeam_ID: step.processorTeam_ID || null,
+        taskName: String(step.taskName || "").trim() || stepName,
+        isMandatory: step.isMandatory,
+        slaDays: Number(step.slaDays),
+        isActive: step.isActive
+      }, false);
+    },
+
+    onCancelEditStep: function () {
+      this.byId("editStepDialog").close();
     },
 
     onDeleteStep: function (event) {
@@ -2716,7 +2771,7 @@ onSaveValuationClass: async function (oEvent) {
     try {
 
         await this.requestMaster(
-            `ValuationClass(${item.ID})`,
+            `${this._valuationClassEntity(context)}(${item.ID})`,
             {
                 method: "PATCH",
                 body: {
@@ -2761,7 +2816,7 @@ onDeleteValuationClass: async function (oEvent) {
                 try {
 
                     await this.requestMaster(
-                        `ValuationClass(${item.ID})`,
+                        `${this._valuationClassEntity(context)}(${item.ID})`,
                         {
                             method: "DELETE"
                         }

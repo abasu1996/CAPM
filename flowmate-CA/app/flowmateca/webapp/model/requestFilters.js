@@ -26,7 +26,7 @@ sap.ui.define([
       if (term) {
         filters.push(new Filter({
           filters: ["referenceNumber", "title", "requesterName"].map((field) =>
-            new Filter(field, FilterOperator.Contains, term)),
+            new Filter({ path: field, operator: FilterOperator.Contains, value1: term, caseSensitive: false })),
           and: false
         }));
       }

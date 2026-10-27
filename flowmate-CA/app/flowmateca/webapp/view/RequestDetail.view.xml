@@ -7,6 +7,7 @@
   xmlns="sap.m">
   <Page class="caPage caObjectPage" showNavButton="true" navButtonPress=".onClose" title="{detail>/title}">
     <headerContent>
+      <Button icon="sap-icon://home" type="Transparent" tooltip="Dashboard" press=".onNavHome"/>
       <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
       <Button text="Assign Request" icon="sap-icon://employee" visible="{detail>/canReassign}" press=".onReassignRequest"/>
     </headerContent>

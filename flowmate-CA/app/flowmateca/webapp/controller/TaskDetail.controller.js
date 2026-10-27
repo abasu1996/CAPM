@@ -122,6 +122,8 @@ sap.ui.define([
           && /g\s*\/?\s*l\s+account\s+enrichment/i.test(currentStep?.stepName || "");
         task.needsValuationClass = singleLine
           && /valuation\s+class/i.test(currentStep?.stepName || "");
+        // The Valuation Class is picked from the type's master: MCC (Material) or SCC (Service).
+        task.valuationLookup = FormDefinitions.valuationClassLookup[typeCode] || null;
         task.needsServiceCode = singleLine && typeCode === "SERVICE_CODE" && s4Step;
         task.needsMaterialCode = singleLine && typeCode === "MATERIAL_CODE" && s4Step;
         // The pop-up starts from what is already recorded (e.g. the requester's Valuation Class).
@@ -145,7 +147,7 @@ sap.ui.define([
           const target = /g\s*\/?\s*l\s+account\s+enrichment/i.test(stepName)
             ? { field: "glAccount", label: "G/L Account", maxLength: 80 }
             : (/valuation\s+class/i.test(stepName)
-              ? { field: "valuationClass_code", label: "Valuation Class", maxLength: 40 }
+              ? { field: "valuationClass_code", label: "Valuation Class", maxLength: 40, lookup: task.valuationLookup }
               : (s4Step
                 ? (isMaterial
                   ? { field: "materialCode", label: "Material Code", maxLength: 40 }
@@ -737,6 +739,7 @@ sap.ui.define([
         glAccount: prefill.glAccount || "",
         needsValuationClass: !!this.getView().getModel("task").getProperty("/needsValuationClass"),
         valuationClass: prefill.valuationClass || "",
+        valuationLookup: this.getView().getModel("task").getProperty("/valuationLookup"),
         needsServiceCode: !!this.getView().getModel("task").getProperty("/needsServiceCode"),
         serviceCode: prefill.serviceCode || "",
         needsMaterialCode: !!this.getView().getModel("task").getProperty("/needsMaterialCode"),
@@ -758,6 +761,19 @@ sap.ui.define([
         })
       });
       this.byId("decisionDialog").open();
+    },
+
+    // Valuation Class in the approve pop-up (single value or per line): value help on the
+    // request type's Valuation Class master.
+    onValuationClassHelp: async function (event) {
+      const input = event.getSource();
+      const lookup = this.getView().getModel("decision").getProperty("/valuationLookup");
+      if (!lookup) {
+        return;
+      }
+      const definition = Object.assign({ label: "Valuation Class" }, lookup);
+      await this._loadFieldCatalogs([definition]);
+      this._openValueHelp(definition, input);
     },
 
     onSendPoNumbersToWorkhub: async function () {

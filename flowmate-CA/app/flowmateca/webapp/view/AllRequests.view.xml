@@ -42,7 +42,7 @@
       <ScrollContainer horizontal="true" vertical="true" width="100%" class="caWorklistScroll">
         <Table id="allRequestsTable" mode="None" growing="true" growingThreshold="50"
           growingScrollToLoad="false" noDataText="{i18n>noMatchingRequests}"
-          updateFinished=".onUpdateFinished" itemPress=".onItemPress" fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable"
+          updateFinished=".onUpdateFinished" itemPress=".onItemPress" fixedLayout="false" sticky="ColumnHeaders" class="caWorklistTable caFitTable"
           items="{
             path: '/Requests',
             parameters: {$count: true, $expand: 'requestType,requestVariant,status'},
@@ -50,27 +50,29 @@
             events: {dataReceived: '.onDataReceived'}
           }">
           <columns>
-            <Column width="12.5rem"><Text text="Request ID"/></Column>
-            <Column width="9.5rem"><Text text="{i18n>requestType}"/></Column>
-            <Column width="8rem"><Text text="Requester"/></Column>
+            <Column><Text text="Request ID"/></Column>
+            <Column width="8rem"><Text text="{i18n>requestType}"/></Column>
+            <Column width="6.5rem"><Text text="Requester"/></Column>
             <Column width="8rem"><Text text="{i18n>requestVariant}"/></Column>
             <Column><Text text="{i18n>title}"/></Column>
-            <Column width="11.5rem"><Text text="{i18n>status}"/></Column>
-            <Column width="8rem"><Text text="{i18n>requesterTeam}"/></Column>
-            <Column width="6.5rem"><Text text="{i18n>dueDate}"/></Column>
-            <Column width="8rem"><Text text="Created"/></Column>
+            <Column><Text text="{i18n>status}"/></Column>
+            <Column width="8rem"><Text text="{i18n>pendingWith}"/></Column>
+            <Column width="9rem"><Text text="{i18n>pendingTask}"/></Column>
+            <Column width="7rem"><Text text="{i18n>requesterTeam}"/></Column>
+            <Column><Text text="{i18n>dueDate}"/></Column>
+            <Column><Text text="Created"/></Column>
           </columns>
           <items>
             <ColumnListItem
-              type="Navigation"
+              type="Active"
               highlight="{parts: ['slaDueAt', 'status_code', 'completedAt'], formatter: '.formatRequestSlaHighlight'}">
               <cells>
                 <ObjectIdentifier title="{referenceNumber}"/>
-                <Text text="{requestType/name}"/>
-                <Text text="{requesterName}"/>
-                <Text text="{requestVariant/name}"/>
+                <Text text="{requestType/name}" class="caWrapCell"/>
+                <Text text="{requesterName}" class="caWrapCell"/>
+                <Text text="{requestVariant/name}" class="caWrapCell"/>
                 <Text text="{title}" tooltip="{title}" class="caTitleCell"/>
-                <HBox alignItems="Center" wrap="NoWrap">
+                <HBox alignItems="Center" wrap="Wrap">
                   <ObjectStatus text="{parts: ['status/name', 'status_code'], formatter: '.statusName'}"
                     state="{path: 'status_code', formatter: '.statusState'}"/>
                   <ObjectStatus
@@ -78,9 +80,11 @@
                     state="{parts: ['slaDueAt', 'status_code', 'completedAt'], formatter: '.formatRequestSlaHighlight'}"
                     class="sapUiTinyMarginBegin"/>
                 </HBox>
-                <Text text="{ownerTeamName}" tooltip="{ownerTeamName}" wrapping="false"/>
-                <Text text="{path: 'dueDate', formatter: '.formatDate'}"/>
-                <Text text="{path: 'createdAt', formatter: '.formatDateTimeShort'}" tooltip="{path: 'createdAt', formatter: '.formatDateTime'}" wrapping="false"/>
+                <Text text="{pendingWith}" class="caWrapCell"/>
+                <Text text="{pendingStep}" class="caWrapCell"/>
+                <Text text="{ownerTeamName}" class="caWrapCell"/>
+                <Text text="{path: 'dueDate', formatter: '.formatDate'}" wrapping="false"/>
+                <Text text="{path: 'createdAt', formatter: '.formatDateTimeShort'}" tooltip="{path: 'createdAt', formatter: '.formatDateTime'}" class="caWrapCell"/>
               </cells>
             </ColumnListItem>
           </items>

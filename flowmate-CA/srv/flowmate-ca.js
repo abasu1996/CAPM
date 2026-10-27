@@ -437,6 +437,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.before("READ", "RequestQueue", this._filterRequestQueue);
     this.before("READ", "Tasks", this._filterTasksByRole);
     this.before("READ", "MyRequests", this._filterMyRequests);
+    this.after("READ", ["Requests", "MyRequests", "RequestQueue"], this._addPendingInfo);
     this.before("READ", "Drafts", this._filterDrafts);
     this.before("READ", "Attachments", this._filterRequestAttachments);
     this.before("READ", ["RequestSteps", "Comments", "InvolvedParties", "History", "RequestVersions"], this._filterRequestChildrenByRole);
@@ -1029,6 +1030,44 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const user = await this._ensureCurrentUser(req);
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
     req.query.where(this._myRequestWhere(effectiveUserIds));
+  };
+
+  // Where a request is: "pendingWith" is whoever holds its open tasks, by name once someone has
+  // claimed or been given one, otherwise the team the task waits in; "pendingStep" is the name of
+  // the step it is at (a task with no step shows its own name). A finished request has neither.
+  _addPendingInfo = async (result, req) => {
+    const rows = (Array.isArray(result) ? result : [result]).filter(Boolean);
+    const asked = ["pendingWith", "pendingStep"];
+    const columns = req.query?.SELECT?.columns;
+    if (!rows.length || (columns && !columns.some((column) => column === "*" || asked.includes(column.ref?.[0])))) {
+      return;
+    }
+    const open = rows.filter((row) => ![REQUEST_STATUS.COMPLETED, REQUEST_STATUS.REJECTED].includes(row.status_code));
+    if (!open.length) {
+      return;
+    }
+    const tasks = await SELECT.from(this.db.CATasks)
+      .columns("request_ID", "taskName", "assignedName", "assignedTeamName", "stepNo", "stepInstance.stepName as stepName")
+      .where({ request_ID: { in: open.map((row) => row.ID) }, status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.IN_PROGRESS] } })
+      .and("(isSuperseded = false or isSuperseded is null)")
+      .orderBy("stepNo");
+    const holders = new Map();
+    const steps = new Map();
+    const add = (map, requestId, value) => {
+      const list = map.get(requestId) || [];
+      if (value && !list.includes(value)) {
+        list.push(value);
+      }
+      map.set(requestId, list);
+    };
+    for (const task of tasks) {
+      add(holders, task.request_ID, task.assignedName || task.assignedTeamName);
+      add(steps, task.request_ID, task.stepName || task.taskName);
+    }
+    for (const row of open) {
+      row.pendingWith = (holders.get(row.ID) || []).join(", ") || null;
+      row.pendingStep = (steps.get(row.ID) || []).join(", ") || null;
+    }
   };
 
   _filterDrafts = async (req) => {
@@ -2373,17 +2412,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     // records a value for them. Mirrored in TaskDetail.controller.js.
     const existingVariant = /_EXISTING$/.test(request?.requestVariant_code || "");
     // Service Code and Material Code: the G/L Account Enrichment, Valuation Class and S/4 Data
-    // Validation approvers record their value, once (single line) or per line item.
+    // Validation approvers record their value, once (single line) or per line item. The Valuation
+    // Class comes from the type's own master: SCC for Service Code, MCC for Material Code.
     const enrichment = {
       SERVICE_CODE: {
-        details: "ServiceCodeDetails", items: "ServiceCodeItems",
+        details: "ServiceCodeDetails", items: "ServiceCodeItems", valuationEntity: "ValuationClassScc",
         s4: { column: "serviceCode", param: "serviceCode", label: "Service Code", maxLength: 80 }
       },
       MATERIAL_CODE: {
-        details: "MaterialCodeDetails", items: "MaterialCodeItems",
+        details: "MaterialCodeDetails", items: "MaterialCodeItems", valuationEntity: "ValuationClass",
         s4: { column: "materialCode", param: "materialCode", label: "Material Code", maxLength: 40 }
       }
     }[request?.requestType_code];
+    const valuationClasses = valuationClassStep && enrichment && !existingVariant
+      ? new Set((await this.master.run(SELECT.from(this.masterEntities[enrichment.valuationEntity])
+        .columns("valuationclassCode").where({ isActive: true }))).map((row) => row.valuationclassCode))
+      : null;
     if ((glEnrichmentStep || valuationClassStep || serviceCodeStep) && enrichment && !existingVariant) {
       const serviceDetails = await SELECT.one.from(this.db[enrichment.details])
         .where({ request_ID: task.request_ID });
@@ -2409,6 +2453,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           if (valuationClass.length > 40) {
             return req.reject(400, "Valuation Class must be 40 characters or fewer");
           }
+          if (!valuationClasses.has(valuationClass)) {
+            return req.reject(400, `Valuation Class ${valuationClass} is not in the active Valuation Class list`);
+          }
           updates.valuationClass_code = valuationClass;
         }
         if (serviceCodeStep) {
@@ -2428,7 +2475,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         const target = glEnrichmentStep
           ? { column: "glAccount", label: "G/L Account", maxLength: 80 }
           : (valuationClassStep
-            ? { column: "valuationClass_code", label: "Valuation Class", maxLength: 40 }
+            ? { column: "valuationClass_code", label: "Valuation Class", maxLength: 40, allowed: valuationClasses }
             : enrichment.s4);
         const failure = await this._applyLineValues(tx, req, this.db[enrichment.items], serviceDetails.ID, target);
         if (failure) return failure;
@@ -2864,6 +2911,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
       if (value.length > target.maxLength) {
         return req.reject(400, `Row ${item.itemNo}: ${target.label} must be ${target.maxLength} characters or fewer`);
+      }
+      // target.allowed: the active master codes the value must be one of.
+      if (target.allowed && !target.allowed.has(value)) {
+        return req.reject(400, `Row ${item.itemNo}: ${target.label} ${value} is not in the active ${target.label} list`);
       }
     }
     for (const item of items) {

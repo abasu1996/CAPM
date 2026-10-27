@@ -1096,10 +1096,13 @@
    at the top of the card. */
 .caWorklistScroll.sapMScrollCont {
   box-sizing: border-box;
-  width: calc(100% - 3rem) !important;
-  max-width: 92rem;
-  max-height: calc(100vh - 11rem);
-  margin: 1.25rem auto 1.5rem;
+  /* The full width of the page, less the same 1rem margin it keeps at the bottom. */
+  width: calc(100% - 2rem) !important;
+  max-width: none;
+  /* As tall as its rows, and at most the space the page leaves it (its own margins taken off), so
+     it reaches the bottom of the window whatever the header above it measures. */
+  max-height: calc(100% - 2.25rem);
+  margin: 1.25rem auto 1rem;
   border: 1px solid var(--ca-border);
   border-radius: 0.65rem;
   background: #fff;
@@ -1138,6 +1141,45 @@
   white-space: nowrap;
   overflow: visible;
   text-overflow: clip;
+}
+
+/* All Requests has eleven columns, more than fit side by side on a laptop screen. The table is as
+   wide as the card and the browser shares the width out: IDs, status and dates stay on one line,
+   and the long text columns (marked caWrapCell) wrap onto a second line when there is no room.
+   Nothing is cut and nothing needs scrolling sideways. */
+.caWorklistScroll .caFitTable.sapMList {
+  width: 100% !important;
+}
+
+.caWorklistScroll .caFitTable .sapMListTbl {
+  width: 100%;
+  table-layout: auto;
+}
+
+.caWorklistScroll .caFitTable .sapMListTblHeaderCell .sapMText {
+  white-space: normal;
+}
+
+.caWorklistScroll .caFitTable .sapMListTblCell .sapMText.caWrapCell {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* The status and its SLA badge sit side by side, or one under the other when there is no room;
+   the gap goes after each so a stacked badge lines up with the status above it. */
+.caWorklistScroll .caFitTable .sapMListTblCell .sapMHBox > .sapMObjStatus {
+  margin-left: 0 !important;
+  margin-right: 0.5rem;
+}
+
+/* A long title is cut with "…" (the full text shows on hover) so it cannot squeeze the others. */
+.caWorklistScroll .caFitTable .sapMListTblCell .sapMText.caTitleCell {
+  display: block;
+  min-width: 0;
+  max-width: 14rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Titles can be long: up to 22rem wide, wrapping onto further lines rather than being cut. */

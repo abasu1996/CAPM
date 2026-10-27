@@ -23,6 +23,19 @@ sap.ui.define([], function () {
     required: true,
     entity: "UnitsOfMeasure"
   });
+  // Material Code fields pick an existing code from the Materials master (value help with
+  // server-side search).
+  const materialLookup = {
+    entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription"
+  };
+  // Valuation Class has one master per request type: MCC for Material Code creation, SCC for
+  // Service Code creation. TaskDetail uses the same lookups for the approver's value.
+  const valuationClassLookup = {
+    MATERIAL_CODE: { entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription" },
+    SERVICE_CODE: { entity: "ValuationClassScc", key: "valuationclassCode", text: "valuationclassDescription" }
+  };
+  const valuationClassMcc = field("valuationClass_code", "Valuation Class", "valueHelp", valuationClassLookup.MATERIAL_CODE);
+  const valuationClassScc = field("valuationClass_code", "Valuation Class", "valueHelp", valuationClassLookup.SERVICE_CODE);
   const vendor = field("vendor_ID", "Vendor", "combo", {
     entity: "Vendors",
     key: "ID",
@@ -41,9 +54,9 @@ sap.ui.define([], function () {
       required: true,
       entity: "MaterialType", key: "materialTypeCode", text: "materialTypeDescription", secondaryText: "materialTypeCode"
     }),
-    field("referenceMaterialCode", "Reference Material Code", "input", {
+    field("referenceMaterialCode", "Reference Material Code", "valueHelp", Object.assign({
       placeholder: "Optional existing SAP material code"
-    }),
+    }, materialLookup)),
     plant,
     field("description", "Material Description", "input", {
       required: true,
@@ -65,9 +78,7 @@ sap.ui.define([], function () {
     }),
     field("snp", "SNP", "input"),
     field("hsCode", "HS Code", "input"),
-    field("valuationClass_code", "Valuation Class", "combo", {
-      entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
-    }),
+    valuationClassMcc,
     field("coupaCommodityCode_code", "Coupa Commodity Code", "combo", {
       entity: "CoupaCommodityCodes"
     }),
@@ -116,7 +127,7 @@ sap.ui.define([], function () {
       required: true,
       entity: "MRPType", key: "mrpTypeCode", text: "mrpTypeDescription"
     }),
-    field("grProcessingTime", "GR Processing Time", "input"),
+    field("grProcessingTime", "GR Processing Time", "input", { placeholder: "Minimum 1 day, Maximum 3 days" }),
     field("availabilityCheck", "Availability Check", "combo", {
       required: true,
       entity: "AvailabilityCheck", key: "availabilityCheckCode", text: "availabilityCheckDescription"
@@ -169,7 +180,7 @@ sap.ui.define([], function () {
 
   const whenDms = { field: "dmsUpdate", equals: true };
   const dmsBlock = [
-    field("dmsSapMaterialCode", "SAP Material Code", "input", { visibleWhen: whenDms }),
+    field("dmsSapMaterialCode", "SAP Material Code", "valueHelp", Object.assign({ visibleWhen: whenDms }, materialLookup)),
     field("itemName", "Item Name", "input", { required: true, visibleWhen: whenDms }),
     field("itemCategory", "Item Category", "input", { required: true, visibleWhen: whenDms }),
     field("unitsPerItem", "Units per Item", "number", { required: true, visibleWhen: whenDms }),
@@ -190,10 +201,10 @@ sap.ui.define([], function () {
     })
   ];
 
-  const referenceMaterial = field("referenceMaterialCode", "Reference Material Code", "input", {
+  const referenceMaterial = field("referenceMaterialCode", "Reference Material Code", "valueHelp", Object.assign({
     required: true,
     placeholder: "Existing SAP material code"
-  });
+  }, materialLookup));
 
   const materialStatus = field("materialStatus", "Material Status (Block/Unblock)", "select", {
     options: [{ key: "BLOCK", text: "Block" }, { key: "UNBLOCK", text: "Unblock" }]
@@ -224,7 +235,7 @@ sap.ui.define([], function () {
   // lineItem: with Multiple Line Items the field is a column of the items table, shown or hidden
   // by its visibleWhen rule, instead of a header field.
   const materialModificationFields = [
-    field("referenceMaterialCode", "Material Code", "input", { required: true }),
+    field("referenceMaterialCode", "Material Code", "valueHelp", Object.assign({ required: true }, materialLookup)),
     modificationPlant,
     field("storageLocation", "Storage Location", "combo", {
       entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName",
@@ -237,7 +248,7 @@ sap.ui.define([], function () {
     Object.assign({}, materialStatus, { visibleWhen: whenChange, lineItem: true })
   ];
   const tradingModificationFields = [
-    field("referenceMaterialCode", "Material Code", "input", { required: true }),
+    field("referenceMaterialCode", "Material Code", "valueHelp", Object.assign({ required: true }, materialLookup)),
     tradingModificationPlant,
     field("storageLocation", "Storage Location", "combo", {
       entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName", visibleWhen: whenExtension
@@ -273,13 +284,16 @@ sap.ui.define([], function () {
     TRADING: matCore.concat(matTrading, [dmsToggle], dmsBlock, [field("cepDE", "CPE (DE)", "checkbox")])
   };
 
-  // Trading New only: Per Unit Price is mandatory and starts at 1. The other Trading forms build
-  // on the plain list above, where it stays optional.
-  const tradingNewFields = materialCategoryFields.TRADING.map(function (definition) {
-    return definition.name === "perUnitPrice"
-      ? Object.assign({}, definition, { required: true, defaultValue: 1 })
-      : definition;
-  });
+  // Creating a material, Per Unit Price starts at 1 and can be changed. It is mandatory on Trading
+  // New only. The modification forms leave it empty: it would change an existing material's price.
+  const withPriceDefault = function (fields, extra) {
+    return fields.map(function (definition) {
+      return definition.name === "perUnitPrice"
+        ? Object.assign({}, definition, { defaultValue: 1 }, extra)
+        : definition;
+    });
+  };
+  const tradingNewFields = withPriceDefault(materialCategoryFields.TRADING, { required: true });
 
   // Keep the original material fields on the reference and modification forms.
   // The workbook relaxes those fields for these request types, so only fields
@@ -308,11 +322,10 @@ sap.ui.define([], function () {
   const materialDefinitions = {};
   Object.keys(materialCategoryFields).forEach(function (categoryCode) {
     const base = materialCategoryFields[categoryCode];
-    materialDefinitions[categoryCode + ":MAT_NEW"] = categoryCode === "TRADING" ? tradingNewFields : base;
+    materialDefinitions[categoryCode + ":MAT_NEW"] = categoryCode === "TRADING" ? tradingNewFields : withPriceDefault(base);
     const referenceFields = [
-      field("referenceMaterialCode", categoryCode === "TRADING" ? "Material Code" : "Reference Material Code", "input", {
-        required: true, placeholder: "Existing SAP material code"
-      }),
+      field("referenceMaterialCode", categoryCode === "TRADING" ? "Material Code" : "Reference Material Code", "valueHelp",
+        Object.assign({ required: true, placeholder: "Existing SAP material code" }, materialLookup)),
       plant,
       field("description", "Material Description", "input", { required: true, maxLength: 40 }),
       Object.assign({}, uom, { required: false })
@@ -336,10 +349,10 @@ sap.ui.define([], function () {
     appendMissingFields(existingFields, optionalMaterialFields(base));
     appendMissingFields(existingFields, modificationFields.slice(2));
     materialDefinitions[categoryCode + ":MAT_EXISTING"] = existingFields;
-    materialDefinitions[categoryCode + ":MAT_NEW_REF"] = appendMissingFields(
+    materialDefinitions[categoryCode + ":MAT_NEW_REF"] = withPriceDefault(appendMissingFields(
       referenceFields,
       optionalMaterialFields(base)
-    );
+    ));
   });
 
   // Service Code forms pick Unit of Measure and Service Group in a value help (OVS).
@@ -364,7 +377,7 @@ sap.ui.define([], function () {
     MAT_ENG_IT: materialBase,
     MAT_ADMIN_CONS: materialBase,
     MAT_ZTRD_NEW: [
-      field("referenceMaterialCode", "Reference Material Code", "input"),
+      field("referenceMaterialCode", "Reference Material Code", "valueHelp", materialLookup),
       field("dmsUpdate", "DMS Update Required", "checkbox"),
       plant,
       field("storageLocation", "Storage Location", "combo", { entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName" }),
@@ -399,9 +412,7 @@ sap.ui.define([], function () {
       field("inspectionStock", "Post to Inspection Stock", "checkbox"),
       field("sourceList", "Source List", "checkbox"),
       field("commodityImportCode", "Commodity / Import Code", "input"),
-      field("valuationClass_code", "Valuation Class", "combo", {
-        entity: "ValuationClass", key: "valuationclassCode", text: "valuationclassDescription"
-      }),
+      valuationClassMcc,
       field("itemName", "DMS Item Name", "input"),
       field("itemCategory", "DMS Item Category", "input"),
       field("unitsPerItem", "Units per Item", "number"),
@@ -420,9 +431,9 @@ sap.ui.define([], function () {
       field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
         required: true
       }),
-      field("dmsSapMaterialCode", "DMS - SAP Material Code", "input", {
+      field("dmsSapMaterialCode", "DMS - SAP Material Code", "valueHelp", Object.assign({
         required: true
-      })
+      }, materialLookup))
     ],
     MAT_ZTRD_EXISTING: [
       field("transactionType", "Change Type", "select", {
@@ -433,9 +444,9 @@ sap.ui.define([], function () {
           { key: "DMS_UPDATE", text: "DMS Update" }
         ]
       }),
-      field("referenceMaterialCode", "Existing Material Code", "input", {
+      field("referenceMaterialCode", "Existing Material Code", "valueHelp", Object.assign({
         required: true
-      }),
+      }, materialLookup)),
       field("serialNumberProfile", "Serial Number Profile", "combo", { entity: "SerialNumberProfile", key: "serialNumberProfileCode", text: "serialNumberProfileDescription" }),
       field("dmsUpdate", "DMS Update Required", "checkbox"),
       field("itemName", "DMS Item Name", "input"),
@@ -456,9 +467,9 @@ sap.ui.define([], function () {
       field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
         required: true
       }),
-      field("dmsSapMaterialCode", "DMS - SAP Material Code", "input", {
+      field("dmsSapMaterialCode", "DMS - SAP Material Code", "valueHelp", Object.assign({
         required: true
-      })
+      }, materialLookup))
     ],
     SVC_NEW: serviceNewBase,
     SVC_NEW_REF: [
@@ -487,6 +498,7 @@ sap.ui.define([], function () {
       field("serviceGroup_code", "Service Group", "valueHelp", {
         entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
       }),
+      valuationClassScc,
       field("supportingAttachment", "Supporting Attachment", "file"),
       field("remarks", "Remarks", "textarea")
     ],
@@ -1423,6 +1435,7 @@ sap.ui.define([], function () {
   };
 
   return {
+    valuationClassLookup: valuationClassLookup,
     // lineMode "SINGLE_LINE" picks a "<variant>_SINGLE" definition when one exists.
     getFields: function (variantCode, categoryCode, lineMode) {
       if (lineMode === "SINGLE_LINE" && definitions[variantCode + "_SINGLE"]) {

@@ -70,6 +70,10 @@ entity CARequests : cuid, managed {
   owner           : Association to common.Users;
   ownerTeam       : Association to common.Teams;
   ownerTeamName   : String(160);
+  // Filled when a request is read, from its open tasks (not stored): who holds them (the person,
+  // or the team they wait in while nobody has claimed them) and what the tasks are called.
+  virtual pendingWith : String(500);
+  virtual pendingStep : String(500);
   status          : Association to RequestStatuses;
   priority        : Association to Priorities;
   currentStep     : Integer default 0;

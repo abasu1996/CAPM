@@ -160,6 +160,12 @@ entity Customers as projection on db.Customers;
     { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
     { grant: '*', to: 'MasterDataAdmin' }
   ]
+  entity ValuationClassScc as projection on db.ValuationClassScc;
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
   entity StorageLocation as projection on db.StorageLocation;
 
   @restrict: [
