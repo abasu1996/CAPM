@@ -1637,6 +1637,34 @@
         </items>
     </Table>
 </IconTabFilter>
+<IconTabFilter key="taxClass" text="Tax Class" icon="sap-icon://money-bills">
+    <Toolbar class="caSectionToolbar">
+        <Title text="Tax Class" level="H3"/>
+        <ToolbarSpacer/>
+        <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="taxClass"/>
+    </Toolbar>
+    <Table items="{admin>/pcc/taxClass}" growing="true" growingThreshold="50" class="caAdminTable">
+        <columns>
+            <Column width="14rem"><Text text="Tax Class Code"/></Column>
+            <Column><Text text="Description"/></Column>
+            <Column width="7rem"><Text text="Active"/></Column>
+            <Column width="6rem"><Text text="Actions"/></Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Input value="{admin>taxClassCode}"/>
+                    <Input value="{admin>taxClassDescription}"/>
+                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <HBox>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="taxClass"/>
+                        <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="taxClass"/>
+                    </HBox>
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</IconTabFilter>
 
 <IconTabFilter key="plant" text="Plants" icon="sap-icon://factory">
     <Toolbar class="caSectionToolbar">

@@ -104,6 +104,7 @@ sap.ui.define([], function () {
       entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription"
     }),
     field("externalMaterialGroup_code", "External Material Group", "combo", {
+      required: true,
       entity: "ExtensionMaterialGroup", key: "extensionMaterialGroupCode", text: "extensionMaterialGroupDescription",
       secondaryText: "extensionMaterialGroupCode"
     }),
@@ -132,15 +133,12 @@ sap.ui.define([], function () {
 
   const matTrading = [
     field("storageLocation", "Storage Location", "combo", {
-      required: true,
       entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName"
     }),
     field("salesOrganization", "Sales Org", "combo", {
-      required: true,
       entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName"
     }),
     field("distributionChannel", "Distribution Channel", "combo", {
-      required: true,
       entity: "DistributionChannel", key: "distributionChannelCode", text: "distributionChannelDescription"
     }),
     field("division", "Division", "combo", {
@@ -151,13 +149,16 @@ sap.ui.define([], function () {
       required: true,
       entity: "Plant", key: "plantCode", text: "plantName"
     }),
-    field("taxClass", "Tax Class", "input", { required: true }),
+    field("taxClass", "Tax Class", "combo", {
+      required: true,
+      entity: "TaxClass", key: "taxClassCode", text: "taxClassDescription", secondaryText: "taxClassCode"
+    }),
     // Both pick from Admin console tables (Account Assignments, Product Hierarchy).
     field("accountAssignmentGroup", "Account Assignment Group", "combo", {
-      required: true, entity: "AccountAssignments"
+      entity: "AccountAssignments"
     }),
     field("productHierarchy", "Product Hierarchy", "combo", {
-      required: true, entity: "ProductHierarchy",
+      entity: "ProductHierarchy",
       key: "productHierarchyCode", text: "productHierarchyDescription", secondaryText: "productHierarchyCode"
     }),
     field("inspectionStock", "Post to Inspection Stock", "checkbox"),
@@ -269,8 +270,16 @@ sap.ui.define([], function () {
   const materialCategoryFields = {
     ENG_IT: matCore,
     ADMIN_CONS: matCore,
-    TRADING: matCore.concat(matTrading, [dmsToggle], dmsBlock, [field("cepDE", "CEP (DE)", "checkbox")])
+    TRADING: matCore.concat(matTrading, [dmsToggle], dmsBlock, [field("cepDE", "CPE (DE)", "checkbox")])
   };
+
+  // Trading New only: Per Unit Price is mandatory and starts at 1. The other Trading forms build
+  // on the plain list above, where it stays optional.
+  const tradingNewFields = materialCategoryFields.TRADING.map(function (definition) {
+    return definition.name === "perUnitPrice"
+      ? Object.assign({}, definition, { required: true, defaultValue: 1 })
+      : definition;
+  });
 
   // Keep the original material fields on the reference and modification forms.
   // The workbook relaxes those fields for these request types, so only fields
@@ -299,7 +308,7 @@ sap.ui.define([], function () {
   const materialDefinitions = {};
   Object.keys(materialCategoryFields).forEach(function (categoryCode) {
     const base = materialCategoryFields[categoryCode];
-    materialDefinitions[categoryCode + ":MAT_NEW"] = base;
+    materialDefinitions[categoryCode + ":MAT_NEW"] = categoryCode === "TRADING" ? tradingNewFields : base;
     const referenceFields = [
       field("referenceMaterialCode", categoryCode === "TRADING" ? "Material Code" : "Reference Material Code", "input", {
         required: true, placeholder: "Existing SAP material code"
@@ -311,12 +320,12 @@ sap.ui.define([], function () {
     if (categoryCode === "TRADING") {
       referenceFields.push(
         field("distributionChannel", "Distribution Channel", "combo", {
-          required: true, entity: "DistributionChannel", key: "distributionChannelCode", text: "distributionChannelDescription"
+          entity: "DistributionChannel", key: "distributionChannelCode", text: "distributionChannelDescription"
         }),
         field("salesOrganization", "Sales Org", "combo", {
-          required: true, entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName"
+          entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName"
         }),
-        field("cepDE", "CEP (DE)", "checkbox")
+        field("cepDE", "CPE (DE)", "checkbox")
       );
     }
     const modificationFields = categoryCode === "TRADING"
@@ -333,6 +342,8 @@ sap.ui.define([], function () {
     );
   });
 
+  // Service Code forms pick Unit of Measure and Service Group in a value help (OVS).
+  const serviceUom = Object.assign({}, uom, { type: "valueHelp" });
   const serviceNewBase = [
     field("serviceCategory", "Service Category", "combo", { required: true, entity: "ServiceCategories", text: "description" }),
     field("serviceDescription", "Service Description", "input", {
@@ -340,8 +351,8 @@ sap.ui.define([], function () {
       maxLength: 40,
       placeholder: "Maximum 40 characters"
     }),
-    uom,
-    field("serviceGroup_code", "Service Group", "combo", {
+    serviceUom,
+    field("serviceGroup_code", "Service Group", "valueHelp", {
       required: true,
       entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
     }),
@@ -472,8 +483,8 @@ sap.ui.define([], function () {
         maxLength: 40,
         placeholder: "Maximum 40 characters"
       }),
-      Object.assign({}, uom, { required: false }),
-      field("serviceGroup_code", "Service Group", "combo", {
+      Object.assign({}, serviceUom, { required: false }),
+      field("serviceGroup_code", "Service Group", "valueHelp", {
         entity: "ServiceGroups", key: "servicegroupCode", text: "servicegroupDescription"
       }),
       field("supportingAttachment", "Supporting Attachment", "file"),
@@ -501,10 +512,12 @@ sap.ui.define([], function () {
       }),
       field("serialNumber", "Serial Number", "input", { required: true }),
       field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
-      field("commissionedDate", "Commissioned Date", "date", { required: true }),
+      field("commissionedDate", "Commissioned Date", "date", { pastOnly: true }),
       field("remarks", "Remarks", "textarea"),
       field("supportingAttachment", "Supporting Attachment", "file")
     ],
+    // Modification: only the existing equipment code and the approver are mandatory; the site,
+    // plant, material and serial number are optional (single and bulk alike).
     EQP_EXISTING: [
       field("existingEquipmentCode", "Existing Equipment Code", "input", {
         required: true,
@@ -512,27 +525,23 @@ sap.ui.define([], function () {
         placeholder: "Enter the existing equipment code"
       }),
       field("siteId", "Site ID", "combo", {
-        required: true,
         entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName",
         autoFills: { field: "siteName", from: "siteName" }
       }),
       field("siteName", "Site Name", "input", {
-        required: true,
         placeholder: "Filled from the selected Site ID (editable)"
       }),
-      plant,
+      Object.assign({}, plant, { required: false }),
       field("materialCode", "Material Code", "combo", {
-        required: true,
         entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription",
         autoFills: { field: "materialDescription", from: "materialDescription" }
       }),
       field("materialDescription", "Material Description", "readonly", {
-        required: true,
         placeholder: "Filled from the selected Material Code"
       }),
-      field("serialNumber", "Serial Number", "input", { required: true }),
+      field("serialNumber", "Serial Number", "input"),
       field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
-      field("commissionedDate", "Commissioned Date", "date"),
+      field("commissionedDate", "Commissioned Date", "date", { pastOnly: true }),
       field("existingFunctionalLocation", "Existing Functional Location", "input", {
         maxLength: 80,
         placeholder: "Enter the existing functional location"
@@ -563,20 +572,21 @@ sap.ui.define([], function () {
       field("projectName", "Project Name", "input", { required: true }),
       // Vendor, Scope, Division, Project Type and AR come from the PCC masters (Admin console);
       // the server builds Project ID / Category / Description from them (see previewProjectCode).
+      // Vendor and Division are mandatory for Engineering only; an empty one is left out of the
+      // generated Project ID.
       field("vendorPcc", "Vendor", "combo", {
-        required: true, entity: "VendorsPcc", key: "vendor", text: "vendor", secondaryText: "vendorLetter", codeField: "vendorLetter"
+        requiredWhen: { field: "requestedByArea", equals: "ENGINEERING" }, entity: "VendorsPcc", key: "vendor", text: "vendor", secondaryText: "vendorLetter", codeField: "vendorLetter"
       }),
-      // Spec 8: Scope applies to engineering requests only.
+      // Scope is mandatory for Engineering and Non-Engineering alike.
       field("scope", "Scope", "combo", {
         required: true,
-        entity: "ScopePcc", key: "scope", text: "scope", secondaryText: "scope",
-        visibleWhen: { field: "requestedByArea", equals: "ENGINEERING" }
+        entity: "ScopePcc", key: "scope", text: "scope", secondaryText: "scope"
       }),
       field("entityCode", "Entity", "combo", {
         required: true, entity: "Entity", key: "code", text: "description", secondaryText: "code"
       }),
       field("division", "Division", "combo", {
-        required: true, entity: "DivisionsPcc", key: "division", text: "division", secondaryText: "divisionLetter", codeField: "divisionLetter"
+        requiredWhen: { field: "requestedByArea", equals: "ENGINEERING" }, entity: "DivisionsPcc", key: "division", text: "division", secondaryText: "divisionLetter", codeField: "divisionLetter"
       }),
       field("projectTypePcc", "Project Type", "combo", {
         required: true, entity: "ProjectTypePcc", key: "projectType", text: "projectType", secondaryText: "projectType"
@@ -610,7 +620,8 @@ sap.ui.define([], function () {
         required: true,
         options: [
           { key: "FUNCTION_LOCATION", text: "Function Location" },
-          { key: "ACTIVITY", text: "Activity" }
+          { key: "ACTIVITY", text: "Activity" },
+          { key: "DESCRIPTION_CHANGE", text: "Description Change" }
         ]
       }),
       field("siteId", "Site ID", "combo", {
@@ -627,7 +638,14 @@ sap.ui.define([], function () {
       field("projectId", "Project Code", "combo", {
         required: true,
         entity: "Projects", key: "projectID", text: "projectID", secondaryText: "projectDescription",
-        visibleWhen: { field: "transactionType", equals: "ACTIVITY" }
+        visibleWhen: { field: "transactionType", in: ["ACTIVITY", "DESCRIPTION_CHANGE"] }
+      }),
+      // Description Change: the new description of the chosen Project Code.
+      field("projectDescription", "Project Description", "input", {
+        required: true,
+        maxLength: 255,
+        placeholder: "New project description",
+        visibleWhen: { field: "transactionType", equals: "DESCRIPTION_CHANGE" }
       }),
       field("remarks", "Remarks", "textarea"),
       field("supportingAttachment", "Supporting Attachment", "file")
@@ -1094,7 +1112,7 @@ sap.ui.define([], function () {
 
   const COLUMN_KEYS = [
     "name", "label", "type", "required", "requiredWhen", "entity", "key", "text", "secondaryText",
-    "options", "maxLength", "autoFills", "placeholder", "codeField"
+    "options", "maxLength", "autoFills", "placeholder", "codeField", "pastOnly"
   ];
 
   const isHeaderOnlyField = (field, drivers) =>
@@ -1117,8 +1135,8 @@ sap.ui.define([], function () {
   // Variants whose Multiple Line table holds only these fields (with per-column overrides);
   // every other field stays in the details form above the table.
   const lineItemFields = {
+    // Project Name is entered once for the request (details), not per line.
     PROJECT_NEW_MOD: {
-      projectName: {},
       siteId: {},
       siteName: {},
       // Generated per row from the row's site and the request's shared Project ID.
@@ -1128,7 +1146,8 @@ sap.ui.define([], function () {
     PROJECT_FL_ACTIVITY: {
       // Column-level visibleWhen: Project Code only for Activity requests, the site columns only
       // for Function Location requests (as in Single).
-      projectId: { required: true, visibleWhen: { field: "transactionType", equals: "ACTIVITY" } },
+      projectId: { required: true, visibleWhen: { field: "transactionType", in: ["ACTIVITY", "DESCRIPTION_CHANGE"] } },
+      projectDescription: { required: true, visibleWhen: { field: "transactionType", equals: "DESCRIPTION_CHANGE" } },
       siteId: { visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" } },
       siteName: { visibleWhen: { field: "transactionType", equals: "FUNCTION_LOCATION" } },
       remarks: {}
@@ -1553,6 +1572,9 @@ sap.ui.define([], function () {
             }),
             column("activityNumber", "Activity", "input", {
               visibleWhen: { field: "transactionType", equals: "ACTIVITY" }
+            }),
+            column("projectCode", "Confirmed Project Code", "input", {
+              visibleWhen: { field: "transactionType", equals: "DESCRIPTION_CHANGE" }
             })
           ]
           : [column("projectCode", "Project Code")]);
@@ -1604,6 +1626,10 @@ sap.ui.define([], function () {
     // days apart (either order). Returns the warning, or null. Mirrors sesDateProblem in srv/flowmate-ca.js.
     // A Purchase Order's Procurement Category is its Process Variant: PO_OPEX -> OPEX,
     // PO_CAPEX_FM -> CAPEX_FM, PO_CAPEX_IM -> CAPEX_IM; null for anything else.
+    // Whether a visibleWhen rule ({ field, equals } or { field, in: [...] }) matches the driver's value.
+    whenMatches: function (rule, value) {
+      return Array.isArray(rule.in) ? rule.in.indexOf(value) >= 0 : value === rule.equals;
+    },
     procurementCategoryForVariant: function (variantCode) {
       return /^PO_/.test(variantCode || "") ? variantCode.slice(3) : null;
     },

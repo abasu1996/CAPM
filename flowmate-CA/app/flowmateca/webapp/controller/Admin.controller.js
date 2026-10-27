@@ -61,6 +61,13 @@ sap.ui.define([
         { name: "materialTypeCode", label: "Material Type Code" },
         { name: "materialTypeDescription", label: "Description" }
       ]
+    },
+    {
+      key: "taxClass", entity: "TaxClass", title: "Tax Class",
+      columns: [
+        { name: "taxClassCode", label: "Tax Class Code" },
+        { name: "taxClassDescription", label: "Description" }
+      ]
     }
   ];
 

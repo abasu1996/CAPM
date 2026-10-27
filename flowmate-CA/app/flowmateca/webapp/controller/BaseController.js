@@ -33,8 +33,10 @@ sap.ui.define([
   "sap/ui/model/json/JSONModel",
   "sap/m/TableSelectDialog",
   "sap/ui/model/Filter",
-  "sap/ui/model/FilterOperator"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel, TableSelectDialog, Filter, FilterOperator) {
+  "sap/ui/model/FilterOperator",
+  "sap/ui/model/FilterType",
+  "flowmateca/control/FormHBox"
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel, TableSelectDialog, Filter, FilterOperator, FilterType, FormHBox) {
   "use strict";
 
   // A VBox that a SimpleForm accepts as a field (forms only take IFormContent controls); it holds
@@ -80,7 +82,7 @@ sap.ui.define([
     "ArReferences", "Currencies", "UnitsOfMeasure", "ServiceCategories", "ProcurementCategories",
     "PaymentTerms", "Projects", "ItemCategories", "AccountAssignments",
     "ContractType", "PurchasingOrganizations", "CompanyCodes", "Incoterms", "CostCenter", "ApplicableTaxes",
-    "BudgetCode", "ProductHierarchy", "MaterialType", "Entity", "ExtensionMaterialGroup",
+    "BudgetCode", "ProductHierarchy", "MaterialType", "TaxClass", "Entity", "ExtensionMaterialGroup",
     "ArPcc", "VendorsPcc", "DivisionsPcc", "ScopePcc", "ProjectTypePcc"
   ]);
   const STATUS_MESSAGES = {
@@ -116,6 +118,29 @@ sap.ui.define([
 
   // Master data whose fields show only the code once picked (the drop-down lists code and name).
   const CODE_ONLY_ENTITIES = new Set(["Sites", "Materials", "ServiceCodes"]);
+
+  // Pick lists too big to load whole (the vendor master holds tens of thousands of rows, and the
+  // server returns at most 1000 per request) are searched on the server as the user types, and
+  // browsed page by page in a value-help dialog. "columns" are the dialog's [field, header] pairs.
+  const SEARCHED_ENTITIES = {
+    Vendors: {
+      fields: ["vendorCode", "vendorName", "vendorEmail"], orderBy: "vendorName",
+      columns: [["vendorCode", "Vendor Code"], ["vendorName", "Vendor Name"], ["vendorEmail", "E-mail"]]
+    },
+    Materials: {
+      fields: ["materialCode", "materialDescription"], orderBy: "materialCode",
+      columns: [["materialCode", "Material Code"], ["materialDescription", "Description"]]
+    },
+    ServiceCodes: {
+      fields: ["serviceCode", "serviceDescription"], orderBy: "serviceCode",
+      columns: [["serviceCode", "Service Code"], ["serviceDescription", "Description"]]
+    },
+    PoNumbers: { fields: ["poNumber"], orderBy: "poNumber", columns: [["poNumber", "PO Number"]] }
+  };
+  const SEARCH_PAGE_SIZE = 50;
+  const SEARCH_DELAY_MS = 300;
+  const RENDER_DELAY_MS = 100;
+  const SEARCH_MIN_CHARS = 2;
 
   return Controller.extend("flowmateca.controller.BaseController", {
     getRouter: function () {
@@ -770,10 +795,13 @@ ${reasons.join("\n")}`);
       const formNames = new Set(this.detailFieldDefinitions(request, details).map(function (definition) {
         return definition.name;
       }));
+      // Project Code Modification names its project in the form already (Project Code), so the
+      // S/4 approver's value reads "Confirmed Project Code".
+      const confirmed = request.requestVariant?.code === "PROJECT_FL_ACTIVITY";
       this.approverFieldsFor(request.requestType?.code).forEach(function (entry) {
         const value = details[entry[0]];
         if (!formNames.has(entry[0]) && value !== undefined && value !== null && value !== "") {
-          fields.push({ label: entry[1], value: String(value) });
+          fields.push({ label: confirmed && entry[0] === "projectCode" ? "Confirmed Project Code" : entry[1], value: String(value) });
         }
       });
       return fields;
@@ -796,7 +824,7 @@ ${reasons.join("\n")}`);
           return true;
         }
         const source = definition.source === "request" ? request : details;
-        return source[rule.field] === rule.equals;
+        return FormDefinitions.whenMatches(rule, source[rule.field]);
       });
     },
 
@@ -874,7 +902,7 @@ ${reasons.join("\n")}`);
         details.materialCategory
       ).filter(function (col) {
         // A conditional column only shows when the request's own details match its rule.
-        return !col.visibleWhen || details[col.visibleWhen.field] === col.visibleWhen.equals;
+        return !col.visibleWhen || FormDefinitions.whenMatches(col.visibleWhen, details[col.visibleWhen.field]);
       });
       table.destroyColumns();
       table.unbindItems();
@@ -923,6 +951,10 @@ ${reasons.join("\n")}`);
         if (catalog.getProperty(`/${entity}`)) {
           return;
         }
+        if (SEARCHED_ENTITIES[entity]) {
+          catalog.setProperty(`/${entity}`, []);
+          return;
+        }
         const fromMaster = MASTER_PICK_LISTS.has(entity);
         let orderBy = `&$orderby=${keyField}`;
         if (entity === "Users" || entity === "Vendors") {
@@ -965,7 +997,7 @@ ${reasons.join("\n")}`);
     },
 
     // Spec-driven conditional fields: a definition may carry
-    // visibleWhen: { field: "<driver>", equals: "<value>" }.
+    // visibleWhen: { field: "<driver>", equals: "<value>" } or { field: "<driver>", in: [...] }.
     _isFieldVisible: function (definition) {
       const rule = definition.visibleWhen;
       if (!rule) {
@@ -973,7 +1005,7 @@ ${reasons.join("\n")}`);
       }
       const form = this.getView().getModel("form").getData();
       const source = definition.source === "request" ? form : (form.details || {});
-      return source[rule.field] === rule.equals;
+      return FormDefinitions.whenMatches(rule, source[rule.field]);
     },
 
     // A field is mandatory outright (required) or only while another field has a given value
@@ -1073,10 +1105,13 @@ ${reasons.join("\n")}`);
           placeholder: definition.placeholder || ""
         }).bindValue(path);
       } else if (definition.type === "date") {
-        control = new DatePicker({
-          valueFormat: "yyyy-MM-dd",
-          displayFormat: "medium"
-        }).bindValue(path);
+        const settings = { valueFormat: "yyyy-MM-dd", displayFormat: "medium" };
+        if (definition.pastOnly) {
+          settings.maxDate = new Date();
+          settings.maxDate.setHours(0, 0, 0, 0);
+          settings.maxDate.setDate(settings.maxDate.getDate() - 1);
+        }
+        control = new DatePicker(settings).bindValue(path);
       } else if (definition.type === "checkbox") {
         control = new CheckBox({
           select: function (event) {
@@ -1142,6 +1177,10 @@ ${reasons.join("\n")}`);
           templateShareable: true,
           template: this._comboListItem(definition, key, text, secondaryText)
         });
+        if (SEARCHED_ENTITIES[definition.entity]) {
+          this._enableServerSearch(control, definition, key);
+          control = this._withValueHelp(control, definition, key);
+        }
       } else if (definition.type === "valueHelp") {
         // Value help (OVS): the value is picked from the master in a searchable dialog.
         control = new Input({
@@ -1171,12 +1210,104 @@ ${reasons.join("\n")}`);
       return control;
     },
 
+    // A searched combo gets a button beside it that browses the whole list.
+    _withValueHelp: function (combo, definition, key) {
+      const controller = this;
+      combo.setLayoutData(new FlexItemData({ growFactor: 1, minWidth: "0" }));
+      const button = new Button({
+        icon: "sap-icon://value-help",
+        type: "Transparent",
+        tooltip: `Browse all ${definition.label}`,
+        press: function (event) {
+          const box = event.getSource().getParent().getItems()[0];
+          controller._openSearchDialog(definition, function (row) {
+            controller._mergeCatalogRows(definition.entity, [row]);
+            box.setSelectedKey(row[key]);
+            const context = box.getBindingContext("form");
+            controller._applyAutoFill(definition, row[key], context ? context.getPath() : null, row);
+            controller._applyConditionalVisibility();
+          });
+        }
+      });
+      return new FormHBox({ width: "100%", alignItems: "Center", items: [combo, button] });
+    },
+
+    // The value-help dialog of a large pick list. Its table is bound to the entity of the master
+    // service, so it asks the server for one page at a time and shows the true total, and the
+    // search is a server-side filter (as in the Admin vendor table). onPick gets the chosen row.
+    _openSearchDialog: function (definition, onPick) {
+      const entity = definition.entity;
+      const config = SEARCHED_ENTITIES[entity];
+      const active = new Filter("isActive", FilterOperator.EQ, true);
+      const select = ["ID"].concat(config.columns.map(function (column) { return column[0]; }));
+      [].concat(definition.autoFills || []).forEach(function (rule) {
+        if (rule.from && select.indexOf(rule.from) < 0) {
+          select.push(rule.from);
+        }
+      });
+      const dialog = new TableSelectDialog({
+        title: `Select ${definition.label}`,
+        noDataText: `No ${definition.label} found`,
+        contentWidth: "48rem",
+        growing: true,
+        growingThreshold: SEARCH_PAGE_SIZE,
+        columns: config.columns.map(function (column) { return new Column({ header: new Text({ text: column[1] }) }); }),
+        items: {
+          path: `master>/${entity}`,
+          parameters: { $select: select.join(","), $orderby: config.orderBy, $count: true },
+          filters: [active],
+          templateShareable: false,
+          template: new ColumnListItem({
+            cells: config.columns.map(function (column) { return new Text({ text: `{master>${column[0]}}` }); })
+          })
+        },
+        search: function (event) {
+          const text = String(event.getParameter("value") || "").trim();
+          const filters = [active];
+          if (text) {
+            filters.push(new Filter({
+              filters: config.fields.map(function (field) {
+                return new Filter({ path: field, operator: FilterOperator.Contains, value1: text, caseSensitive: false });
+              }),
+              and: false
+            }));
+          }
+          event.getSource().getBinding("items").filter(filters, FilterType.Application);
+        },
+        confirm: function (event) {
+          const item = event.getParameter("selectedItem");
+          if (item) {
+            onPick(item.getBindingContext("master").getObject());
+          }
+        },
+        afterClose: function () {
+          dialog.destroy();
+        }
+      });
+      dialog.setModel(this.getView().getModel("master"), "master");
+      this.getView().addDependent(dialog);
+      dialog.open("");
+    },
+
     // Value-help dialog of a "valueHelp" field: the active rows of definition.entity (already in
-    // the catalog model) with the code and, when the definition has one, the description; the
-    // search matches either. Confirming writes the code into the input, which is bound two-way.
+    // the catalog model) with the code and, when the definition has one (secondaryText, else text),
+    // the description; the search matches either. Confirming writes the code into the input, which
+    // is bound two-way. A large list is browsed through _openSearchDialog instead.
     _openValueHelp: function (definition, input) {
       const key = definition.key || "code";
-      const description = definition.secondaryText && definition.secondaryText !== key ? definition.secondaryText : null;
+      if (SEARCHED_ENTITIES[definition.entity]) {
+        this._openSearchDialog(definition, function (row) {
+          input.setValue(row[key]);
+          const context = input.getBindingContext("form");
+          this._applyAutoFill(definition, row[key], context ? context.getPath() : null, row);
+          this._applyConditionalVisibility();
+        }.bind(this));
+        return;
+      }
+      const text = definition.text || "name";
+      const description = definition.secondaryText && definition.secondaryText !== key
+        ? definition.secondaryText
+        : (text !== key ? text : null);
       const fields = [key].concat(description ? [description] : []);
       const current = input.getValue();
       const dialog = new TableSelectDialog({
@@ -1234,9 +1365,6 @@ ${reasons.join("\n")}`);
       return `${codeValue} - ${textValue}`;
     },
 
-    // The code and name properties a master-data combo shows: codeField when the definition names
-    // one, else its key (unless that is a technical ID), else its secondary text. Users have no
-    // code and return null, keeping name + e-mail.
     _comboFields: function (definition) {
       if (definition.entity === "Users") {
         return null;
@@ -1247,6 +1375,115 @@ ${reasons.join("\n")}`);
       const text = definition.text || "name";
       const name = text !== code ? text : (definition.secondaryText !== code ? definition.secondaryText : null);
       return { code: code, text: name };
+    },
+
+
+    // The combo starts empty and fills from the server as the user types. A value that is already
+    // set (a draft, an edit step, an import) has its row fetched, so the field shows the name and
+    // not a bare key. In a table the cell is cloned for every row, so the handlers work on `this`,
+    // the control that received the event, and never on `combo`, the unrendered template.
+    _enableServerSearch: function (combo, definition, key) {
+      const controller = this;
+      const entity = definition.entity;
+      combo.setPlaceholder(`Type to search ${definition.label}`);
+      // A ComboBox has no event per keystroke, so the typed text is read from its native input.
+      combo.addEventDelegate({
+        oninput: function (event) {
+          const box = this;
+          clearTimeout(box._searchTimer);
+          const text = (event.target.value || "").trim();
+          if (!box._replaying && text.length >= SEARCH_MIN_CHARS) {
+            box._searchTimer = setTimeout(function () {
+              controller._searchCatalog(entity, text).then(function () {
+                setTimeout(controller._showSearchResults.bind(controller, box, text), RENDER_DELAY_MS);
+              });
+            }, SEARCH_DELAY_MS);
+          }
+        },
+        onBeforeRendering: function () {
+          controller._ensureCatalogRow(entity, key, this.getSelectedKey());
+        }
+      }, combo);
+    },
+
+    // The ComboBox neither opens nor re-filters when rows arrive later. Once they have, the typed
+    // text is replayed (one character short, then in full, as the same text again counts as no
+    // change) so the ComboBox runs its normal filter-and-open path.
+    _showSearchResults: function (box, text) {
+      const field = box.bIsDestroyed ? null : box.getFocusDomRef();
+      // Focus may sit on the page body for a moment when the row re-rendered; another field
+      // holding it means the user has moved on.
+      const active = document.activeElement;
+      if (!field || (active !== field && active !== document.body) || field.value.trim() !== text) {
+        return;
+      }
+      field.focus();
+      box._replaying = true;
+      [text.slice(0, -1), text].forEach(function (value) {
+        field.value = value;
+        field.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      box._replaying = false;
+      // Inside a table row the ComboBox can stay closed after the replay.
+      if (!box.isOpen() && box.getVisibleItems().length) {
+        box.open();
+      }
+    },
+
+    _readPickList: function (entity, path) {
+      return MASTER_PICK_LISTS.has(entity) ? this.requestMaster(path) : this.request(path);
+    },
+
+    _searchCatalog: function (entity, text) {
+      const config = SEARCHED_ENTITIES[entity];
+      const term = text.toLowerCase().replace(/'/g, "''");
+      const match = config.fields.map(function (field) {
+        return `contains(tolower(${field}),'${term}')`;
+      }).join(" or ");
+      const filter = encodeURIComponent(`isActive eq true and (${match})`);
+      return this._readPickList(entity, `${entity}?$filter=${filter}&$orderby=${config.orderBy}&$top=${SEARCH_PAGE_SIZE}`)
+        .then(function (result) {
+          this._mergeCatalogRows(entity, result.value || []);
+        }.bind(this))
+        .catch(function (error) {
+          Log.error(`Could not search the ${entity} list`, error);
+        });
+    },
+
+    _ensureCatalogRow: function (entity, key, value) {
+      const known = this.getView().getModel("catalog").getProperty(`/${entity}`) || [];
+      if (!value || known.some(function (row) { return String(row[key]) === String(value); })) {
+        return;
+      }
+      if (key === "ID" && !/^[0-9a-f-]{36}$/i.test(value)) {
+        return;
+      }
+      this._catalogLookups = this._catalogLookups || new Set();
+      const lookup = `${entity}/${key}/${value}`;
+      if (this._catalogLookups.has(lookup)) {
+        return;
+      }
+      this._catalogLookups.add(lookup);
+      const literal = key === "ID" ? value : `'${String(value).replace(/'/g, "''")}'`;
+      this._readPickList(entity, `${entity}?$filter=${encodeURIComponent(`${key} eq ${literal}`)}&$top=1`)
+        .then(function (result) {
+          this._mergeCatalogRows(entity, result.value || []);
+        }.bind(this))
+        .catch(function (error) {
+          Log.error(`Could not load the ${entity} row for ${value}`, error);
+        });
+    },
+
+    // Rows are only ever added: a vendor picked earlier must stay in the list while the user
+    // searches for another one.
+    _mergeCatalogRows: function (entity, rows) {
+      const catalog = this.getView().getModel("catalog");
+      const known = catalog.getProperty(`/${entity}`) || [];
+      const have = new Set(known.map(function (row) { return row.ID; }));
+      const added = rows.filter(function (row) { return !have.has(row.ID); });
+      if (added.length) {
+        catalog.setProperty(`/${entity}`, known.concat(added));
+      }
     },
 
     _comboListItem: function (definition, key, text, secondaryText) {
@@ -1431,7 +1668,7 @@ ${reasons.join("\n")}`);
     _columnVisibleBinding: function (col) {
       const rule = col.visibleWhen;
       return rule
-        ? { path: `form>/details/${rule.field}`, formatter: function (value) { return value === rule.equals; } }
+        ? { path: `form>/details/${rule.field}`, formatter: function (value) { return FormDefinitions.whenMatches(rule, value); } }
         : true;
     },
 
@@ -1447,8 +1684,25 @@ ${reasons.join("\n")}`);
         if (missing) {
           return `Row ${index + 1}: ${missing.label} is required.`;
         }
+        const late = (columns || this._itemColumns || []).map(function (col) {
+          return this._isColumnShown(col) ? this._pastDateProblem(col, items[index][col.name]) : null;
+        }.bind(this)).find(Boolean);
+        if (late) {
+          return `Row ${index + 1}: ${late}`;
+        }
       }
       return null;
+    },
+
+    // A date field flagged pastOnly (Commissioned Date) must lie before today. The date picker
+    // already refuses later days; this catches a value that was typed or imported.
+    _pastDateProblem: function (definition, value) {
+      const now = new Date();
+      const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
+      const date = String(value || "");
+      return definition.pastOnly && /^\d{4}-\d{2}-\d{2}/.test(date) && date.slice(0, 10) >= today
+        ? `${definition.label} must be before today.`
+        : null;
     },
   });
 });

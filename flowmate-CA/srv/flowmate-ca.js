@@ -2457,13 +2457,17 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return JSON.stringify(await this._generateProjectCode(details || {}));
   };
 
-  // Project Code (New / Modification), Single line. From the PCC masters:
-  //   Project ID          <Division letter>/<YY of the AR year>/<NNN>/<Vendor letter>, where NNN counts
-  //                       per Division letter + Vendor letter across all years;
-  //   Project Category    <High Level PC>/<Scope>/<Project Type> (no Scope for non-engineering);
+  // Project Code (New / Modification), Single line. From the PCC masters, parts joined without
+  // separators:
+  //   Project ID          <Division letter><YY of the AR year><NNN><Vendor letter>, where NNN counts
+  //                       per Division letter + Vendor letter across all years. Division and Vendor
+  //                       are optional for Non-Engineering; an empty one is left out (e.g. 26001V);
+  //   Project Category    <High Level PC><Scope><Project Type>, slashes in the master values dropped
+  //                       (High Level PC TR/253980 -> TR253980);
   //   Project Description <Site ID>_<Site Name>_<Project ID>.
   // Parts whose inputs are not chosen yet stay empty. keepProjectId keeps an already assigned
   // number while the Division and Vendor letters are unchanged (requester edits on step 1).
+  // Older IDs were stored as N/26/001/V; they still count, and a kept one loses its slashes.
   async _generateProjectCode(details, keepProjectId) {
     const lookup = (entity, column, value) => (value
       ? this.master.run(SELECT.one.from(this.masterEntities[entity]).where({ [column]: value }))
@@ -2474,31 +2478,40 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       lookup("ArPcc", "ar", details.arReference)
     ]);
     const projectCategory = ar?.highLevelPc && details.projectTypePcc
-      ? [ar.highLevelPc, details.scope, details.projectTypePcc].filter(Boolean).join("/")
+      ? [ar.highLevelPc, details.scope, details.projectTypePcc].filter(Boolean)
+        .map((part) => String(part).replace(/\//g, "")).join("")
       : "";
 
     let projectId = "";
-    if (division?.divisionLetter && vendor?.vendorLetter && ar?.year) {
-      const prefix = `${division.divisionLetter}/`;
-      const suffix = `/${vendor.vendorLetter}`;
+    if (ar?.year) {
+      const divisionLetter = details.division ? String(division?.divisionLetter || "") : "";
+      const vendorLetter = details.vendorPcc ? String(vendor?.vendorLetter || "") : "";
       const yy = String(ar.year).slice(-2);
-      const kept = String(keepProjectId || "").split("/");
-      let number;
-      if (kept.length === 4 && keepProjectId.startsWith(prefix) && keepProjectId.endsWith(suffix)) {
-        number = kept[2];
-      } else {
-        const pattern = `${prefix}%${suffix}`;
+      const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const owned = [
+        new RegExp(`^${escape(divisionLetter)}\\d{2}(\\d{3,})${escape(vendorLetter)}$`),
+        new RegExp(`^${escape(divisionLetter)}/\\d{2}/(\\d+)/${escape(vendorLetter)}$`)
+      ];
+      const numberOf = (id) => {
+        for (const pattern of owned) {
+          const match = pattern.exec(String(id || ""));
+          if (match) return Number.parseInt(match[1], 10);
+        }
+        return null;
+      };
+      let number = numberOf(keepProjectId);
+      if (number === null) {
+        const pattern = `${divisionLetter}%${vendorLetter}`;
         const [headerIds, itemIds] = await Promise.all([
           SELECT.from(this.db.ProjectCodeDetails).columns("projectId").where({ projectId: { like: pattern } }),
           SELECT.from(this.db.ProjectCodeItems).columns("projectId").where({ projectId: { like: pattern } })
         ]);
-        const highest = headerIds.concat(itemIds).reduce((max, row) => {
-          const value = Number.parseInt(String(row.projectId).split("/")[2], 10);
+        number = headerIds.concat(itemIds).reduce((max, row) => {
+          const value = numberOf(row.projectId);
           return Number.isFinite(value) && value > max ? value : max;
-        }, 0);
-        number = String(highest + 1).padStart(3, "0");
+        }, 0) + 1;
       }
-      projectId = `${division.divisionLetter}/${yy}/${number}/${vendor.vendorLetter}`;
+      projectId = `${divisionLetter}${yy}${String(number).padStart(3, "0")}${vendorLetter}`;
     }
 
     const projectDescription = details.siteId && details.siteName && projectId
@@ -2516,7 +2529,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     const generated = await this._generateProjectCode(details, keepProjectId);
     if (!generated.projectId) {
-      return req.reject(400, "Select a Division, AR and Vendor from the PCC lists to generate the Project ID");
+      return req.reject(400, "Select an AR from the PCC list to generate the Project ID");
     }
     if (!generated.projectCategory) {
       return req.reject(400, "Select an AR and Project Type from the PCC lists to generate the Project Category");
@@ -2600,6 +2613,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
       if (transactionType === "ACTIVITY") {
         return { column: "activityNumber", label: "Activity", maxLength: 80 };
+      }
+      // Description Change: the approver confirms the Project Code.
+      if (transactionType === "DESCRIPTION_CHANGE") {
+        return { column: "projectCode", label: "Confirmed Project Code", maxLength: 80 };
       }
     }
     return null;

@@ -215,13 +215,16 @@ sap.ui.define([
           task.needsProjectValue = true;
           task.projectValueLabel = projectTarget.label;
         } else if (projectTarget) {
-          // Each row shows what identifies the line: Project Name / Description (New / Modification),
-          // Site ID / Name (Function Location) or Project Code / Remarks (Activity).
+          // Each row shows what identifies the line: Site ID / Project Description (New Project Code),
+          // Site ID / Name (Function Location), Project Code / Remarks (Activity) or Project Code /
+          // Project Description (Description Change).
           const info = request.requestVariant?.code === "PROJECT_NEW_MOD"
-            ? { info1Label: "Project Name", info2Label: "Project Description", info1: "projectName", info2: "projectDescription" }
+            ? { info1Label: "Site ID", info2Label: "Project Description", info1: "siteId", info2: "projectDescription" }
             : (details.transactionType === "FUNCTION_LOCATION"
               ? { info1Label: "Site ID", info2Label: "Site Name", info1: "siteId", info2: "siteName" }
-              : { info1Label: "Project Code", info2Label: "Remarks", info1: "projectId", info2: "remarks" });
+              : details.transactionType === "DESCRIPTION_CHANGE"
+                ? { info1Label: "Project Code", info2Label: "Project Description", info1: "projectId", info2: "projectDescription" }
+                : { info1Label: "Project Code", info2Label: "Remarks", info1: "projectId", info2: "remarks" });
           task.lineEntry = Object.assign(projectTarget, { info1Label: info.info1Label, info2Label: info.info2Label });
           task.lineEntryRows = details.items.slice()
             .sort(function (left, right) { return left.itemNo - right.itemNo; })
@@ -539,6 +542,13 @@ sap.ui.define([
         MessageBox.warning(missingField.label + " is required.");
         return false;
       }
+      const lateField = (this._headerFields || []).find(function (definition) {
+        return this._isFieldVisible(definition) && this._pastDateProblem(definition, details[definition.name]);
+      }.bind(this));
+      if (lateField) {
+        MessageBox.warning(this._pastDateProblem(lateField, details[lateField.name]));
+        return false;
+      }
       // Service Entry Sheet, tax based: the two dates may be at most 30 days apart.
       const sesDateProblem = FormDefinitions.sesDateProblem(details);
       if (sesDateProblem) {
@@ -639,6 +649,9 @@ sap.ui.define([
       if (variantCode === "PROJECT_FL_ACTIVITY" && transactionType === "ACTIVITY") {
         return { field: "activityNumber", label: "Activity", maxLength: 80 };
       }
+      if (variantCode === "PROJECT_FL_ACTIVITY" && transactionType === "DESCRIPTION_CHANGE") {
+        return { field: "projectCode", label: "Confirmed Project Code", maxLength: 80 };
+      }
       return null;
     },
 
@@ -654,7 +667,7 @@ sap.ui.define([
         ? FormDefinitions.getHeaderDisplayColumns(source.request.requestVariant?.code)
         : FormDefinitions.getItemDisplayColumns(source.request.requestType?.code, source.request.requestVariant?.code,
           source.details.materialCategory).filter(function (col) {
-          return !col.visibleWhen || source.details[col.visibleWhen.field] === col.visibleWhen.equals;
+          return !col.visibleWhen || FormDefinitions.whenMatches(col.visibleWhen, source.details[col.visibleWhen.field]);
         });
       const title = headers ? "Header Creation" : (task.detailItemsTitle || "Line Items");
       this.exportTableRows([task.request?.referenceNumber, title].filter(Boolean).join(" - "), columns,

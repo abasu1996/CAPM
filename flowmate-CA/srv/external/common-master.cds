@@ -382,6 +382,14 @@ service CommonMasterDataService {
     isActive                : Boolean default true;
   }
 
+  @cds.persistence.skip
+  entity TaxClass {
+    key ID : UUID;
+    taxClassCode        : String(40) not null;
+    taxClassDescription : String(180);
+    isActive            : Boolean default true;
+  }
+
   // Project Code Creation (PCC) masters.
   @cds.persistence.skip
   entity ArPcc {

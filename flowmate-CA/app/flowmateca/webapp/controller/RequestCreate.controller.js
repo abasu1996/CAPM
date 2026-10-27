@@ -819,7 +819,7 @@ sap.ui.define([
     // based transaction) is hidden and not required.
     _sesFieldShown: function (definition, details) {
       const rule = definition.visibleWhen;
-      return !rule || (details || {})[rule.field] === rule.equals;
+      return !rule || FormDefinitions.whenMatches(rule, (details || {})[rule.field]);
     },
 
     _openSesDialog: async function () {
@@ -860,7 +860,7 @@ sap.ui.define([
           const visible = function () {
             return {
               path: `form>/sesDraft/details/${rule.field}`,
-              formatter: function (value) { return value === rule.equals; }
+              formatter: function (value) { return FormDefinitions.whenMatches(rule, value); }
             };
           };
           label.bindProperty("visible", visible());
@@ -2125,6 +2125,15 @@ sap.ui.define([
       }.bind(this)).find(Boolean);
       if (emailLimit) {
         MessageBox.warning(emailLimit);
+        return;
+      }
+      const lateDate = (this._fieldControls || []).find(function (entry) {
+        return this._isFieldVisible(entry.definition)
+          && this._pastDateProblem(entry.definition, form.details[entry.definition.name]);
+      }.bind(this));
+      if (lateDate) {
+        MessageBox.warning(this._pastDateProblem(lateDate.definition, form.details[lateDate.definition.name]));
+        this._focusFieldControl(lateDate.control);
         return;
       }
 
