@@ -518,7 +518,7 @@ sap.ui.define([
           this.request("MaterialCategories?$filter=isActive eq true&$orderby=sortOrder"),
           this.request("Priorities?$filter=isActive eq true&$orderby=sortOrder"),
           this.request("MyRequests?$select=ID,referenceNumber,title&$orderby=createdAt desc&$top=5000"),
-          this.request("Teams?$filter=isActive eq true&$orderby=name")
+          this.request("RequesterTeams?$filter=isActive eq true&$orderby=name")
         ]);
         const catalog = this.getView().getModel("catalog");
         catalog.setProperty("/requestTypes", types.value || []);
@@ -526,7 +526,7 @@ sap.ui.define([
         catalog.setProperty("/materialCategories", materialCategories.value || []);
         catalog.setProperty("/priorities", priorities.value || []);
         catalog.setProperty("/myRequests", requests.value || []);
-        // Requester Team: every active team maintained in the Admin Console.
+        // Requester Team: every active team in the Admin Console's Requester Team table.
         catalog.setProperty("/teams", teams.value || []);
       } catch (error) {
         this.showError(error);

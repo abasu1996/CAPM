@@ -161,6 +161,41 @@
               </Table>
             </IconTabFilter>
 
+            <IconTabFilter key="requesterTeams" text="Requester Team" icon="sap-icon://group">
+              <Toolbar class="caSectionToolbar">
+                <Title text="Requester Team Structure" level="H3"/>
+                <ToolbarSpacer/>
+                <Button text="Add Requester Team" icon="sap-icon://add" type="Emphasized" press=".onAddRequesterTeam"/>
+              </Toolbar>
+              <Tree items="{path: 'admin>/requesterTeamTree', parameters: {arrayNames: ['children']}}" mode="None" class="caTeamTree">
+                <StandardTreeItem title="{admin>title}" icon="{admin>icon}" type="Inactive"/>
+              </Tree>
+              <Table items="{admin>/requesterTeams}" growing="true" class="caAdminTable sapUiSmallMarginTop">
+                <columns>
+                  <Column width="10rem"><Text text="Team Code"/></Column>
+                  <Column><Text text="Team Name"/></Column>
+                  <Column><Text text="{i18n>description}"/></Column>
+                  <Column width="7rem"><Text text="Active"/></Column>
+                  <Column width="9rem"><Text text="Actions"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{admin>teamCode}"/>
+                      <Input value="{admin>name}"/>
+                      <Input value="{admin>description}"/>
+                      <Switch state="{admin>isActive}"/>
+                      <HBox>
+                        <Button icon="sap-icon://group" type="Transparent" tooltip="Manage Requester Team" press=".onManageRequesterTeam"/>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveRequesterTeam"/>
+                        <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteRequesterTeam"/>
+                      </HBox>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </IconTabFilter>
+
             <IconTabFilter key="vendors" text="Vendors" icon="sap-icon://supplier">
               <Toolbar class="caSectionToolbar">
                 <Title text="Vendor Master" level="H3"/>
@@ -266,6 +301,7 @@
 <IconTabFilter key="materials" text="Materials" icon="sap-icon://product">
     <Toolbar class="caSectionToolbar">
         <Title text="Material Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search by code or description" search=".onMaterialSearch"/>
         <ToolbarSpacer/>
         <Button
             text="Add Material"
@@ -275,8 +311,10 @@
     </Toolbar>
 
     <Table
-        items="{admin>/materials}"
+        id="materialTable"
+        items="{path: 'master>/Materials', parameters: {$orderby: 'materialCode', $count: true, $$updateGroupId: 'materialEdits'}}"
         growing="true"
+        growingThreshold="50"
         class="caAdminTable">
 
         <columns>
@@ -301,12 +339,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>materialCode}"/>
+                    <Text text="{master>materialCode}"/>
 
-                    <Input value="{admin>materialDescription}"/>
+                    <Input value="{master>materialDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 

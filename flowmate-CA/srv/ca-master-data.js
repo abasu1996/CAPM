@@ -4,6 +4,8 @@ const SHARED_ENTITIES = [
   "Users",
   "Teams",
   "TeamMembers",
+  "RequesterTeams",
+  "RequesterTeamMembers",
   "Vendors",
   "Delegations",
   "Sites",

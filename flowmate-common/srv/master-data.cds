@@ -41,6 +41,25 @@ service CommonMasterDataService {
   };
 
   @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity RequesterTeams as projection on db.RequesterTeams {
+    *,
+    members : redirected to RequesterTeamMembers
+  };
+
+  @restrict: [
+    { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'UserProvisioning'] },
+    { grant: '*', to: 'MasterDataAdmin' }
+  ]
+  entity RequesterTeamMembers as projection on db.RequesterTeamMembers {
+    *,
+    team : redirected to RequesterTeams,
+    user : redirected to Users
+  };
+
+  @restrict: [
     { grant: 'READ', to: ['MasterDataRead', 'MasterDataAdmin', 'VendorProvisioning'] },
     { grant: '*', to: 'MasterDataAdmin' },
     { grant: ['CREATE', 'UPDATE', 'DELETE'], to: 'VendorProvisioning' }

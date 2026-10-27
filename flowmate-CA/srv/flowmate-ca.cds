@@ -78,6 +78,7 @@ service FlowmateCAService {
   entity Users as projection on common.Users;
   entity Teams as projection on common.Teams;
   entity TeamMembers as projection on common.TeamMembers;
+  entity RequesterTeams as projection on common.RequesterTeams;
   entity Vendors as projection on common.Vendors;
   entity Delegations as projection on common.Delegations;
 
@@ -317,6 +318,18 @@ service CAMasterDataService {
     { grant: '*', to: 'CAAdmin' }
   ]
   entity TeamMembers as projection on common.TeamMembers;
+
+  @restrict: [
+    { grant: 'READ', to: 'authenticated-user' },
+    { grant: '*', to: 'CAAdmin' }
+  ]
+  entity RequesterTeams as projection on common.RequesterTeams;
+
+  @restrict: [
+    { grant: 'READ', to: 'authenticated-user' },
+    { grant: '*', to: 'CAAdmin' }
+  ]
+  entity RequesterTeamMembers as projection on common.RequesterTeamMembers;
 
   @restrict: [
     { grant: 'READ', to: 'authenticated-user' },

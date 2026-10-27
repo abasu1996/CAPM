@@ -37,6 +37,25 @@ service CommonMasterDataService {
   }
 
   @cds.persistence.skip
+  entity RequesterTeams {
+    key ID         : UUID;
+        teamCode   : String(40);
+        name       : String(160);
+        description: String(500);
+        isActive   : Boolean;
+  }
+
+  @cds.persistence.skip
+  entity RequesterTeamMembers {
+    key ID         : UUID;
+        team       : Association to RequesterTeams;
+        user       : Association to Users;
+        displayName: String(160);
+        email      : String(255);
+        isActive   : Boolean;
+  }
+
+  @cds.persistence.skip
   entity Vendors {
     key ID         : UUID;
         vendorCode : String(40);

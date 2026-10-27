@@ -8,7 +8,9 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
       Users,
       Roles,
       Teams,
-      TeamMembers
+      TeamMembers,
+      RequesterTeams,
+      RequesterTeamMembers
     } = this.entities;
 
     this.before("READ", Users, (req) => {
@@ -132,6 +134,59 @@ module.exports = class CommonMasterDataService extends cds.ApplicationService {
         TeamMembers,
         Teams
       });
+    });
+
+    this.before(["CREATE", "UPDATE"], RequesterTeams, async (req) => {
+      const sTeamId = this._requestId(req);
+      const oExisting = req.event === "UPDATE" && sTeamId
+        ? await cds.tx(req).run(SELECT.one.from(RequesterTeams).where({ ID: sTeamId }))
+        : {};
+      const oTeam = { ...oExisting, ...req.data };
+
+      oTeam.teamCode = oTeam.teamCode?.trim();
+      oTeam.name = oTeam.name?.trim();
+
+      if (!oTeam.teamCode || !oTeam.name) {
+        return req.reject(400, "Team code and team name are required");
+      }
+
+      const oDuplicate = await cds.tx(req).run(
+        SELECT.one.from(RequesterTeams).where({ teamCode: oTeam.teamCode })
+      );
+
+      if (oDuplicate && oDuplicate.ID !== sTeamId) {
+        return req.reject(409, "A requester team already exists with the same team code");
+      }
+
+      req.data.teamCode = oTeam.teamCode;
+      req.data.name = oTeam.name;
+    });
+
+    this.before("CREATE", RequesterTeamMembers, async (req) => {
+      if (!req.data.team_ID || !req.data.user_ID) {
+        return req.reject(400, "Select a requester team and a user");
+      }
+
+      const [oTeam, oUser, oExisting] = await Promise.all([
+        this._getTeam(req, req.data.team_ID, RequesterTeams),
+        this._getUser(req, req.data.user_ID, Users),
+        cds.tx(req).run(SELECT.one.from(RequesterTeamMembers).where({
+          team_ID: req.data.team_ID,
+          user_ID: req.data.user_ID
+        }))
+      ]);
+
+      if (!oTeam) {
+        return req.reject(400, "Selected requester team was not found");
+      }
+      if (!oUser) {
+        return req.reject(400, "Selected user was not found");
+      }
+      if (oExisting) {
+        return req.reject(409, "This user is already in the requester team");
+      }
+
+      this._setTeamMemberSnapshot(req.data, oUser);
     });
 
     this.before("UPDATE", TeamMembers, async (req) => {

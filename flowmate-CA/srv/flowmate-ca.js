@@ -420,7 +420,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.before("getReportingDashboard", this._requireSupervisor);
     this.before(["rejectTask", "addTask", "completeStep", "sendToS4"], this._requireAdmin);
 
-    this.on("READ", ["Users", "Teams", "TeamMembers", "Vendors"], (req) => {
+    this.on("READ", ["Users", "Teams", "TeamMembers", "RequesterTeams", "Vendors"], (req) => {
       return this.master.run(req.query);
     });
 
@@ -1713,12 +1713,13 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     let processorTeam = null;
     if (input.processorTeamCode) {
-      processorTeam = await this.master.run(SELECT.one.from(this.masterEntities.Teams).where({
+      // The form's "Requester Team": a team from the Requester Team master.
+      processorTeam = await this.master.run(SELECT.one.from(this.masterEntities.RequesterTeams).where({
         teamCode: input.processorTeamCode,
         isActive: true
       }));
       if (!processorTeam) {
-        return req.reject(400, "Select a valid processor team");
+        return req.reject(400, "Select a valid requester team");
       }
     }
 
@@ -2011,12 +2012,13 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     let processorTeam = null;
     if (input.processorTeamCode) {
-      processorTeam = await this.master.run(SELECT.one.from(this.masterEntities.Teams).where({
+      // The form's "Requester Team": a team from the Requester Team master.
+      processorTeam = await this.master.run(SELECT.one.from(this.masterEntities.RequesterTeams).where({
         teamCode: input.processorTeamCode,
         isActive: true
       }));
       if (!processorTeam) {
-        return req.reject(400, "Select a valid processor team");
+        return req.reject(400, "Select a valid requester team");
       }
     }
 
@@ -3505,7 +3507,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       tx.run(SELECT.one.from(this.db.RequestVariants).where({ code: "SES_NEW" })),
       this.master.run(SELECT.one.from(this.masterEntities.Users).where({ ID: poRequest.requester_ID })),
       poRequest.ownerTeam_ID
-        ? this.master.run(SELECT.one.from(this.masterEntities.Teams).where({ ID: poRequest.ownerTeam_ID }))
+        ? this.master.run(SELECT.one.from(this.masterEntities.RequesterTeams).where({ ID: poRequest.ownerTeam_ID }))
         : null
     ]);
     const sesId = await this._insertOneRequest(req, tx, requester || user, {

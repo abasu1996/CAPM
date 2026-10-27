@@ -57,6 +57,26 @@ entity TeamMembers : cuid, managed {
   isPrimary       : Boolean default false;
 }
 
+// Requester Teams: teams of requesters, maintained in the Admin console like Teams.
+@assert.unique.requesterTeamCode: [teamCode]
+entity RequesterTeams : cuid, managed {
+  teamCode    : String(40) not null;
+  name        : String(160) not null;
+  description : String(500);
+  isActive    : Boolean default true;
+  members     : Composition of many RequesterTeamMembers
+                  on members.team = $self;
+}
+
+@assert.unique.requesterTeamUser: [team, user]
+entity RequesterTeamMembers : cuid, managed {
+  team        : Association to RequesterTeams not null;
+  user        : Association to Users not null;
+  displayName : String(160);
+  email       : String(255);
+  isActive    : Boolean default true;
+}
+
 @assert.unique.vendorCode: [vendorCode]
 entity Vendors : cuid, managed {
   vendorCode   : String(40) not null;

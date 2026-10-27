@@ -81,8 +81,10 @@ sap.ui.define([
         teams: [],
         teamMembers: [],
         teamTree: [],
+        requesterTeams: [],
+        requesterTeamMembers: [],
+        requesterTeamTree: [],
         sites: [],
-        materials: [],
         serviceCodes: [],
         poNumbers: [],
         wbs: [],
@@ -131,7 +133,7 @@ sap.ui.define([
     onRefresh: async function () {
       this.setBusy(true);
       try {
-        const [steps, requestTypes, variants, users, teams, teamMembers, sites, materials,
+        const [steps, requestTypes, variants, users, teams, teamMembers, sites,
           serviceCodes, poNumbers,
           purchasingOrganizations, wbs, documentTypes, companyCodes, purchasingGroups, divisions,
           applicableTaxes, plant, serviceGroups, valuationClasses, valuationClassesScc, storageLocations,
@@ -139,7 +141,7 @@ sap.ui.define([
           procurementCategories, itemCategories, accountAssignments, serviceCategories,
           unitsOfMeasure, entities, projects, matGroups, extensionMaterialGroups, profitCenters,
           mrpTypes, availabilityChecks, serialNumberProfiles, distributionChannels, arReferences,
-          contractTypes, budgetCodes] = await Promise.all([
+          contractTypes, budgetCodes, requesterTeams, requesterTeamMembers] = await Promise.all([
           this.requestMaster("WorkflowStepConfigs?$expand=requestType,requestVariant&$orderby=requestType_code,requestVariant_code,stepNo"),
           this.requestMaster("RequestTypes?$orderby=sortOrder"),
           this.requestMaster("RequestVariants?$expand=requestType&$orderby=requestType_code,sortOrder"),
@@ -147,7 +149,6 @@ sap.ui.define([
           this.requestMaster("Teams?$orderby=name"),
           this.requestMaster("TeamMembers?$expand=user,team"),
           this.requestMaster("Sites?$orderby=siteName"),
-          this.requestMaster("Materials?$orderby=materialDescription"),
           this.requestMaster("ServiceCodes?$orderby=serviceCode"),
           this.requestMaster("PoNumbers?$orderby=poNumber"),
           this.requestMaster("PurchasingOrganizations?$orderby=purchasingOrganizationCode"),
@@ -184,7 +185,9 @@ sap.ui.define([
           this.requestMaster("DistributionChannel?$orderby=distributionChannelCode"),
           this.requestMaster("ArReferences?$orderby=arReferenceCode"),
           this.requestMaster("ContractType?$orderby=contractTypeCode"),
-          this.requestMaster("BudgetCode?$orderby=budgetCode")
+          this.requestMaster("BudgetCode?$orderby=budgetCode"),
+          this.requestMaster("RequesterTeams?$orderby=name"),
+          this.requestMaster("RequesterTeamMembers?$expand=user,team")
         ]);
         const model = this.getView().getModel("admin");
         model.setProperty("/steps", steps.value || []);
@@ -193,8 +196,9 @@ sap.ui.define([
         model.setProperty("/users", users.value || []);
         model.setProperty("/teams", teams.value || []);
         model.setProperty("/teamMembers", teamMembers.value || []);
+        model.setProperty("/requesterTeams", requesterTeams.value || []);
+        model.setProperty("/requesterTeamMembers", requesterTeamMembers.value || []);
         model.setProperty("/sites", sites.value || []);
-        model.setProperty("/materials", materials.value || []);
         model.setProperty("/serviceCodes", serviceCodes.value || []);
         model.setProperty("/poNumbers", poNumbers.value || []);
         model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || []);
@@ -234,7 +238,8 @@ sap.ui.define([
         model.setProperty("/budgetCodes", budgetCodes.value || []);
         model.setProperty("/pcc", await this._loadPccMasters());
         model.setProperty("/teamTree", this._teamTree(teams.value || [], teamMembers.value || []));
-        this._refreshVendors();
+        model.setProperty("/requesterTeamTree", this._teamTree(requesterTeams.value || [], requesterTeamMembers.value || []));
+        this._refreshPagedTables();
       } catch (error) {
         this.showError(error);
       } finally {
@@ -242,14 +247,27 @@ sap.ui.define([
       }
     },
 
-    // The vendor master (tens of thousands of rows) is read page by page from the OData entity
-    // through the "master" model, not loaded into the admin JSON model like the small masters.
-    // A refresh would throw away unsaved edits, so it waits until they are saved.
-    _refreshVendors: function () {
-      const binding = this.byId("vendorTable")?.getBinding("items");
-      if (binding && !binding.hasPendingChanges()) {
-        binding.refresh();
-      }
+    // The vendor and material masters (tens of thousands of rows) are read page by page from the
+    // OData entity through the "master" model, not loaded into the admin JSON model like the small
+    // masters. A refresh would throw away unsaved edits, so it waits until they are saved.
+    _refreshPagedTables: function () {
+      ["vendorTable", "materialTable"].forEach(function (id) {
+        const binding = this.byId(id)?.getBinding("items");
+        if (binding && !binding.hasPendingChanges()) {
+          binding.refresh();
+        }
+      }.bind(this));
+    },
+
+    onMaterialSearch: function (event) {
+      const query = (event.getParameter("query") || "").trim();
+      const filter = query ? new Filter({
+        filters: ["materialCode", "materialDescription"].map(function (path) {
+          return new Filter({ path, operator: FilterOperator.Contains, value1: query, caseSensitive: false });
+        }),
+        and: false
+      }) : [];
+      this.byId("materialTable").getBinding("items").filter(filter, FilterType.Application);
     },
 
     onVendorSearch: function (event) {
@@ -298,8 +316,27 @@ sap.ui.define([
       this._openAddDialog("team", "Add Team");
     },
 
-    // ---- Manage Team: add users to a team / remove them (TeamMembers in flowmate-common) ----
+    onAddRequesterTeam: function () {
+      this._openAddDialog("requesterTeam", "Add Requester Team");
+    },
+
+    // ---- Manage Team: add users to a team / remove them (TeamMembers or RequesterTeamMembers
+    // in flowmate-common); one dialog serves both tabs ----
     onManageTeam: function (event) {
+      this._openTeamManage(event, { teams: "/teams", members: "/teamMembers", entity: "TeamMembers", label: "Team" });
+    },
+
+    onManageRequesterTeam: function (event) {
+      this._openTeamManage(event, {
+        teams: "/requesterTeams",
+        members: "/requesterTeamMembers",
+        entity: "RequesterTeamMembers",
+        label: "Requester Team"
+      });
+    },
+
+    _openTeamManage: function (event, source) {
+      this._teamManageSource = source;
       this._managedTeamId = event.getSource().getBindingContext("admin").getObject().ID;
       this._fillTeamManage();
       this.byId("manageTeamDialog").open();
@@ -309,10 +346,11 @@ sap.ui.define([
     // who are not members yet.
     _fillTeamManage: function () {
       const admin = this.getView().getModel("admin");
-      const team = (admin.getProperty("/teams") || []).find(function (entry) {
+      const source = this._teamManageSource;
+      const team = (admin.getProperty(source.teams) || []).find(function (entry) {
         return entry.ID === this._managedTeamId;
       }.bind(this)) || {};
-      const members = (admin.getProperty("/teamMembers") || [])
+      const members = (admin.getProperty(source.members) || [])
         .filter(function (membership) {
           return membership.team_ID === team.ID;
         })
@@ -332,7 +370,7 @@ sap.ui.define([
         return user.isActive !== false && !memberIds.has(user.ID);
       });
       this.getView().getModel("teamManage").setData({
-        title: `Manage Team – ${team.name || ""} (${team.teamCode || ""})`,
+        title: `Manage ${source.label} – ${team.name || ""} (${team.teamCode || ""})`,
         teamName: team.name,
         members,
         availableUsers,
@@ -350,7 +388,7 @@ sap.ui.define([
       this.setBusy(true);
       try {
         for (const userId of userIds) {
-          await this.requestMaster("TeamMembers", {
+          await this.requestMaster(this._teamManageSource.entity, {
             method: "POST",
             body: { team_ID: this._managedTeamId, user_ID: userId, isActive: true }
           });
@@ -376,7 +414,7 @@ sap.ui.define([
           }
           this.setBusy(true);
           try {
-            await this.requestMaster(`TeamMembers(${member.ID})`, { method: "DELETE" });
+            await this.requestMaster(`${this._teamManageSource.entity}(${member.ID})`, { method: "DELETE" });
             this.showSuccess(`${member.name} removed from ${teamName}`);
           } catch (error) {
             this.showError(error);
@@ -654,7 +692,7 @@ onAddBudgetCode: function () {
         isStep: type === "step",
         isVariant: type === "variant",
         isUser: type === "user",
-        isTeam: type === "team",
+        isTeam: type === "team" || type === "requesterTeam",
         isVendor: type === "vendor",
         isSite: type === "site",
         isMaterial: type === "material",
@@ -823,11 +861,11 @@ onAddBudgetCode: function () {
               isActive: true
             }
           });
-        } else if (item.type === "team") {
+        } else if (item.type === "team" || item.type === "requesterTeam") {
           if (!item.code || !item.name) {
             throw new Error("Team code and name are required.");
           }
-          await this.requestMaster("Teams", {
+          await this.requestMaster(item.type === "requesterTeam" ? "RequesterTeams" : "Teams", {
             method: "POST",
             body: {
               teamCode: item.code,
@@ -1771,6 +1809,19 @@ else if (item.type === "mrpType") {
       return this._delete("Teams", event.getSource().getBindingContext("admin").getObject());
     },
 
+    onSaveRequesterTeam: function (event) {
+      const row = event.getSource().getBindingContext("admin").getObject();
+      return this._patch("RequesterTeams", row.ID, {
+        name: row.name,
+        description: row.description,
+        isActive: row.isActive
+      });
+    },
+
+    onDeleteRequesterTeam: function (event) {
+      return this._delete("RequesterTeams", event.getSource().getBindingContext("admin").getObject());
+    },
+
     // Edits to the listed vendors are held in the "vendorEdits" group until Save sends them.
     onSaveVendor: async function () {
       const model = this.getView().getModel("master");
@@ -1803,18 +1854,22 @@ onDeleteSite: function (event) {
       return this._delete("Sites", event.getSource().getBindingContext("admin").getObject());
     },
 
-onSaveMaterial: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("Materials", row.ID, {
-        materialCode: row.materialCode,
-        materialDescription: row.materialDescription,
-        isActive: row.isActive
-      });
+    // Edits to the listed materials are held in the "materialEdits" group until Save sends them.
+    onSaveMaterial: async function () {
+      const model = this.getView().getModel("master");
+      try {
+        await model.submitBatch("materialEdits");
+        if (model.hasPendingChanges("materialEdits")) {
+          throw new Error("The material changes could not be saved. Check the values and try again.");
+        }
+        this.showSuccess("Changes saved");
+      } catch (error) {
+        this.showError(error);
+      }
     },
 
-
-onDeleteMaterial: function (event) {
-      return this._delete("Materials", event.getSource().getBindingContext("admin").getObject());
+    onDeleteMaterial: function (event) {
+      return this._delete("Materials", event.getSource().getBindingContext("master").getObject());
     },
 
     onSaveServiceCode: function (event) {
