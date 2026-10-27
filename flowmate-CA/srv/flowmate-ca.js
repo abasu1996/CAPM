@@ -429,6 +429,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     this.before("READ", "MyRequests", this._filterMyRequests);
     this.before("READ", "Drafts", this._filterDrafts);
+    this.before("READ", "Attachments", this._filterRequestAttachments);
+    this.before("READ", "DraftAttachments", this._filterDraftAttachments);
     this.before("READ", "MyTasks", this._filterMyTasks);
     this.before("READ", "MyTeamTasks", this._filterMyTeamTasks);
     this.before("UPDATE", ["Requests", "MyRequests", "RequestQueue"], this._protectRequestAssignment);
@@ -447,6 +449,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("slaPreview", this._slaPreview);
     this.on("canContribute", this._canContributeToRequest);
     this.before("CREATE", "Attachments", this._beforeCreateAttachment);
+    this.before(["UPDATE", "DELETE"], "Attachments", this._protectRequestAttachment);
+    this.before("CREATE", "DraftAttachments", this._beforeCreateDraftAttachment);
+    this.before(["UPDATE", "DELETE"], "DraftAttachments", this._protectDraftAttachment);
     this.on("runSlaBreachScan", this._runSlaBreachScan);
     this.on("createFlowmatePaymentRun", this._createFlowmatePaymentRun);
     this.on("createFlowmateServiceEntrySheet", this._createFlowmateServiceEntrySheet);
@@ -995,6 +1000,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
   };
 
+  _filterRequestAttachments = (req) => {
+    // Draft binaries are exposed only through DraftAttachments, where creator/admin
+    // ownership is enforced. They must never leak through the normal request endpoint.
+    req.query.where({ draft_ID: null });
+  };
+
+  _filterDraftAttachments = async (req) => {
+    const user = await this._ensureCurrentUser(req);
+    if (!req.user.is("CAAdmin")) {
+      req.query.where([
+        { ref: ["draft", "creator_ID"] }, "=", { val: user.ID }
+      ]);
+    }
+    req.query.where({ request_ID: null });
+  };
+
   async _accessibleDraft(req, tx, draftId, user) {
     if (!draftId) return req.reject(400, "Select a draft");
     const draft = await tx.run(SELECT.one.from(this.db.CARequestDrafts).where({ ID: draftId }));
@@ -1040,6 +1061,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req);
     const draft = await this._accessibleDraft(req, tx, req.data.draftId, user);
+    await tx.run(DELETE.from(this.db.CAAttachments).where({ draft_ID: draft.ID }));
     await tx.run(DELETE.from(this.db.CARequestDrafts).where({ ID: draft.ID }));
     return true;
   };
@@ -1048,6 +1070,37 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!draftId) return;
     const draft = await this._accessibleDraft(req, tx, draftId, user);
     await tx.run(DELETE.from(this.db.CARequestDrafts).where({ ID: draft.ID }));
+  }
+
+  async _moveDraftAttachments(req, tx, draftId, requestId, user) {
+    if (!draftId) return 0;
+    await this._accessibleDraft(req, tx, draftId, user);
+    const attachments = await tx.run(
+      SELECT.from(this.db.CAAttachments).columns("ID").where({ draft_ID: draftId })
+    );
+    // Do not pull every BLOB through the Node.js process merely to verify it exists.
+    const incomplete = await tx.run(
+      SELECT.one.from(this.db.CAAttachments).columns("ID").where({ draft_ID: draftId, content: null })
+    );
+    if (incomplete) {
+      return req.reject(409, "A saved draft attachment has no file content. Remove it and upload the file again");
+    }
+    if (attachments.length) {
+      await tx.run(UPDATE(this.db.CAAttachments)
+        .set({ request_ID: requestId, draft_ID: null })
+        .where({ draft_ID: draftId }));
+    }
+    return attachments.length;
+  }
+
+  async _assertNoBulkDraftAttachments(req, tx, draftId) {
+    if (!draftId) return;
+    const attachment = await tx.run(
+      SELECT.one.from(this.db.CAAttachments).columns("ID").where({ draft_ID: draftId })
+    );
+    if (attachment) {
+      return req.reject(400, "Saved draft attachments are currently supported only for single-request submission");
+    }
   }
 
   _myRequestWhere(ids, status) {
@@ -1601,6 +1654,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     await this._insertDetails(tx, requestType.code, requestId, details);
     await this._recordVersion(tx, requestId, requestType.code, user);
+    // Browser draft attachments already contain their binaries. Reparent them before
+    // workflow creation so the submitted request is complete from its first task onward.
+    await this._moveDraftAttachments(req, tx, input.draftId, requestId, user);
     const creationRemarks = integration ? JSON.stringify({
       source: "TECHNICAL_API",
       clientId: integration.clientId,
@@ -1734,6 +1790,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const user = await this._ensureCurrentUser(req, tx);
     if (input.draftId) {
       await this._accessibleDraft(req, tx, input.draftId, user);
+      await this._assertNoBulkDraftAttachments(req, tx, input.draftId);
     }
 
     let rows;
@@ -3684,6 +3741,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   _beforeCreateAttachment = async (req) => {
+    if (req.data.draft_ID) {
+      return req.reject(400, "Use DraftAttachments to upload a file to a saved draft");
+    }
     const user = await this._ensureCurrentUser(req, cds.tx(req));
     const request = await SELECT.one.from(this.db.CARequests).where({ ID: req.data.request_ID });
     if (!request) {
@@ -3695,6 +3755,51 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(403, "Only the person working on the open task can upload attachments");
     }
     req.data.uploadedByName = user.displayName;
+  };
+
+  _attachmentId(req) {
+    return req.data?.ID || req.params?.[0]?.ID;
+  }
+
+  _protectRequestAttachment = async (req) => {
+    const ID = this._attachmentId(req);
+    if (!ID) return;
+    const attachment = await cds.tx(req).run(
+      SELECT.one.from(this.db.CAAttachments).columns("ID", "draft_ID").where({ ID })
+    );
+    if (!attachment || attachment.draft_ID) {
+      return req.reject(404, "Attachment not found");
+    }
+    if (Object.hasOwn(req.data || {}, "draft_ID") || Object.hasOwn(req.data || {}, "request_ID")) {
+      return req.reject(400, "Attachment ownership cannot be changed through this endpoint");
+    }
+  };
+
+  _beforeCreateDraftAttachment = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req, tx);
+    if (req.data.request_ID) {
+      return req.reject(400, "A draft attachment cannot belong to a submitted request");
+    }
+    await this._accessibleDraft(req, tx, req.data.draft_ID, user);
+    req.data.request_ID = null;
+    req.data.uploadedByName = user.displayName;
+  };
+
+  _protectDraftAttachment = async (req) => {
+    const tx = cds.tx(req);
+    const user = await this._ensureCurrentUser(req, tx);
+    const ID = this._attachmentId(req);
+    const attachment = ID && await tx.run(
+      SELECT.one.from(this.db.CAAttachments).columns("ID", "draft_ID", "request_ID").where({ ID })
+    );
+    if (!attachment || !attachment.draft_ID || attachment.request_ID) {
+      return req.reject(404, "Draft attachment not found");
+    }
+    await this._accessibleDraft(req, tx, attachment.draft_ID, user);
+    if (Object.hasOwn(req.data || {}, "draft_ID") || Object.hasOwn(req.data || {}, "request_ID")) {
+      return req.reject(400, "Draft attachment ownership cannot be changed through this endpoint");
+    }
   };
 
   // ---- SLA ----

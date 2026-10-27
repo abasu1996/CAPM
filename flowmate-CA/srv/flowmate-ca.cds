@@ -96,7 +96,7 @@ service FlowmateCAService {
   entity Requests as projection on db.CARequests;
   entity MyRequests as projection on db.CARequests;
   entity RequestQueue as projection on db.CARequests;
-  @readonly entity Drafts as projection on db.CARequestDrafts;
+  @readonly entity Drafts as projection on db.CARequestDrafts excluding { attachments };
 
   @cds.redirection.target
   entity Tasks as projection on db.CATasks;
@@ -104,7 +104,9 @@ service FlowmateCAService {
   entity MyTeamTasks as projection on db.CATasks;
 
   entity RequestSteps as projection on db.RequestStepInstances;
+  @cds.redirection.target
   entity Attachments as projection on db.CAAttachments;
+  entity DraftAttachments as projection on db.CAAttachments;
   entity Comments as projection on db.CAComments;
   entity InvolvedParties as projection on db.CAInvolvedParties;
   entity History as projection on db.CAHistory;

@@ -239,6 +239,7 @@ sap.ui.define([
         teams:[]
       }), "catalog");
       this.getView().setModel(new ListModel({ items: [] }), "files");
+      this.getView().setModel(new ListModel({ items: [] }), "draftFiles");
       this.getView().setModel(new ListModel({ items: [] }), "paymentRunFiles");
       this.getView().setModel(new ListModel(this._emptyPaymentRunForm()), "paymentRun");
       this.getView().setModel(new ListModel({}), "paymentRunGridEdit");
@@ -270,7 +271,7 @@ sap.ui.define([
         attachmentSectionTitle: "Payment Run Attachments",
         selectAttachmentText: "Select Payment Run Files",
         noAttachmentsText: "No Payment Run attachments selected",
-        attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 400 MB.",
+        attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 50 MB.",
         saveText: "Save Payment Run",
         details: {}
       };
@@ -312,6 +313,7 @@ sap.ui.define([
       this._draftId = null;
       this.getView().getModel("form").setData(this._emptyForm());
       this.getView().getModel("files").setData({ items: [] });
+      this.getView().getModel("draftFiles").setData({ items: [] });
       this.getView().getModel("paymentRunFiles").setData({ items: [] });
       this.getView().getModel("paymentRun").setData(this._emptyPaymentRunForm());
       // The view is cached between visits, so the uploaders still show the last file names.
@@ -328,6 +330,7 @@ sap.ui.define([
       this._dynamicFileUploads = {};
       this._sesFiles = [];
       this._sesFileUploads = {};
+      this._persistedDraftAttachments = [];
       await Promise.all([
         this._loadCatalog(),
         this._loadCurrentUser()
@@ -349,6 +352,7 @@ sap.ui.define([
           current.setData(Object.assign(this._emptyForm(), saved));
           this._filterVariants(saved.requestTypeCode);
           this._paymentRunSaved = Boolean(saved.details && (saved.details.paymentRunDetails || saved.details.flowmateSesRequestDetails));
+          await this._loadDraftAttachments();
         } catch (error) {
           this.showError(error);
           this.navTo("drafts", {}, true);
@@ -362,14 +366,18 @@ sap.ui.define([
       this._renderItemsTable();
       if (!this._draftId) this._refreshTitlePreview();
       if (this._draftId) {
-        // A stored file name is not a File object and cannot be uploaded.
-        (this._fieldControls || []).filter((entry) => entry.definition.type === "file")
-          .forEach((entry) => this.getView().getModel("form").setProperty(`/details/${entry.definition.name}`, ""));
+        this._restoreDraftAttachmentFields();
       }
     },
 
     onSaveDraft: async function () {
-      const saved = JSON.parse(JSON.stringify(this.getView().getModel("form").getData()));
+      const form = this.getView().getModel("form").getData();
+      const uploads = this._collectPendingAttachments(form);
+      if (uploads.length && (form.requestTypeCode === "MATERIAL_RESERVATION" || this._isPoBulk())) {
+        MessageBox.warning("Saving attachments with a draft is currently available only for single-request submission. Remove the selected files or switch to Single Request.");
+        return;
+      }
+      const saved = JSON.parse(JSON.stringify(form));
       if (saved.sesDraft) saved.sesDraft.files = [];
       this.setBusy(true);
       try {
@@ -378,8 +386,90 @@ sap.ui.define([
           body: { draftId: this._draftId, formData: JSON.stringify(saved) }
         });
         this._draftId = result.ID;
-        this.showSuccess("Draft saved. Reattach selected files when you resume.");
+        if (uploads.length) {
+          const uploadResult = await this.uploadDraftAttachments(this._draftId, uploads);
+          this._clearPendingAttachmentSelections();
+          await this._loadDraftAttachments();
+          this._restoreDraftAttachmentFields();
+          if (uploadResult.failedCount) {
+            throw new Error(`${uploadResult.failedCount} draft attachment(s) could not be saved. Re-select only those files and save again. ${uploadResult.errors.join(" ")}`);
+          }
+        }
+        this.showSuccess("Draft and attachments saved");
         this.navTo("drafts");
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        this.setBusy(false);
+      }
+    },
+
+    _loadDraftAttachments: async function () {
+      if (!this._draftId) return;
+      const filter = encodeURIComponent(`draft_ID eq ${this._draftId}`);
+      const result = await this.request(`DraftAttachments?$select=ID,filename,category,fieldName,mimeType,createdAt&$filter=${filter}&$orderby=createdAt`);
+      this._persistedDraftAttachments = result.value || [];
+      this.getView().getModel("draftFiles").setData({
+        items: this._persistedDraftAttachments.map(function (attachment) {
+          return Object.assign({}, attachment, {
+            categoryText: String(attachment.category || "SUPPORTING_DOCUMENT").replace(/_/g, " ")
+          });
+        })
+      });
+    },
+
+    _restoreDraftAttachmentFields: function () {
+      const model = this.getView().getModel("form");
+      const byField = new Map((this._persistedDraftAttachments || [])
+        .filter(function (attachment) { return attachment.fieldName; })
+        .map(function (attachment) { return [attachment.fieldName, attachment.filename]; }));
+      (this._fieldControls || []).filter(function (entry) { return entry.definition.type === "file"; })
+        .forEach(function (entry) {
+          const name = entry.definition.name;
+          const filename = byField.get(name) || "";
+          model.setProperty(`/details/${name}`, filename);
+          if (filename && entry.control.setValue) entry.control.setValue(filename);
+        });
+      this._sesDialogFields().filter(function (definition) { return definition.type === "file"; })
+        .forEach(function (definition) {
+          model.setProperty(`/sesDraft/details/${definition.name}`, byField.get(`sesDraft.${definition.name}`) || "");
+        });
+    },
+
+    _hasSavedDraftAttachmentCategory: function (category) {
+      return (this._persistedDraftAttachments || []).some(function (attachment) {
+        return attachment.category === category;
+      });
+    },
+
+    _clearPendingAttachmentSelections: function () {
+      this._selectedFiles = [];
+      this._paymentRunFiles = [];
+      this._dynamicFileUploads = {};
+      this._sesFiles = [];
+      this._sesFileUploads = {};
+      this.getView().getModel("files").setData({ items: [] });
+      this.getView().getModel("paymentRunFiles").setData({ items: [] });
+      this.getView().getModel("form").setProperty("/sesDraft/files", []);
+      ["attachmentUploader", "paymentRunAttachmentUploader", "sesAttachmentUploader"].forEach(function (id) {
+        const uploader = this.byId(id);
+        if (uploader) uploader.clear();
+      }.bind(this));
+    },
+
+    onOpenDraftAttachment: function (event) {
+      const attachment = event.getSource().getBindingContext("draftFiles").getObject();
+      window.open(this.resolveAppUri(`odata/v4/flowmate-ca/DraftAttachments(${attachment.ID})/content`), "_blank", "noopener");
+    },
+
+    onDeleteDraftAttachment: async function (event) {
+      const attachment = event.getParameter("listItem").getBindingContext("draftFiles").getObject();
+      this.setBusy(true);
+      try {
+        await this.request(`DraftAttachments(${attachment.ID})`, { method: "DELETE" });
+        await this._loadDraftAttachments();
+        this._restoreDraftAttachmentFields();
+        this.showSuccess("Draft attachment removed");
       } catch (error) {
         this.showError(error);
       } finally {
@@ -990,7 +1080,7 @@ sap.ui.define([
           attachmentSectionTitle: "Service Entry Sheet Attachments",
           selectAttachmentText: "Select Service Entry Sheet Files",
           noAttachmentsText: "No Service Entry Sheet attachments selected",
-          attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 400 MB.",
+          attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 50 MB.",
           saveText: "Save Service Entry Sheet",
           attachmentCategory: "FLOWMATE_SES",
           action: "createFlowmateServiceEntrySheet",
@@ -1006,7 +1096,7 @@ sap.ui.define([
         attachmentSectionTitle: "Payment Run Attachments",
         selectAttachmentText: "Select Payment Run Files",
         noAttachmentsText: "No Payment Run attachments selected",
-        attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 400 MB.",
+        attachmentInfo: "These files are copied to the Flowmate request after the CA request is successfully completed. The maximum size per file is 50 MB.",
         saveText: "Save Payment Run",
         attachmentCategory: "PAYMENT_RUN",
         action: "createFlowmatePaymentRun",
@@ -1677,10 +1767,10 @@ sap.ui.define([
 
     onPaymentRunAttachmentsSelected: function (event) {
       const files = Array.from(event.getParameter("files") || []);
-      const maxBytes = 400 * 1024 * 1024;
+      const maxBytes = 50 * 1024 * 1024;
       const oversized = files.find(function (file) { return file.size > maxBytes; });
       if (oversized) {
-        MessageBox.warning(`The attachment ${oversized.name} exceeds the 400 MB limit.`);
+        MessageBox.warning(`The attachment ${oversized.name} exceeds the 50 MB limit.`);
         event.getSource().clear();
         return;
       }
@@ -2058,6 +2148,42 @@ sap.ui.define([
       }));
     },
 
+    _collectPendingAttachments: function (form) {
+      const uploads = (this._selectedFiles || []).map(function (file) {
+        return { file, category: "SUPPORTING_DOCUMENT" };
+      });
+      if (form.details && form.details.paymentRun) {
+        (this._paymentRunFiles || []).forEach(function (file) {
+          uploads.push({ file, category: "PAYMENT_RUN" });
+        });
+      }
+      if (form.details && form.details.flowmateSesRequest) {
+        (this._paymentRunFiles || []).forEach(function (file) {
+          uploads.push({ file, category: "FLOWMATE_SES" });
+        });
+      }
+      Object.keys(this._dynamicFileUploads || {}).forEach(function (name) {
+        uploads.push({
+          file: this._dynamicFileUploads[name],
+          category: name.replace(/([A-Z])/g, "_$1").toUpperCase(),
+          fieldName: name
+        });
+      }.bind(this));
+      if (form.requestTypeCode === "PURCHASE_ORDER" && form.details && form.details.sesRequired === true) {
+        (this._sesFiles || []).forEach(function (file) {
+          uploads.push({ file, category: "SES_SUPPORTING_DOCUMENT" });
+        });
+        Object.keys(this._sesFileUploads || {}).forEach(function (name) {
+          uploads.push({
+            file: this._sesFileUploads[name],
+            category: "SES_" + name.replace(/([A-Z])/g, "_$1").toUpperCase(),
+            fieldName: `sesDraft.${name}`
+          });
+        }.bind(this));
+      }
+      return uploads;
+    },
+
     onSubmit: async function () {
       const form = this.getView().getModel("form").getData();
       if (form.requestTypeCode === "MATERIAL_RESERVATION") {
@@ -2076,7 +2202,10 @@ sap.ui.define([
       }
       const paymentRunSelected = Boolean(form.details && form.details.paymentRun);
       const serviceEntrySheetSelected = Boolean(form.details && form.details.flowmateSesRequest);
-      if ((paymentRunSelected || serviceEntrySheetSelected) && !this._paymentRunFiles.length) {
+      const hasSavedIntegrationFile = paymentRunSelected
+        ? this._hasSavedDraftAttachmentCategory("PAYMENT_RUN")
+        : this._hasSavedDraftAttachmentCategory("FLOWMATE_SES");
+      if ((paymentRunSelected || serviceEntrySheetSelected) && !this._paymentRunFiles.length && !hasSavedIntegrationFile) {
         MessageBox.warning("Select the Flowmate integration attachment again before submitting this request.");
         return;
       }
@@ -2238,38 +2367,7 @@ sap.ui.define([
           }
         });
         this.showSuccess(`Request ${request.referenceNumber} created`);
-        const uploads = (this._selectedFiles || []).map(function (file) {
-          return { file: file, category: "SUPPORTING_DOCUMENT" };
-        });
-        if (paymentRunSelected) {
-          (this._paymentRunFiles || []).forEach(function (file) {
-            uploads.push({ file: file, category: "PAYMENT_RUN" });
-          });
-        }
-        if (serviceEntrySheetSelected) {
-          (this._paymentRunFiles || []).forEach(function (file) {
-            uploads.push({ file: file, category: "FLOWMATE_SES" });
-          });
-        }
-        Object.keys(this._dynamicFileUploads || {}).forEach(function (name) {
-          uploads.push({
-            file: this._dynamicFileUploads[name],
-            category: name.replace(/([A-Z])/g, "_$1").toUpperCase()
-          });
-        }.bind(this));
-        // SES successor files are parked on the PO with an SES_ prefix; the server moves them to
-        // the SES request when it is created.
-        if (withSesSuccessor) {
-          (this._sesFiles || []).forEach(function (file) {
-            uploads.push({ file: file, category: "SES_SUPPORTING_DOCUMENT" });
-          });
-          Object.keys(this._sesFileUploads || {}).forEach(function (name) {
-            uploads.push({
-              file: this._sesFileUploads[name],
-              category: "SES_" + name.replace(/([A-Z])/g, "_$1").toUpperCase()
-            });
-          }.bind(this));
-        }
+        const uploads = this._collectPendingAttachments(form);
         let uploadResult = { failedCount: 0 };
         if (uploads.length) {
           uploadResult = await this.uploadAttachments(request.ID, uploads);

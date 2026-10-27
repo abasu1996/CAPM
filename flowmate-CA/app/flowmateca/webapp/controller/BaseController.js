@@ -738,6 +738,56 @@ ${reasons.join("\n")}`);
       return { failedCount: failed.length };
     },
 
+    // Persists browser-selected files against an incomplete request. The server restricts
+    // these rows to the draft creator (or a CA administrator) and reparents them atomically
+    // when the single request is finally submitted.
+    uploadDraftAttachments: async function (draftId, uploads) {
+      const results = await Promise.allSettled(uploads.map(async function (upload) {
+        const file = upload.file;
+        const attachment = await this.request("DraftAttachments", {
+          method: "POST",
+          body: {
+            draft_ID: draftId,
+            filename: file.name,
+            category: upload.category || "SUPPORTING_DOCUMENT",
+            fieldName: upload.fieldName || null
+          }
+        });
+        const token = await this._csrfToken();
+        const response = await fetch(this.resolveAppUri(`odata/v4/flowmate-ca/DraftAttachments(${attachment.ID})/content`), {
+          method: "PUT",
+          headers: {
+            "X-CSRF-Token": token,
+            "Content-Type": file.type || "application/octet-stream"
+          },
+          body: file
+        });
+        if (!response.ok) {
+          let reason = "";
+          try {
+            const body = await response.json();
+            reason = (body && body.error && body.error.message) || "";
+          } catch (parseError) {
+            reason = "";
+          }
+          try {
+            await this.request(`DraftAttachments(${attachment.ID})`, { method: "DELETE" });
+          } catch (cleanupError) {
+            Log.warning("Could not remove incomplete draft attachment " + attachment.ID, cleanupError);
+          }
+          throw new Error(reason || `Upload failed for ${file.name}`);
+        }
+        return attachment.ID;
+      }.bind(this)));
+      const failed = results.filter(function (result) { return result.status === "rejected"; });
+      return {
+        failedCount: failed.length,
+        errors: failed.map(function (result) {
+          return result.reason && result.reason.message;
+        }).filter(Boolean)
+      };
+    },
+
     // Exports a read-only row table as shown: "#" (itemNo) plus one column per definition, with
     // select values as their text and flags as Yes/No.
     exportTableRows: function (fileName, columns, rows) {

@@ -347,6 +347,13 @@ entity MaterialType : cuid, managed {
   isActive                : Boolean default true;
 }
 
+// Material Code: Tax Class pick list, maintained in the CA Admin console.
+entity TaxClass : cuid, managed {
+  taxClassCode        : String(40) not null;
+  taxClassDescription : String(180);
+  isActive            : Boolean default true;
+}
+
 // Project Code Creation (PCC) masters, maintained in the CA Admin console.
 entity ArPcc : cuid, managed {
   srNo           : String(10);

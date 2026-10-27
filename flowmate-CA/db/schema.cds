@@ -129,6 +129,8 @@ entity CARequestDrafts : cuid, managed {
   requestVariantCode : String(40);
   title              : String(255);
   formData           : LargeString not null;
+  attachments        : Composition of many CAAttachments
+                         on attachments.draft = $self;
 }
 
 entity RequestStepInstances : cuid, managed {
@@ -177,8 +179,12 @@ entity CATasks : cuid, managed {
 }
 
 entity CAAttachments : Attachments {
-  request : Association to CARequests not null;
+  // An attachment belongs either to an incomplete browser draft or to a submitted
+  // request. Draft submission reparents the existing row, so the binary is never copied.
+  request : Association to CARequests;
+  draft   : Association to CARequestDrafts;
   category: String(60);
+  fieldName      : String(120);
   uploadedByName: String(160);
   clientFileId   : String(100);
   contentChecksum: String(64);

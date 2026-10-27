@@ -20,7 +20,7 @@
           showIcon="true"
           class="sapUiSmallMarginBottom"/>
         <MessageStrip
-          text="Drafts save form fields and table rows without submitting. Selected files must be reattached when you resume."
+          text="Drafts save form fields, table rows and attachments without starting workflow or integrations. Draft attachments are currently supported for single-request submission."
           type="Information"
           showIcon="true"
           class="sapUiSmallMarginBottom"/>
@@ -219,8 +219,22 @@
                   icon="sap-icon://document"
                   type="Inactive"/>
               </List>
+              <List
+                headerText="Attachments already saved with this draft"
+                items="{draftFiles>/items}"
+                mode="Delete"
+                delete=".onDeleteDraftAttachment"
+                visible="{= ${draftFiles>/items}.length > 0 }"
+                class="sapUiSmallMarginTop">
+                <StandardListItem
+                  title="{draftFiles>filename}"
+                  description="{draftFiles>categoryText}"
+                  icon="sap-icon://document"
+                  type="Active"
+                  press=".onOpenDraftAttachment"/>
+              </List>
               <MessageStrip
-                text="Files upload in the background after the request is created. The maximum size per file is 50 MB."
+                text="Files are saved with the draft or uploaded after direct submission. The maximum size per file is 50 MB."
                 type="Information"
                 showIcon="true"
                 class="sapUiSmallMarginTop"/>
