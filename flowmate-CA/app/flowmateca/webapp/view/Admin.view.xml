@@ -499,6 +499,10 @@
 <IconTabFilter key="wbs" text="WBS" icon="sap-icon://tree">
     <Toolbar class="caSectionToolbar">
         <Title text="WBS Master" level="H3"/>
+        <SearchField
+            width="22rem"
+            placeholder="Search WBS, project, plant or company"
+            search=".onWbsSearch"/>
         <ToolbarSpacer/>
         <Button
             text="Add WBS"
@@ -508,8 +512,10 @@
     </Toolbar>
 
     <Table
-        items="{admin>/wbs}"
+        id="wbsTable"
+        items="{path: 'master>/Wbs', parameters: {$orderby: 'wbsDescription', $count: true, $$updateGroupId: 'wbsEdits'}}"
         growing="true"
+        growingThreshold="50"
         class="caAdminTable">
 
         <columns>
@@ -522,7 +528,7 @@
             </Column>
 
             <Column width="10rem">
-                <Text text="Project ID"/>
+                <Text text="Project Code"/>
             </Column>
 
             <Column width="8rem">
@@ -550,20 +556,20 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>wbsCode}"/>
+                    <Text text="{master>wbsCode}"/>
 
-                    <Input value="{admin>WBSID}"/>
+                    <Input value="{master>WBSID}"/>
 
-                    <Input value="{admin>ProjectID}"/>
+                    <Input value="{master>ProjectID}"/>
 
-                    <Input value="{admin>Plant}"/>
+                    <Input value="{master>Plant}"/>
 
-                    <Input value="{admin>CompanyCode}"/>
+                    <Input value="{master>CompanyCode}"/>
 
-                    <Input value="{admin>wbsDescription}"/>
+                    <Input value="{master>wbsDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -3646,8 +3652,8 @@
             <Input value="{newItem>/wbsDescription}" placeholder="Enter WBS Description"/>
             <Label text="WBS ID" class="sapUiSmallMarginTop"/>
             <Input value="{newItem>/WBSID}" placeholder="Enter WBS ID"/>
-            <Label text="Project ID" class="sapUiSmallMarginTop"/>
-            <Input value="{newItem>/ProjectID}" placeholder="Enter Project ID"/>
+            <Label text="Project Code" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/ProjectID}" placeholder="Enter Project Code"/>
             <Label text="Plant" class="sapUiSmallMarginTop"/>
             <Input value="{newItem>/Plant}" placeholder="Enter Plant"/>
             <Label text="Company Code" class="sapUiSmallMarginTop"/>

@@ -32,6 +32,7 @@ service FlowmateCAService {
     isValidator            : Boolean;
     isCreator              : Boolean;
     canCreate              : Boolean;
+    canViewDrafts          : Boolean;
     canValidate            : Boolean;
     canAssign              : Boolean;
     canManageDelegation    : Boolean;

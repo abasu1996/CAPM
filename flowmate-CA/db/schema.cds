@@ -434,6 +434,7 @@ entity EquipmentCodeDetails : cuid, managed {
   materialCode     : String(40);
   serialNumber     : String(100);
   wbsElement       : String(80);
+  projectCode      : String(80);
   commissionedDate : Date;
   approver          : Association to common.Users;
   remarks          : LargeString;
@@ -455,6 +456,7 @@ entity EquipmentCodeItems : cuid, managed {
   materialCode     : String(40);
   serialNumber     : String(100);
   wbsElement       : String(80);
+  projectCode      : String(80);
   commissionedDate : Date;
   approver          : Association to common.Users;
   remarks          : LargeString;
@@ -689,6 +691,7 @@ entity OutlineContractItems : cuid, managed {
   costCenter           : String(80);
   orderNumber          : String(80);
   wbsElement           : String(80);
+  projectCode          : String(80);
   scmSpocUserId        : String(255);
 }
 
@@ -783,6 +786,7 @@ entity PurchaseOrderItems : cuid, managed {
   taxCode          : String(40);
   deliveryDate     : Date;
   wbsElement       : String(80);
+  projectCode      : String(80);
   currency         : String(40);
   contractNo       : String(80);
   campaignLocationCode: String(100);

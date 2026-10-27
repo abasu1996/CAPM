@@ -87,7 +87,6 @@ sap.ui.define([
         sites: [],
         serviceCodes: [],
         poNumbers: [],
-        wbs: [],
         documentTypes: [],
         purchasingOrganizations: [],
         companyCodes: [],
@@ -135,7 +134,7 @@ sap.ui.define([
       try {
         const [steps, requestTypes, variants, users, teams, teamMembers, sites,
           serviceCodes, poNumbers,
-          purchasingOrganizations, wbs, documentTypes, companyCodes, purchasingGroups, divisions,
+          purchasingOrganizations, documentTypes, companyCodes, purchasingGroups, divisions,
           applicableTaxes, plant, serviceGroups, valuationClasses, valuationClassesScc, storageLocations,
           salesOrgs, incoterms, costCenters, currencies, paymentTerms, systemContractBasePO,
           procurementCategories, itemCategories, accountAssignments, serviceCategories,
@@ -152,7 +151,6 @@ sap.ui.define([
           this.requestMaster("ServiceCodes?$orderby=serviceCode"),
           this.requestMaster("PoNumbers?$orderby=poNumber"),
           this.requestMaster("PurchasingOrganizations?$orderby=purchasingOrganizationCode"),
-          this.requestMaster("Wbs?$orderby=wbsDescription"),
           this.requestMaster("DocumentTypes?$orderby=documentTypeCode"),
           this.requestMaster("CompanyCodes?$orderby=companyCode"),
           this.requestMaster("PurchasingGroups?$orderby=purchasingGroupCode"),
@@ -202,7 +200,6 @@ sap.ui.define([
         model.setProperty("/serviceCodes", serviceCodes.value || []);
         model.setProperty("/poNumbers", poNumbers.value || []);
         model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || []);
-        model.setProperty("/wbs", wbs.value || []);
         model.setProperty("/documentTypes", documentTypes.value || []);
         model.setProperty("/companyCodes", companyCodes.value || []);
         model.setProperty("/purchasingGroups", purchasingGroups.value || []);
@@ -247,11 +244,11 @@ sap.ui.define([
       }
     },
 
-    // The vendor and material masters (tens of thousands of rows) are read page by page from the
+    // The vendor, material and WBS masters (tens of thousands of rows) are read page by page from the
     // OData entity through the "master" model, not loaded into the admin JSON model like the small
     // masters. A refresh would throw away unsaved edits, so it waits until they are saved.
     _refreshPagedTables: function () {
-      ["vendorTable", "materialTable"].forEach(function (id) {
+      ["vendorTable", "materialTable", "wbsTable"].forEach(function (id) {
         const binding = this.byId(id)?.getBinding("items");
         if (binding && !binding.hasPendingChanges()) {
           binding.refresh();
@@ -279,6 +276,17 @@ sap.ui.define([
         and: false
       }) : [];
       this.byId("vendorTable").getBinding("items").filter(filter, FilterType.Application);
+    },
+
+    onWbsSearch: function (event) {
+      const query = (event.getParameter("query") || "").trim();
+      const filter = query ? new Filter({
+        filters: ["wbsCode", "WBSID", "ProjectID", "Plant", "CompanyCode", "wbsDescription"].map(function (path) {
+          return new Filter({ path, operator: FilterOperator.Contains, value1: query, caseSensitive: false });
+        }),
+        and: false
+      }) : [];
+      this.byId("wbsTable").getBinding("items").filter(filter, FilterType.Application);
     },
 
     _teamTree: function (teams, memberships) {
@@ -1897,17 +1905,19 @@ onDeleteSite: function (event) {
       return this._delete("PoNumbers", event.getSource().getBindingContext("admin").getObject());
     },
 
-onSaveWBS: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("Wbs", row.ID, {
-        wbsCode: row.wbsCode,
-        wbsDescription: row.wbsDescription,
-        Plant: row.Plant || null,
-        ProjectID: row.ProjectID || null,
-        WBSID: row.WBSID || null,
-        CompanyCode: row.CompanyCode || null,
-        isActive: row.isActive
-      });
+    // WBS is a large master, so edits use the OData model's deferred update group just like
+    // Vendors and Materials. This avoids copying (and truncating) the table into a JSON model.
+    onSaveWBS: async function () {
+      const model = this.getView().getModel("master");
+      try {
+        await model.submitBatch("wbsEdits");
+        if (model.hasPendingChanges("wbsEdits")) {
+          throw new Error("The WBS changes could not be saved. Check the values and try again.");
+        }
+        this.showSuccess("Changes saved");
+      } catch (error) {
+        this.showError(error);
+      }
     },
 
     onSaveDocumentType: function (event) {
@@ -1927,8 +1937,8 @@ onDeleteDocumentType: function (event) {
     return this._delete( "DocumentTypes", event.getSource().getBindingContext("admin").getObject());
 },
 
-onDeleteWBS: function (event) {
-      return this._delete("Wbs", event.getSource().getBindingContext("admin").getObject());
+    onDeleteWBS: function (event) {
+      return this._delete("Wbs", event.getSource().getBindingContext("master").getObject());
     },
 
 

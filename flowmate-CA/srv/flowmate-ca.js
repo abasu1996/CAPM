@@ -971,6 +971,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       isValidator,
       isCreator,
       canCreate: isCreator,
+      canViewDrafts: isCreator,
       canValidate: isValidator,
       canAssign: isSupervisor,
       canManageDelegation: isSupervisor,
@@ -1075,7 +1076,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   _filterDrafts = async (req) => {
-    if (!this._roleCapabilities(req).canCreate) {
+    if (!this._roleCapabilities(req).canViewDrafts) {
       return req.reject(403, "Only a creator or administrator can view drafts");
     }
     const user = await this._ensureCurrentUser(req);
@@ -1175,7 +1176,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   };
 
   _filterDraftAttachments = async (req) => {
-    if (!this._roleCapabilities(req).canCreate) {
+    if (!this._roleCapabilities(req).canViewDrafts) {
       return req.reject(403, "Only a creator or administrator can view draft attachments");
     }
     const user = await this._ensureCurrentUser(req);
@@ -1334,7 +1335,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _getDashboardCounts = async (req) => {
     const user = await this._ensureCurrentUser(req);
     const capabilities = this._roleCapabilities(req);
-    const { isAdmin, canCreate, canValidate } = capabilities;
+    const { isAdmin, canCreate, canViewDrafts, canValidate } = capabilities;
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
     const requestedBy = this._myRequestWhere(effectiveUserIds);
     const assignedToMe = { assignedUser_ID: { in: effectiveUserIds } };
@@ -1355,7 +1356,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     ] = await Promise.all([
       capabilities.canViewAllRequests ? this._count(this.db.CARequests, {}) : 0,
       canCreate ? this._count(this.db.CARequests, requestedBy) : 0,
-      canCreate ? this._count(this.db.CARequestDrafts, { creator_ID: user.ID }) : 0,
+      canViewDrafts ? this._count(this.db.CARequestDrafts, { creator_ID: user.ID }) : 0,
       canValidate ? this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }) : 0,
       canCreate ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.SENT_BACK)) : 0,
       canCreate ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED)) : 0,

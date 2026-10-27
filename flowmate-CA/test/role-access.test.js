@@ -16,6 +16,7 @@ test("creator can create and monitor but cannot validate, assign, or terminate",
   const req = requestFor("CARequester");
   const access = service._roleCapabilities(req);
   assert.equal(access.canCreate, true);
+  assert.equal(access.canViewDrafts, true);
   assert.equal(access.canValidate, false);
   assert.equal(access.canAssign, false);
   assert.equal(access.canViewAllRequests, true);
@@ -31,6 +32,7 @@ test("validator can process tasks but cannot create, assign, or terminate", () =
   const req = requestFor("CAProcessor");
   const access = service._roleCapabilities(req);
   assert.equal(access.canCreate, false);
+  assert.equal(access.canViewDrafts, false);
   assert.equal(access.canValidate, true);
   assert.equal(access.canAssign, false);
   assert.equal(access.canViewAllRequests, true);
@@ -45,6 +47,7 @@ test("supervisor can validate, assign, and maintain delegation but cannot create
   const req = requestFor("CASupervisor");
   const access = service._roleCapabilities(req);
   assert.equal(access.canCreate, false);
+  assert.equal(access.canViewDrafts, false);
   assert.equal(access.canValidate, true);
   assert.equal(access.canAssign, true);
   assert.equal(access.canManageDelegation, true);
@@ -64,6 +67,7 @@ test("administrator has every business capability", () => {
     isValidator: true,
     isCreator: true,
     canCreate: true,
+    canViewDrafts: true,
     canValidate: true,
     canAssign: true,
     canManageDelegation: true,

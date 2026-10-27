@@ -60,7 +60,7 @@
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTileIndigo" header="Draft Requests" subheader="Saved forms awaiting submission" visible="{app>/currentUser/canCreate}" press=".onDrafts">
+          <GenericTile class="caTile caTileIndigo" header="Draft Requests" subheader="Your saved forms awaiting submission" visible="{app>/currentUser/canViewDrafts}" press=".onDrafts">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/myDrafts}" icon="sap-icon://save" valueColor="Neutral"/>

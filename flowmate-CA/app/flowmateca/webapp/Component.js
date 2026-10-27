@@ -39,6 +39,7 @@ sap.ui.define([
           isValidator: false,
           isCreator: false,
           canCreate: false,
+          canViewDrafts: false,
           canValidate: false,
           canAssign: false,
           canManageDelegation: false,

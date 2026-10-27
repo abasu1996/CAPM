@@ -119,7 +119,7 @@ sap.ui.define([
   // Master data whose fields show only the code once picked (the drop-down lists code and name).
   const CODE_ONLY_ENTITIES = new Set(["Sites", "Materials", "ServiceCodes"]);
 
-  // Pick lists too big to load whole (the vendor master holds tens of thousands of rows, and the
+  // Pick lists too big to load whole (the vendor and WBS masters can hold tens of thousands of rows, and the
   // server returns at most 1000 per request) are picked in a value-help dialog that searches on
   // the server and loads page by page. "columns" are the dialog's [field, header] pairs.
   const SEARCHED_ENTITIES = {
@@ -135,7 +135,18 @@ sap.ui.define([
       fields: ["serviceCode", "serviceDescription"], orderBy: "serviceCode",
       columns: [["serviceCode", "Service Code"], ["serviceDescription", "Description"]]
     },
-    PoNumbers: { fields: ["poNumber"], orderBy: "poNumber", columns: [["poNumber", "PO Number"]] }
+    PoNumbers: { fields: ["poNumber"], orderBy: "poNumber", columns: [["poNumber", "PO Number"]] },
+    Wbs: {
+      fields: ["wbsCode", "WBSID", "ProjectID", "wbsDescription", "Plant", "CompanyCode"],
+      orderBy: "wbsDescription",
+      columns: [
+        ["wbsCode", "WBS Element"],
+        ["ProjectID", "Project Code"],
+        ["wbsDescription", "Description"],
+        ["Plant", "Plant"],
+        ["CompanyCode", "Company Code"]
+      ]
+    }
   };
   const SEARCH_PAGE_SIZE = 50;
 
@@ -1237,7 +1248,14 @@ ${reasons.join("\n")}`);
           valueHelpRequest: function (event) {
             this._openValueHelp(definition, event.getSource());
           }.bind(this),
-          change: this._applyConditionalVisibility.bind(this)
+          change: function (event) {
+            const input = event.getSource();
+            if (!input.getValue()) {
+              const context = input.getBindingContext("form");
+              this._applyAutoFill(definition, "", context ? context.getPath() : null, null);
+            }
+            this._applyConditionalVisibility();
+          }.bind(this)
         }).bindValue(path);
       } else if (definition.type === "emailList") {
         control = this._createEmailListControl(definition, dataPath);

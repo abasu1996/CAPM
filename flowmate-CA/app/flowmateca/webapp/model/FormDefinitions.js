@@ -42,6 +42,20 @@ sap.ui.define([], function () {
     text: "vendorName",
     secondaryText: "vendorCode"
   });
+  const wbsElement = function (extra) {
+    return field("wbsElement", "WBS Element", "valueHelp", Object.assign({
+      entity: "Wbs",
+      key: "wbsCode",
+      text: "wbsDescription",
+      secondaryText: "ProjectID",
+      autoFills: { field: "projectCode", from: "ProjectID" }
+    }, extra || {}));
+  };
+  const wbsProjectCode = function (extra) {
+    return field("projectCode", "Project Code", "input", Object.assign({
+      placeholder: "Filled from the selected WBS Element"
+    }, extra || {}));
+  };
 
   const materialBase = [
     field("industrySector", "Industry Sector", "select", {
@@ -523,7 +537,8 @@ sap.ui.define([], function () {
         placeholder: "Filled from the selected Material Code"
       }),
       field("serialNumber", "Serial Number", "input", { required: true }),
-      field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
+      wbsElement(),
+      wbsProjectCode(),
       field("commissionedDate", "Commissioned Date", "date", { pastOnly: true }),
       field("remarks", "Remarks", "textarea"),
       field("supportingAttachment", "Supporting Attachment", "file")
@@ -552,7 +567,8 @@ sap.ui.define([], function () {
         placeholder: "Filled from the selected Material Code"
       }),
       field("serialNumber", "Serial Number", "input"),
-      field("wbsElement", "WBS Element", "combo", { entity: "Wbs", key: "wbsCode", text: "wbsDescription" }),
+      wbsElement(),
+      wbsProjectCode(),
       field("commissionedDate", "Commissioned Date", "date", { pastOnly: true }),
       field("existingFunctionalLocation", "Existing Functional Location", "input", {
         maxLength: 80,
@@ -1208,8 +1224,12 @@ sap.ui.define([], function () {
     costCenter: column("costCenter", "Cost Center", "combo", {
       entity: "CostCenter", key: "costCenterCode", text: "costCenterName", secondaryText: "costCenterCode"
     }),
-    wbsElement: column("wbsElement", "WBS Element", "combo", {
-      entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "wbsCode"
+    wbsElement: column("wbsElement", "WBS Element", "valueHelp", {
+      entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "ProjectID",
+      autoFills: { field: "projectCode", from: "ProjectID" }
+    }),
+    projectCode: column("projectCode", "Project Code", "input", {
+      placeholder: "Filled from the selected WBS Element"
     })
   };
 
@@ -1217,8 +1237,12 @@ sap.ui.define([], function () {
     // Shown for Single and Multiple Line Items alike (see alwaysHasItems).
     PURCHASE_ORDER: [
       column("materialOrService", "Service Code / Material Code", "input", { required: true }),
-      column("wbsElement", "WBS Element", "combo", {
-        required: true, entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "wbsCode"
+      column("wbsElement", "WBS Element", "valueHelp", {
+        required: true, entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "ProjectID",
+        autoFills: { field: "projectCode", from: "ProjectID" }
+      }),
+      column("projectCode", "Project Code", "input", {
+        placeholder: "Filled from the selected WBS Element"
       }),
       column("costCenter", "Cost Center", "combo", {
         required: true, entity: "CostCenter", key: "costCenterCode", text: "costCenterName", secondaryText: "costCenterCode"
@@ -1308,7 +1332,8 @@ sap.ui.define([], function () {
       contractColumn.accountAssignment,
       contractColumn.costCenter,
       column("orderNumber", "Order Number"),
-      contractColumn.wbsElement
+      contractColumn.wbsElement,
+      contractColumn.projectCode
     ],
     // Labels follow "Details of Contract Creation-SCC M-212.csv" so that file imports as-is.
     CONTRACT_NEW: [
@@ -1345,7 +1370,8 @@ sap.ui.define([], function () {
       contractColumn.accountAssignment,
       contractColumn.costCenter,
       column("orderNumber", "Order Number"),
-      Object.assign({}, contractColumn.wbsElement, { label: "Work Breakdown Structure Element (WBS Element)" })
+      Object.assign({}, contractColumn.wbsElement, { label: "Work Breakdown Structure Element (WBS Element)" }),
+      contractColumn.projectCode
       // User ID - SCM SPOC is captured once, in the Details section (definitions.CONTRACT_NEW).
     ]
   };
