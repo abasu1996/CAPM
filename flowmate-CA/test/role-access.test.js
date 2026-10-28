@@ -19,6 +19,10 @@ test("creator can create and monitor but cannot validate, assign, or terminate",
   assert.equal(access.canViewDrafts, true);
   assert.equal(access.canValidate, false);
   assert.equal(access.canProcessAssignedTasks, true);
+  assert.equal(access.canViewAllTasks, true);
+  assert.equal(access.canAddTask, false);
+  assert.equal(access.canViewSentBack, true);
+  assert.equal(access.canViewTerminated, true);
   assert.equal(access.canAssign, false);
   assert.equal(access.canViewAllRequests, true);
   assert.equal(access.canViewReports, false);
@@ -36,6 +40,10 @@ test("validator can process tasks but cannot create, assign, or terminate", () =
   assert.equal(access.canViewDrafts, false);
   assert.equal(access.canValidate, true);
   assert.equal(access.canProcessAssignedTasks, true);
+  assert.equal(access.canViewAllTasks, true);
+  assert.equal(access.canAddTask, true);
+  assert.equal(access.canViewSentBack, true);
+  assert.equal(access.canViewTerminated, false);
   assert.equal(access.canAssign, false);
   assert.equal(access.canViewAllRequests, true);
   assert.equal(access.canViewReports, false);
@@ -52,6 +60,10 @@ test("supervisor can validate, assign, and maintain delegation but cannot create
   assert.equal(access.canViewDrafts, false);
   assert.equal(access.canValidate, true);
   assert.equal(access.canProcessAssignedTasks, true);
+  assert.equal(access.canViewAllTasks, true);
+  assert.equal(access.canAddTask, true);
+  assert.equal(access.canViewSentBack, true);
+  assert.equal(access.canViewTerminated, false);
   assert.equal(access.canAssign, true);
   assert.equal(access.canManageDelegation, true);
   assert.equal(access.canViewAllRequests, true);
@@ -73,6 +85,10 @@ test("administrator has every business capability", () => {
     canViewDrafts: true,
     canValidate: true,
     canProcessAssignedTasks: true,
+    canViewAllTasks: true,
+    canAddTask: true,
+    canViewSentBack: true,
+    canViewTerminated: true,
     canAssign: true,
     canManageDelegation: true,
     canViewAllRequests: true,
@@ -87,6 +103,7 @@ test("technical PO client retains createRequest access only", () => {
   const req = requestFor("system-user", "PORequestCreate");
   assert.doesNotThrow(() => service._requireCreateAccess(req));
   assert.equal(service._roleCapabilities(req).canViewAllRequests, false);
+  assert.equal(service._roleCapabilities(req).canViewAllTasks, false);
   assert.throws(() => service._requireValidator(req), { status: 403 });
 });
 
@@ -102,17 +119,22 @@ test("all business roles can read the all-requests catalogue without receiving m
   assert.deepEqual(query.filter, { ID: null });
 });
 
-test("supervisor must own a task before processing; administrator may override ownership", async () => {
+test("supervisor and administrator must own a task before processing", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
-  service._effectiveTaskUserIds = async () => ["supervisor"];
+  service._effectiveTaskUserIds = async (_req, userId) => [userId];
   await assert.rejects(service._assertTaskAccess(
     requestFor("CASupervisor"),
     { assignedUser_ID: "validator", assignedTeam_ID: "team" },
     { ID: "supervisor" }
   ), { status: 403 });
-  await assert.doesNotReject(service._assertTaskAccess(
+  await assert.rejects(service._assertTaskAccess(
     requestFor("CAAdmin"),
     { assignedUser_ID: "validator", assignedTeam_ID: "team" },
+    { ID: "admin" }
+  ), { status: 403 });
+  await assert.doesNotReject(service._assertTaskAccess(
+    requestFor("CAAdmin"),
+    { assignedUser_ID: "admin", assignedTeam_ID: "team" },
     { ID: "admin" }
   ));
 });
@@ -143,15 +165,30 @@ test("requester may process a task assigned directly to them but not another use
   ), { status: 403 });
 });
 
-test("requester task reads are limited to directly assigned tasks", async () => {
+test("requester All Tasks includes their requests and directly assigned approval tasks", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   service._ensureCurrentUser = async () => ({ ID: "requester" });
   service._effectiveTaskUserIds = async () => ["requester", "delegator"];
   const query = { where(value) { this.filter = value; } };
   await service._filterTasksByRole({ ...requestFor("CARequester"), query });
-  assert.deepEqual(query.filter, [
-    { ref: ["assignedUser_ID"] },
-    "in",
-    { list: [{ val: "requester" }, { val: "delegator" }] }
-  ]);
+  const serialized = JSON.stringify(query.filter);
+  assert.match(serialized, /requester_ID/);
+  assert.match(serialized, /owner_ID/);
+  assert.match(serialized, /assignedUser_ID/);
+  assert.match(serialized, /requester/);
+  assert.match(serialized, /delegator/);
+});
+
+test("processor All Tasks includes direct and active-team work", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._ensureCurrentUser = async () => ({ ID: "processor" });
+  service._effectiveTaskUserIds = async () => ["processor"];
+  service._teamIdsOf = async () => ["team-a", "team-b"];
+  const query = { where(value) { this.filter = value; } };
+  await service._filterTasksByRole({ ...requestFor("CAProcessor"), query });
+  const serialized = JSON.stringify(query.filter);
+  assert.match(serialized, /assignedUser_ID/);
+  assert.match(serialized, /assignedTeam_ID/);
+  assert.doesNotMatch(serialized, /requester_ID/);
+  assert.match(serialized, /team-a/);
 });

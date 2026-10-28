@@ -422,7 +422,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.before("claimTeamTask", this._requireValidator);
     this.before(["reassignRequest", "reassignTask"], this._requireSupervisor);
     this.before("getReportingDashboard", this._requireSupervisor);
-    this.before(["rejectTask", "addTask", "completeStep", "sendToS4"], this._requireAdmin);
+    this.before("addTask", this._requireAddTask);
+    this.before(["rejectTask", "completeStep", "sendToS4"], this._requireAdmin);
 
     this.on("READ", ["Users", "Teams", "TeamMembers", "RequesterTeams", "Vendors"], (req) => {
       return this.master.run(req.query);
@@ -984,6 +985,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       canViewDrafts: isCreator,
       canValidate: isValidator,
       canProcessAssignedTasks: isBusinessUser,
+      canViewAllTasks: isBusinessUser,
+      canAddTask: isValidator,
+      canViewSentBack: isBusinessUser,
+      canViewTerminated: isCreator,
       canAssign: isSupervisor,
       canManageDelegation: isSupervisor,
       canViewAllRequests: isBusinessUser,
@@ -1006,6 +1011,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   _requireCreator = (req) => this._requireCapability(req, "canCreate", "Only a creator or administrator can perform this action");
   _requireValidator = (req) => this._requireCapability(req, "canValidate", "Only a validator, supervisor, or administrator can process requests and tasks");
+  _requireAddTask = (req) => this._requireCapability(req, "canAddTask", "Only a processor, supervisor, or administrator can add tasks");
   _requireSupervisor = (req) => this._requireCapability(req, "canAssign", "Only a supervisor or administrator can assign requests and tasks");
   _requireAdmin = (req) => this._requireCapability(req, "isAdmin", "Only an administrator can perform this action");
 
@@ -1127,6 +1133,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       ]);
       [...requested, ...owned].forEach((request) => requestIds.add(request.ID));
     }
+    // A user assigned as an approver or correction owner must be able to open the
+    // request context even when they are not its creator and do not process its team.
+    if (capabilities.canProcessAssignedTasks && !capabilities.canValidate) {
+      const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+      const assigned = await cds.tx(req).run(
+        SELECT.from(this.db.CATasks).columns("request_ID").where({ assignedUser_ID: { in: effectiveUserIds } })
+      );
+      assigned.forEach((task) => task.request_ID && requestIds.add(task.request_ID));
+    }
     if (capabilities.canValidate) {
       (await this._validatorRequestIds(req, user)).forEach((ID) => requestIds.add(ID));
     }
@@ -1150,39 +1165,50 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   _filterTasksByRole = async (req) => {
     const capabilities = this._roleCapabilities(req);
-    if (capabilities.canAssign) return;
-    if (!capabilities.canProcessAssignedTasks) {
+    if (!capabilities.canViewAllTasks) {
       req.query.where({ ID: null });
       return;
     }
+    if (capabilities.canAssign) return;
     const user = await this._ensureCurrentUser(req);
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
-    const assigned = [{ ref: ["assignedUser_ID"] }, "in", { list: effectiveUserIds.map((ID) => ({ val: ID })) }];
-    // Requester-only users may read a task assigned directly to them (or to an active
-    // delegator), but never gain visibility of an unclaimed team task.
-    if (!capabilities.canValidate) {
-      req.query.where(assigned);
-      return;
-    }
-    const teamIds = await this._teamIdsOf(user);
-    if (!teamIds.length) {
-      req.query.where(assigned);
-      return;
-    }
-    req.query.where([{
-      xpr: [
-        ...assigned,
-        "or",
-        {
-          xpr: [
-            { ref: ["assignedUser_ID"] }, "=", { val: null },
-            "and",
-            { ref: ["assignedTeam_ID"] }, "in", { list: teamIds.map((ID) => ({ val: ID })) }
-          ]
-        }
-      ]
-    }]);
+    const teamIds = capabilities.canValidate ? await this._teamIdsOf(user) : [];
+    req.query.where(this._taskReadWhere(capabilities, effectiveUserIds, teamIds));
   };
+
+  _taskReadWhere(capabilities, effectiveUserIds, teamIds = []) {
+    if (capabilities.canAssign) return null;
+    const userList = { list: effectiveUserIds.map((val) => ({ val })) };
+    const predicates = [];
+    const add = (predicate) => {
+      if (predicates.length) predicates.push("or");
+      predicates.push(...predicate);
+    };
+
+    // A requestor monitors every task belonging to a request they created or currently own.
+    if (capabilities.canCreate) {
+      add([{ ref: ["request", "requester_ID"] }, "in", userList]);
+      add([{ ref: ["request", "owner_ID"] }, "in", userList]);
+    }
+    // Direct assignment (including an active delegation) always grants task visibility.
+    if (capabilities.canProcessAssignedTasks) {
+      add([{ ref: ["assignedUser_ID"] }, "in", userList]);
+    }
+    // Processors monitor work assigned anywhere inside their active teams, including claimed work.
+    if (capabilities.canValidate && teamIds.length) {
+      add([{ ref: ["assignedTeam_ID"] }, "in", { list: teamIds.map((val) => ({ val })) }]);
+    }
+    return predicates.length ? [{ xpr: predicates }] : [{ ref: ["ID"] }, "=", { val: null }];
+  }
+
+  _withTaskFilters(scope, ...filters) {
+    const result = scope ? [...scope] : [];
+    filters.filter(Boolean).forEach((filter) => {
+      if (result.length) result.push("and");
+      result.push(...filter);
+    });
+    return result;
+  }
 
   _filterRequestsByRole = (req) => {
     // Requests is the read-only, cross-team catalogue used by All Requests and request details.
@@ -1352,7 +1378,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _getDashboardCounts = async (req) => {
     const user = await this._ensureCurrentUser(req);
     const capabilities = this._roleCapabilities(req);
-    const { isAdmin, canCreate, canViewDrafts, canValidate } = capabilities;
+    const { isAdmin, canCreate, canViewDrafts, canValidate, canProcessAssignedTasks } = capabilities;
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
     const requestedBy = this._myRequestWhere(effectiveUserIds);
     const assignedToMe = { assignedUser_ID: { in: effectiveUserIds } };
@@ -1360,9 +1386,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     // has been rolled back and is reopened when that step comes around again.
     const openStatus = { status_code: TASK_STATUS.OPEN };
     const teamIds = isAdmin ? [] : await this._teamIdsOf(user);
+    const taskScope = this._taskReadWhere(capabilities, effectiveUserIds, teamIds);
+    const sentBackTaskScope = this._withTaskFilters(
+      taskScope,
+      [{ ref: ["status_code"] }, "=", { val: TASK_STATUS.OPEN }],
+      [{ ref: ["request", "status_code"] }, "=", { val: REQUEST_STATUS.SENT_BACK }]
+    );
 
     const [
       allRequests,
+      allTasks,
       myRequests,
       myDrafts,
       myOpenTasks,
@@ -1372,12 +1405,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       completedRequests
     ] = await Promise.all([
       capabilities.canViewAllRequests ? this._count(this.db.CARequests, {}) : 0,
+      capabilities.canViewAllTasks ? this._count(this.db.CATasks, taskScope || {}) : 0,
       canCreate ? this._count(this.db.CARequests, requestedBy) : 0,
       canViewDrafts ? this._count(this.db.CARequestDrafts, { creator_ID: user.ID }) : 0,
-      canValidate ? this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }) : 0,
-      canCreate ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.SENT_BACK)) : 0,
-      canCreate ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED)) : 0,
-      canValidate ? this._count(this.db.CATasks, {
+      canProcessAssignedTasks ? this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }) : 0,
+      capabilities.canViewSentBack ? this._count(this.db.CATasks, sentBackTaskScope) : 0,
+      capabilities.canViewTerminated
+        ? this._count(this.db.CARequests, isAdmin ? { status_code: REQUEST_STATUS.REJECTED } : this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED))
+        : 0,
+      canProcessAssignedTasks ? this._count(this.db.CATasks, {
         ...assignedToMe,
         ...openStatus,
         isApproval: true
@@ -1400,6 +1436,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     return {
       allRequests,
+      allTasks,
       myRequests,
       myDrafts,
       myOpenTasks,
@@ -2124,6 +2161,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(404, "Request not found");
     }
     this._assertMutableRequest(req, request);
+    const capabilities = this._roleCapabilities(req);
+    if (!capabilities.canAssign && !await this._canContribute(req, request, user)) {
+      return req.reject(403, "A processor can add a task only while working on an open task of this request");
+    }
 
     const step = await SELECT.one.from(this.db.RequestStepInstances).where({
       request_ID: request.ID,
@@ -3948,10 +3989,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // ---- Comments and attachments ----
   // Only the person holding an open task of the request (or their active delegate) may add
   // attachments and comments to it. An unclaimed team task lets nobody add anything until someone
-  // takes it; administrators retain their explicit all-access override. The requester may also attach files while creating
+  // takes it. Administrators must assign the task to themselves before acting. The requester may also attach files while creating
   // the request (the create page uploads right after creating, see _beforeCreateAttachment).
   async _canContribute(req, request, user) {
-    if (this._roleCapabilities(req).isAdmin) return true;
     if (!this._roleCapabilities(req).canProcessAssignedTasks) return false;
     const openTasks = (await SELECT.from(this.db.CATasks)
       .columns("assignedUser_ID", "isSuperseded")
@@ -4490,9 +4530,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   async _assertTaskAccess(req, task, user) {
-    if (req.user.is("CAAdmin")) {
-      return;
-    }
     if (task.assignedUser_ID) {
       const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
       if (effectiveUserIds.includes(task.assignedUser_ID)) {

@@ -97,6 +97,7 @@ test("dashboard counts include requests created or owned by the current user or 
   }).length;
   const counts = await service._getDashboardCounts({ user: { is: (role) => role === "CARequester" } });
   assert.equal(counts.allRequests, 4);
+  assert.equal(counts.allTasks, 0);
   assert.equal(counts.myRequests, 4);
   assert.equal(counts.myDrafts, 0);
   assert.equal(counts.rejectedRequests, 1);

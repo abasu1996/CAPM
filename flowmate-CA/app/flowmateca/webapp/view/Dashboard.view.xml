@@ -10,7 +10,7 @@
         <ToolbarSpacer/>
         <Button icon="sap-icon://home" type="Transparent" tooltip="Workspace"/>
         <Button icon="sap-icon://documents" type="Transparent" tooltip="Requests" visible="{app>/currentUser/canCreate}" press=".onRequests"/>
-        <Button icon="sap-icon://task" type="Transparent" tooltip="Tasks" visible="{app>/currentUser/canValidate}" press=".onTasks"/>
+        <Button icon="sap-icon://task" type="Transparent" tooltip="Tasks" visible="{app>/currentUser/canViewAllTasks}" press=".onTasks"/>
         <Button
           icon="sap-icon://action-settings"
           type="Transparent"
@@ -46,10 +46,10 @@
         </HBox>
 
         <FlexBox wrap="Wrap" class="caTileGrid" renderType="Div">
-          <GenericTile class="caTile caTileIndigo" header="{i18n>allRequests}" subheader="{i18n>allRequestsSubtitle}" visible="{app>/currentUser/canViewAllRequests}" press=".onAllRequests">
+          <GenericTile class="caTile caTileIndigo" header="{i18n>allTasks}" subheader="{i18n>allTasksSubtitle}" visible="{app>/currentUser/canViewAllTasks}" press=".onAllTasks">
             <tileContent>
               <TileContent>
-                <NumericContent value="{dashboard>/allRequests}" icon="sap-icon://overview-chart" valueColor="Neutral"/>
+                <NumericContent value="{dashboard>/allTasks}" icon="sap-icon://task" valueColor="Neutral"/>
               </TileContent>
             </tileContent>
           </GenericTile>
@@ -67,7 +67,7 @@
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTileTeal" header="{i18n>myTasks}" subheader="Tasks assigned to you" visible="{app>/currentUser/canValidate}" press=".onMyTasks">
+          <GenericTile class="caTile caTileTeal" header="{i18n>myTasks}" subheader="Tasks assigned to you" visible="{app>/currentUser/canProcessAssignedTasks}" press=".onMyTasks">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/myOpenTasks}" icon="sap-icon://task" valueColor="Neutral"/>
@@ -81,21 +81,21 @@
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTileOrange" header="{i18n>sentBack}" subheader="Waiting for correction" visible="{app>/currentUser/canCreate}" press=".onSentBack">
+          <GenericTile class="caTile caTileOrange" header="{i18n>sentBack}" subheader="Waiting for correction" visible="{app>/currentUser/canViewSentBack}" press=".onSentBack">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/sentBackRequests}" icon="sap-icon://undo" valueColor="Neutral"/>
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTileRed" header="{i18n>rejected}" subheader="Raise a new request" visible="{app>/currentUser/canCreate}" press=".onRejected">
+          <GenericTile class="caTile caTileRed" header="{i18n>rejected}" subheader="Terminated request history" visible="{app>/currentUser/canViewTerminated}" press=".onRejected">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/rejectedRequests}" icon="sap-icon://decline" valueColor="Neutral"/>
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTileIndigo" header="{i18n>pendingApproval}" subheader="Approval tasks assigned to you" visible="{app>/currentUser/canValidate}" press=".onPendingApproval">
+          <GenericTile class="caTile caTileIndigo" header="{i18n>pendingApproval}" subheader="Approval tasks assigned to you" visible="{app>/currentUser/canProcessAssignedTasks}" press=".onPendingApproval">
             <tileContent>
               <TileContent>
                 <NumericContent value="{dashboard>/pendingApproval}" icon="sap-icon://approvals" valueColor="Neutral"/>

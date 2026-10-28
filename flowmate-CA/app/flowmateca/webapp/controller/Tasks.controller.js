@@ -14,6 +14,8 @@ sap.ui.define([
       this.getView().setModel(new ListModel({
         mode: "mine",
         isTeamMode: false,
+        isAllMode: false,
+        showScopeFilters: false,
         title: "My Tasks"
       }), "taskView");
       this.getRouter().getRoute("tasks").attachPatternMatched(this._onRouteMatched, this);
@@ -21,15 +23,20 @@ sap.ui.define([
 
     _onRouteMatched: function (event) {
       const query = event.getParameter("arguments")["?query"] || {};
-      const mode = query.mode === "team" ? "team" : "mine";
+      const mode = ["all", "team"].includes(query.mode) ? query.mode : "mine";
       const model = this.getView().getModel("taskView");
       model.setProperty("/mode", mode);
       model.setProperty("/isTeamMode", mode === "team");
-      model.setProperty("/title", mode === "team" ? "Team Task Queue" : "My Tasks");
+      model.setProperty("/isAllMode", mode === "all");
+      model.setProperty("/showScopeFilters", mode !== "mine");
+      model.setProperty("/title", mode === "all" ? "All Tasks" : (mode === "team" ? "Team Task Queue" : "My Tasks"));
       this._approvalOnly = query.approval === "true";
+      this._requestStatus = query.requestStatus || "";
+      this._presetStatus = query.status || "";
+      this.byId("taskStatusFilter").setSelectedKey(this._presetStatus);
       this.getView().getModel("sortView").setProperty("/key", "asc");
-      // The request type / requester filters belong to the Team Queue; never let them apply hidden.
-      if (mode !== "team") {
+      // Request type / requester filters belong to shared task catalogues; never let them apply hidden.
+      if (mode === "mine") {
         this.byId("taskTypeFilter").setSelectedKey("");
         this.byId("taskRequesterFilter").setValue("");
       } else {
@@ -64,12 +71,12 @@ sap.ui.define([
       this.setBusy(true);
       try {
         const mode = this.getView().getModel("taskView").getProperty("/mode");
-        const entity = mode === "team" ? "MyTeamTasks" : "MyTasks";
+        const entity = mode === "all" ? "Tasks" : (mode === "team" ? "MyTeamTasks" : "MyTasks");
         const filters = [];
         const search = this.byId("taskSearch").getValue().trim().toLowerCase();
         const status = this.byId("taskStatusFilter").getSelectedKey();
-        const type = mode === "team" ? this.byId("taskTypeFilter").getSelectedKey() : "";
-        const requester = mode === "team" ? this.byId("taskRequesterFilter").getValue().trim().toLowerCase() : "";
+        const type = mode !== "mine" ? this.byId("taskTypeFilter").getSelectedKey() : "";
+        const requester = mode !== "mine" ? this.byId("taskRequesterFilter").getValue().trim().toLowerCase() : "";
 
         if (search) {
           const safeSearch = search.replace(/'/g, "''");
@@ -86,6 +93,9 @@ sap.ui.define([
         }
         if (this._approvalOnly) {
           filters.push("isApproval eq true");
+        }
+        if (this._requestStatus) {
+          filters.push(`request/status_code eq '${String(this._requestStatus).replace(/'/g, "''")}'`);
         }
 
         const filterQuery = filters.length ? `&$filter=${encodeURIComponent(filters.join(" and "))}` : "";
@@ -151,6 +161,8 @@ sap.ui.define([
       this.byId("taskRequesterFilter").setValue("");
       this.getView().getModel("sortView").setProperty("/key", "asc");
       this._approvalOnly = false;
+      this._requestStatus = "";
+      this._presetStatus = "";
       this.onRefresh();
     },
 

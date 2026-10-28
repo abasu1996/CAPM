@@ -7,8 +7,9 @@
     <headerContent>
       <SegmentedButton selectedKey="{taskView>/mode}" selectionChange=".onModeChange">
         <items>
+          <SegmentedButtonItem key="all" text="All Tasks" icon="sap-icon://overview-chart" visible="{app>/currentUser/canViewAllTasks}"/>
           <SegmentedButtonItem key="mine" text="My Tasks" icon="sap-icon://person-placeholder"/>
-          <SegmentedButtonItem key="team" text="Team Queue" icon="sap-icon://group"/>
+          <SegmentedButtonItem key="team" text="Team Queue" icon="sap-icon://group" visible="{app>/currentUser/canValidate}"/>
         </items>
       </SegmentedButton>
       <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent" press=".onExportExcel"/>
@@ -30,12 +31,12 @@
           <core:Item key="APPROVED" text="Approved"/>
           <core:Item key="REJECTED" text="Terminated"/>
         </Select>
-        <!-- Team Queue only: narrow the shared queue by request type and requester. -->
+        <!-- Shared task catalogues can be narrowed by request type and requester. -->
         <ComboBox
           id="taskTypeFilter"
           width="15rem"
           placeholder="{i18n>requestType}"
-          visible="{taskView>/isTeamMode}"
+          visible="{taskView>/showScopeFilters}"
           items="{catalog>/requestTypes}"
           selectionChange=".onFilterChange">
           <core:Item key="{catalog>code}" text="{catalog>name}"/>
@@ -44,7 +45,7 @@
           id="taskRequesterFilter"
           width="13rem"
           placeholder="{i18n>requesterFilterPlaceholder}"
-          visible="{taskView>/isTeamMode}"
+          visible="{taskView>/showScopeFilters}"
           liveChange=".onFilterChange"
           search=".onFilterChange"/>
         <ToolbarSpacer/>
@@ -81,6 +82,7 @@
             <Column width="8rem"><Text text="{= ${taskView>/isTeamMode} ? 'Received On' : 'Assigned On' }"/></Column>
             <!-- My Tasks only: when the task was approved (Team Queue holds open tasks). -->
             <Column width="8rem" visible="{= !${taskView>/isTeamMode} }"><Text text="Approved On"/></Column>
+            <Column width="12rem" visible="{taskView>/isAllMode}"><Text text="Assigned To"/></Column>
             <Column width="9rem" visible="{taskView>/isTeamMode}"><Text text="Action"/></Column>
           </columns>
           <items>
@@ -110,6 +112,7 @@
                   text="{parts: ['tasks>completedAt', 'tasks>status/code'], formatter: '.formatApprovedOn'}"
                   tooltip="{parts: ['tasks>completedAt', 'tasks>status/code'], formatter: '.formatApprovedOnFull'}"
                   wrapping="false"/>
+                <Text text="{= ${tasks>assignedName} || ${tasks>assignedTeamName} || '-' }" wrapping="false"/>
                 <Button
                   text="Assign to Me"
                   icon="sap-icon://employee-approvals"

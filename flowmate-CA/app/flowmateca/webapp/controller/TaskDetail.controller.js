@@ -54,8 +54,8 @@ sap.ui.define([
         task.canReassign = Boolean(user?.canReassign) && ["OPEN", "IN_PROGRESS"].includes(task.status?.code) && !task.isSuperseded
           && !["COMPLETED", "REJECTED"].includes(task.request?.status?.code || task.request?.status_code);
         task.canProcess = processableStatus && Boolean(user?.canProcessAssignedTasks)
-          && (Boolean(user?.isAdmin) || this.canActForAssignedUser(task.assignedUser_ID, user));
-        task.canTerminate = processableStatus && Boolean(user?.canTerminate) && !task.isRequesterStep;
+          && this.canActForAssignedUser(task.assignedUser_ID, user);
+        task.canTerminate = task.canProcess && Boolean(user?.canTerminate) && !task.isRequesterStep;
         // Line-item exports are for the approver the task is assigned to (once claimed), also after deciding it.
         task.isAssignedToMe = this.canActForAssignedUser(task.assignedUser_ID, user);
         task.canSendBack = task.canProcess && task.stepNo > 1;

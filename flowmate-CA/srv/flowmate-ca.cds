@@ -13,6 +13,7 @@ service FlowmateCAService {
 
   type DashboardCounts {
     allRequests     : Integer;
+    allTasks        : Integer;
     myRequests       : Integer;
     myDrafts         : Integer;
     myOpenTasks      : Integer;
@@ -35,6 +36,10 @@ service FlowmateCAService {
     canViewDrafts          : Boolean;
     canValidate            : Boolean;
     canProcessAssignedTasks: Boolean;
+    canViewAllTasks         : Boolean;
+    canAddTask              : Boolean;
+    canViewSentBack         : Boolean;
+    canViewTerminated       : Boolean;
     canAssign              : Boolean;
     canManageDelegation    : Boolean;
     canViewAllRequests     : Boolean;
@@ -221,7 +226,7 @@ service FlowmateCAService {
   action getReportingDashboard(periodStart: Date, periodEnd: Date, poType: String(40)) returns LargeString;
   @requires: ['CARequester', 'CAAdmin']
   action submitRequest(requestId: UUID) returns Boolean;
-  @requires: 'CAAdmin'
+  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
   action addTask(
     requestId: UUID,
     stepNo: Integer,

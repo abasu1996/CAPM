@@ -8,6 +8,7 @@ sap.ui.define([
     onInit: function () {
       this.getView().setModel(new ListModel({
         allRequests: 0,
+        allTasks: 0,
         myRequests: 0,
         myDrafts: 0,
         myOpenTasks: 0,
@@ -68,15 +69,24 @@ sap.ui.define([
       this.navTo("allRequests");
     },
 
+    onAllTasks: function () {
+      this.navTo("tasks", {
+        "?query": {
+          mode: "all"
+        }
+      });
+    },
+
     onReports: function () {
       this.navTo("reports");
     },
 
     onSentBack: function () {
-      this.navTo("requests", {
+      this.navTo("tasks", {
         "?query": {
-          mode: "mine",
-          status: "SENT_BACK"
+          mode: "all",
+          requestStatus: "SENT_BACK",
+          status: "OPEN"
         }
       });
     },

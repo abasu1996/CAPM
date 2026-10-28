@@ -137,7 +137,9 @@ sap.ui.define([
       });
       const currentUser = this.getAppModel().getProperty("/currentUser") || {};
       request.canReassign = Boolean(currentUser.canReassign) && !["COMPLETED", "REJECTED"].includes(request.status?.code || request.status_code);
-      request.canAddTask = Boolean(currentUser.isAdmin) && !["COMPLETED", "REJECTED"].includes(request.status?.code || request.status_code);
+      request.canAddTask = Boolean(currentUser.canAddTask)
+        && (Boolean(currentUser.canAssign) || Boolean(request.canContribute))
+        && !["COMPLETED", "REJECTED"].includes(request.status?.code || request.status_code);
       request.canCompleteCurrentStep = !["COMPLETED", "REJECTED"].includes(request.status?.code)
         && !blockingTask
         && Boolean(currentUser.isAdmin);
@@ -149,7 +151,7 @@ sap.ui.define([
       const myTask = currentTasks.find(function (task) {
         return task.status?.code === "OPEN"
           && Boolean(currentUser.canProcessAssignedTasks)
-          && (Boolean(currentUser.isAdmin) || this.canActForAssignedUser(task.assignedUser_ID, currentUser));
+          && this.canActForAssignedUser(task.assignedUser_ID, currentUser);
       }.bind(this));
       request.myOpenTaskId = myTask ? myTask.ID : null;
       request.myOpenTaskName = myTask ? (myTask.taskName || "Open My Task") : "";
