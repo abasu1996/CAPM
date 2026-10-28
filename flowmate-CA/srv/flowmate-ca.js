@@ -1411,7 +1411,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       canProcessAssignedTasks ? this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }) : 0,
       capabilities.canViewSentBack ? this._count(this.db.CATasks, sentBackTaskScope) : 0,
       capabilities.canViewTerminated
-        ? this._count(this.db.CARequests, isAdmin ? { status_code: REQUEST_STATUS.REJECTED } : this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED))
+        ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED))
         : 0,
       canProcessAssignedTasks ? this._count(this.db.CATasks, {
         ...assignedToMe,
