@@ -895,10 +895,16 @@ sap.ui.define([], function () {
   const PSR_IDS = ["PSR-000001", "PSR-000002", "PSR-000003", "PSR-000004", "PSR-000005"]
     .map(function (key) { return { key, text: key }; });
 
+  // A Contract Based PO does not need these fields filled in.
+  const unlessContract = { field: "contractBased", notEquals: true };
   const poFields = [
-    field("purchaseOrderType_code", "PO Type", "combo", {
+    // Only these two of the PurchaseOrderTypes codes are offered for new POs.
+    field("purchaseOrderType_code", "PO Type", "select", {
       required: true,
-      entity: "PurchaseOrderTypes"
+      options: [
+        { key: "CENTRALIZED", text: "Centralized PO" },
+        { key: "DNS", text: "DNS" }
+      ]
     }),
     field("contractBased", "Contract Based PO", "checkbox"),
     field("systemContractId", "System Contract / Outline Agreement ID", "input", {
@@ -906,7 +912,7 @@ sap.ui.define([], function () {
       visibleWhen: { field: "contractBased", equals: true }
     }),
     field("procurementType", "Procurement Type", "select", {
-      required: true,
+      requiredWhen: unlessContract,
       options: [
         { key: "CENTRALIZED", text: "Centralized Procurement" },
         { key: "DECENTRALIZED", text: "Decentralized Procurement" }
@@ -928,11 +934,19 @@ sap.ui.define([], function () {
       readOnly: true,
       fromVariant: true
     }),
-    field("division", "Division", "combo", { entity: "Divisions", key: "divisionCode", text: "divisionName" }),
-    field("specialPersonArea", "Special Person Area", "select", {
+    // Several areas may apply; stored as "FTK; IT".
+    field("specialPersonArea", "Special Area", "multiSelect", {
       options: ["FTK", "ENGINEERING", "IT", "DBS", "MARKETING", "FOC", "DNS"].map(function (key) {
         return { key, text: key };
       })
+    }),
+    field("icApprovalNeeded", "IC Approval Needed", "select", {
+      required: true,
+      options: [{ key: "YES", text: "Yes" }, { key: "NO", text: "No" }]
+    }),
+    field("icApprovalValue", "IC Approval Value", "number", {
+      required: true,
+      visibleWhen: { field: "icApprovalNeeded", equals: "YES" }
     }),
     // Mandatory for Capex purchases only.
     field("arNumber", "AR Number", "input", {
@@ -961,9 +975,9 @@ sap.ui.define([], function () {
     field("procurementDescription", "Procurement Description", "textarea", {
       required: true
     }),
-    // Mandatory: the (mandatory) Vendor Code is filled from it.
+    // Mandatory (unless Contract Based): the Vendor Code is filled from it.
     field("vendor_ID", "Vendor Name", "combo", {
-      required: true,
+      requiredWhen: unlessContract,
       entity: "Vendors",
       key: "ID",
       text: "vendorName",
@@ -971,7 +985,7 @@ sap.ui.define([], function () {
       autoFills: { field: "vendorCode", from: "vendorCode" }
     }),
     field("vendorCode", "Vendor Code", "readonly", {
-      required: true,
+      requiredWhen: unlessContract,
       placeholder: "Filled from the selected Vendor Name"
     }),
     field("purchasingOrganization_ID", "Purchasing Organization", "combo", {
@@ -980,55 +994,54 @@ sap.ui.define([], function () {
       text: "purchasingOrganizationName", secondaryText: "purchasingOrganizationCode"
     }),
     field("companyCode", "Company Code", "combo", {
-      required: true,
+      requiredWhen: unlessContract,
       entity: "CompanyCodes", key: "companyCode", text: "companyName", secondaryText: "companyCode"
     }),
     field("purchasingGroup", "Purchasing Group", "combo", {
       required: true,
       entity: "PurchasingGroups", key: "purchasingGroupCode", text: "purchasingGroupName", secondaryText: "purchasingGroupCode"
     }),
-    // Currency, Plant and Account Assignment are captured once per PO; Site ID stays per line
-    // item (itemColumns.PURCHASE_ORDER).
-    field("currency_code", "Currency", "combo", { required: true, entity: "Currencies" }),
+    // Plant and Currency are captured once per PO; Account Assignment and Site ID per line item
+    // (itemColumns.PURCHASE_ORDER).
     field("plant_code", "Plant", "combo", {
       required: true,
       entity: "Plant", key: "plantCode", text: "plantName", secondaryText: "plantCode"
     }),
-    field("accountAssignment", "Account Assignment", "combo", { required: true, entity: "AccountAssignments" }),
+    field("currency_code", "Currency", "combo", { required: true, entity: "Currencies" }),
     field("totalValue", "PO Value (Without Taxes)", "number", { required: true }),
     field("poValueWithTaxes", "PO Value (With Taxes)", "readonly", {
       placeholder: "Calculated from the PO value and the applicable tax"
     }),
-    field("procurementValue", "Procurement Value", "number"),
+    field("procurementValue", "Procurement Value", "number", { required: true }),
+    field("procurementApprovalAttachment", "Procurement Approval", "file", {
+      requiredWhen: unlessContract
+    }),
     field("paymentTerms_code", "Payment Terms", "combo", {
       entity: "PaymentTerms"
     }),
-    field("remarks", "Remarks", "textarea"),
-    field("termsOfDelivery", "Terms of Delivery", "textarea", { required: true }),
-    field("warranty", "Warranty", "textarea", { required: true }),
     field("paymentMilestone", "Payment Milestone", "input"),
+    field("remarks", "Remarks", "textarea"),
+    field("termsOfDelivery", "Terms of Delivery", "textarea", { requiredWhen: unlessContract }),
+    field("warranty", "Warranty", "textarea", { requiredWhen: unlessContract }),
     // The requester's e-mail first (pre-filled on the create page); the + button adds up to 4 more,
     // 5 in all (stored "a@x.com; b@y.com").
     field("approvedPoRecipientEmail", "Approved PO Recipient Email", "emailList", {
       required: true,
       maxEmails: 5
     }),
+    // Up to 20 files, added with the + button.
     field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file", {
-      required: true
+      required: true,
+      multiple: true,
+      maxFiles: 20
     }),
-    field("emailApprovalAttachment", "Email Approval Attachment (max 5MB)", "file", {
-      required: true
-    }),
+    field("emailApprovalAttachment", "Email Approval Attachment (max 5MB)", "file"),
     field("summary", "Summary", "textarea"),
     field("divisionalUser_ID", "Divisional User", "combo", {
-      required: true,
       entity: "Users",
       key: "ID",
       text: "displayName",
       secondaryText: "email"
-    }),
-    field("procurementApprovalAttachment", "Procurement Approval", "file", {
-      required: true
     }),
     field("supportiveDocumentAttachment", "Supporting Document", "file")
   ];
@@ -1238,7 +1251,8 @@ sap.ui.define([], function () {
     PURCHASE_ORDER: [
       column("materialOrService", "Service Code / Material Code", "input", { required: true }),
       column("wbsElement", "WBS Element", "valueHelp", {
-        required: true, entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "ProjectID",
+        requiredWhen: { field: "procurementCategory_code", in: ["CAPEX_IM"] },
+        entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "ProjectID",
         autoFills: { field: "projectCode", from: "ProjectID" }
       }),
       column("projectCode", "Project Code", "input", {
@@ -1248,7 +1262,8 @@ sap.ui.define([], function () {
         required: true, entity: "CostCenter", key: "costCenterCode", text: "costCenterName", secondaryText: "costCenterCode"
       }),
       column("budgetCode", "Budget Code", "combo", {
-        required: true, entity: "BudgetCode", key: "budgetCode", text: "budgetCodeDescription", secondaryText: "budgetCode"
+        requiredWhen: { field: "procurementCategory_code", in: ["CAPEX_FM", "OPEX"] },
+        entity: "BudgetCode", key: "budgetCode", text: "budgetCodeDescription", secondaryText: "budgetCode"
       }),
       column("quantity", "Quantity", "number", { required: true }),
       column("unitPrice", "Unit Price", "number", { required: true }),
@@ -1256,6 +1271,7 @@ sap.ui.define([], function () {
         entity: "Sites", key: "siteId", text: "siteName", secondaryText: "siteId"
       }),
       column("siteId", "Site ID Available", "combo", { entity: "Sites", key: "siteId", text: "siteId", secondaryText: "siteName" }),
+      column("accountAssignment", "Account Assignment", "combo", { required: true, entity: "AccountAssignments" }),
       column("itemCategory", "Item Category", "combo", { required: true, entity: "ItemCategories" }),
       column("materialGroup", "Material Group", "combo", {
         required: true, entity: "MatGroup", key: "matGroupCode", text: "matGroupDescription", secondaryText: "matGroupCode"
@@ -1472,6 +1488,24 @@ sap.ui.define([], function () {
       }
       return definitions[variantCode] || [];
     },
+    // The PO's "Create SES Successor" pop-up: the SES New Single Line form without the PO Number
+    // (filled from the PO's last approval), the Payment Run box, the Divisional Head, the SES /
+    // Payment Option and the Invoice / BoQ file; Remarks and Division optional, and the tax invoice
+    // asked for as "Invoice Attachment". The SES request form itself is unchanged.
+    getSesSuccessorFields: function () {
+      const left = ["purchaseOrderNo", "flowmateSesRequest", "approvalDivisionalHead_ID", "sesPaymentOption", "invoiceBoqAttachment"];
+      const changes = {
+        remarks: { required: false },
+        division: { required: false },
+        taxInvoiceAttachment: { label: "Invoice Attachment", required: true },
+        specialPersonArea: { label: "Special Area" }
+      };
+      return this.getFields("SES_NEW", undefined, "SINGLE_LINE").filter(function (definition) {
+        return definition.source !== "request" && left.indexOf(definition.name) < 0;
+      }).map(function (definition) {
+        return changes[definition.name] ? Object.assign({}, definition, changes[definition.name]) : definition;
+      });
+    },
     getFieldsByRequestType: function (requestTypeCode) {
       const variantCodes = variantsByRequestType[requestTypeCode] || [];
       const seen = new Set();
@@ -1552,6 +1586,11 @@ sap.ui.define([], function () {
           // A rule on another PO field reads that field from the same row of the table.
           if (definition.requiredWhen && poFields.some(function (other) { return other.name === definition.requiredWhen.field; })) {
             col.requiredWhen = Object.assign({}, definition.requiredWhen, { row: true });
+          }
+          // A table cell holds several choices as "A; B".
+          if (definition.type === "multiSelect") {
+            col.type = "input";
+            col.placeholder = "e.g. FTK; IT";
           }
           // A table cell cannot hold the + rows of an e-mail list: one text cell, ";"-separated.
           if (definition.type === "emailList") {
@@ -1637,10 +1676,6 @@ sap.ui.define([], function () {
       const existing = new Set(columns.map(function (col) { return col.name; }));
       return columns.concat(approverColumns.filter(function (col) { return !existing.has(col.name); }));
     },
-    // Request types whose line items table may stay empty (a row that is entered is still checked).
-    lineItemsOptional: function (requestTypeCode) {
-      return requestTypeCode === "PURCHASE_ORDER";
-    },
     alwaysHasItems: function (requestTypeCode) {
       return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";
     },
@@ -1698,7 +1733,7 @@ sap.ui.define([], function () {
       }
       // The form fields of the request (both line modes), or of the SES Successor form.
       const fields = successor
-        ? this.getFields("SES_NEW", undefined, "SINGLE_LINE")
+        ? this.getSesSuccessorFields()
         : this.getFields(variantCode, categoryCode, "SINGLE_LINE").concat(this.getFields(variantCode, categoryCode));
       const index = fields.findIndex(function (field) {
         return field.name.replace(/([A-Z])/g, "_$1").toUpperCase() === own;

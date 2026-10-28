@@ -35,8 +35,9 @@ sap.ui.define([
   "sap/ui/model/Filter",
   "sap/ui/model/FilterOperator",
   "sap/ui/model/FilterType",
-  "flowmateca/control/FormHBox"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel, TableSelectDialog, Filter, FilterOperator, FilterType, FormHBox) {
+  "flowmateca/control/FormHBox",
+  "sap/m/MultiComboBox"
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel, TableSelectDialog, Filter, FilterOperator, FilterType, FormHBox, MultiComboBox) {
   "use strict";
 
   // A VBox that a SimpleForm accepts as a field (forms only take IFormContent controls); it holds
@@ -1142,6 +1143,73 @@ ${reasons.join("\n")}`);
       }
     },
 
+    // A file field that takes several files (multiple: true, up to maxFiles): every "+ Add files"
+    // pick adds to the list, each file can be removed again. The Files sit in store[name] as an
+    // array; the field's value is their names, so the required check sees them.
+    _createMultiFileControl: function (definition, namePath, fileStore) {
+      const formModel = this.getView().getModel("form");
+      const maxFiles = definition.maxFiles || 20;
+      const list = new VBox();
+      const files = function () {
+        const store = fileStore || this._dynamicFileUploads;
+        if (!Array.isArray(store[definition.name])) {
+          store[definition.name] = [];
+        }
+        return store[definition.name];
+      }.bind(this);
+      const render = function () {
+        const chosen = files();
+        formModel.setProperty(namePath, chosen.map(function (file) { return file.name; }).join("; "));
+        list.destroyItems();
+        chosen.forEach(function (file, index) {
+          list.addItem(new HBox({
+            alignItems: "Center",
+            items: [
+              new Text({ text: file.name }),
+              new Button({
+                icon: "sap-icon://decline",
+                type: "Transparent",
+                tooltip: "Remove",
+                press: function () {
+                  files().splice(index, 1);
+                  render();
+                }
+              })
+            ]
+          }));
+        });
+      };
+      const uploader = new FileUploader({
+        buttonOnly: true,
+        multiple: true,
+        icon: "sap-icon://add",
+        buttonText: `Add files (up to ${maxFiles})`,
+        change: function (event) {
+          const picked = Array.from(event.getParameter("files") || []);
+          const chosen = files();
+          const room = maxFiles - chosen.length;
+          if (picked.length > room) {
+            MessageBox.warning(`${definition.label}: up to ${maxFiles} files. ${room > 0 ? `Only the first ${room} were added.` : "Remove a file to add another."}`);
+          }
+          chosen.push.apply(chosen, picked.slice(0, Math.max(room, 0)));
+          event.getSource().clear();
+          render();
+        }
+      });
+      return new FormVBox({ width: "100%", items: [uploader, list] });
+    },
+
+    // The files picked in dynamic file fields as upload entries: one per File, several for a
+    // field that takes multiple files.
+    _dynamicUploadList: function (store, toUpload) {
+      return Object.keys(store || {}).reduce(function (uploads, name) {
+        [].concat(store[name] || []).forEach(function (file) {
+          uploads.push(toUpload(name, file));
+        });
+        return uploads;
+      }, []);
+    },
+
     _createFieldControl: function (definition, explicitPath, fileStore) {
       const dataPath = definition.source === "request"
         ? `/${definition.name}`
@@ -1192,6 +1260,35 @@ ${reasons.join("\n")}`);
             text: option.text
           }));
         });
+      } else if (definition.type === "multiSelect") {
+        // Several choices, stored as one "A; B" string: the keys are read from it and written
+        // back to it on every change.
+        const formModel = this.getView().getModel(path.slice(0, path.indexOf(">")));
+        const valuePath = path.slice(path.indexOf(">") + 1);
+        control = new MultiComboBox({
+          width: "100%",
+          editable: !definition.readOnly,
+          placeholder: definition.placeholder || "",
+          selectionChange: function (event) {
+            formModel.setProperty(valuePath, event.getSource().getSelectedKeys().join("; "));
+            this._applyConditionalVisibility();
+          }.bind(this)
+        });
+        control.bindProperty("selectedKeys", {
+          path,
+          mode: "OneWay",
+          formatter: function (value) {
+            return String(value || "").split(";").map(function (key) { return key.trim(); }).filter(Boolean);
+          }
+        });
+        (definition.options || []).forEach(function (option) {
+          control.addItem(new Item({
+            key: option.key,
+            text: option.text
+          }));
+        });
+      } else if (definition.type === "file" && definition.multiple) {
+        control = this._createMultiFileControl(definition, explicitPath ? explicitPath.slice(explicitPath.indexOf(">") + 1) : dataPath, fileStore);
       } else if (definition.type === "file") {
         // With an explicit path (e.g. the SES successor pop-up) the file name goes there and the
         // File into the given store; otherwise into /details and the main upload map.

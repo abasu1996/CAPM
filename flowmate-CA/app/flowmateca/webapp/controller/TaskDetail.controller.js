@@ -591,9 +591,9 @@ sap.ui.define([
         }
       });
       // Files chosen again replace the field's attachment; the earlier one stays, marked replaced.
-      const uploads = Object.keys(this._dynamicFileUploads || {}).map(function (name) {
-        return { file: this._dynamicFileUploads[name], category: name.replace(/([A-Z])/g, "_$1").toUpperCase() };
-      }.bind(this));
+      const uploads = this._dynamicUploadList(this._dynamicFileUploads, function (name, file) {
+        return { file, category: name.replace(/([A-Z])/g, "_$1").toUpperCase() };
+      });
       if (uploads.length) {
         const result = await this.uploadAttachments(requestId, uploads);
         if (result.failedCount) {

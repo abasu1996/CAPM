@@ -707,6 +707,8 @@ entity PurchaseOrderDetails : cuid, managed {
   division                : String(80);
   delegatedUser           : Association to common.Users;
   specialPersonArea       : String(80);
+  icApprovalNeeded        : String(3);
+  icApprovalValue         : Decimal(17,2);
   arNumber                : String(80);
   wbsElement              : String(80);
   documentType            : String(40);

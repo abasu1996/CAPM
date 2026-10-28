@@ -641,10 +641,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         return req.reject(400, `Payment Run field ${field} must contain a JSON array`);
       }
     }
+    // As for the SES successor, the PO Numbers recorded at S/4 Data Validation go with the request.
+    const poNumbers = poNumberList(purchaseOrder.purchaseOrderNumber);
+    if (poNumbers.length) {
+      normalizedDetails.poNumber = poNumbers.join("; ");
+    }
     const flowmateInput = {
       processType_code: paymentRunDetails.processType_code,
       subProcessType_code: paymentRunDetails.subProcessType_code,
-      title: String(paymentRunDetails.title || request.title || "").trim(),
+      // The PO's own title: the pop-up only showed a preview of its number.
+      title: String(request.title || paymentRunDetails.title || "").trim(),
       description: paymentRunDetails.description || request.description || null,
       requesterUser_ID: request.requester_ID,
       processorTeam_ID: paymentRunDetails.processorTeam_ID || request.ownerTeam_ID || null,
@@ -1826,7 +1832,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     // One serial per request type and year names both: title POC-26-0001, Request ID CA-POC-26-000001.
     const serial = await this._nextRequestSerial(tx, requestType);
-    const title = this._formatRequestTitle(requestType, serial.year, serial.number);
+    let title = this._formatRequestTitle(requestType, serial.year, serial.number);
+    // A Purchase Order's title: "POC-26-0001 - <PO Header Text> - <Requester Name>".
+    if (requestType.code === "PURCHASE_ORDER") {
+      title = [title, String(details.poHeaderText || "").replace(/\s+/g, " ").trim(), user.displayName]
+        .filter(Boolean).join(" - ").slice(0, 255);
+    }
     const referenceNumber = this._formatRequestReference(requestType, serial.year, serial.number);
     await tx.run(INSERT.into(this.db.CARequests).entries({
       ID: requestId,

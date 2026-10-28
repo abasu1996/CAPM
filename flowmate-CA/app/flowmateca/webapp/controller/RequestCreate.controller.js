@@ -223,6 +223,10 @@ sap.ui.define([
             this._discardSesDraft();
           }
         }
+        // A Purchase Order's title carries its PO Header Text.
+        if (path === "/details/poHeaderText") {
+          this._composeTitle();
+        }
         if (/^\/details\/(division|vendorPcc|arReference|scope|projectTypePcc|siteId|siteName|requestedByArea)$/.test(path)
           || /^\/details\/items\/\d+\/(siteId|siteName)$/.test(path)) {
           this._scheduleProjectCodePreview();
@@ -425,9 +429,14 @@ sap.ui.define([
 
     _restoreDraftAttachmentFields: function () {
       const model = this.getView().getModel("form");
-      const byField = new Map((this._persistedDraftAttachments || [])
+      // A field that takes several files lists all of them.
+      const byField = new Map();
+      (this._persistedDraftAttachments || [])
         .filter(function (attachment) { return attachment.fieldName; })
-        .map(function (attachment) { return [attachment.fieldName, attachment.filename]; }));
+        .forEach(function (attachment) {
+          const earlier = byField.get(attachment.fieldName);
+          byField.set(attachment.fieldName, earlier ? `${earlier}; ${attachment.filename}` : attachment.filename);
+        });
       (this._fieldControls || []).filter(function (entry) { return entry.definition.type === "file"; })
         .forEach(function (entry) {
           const name = entry.definition.name;
@@ -565,6 +574,7 @@ sap.ui.define([
             "/requesterEmail",
             user.email
         );
+        this._composeTitle();
 
         return user;
 
@@ -863,18 +873,38 @@ sap.ui.define([
     _refreshTitlePreview: async function () {
       const formModel = this.getView().getModel("form");
       const typeCode = formModel.getProperty("/requestTypeCode");
-      formModel.setProperty("/title", "");
+      formModel.setProperty("/titleNumber", "");
+      this._composeTitle();
       if (!typeCode) {
         return;
       }
       try {
         const result = await this.request(`previewRequestTitle(requestTypeCode='${typeCode}')`);
         if (formModel.getProperty("/requestTypeCode") === typeCode) {
-          formModel.setProperty("/title", result.value || "");
+          formModel.setProperty("/titleNumber", result.value || "");
+          this._composeTitle();
         }
       } catch (error) {
         // The server numbers the title on create regardless.
       }
+    },
+
+    // A Purchase Order's title is "POC-26-0001 - <PO Header Text> - <Requester Name>", each part
+    // added once it is known (the server builds the same on create); other types show the number.
+    _composeTitle: function () {
+      const formModel = this.getView().getModel("form");
+      const number = formModel.getProperty("/titleNumber");
+      if (number === undefined) {
+        return; // a draft opened before titles were composed keeps its saved title
+      }
+      const parts = [number];
+      if (formModel.getProperty("/requestTypeCode") === "PURCHASE_ORDER") {
+        parts.push(
+          String(formModel.getProperty("/details/poHeaderText") || "").replace(/\s+/g, " ").trim(),
+          formModel.getProperty("/requesterName")
+        );
+      }
+      formModel.setProperty("/title", parts.filter(Boolean).join(" - "));
     },
 
     // PO Value (With Taxes) = PO Value (Without Taxes) x (1 + rate / 100), the rate taken from
@@ -906,15 +936,10 @@ sap.ui.define([
 
     // ---- "Create SES Successor" pop-up (Purchase Order) ----------------------------------------
     // The SES is captured here and stored with the PO; the server creates the SES request when
-    // the PO workflow completes. The fields are the SES New request form for Single Line Items
-    // (Type of Transaction and its dates included). Left out: the Purchase Order Number, filled from
-    // the PO's last approval, and "Create Flowmate Service Entry Sheet Request", which belongs to an
-    // SES request of its own, not to a PO's successor.
+    // the PO workflow completes. The fields are FormDefinitions.getSesSuccessorFields(); the pop-up
+    // has no line items.
     _sesDialogFields: function () {
-      const notInPopup = ["purchaseOrderNo", "flowmateSesRequest"];
-      return FormDefinitions.getFields("SES_NEW", undefined, "SINGLE_LINE").filter(function (definition) {
-        return definition.source !== "request" && notInPopup.indexOf(definition.name) < 0;
-      });
+      return FormDefinitions.getSesSuccessorFields();
     },
 
     // A pop-up field whose visibleWhen rule does not match the draft (e.g. the dates of a non tax
@@ -931,11 +956,11 @@ sap.ui.define([
         return;
       }
       const fields = this._sesDialogFields();
-      // PO Number is filled from the PO when the SES is created, so it is not asked for here.
-      const columns = FormDefinitions.getItemColumns("SERVICE_ENTRY_SHEET", "SES_NEW").map(function (col) {
-        return col.name === "poNumber" ? Object.assign({}, col, { required: false }) : col;
-      });
-      await this._loadFieldCatalogs(fields.concat(columns));
+      await this._loadFieldCatalogs(fields);
+      // SES Recipient Email starts as the requester's e-mail.
+      if (!formModel.getProperty("/sesDraft/details/sesRecipientEmail")) {
+        formModel.setProperty("/sesDraft/details/sesRecipientEmail", formModel.getProperty("/requesterEmail") || "");
+      }
 
       const formHost = this.byId("sesFormHost");
       formHost.destroyItems();
@@ -973,14 +998,6 @@ sap.ui.define([
         this._sesControls.push({ definition, control });
       }.bind(this));
       formHost.addItem(simpleForm);
-
-      const itemsHost = this.byId("sesItemsHost");
-      itemsHost.destroyItems();
-      GRIDS.sesItems = { tableId: "sesItemsTable", path: "/sesDraft/items", columns, title: "SES Line Items" };
-      GRIDS.sesItems.panel = this._buildGridPanel("sesItems");
-      GRIDS.sesItems.panel.setVisible(true);
-      itemsHost.addItem(GRIDS.sesItems.panel);
-      this._renderGrid("sesItems");
       dialog.open();
     },
 
@@ -1025,15 +1042,6 @@ sap.ui.define([
       const sesDateProblem = FormDefinitions.sesDateProblem(draft.details);
       if (sesDateProblem) {
         MessageBox.warning(sesDateProblem);
-        return;
-      }
-      if (!(draft.items || []).length) {
-        MessageBox.warning("Add at least one SES line item.");
-        return;
-      }
-      const missingCell = this._firstMissingItemCell(draft.items, GRIDS.sesItems.columns);
-      if (missingCell) {
-        MessageBox.warning(`SES Line Items - ${missingCell}`);
         return;
       }
       formModel.setProperty("/sesDraft/saved", true);
@@ -1161,6 +1169,85 @@ sap.ui.define([
       }, saved);
     },
 
+    // Payment Run (PO): Process Type PO and the I2P processor team, when nothing was saved yet.
+    _poPaymentRunOverviewDefaults: function () {
+      const catalog = this.getView().getModel("catalog");
+      const processType = (catalog.getProperty("/flowmateProcessTypes") || []).find(function (row) { return row.code === "PO"; });
+      const team = (catalog.getProperty("/flowmateTeams") || []).find(function (row) {
+        return /I2P/i.test(`${row.name || ""} ${row.teamCode || ""}`);
+      });
+      return Object.assign(
+        processType ? { processType_code: processType.code, processTypeName: processType.name } : {},
+        team ? { processorTeam_ID: team.ID, processorTeamName: team.name } : {}
+      );
+    },
+
+    // Payment Run (PO): the Flowmate details filled from the PO. Entity only when a Flowmate entity's
+    // code or name equals the PO's Company Code or company name; Vendor only when Flowmate has the
+    // PO vendor's code. The PO Number is added by the server when the PO completes.
+    _poPaymentRunDefaults: async function () {
+      const details = this.getView().getModel("form").getProperty("/details") || {};
+      const catalog = this.getView().getModel("catalog");
+      const lookup = async function (path) {
+        try {
+          return ((await this.request(path)).value || [])[0] || null;
+        } catch (_error) {
+          return null;
+        }
+      }.bind(this);
+      const [company, vendor, divisionalUser] = await Promise.all([
+        details.companyCode ? lookup(`CompanyCodes?$filter=companyCode eq '${String(details.companyCode).replace(/'/g, "''")}'&$select=companyCode,companyName`) : null,
+        details.vendor_ID ? lookup(`Vendors?$filter=ID eq ${details.vendor_ID}&$select=vendorCode,vendorName`) : null,
+        details.divisionalUser_ID ? lookup(`Users?$filter=ID eq ${details.divisionalUser_ID}&$select=displayName`) : null
+      ]);
+      const same = function (a, b) {
+        return Boolean(a) && Boolean(b) && String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
+      };
+      const entity = (catalog.getProperty("/flowmateFtkEntities") || []).find(function (row) {
+        return [details.companyCode, company && company.companyName].some(function (value) {
+          return same(row.code, value) || same(row.name, value);
+        });
+      });
+      const currency = (catalog.getProperty("/flowmateCurrencies") || []).find(function (row) {
+        return same(row.code, details.currency_code);
+      });
+      const vendorCode = (vendor && vendor.vendorCode) || details.vendorCode || "";
+      const flowmateVendor = (catalog.getProperty("/flowmateVendors") || []).find(function (row) {
+        return same(row.vendorCode, vendorCode);
+      });
+      const defaults = {
+        paymentSubCategory_code: "GENERAL",
+        vendorCode: vendorCode,
+        vendorName: (vendor && vendor.vendorName) || (flowmateVendor && flowmateVendor.vendorName) || "",
+        userDivisionRepresentativeName: (divisionalUser && divisionalUser.displayName) || ""
+      };
+      if (entity) defaults.businessEntity_code = entity.code;
+      if (currency) defaults.currency_code = currency.code;
+      if (flowmateVendor) defaults.vendor_ID = flowmateVendor.ID;
+      return defaults;
+    },
+
+    // Fills the Payment Run details the chosen sub-type has, without overwriting entered values.
+    _applyPoPaymentRunDefaults: function () {
+      if (this._flowmateIntegrationMode !== "paymentRun" || !this._poPaymentRunDefaultValues) {
+        return;
+      }
+      const paymentRun = this.getView().getModel("paymentRun");
+      const code = paymentRun.getProperty("/subProcessType_code");
+      if (!code) {
+        return;
+      }
+      const details = Object.assign({}, paymentRun.getProperty("/details") || {});
+      const defaults = this._poPaymentRunDefaultValues;
+      FlowmateRequestFormDefinitions.getFields(code).forEach(function (definition) {
+        const value = details[definition.name];
+        if (defaults[definition.name] && (value === undefined || value === null || value === "")) {
+          details[definition.name] = defaults[definition.name];
+        }
+      });
+      paymentRun.setProperty("/details", details);
+    },
+
     _paymentRunFormValue: function (path, properties) {
       return new Input(Object.assign({ width: "100%" }, properties || {}))
         .bindValue(`paymentRun>/${path}`);
@@ -1248,13 +1335,16 @@ sap.ui.define([
           const label = new Label({ text: field.label, required: !!field.required });
           const control = this._paymentRunGridField(field, field.name, "paymentRunGridEdit");
           if (isInvoiceVatSes) {
-            const visibility = {
-              path: "paymentRun>/subProcessType_code",
-              formatter: this._isPaymentRunInvoiceVatSesVisible.bind(this)
-            };
-            label.bindProperty("visible", visibility);
-            control.bindProperty("visible", visibility);
-            label.bindProperty("required", visibility);
+            // A fresh binding info per property: UI5 takes over the object it is given.
+            const visibility = function () {
+              return {
+                path: "paymentRun>/subProcessType_code",
+                formatter: this._isPaymentRunInvoiceVatSesVisible.bind(this)
+              };
+            }.bind(this);
+            label.bindProperty("visible", visibility());
+            control.bindProperty("visible", visibility());
+            label.bindProperty("required", visibility());
           }
           form.addContent(label);
           form.addContent(control);
@@ -1391,7 +1481,7 @@ sap.ui.define([
       });
     },
 
-    _paymentRunGridPanel: function (gridName, definition) {
+    _paymentRunGridPanel: function (gridName, definition, required) {
       const table = new Table({
         width: "100%",
         fixedLayout: false,
@@ -1411,7 +1501,7 @@ sap.ui.define([
                 });
               }
               return cell;
-            }).concat([
+            }.bind(this)).concat([
               new HBox({
                 justifyContent: "Center",
                 items: [
@@ -1435,14 +1525,17 @@ sap.ui.define([
           });
         }
         table.addColumn(column);
-      });
+      }.bind(this));
       table.addColumn(new Column({ width: "6rem", hAlign: "Center", header: new Text({ text: "Actions" }) }));
       return new Panel({
         expandable: false,
         class: "sapUiSmallMarginTop",
         headerToolbar: new Toolbar({
           content: [
-            new MTitle({ text: definition.title, level: "H4" }),
+            // A table that needs at least one entry gets the * of a required field.
+            required
+              ? new Label({ text: definition.title, required: true, design: "Bold" })
+              : new MTitle({ text: definition.title, level: "H4" }),
             new ToolbarSpacer(),
             new Button({ text: definition.addText, icon: "sap-icon://add", type: "Emphasized", press: this._openPaymentRunGridDialog.bind(this, gridName, -1) })
           ]
@@ -1455,7 +1548,11 @@ sap.ui.define([
       const catalog = this.getView().getModel("catalog");
       const path = `paymentRun>/details/${definition.name}`;
       let control;
-      if (definition.type === "readonly") {
+      if (definition.name === "poNumber" && this._flowmateIntegrationMode === "paymentRun") {
+        // Added from the PO Number recorded on the PO when it completes (as for the SES successor).
+        definition = Object.assign({}, definition, { required: false });
+        control = new Input({ editable: false, width: "100%", placeholder: "Filled when the Purchase Order completes" }).bindValue(path);
+      } else if (definition.type === "readonly") {
         control = new Input({ editable: false, width: "100%" }).bindValue(path);
       } else if (definition.type === "textarea" || definition.type === "json") {
         control = new TextArea({
@@ -1545,7 +1642,8 @@ sap.ui.define([
       }.bind(this));
       host.addItem(form);
       grids.forEach(function (gridName) {
-        host.addItem(this._paymentRunGridPanel(gridName, PAYMENT_RUN_GRIDS[gridName]));
+        const required = this._paymentRunRequiredGrids.some(function (definition) { return definition.name === gridName; });
+        host.addItem(this._paymentRunGridPanel(gridName, PAYMENT_RUN_GRIDS[gridName], required));
       }.bind(this));
     },
 
@@ -1593,7 +1691,9 @@ sap.ui.define([
       }).bindProperty("selectedKey", "paymentRun>/subProcessType_code");
       add("Process Type", processTypes, true);
       add("Sub Process Type", subProcessTypes, true);
-      add("Request Title", this._paymentRunFormValue("title"), true);
+      // Payment Run: Title and Requester come from the PO.
+      const fromPo = this._flowmateIntegrationMode === "paymentRun";
+      add("Request Title", this._paymentRunFormValue("title", { editable: !fromPo }), true);
       add("Linked Request", this._paymentRunFormValue("predecessorDisplay", { editable: false }));
       const priority = new ComboBox({
         width: "100%",
@@ -1673,6 +1773,7 @@ sap.ui.define([
         ? selected.getBindingContext("catalog").getObject()
         : null;
       model.setProperty("/loaApprovalApplicable", Boolean(row && row.loaApprovalApplicable));
+      this._applyPoPaymentRunDefaults();
       this._renderPaymentRunDetails();
     },
 
@@ -1693,7 +1794,10 @@ sap.ui.define([
         const previous = formModel.getProperty(`/details/${config.detailsField}`);
         let saved = null;
         try { saved = previous ? JSON.parse(previous) : null; } catch (_error) { saved = null; }
-        this.getView().getModel("paymentRun").setData(Object.assign(this._paymentRunContext(), saved || {}));
+        const poDefaults = mode === "paymentRun" && !saved ? this._poPaymentRunOverviewDefaults() : {};
+        this._poPaymentRunDefaultValues = mode === "paymentRun" ? await this._poPaymentRunDefaults() : null;
+        this.getView().getModel("paymentRun").setData(Object.assign(this._paymentRunContext(), poDefaults, saved || {}));
+        this._applyPoPaymentRunDefaults();
         const paymentRun = this.getView().getModel("paymentRun");
         const catalog = this.getView().getModel("catalog");
         const subtypes = catalog.getProperty("/flowmateProcessSubTypes") || [];
@@ -1847,11 +1951,9 @@ sap.ui.define([
           || typeCode === "MATERIAL_RESERVATION"
           || FormDefinitions.alwaysHasItems(typeCode)));
       // "Contract Creation Details" is an Outline Contract title; every other type calls the
-      // second table its line items, header table or not (optional ones for a Purchase Order and a
-      // Service Entry Sheet).
+      // second table its line items, header table or not.
       formModel.setProperty("/itemsTableTitle", this.getView().getModel("i18n").getResourceBundle()
-        .getText(typeCode === "OUTLINE_CONTRACT" ? "contractItemsTableTitle"
-          : FormDefinitions.lineItemsOptional(typeCode) ? "optionalItemsTableTitle" : "itemsTableTitle"));
+        .getText(typeCode === "OUTLINE_CONTRACT" ? "contractItemsTableTitle" : "itemsTableTitle"));
       this._renderGrid("items");
       this._renderGrid("headers");
       this._renderConditionalGrids(typeCode, variantCode);
@@ -2180,13 +2282,9 @@ sap.ui.define([
           uploads.push({ file, category: "FLOWMATE_SES" });
         });
       }
-      Object.keys(this._dynamicFileUploads || {}).forEach(function (name) {
-        uploads.push({
-          file: this._dynamicFileUploads[name],
-          category: name.replace(/([A-Z])/g, "_$1").toUpperCase(),
-          fieldName: name
-        });
-      }.bind(this));
+      uploads.push.apply(uploads, this._dynamicUploadList(this._dynamicFileUploads, function (name, file) {
+        return { file, category: name.replace(/([A-Z])/g, "_$1").toUpperCase(), fieldName: name };
+      }));
       if (form.requestTypeCode === "PURCHASE_ORDER" && form.details && form.details.sesRequired === true) {
         (this._sesFiles || []).forEach(function (file) {
           uploads.push({ file, category: "SES_SUPPORTING_DOCUMENT" });
@@ -2324,9 +2422,7 @@ sap.ui.define([
         }
       }
       if (form.showsItemsTable) {
-        // Purchase Order and Service Entry Sheet line items are optional; a row that is entered
-        // still needs its required cells.
-        if (!itemRows.length && !FormDefinitions.lineItemsOptional(form.requestTypeCode)) {
+        if (!itemRows.length) {
           MessageBox.warning(`Add at least one row to the ${itemsTitle} table.`);
           return;
         }
@@ -2432,8 +2528,8 @@ sap.ui.define([
       }
       const missingShared = (this._fieldControls || []).find(function (entry) {
         const value = form.details[entry.definition.name];
-        return entry.definition.required && (value === undefined || value === null || value === "");
-      });
+        return this._isFieldRequired(entry.definition) && (value === undefined || value === null || value === "");
+      }.bind(this));
       if (missingShared) {
         MessageBox.warning(`${missingShared.definition.label} is required.`);
         missingShared.control.focus();
@@ -2445,6 +2541,8 @@ sap.ui.define([
       (form.details.bulkRows || []).forEach(function (row) {
         row.procurementCategory_code = variantCategory;
       });
+      // The line-item WBS / Budget Code rules read it from the form.
+      form.details.procurementCategory_code = variantCategory;
       const rows = form.details.bulkRows || [];
       const items = form.details.items || [];
       if (!rows.length) {
@@ -2473,7 +2571,7 @@ sap.ui.define([
         MessageBox.warning(rowLimit);
         return;
       }
-      // Line items are optional; the ones entered need their required cells and a valid Row #.
+      // Each line item needs its required cells and a valid Row #.
       const missingItem = this._firstMissingItemCell(items);
       if (missingItem) {
         MessageBox.warning(`Line Items - ${missingItem}`);
@@ -2485,6 +2583,14 @@ sap.ui.define([
       });
       if (strayItem >= 0) {
         MessageBox.warning(`Line Items - Row ${strayItem + 1}: Row # must be between 1 and ${rows.length}.`);
+        return;
+      }
+      // Every PO needs at least one line item.
+      const rowWithoutItems = rows.findIndex(function (_row, index) {
+        return !items.some(function (item) { return Number(item.poRow) === index + 1; });
+      });
+      if (rowWithoutItems >= 0) {
+        MessageBox.warning(`Purchase Order Details - Row ${rowWithoutItems + 1}: add at least one line item (Row # ${rowWithoutItems + 1}).`);
         return;
       }
 
@@ -2530,12 +2636,9 @@ sap.ui.define([
         const uploads = (this._selectedFiles || []).map(function (file) {
           return { file: file, category: "SUPPORTING_DOCUMENT" };
         });
-        Object.keys(this._dynamicFileUploads || {}).forEach(function (name) {
-          uploads.push({
-            file: this._dynamicFileUploads[name],
-            category: name.replace(/([A-Z])/g, "_$1").toUpperCase()
-          });
-        }.bind(this));
+        uploads.push.apply(uploads, this._dynamicUploadList(this._dynamicFileUploads, function (name, file) {
+          return { file, category: name.replace(/([A-Z])/g, "_$1").toUpperCase() };
+        }));
         if (uploads.length) {
           for (const requestId of JSON.parse(result.requestIds || "[]")) {
             await this.uploadAttachments(requestId, uploads);

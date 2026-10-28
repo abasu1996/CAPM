@@ -96,13 +96,13 @@
               <Label text="{i18n>requester}"/>
               <Input id="requesterInput" value="{form>/requesterName}" editable="false" placeholder="Logged-in user"/>
 
-<Label text="Requester Team" required="true"/>
+<Label text="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' ? 'Requester Division' : 'Requester Team' }" required="true"/>
 <ComboBox
     id="processorTeamComboBox"
     selectedKey="{form>/processorTeamCode}"
     items="{catalog>/teams}"
     showSecondaryValues="true"
-    placeholder="Select requester team"
+    placeholder="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' ? 'Select requester division' : 'Select requester team' }"
     selectionChange=".onProcessorTeamChange">
     <core:ListItem
         key="{catalog>teamCode}"
@@ -266,7 +266,13 @@
               class="sapUiSmallMarginBottom"/>
             <VBox id="paymentRunFormHost"/>
             <VBox id="paymentRunDetailsHost" class="sapUiSmallMarginTop"/>
-            <Panel headerText="{paymentRun>/attachmentSectionTitle}" expandable="false" class="sapUiSmallMarginTop">
+            <Panel expandable="false" class="sapUiSmallMarginTop">
+              <!-- At least one attachment is required: the header carries the * of a required field. -->
+              <headerToolbar>
+                <Toolbar>
+                  <Label text="{paymentRun>/attachmentSectionTitle}" required="true" design="Bold"/>
+                </Toolbar>
+              </headerToolbar>
               <content>
                 <VBox>
                   <unified:FileUploader
@@ -321,7 +327,6 @@
               showIcon="true"
               class="sapUiSmallMarginBottom"/>
             <VBox id="sesFormHost"/>
-            <VBox id="sesItemsHost"/>
             <Title text="SES Supporting Documents" level="H5" class="sapUiSmallMarginTop"/>
             <unified:FileUploader
               id="sesAttachmentUploader"
