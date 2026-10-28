@@ -29,7 +29,8 @@ sap.ui.define([
   "sap/ui/core/Title",
   "sap/m/HBox",
   "sap/m/VBox",
-  "sap/m/Dialog"
+  "sap/m/Dialog",
+  "sap/m/MessageToast"
 ], function (
   BaseController,
   FormDefinitions,
@@ -61,9 +62,15 @@ sap.ui.define([
   FormTitle,
   HBox,
   VBox,
-  Dialog
+  Dialog,
+  MessageToast
 ) {
   "use strict";
+
+  // Pause after the last edit before the request is saved to Drafts on its own.
+  const AUTO_SAVE_DELAY = 10000;
+  // Edits to these never count as content: they pick the form, they are not filled into it.
+  const STRUCTURAL_PATHS = /^\/(requestTypeCode|requestVariantCode|materialCategoryCode|bulkUpload|processorTeamCode|title)$/;
 
   // Pick lists maintained by admins in flowmate-common; served by CAMasterDataService,
   // not FlowmateCAService, and they carry no sortOrder column.
@@ -211,6 +218,9 @@ sap.ui.define([
         const context = event.getParameter("context");
         const relative = event.getParameter("path") || "";
         const path = context && relative.charAt(0) !== "/" ? `${context.getPath()}/${relative}` : relative;
+        if (!STRUCTURAL_PATHS.test(path)) {
+          this._markEdited();
+        }
         const recalc = path.match(/^(\/details(?:\/bulkRows\/\d+)?)\/(totalValue|applicableTax|taxApplicable)$/);
         if (recalc) {
           this._recalculatePoValueWithTaxes(recalc[1]);
@@ -250,6 +260,12 @@ sap.ui.define([
       this._paymentRunGridDialogs = {};
       this._flowmateIntegrationMode = "paymentRun";
       this.getRouter().getRoute("requestCreate").attachPatternMatched(this._onRouteMatched, this);
+      this.getRouter().attachRouteMatched(function (event) {
+        if (this._active && event.getParameter("name") !== "requestCreate") {
+          this._active = false;
+          this._autoSaveDraft(true);
+        }
+      }, this);
     },
 
     _emptyPaymentRunForm: function () {
@@ -315,6 +331,9 @@ sap.ui.define([
 
     _onRouteMatched: async function (event) {
       this._draftId = null;
+      this._active = true;
+      this._discardEdits();
+      this._lastSavedData = null;
       this.getView().getModel("form").setData(this._emptyForm());
       this.getView().getModel("files").setData({ items: [] });
       this.getView().getModel("draftFiles").setData({ items: [] });
@@ -386,15 +405,9 @@ sap.ui.define([
         MessageBox.warning("Saving attachments with a draft is currently available only for single-request submission. Remove the selected files or switch to Single Request.");
         return;
       }
-      const saved = JSON.parse(JSON.stringify(form));
-      if (saved.sesDraft) saved.sesDraft.files = [];
       this.setBusy(true);
       try {
-        const result = await this.request("saveDraft", {
-          method: "POST",
-          body: { draftId: this._draftId, formData: JSON.stringify(saved) }
-        });
-        this._draftId = result.ID;
+        await this._saveDraftData(form);
         if (uploads.length) {
           const uploadResult = await this.uploadDraftAttachments(this._draftId, uploads);
           this._clearPendingAttachmentSelections();
@@ -404,6 +417,7 @@ sap.ui.define([
             throw new Error(`${uploadResult.failedCount} draft attachment(s) could not be saved. Re-select only those files and save again. ${uploadResult.errors.join(" ")}`);
           }
         }
+        this._discardEdits();
         this.showSuccess("Draft and attachments saved");
         this.navTo("drafts");
       } catch (error) {
@@ -411,6 +425,64 @@ sap.ui.define([
       } finally {
         this.setBusy(false);
       }
+    },
+
+    _saveDraftData: async function (form) {
+      const saved = JSON.parse(JSON.stringify(form));
+      if (saved.sesDraft) saved.sesDraft.files = [];
+      const formData = JSON.stringify(saved);
+      const result = await this.request("saveDraft", {
+        method: "POST",
+        body: { draftId: this._draftId, formData }
+      });
+      this._draftId = result.ID;
+      this._lastSavedData = formData;
+    },
+
+    _isFileLimitedForm: function (form) {
+      return form.requestTypeCode === "MATERIAL_RESERVATION" || this._isPoBulk();
+    },
+
+    _markEdited: function () {
+      if (!this._active) return;
+      this._edited = true;
+      clearTimeout(this._autoSaveTimer);
+      this._autoSaveTimer = setTimeout(this._autoSaveDraft.bind(this), AUTO_SAVE_DELAY);
+    },
+
+    _discardEdits: function () {
+      this._edited = false;
+      clearTimeout(this._autoSaveTimer);
+    },
+
+
+    _autoSaveDraft: async function (leaving) {
+      clearTimeout(this._autoSaveTimer);
+      if (this._autoSaving) return this._autoSaving;
+      const form = this.getView().getModel("form").getData();
+      if (!this._edited || !form.requestTypeCode || this.getAppModel().getProperty("/busy")) return;
+      const uploads = leaving === true && !this._isFileLimitedForm(form) ? this._collectPendingAttachments(form) : [];
+      this._autoSaving = (async () => {
+        this._edited = false;
+        try {
+          await this._saveDraftData(form);
+          if (uploads.length) {
+            const uploadResult = await this.uploadDraftAttachments(this._draftId, uploads);
+            this._clearPendingAttachmentSelections();
+            if (uploadResult.failedCount) {
+              MessageToast.show(`Saved to Drafts, but ${uploadResult.failedCount} attachment(s) could not be saved`);
+              return;
+            }
+          }
+          MessageToast.show("Saved to Drafts");
+        } catch (error) {
+          this._edited = true;
+          MessageToast.show("Could not save to Drafts");
+        } finally {
+          this._autoSaving = null;
+        }
+      })();
+      return this._autoSaving;
     },
 
     _loadDraftAttachments: async function () {
@@ -664,6 +736,7 @@ sap.ui.define([
             }
           }
         });
+        this._discardEdits();
         this.showSuccess(`${result.created} request(s) created from ${items.length} line item(s)`);
         this.navTo("requests");
       } catch (error) {
@@ -1145,7 +1218,11 @@ sap.ui.define([
           saved = {};
         }
       }
+      const defaultProcessType = (this.getView().getModel("catalog").getProperty("/flowmateProcessTypes") || [])
+        .find(function (entry) { return entry.code === "PO"; });
       return Object.assign(this._emptyPaymentRunForm(), {
+        processType_code: defaultProcessType ? defaultProcessType.code : "",
+        processTypeName: defaultProcessType ? defaultProcessType.name : "",
         title: form.title || "",
         priorityConfig_code: form.priorityCode || "MEDIUM",
         department: details.division || details.companyCode || "",
@@ -2240,18 +2317,18 @@ sap.ui.define([
       }
       const gridKey = this._gridOf(event.getSource());
       const columns = this._gridColumns(gridKey);
-      const reader = new FileReader();
-      reader.onload = function () {
-        const rows = this._parseCsv(String(reader.result));
+      const uploader = event.getSource();
+      tableFile.readTableFile(files[0]).then(async function (rows) {
         if (!rows.length) {
           return;
         }
-        const items = tableFile.toRows(rows, columns, []).rows;
+        const items = await this._autoFillRows(tableFile.toRows(rows, columns, []).rows, columns);
         this.getView().getModel("form").setProperty(GRIDS[gridKey].path, this._renumberItems(items));
         this.showSuccess(`${items.length} row(s) imported`);
-      }.bind(this);
-      reader.readAsText(files[0]);
-      event.getSource().clear();
+      }.bind(this)).catch(function (error) {
+        MessageBox.error(`The file could not be read: ${error.message}`);
+      });
+      uploader.clear();
     },
 
     _parseCsv: function (text) {
@@ -2433,7 +2510,7 @@ sap.ui.define([
         }
         // New Contract: each line item names its Header Creation row; every header row needs one.
         if (form.requestVariantCode === "CONTRACT_NEW") {
-          const headerProblem = FormDefinitions.contractItemHeaderProblem(itemRows, headerRows.length);
+          const headerProblem = FormDefinitions.contractItemHeaderProblem(itemRows, headerRows);
           if (headerProblem) {
             MessageBox.warning(headerProblem);
             return;
@@ -2500,6 +2577,7 @@ sap.ui.define([
             }
           }
         });
+        this._discardEdits();
         this.showSuccess(`Request ${request.referenceNumber} created`);
         const uploads = this._collectPendingAttachments(form);
         let uploadResult = { failedCount: 0 };
@@ -2633,6 +2711,7 @@ sap.ui.define([
             }
           }
         });
+        this._discardEdits();
         const uploads = (this._selectedFiles || []).map(function (file) {
           return { file: file, category: "SUPPORTING_DOCUMENT" };
         });
@@ -2653,7 +2732,22 @@ sap.ui.define([
       }
     },
 
-    onCancel: function () {
+    _setBrowsedKey: function () {
+      this._markEdited();
+      return BaseController.prototype._setBrowsedKey.apply(this, arguments);
+    },
+
+    onCancel: async function () {
+      const form = this.getView().getModel("form").getData();
+      if (this._edited && this._isFileLimitedForm(form) && this._collectPendingAttachments(form).length) {
+        const keep = await new Promise(function (resolve) {
+          MessageBox.confirm("The selected files cannot be kept in a draft of this request type. Leave and save the rest to Drafts?", {
+            onClose: function (action) { resolve(action === MessageBox.Action.OK); }
+          });
+        });
+        if (!keep) return;
+      }
+      await this._autoSaveDraft(true);
       window.history.length > 1 ? window.history.back() : this.navTo("dashboard", {}, true);
     }
   });

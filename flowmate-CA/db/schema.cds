@@ -643,6 +643,8 @@ entity OutlineContractHeaders : cuid, managed {
   details              : Association to OutlineContractDetails not null;
   itemNo               : Integer;
   vendorCode           : String(40);
+  // Alphanumeric key that the line items of this header row carry in their Contract Count.
+  contractCount        : String(40);
   coupaSourcingEventNo : String(80);
   // Recorded per row by the S/4 Data Validation approver (New Contract).
   contractNumber       : String(80);
@@ -660,7 +662,8 @@ entity OutlineContractItems : cuid, managed {
   itemNo             : Integer;
   // New Contract: the Header Creation row (its itemNo) this line item belongs to.
   headerRowNo        : Integer;
-  contractCount        : Integer;
+  // New Contract: matches the Contract Count of its Header Creation row.
+  contractCount        : String(40);
   contractType        : String(40);
   lineItem            : String(40);
   itemCategory         : String(40);

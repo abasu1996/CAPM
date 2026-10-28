@@ -613,26 +613,43 @@ sap.ui.define([
       }, this._headerGrouping(variantCode, modelName)));
     },
 
-    // New Contract line items, grouped under the Header Creation row they name (headerRowNo):
-    // "Header 1 · Vendor 100021 · Ariba Event 123". Other variants are not grouped.
+    // New Contract line items, grouped under the Header Creation row whose Contract Count they
+    // carry: "Contract Count C1 · Vendor 100021 · Ariba Event 123". Requests saved before Contract
+    // Count linked the two have no count on their header rows and are grouped by header row number
+    // (headerRowNo). Other variants are not grouped.
     _headerGrouping: function (variantCode, modelName) {
       if (variantCode !== "CONTRACT_NEW") {
         return {};
       }
       const model = this.getView().getModel(modelName);
+      const headers = ((model && model.getProperty("/detailHeaders")) || []);
+      const text = function (value) { return String(value ?? "").trim().toLowerCase(); };
+      const byCount = headers.some(function (row) { return text(row.contractCount); });
+      const headerOf = function (group) {
+        return byCount
+          ? headers.find(function (row) { return text(row.contractCount) === group.key; })
+          : headers.find(function (row) { return Number(row.itemNo) === Number(group.headerNo); });
+      };
+      const rank = function (value) {
+        const index = headers.findIndex(function (row) { return text(row.contractCount) === text(value); });
+        return index < 0 ? headers.length : index;
+      };
       return {
         sorter: [
-          new Sorter("headerRowNo", false, function (context) {
-            const headerNo = context.getProperty("headerRowNo");
-            return { key: String(headerNo ?? ""), headerNo: headerNo };
-          }),
+          byCount
+            ? new Sorter("contractCount", false, function (context) {
+              const count = context.getProperty("contractCount");
+              return { key: text(count), count: count };
+            }, function (left, right) { return rank(left) - rank(right); })
+            : new Sorter("headerRowNo", false, function (context) {
+              const headerNo = context.getProperty("headerRowNo");
+              return { key: String(headerNo ?? ""), headerNo: headerNo };
+            }),
           new Sorter("itemNo", false)
         ],
         groupHeaderFactory: function (group) {
-          const header = ((model && model.getProperty("/detailHeaders")) || []).find(function (row) {
-            return Number(row.itemNo) === Number(group.headerNo);
-          });
-          const parts = [`Header ${group.headerNo ?? "-"}`];
+          const header = headerOf(group);
+          const parts = [byCount ? `Contract Count ${group.count || "-"}` : `Header ${group.headerNo ?? "-"}`];
           if (header && header.vendorCode) {
             parts.push(`Vendor ${header.vendorCode}`);
           }
@@ -1050,6 +1067,38 @@ ${reasons.join("\n")}`);
         formModel.setProperty(target, match ? (match[rule.from] || "") : "");
       });
     },
+    // The dependent cells of imported rows (Site Name from Site ID, Material Description from
+    // Material Code, ...), which a file does not trigger the way a pick does. A cell the file
+    // filled is kept; codes the catalog does not hold yet are read from the server first.
+    _autoFillRows: async function (rows, columns) {
+      const catalog = this.getView().getModel("catalog");
+      for (const column of columns.filter(function (entry) { return entry.autoFills && entry.entity; })) {
+        const key = column.key || "code";
+        const known = new Set((catalog.getProperty(`/${column.entity}`) || []).map(function (row) { return String(row[key]); }));
+        const missing = Array.from(new Set(rows.map(function (row) { return String(row[column.name] || "").trim(); })))
+          .filter(function (code) { return code && !known.has(code); });
+        for (let start = 0; start < missing.length; start += 40) {
+          const filter = missing.slice(start, start + 40)
+            .map(function (code) { return `${key} eq '${code.replace(/'/g, "''")}'`; }).join(" or ");
+          try {
+            const result = await this._readPickList(column.entity, `${column.entity}?$filter=${encodeURIComponent(filter)}&$top=40`);
+            this._mergeCatalogRows(column.entity, result.value || []);
+          } catch (error) {
+            Log.error(`Could not load the ${column.entity} rows of the imported file`, error);
+          }
+        }
+        const lookup = new Map((catalog.getProperty(`/${column.entity}`) || []).map(function (row) { return [String(row[key]), row]; }));
+        rows.forEach(function (row) {
+          const match = lookup.get(String(row[column.name] || "").trim());
+          [].concat(column.autoFills).forEach(function (rule) {
+            if (match && !String(row[rule.field] || "").trim()) {
+              row[rule.field] = match[rule.from] || "";
+            }
+          });
+        });
+      }
+      return rows;
+    },
     // Subclasses that own show/hide grids override this; the default has none.
     _conditionalGrids: function () {
       return {};
@@ -1236,6 +1285,11 @@ ${reasons.join("\n")}`);
           settings.maxDate = new Date();
           settings.maxDate.setHours(0, 0, 0, 0);
           settings.maxDate.setDate(settings.maxDate.getDate() - 1);
+        }
+        if (definition.futureOnly) {
+          settings.minDate = new Date();
+          settings.minDate.setHours(0, 0, 0, 0);
+          settings.minDate.setDate(settings.minDate.getDate() + 1);
         }
         control = new DatePicker(settings).bindValue(path);
       } else if (definition.type === "checkbox") {
@@ -1827,15 +1881,20 @@ ${reasons.join("\n")}`);
       return null;
     },
 
-    // A date field flagged pastOnly (Commissioned Date) must lie before today. The date picker
-    // already refuses later days; this catches a value that was typed or imported.
+    // A date field flagged pastOnly (Commissioned Date) must lie before today, one flagged
+    // futureOnly (Target Date) after today. The date picker already refuses the other days; this
+    // catches a value that was typed or imported.
     _pastDateProblem: function (definition, value) {
       const now = new Date();
       const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
       const date = String(value || "");
-      return definition.pastOnly && /^\d{4}-\d{2}-\d{2}/.test(date) && date.slice(0, 10) >= today
-        ? `${definition.label} must be before today.`
-        : null;
+      if (!/^\d{4}-\d{2}-\d{2}/.test(date)) {
+        return null;
+      }
+      if (definition.pastOnly && date.slice(0, 10) >= today) {
+        return `${definition.label} must be before today.`;
+      }
+      return definition.futureOnly && date.slice(0, 10) <= today ? `${definition.label} must be after today.` : null;
     },
   });
 });

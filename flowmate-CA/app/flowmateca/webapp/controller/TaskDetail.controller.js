@@ -515,7 +515,7 @@ sap.ui.define([
           MessageBox.error("None of the file's column headings match this table. Use Export to get a file in the right layout, edit it and import it.");
           return;
         }
-        formModel.setProperty(grid.path, result.rows);
+        formModel.setProperty(grid.path, await this._autoFillRows(result.rows, grid.columns));
         this.showSuccess(`${result.rows.length} row(s) imported`);
       } catch (error) {
         MessageBox.error(`The file could not be read: ${error.message}`);
@@ -575,7 +575,7 @@ sap.ui.define([
       }
       // New Contract: each line item names its Header Creation row; every header row needs one.
       if (this._editVariantCode === "CONTRACT_NEW") {
-        const headerProblem = FormDefinitions.contractItemHeaderProblem(details.items || [], (details.headers || []).length);
+        const headerProblem = FormDefinitions.contractItemHeaderProblem(details.items || [], details.headers || []);
         if (headerProblem) {
           MessageBox.warning(headerProblem);
           return false;

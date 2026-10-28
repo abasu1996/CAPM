@@ -840,7 +840,7 @@ sap.ui.define([], function () {
       field("headerServiceCode", "Service Code", "input", { section: "Header Change" }),
       field("headerMaterialCode", "Material Code", "input", { section: "Header Change" }),
       field("targetValue", "Target Value", "input", { section: "Header Change" }),
-      field("targetDate", "Target Date", "date", { section: "Header Change" }),
+      field("targetDate", "Target Date", "date", { section: "Header Change", futureOnly: true }),
       field("headerPaymentTerms", "Payment Terms", "input", { section: "Header Change" }),
       field("contractRevoked", "Contract Revoked", "select", { section: "Header Change", required: true, options: YES_NO }),
       field("scmAssignUser", "SCM Assign User", "combo", {
@@ -1056,7 +1056,7 @@ sap.ui.define([], function () {
       entity: "PoNumbers", key: "poNumber", text: "poNumber"
     }),
     field("existingSesNo", "Existing SES Number", "input"),
-    field("loaApprover_ID", "LOA Approver", "combo", {
+    field("loaApprover_ID", "Divisional Head Approval", "combo", {
       required: true,
       entity: "Users",
       key: "ID",
@@ -1064,16 +1064,7 @@ sap.ui.define([], function () {
       secondaryText: "email"
     }),
     field("flowmateSesRequest", "Payment Run", "checkbox", { onSelect: "onFlowmateServiceEntrySheetSelect" }),
-    // Mandatory in both variants: on the form (Single Line) and in each Header Creation row (Multiple).
-    field("remarks", "Remarks", "textarea", { required: true }),
-    field("sesPaymentOption", "SES / Payment Option", "select", {
-      required: true,
-      options: [
-        { key: "SES_REQUIRED", text: "SES Required" },
-        { key: "PAYMENT_REQUIRED", text: "Payment Required" },
-        { key: "PAYMENT_REQUIRED_GRN_PO", text: "Payment Required for GRN PO" }
-      ]
-    }),
+    field("remarks", "Remarks", "textarea"),
     field("sesRecipientEmail", "SES Recipient Email", "input", { required: true }),
     field("specialPersonArea", "Special Area", "select", {
       options: [
@@ -1081,17 +1072,9 @@ sap.ui.define([], function () {
         { key: "MARKETING", text: "Marketing" }
       ]
     }),
-    field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file", { required: true }),
-    field("division", "Division", "combo", { required: true, entity: "Divisions", key: "divisionCode", text: "divisionName" }),
+    field("invoiceBoqAttachment", "Invoice / BoQ / PI / Quotation Attachment", "file"),
+    field("division", "Division", "combo", { entity: "Divisions", key: "divisionCode", text: "divisionName" }),
     field("divisionalUser_ID", "Divisional User", "combo", {
-      required: true,
-      entity: "Users",
-      key: "ID",
-      text: "displayName",
-      secondaryText: "email"
-    }),
-    field("approvalDivisionalHead_ID", "Approval - Divisional Head", "combo", {
-      required: true,
       entity: "Users",
       key: "ID",
       text: "displayName",
@@ -1101,12 +1084,13 @@ sap.ui.define([], function () {
     field("comment", "Comment", "textarea")
   ];
   sesFields.push(...requesterFields);
-  // These stay on the form in both line modes: the LOA approver routes the approval task from
-  // the detail row, the division describes the whole request, an attachment cannot live in a
-  // table row, and the requester fields are request metadata. Everything else is captured per
-  // row in the Header Creation table when Multiple Line is chosen.
+  // These stay on the form in both line modes: the divisional head approval routes the approval
+  // task from the detail row, the division describes the whole request, the recipient e-mail and
+  // special area belong to the service entry sheet details, an attachment cannot live in a table
+  // row, and the requester fields are request metadata. Everything else is captured per row in
+  // the Header Creation table when Multiple Line is chosen.
   const sesFormFieldNames = new Set([
-    "loaApprover_ID", "division", "divisionalUser_ID", "approvalDivisionalHead_ID",
+    "loaApprover_ID", "division", "divisionalUser_ID", "sesRecipientEmail", "specialPersonArea",
     "invoiceBoqAttachment", "taxInvoiceAttachment", "additionalAttachment",
     "requesterName", "requesterEmail", "requestDateTime"
   ]);
@@ -1119,7 +1103,8 @@ sap.ui.define([], function () {
   // header table. LOA approval applies to both variants, so both collect the LOA approver.
   const sesHeaderRowFields = {};
   // Single Line Items only: Type of Transaction, and for a tax based one the Invoice Date and
-  // Service Obtained Date (at most 30 days apart, see sesDateProblem), placed before Remarks.
+  // Service Obtained Date (at most 30 days apart, see sesDateProblem), placed before Remarks, with
+  // the Tax Invoice Attachment under them.
   const sesTaxFields = [
     field("taxTransactionType", "Type of Transaction", "select", {
       required: true,
@@ -1138,22 +1123,25 @@ sap.ui.define([], function () {
     })
   ];
   const withSesTaxFields = function (fields) {
-    const at = fields.findIndex(function (f) { return f.name === "remarks"; });
-    return fields.slice(0, at).concat(sesTaxFields, fields.slice(at));
+    const taxInvoice = fields.find(function (f) { return f.name === "taxInvoiceAttachment"; });
+    const rest = fields.filter(function (f) { return f !== taxInvoice; });
+    const at = rest.findIndex(function (f) { return f.name === "remarks"; });
+    return rest.slice(0, at).concat(sesTaxFields, taxInvoice, rest.slice(at));
   };
   Object.keys(sesVariantFields).forEach(function (variant) {
     definitions[variant + "_SINGLE"] = withSesTaxFields(sesVariantFields[variant]);
     definitions[variant] = sesVariantFields[variant]
       .filter(function (f) { return sesFormFieldNames.has(f.name); });
+    // The Payment Run option is a request-level choice, not a per-row one.
     sesHeaderRowFields[variant] = sesVariantFields[variant]
-      .filter(function (f) { return !sesFormFieldNames.has(f.name); });
+      .filter(function (f) { return !sesFormFieldNames.has(f.name) && f.name !== "flowmateSesRequest"; });
   });
 
   const column = (name, label, type, extra) => Object.assign({ name, label, type: type || "input" }, extra || {});
 
   const COLUMN_KEYS = [
     "name", "label", "type", "required", "requiredWhen", "entity", "key", "text", "secondaryText",
-    "options", "maxLength", "autoFills", "placeholder", "codeField", "pastOnly"
+    "options", "maxLength", "autoFills", "placeholder", "codeField", "pastOnly", "futureOnly"
   ];
 
   const isHeaderOnlyField = (field, drivers) =>
@@ -1353,10 +1341,9 @@ sap.ui.define([], function () {
     ],
     // Labels follow "Details of Contract Creation-SCC M-212.csv" so that file imports as-is.
     CONTRACT_NEW: [
-      // Entered by the user: the ID of the Header Creation row this line item belongs to (one
-      // header row can have several line items). itemNo stays the internal running number.
-      column("headerRowNo", "ID", "number", { required: true }),
-      column("contractCount", "Contract Count", "number", { required: true }),
+      // Entered by the user: the Contract Count of the Header Creation row this line item belongs
+      // to (one header row can have several line items). itemNo stays the internal running number.
+      column("contractCount", "Contract Count", "input", { required: true, maxLength: 40 }),
       contractColumn.contractType,
       column("lineItem", "Line Item"),
       contractColumn.itemCategory,
@@ -1395,7 +1382,7 @@ sap.ui.define([], function () {
   // Second row table, keyed by variant. Labels follow "Details of Header Creation-SCC M-212.csv".
   const headerTableColumns = {
     CONTRACT_NEW: [
-      column("itemNo", "ID", "readonly"),
+      column("contractCount", "Contract Count", "input", { required: true, maxLength: 40 }),
       Object.assign({}, contractColumn.vendorId, { name: "vendorCode", label: "Vendor Code", required: true }),
       column("coupaSourcingEventNo", "Ariba Sourcing Event No", "input", { required: true }),
       column("poHeaderText", "PO header text", "input", { required: true }),
@@ -1679,19 +1666,26 @@ sap.ui.define([], function () {
     alwaysHasItems: function (requestTypeCode) {
       return requestTypeCode === "PURCHASE_ORDER" || requestTypeCode === "SERVICE_ENTRY_SHEET";
     },
-    // New Contract: every line item's ID must name an existing Header Creation row, and every
-    // header row needs at least one line item. Returns the first problem as text, or null.
-    contractItemHeaderProblem: function (items, headerCount) {
+    // New Contract: a line item's Contract Count must name a Header Creation row (the header
+    // counts are unique), and every header row needs at least one line item. Returns the first
+    // problem as text, or null.
+    contractItemHeaderProblem: function (items, headers) {
+      const key = function (value) { return String(value === undefined || value === null ? "" : value).trim().toLowerCase(); };
       const rows = items || [];
-      for (let index = 0; index < rows.length; index++) {
-        const headerNo = Number(rows[index].headerRowNo);
-        if (!Number.isInteger(headerNo) || headerNo < 1 || headerNo > headerCount) {
-          return `Contract Creation Details - Row ${index + 1}: ID must match a Header Creation row (1-${headerCount}).`;
+      const counts = (headers || []).map(function (header) { return key(header.contractCount); });
+      for (let index = 0; index < counts.length; index++) {
+        if (counts.indexOf(counts[index]) !== index) {
+          return `Header Creation - Row ${index + 1}: Contract Count ${headers[index].contractCount} is used by another row.`;
         }
       }
-      for (let headerNo = 1; headerNo <= headerCount; headerNo++) {
-        if (!rows.some(function (row) { return Number(row.headerRowNo) === headerNo; })) {
-          return `Header Creation - Row ${headerNo} has no line items.`;
+      for (let index = 0; index < rows.length; index++) {
+        if (counts.indexOf(key(rows[index].contractCount)) < 0) {
+          return `Contract Creation Details - Row ${index + 1}: Contract Count must match a Header Creation row.`;
+        }
+      }
+      for (let index = 0; index < counts.length; index++) {
+        if (!rows.some(function (row) { return key(row.contractCount) === counts[index]; })) {
+          return `Header Creation - Row ${index + 1} (Contract Count ${headers[index].contractCount}) has no line items.`;
         }
       }
       return null;
