@@ -415,7 +415,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     this.before("createRequest", this._requireCreateAccess);
     this.before(["saveDraft", "deleteDraft", "createBulkRequests", "submitRequest", "createSuccessorRequest"], this._requireCreator);
-    this.before(["claimTeamTask", "requestBudgetCheck", "approveTask", "sendPoNumbersToWorkhub", "sendBackTask", "saveRequesterDetails", "addComment"], this._requireValidator);
+    // Claiming an unassigned team task remains a processor capability. Once a task is
+    // assigned to a person, its handlers enforce ownership (or active delegation) instead
+    // of requiring the assignee to hold CAProcessor as well. This lets a requester work a
+    // task sent back to them without exposing the team queue.
+    this.before("claimTeamTask", this._requireValidator);
     this.before(["reassignRequest", "reassignTask"], this._requireSupervisor);
     this.before("getReportingDashboard", this._requireSupervisor);
     this.before(["rejectTask", "addTask", "completeStep", "sendToS4"], this._requireAdmin);
@@ -973,6 +977,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       canCreate: isCreator,
       canViewDrafts: isCreator,
       canValidate: isValidator,
+      canProcessAssignedTasks: isBusinessUser,
       canAssign: isSupervisor,
       canManageDelegation: isSupervisor,
       canViewAllRequests: isBusinessUser,
@@ -1140,14 +1145,20 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _filterTasksByRole = async (req) => {
     const capabilities = this._roleCapabilities(req);
     if (capabilities.canAssign) return;
-    if (!capabilities.canValidate) {
+    if (!capabilities.canProcessAssignedTasks) {
       req.query.where({ ID: null });
       return;
     }
     const user = await this._ensureCurrentUser(req);
     const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
-    const teamIds = await this._teamIdsOf(user);
     const assigned = [{ ref: ["assignedUser_ID"] }, "in", { list: effectiveUserIds.map((ID) => ({ val: ID })) }];
+    // Requester-only users may read a task assigned directly to them (or to an active
+    // delegator), but never gain visibility of an unclaimed team task.
+    if (!capabilities.canValidate) {
+      req.query.where(assigned);
+      return;
+    }
+    const teamIds = await this._teamIdsOf(user);
     if (!teamIds.length) {
       req.query.where(assigned);
       return;
@@ -1281,7 +1292,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   _filterMyTasks = async (req) => {
-    if (!this._roleCapabilities(req).canValidate) {
+    if (!this._roleCapabilities(req).canProcessAssignedTasks) {
       req.query.where({ ID: null });
       return;
     }
@@ -3930,7 +3941,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   // the request (the create page uploads right after creating, see _beforeCreateAttachment).
   async _canContribute(req, request, user) {
     if (this._roleCapabilities(req).isAdmin) return true;
-    if (!this._roleCapabilities(req).canValidate) return false;
+    if (!this._roleCapabilities(req).canProcessAssignedTasks) return false;
     const openTasks = (await SELECT.from(this.db.CATasks)
       .columns("assignedUser_ID", "isSuperseded")
       .where({ request_ID: request.ID, status_code: TASK_STATUS.OPEN }))

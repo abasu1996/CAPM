@@ -18,6 +18,7 @@ test("creator can create and monitor but cannot validate, assign, or terminate",
   assert.equal(access.canCreate, true);
   assert.equal(access.canViewDrafts, true);
   assert.equal(access.canValidate, false);
+  assert.equal(access.canProcessAssignedTasks, true);
   assert.equal(access.canAssign, false);
   assert.equal(access.canViewAllRequests, true);
   assert.equal(access.canViewReports, false);
@@ -34,6 +35,7 @@ test("validator can process tasks but cannot create, assign, or terminate", () =
   assert.equal(access.canCreate, false);
   assert.equal(access.canViewDrafts, false);
   assert.equal(access.canValidate, true);
+  assert.equal(access.canProcessAssignedTasks, true);
   assert.equal(access.canAssign, false);
   assert.equal(access.canViewAllRequests, true);
   assert.equal(access.canViewReports, false);
@@ -49,6 +51,7 @@ test("supervisor can validate, assign, and maintain delegation but cannot create
   assert.equal(access.canCreate, false);
   assert.equal(access.canViewDrafts, false);
   assert.equal(access.canValidate, true);
+  assert.equal(access.canProcessAssignedTasks, true);
   assert.equal(access.canAssign, true);
   assert.equal(access.canManageDelegation, true);
   assert.equal(access.canViewAllRequests, true);
@@ -69,6 +72,7 @@ test("administrator has every business capability", () => {
     canCreate: true,
     canViewDrafts: true,
     canValidate: true,
+    canProcessAssignedTasks: true,
     canAssign: true,
     canManageDelegation: true,
     canViewAllRequests: true,
@@ -122,4 +126,32 @@ test("validator must claim an available team task before processing", async () =
     { assignedUser_ID: null, assignedTeam_ID: "team" },
     { ID: "validator" }
   ), { status: 409 });
+});
+
+test("requester may process a task assigned directly to them but not another user's task", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._effectiveTaskUserIds = async () => ["requester"];
+  await assert.doesNotReject(service._assertTaskAccess(
+    requestFor("CARequester"),
+    { assignedUser_ID: "requester", assignedTeam_ID: null },
+    { ID: "requester" }
+  ));
+  await assert.rejects(service._assertTaskAccess(
+    requestFor("CARequester"),
+    { assignedUser_ID: "someone-else", assignedTeam_ID: null },
+    { ID: "requester" }
+  ), { status: 403 });
+});
+
+test("requester task reads are limited to directly assigned tasks", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._ensureCurrentUser = async () => ({ ID: "requester" });
+  service._effectiveTaskUserIds = async () => ["requester", "delegator"];
+  const query = { where(value) { this.filter = value; } };
+  await service._filterTasksByRole({ ...requestFor("CARequester"), query });
+  assert.deepEqual(query.filter, [
+    { ref: ["assignedUser_ID"] },
+    "in",
+    { list: [{ val: "requester" }, { val: "delegator" }] }
+  ]);
 });

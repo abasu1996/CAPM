@@ -34,6 +34,7 @@ service FlowmateCAService {
     canCreate              : Boolean;
     canViewDrafts          : Boolean;
     canValidate            : Boolean;
+    canProcessAssignedTasks: Boolean;
     canAssign              : Boolean;
     canManageDelegation    : Boolean;
     canViewAllRequests     : Boolean;
@@ -240,10 +241,10 @@ service FlowmateCAService {
   action reassignTask(taskId: UUID, userId: UUID) returns Boolean;
   // Purchase Order S/4 Data Validation: opens the (auto-completed) Budget Check step's task and
   // puts this task In Progress until the Budget Check is approved.
-  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
+  @requires: ['CARequester', 'CAProcessor', 'CASupervisor', 'CAAdmin']
   action requestBudgetCheck(taskId: UUID) returns Boolean;
   // purchaseOrderNo is required only on the last step of a PO that has "Create SES Successor".
-  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
+  @requires: ['CARequester', 'CAProcessor', 'CASupervisor', 'CAAdmin']
   action approveTask(
     taskId: UUID,
     remarks: LargeString,
@@ -267,7 +268,7 @@ service FlowmateCAService {
   ) returns Boolean;
   /** Sends all PO numbers entered in the S/4 Data Validation dialog to the Workhub card.
    * Workhub credentials and workflow ID are server settings. */
-  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
+  @requires: ['CARequester', 'CAProcessor', 'CASupervisor', 'CAAdmin']
   action sendPoNumbersToWorkhub(
     taskId: UUID,
     pONumber1: LargeString,
@@ -280,13 +281,13 @@ service FlowmateCAService {
   };
   @requires: 'CAAdmin'
   action rejectTask(taskId: UUID, remarks: LargeString) returns Boolean;
-  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
+  @requires: ['CARequester', 'CAProcessor', 'CASupervisor', 'CAAdmin']
   action sendBackTask(taskId: UUID, targetStepNo: Integer, remarks: LargeString) returns Boolean;
   @requires: 'CAAdmin'
   action completeStep(requestId: UUID, stepNo: Integer, remarks: LargeString) returns Boolean;
-  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
+  @requires: ['CARequester', 'CAProcessor', 'CASupervisor', 'CAAdmin']
   action saveRequesterDetails(requestId: UUID, details: LargeString) returns Boolean;
-  @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']
+  @requires: ['CARequester', 'CAProcessor', 'CASupervisor', 'CAAdmin']
   action addComment(requestId: UUID, comment: LargeString) returns Comments;
   @requires: ['CARequester', 'CAAdmin']
   action createSuccessorRequest(requestId: UUID, requestTypeCode: String(40), title: String(255)) returns Requests;

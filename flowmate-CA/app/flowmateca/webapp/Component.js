@@ -41,6 +41,7 @@ sap.ui.define([
           canCreate: false,
           canViewDrafts: false,
           canValidate: false,
+          canProcessAssignedTasks: false,
           canAssign: false,
           canManageDelegation: false,
           canViewAllRequests: false,

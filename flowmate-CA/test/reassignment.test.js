@@ -142,11 +142,11 @@ test("a reassigned requester task can save details without transferring request 
   const originalTx = cds.tx;
   cds.tx = () => tx;
   try {
-    await service._saveRequesterDetails(req("CAProcessor", { requestId: "request", details: "{}" }));
+    await service._saveRequesterDetails(req("CARequester", { requestId: "request", details: "{}" }));
     assert.equal(saved, true);
     assert.equal(rows.requests[0].owner_ID, "old");
     service._ensureCurrentUser = async () => ({ ID: "old" });
-    await assert.rejects(service._saveRequesterDetails(req("CAProcessor", { requestId: "request", details: "{}" })), { status: 403 });
+    await assert.rejects(service._saveRequesterDetails(req("CARequester", { requestId: "request", details: "{}" })), { status: 403 });
   } finally { cds.tx = originalTx; }
 });
 

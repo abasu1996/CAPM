@@ -148,7 +148,7 @@ sap.ui.define([
       // looking at it needs a way through - otherwise a send-back looks like a dead end.
       const myTask = currentTasks.find(function (task) {
         return task.status?.code === "OPEN"
-          && Boolean(currentUser.canValidate)
+          && Boolean(currentUser.canProcessAssignedTasks)
           && (Boolean(currentUser.isAdmin) || this.canActForAssignedUser(task.assignedUser_ID, currentUser));
       }.bind(this));
       request.myOpenTaskId = myTask ? myTask.ID : null;
