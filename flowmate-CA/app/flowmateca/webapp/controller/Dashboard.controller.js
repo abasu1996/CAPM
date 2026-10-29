@@ -50,7 +50,7 @@ sap.ui.define([
     },
 
     onRequests: function () {
-      this.onMyRequests();
+      this.onAllRequests();
     },
 
     onMyRequests: function () {
@@ -67,14 +67,6 @@ sap.ui.define([
 
     onAllRequests: function () {
       this.navTo("allRequests");
-    },
-
-    onAllTasks: function () {
-      this.navTo("tasks", {
-        "?query": {
-          mode: "all"
-        }
-      });
     },
 
     onReports: function () {
@@ -94,7 +86,7 @@ sap.ui.define([
     onRejected: function () {
       this.navTo("requests", {
         "?query": {
-          mode: "mine",
+          mode: this.getAppModel().getProperty("/currentUser/isAdmin") ? "all" : "mine",
           status: "REJECTED"
         }
       });
@@ -103,7 +95,7 @@ sap.ui.define([
     onCompleted: function () {
       this.navTo("requests", {
         "?query": {
-          mode: "mine",
+          mode: this.getAppModel().getProperty("/currentUser/isAdmin") ? "all" : "mine",
           status: "COMPLETED"
         }
       });

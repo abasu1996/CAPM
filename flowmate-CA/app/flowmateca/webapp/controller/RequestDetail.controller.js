@@ -138,11 +138,12 @@ sap.ui.define([
       const currentUser = this.getAppModel().getProperty("/currentUser") || {};
       request.canReassign = Boolean(currentUser.canReassign) && !["COMPLETED", "REJECTED"].includes(request.status?.code || request.status_code);
       request.canAddTask = Boolean(currentUser.canAddTask)
-        && (Boolean(currentUser.canAssign) || Boolean(request.canContribute))
+        && ((Boolean(currentUser.canAssign) && !currentUser.isAdmin) || Boolean(request.canContribute))
         && !["COMPLETED", "REJECTED"].includes(request.status?.code || request.status_code);
       request.canCompleteCurrentStep = !["COMPLETED", "REJECTED"].includes(request.status?.code)
         && !blockingTask
-        && Boolean(currentUser.isAdmin);
+        && Boolean(currentUser.isAdmin)
+        && currentTasks.some(function (task) { return !task.isSuperseded && task.assignedUser_ID === currentUser.ID; });
       request.processStatusText = request.status?.code === "COMPLETED"
         ? "Workflow completed"
         : `Step ${request.currentStep} of ${request.stepInstances.length}`;
@@ -151,7 +152,9 @@ sap.ui.define([
       const myTask = currentTasks.find(function (task) {
         return task.status?.code === "OPEN"
           && Boolean(currentUser.canProcessAssignedTasks)
-          && this.canActForAssignedUser(task.assignedUser_ID, currentUser);
+          && (currentUser.isAdmin
+            ? task.assignedUser_ID === currentUser.ID
+            : this.canActForAssignedUser(task.assignedUser_ID, currentUser));
       }.bind(this));
       request.myOpenTaskId = myTask ? myTask.ID : null;
       request.myOpenTaskName = myTask ? (myTask.taskName || "Open My Task") : "";

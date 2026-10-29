@@ -20,6 +20,9 @@ sap.ui.define([
 
     _onRouteMatched: async function (event) {
       this._query = event.getParameter("arguments")["?query"] || {};
+      this.getView().getModel("list").setProperty("/title", this._query.mode === "all"
+        ? (this._query.status === "REJECTED" ? "Terminated Requests" : "Completed Requests")
+        : "My Requests");
       this.byId("requestStatusFilter").setSelectedKey(this._query.status || "");
       this.getView().getModel("sortView").setProperty("/key", "asc");
       await this._loadCatalog();
@@ -61,8 +64,10 @@ sap.ui.define([
         }
 
         const filterQuery = filters.length ? `&$filter=${encodeURIComponent(filters.join(" and "))}` : "";
+        const entity = this._query?.mode === "all" && this.getAppModel().getProperty("/currentUser/isAdmin")
+          ? "Requests" : "MyRequests";
         const result = await this.request(
-          `MyRequests?$expand=requestType,requestVariant,status&$orderby=createdAt desc${filterQuery}`
+          `${entity}?$expand=requestType,requestVariant,status&$orderby=createdAt desc${filterQuery}`
         );
         this.getView().getModel("list").setProperty("/items", this._sorted(result.value || []));
       } catch (error) {

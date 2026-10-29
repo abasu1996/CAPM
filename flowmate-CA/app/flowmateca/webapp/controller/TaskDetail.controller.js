@@ -53,11 +53,12 @@ sap.ui.define([
           && Boolean(task.assignedTeam_ID) && !task.assignedUser_ID && belongsToAssignedTeam;
         task.canReassign = Boolean(user?.canReassign) && ["OPEN", "IN_PROGRESS"].includes(task.status?.code) && !task.isSuperseded
           && !["COMPLETED", "REJECTED"].includes(task.request?.status?.code || task.request?.status_code);
-        task.canProcess = processableStatus && Boolean(user?.canProcessAssignedTasks)
-          && this.canActForAssignedUser(task.assignedUser_ID, user);
-        task.canTerminate = task.canProcess && Boolean(user?.canTerminate) && !task.isRequesterStep;
+        const assignedToActor = user?.isAdmin
+          ? Boolean(user.ID && task.assignedUser_ID === user.ID)
+          : this.canActForAssignedUser(task.assignedUser_ID, user);
+        task.canProcess = processableStatus && Boolean(user?.canProcessAssignedTasks) && assignedToActor;
         // Line-item exports are for the approver the task is assigned to (once claimed), also after deciding it.
-        task.isAssignedToMe = this.canActForAssignedUser(task.assignedUser_ID, user);
+        task.isAssignedToMe = assignedToActor;
         task.canSendBack = task.canProcess && task.stepNo > 1;
 
         const request = task.request || {};
@@ -310,8 +311,8 @@ sap.ui.define([
 
         // Step 1 is the requester's own: they correct the details here and send the
         // request on, rather than approving it.
-        task.isRequesterStep = task.stepNo === 1 && task.canProcess;
-        task.canTerminate = processableStatus && Boolean(user?.canTerminate) && !task.isRequesterStep;
+        task.isRequesterStep = task.stepNo === 1 && !task.isApproval && task.canProcess;
+        task.canTerminate = task.canProcess && Boolean(user?.canTerminate);
         this.getView().getModel("task").setData(task);
         // User/vendor fields are stored as IDs; show their names.
         this.resolveIdLabels(request, details, "task", "/detailFields");

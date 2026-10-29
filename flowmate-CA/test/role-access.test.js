@@ -107,15 +107,14 @@ test("technical PO client retains createRequest access only", () => {
   assert.throws(() => service._requireValidator(req), { status: 403 });
 });
 
-test("all business roles can read the all-requests catalogue without receiving mutation capability", () => {
+test("All Requests reads are global for business roles, but unavailable to technical clients", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   for (const role of ["CARequester", "CAProcessor", "CASupervisor", "CAAdmin"]) {
-    const req = requestFor(role);
-    const query = { where() { throw new Error(`${role} must not be filtered`); } };
-    assert.doesNotThrow(() => service._filterRequestsByRole({ ...req, query }));
+    const query = { where() { throw new Error(`${role} should see every request`); } };
+    assert.doesNotThrow(() => service._filterRequestsByRole({ ...requestFor(role), query }));
   }
   const query = { where(value) { this.filter = value; } };
-  service._filterRequestsByRole({ ...requestFor(), query });
+  await service._filterRequestsByRole({ ...requestFor(), query });
   assert.deepEqual(query.filter, { ID: null });
 });
 
@@ -137,6 +136,33 @@ test("supervisor and administrator must own a task before processing", async () 
     { assignedUser_ID: "admin", assignedTeam_ID: "team" },
     { ID: "admin" }
   ));
+});
+
+test("administrator cannot act on a delegator's task without self-assignment", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._effectiveTaskUserIds = async () => ["admin", "delegator"];
+  await assert.rejects(service._assertTaskAccess(
+    requestFor("CAAdmin"),
+    { assignedUser_ID: "delegator" },
+    { ID: "admin" }
+  ), { status: 403 });
+  await assert.doesNotReject(service._assertTaskAccess(
+    requestFor("CAProcessor"),
+    { assignedUser_ID: "delegator" },
+    { ID: "admin" }
+  ));
+});
+
+test("administrator My Tasks is limited to tasks assigned directly to the administrator", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._ensureCurrentUser = async () => ({ ID: "admin" });
+  service._effectiveTaskUserIds = async () => ["admin", "delegator"];
+  const query = { where(value) { this.filter = value; } };
+  await service._filterMyTasks({ ...requestFor("CAAdmin"), query });
+  assert.deepEqual(query.filter, { assignedUser_ID: { in: ["admin"] } });
+  const delegatedQuery = { where(value) { this.filter = value; } };
+  await service._filterMyTasks({ ...requestFor("CAProcessor"), query: delegatedQuery });
+  assert.deepEqual(delegatedQuery.filter, { assignedUser_ID: { in: ["admin", "delegator"] } });
 });
 
 test("validator must claim an available team task before processing", async () => {

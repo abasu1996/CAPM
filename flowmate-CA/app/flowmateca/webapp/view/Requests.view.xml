@@ -3,7 +3,7 @@
   xmlns:mvc="sap.ui.core.mvc"
   xmlns:core="sap.ui.core"
   xmlns="sap.m">
-  <Page class="caPage" showNavButton="true" navButtonPress=".onNavHome" title="{i18n>myRequests}">
+  <Page class="caPage" showNavButton="true" navButtonPress=".onNavHome" title="{list>/title}">
     <headerContent>
       <Button text="{i18n>createRequest}" icon="sap-icon://add" type="Emphasized" visible="{app>/currentUser/canCreate}" press=".onCreate"/>
       <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent" press=".onExportExcel"/>

@@ -440,7 +440,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     });
 
     this.before("READ", "Requests", this._filterRequestsByRole);
-    this.before("READ", "RequestQueue", this._filterRequestQueue);
+    this.before("READ", "RequestQueue", this._filterRequestsByRole);
     this.before("READ", "Tasks", this._filterTasksByRole);
     this.before("READ", "MyRequests", this._filterMyRequests);
     this.after("READ", ["Requests", "MyRequests", "RequestQueue"], this._addPendingInfo);
@@ -1157,12 +1157,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       : { request_ID: null });
   };
 
-  _filterRequestQueue = (req) => {
-    if (!this._roleCapabilities(req).canViewAllRequests) {
-      return req.reject(403, "You are not authorised to view all requests");
-    }
-  };
-
   _filterTasksByRole = async (req) => {
     const capabilities = this._roleCapabilities(req);
     if (!capabilities.canViewAllTasks) {
@@ -1211,8 +1205,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   }
 
   _filterRequestsByRole = (req) => {
-    // Requests is the read-only, cross-team catalogue used by All Requests and request details.
-    // Mutation remains protected by role-specific actions and task ownership checks.
     if (!this._roleCapabilities(req).canViewAllRequests) {
       req.query.where({ ID: null });
     }
@@ -1329,7 +1321,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return;
     }
     const user = await this._ensureCurrentUser(req);
-    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    const effectiveUserIds = req.user.is("CAAdmin")
+      ? [user.ID]
+      : await this._effectiveTaskUserIds(req, user.ID);
     req.query.where({ assignedUser_ID: { in: effectiveUserIds } });
   };
 
@@ -1379,7 +1373,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const user = await this._ensureCurrentUser(req);
     const capabilities = this._roleCapabilities(req);
     const { isAdmin, canCreate, canViewDrafts, canValidate, canProcessAssignedTasks } = capabilities;
-    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
+    const effectiveUserIds = isAdmin ? [user.ID] : await this._effectiveTaskUserIds(req, user.ID);
     const requestedBy = this._myRequestWhere(effectiveUserIds);
     const assignedToMe = { assignedUser_ID: { in: effectiveUserIds } };
     // Only OPEN tasks are waiting on someone. A SENT_BACK task belongs to a step that
@@ -1411,14 +1405,14 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       canProcessAssignedTasks ? this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }) : 0,
       capabilities.canViewSentBack ? this._count(this.db.CATasks, sentBackTaskScope) : 0,
       capabilities.canViewTerminated
-        ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED))
+        ? this._count(this.db.CARequests, isAdmin ? { status_code: REQUEST_STATUS.REJECTED } : this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED))
         : 0,
       canProcessAssignedTasks ? this._count(this.db.CATasks, {
         ...assignedToMe,
         ...openStatus,
         isApproval: true
       }) : 0,
-      canCreate ? this._count(this.db.CARequests, this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.COMPLETED)) : 0
+      canCreate ? this._count(this.db.CARequests, isAdmin ? { status_code: REQUEST_STATUS.COMPLETED } : this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.COMPLETED)) : 0
     ]);
 
     let myTeamTasks = 0;
@@ -2162,7 +2156,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     this._assertMutableRequest(req, request);
     const capabilities = this._roleCapabilities(req);
-    if (!capabilities.canAssign && !await this._canContribute(req, request, user)) {
+    if ((capabilities.isAdmin || !capabilities.canAssign) && !await this._canContribute(req, request, user)) {
       return req.reject(403, "A processor can add a task only while working on an open task of this request");
     }
 
@@ -3154,12 +3148,16 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(404, "Request not found");
     }
     this._assertMutableRequest(req, request);
-    const effectiveIds = await this._effectiveTaskUserIds(req, user.ID);
+    const effectiveIds = req.user.is("CAAdmin")
+      ? [user.ID]
+      : await this._effectiveTaskUserIds(req, user.ID);
     const requesterTasks = await tx.run(SELECT.from(this.db.CATasks).where({
       request_ID: request.ID, stepNo: 1, status_code: TASK_STATUS.OPEN
     }));
     if (!requesterTasks.some((task) => !task.isSuperseded && !task.isApproval && effectiveIds.includes(task.assignedUser_ID))) {
-      return req.reject(403, "Only the person assigned to the open requester task or an active delegate can edit these details");
+      return req.reject(403, req.user.is("CAAdmin")
+        ? "Assign the open requester task to yourself before editing its details"
+        : "Only the person assigned to the open requester task or an active delegate can edit these details");
     }
 
     const step = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
@@ -3203,11 +3201,6 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(404, "Request not found");
     }
     this._assertMutableRequest(req, request);
-    if (!(await this._canActForUser(req, user.ID, request.owner_ID))
-        && !req.user.is("CAAdmin") && !req.user.is("CASupervisor")) {
-      return req.reject(403, "Only the request owner, an active delegate, or a supervisor can complete a step");
-    }
-
     const steps = await SELECT.from(this.db.RequestStepInstances)
       .where({ request_ID: request.ID })
       .orderBy("stepNo");
@@ -3220,6 +3213,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       request_ID: request.ID,
       stepNo: step.stepNo
     })).filter((task) => !task.isSuperseded);
+    if (!tasks.some((task) => task.assignedUser_ID === user.ID)) {
+      return req.reject(403, "Assign a task in this step to yourself before completing it");
+    }
     const blockingTask = tasks.find((task) => task.isMandatory && task.status_code !== TASK_STATUS.APPROVED);
     if (blockingTask) {
       return req.reject(409, `Approve mandatory task "${blockingTask.taskName}" before completing this step`);
@@ -3998,7 +3994,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       .where({ request_ID: request.ID, status_code: TASK_STATUS.OPEN }))
       .filter((task) => !task.isSuperseded && task.assignedUser_ID);
     for (const task of openTasks) {
-      if (await this._canActForUser(req, user.ID, task.assignedUser_ID)) {
+      if (await this._canActOnTask(req, user.ID, task.assignedUser_ID)) {
         return true;
       }
     }
@@ -4531,11 +4527,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   async _assertTaskAccess(req, task, user) {
     if (task.assignedUser_ID) {
-      const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
-      if (effectiveUserIds.includes(task.assignedUser_ID)) {
+      if (await this._canActOnTask(req, user.ID, task.assignedUser_ID)) {
         return;
       }
-      return req.reject(403, "This task is assigned to another user and is not covered by an active delegation");
+      return req.reject(403, req.user.is("CAAdmin")
+        ? "Assign this task to yourself before taking action"
+        : "This task is assigned to another user and is not covered by an active delegation");
     }
     if (task.assignedTeam_ID) {
       const membership = await this.master.run(SELECT.one.from(this.masterEntities.TeamMembers).where({
@@ -4548,6 +4545,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       }
     }
     req.reject(403, "This task is not assigned to you or your team");
+  }
+
+  async _canActOnTask(req, actingUserId, assignedUserId) {
+    if (req.user.is("CAAdmin")) return Boolean(actingUserId && assignedUserId && actingUserId === assignedUserId);
+    return this._canActForUser(req, actingUserId, assignedUserId);
   }
 
   _assertMutableRequest(req, request) {

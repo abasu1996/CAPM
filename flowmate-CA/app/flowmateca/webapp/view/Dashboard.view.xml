@@ -9,7 +9,7 @@
         <Title text="Flowmate CA" level="H2"/>
         <ToolbarSpacer/>
         <Button icon="sap-icon://home" type="Transparent" tooltip="Workspace"/>
-        <Button icon="sap-icon://documents" type="Transparent" tooltip="Requests" visible="{app>/currentUser/canCreate}" press=".onRequests"/>
+        <Button icon="sap-icon://documents" type="Transparent" tooltip="Requests" visible="{app>/currentUser/canViewAllRequests}" press=".onRequests"/>
         <Button icon="sap-icon://task" type="Transparent" tooltip="Tasks" visible="{app>/currentUser/canViewAllTasks}" press=".onTasks"/>
         <Button
           icon="sap-icon://action-settings"
@@ -46,10 +46,10 @@
         </HBox>
 
         <FlexBox wrap="Wrap" class="caTileGrid" renderType="Div">
-          <GenericTile class="caTile caTileIndigo" header="{i18n>allTasks}" subheader="{i18n>allTasksSubtitle}" visible="{app>/currentUser/canViewAllTasks}" press=".onAllTasks">
+          <GenericTile class="caTile caTileBlue" header="{i18n>allRequests}" subheader="{i18n>allRequestsSubtitle}" visible="{app>/currentUser/canViewAllRequests}" press=".onAllRequests">
             <tileContent>
               <TileContent>
-                <NumericContent value="{dashboard>/allTasks}" icon="sap-icon://task" valueColor="Neutral"/>
+                <NumericContent value="{dashboard>/allRequests}" icon="sap-icon://documents" valueColor="Neutral"/>
               </TileContent>
             </tileContent>
           </GenericTile>
