@@ -24,9 +24,11 @@ sap.ui.define([], function () {
     entity: "UnitsOfMeasure"
   });
   // Material Code fields pick an existing code from the Materials master (value help with
-  // server-side search).
+  // server-side search). An imported table row whose Material Description is blank takes the
+  // master's description (import only: the form keeps a description the user is typing).
   const materialLookup = {
-    entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription"
+    entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription",
+    importFills: { field: "description", from: "materialDescription" }
   };
   // Valuation Class has one master per request type: MCC for Material Code creation, SCC for
   // Service Code creation. TaskDetail uses the same lookups for the approver's value.
@@ -1141,7 +1143,7 @@ sap.ui.define([], function () {
 
   const COLUMN_KEYS = [
     "name", "label", "type", "required", "requiredWhen", "entity", "key", "text", "secondaryText",
-    "options", "maxLength", "autoFills", "placeholder", "codeField", "pastOnly", "futureOnly"
+    "options", "maxLength", "autoFills", "importFills", "placeholder", "codeField", "pastOnly", "futureOnly"
   ];
 
   const isHeaderOnlyField = (field, drivers) =>
@@ -1374,7 +1376,8 @@ sap.ui.define([], function () {
       contractColumn.costCenter,
       column("orderNumber", "Order Number"),
       Object.assign({}, contractColumn.wbsElement, { label: "Work Breakdown Structure Element (WBS Element)" }),
-      contractColumn.projectCode
+      contractColumn.projectCode,
+      column("employeeId", "Employee ID", "input", { maxLength: 80 })
       // User ID - SCM SPOC is captured once, in the Details section (definitions.CONTRACT_NEW).
     ]
   };

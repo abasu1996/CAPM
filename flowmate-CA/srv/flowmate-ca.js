@@ -2770,13 +2770,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return JSON.stringify(await this._generateProjectCode(details || {}));
   };
 
-  // Project Code (New / Modification), Single line. From the PCC masters, parts joined without
-  // separators:
+  // Project Code (New / Modification), Single line. From the PCC masters:
   //   Project ID          <Division letter><YY of the AR year><NNN><Vendor letter>, where NNN counts
   //                       per Division letter + Vendor letter across all years. Division and Vendor
   //                       are optional for Non-Engineering; an empty one is left out (e.g. 26001V);
-  //   Project Category    <High Level PC><Scope><Project Type>, slashes in the master values dropped
-  //                       (High Level PC TR/253980 -> TR253980);
+  //   Project Category    <High Level PC>/<Scope>/<Project Type>, the master values kept as they are
+  //                       (TR/253986 + NU + FDD -> TR/253986/NU/FDD; no Scope -> TR/253986/FDD);
   //   Project Description <Site ID>_<Site Name>_<Project ID>.
   // Parts whose inputs are not chosen yet stay empty. keepProjectId keeps an already assigned
   // number while the Division and Vendor letters are unchanged (requester edits on step 1).
@@ -2792,7 +2791,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     ]);
     const projectCategory = ar?.highLevelPc && details.projectTypePcc
       ? [ar.highLevelPc, details.scope, details.projectTypePcc].filter(Boolean)
-        .map((part) => String(part).replace(/\//g, "")).join("")
+        .map((part) => String(part).trim()).join("/")
       : "";
 
     let projectId = "";

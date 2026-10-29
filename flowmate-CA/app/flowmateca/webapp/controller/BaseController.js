@@ -297,6 +297,24 @@ sap.ui.define([
       return response.json();
     },
 
+    // Every row of a master-data GET: the services return at most 1000 rows per request on BTP,
+    // so the rows are read page by page ($skip) until all $count rows are in. Returns
+    // { value: rows } like requestMaster. The path needs an $orderby for a stable order.
+    requestMasterAll: async function (path) {
+      const separator = path.indexOf("?") < 0 ? "?" : "&";
+      const rows = [];
+      for (let page = 0; page < 1000; page++) {
+        const result = await this.requestMaster(`${path}${separator}$count=true&$skip=${rows.length}`);
+        const value = (result && result.value) || [];
+        rows.push(...value);
+        const total = Number(result && result["@odata.count"]);
+        if (!value.length || !(rows.length < total)) {
+          break;
+        }
+      }
+      return { value: rows };
+    },
+
     _csrfToken: async function (serviceRoot) {
       const root = serviceRoot || MAIN_SERVICE_URL;
       const cacheKey = root === MAIN_SERVICE_URL ? "_csrfMain" : "_csrfMaster";
@@ -1070,27 +1088,41 @@ ${reasons.join("\n")}`);
     // The dependent cells of imported rows (Site Name from Site ID, Material Description from
     // Material Code, ...), which a file does not trigger the way a pick does. A cell the file
     // filled is kept; codes the catalog does not hold yet are read from the server first.
+    // importFills are the same rules for the import only (the form's pick leaves them alone).
+    // Excel turns an all-digit code into a number and drops its leading zeros, while SAP keeps
+    // material numbers padded to 18 digits: such a code also matches its padded form, and the
+    // cell then takes the master's code.
     _autoFillRows: async function (rows, columns) {
       const catalog = this.getView().getModel("catalog");
-      for (const column of columns.filter(function (entry) { return entry.autoFills && entry.entity; })) {
+      const unpadded = function (code) { return /^\d+$/.test(code) ? code.replace(/^0+(?=\d)/, "") : code; };
+      const fillers = columns.filter(function (entry) { return (entry.autoFills || entry.importFills) && entry.entity; });
+      for (const column of fillers) {
         const key = column.key || "code";
-        const known = new Set((catalog.getProperty(`/${column.entity}`) || []).map(function (row) { return String(row[key]); }));
+        const known = new Set((catalog.getProperty(`/${column.entity}`) || []).map(function (row) { return unpadded(String(row[key])); }));
         const missing = Array.from(new Set(rows.map(function (row) { return String(row[column.name] || "").trim(); })))
-          .filter(function (code) { return code && !known.has(code); });
+          .filter(function (code) { return code && !known.has(unpadded(code)); });
         for (let start = 0; start < missing.length; start += 40) {
           const filter = missing.slice(start, start + 40)
+            .flatMap(function (code) { return /^\d+$/.test(code) ? [code, unpadded(code).padStart(18, "0")] : [code]; })
             .map(function (code) { return `${key} eq '${code.replace(/'/g, "''")}'`; }).join(" or ");
           try {
-            const result = await this._readPickList(column.entity, `${column.entity}?$filter=${encodeURIComponent(filter)}&$top=40`);
+            const result = await this._readPickList(column.entity, `${column.entity}?$filter=${encodeURIComponent(filter)}&$top=80`);
             this._mergeCatalogRows(column.entity, result.value || []);
           } catch (error) {
             Log.error(`Could not load the ${column.entity} rows of the imported file`, error);
           }
         }
-        const lookup = new Map((catalog.getProperty(`/${column.entity}`) || []).map(function (row) { return [String(row[key]), row]; }));
+        const lookup = new Map((catalog.getProperty(`/${column.entity}`) || []).map(function (row) { return [unpadded(String(row[key])), row]; }));
+        // An import-only rule fills its target only where the target is a column shown in the table.
+        const importRules = [].concat(column.importFills || []).filter(function (rule) {
+          const target = columns.find(function (entry) { return entry.name === rule.field; });
+          return target && this._isFieldVisible(target);
+        }.bind(this));
         rows.forEach(function (row) {
-          const match = lookup.get(String(row[column.name] || "").trim());
-          [].concat(column.autoFills).forEach(function (rule) {
+          const code = String(row[column.name] || "").trim();
+          const match = code ? lookup.get(unpadded(code)) : null;
+          row[column.name] = match ? String(match[key]) : code;
+          [].concat(column.autoFills || [], importRules).forEach(function (rule) {
             if (match && !String(row[rule.field] || "").trim()) {
               row[rule.field] = match[rule.from] || "";
             }

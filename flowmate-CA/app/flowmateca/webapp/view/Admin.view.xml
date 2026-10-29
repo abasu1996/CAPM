@@ -23,10 +23,13 @@
             <IconTabFilter key="steps" text="Process Steps" icon="sap-icon://process">
               <Toolbar class="caSectionToolbar">
                 <Title text="Workflow Step Configuration" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_stepsTable" app:fields="stepName"/>
                 <ToolbarSpacer/>
                 <Button text="Add Step" icon="sap-icon://add" type="Emphasized" press=".onAddStep"/>
               </Toolbar>
-              <Table items="{admin>/steps}" growing="true" class="caAdminTable">
+              <Table id="admin_stepsTable"
+        items="{path: 'master>/WorkflowStepConfigs', parameters: {$expand: 'requestType,requestVariant', $orderby: 'requestType_code,requestVariant_code,stepNo', $count: true, $select: 'taskName,activityDescription,requestType_code,requestVariant_code', $$updateGroupId: 'stepsEdits'}}"
+        growingThreshold="50" growing="true" class="caAdminTable">
                 <columns>
                   <Column width="13rem"><Text text="{i18n>requestType}"/></Column>
                   <Column width="14rem"><Text text="{i18n>requestVariant}"/></Column>
@@ -40,18 +43,18 @@
                 <items>
                   <ColumnListItem>
                     <cells>
-                      <Text text="{admin>requestType/name}"/>
-                      <Text text="{admin>requestVariant/name}"/>
-                      <Input value="{admin>stepNo}" type="Number"/>
-                      <Input value="{admin>stepName}"/>
-                      <ComboBox selectedKey="{admin>processorTeam_ID}" items="{admin>/teams}">
+                      <Text text="{master>requestType/name}"/>
+                      <Text text="{master>requestVariant/name}"/>
+                      <Input value="{master>stepNo}" type="Number"/>
+                      <Input value="{master>stepName}"/>
+                      <ComboBox selectedKey="{master>processorTeam_ID}" items="{admin>/teams}">
                         <core:Item key="{admin>ID}" text="{admin>name}"/>
                       </ComboBox>
-                      <Switch state="{admin>isMandatory}" customTextOn="Yes" customTextOff="No"/>
-                      <StepInput value="{admin>slaDays}" min="1" max="30" width="5rem"/>
+                      <Switch state="{master>isMandatory}" customTextOn="Yes" customTextOff="No"/>
+                      <StepInput value="{master>slaDays}" min="1" max="30" width="5rem"/>
                       <HBox>
                         <Button icon="sap-icon://edit" type="Transparent" tooltip="Edit" press=".onEditStep"/>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveStep"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeleteStep"/>
                       </HBox>
                     </cells>
@@ -63,10 +66,13 @@
             <IconTabFilter key="types" text="Process Catalog" icon="sap-icon://list">
               <Toolbar class="caSectionToolbar">
                 <Title text="Process Types and Variants" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_variantsTable" app:fields="code,description,name"/>
                 <ToolbarSpacer/>
                 <Button text="Add Variant" icon="sap-icon://add" type="Emphasized" press=".onAddVariant"/>
               </Toolbar>
-              <Table items="{admin>/variants}" growing="true" class="caAdminTable">
+              <Table id="admin_variantsTable"
+        items="{path: 'master>/RequestVariants', parameters: {$expand: 'requestType', $orderby: 'requestType_code,sortOrder', $count: true, $$updateGroupId: 'variantsEdits'}}"
+        growingThreshold="50" growing="true" class="caAdminTable">
                 <columns>
                   <Column width="14rem"><Text text="{i18n>requestType}"/></Column>
                   <Column width="12rem"><Text text="Code"/></Column>
@@ -78,13 +84,13 @@
                 <items>
                   <ColumnListItem>
                     <cells>
-                      <Text text="{admin>requestType/name}"/>
-                      <Text text="{admin>code}"/>
-                      <Input value="{admin>name}"/>
-                      <Input value="{admin>description}"/>
-                      <Switch state="{admin>isActive}"/>
+                      <Text text="{master>requestType/name}"/>
+                      <Text text="{master>code}"/>
+                      <Input value="{master>name}"/>
+                      <Input value="{master>description}"/>
+                      <Switch state="{master>isActive}"/>
                       <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveVariant"/>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveAdminRow"/>
                         <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteVariant"/>
                       </HBox>
                     </cells>
@@ -96,10 +102,13 @@
             <IconTabFilter key="users" text="Users" icon="sap-icon://employee">
               <Toolbar class="caSectionToolbar">
                 <Title text="Users" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_usersTable" app:fields="displayName,email"/>
                 <ToolbarSpacer/>
                 <Button text="Add User" icon="sap-icon://add-employee" type="Emphasized" press=".onAddUser"/>
               </Toolbar>
-              <Table items="{admin>/users}" growing="true" class="caAdminTable">
+              <Table id="admin_usersTable"
+        items="{path: 'master>/Users', parameters: {$expand: 'manager', $orderby: 'displayName', $count: true, $$updateGroupId: 'usersEdits'}}"
+        growingThreshold="50" growing="true" class="caAdminTable">
                 <columns>
                   <Column><Text text="Display Name"/></Column>
                   <Column><Text text="Email"/></Column>
@@ -110,14 +119,14 @@
                 <items>
                   <ColumnListItem>
                     <cells>
-                      <Input value="{admin>displayName}"/>
-                      <Input value="{admin>email}" type="Email"/>
-                      <ComboBox selectedKey="{admin>manager_ID}" items="{admin>/users}" showSecondaryValues="true">
+                      <Input value="{master>displayName}"/>
+                      <Input value="{master>email}" type="Email"/>
+                      <ComboBox selectedKey="{master>manager_ID}" items="{admin>/users}" showSecondaryValues="true">
                         <core:ListItem key="{admin>ID}" text="{admin>displayName}" additionalText="{admin>email}"/>
                       </ComboBox>
-                      <Switch state="{admin>isActive}"/>
+                      <Switch state="{master>isActive}"/>
                       <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveUser"/>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveAdminRow"/>
                         <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteUser"/>
                       </HBox>
                     </cells>
@@ -129,13 +138,16 @@
             <IconTabFilter key="teams" text="Teams" icon="sap-icon://org-chart">
               <Toolbar class="caSectionToolbar">
                 <Title text="Team Structure" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_teamsTable" app:fields="description,name,teamCode"/>
                 <ToolbarSpacer/>
                 <Button text="Add Team" icon="sap-icon://add" type="Emphasized" press=".onAddTeam"/>
               </Toolbar>
               <Tree items="{path: 'admin>/teamTree', parameters: {arrayNames: ['children']}}" mode="None" class="caTeamTree">
                 <StandardTreeItem title="{admin>title}" icon="{admin>icon}" type="Inactive"/>
               </Tree>
-              <Table items="{admin>/teams}" growing="true" class="caAdminTable sapUiSmallMarginTop">
+              <Table id="admin_teamsTable"
+        items="{path: 'master>/Teams', parameters: {$orderby: 'name', $count: true, $$updateGroupId: 'teamsEdits'}}"
+        growingThreshold="50" growing="true" class="caAdminTable sapUiSmallMarginTop">
                 <columns>
                   <Column width="10rem"><Text text="Team Code"/></Column>
                   <Column><Text text="Team Name"/></Column>
@@ -146,13 +158,13 @@
                 <items>
                   <ColumnListItem>
                     <cells>
-                      <Text text="{admin>teamCode}"/>
-                      <Input value="{admin>name}"/>
-                      <Input value="{admin>description}"/>
-                      <Switch state="{admin>isActive}"/>
+                      <Text text="{master>teamCode}"/>
+                      <Input value="{master>name}"/>
+                      <Input value="{master>description}"/>
+                      <Switch state="{master>isActive}"/>
                       <HBox>
                         <Button icon="sap-icon://group" type="Transparent" tooltip="Manage Team" press=".onManageTeam"/>
-                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveTeam"/>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveAdminRow"/>
                         <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteTeam"/>
                       </HBox>
                     </cells>
@@ -164,13 +176,16 @@
             <IconTabFilter key="requesterTeams" text="Requester Team" icon="sap-icon://group">
               <Toolbar class="caSectionToolbar">
                 <Title text="Requester Team Structure" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_requesterTeamsTable" app:fields="description,name,teamCode"/>
                 <ToolbarSpacer/>
                 <Button text="Add Requester Team" icon="sap-icon://add" type="Emphasized" press=".onAddRequesterTeam"/>
               </Toolbar>
               <Tree items="{path: 'admin>/requesterTeamTree', parameters: {arrayNames: ['children']}}" mode="None" class="caTeamTree">
                 <StandardTreeItem title="{admin>title}" icon="{admin>icon}" type="Inactive"/>
               </Tree>
-              <Table items="{admin>/requesterTeams}" growing="true" class="caAdminTable sapUiSmallMarginTop">
+              <Table id="admin_requesterTeamsTable"
+        items="{path: 'master>/RequesterTeams', parameters: {$orderby: 'name', $count: true, $$updateGroupId: 'requesterTeamsEdits'}}"
+        growingThreshold="50" growing="true" class="caAdminTable sapUiSmallMarginTop">
                 <columns>
                   <Column width="10rem"><Text text="Team Code"/></Column>
                   <Column><Text text="Team Name"/></Column>
@@ -181,13 +196,13 @@
                 <items>
                   <ColumnListItem>
                     <cells>
-                      <Text text="{admin>teamCode}"/>
-                      <Input value="{admin>name}"/>
-                      <Input value="{admin>description}"/>
-                      <Switch state="{admin>isActive}"/>
+                      <Text text="{master>teamCode}"/>
+                      <Input value="{master>name}"/>
+                      <Input value="{master>description}"/>
+                      <Switch state="{master>isActive}"/>
                       <HBox>
                         <Button icon="sap-icon://group" type="Transparent" tooltip="Manage Requester Team" press=".onManageRequesterTeam"/>
-                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveRequesterTeam"/>
+                        <Button icon="sap-icon://save" type="Transparent" press=".onSaveAdminRow"/>
                         <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteRequesterTeam"/>
                       </HBox>
                     </cells>
@@ -233,6 +248,7 @@
             <IconTabFilter key="sites" text="Sites" icon="sap-icon://building">
     <Toolbar class="caSectionToolbar">
         <Title text="Site Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_sitesTable" app:fields="siteId,siteName"/>
         <ToolbarSpacer/>
         <Button
             text="Add Site"
@@ -242,9 +258,9 @@
           />
     </Toolbar>
 
-    <Table
-        items="{admin>/sites}"
-        growing="true"
+    <Table id="admin_sitesTable"
+        items="{path: 'master>/Sites', parameters: {$orderby: 'siteName', $count: true, $$updateGroupId: 'sitesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -269,12 +285,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>siteId}"/>
+                    <Text text="{master>siteId}"/>
 
-                    <Input value="{admin>siteName}"/>
+                    <Input value="{master>siteName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -283,7 +299,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveSite"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -371,6 +387,7 @@
 <IconTabFilter key="serviceCodes" text="Service Codes" icon="sap-icon://wrench">
     <Toolbar class="caSectionToolbar">
         <Title text="Service Code Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_serviceCodesTable" app:fields="serviceCode,serviceDescription"/>
         <ToolbarSpacer/>
         <Button
             text="Add Service Code"
@@ -379,9 +396,9 @@
             press=".onAddServiceCode"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/serviceCodes}"
-        growing="true"
+    <Table id="admin_serviceCodesTable"
+        items="{path: 'master>/ServiceCodes', parameters: {$orderby: 'serviceCode', $count: true, $$updateGroupId: 'serviceCodesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -406,12 +423,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>serviceCode}"/>
+                    <Text text="{master>serviceCode}"/>
 
-                    <Input value="{admin>serviceDescription}"/>
+                    <Input value="{master>serviceDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -420,7 +437,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveServiceCode"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -438,6 +455,7 @@
 <IconTabFilter key="poNumbers" text="PO Numbers" icon="sap-icon://sales-order">
     <Toolbar class="caSectionToolbar">
         <Title text="PO Number Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_poNumbersTable" app:fields="poNumber"/>
         <ToolbarSpacer/>
         <Button
             text="Add PO Number"
@@ -446,9 +464,9 @@
             press=".onAddPoNumber"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/poNumbers}"
-        growing="true"
+    <Table id="admin_poNumbersTable"
+        items="{path: 'master>/PoNumbers', parameters: {$orderby: 'poNumber', $count: true, $$updateGroupId: 'poNumbersEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -469,10 +487,10 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>poNumber}"/>
+                    <Text text="{master>poNumber}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -481,7 +499,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSavePoNumber"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -602,6 +620,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Document Type Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_documentTypesTable" app:fields="documentTypeCode,documentTypeDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -611,9 +630,9 @@
             press=".onAddDocumentType"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/documentTypes}"
-        growing="true"
+    <Table id="admin_documentTypesTable"
+        items="{path: 'master>/DocumentTypes', parameters: {$orderby: 'documentTypeCode', $count: true, $$updateGroupId: 'documentTypesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -640,13 +659,13 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>documentTypeCode}"/>
+                    <Text text="{master>documentTypeCode}"/>
 
                     <Input
-                        value="{admin>documentTypeDescription}"/>
+                        value="{master>documentTypeDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -656,7 +675,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveDocumentType"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -684,6 +703,7 @@
         <Title
             text="Purchasing Organization Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_purchasingOrganizationsTable" app:fields="purchasingOrganizationCode,purchasingOrganizationName"/>
 
         <ToolbarSpacer/>
 
@@ -695,9 +715,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/purchasingOrganizations}"
-        growing="true"
+    <Table id="admin_purchasingOrganizationsTable"
+        items="{path: 'master>/PurchasingOrganizations', parameters: {$orderby: 'purchasingOrganizationCode', $count: true, $$updateGroupId: 'purchasingOrganizationsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -727,13 +747,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>purchasingOrganizationCode}"/>
+                        text="{master>purchasingOrganizationCode}"/>
 
                     <Input
-                        value="{admin>purchasingOrganizationName}"/>
+                        value="{master>purchasingOrganizationName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -743,7 +763,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSavePurchasingOrganization"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -774,6 +794,7 @@
         <Title
             text="Company Code Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_companyCodesTable" app:fields="companyCode,companyName"/>
 
         <ToolbarSpacer/>
 
@@ -785,9 +806,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/companyCodes}"
-        growing="true"
+    <Table id="admin_companyCodesTable"
+        items="{path: 'master>/CompanyCodes', parameters: {$orderby: 'companyCode', $count: true, $$updateGroupId: 'companyCodesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -817,13 +838,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>companyCode}"/>
+                        text="{master>companyCode}"/>
 
                     <Input
-                        value="{admin>companyName}"/>
+                        value="{master>companyName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -833,7 +854,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveCompanyCode"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -865,6 +886,7 @@
         <Title
             text="Purchasing Group Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_purchasingGroupsTable" app:fields="purchasingGroupCode,purchasingGroupName"/>
 
         <ToolbarSpacer/>
 
@@ -876,9 +898,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/purchasingGroups}"
-        growing="true"
+    <Table id="admin_purchasingGroupsTable"
+        items="{path: 'master>/PurchasingGroups', parameters: {$orderby: 'purchasingGroupCode', $count: true, $$updateGroupId: 'purchasingGroupsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -907,13 +929,13 @@
 
                 <cells>
 
-                    <Text text="{admin>purchasingGroupCode}"/>
+                    <Text text="{master>purchasingGroupCode}"/>
 
                     <Input
-                        value="{admin>purchasingGroupName}"/>
+                        value="{master>purchasingGroupName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -923,7 +945,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSavePurchasingGroup"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -953,6 +975,7 @@
         <Title
             text="Currency Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_currenciesTable" app:fields="code,name"/>
 
         <ToolbarSpacer/>
 
@@ -964,9 +987,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/currencies}"
-        growing="true"
+    <Table id="admin_currenciesTable"
+        items="{path: 'master>/Currencies', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'currenciesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -996,13 +1019,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{master>code}"/>
 
                     <Input
-                        value="{admin>name}"/>
+                        value="{master>name}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1012,7 +1035,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveCurrency"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1043,6 +1066,7 @@
         <Title
             text="Payment Terms"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_paymentTermsTable" app:fields="code,name"/>
 
         <ToolbarSpacer/>
 
@@ -1054,9 +1078,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/paymentTerms}"
-        growing="true"
+    <Table id="admin_paymentTermsTable"
+        items="{path: 'master>/PaymentTerms', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'paymentTermsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -1086,13 +1110,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{master>code}"/>
 
                     <Input
-                        value="{admin>name}"/>
+                        value="{master>name}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1102,7 +1126,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSavePaymentTerm"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1133,6 +1157,7 @@
         <Title
             text="System Contract Base PO"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_systemContractBasePOTable" app:fields="code,name"/>
 
         <ToolbarSpacer/>
 
@@ -1144,9 +1169,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/systemContractBasePO}"
-        growing="true"
+    <Table id="admin_systemContractBasePOTable"
+        items="{path: 'master>/SystemContractBasePO', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'systemContractBasePOEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -1176,13 +1201,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{master>code}"/>
 
                     <Input
-                        value="{admin>name}"/>
+                        value="{master>name}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1192,7 +1217,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveSystemContractBasePO"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1216,6 +1241,7 @@
 <IconTabFilter key="divisions" text="Divisions" icon="sap-icon://org-chart">
     <Toolbar class="caSectionToolbar">
         <Title text="Divisions Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_divisionsTable" app:fields="divisionCode,divisionName"/>
         <ToolbarSpacer/>
         <Button
             text="Add Division"
@@ -1224,9 +1250,9 @@
             press=".onAddDivision"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/divisions}"
-        growing="true"
+    <Table id="admin_divisionsTable"
+        items="{path: 'master>/Divisions', parameters: {$orderby: 'divisionCode', $count: true, $$updateGroupId: 'divisionsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -1251,12 +1277,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>divisionCode}"/>
+                    <Text text="{master>divisionCode}"/>
 
-                    <Input value="{admin>divisionName}"/>
+                    <Input value="{master>divisionName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1265,7 +1291,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveDivision"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1290,6 +1316,7 @@
         <Title
             text="Procurement Categories Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_procurementCategoriesTable" app:fields="code,name"/>
 
         <ToolbarSpacer/>
 
@@ -1301,9 +1328,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/procurementCategories}"
-        growing="true"
+    <Table id="admin_procurementCategoriesTable"
+        items="{path: 'master>/ProcurementCategories', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'procurementCategoriesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -1333,13 +1360,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{master>code}"/>
 
                     <Input
-                        value="{admin>name}"/>
+                        value="{master>name}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1349,7 +1376,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveProcurementCategory"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1372,6 +1399,7 @@
 <IconTabFilter key="applicableTaxes" text="Applicable Taxes" icon="sap-icon://receipt">
     <Toolbar class="caSectionToolbar">
         <Title text="Applicable Taxes Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_applicableTaxesTable" app:fields="taxCode,taxDescription"/>
         <ToolbarSpacer/>
         <Button
             text="Add Applicable Tax"
@@ -1380,9 +1408,9 @@
             press=".onAddApplicableTax"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/applicableTaxes}"
-        growing="true"
+    <Table id="admin_applicableTaxesTable"
+        items="{path: 'master>/ApplicableTaxes', parameters: {$orderby: 'taxCode', $count: true, $$updateGroupId: 'applicableTaxesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -1411,14 +1439,14 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>taxCode}"/>
+                    <Text text="{master>taxCode}"/>
 
-                    <Input value="{admin>taxDescription}"/>
+                    <Input value="{master>taxDescription}"/>
 
-                    <Input value="{admin>taxRate}" type="Number"/>
+                    <Input value="{master>taxRate}" type="Number"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1427,7 +1455,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveApplicableTax"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1446,10 +1474,13 @@
 <IconTabFilter key="budgetCodes" text="Budget Codes" icon="sap-icon://wallet">
     <Toolbar class="caSectionToolbar">
         <Title text="Budget Code Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_budgetCodesTable" app:fields="budgetCode,budgetCodeDescription"/>
         <ToolbarSpacer/>
         <Button text="Add Budget Code" icon="sap-icon://add" type="Emphasized" press=".onAddBudgetCode"/>
     </Toolbar>
-    <Table items="{admin>/budgetCodes}" growing="true" class="caAdminTable">
+    <Table id="admin_budgetCodesTable"
+        items="{path: 'master>/BudgetCode', parameters: {$orderby: 'budgetCode', $count: true, $$updateGroupId: 'budgetCodesEdits'}}"
+        growingThreshold="50" growing="true" class="caAdminTable">
         <columns>
             <Column width="12rem"><Text text="Budget Code"/></Column>
             <Column><Text text="Budget Code Description"/></Column>
@@ -1459,11 +1490,11 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Text text="{admin>budgetCode}"/>
-                    <Input value="{admin>budgetCodeDescription}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Text text="{master>budgetCode}"/>
+                    <Input value="{master>budgetCodeDescription}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveBudgetCode"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeleteBudgetCode"/>
                     </HBox>
                 </cells>
@@ -1475,10 +1506,12 @@
 <IconTabFilter key="pcc-ar" text="AR for PCC" icon="sap-icon://money-bills">
     <Toolbar class="caSectionToolbar">
         <Title text="AR for PCC" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_pcc_arTable" app:fields="ar,division,highLevelPc,lastFourDigits,portfolio,srNo,year"/>
         <ToolbarSpacer/>
         <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="ar"/>
     </Toolbar>
-    <Table items="{admin>/pcc/ar}" growing="true" growingThreshold="50" class="caAdminTable">
+    <Table id="admin_pcc_arTable"
+        items="{path: 'master>/ArPcc', parameters: {$orderby: 'srNo', $count: true, $$updateGroupId: 'pcc_arEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
         <columns>
             <Column width="5rem"><Text text="ID"/></Column>
             <Column><Text text="Portfolio"/></Column>
@@ -1493,16 +1526,16 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Input value="{admin>srNo}"/>
-                    <Input value="{admin>portfolio}"/>
-                    <Input value="{admin>ar}"/>
-                    <Input value="{admin>division}"/>
-                    <Input value="{admin>lastFourDigits}"/>
-                    <Input value="{admin>year}"/>
-                    <Input value="{admin>highLevelPc}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Input value="{master>srNo}"/>
+                    <Input value="{master>portfolio}"/>
+                    <Input value="{master>ar}"/>
+                    <Input value="{master>division}"/>
+                    <Input value="{master>lastFourDigits}"/>
+                    <Input value="{master>year}"/>
+                    <Input value="{master>highLevelPc}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="ar"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow" app:pcc="ar"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="ar"/>
                     </HBox>
                 </cells>
@@ -1514,10 +1547,12 @@
 <IconTabFilter key="pcc-vendors" text="Vendors for PCC" icon="sap-icon://supplier">
     <Toolbar class="caSectionToolbar">
         <Title text="Vendors for PCC" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_pcc_vendorsTable" app:fields="srNo,vendor,vendorLetter"/>
         <ToolbarSpacer/>
         <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="vendors"/>
     </Toolbar>
-    <Table items="{admin>/pcc/vendors}" growing="true" growingThreshold="50" class="caAdminTable">
+    <Table id="admin_pcc_vendorsTable"
+        items="{path: 'master>/VendorsPcc', parameters: {$orderby: 'srNo', $count: true, $$updateGroupId: 'pcc_vendorsEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
         <columns>
             <Column width="5rem"><Text text="ID"/></Column>
             <Column><Text text="Vendor"/></Column>
@@ -1528,12 +1563,12 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Input value="{admin>srNo}"/>
-                    <Input value="{admin>vendor}"/>
-                    <Input value="{admin>vendorLetter}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Input value="{master>srNo}"/>
+                    <Input value="{master>vendor}"/>
+                    <Input value="{master>vendorLetter}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="vendors"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow" app:pcc="vendors"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="vendors"/>
                     </HBox>
                 </cells>
@@ -1545,10 +1580,12 @@
 <IconTabFilter key="pcc-divisions" text="Divisions for PCC" icon="sap-icon://org-chart">
     <Toolbar class="caSectionToolbar">
         <Title text="Divisions for PCC" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_pcc_divisionsTable" app:fields="division,divisionLetter,srNo"/>
         <ToolbarSpacer/>
         <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="divisions"/>
     </Toolbar>
-    <Table items="{admin>/pcc/divisions}" growing="true" growingThreshold="50" class="caAdminTable">
+    <Table id="admin_pcc_divisionsTable"
+        items="{path: 'master>/DivisionsPcc', parameters: {$orderby: 'srNo', $count: true, $$updateGroupId: 'pcc_divisionsEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
         <columns>
             <Column width="5rem"><Text text="ID"/></Column>
             <Column><Text text="Division"/></Column>
@@ -1559,12 +1596,12 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Input value="{admin>srNo}"/>
-                    <Input value="{admin>division}"/>
-                    <Input value="{admin>divisionLetter}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Input value="{master>srNo}"/>
+                    <Input value="{master>division}"/>
+                    <Input value="{master>divisionLetter}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="divisions"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow" app:pcc="divisions"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="divisions"/>
                     </HBox>
                 </cells>
@@ -1576,10 +1613,12 @@
 <IconTabFilter key="pcc-scope" text="Scope for PCC" icon="sap-icon://target-group">
     <Toolbar class="caSectionToolbar">
         <Title text="Scope for PCC" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_pcc_scopeTable" app:fields="scope"/>
         <ToolbarSpacer/>
         <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="scope"/>
     </Toolbar>
-    <Table items="{admin>/pcc/scope}" growing="true" growingThreshold="50" class="caAdminTable">
+    <Table id="admin_pcc_scopeTable"
+        items="{path: 'master>/ScopePcc', parameters: {$orderby: 'scope', $count: true, $$updateGroupId: 'pcc_scopeEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
         <columns>
             <Column><Text text="Scope"/></Column>
             <Column width="7rem"><Text text="Active"/></Column>
@@ -1588,10 +1627,10 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Input value="{admin>scope}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Input value="{master>scope}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="scope"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow" app:pcc="scope"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="scope"/>
                     </HBox>
                 </cells>
@@ -1603,10 +1642,12 @@
 <IconTabFilter key="pcc-projectType" text="Project Type for PCC" icon="sap-icon://product">
     <Toolbar class="caSectionToolbar">
         <Title text="Project Type for PCC" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_pcc_projectTypeTable" app:fields="projectType"/>
         <ToolbarSpacer/>
         <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="projectType"/>
     </Toolbar>
-    <Table items="{admin>/pcc/projectType}" growing="true" growingThreshold="50" class="caAdminTable">
+    <Table id="admin_pcc_projectTypeTable"
+        items="{path: 'master>/ProjectTypePcc', parameters: {$orderby: 'projectType', $count: true, $$updateGroupId: 'pcc_projectTypeEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
         <columns>
             <Column><Text text="Project Type"/></Column>
             <Column width="7rem"><Text text="Active"/></Column>
@@ -1615,10 +1656,10 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Input value="{admin>projectType}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Input value="{master>projectType}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="projectType"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow" app:pcc="projectType"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="projectType"/>
                     </HBox>
                 </cells>
@@ -1629,10 +1670,12 @@
 <IconTabFilter key="productHierarchy" text="Product Hierarchy" icon="sap-icon://tree">
     <Toolbar class="caSectionToolbar">
         <Title text="Product Hierarchy" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_pcc_productHierarchyTable" app:fields="productHierarchyCode,productHierarchyDescription"/>
         <ToolbarSpacer/>
         <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="productHierarchy"/>
     </Toolbar>
-    <Table items="{admin>/pcc/productHierarchy}" growing="true" growingThreshold="50" class="caAdminTable">
+    <Table id="admin_pcc_productHierarchyTable"
+        items="{path: 'master>/ProductHierarchy', parameters: {$orderby: 'productHierarchyCode', $count: true, $$updateGroupId: 'pcc_productHierarchyEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
         <columns>
             <Column width="14rem"><Text text="Product Hierarchy Code"/></Column>
             <Column><Text text="Description"/></Column>
@@ -1642,11 +1685,11 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Input value="{admin>productHierarchyCode}"/>
-                    <Input value="{admin>productHierarchyDescription}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Input value="{master>productHierarchyCode}"/>
+                    <Input value="{master>productHierarchyDescription}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="productHierarchy"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow" app:pcc="productHierarchy"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="productHierarchy"/>
                     </HBox>
                 </cells>
@@ -1657,10 +1700,12 @@
 <IconTabFilter key="materialType" text="Material Type" icon="sap-icon://product">
     <Toolbar class="caSectionToolbar">
         <Title text="Material Type" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_pcc_materialTypeTable" app:fields="materialTypeCode,materialTypeDescription"/>
         <ToolbarSpacer/>
         <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="materialType"/>
     </Toolbar>
-    <Table items="{admin>/pcc/materialType}" growing="true" growingThreshold="50" class="caAdminTable">
+    <Table id="admin_pcc_materialTypeTable"
+        items="{path: 'master>/MaterialType', parameters: {$orderby: 'materialTypeCode', $count: true, $$updateGroupId: 'pcc_materialTypeEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
         <columns>
             <Column width="14rem"><Text text="Material Type Code"/></Column>
             <Column><Text text="Description"/></Column>
@@ -1670,11 +1715,11 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Input value="{admin>materialTypeCode}"/>
-                    <Input value="{admin>materialTypeDescription}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Input value="{master>materialTypeCode}"/>
+                    <Input value="{master>materialTypeDescription}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="materialType"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow" app:pcc="materialType"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="materialType"/>
                     </HBox>
                 </cells>
@@ -1685,10 +1730,12 @@
 <IconTabFilter key="taxClass" text="Tax Class" icon="sap-icon://money-bills">
     <Toolbar class="caSectionToolbar">
         <Title text="Tax Class" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_pcc_taxClassTable" app:fields="taxClassCode,taxClassDescription"/>
         <ToolbarSpacer/>
         <Button text="Add" icon="sap-icon://add" type="Emphasized" press=".onAddPcc" app:pcc="taxClass"/>
     </Toolbar>
-    <Table items="{admin>/pcc/taxClass}" growing="true" growingThreshold="50" class="caAdminTable">
+    <Table id="admin_pcc_taxClassTable"
+        items="{path: 'master>/TaxClass', parameters: {$orderby: 'taxClassCode', $count: true, $$updateGroupId: 'pcc_taxClassEdits'}}" growing="true" growingThreshold="50" class="caAdminTable">
         <columns>
             <Column width="14rem"><Text text="Tax Class Code"/></Column>
             <Column><Text text="Description"/></Column>
@@ -1698,11 +1745,11 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Input value="{admin>taxClassCode}"/>
-                    <Input value="{admin>taxClassDescription}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Input value="{master>taxClassCode}"/>
+                    <Input value="{master>taxClassDescription}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSavePcc" app:pcc="taxClass"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow" app:pcc="taxClass"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeletePcc" app:pcc="taxClass"/>
                     </HBox>
                 </cells>
@@ -1714,6 +1761,7 @@
 <IconTabFilter key="plant" text="Plants" icon="sap-icon://factory">
     <Toolbar class="caSectionToolbar">
         <Title text="Plants Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_plantTable" app:fields="plantCode,plantName"/>
         <ToolbarSpacer/>
         <Button
             text="Add Plant"
@@ -1722,9 +1770,9 @@
             press=".onAddPlant"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/plant}"
-        growing="true"
+    <Table id="admin_plantTable"
+        items="{path: 'master>/Plant', parameters: {$orderby: 'plantCode', $count: true, $$updateGroupId: 'plantEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -1749,12 +1797,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>plantCode}"/>
+                    <Text text="{master>plantCode}"/>
 
-                    <Input value="{admin>plantName}"/>
+                    <Input value="{master>plantName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1763,7 +1811,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSavePlant"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1788,6 +1836,7 @@
         <Title
             text="Item Categories Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_itemCategoriesTable" app:fields="code,name"/>
 
         <ToolbarSpacer/>
 
@@ -1799,9 +1848,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/itemCategories}"
-        growing="true"
+    <Table id="admin_itemCategoriesTable"
+        items="{path: 'master>/ItemCategories', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'itemCategoriesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -1831,13 +1880,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{master>code}"/>
 
                     <Input
-                        value="{admin>name}"/>
+                        value="{master>name}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1847,7 +1896,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveItemCategory"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1877,6 +1926,7 @@
         <Title
             text="Account Assignment Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_accountAssignmentsTable" app:fields="code,description"/>
 
         <ToolbarSpacer/>
 
@@ -1888,9 +1938,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/accountAssignments}"
-        growing="true"
+    <Table id="admin_accountAssignmentsTable"
+        items="{path: 'master>/AccountAssignments', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'accountAssignmentsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -1920,13 +1970,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{master>code}"/>
 
                     <Input
-                        value="{admin>description}"/>
+                        value="{master>description}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -1936,7 +1986,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveAccountAssignment"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -1966,6 +2016,7 @@
         <Title
             text="Service Category Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_serviceCategoriesTable" app:fields="code,description"/>
 
         <ToolbarSpacer/>
 
@@ -1977,9 +2028,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/serviceCategories}"
-        growing="true"
+    <Table id="admin_serviceCategoriesTable"
+        items="{path: 'master>/ServiceCategories', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'serviceCategoriesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2009,13 +2060,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{master>code}"/>
 
                     <Input
-                        value="{admin>description}"/>
+                        value="{master>description}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2025,7 +2076,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveServiceCategories"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2055,6 +2106,7 @@
         <Title
             text="Unit of Measure Master"
             level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_unitsOfMeasureTable" app:fields="code,description,name"/>
 
         <ToolbarSpacer/>
 
@@ -2066,9 +2118,9 @@
 
     </Toolbar>
 
-    <Table
-        items="{admin>/unitsOfMeasure}"
-        growing="true"
+    <Table id="admin_unitsOfMeasureTable"
+        items="{path: 'master>/UnitsOfMeasure', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'unitsOfMeasureEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2102,16 +2154,16 @@
                 <cells>
 
                     <Text
-                        text="{admin>code}"/>
+                        text="{master>code}"/>
 
                     <Input
-                        value="{admin>name}"/>
+                        value="{master>name}"/>
 
                     <Input
-                        value="{admin>description}"/>
+                        value="{master>description}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2121,7 +2173,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveUnitOfMeasure"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2145,6 +2197,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Service Group Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_serviceGroupsTable" app:fields="servicegroupCode,servicegroupDescription"/>
         <ToolbarSpacer/>
         <Button
             text="Add Service Group"
@@ -2153,9 +2206,9 @@
             press=".onAddServiceGroup"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/serviceGroups}"
-        growing="true"
+    <Table id="admin_serviceGroupsTable"
+        items="{path: 'master>/ServiceGroups', parameters: {$orderby: 'servicegroupCode', $count: true, $$updateGroupId: 'serviceGroupsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2180,12 +2233,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>servicegroupCode}"/>
+                    <Text text="{master>servicegroupCode}"/>
 
-                    <Input value="{admin>servicegroupDescription}"/>
+                    <Input value="{master>servicegroupDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2194,7 +2247,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveServiceGroup"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2214,6 +2267,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Valuation Class Master - Material Code Creation (MCC)" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_valuationClassesTable" app:fields="valuationclassCode,valuationclassDescription"/>
         <ToolbarSpacer/>
         <Button
             text="Add Valuation Class"
@@ -2222,9 +2276,9 @@
             press=".onAddValuationClass"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/valuationClasses}"
-        growing="true"
+    <Table id="admin_valuationClassesTable"
+        items="{path: 'master>/ValuationClass', parameters: {$orderby: 'valuationclassCode', $count: true, $$updateGroupId: 'valuationClassesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2249,12 +2303,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>valuationclassCode}"/>
+                    <Text text="{master>valuationclassCode}"/>
 
-                    <Input value="{admin>valuationclassDescription}"/>
+                    <Input value="{master>valuationclassDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2263,7 +2317,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveValuationClass"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2284,6 +2338,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Valuation Class Master - Service Code Creation (SCC)" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_valuationClassesSccTable" app:fields="valuationclassCode,valuationclassDescription"/>
         <ToolbarSpacer/>
         <Button
             text="Add Valuation Class"
@@ -2292,9 +2347,9 @@
             press=".onAddValuationClassScc"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/valuationClassesScc}"
-        growing="true"
+    <Table id="admin_valuationClassesSccTable"
+        items="{path: 'master>/ValuationClassScc', parameters: {$orderby: 'valuationclassCode', $count: true, $$updateGroupId: 'valuationClassesSccEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2319,12 +2374,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>valuationclassCode}"/>
+                    <Text text="{master>valuationclassCode}"/>
 
-                    <Input value="{admin>valuationclassDescription}"/>
+                    <Input value="{master>valuationclassDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2333,7 +2388,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveValuationClass"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2354,6 +2409,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Entity Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_entitiesTable" app:fields="code,description"/>
         <ToolbarSpacer/>
         <Button
             text="Add Entity"
@@ -2362,9 +2418,9 @@
             press=".onAddEntity"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/entities}"
-        growing="true"
+    <Table id="admin_entitiesTable"
+        items="{path: 'master>/Entity', parameters: {$orderby: 'code', $count: true, $$updateGroupId: 'entitiesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2389,12 +2445,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>code}"/>
+                    <Text text="{master>code}"/>
 
-                    <Input value="{admin>description}"/>
+                    <Input value="{master>description}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2403,7 +2459,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveEntity"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2424,6 +2480,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Projects Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_projectsTable" app:fields="projectCategory,projectDescription,projectID"/>
         <ToolbarSpacer/>
 
         <Button
@@ -2433,9 +2490,9 @@
             press=".onAddProject"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/projects}"
-        growing="true"
+    <Table id="admin_projectsTable"
+        items="{path: 'master>/Projects', parameters: {$orderby: 'projectID', $count: true, $$updateGroupId: 'projectsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2468,14 +2525,14 @@
 
                 <cells>
 
-                    <Text text="{admin>projectID}"/>
+                    <Text text="{master>projectID}"/>
 
-                    <Input value="{admin>projectCategory}"/>
+                    <Input value="{master>projectCategory}"/>
 
-                    <Input value="{admin>projectDescription}"/>
+                    <Input value="{master>projectDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2485,7 +2542,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveProject"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2509,6 +2566,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Material Group Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_matGroupsTable" app:fields="matGroupCode,matGroupDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -2518,9 +2576,9 @@
             press=".onAddMatGroup"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/matGroups}"
-        growing="true"
+    <Table id="admin_matGroupsTable"
+        items="{path: 'master>/MatGroup', parameters: {$orderby: 'matGroupCode', $count: true, $$updateGroupId: 'matGroupsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2549,12 +2607,12 @@
 
                 <cells>
 
-                    <Text text="{admin>matGroupCode}"/>
+                    <Text text="{master>matGroupCode}"/>
 
-                    <Input value="{admin>matGroupDescription}"/>
+                    <Input value="{master>matGroupDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2564,7 +2622,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveMatGroup"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2588,6 +2646,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Extension Material Group Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_extensionMaterialGroupsTable" app:fields="extensionMaterialGroupCode,extensionMaterialGroupDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -2597,9 +2656,9 @@
             press=".onAddExtensionMaterialGroup"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/extensionMaterialGroups}"
-        growing="true"
+    <Table id="admin_extensionMaterialGroupsTable"
+        items="{path: 'master>/ExtensionMaterialGroup', parameters: {$orderby: 'extensionMaterialGroupCode', $count: true, $$updateGroupId: 'extensionMaterialGroupsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2629,13 +2688,13 @@
                 <cells>
 
                     <Text
-                        text="{admin>extensionMaterialGroupCode}"/>
+                        text="{master>extensionMaterialGroupCode}"/>
 
                     <Input
-                        value="{admin>extensionMaterialGroupDescription}"/>
+                        value="{master>extensionMaterialGroupDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2645,7 +2704,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveExtensionMaterialGroup"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2669,6 +2728,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Profit Center Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_profitCentersTable" app:fields="profitCenterCode,profitCenterDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -2678,9 +2738,9 @@
             press=".onAddProfitCenter"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/profitCenters}"
-        growing="true"
+    <Table id="admin_profitCentersTable"
+        items="{path: 'master>/ProfitCenter', parameters: {$orderby: 'profitCenterCode', $count: true, $$updateGroupId: 'profitCentersEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2708,12 +2768,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>profitCenterCode}"/>
+                    <Text text="{master>profitCenterCode}"/>
 
-                    <Input value="{admin>profitCenterDescription}"/>
+                    <Input value="{master>profitCenterDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2723,7 +2783,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveProfitCenter"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2746,6 +2806,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="MRP Type Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_mrpTypesTable" app:fields="mrpTypeCode,mrpTypeDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -2755,9 +2816,9 @@
             press=".onAddMRPType"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/mrpTypes}"
-        growing="true"
+    <Table id="admin_mrpTypesTable"
+        items="{path: 'master>/MRPType', parameters: {$orderby: 'mrpTypeCode', $count: true, $$updateGroupId: 'mrpTypesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2782,12 +2843,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>mrpTypeCode}"/>
+                    <Text text="{master>mrpTypeCode}"/>
 
-                    <Input value="{admin>mrpTypeDescription}"/>
+                    <Input value="{master>mrpTypeDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2796,7 +2857,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveMRPType"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2817,6 +2878,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Availability Check Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_availabilityChecksTable" app:fields="availabilityCheckCode,availabilityCheckDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -2826,9 +2888,9 @@
             press=".onAddAvailabilityCheck"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/availabilityChecks}"
-        growing="true"
+    <Table id="admin_availabilityChecksTable"
+        items="{path: 'master>/AvailabilityCheck', parameters: {$orderby: 'availabilityCheckCode', $count: true, $$updateGroupId: 'availabilityChecksEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2853,12 +2915,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>availabilityCheckCode}"/>
+                    <Text text="{master>availabilityCheckCode}"/>
 
-                    <Input value="{admin>availabilityCheckDescription}"/>
+                    <Input value="{master>availabilityCheckDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2867,7 +2929,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveAvailabilityCheck"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2888,6 +2950,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Serial Number Profile Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_serialNumberProfilesTable" app:fields="serialNumberProfileCode,serialNumberProfileDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -2897,9 +2960,9 @@
             press=".onAddSerialNumberProfile"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/serialNumberProfiles}"
-        growing="true"
+    <Table id="admin_serialNumberProfilesTable"
+        items="{path: 'master>/SerialNumberProfile', parameters: {$orderby: 'serialNumberProfileCode', $count: true, $$updateGroupId: 'serialNumberProfilesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2924,12 +2987,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>serialNumberProfileCode}"/>
+                    <Text text="{master>serialNumberProfileCode}"/>
 
-                    <Input value="{admin>serialNumberProfileDescription}"/>
+                    <Input value="{master>serialNumberProfileDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -2938,7 +3001,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveSerialNumberProfile"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -2959,6 +3022,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Distribution Channel Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_distributionChannelsTable" app:fields="distributionChannelCode,distributionChannelDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -2968,9 +3032,9 @@
             press=".onAddDistributionChannel"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/distributionChannels}"
-        growing="true"
+    <Table id="admin_distributionChannelsTable"
+        items="{path: 'master>/DistributionChannel', parameters: {$orderby: 'distributionChannelCode', $count: true, $$updateGroupId: 'distributionChannelsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -2995,12 +3059,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>distributionChannelCode}"/>
+                    <Text text="{master>distributionChannelCode}"/>
 
-                    <Input value="{admin>distributionChannelDescription}"/>
+                    <Input value="{master>distributionChannelDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -3009,7 +3073,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveDistributionChannel"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -3029,6 +3093,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="AR Reference Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_arReferencesTable" app:fields="arReferenceCode,arReferenceDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -3038,9 +3103,9 @@
             press=".onAddArReference"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/arReferences}"
-        growing="true"
+    <Table id="admin_arReferencesTable"
+        items="{path: 'master>/ArReferences', parameters: {$orderby: 'arReferenceCode', $count: true, $$updateGroupId: 'arReferencesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -3065,12 +3130,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>arReferenceCode}"/>
+                    <Text text="{master>arReferenceCode}"/>
 
-                    <Input value="{admin>arReferenceDescription}"/>
+                    <Input value="{master>arReferenceDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -3079,7 +3144,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveArReference"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -3099,6 +3164,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Storage Location Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_storageLocationsTable" app:fields="storageLocationCode,storageLocationName"/>
         <ToolbarSpacer/>
 
         <Button
@@ -3108,9 +3174,9 @@
             press=".onAddStorageLocation"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/storageLocations}"
-        growing="true"
+    <Table id="admin_storageLocationsTable"
+        items="{path: 'master>/StorageLocation', parameters: {$orderby: 'storageLocationCode', $count: true, $$updateGroupId: 'storageLocationsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -3135,12 +3201,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>storageLocationCode}"/>
+                    <Text text="{master>storageLocationCode}"/>
 
-                    <Input value="{admin>storageLocationName}"/>
+                    <Input value="{master>storageLocationName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -3150,7 +3216,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveStorageLocation"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -3171,6 +3237,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Sales Organization Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_salesOrgsTable" app:fields="salesOrgCode,salesOrgName"/>
         <ToolbarSpacer/>
 
         <Button
@@ -3180,9 +3247,9 @@
             press=".onAddSalesOrg"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/salesOrgs}"
-        growing="true"
+    <Table id="admin_salesOrgsTable"
+        items="{path: 'master>/SalesOrg', parameters: {$orderby: 'salesOrgCode', $count: true, $$updateGroupId: 'salesOrgsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -3207,12 +3274,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>salesOrgCode}"/>
+                    <Text text="{master>salesOrgCode}"/>
 
-                    <Input value="{admin>salesOrgName}"/>
+                    <Input value="{master>salesOrgName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -3222,7 +3289,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveSalesOrg"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -3243,6 +3310,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Incoterms Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_incotermsTable" app:fields="incotermsCode,incotermsDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -3252,9 +3320,9 @@
             press=".onAddIncoterm"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/incoterms}"
-        growing="true"
+    <Table id="admin_incotermsTable"
+        items="{path: 'master>/Incoterms', parameters: {$orderby: 'incotermsCode', $count: true, $$updateGroupId: 'incotermsEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -3279,12 +3347,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>incotermsCode}"/>
+                    <Text text="{master>incotermsCode}"/>
 
-                    <Input value="{admin>incotermsDescription}"/>
+                    <Input value="{master>incotermsDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -3294,7 +3362,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveIncoterm"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -3316,6 +3384,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Contract Type Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_contractTypesTable" app:fields="contractTypeCode,contractTypeDescription"/>
         <ToolbarSpacer/>
 
         <Button
@@ -3325,9 +3394,9 @@
             press=".onAddContractType"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/contractTypes}"
-        growing="true"
+    <Table id="admin_contractTypesTable"
+        items="{path: 'master>/ContractType', parameters: {$orderby: 'contractTypeCode', $count: true, $$updateGroupId: 'contractTypesEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -3352,12 +3421,12 @@
             <ColumnListItem>
                 <cells>
 
-                    <Text text="{admin>contractTypeCode}"/>
+                    <Text text="{master>contractTypeCode}"/>
 
-                    <Input value="{admin>contractTypeDescription}"/>
+                    <Input value="{master>contractTypeDescription}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -3366,7 +3435,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveContractType"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -3389,6 +3458,7 @@
 
     <Toolbar class="caSectionToolbar">
         <Title text="Cost Center Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_costCentersTable" app:fields="costCenterCode,costCenterName"/>
         <ToolbarSpacer/>
 
         <Button
@@ -3398,9 +3468,9 @@
             press=".onAddCostCenter"/>
     </Toolbar>
 
-    <Table
-        items="{admin>/costCenters}"
-        growing="true"
+    <Table id="admin_costCentersTable"
+        items="{path: 'master>/CostCenter', parameters: {$orderby: 'costCenterCode', $count: true, $$updateGroupId: 'costCentersEdits'}}"
+        growingThreshold="50" growing="true"
         class="caAdminTable">
 
         <columns>
@@ -3429,13 +3499,13 @@
 
                 <cells>
 
-                    <Text text="{admin>costCenterCode}"/>
+                    <Text text="{master>costCenterCode}"/>
 
                     <Input
-                        value="{admin>costCenterName}"/>
+                        value="{master>costCenterName}"/>
 
                     <Switch
-                        state="{admin>isActive}"
+                        state="{master>isActive}"
                         customTextOn="Yes"
                         customTextOff="No"/>
 
@@ -3445,7 +3515,7 @@
                             icon="sap-icon://save"
                             type="Transparent"
                             tooltip="{i18n>save}"
-                            press=".onSaveCostCenter"/>
+                            press=".onSaveAdminRow"/>
 
                         <Button
                             icon="sap-icon://delete"
@@ -3468,10 +3538,13 @@
 <IconTabFilter key="budgetCodes" text="Budget Codes" icon="sap-icon://wallet">
     <Toolbar class="caSectionToolbar">
         <Title text="Budget Code Master" level="H3"/>
+        <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_budgetCodes2Table" app:fields="budgetCode,budgetCodeDescription"/>
         <ToolbarSpacer/>
         <Button text="Add Budget Code" icon="sap-icon://add" type="Emphasized" press=".onAddBudgetCode"/>
     </Toolbar>
-    <Table items="{admin>/budgetCodes}" growing="true" class="caAdminTable">
+    <Table id="admin_budgetCodes2Table"
+        items="{path: 'master>/BudgetCode', parameters: {$orderby: 'budgetCode', $count: true, $$updateGroupId: 'budgetCodes2Edits'}}"
+        growingThreshold="50" growing="true" class="caAdminTable">
         <columns>
             <Column width="12rem"><Text text="Budget Code"/></Column>
             <Column><Text text="Budget Code Description"/></Column>
@@ -3481,11 +3554,11 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Text text="{admin>budgetCode}"/>
-                    <Input value="{admin>budgetCodeDescription}"/>
-                    <Switch state="{admin>isActive}" customTextOn="Yes" customTextOff="No"/>
+                    <Text text="{master>budgetCode}"/>
+                    <Input value="{master>budgetCodeDescription}"/>
+                    <Switch state="{master>isActive}" customTextOn="Yes" customTextOff="No"/>
                     <HBox>
-                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveBudgetCode"/>
+                        <Button icon="sap-icon://save" type="Transparent" tooltip="{i18n>save}" press=".onSaveAdminRow"/>
                         <Button icon="sap-icon://delete" type="Transparent" tooltip="{i18n>delete}" press=".onDeleteBudgetCode"/>
                     </HBox>
                 </cells>

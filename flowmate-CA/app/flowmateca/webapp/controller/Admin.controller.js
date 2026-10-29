@@ -132,110 +132,7 @@ sap.ui.define([
     onRefresh: async function () {
       this.setBusy(true);
       try {
-        const [steps, requestTypes, variants, users, teams, teamMembers, sites,
-          serviceCodes, poNumbers,
-          purchasingOrganizations, documentTypes, companyCodes, purchasingGroups, divisions,
-          applicableTaxes, plant, serviceGroups, valuationClasses, valuationClassesScc, storageLocations,
-          salesOrgs, incoterms, costCenters, currencies, paymentTerms, systemContractBasePO,
-          procurementCategories, itemCategories, accountAssignments, serviceCategories,
-          unitsOfMeasure, entities, projects, matGroups, extensionMaterialGroups, profitCenters,
-          mrpTypes, availabilityChecks, serialNumberProfiles, distributionChannels, arReferences,
-          contractTypes, budgetCodes, requesterTeams, requesterTeamMembers] = await Promise.all([
-          this.requestMaster("WorkflowStepConfigs?$expand=requestType,requestVariant&$orderby=requestType_code,requestVariant_code,stepNo"),
-          this.requestMaster("RequestTypes?$orderby=sortOrder"),
-          this.requestMaster("RequestVariants?$expand=requestType&$orderby=requestType_code,sortOrder"),
-          this.requestMaster("Users?$expand=manager&$orderby=displayName"),
-          this.requestMaster("Teams?$orderby=name"),
-          this.requestMaster("TeamMembers?$expand=user,team"),
-          this.requestMaster("Sites?$orderby=siteName"),
-          this.requestMaster("ServiceCodes?$orderby=serviceCode"),
-          this.requestMaster("PoNumbers?$orderby=poNumber"),
-          this.requestMaster("PurchasingOrganizations?$orderby=purchasingOrganizationCode"),
-          this.requestMaster("DocumentTypes?$orderby=documentTypeCode"),
-          this.requestMaster("CompanyCodes?$orderby=companyCode"),
-          this.requestMaster("PurchasingGroups?$orderby=purchasingGroupCode"),
-          this.requestMaster("Divisions?$orderby=divisionCode"),
-          this.requestMaster("ApplicableTaxes?$orderby=taxCode"),
-          this.requestMaster("Plant?$orderby=plantCode"),
-          this.requestMaster("ServiceGroups?$orderby=servicegroupCode"),
-          this.requestMaster("ValuationClass?$orderby=valuationclassCode"),
-          this.requestMaster("ValuationClassScc?$orderby=valuationclassCode"),
-          this.requestMaster("StorageLocation?$orderby=storageLocationCode"),
-          this.requestMaster("SalesOrg?$orderby=salesOrgCode"),
-          this.requestMaster("Incoterms?$orderby=incotermsCode"),
-          this.requestMaster("CostCenter?$orderby=costCenterCode"),
-          this.requestMaster("Currencies?$orderby=code"),
-          this.requestMaster("PaymentTerms?$orderby=code"),
-          this.requestMaster("SystemContractBasePO?$orderby=code"),
-          this.requestMaster("ProcurementCategories?$orderby=code"),
-          this.requestMaster("ItemCategories?$orderby=code"),
-          this.requestMaster("AccountAssignments?$orderby=code"),
-          this.requestMaster("ServiceCategories?$orderby=code"),
-          this.requestMaster("UnitsOfMeasure?$orderby=code"),
-          this.requestMaster("Entity?$orderby=code"),
-          this.requestMaster("Projects?$orderby=projectID"),
-          this.requestMaster("MatGroup?$orderby=matGroupCode"),
-          this.requestMaster("ExtensionMaterialGroup?$orderby=extensionMaterialGroupCode"),
-          this.requestMaster("ProfitCenter?$orderby=profitCenterCode"),
-          this.requestMaster("MRPType?$orderby=mrpTypeCode"),
-          this.requestMaster("AvailabilityCheck?$orderby=availabilityCheckCode"),
-          this.requestMaster("SerialNumberProfile?$orderby=serialNumberProfileCode"),
-          this.requestMaster("DistributionChannel?$orderby=distributionChannelCode"),
-          this.requestMaster("ArReferences?$orderby=arReferenceCode"),
-          this.requestMaster("ContractType?$orderby=contractTypeCode"),
-          this.requestMaster("BudgetCode?$orderby=budgetCode"),
-          this.requestMaster("RequesterTeams?$orderby=name"),
-          this.requestMaster("RequesterTeamMembers?$expand=user,team")
-        ]);
-        const model = this.getView().getModel("admin");
-        model.setProperty("/steps", steps.value || []);
-        model.setProperty("/requestTypes", requestTypes.value || []);
-        model.setProperty("/variants", variants.value || []);
-        model.setProperty("/users", users.value || []);
-        model.setProperty("/teams", teams.value || []);
-        model.setProperty("/teamMembers", teamMembers.value || []);
-        model.setProperty("/requesterTeams", requesterTeams.value || []);
-        model.setProperty("/requesterTeamMembers", requesterTeamMembers.value || []);
-        model.setProperty("/sites", sites.value || []);
-        model.setProperty("/serviceCodes", serviceCodes.value || []);
-        model.setProperty("/poNumbers", poNumbers.value || []);
-        model.setProperty("/purchasingOrganizations", purchasingOrganizations.value || []);
-        model.setProperty("/documentTypes", documentTypes.value || []);
-        model.setProperty("/companyCodes", companyCodes.value || []);
-        model.setProperty("/purchasingGroups", purchasingGroups.value || []);
-        model.setProperty("/divisions", divisions.value || []);
-        model.setProperty("/applicableTaxes", applicableTaxes.value || []);
-        model.setProperty("/plant", plant.value || []);
-        model.setProperty("/serviceGroups", serviceGroups.value || []);
-        model.setProperty("/valuationClasses", valuationClasses.value || []);
-        model.setProperty("/valuationClassesScc", valuationClassesScc.value || []);
-        model.setProperty("/storageLocations", storageLocations.value || []);
-        model.setProperty("/salesOrgs", salesOrgs.value || []);
-        model.setProperty("/incoterms", incoterms.value || []);
-        model.setProperty("/costCenters", costCenters.value || []);
-        model.setProperty("/currencies", currencies.value || []);
-        model.setProperty("/paymentTerms", paymentTerms.value || []);
-        model.setProperty("/systemContractBasePO", systemContractBasePO.value || []);
-        model.setProperty("/procurementCategories", procurementCategories.value || []);
-        model.setProperty("/itemCategories", itemCategories.value || []);
-        model.setProperty("/accountAssignments", accountAssignments.value || []);
-        model.setProperty("/serviceCategories", serviceCategories.value || []);
-        model.setProperty("/unitsOfMeasure", unitsOfMeasure.value || []);
-        model.setProperty("/entities", entities.value || []);
-        model.setProperty("/projects", projects.value || []);
-        model.setProperty("/matGroups", matGroups.value || []);
-        model.setProperty("/extensionMaterialGroups", extensionMaterialGroups.value || []);
-        model.setProperty("/profitCenters", profitCenters.value || []);
-        model.setProperty("/mrpTypes", mrpTypes.value || []);
-        model.setProperty("/availabilityChecks", availabilityChecks.value || []);
-        model.setProperty("/serialNumberProfiles", serialNumberProfiles.value || []);
-        model.setProperty("/distributionChannels", distributionChannels.value || []);
-        model.setProperty("/arReferences", arReferences.value || []);
-        model.setProperty("/contractTypes", contractTypes.value || []);
-        model.setProperty("/budgetCodes", budgetCodes.value || []);
-        model.setProperty("/pcc", await this._loadPccMasters());
-        model.setProperty("/teamTree", this._teamTree(teams.value || [], teamMembers.value || []));
-        model.setProperty("/requesterTeamTree", this._teamTree(requesterTeams.value || [], requesterTeamMembers.value || []));
+        await this._loadAdminLists();
         this._refreshPagedTables();
       } catch (error) {
         this.showError(error);
@@ -244,16 +141,61 @@ sap.ui.define([
       }
     },
 
-    // The vendor, material and WBS masters (tens of thousands of rows) are read page by page from the
-    // OData entity through the "master" model, not loaded into the admin JSON model like the small
-    // masters. A refresh would throw away unsaved edits, so it waits until they are saved.
+    // Only the lists the drop-downs, the team trees and the Manage Team dialog use; the tables
+    // read their own rows page by page from the "master" model.
+    _loadAdminLists: async function () {
+      const [requestTypes, variants, users, teams, teamMembers, requesterTeams, requesterTeamMembers] = await Promise.all([
+        this.requestMasterAll("RequestTypes?$orderby=sortOrder"),
+        this.requestMasterAll("RequestVariants?$expand=requestType&$orderby=requestType_code,sortOrder"),
+        this.requestMasterAll("Users?$expand=manager&$orderby=displayName"),
+        this.requestMasterAll("Teams?$orderby=name"),
+        this.requestMasterAll("TeamMembers?$expand=user,team&$orderby=ID"),
+        this.requestMasterAll("RequesterTeams?$orderby=name"),
+        this.requestMasterAll("RequesterTeamMembers?$expand=user,team&$orderby=ID")
+      ]);
+      const model = this.getView().getModel("admin");
+      model.setProperty("/requestTypes", requestTypes.value || []);
+      model.setProperty("/variants", variants.value || []);
+      model.setProperty("/users", users.value || []);
+      model.setProperty("/teams", teams.value || []);
+      model.setProperty("/teamMembers", teamMembers.value || []);
+      model.setProperty("/requesterTeams", requesterTeams.value || []);
+      model.setProperty("/requesterTeamMembers", requesterTeamMembers.value || []);
+      model.setProperty("/teamTree", this._teamTree(teams.value || [], teamMembers.value || []));
+      model.setProperty("/requesterTeamTree", this._teamTree(requesterTeams.value || [], requesterTeamMembers.value || []));
+    },
+
+    // Every Admin table is read page by page from its OData entity through the "master" model,
+    // like Vendors. A refresh would throw away unsaved edits, so it waits until they are saved.
     _refreshPagedTables: function () {
-      ["vendorTable", "materialTable", "wbsTable"].forEach(function (id) {
-        const binding = this.byId(id)?.getBinding("items");
-        if (binding && !binding.hasPendingChanges()) {
+      this.getView().findAggregatedObjects(true, function (control) {
+        return control.isA("sap.m.Table") && control.getBinding("items")?.getModel() === this.getView().getModel("master");
+      }.bind(this)).forEach(function (table) {
+        const binding = table.getBinding("items");
+        if (!binding.hasPendingChanges()) {
           binding.refresh();
         }
-      }.bind(this));
+      });
+    },
+
+    // Each table holds its edits in its own update group ($$updateGroupId in the view) until Save
+    // sends them, as Vendors does. Saving users, teams or variants also reloads the drop-down lists.
+    onSaveAdminRow: async function (event) {
+      const binding = event.getSource().getBindingContext("master").getBinding();
+      const group = binding.getUpdateGroupId();
+      const model = binding.getModel();
+      try {
+        await model.submitBatch(group);
+        if (model.hasPendingChanges(group)) {
+          throw new Error("The changes could not be saved. Check the values and try again.");
+        }
+        this.showSuccess("Changes saved");
+        if (["/Users", "/Teams", "/RequesterTeams", "/RequestVariants"].includes(binding.getPath())) {
+          await this._loadAdminLists();
+        }
+      } catch (error) {
+        this.showError(error);
+      }
     },
 
     onMaterialSearch: function (event) {
@@ -265,6 +207,20 @@ sap.ui.define([
         and: false
       }) : [];
       this.byId("materialTable").getBinding("items").filter(filter, FilterType.Application);
+    },
+
+    // Search box of a paged Admin table: app:table names the table, app:fields its text columns.
+    onAdminTableSearch: function (event) {
+      const source = event.getSource();
+      const query = (event.getParameter("query") || "").trim();
+      const fields = String(source.data("fields") || "").split(",").filter(Boolean);
+      const filter = query && fields.length ? new Filter({
+        filters: fields.map(function (path) {
+          return new Filter({ path, operator: FilterOperator.Contains, value1: query, caseSensitive: false });
+        }),
+        and: false
+      }) : [];
+      this.byId(source.data("table")).getBinding("items").filter(filter, FilterType.Application);
     },
 
     onVendorSearch: function (event) {
@@ -345,7 +301,7 @@ sap.ui.define([
 
     _openTeamManage: function (event, source) {
       this._teamManageSource = source;
-      this._managedTeamId = event.getSource().getBindingContext("admin").getObject().ID;
+      this._managedTeamId = event.getSource().getBindingContext("master").getObject().ID;
       this._fillTeamManage();
       this.byId("manageTeamDialog").open();
     },
@@ -634,18 +590,6 @@ onAddBudgetCode: function () {
     },
 
     // Rows sorted by the user's ID column numerically where there is one ("2" before "10").
-    _loadPccMasters: async function () {
-      const pcc = {};
-      await Promise.all(PCC_MASTERS.map(async function (master) {
-        const result = await this.requestMaster(master.entity);
-        const sortBy = master.columns[0].name;
-        pcc[master.key] = (result.value || []).sort(function (left, right) {
-          return String(left[sortBy] || "").localeCompare(String(right[sortBy] || ""), undefined, { numeric: true });
-        });
-      }.bind(this)));
-      return pcc;
-    },
-
     onAddPcc: function (oEvent) {
       const master = this._pccMaster(oEvent.getSource());
       this._openAddDialog("pcc", `Add ${master.title}`);
@@ -657,25 +601,9 @@ onAddBudgetCode: function () {
       }));
     },
 
-    onSavePcc: async function (oEvent) {
-      const master = this._pccMaster(oEvent.getSource());
-      const item = oEvent.getSource().getBindingContext("admin").getObject();
-      const body = { isActive: item.isActive };
-      master.columns.forEach(function (column) {
-        body[column.name] = String(item[column.name] ?? "").trim();
-      });
-      try {
-        await this.requestMaster(`${master.entity}(${item.ID})`, { method: "PATCH", body: body });
-        this.showSuccess(`${master.title} updated successfully.`);
-        await this.onRefresh();
-      } catch (error) {
-        this.showError(error);
-      }
-    },
-
     onDeletePcc: function (oEvent) {
       const master = this._pccMaster(oEvent.getSource());
-      const item = oEvent.getSource().getBindingContext("admin").getObject();
+      const item = oEvent.getSource().getBindingContext("master").getObject();
       MessageBox.confirm(`Are you sure you want to delete "${item[master.columns[master.columns.length > 1 ? 1 : 0].name]}" from ${master.title}?`, {
         title: `Delete from ${master.title}`,
         onClose: async function (action) {
@@ -1716,22 +1644,9 @@ else if (item.type === "mrpType") {
     }
 },
 
-    onSaveStep: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("WorkflowStepConfigs", row.ID, {
-        stepNo: Number(row.stepNo),
-        stepName: row.stepName,
-        activityDescription: row.activityDescription,
-        processorTeam_ID: row.processorTeam_ID || null,
-        isMandatory: row.isMandatory,
-        slaDays: Number(row.slaDays),
-        isActive: row.isActive
-      }, false);
-    },
-
     // Edit pop-up for one step: works on a copy of the row, so Cancel leaves the table unchanged.
     onEditStep: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
+      const row = event.getSource().getBindingContext("master").getObject();
       this.getView().getModel("editStep").setData({
         ID: row.ID,
         requestTypeName: row.requestType?.name || row.requestType_code || "",
@@ -1773,61 +1688,23 @@ else if (item.type === "mrpType") {
     },
 
     onDeleteStep: function (event) {
-      return this._delete("WorkflowStepConfigs", event.getSource().getBindingContext("admin").getObject());
-    },
-
-    onSaveVariant: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("RequestVariants", row.code, {
-        name: row.name,
-        description: row.description,
-        isActive: row.isActive
-      }, true);
+      return this._delete("WorkflowStepConfigs", event.getSource().getBindingContext("master").getObject());
     },
 
     onDeleteVariant: function (event) {
-      return this._delete("RequestVariants", event.getSource().getBindingContext("admin").getObject(), true);
-    },
-
-    onSaveUser: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("Users", row.ID, {
-        displayName: row.displayName,
-        email: row.email,
-        userPrincipalName: row.userPrincipalName || row.email,
-        manager_ID: row.manager_ID || null,
-        isActive: row.isActive
-      });
+      return this._delete("RequestVariants", event.getSource().getBindingContext("master").getObject(), true);
     },
 
     onDeleteUser: function (event) {
-      return this._delete("Users", event.getSource().getBindingContext("admin").getObject());
-    },
-
-    onSaveTeam: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("Teams", row.ID, {
-        name: row.name,
-        description: row.description,
-        isActive: row.isActive
-      });
+      return this._delete("Users", event.getSource().getBindingContext("master").getObject());
     },
 
     onDeleteTeam: function (event) {
-      return this._delete("Teams", event.getSource().getBindingContext("admin").getObject());
-    },
-
-    onSaveRequesterTeam: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("RequesterTeams", row.ID, {
-        name: row.name,
-        description: row.description,
-        isActive: row.isActive
-      });
+      return this._delete("Teams", event.getSource().getBindingContext("master").getObject());
     },
 
     onDeleteRequesterTeam: function (event) {
-      return this._delete("RequesterTeams", event.getSource().getBindingContext("admin").getObject());
+      return this._delete("RequesterTeams", event.getSource().getBindingContext("master").getObject());
     },
 
     // Edits to the listed vendors are held in the "vendorEdits" group until Save sends them.
@@ -1848,18 +1725,8 @@ else if (item.type === "mrpType") {
       return this._delete("Vendors", event.getSource().getBindingContext("master").getObject());
     },
 
-    onSaveSite: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("Sites", row.ID, {
-        siteId: row.siteId,
-        siteName: row.siteName,
-        isActive: row.isActive
-      });
-    },
-
-
 onDeleteSite: function (event) {
-      return this._delete("Sites", event.getSource().getBindingContext("admin").getObject());
+      return this._delete("Sites", event.getSource().getBindingContext("master").getObject());
     },
 
     // Edits to the listed materials are held in the "materialEdits" group until Save sends them.
@@ -1880,29 +1747,12 @@ onDeleteSite: function (event) {
       return this._delete("Materials", event.getSource().getBindingContext("master").getObject());
     },
 
-    onSaveServiceCode: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("ServiceCodes", row.ID, {
-        serviceCode: row.serviceCode,
-        serviceDescription: row.serviceDescription || null,
-        isActive: row.isActive
-      });
-    },
-
     onDeleteServiceCode: function (event) {
-      return this._delete("ServiceCodes", event.getSource().getBindingContext("admin").getObject());
-    },
-
-    onSavePoNumber: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("PoNumbers", row.ID, {
-        poNumber: row.poNumber,
-        isActive: row.isActive
-      });
+      return this._delete("ServiceCodes", event.getSource().getBindingContext("master").getObject());
     },
 
     onDeletePoNumber: function (event) {
-      return this._delete("PoNumbers", event.getSource().getBindingContext("admin").getObject());
+      return this._delete("PoNumbers", event.getSource().getBindingContext("master").getObject());
     },
 
     // WBS is a large master, so edits use the OData model's deferred update group just like
@@ -1920,21 +1770,8 @@ onDeleteSite: function (event) {
       }
     },
 
-    onSaveDocumentType: function (event) {
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    return this._patch("DocumentTypes", row.ID, {
-        documentTypeCode: row.documentTypeCode,
-        documentTypeDescription: row.documentTypeDescription,
-        isActive: row.isActive
-    });
-},
-
 onDeleteDocumentType: function (event) {
-    return this._delete( "DocumentTypes", event.getSource().getBindingContext("admin").getObject());
+    return this._delete( "DocumentTypes", event.getSource().getBindingContext("master").getObject());
 },
 
     onDeleteWBS: function (event) {
@@ -1942,22 +1779,11 @@ onDeleteDocumentType: function (event) {
     },
 
 
-onSaveCompanyCode: function (event) {
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-        return this._patch("CompanyCodes", row.ID, {
-        companyCode: row.companyCode,
-        companyName: row.companyName,
-        isActive: row.isActive
-    });
-},
 onDeleteCompanyCode: function (event) {
 
     const row = event
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
         return this._delete(
         "CompanyCodes",
@@ -1965,80 +1791,20 @@ onDeleteCompanyCode: function (event) {
     );
 },
 
-    onSavePurchasingGroup: function (event) {
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-  return this._patch("PurchasingGroups", row.ID, {
-        purchasingGroupCode: row.purchasingGroupCode,
-        purchasingGroupName: row.purchasingGroupName,
-        isActive: row.isActive
-    });
-},
-
     onDeletePurchasingGroup: function (event) {
-      return this._delete( "PurchasingGroups", event.getSource().getBindingContext("admin").getObject());
+      return this._delete( "PurchasingGroups", event.getSource().getBindingContext("master").getObject());
 
     },
-
-   onSavePurchasingOrganization: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("PurchasingOrganizations", row.ID, {
-        purchasingOrganizationCode: row.purchasingOrganizationCode,
-        purchasingOrganizationName: row.purchasingOrganizationName,
-        isActive: row.isActive
-      });
-    },
-
 
 onDeletePurchasingOrganization: function (event) {
-      return this._delete("PurchasingOrganizations", event.getSource().getBindingContext("admin").getObject());
+      return this._delete("PurchasingOrganizations", event.getSource().getBindingContext("master").getObject());
     },
-
- onSaveCurrency: async function (event) {
-
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    try {
-
-        await this.requestMaster(
-            `Currencies('${encodeURIComponent(row.code)}')`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "If-Match": "*"
-                },
-                body: {
-                    code: row.code,
-                    name: row.name,
-                    description: row.description,
-                    isActive: row.isActive,
-                    sortOrder: row.sortOrder
-                }
-            }
-        );
-
-        this.showSuccess("Changes saved");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
 
     onDeleteCurrency: async function (event) {
 
     const row = event
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
 
     const confirmed = await new Promise(function (resolve) {
@@ -2085,49 +1851,11 @@ onDeletePurchasingOrganization: function (event) {
     }
 },
 
-onSavePaymentTerm: async function (event) {
-
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    try {
-
-        await this.requestMaster(
-            `PaymentTerms('${encodeURIComponent(row.code)}')`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "If-Match": "*"
-                },
-                body: {
-                    code: row.code,
-                    name: row.name,
-                    description: row.description,
-                    isActive: row.isActive,
-                    sortOrder: row.sortOrder
-                }
-            }
-        );
-
-        this.showSuccess("Changes saved");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-
 onDeletePaymentTerm: async function (event) {
 
     const row = event
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
 
     const confirmed = await new Promise(function (resolve) {
@@ -2175,49 +1903,11 @@ onDeletePaymentTerm: async function (event) {
 },
 
 
-onSaveSystemContractBasePO: async function (event) {
-
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    try {
-
-        await this.requestMaster(
-            `SystemContractBasePO('${encodeURIComponent(row.code)}')`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "If-Match": "*"
-                },
-                body: {
-                    code: row.code,
-                    name: row.name,
-                    description: row.description,
-                    isActive: row.isActive,
-                    sortOrder: row.sortOrder
-                }
-            }
-        );
-
-        this.showSuccess("Changes saved");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-
     onDeleteSystemContractBasePO: async function (event) {
 
     const row = event
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
 
     const confirmed = await new Promise(function (resolve) {
@@ -2264,62 +1954,15 @@ onSaveSystemContractBasePO: async function (event) {
     }
 },
 
-onSaveDivision: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("Divisions", row.ID, {
-        divisionCode: row.divisionCode,
-        divisionName: row.divisionName,
-        isActive: row.isActive
-      });
-    },
-
-
 onDeleteDivision: function (event) {
-      return this._delete("Divisions", event.getSource().getBindingContext("admin").getObject());
+      return this._delete("Divisions", event.getSource().getBindingContext("master").getObject());
     },
 
- onSaveProcurementCategory: async function (event) {
-
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    try {
-
-        await this.requestMaster(
-            `ProcurementCategories('${encodeURIComponent(row.code)}')`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "If-Match": "*"
-                },
-                body: {
-                    code: row.code,
-                    name: row.name,
-                    description: row.description,
-                    isActive: row.isActive,
-                    sortOrder: row.sortOrder
-                }
-            }
-        );
-
-        this.showSuccess("Changes saved");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
     onDeleteProcurementCategory: async function (event) {
 
     const row = event
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
 
     const confirmed = await new Promise(function (resolve) {
@@ -2366,81 +2009,20 @@ onDeleteDivision: function (event) {
     }
 },
 
-onSaveApplicableTax: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("ApplicableTaxes", row.ID, {
-        taxCode: row.taxCode,
-        taxDescription: row.taxDescription,
-        taxRate: Number(row.taxRate) || 0,
-        isActive: row.isActive
-      });
-    },
-
-
 onDeleteApplicableTax: function (event) {
-      return this._delete("ApplicableTaxes", event.getSource().getBindingContext("admin").getObject());
+      return this._delete("ApplicableTaxes", event.getSource().getBindingContext("master").getObject());
     },
-
-onSavePlant: function (event) {
-      const row = event.getSource().getBindingContext("admin").getObject();
-      return this._patch("Plant", row.ID, {
-        plantCode: row.plantCode,
-        plantName: row.plantName,
-        isActive: row.isActive
-      });
-    },
-
 
 onDeletePlant: function (event) {
-      return this._delete("Plant", event.getSource().getBindingContext("admin").getObject());
+      return this._delete("Plant", event.getSource().getBindingContext("master").getObject());
     },
-
-
-onSaveItemCategory: async function (event) {
-
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    try {
-
-        if (!row.code) {
-            throw new Error("Item Category Code is missing.");
-        }
-
-        await this.requestMaster(
-            `ItemCategories('${encodeURIComponent(row.code)}')`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "If-Match": "*"
-                },
-                body: {
-                    name: row.name,
-                    isActive: row.isActive
-                }
-            }
-        );
-
-        this.showSuccess("Item Category changes saved");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
 
 
 onDeleteItemCategory: async function (event) {
 
     const row = event
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
 
     if (!row.code) {
@@ -2492,46 +2074,11 @@ onDeleteItemCategory: async function (event) {
     }
 },
 
-onSaveAccountAssignment: async function (event) {
-
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    try {
-
-        await this.requestMaster(
-            `AccountAssignments('${encodeURIComponent(row.code)}')`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "If-Match": "*"
-                },
-                body: {
-                    description: row.description,
-                    isActive: row.isActive,
-                }
-            }
-        );
-
-        this.showSuccess("Changes saved");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-
     onDeleteAccountAssignment: async function (event) {
 
     const row = event
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
 
     const confirmed = await new Promise(function (resolve) {
@@ -2579,47 +2126,11 @@ onSaveAccountAssignment: async function (event) {
 },
 
 
-onSaveServiceCategories: async function (event) {
-
-    const row = event
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    try {
-
-        await this.requestMaster(
-            `ServiceCategories('${encodeURIComponent(row.code)}')`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "If-Match": "*"
-                },
-                body: {
-                    name: row.name || row.description,
-                    description: row.description,
-                    isActive: row.isActive,
-                }
-            }
-        );
-
-        this.showSuccess("Changes saved");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-
     onDeleteServiceCategories: async function (event) {
 
     const row = event
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
 
     const confirmed = await new Promise(function (resolve) {
@@ -2665,47 +2176,11 @@ onSaveServiceCategories: async function (event) {
 
     }
 },
-onSaveUnitOfMeasure: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `UnitsOfMeasure('${item.code}')`,
-            {
-                method: "PATCH",
-                body: {
-                    name: item.name,
-                    description: item.description,
-                    isActive: item.isActive,
-                    sortOrder: item.sortOrder
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Unit of Measure updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-
 onDeleteUnitOfMeasure: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -2746,46 +2221,11 @@ onDeleteUnitOfMeasure: async function (oEvent) {
     );
 },
 
-onSaveServiceGroup: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `ServiceGroups(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    servicegroupDescription:
-                        item.servicegroupDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Service Group updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-
 onDeleteServiceGroup: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -2825,45 +2265,11 @@ onDeleteServiceGroup: async function (oEvent) {
         }
     );
 },
-onSaveValuationClass: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `${this._valuationClassEntity(context)}(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    valuationclassDescription:
-                        item.valuationclassDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Valuation Class updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
 onDeleteValuationClass: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -2904,45 +2310,11 @@ onDeleteValuationClass: async function (oEvent) {
     );
 },
 
-onSaveEntity: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `Entity(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    description: item.description,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Entity updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-
 onDeleteEntity: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -2982,48 +2354,11 @@ onDeleteEntity: async function (oEvent) {
         }
     );
 },
-onSaveProject: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `Projects(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    projectCategory:
-                        item.projectCategory,
-                    projectDescription:
-                        item.projectDescription,
-                    isActive:
-                        item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Project updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
 onDeleteProject: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3064,47 +2399,11 @@ onDeleteProject: async function (oEvent) {
     );
 },
 
-onSaveMatGroup: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `MatGroup(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    matGroupDescription:
-                        item.matGroupDescription,
-                    isActive:
-                        item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Material Group updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
-
 onDeleteMatGroup: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3144,45 +2443,11 @@ onDeleteMatGroup: async function (oEvent) {
         }
     );
 },
-onSaveExtensionMaterialGroup: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `ExtensionMaterialGroup(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    extensionMaterialGroupDescription:
-                        item.extensionMaterialGroupDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Extension Material Group updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
 onDeleteExtensionMaterialGroup: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3222,46 +2487,11 @@ onDeleteExtensionMaterialGroup: async function (oEvent) {
         }
     );
 },
-onSaveProfitCenter: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `ProfitCenter(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    profitCenterDescription:
-                        item.profitCenterDescription,
-                    isActive:
-                        item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Profit Center updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
 onDeleteProfitCenter: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3301,43 +2531,11 @@ onDeleteProfitCenter: async function (oEvent) {
         }
     );
 },
-onSaveMRPType: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `MRPType(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    mrpTypeDescription:
-                        item.mrpTypeDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "MRP Type updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteMRPType: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3375,43 +2573,11 @@ onDeleteMRPType: async function (oEvent) {
         }
     );
 },
-onSaveAvailabilityCheck: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `AvailabilityCheck(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    availabilityCheckDescription:
-                        item.availabilityCheckDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Availability Check updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteAvailabilityCheck: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3449,43 +2615,11 @@ onDeleteAvailabilityCheck: async function (oEvent) {
         }
     );
 },
-onSaveSerialNumberProfile: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `SerialNumberProfile(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    serialNumberProfileDescription:
-                        item.serialNumberProfileDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Serial Number Profile updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteSerialNumberProfile: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3523,43 +2657,11 @@ onDeleteSerialNumberProfile: async function (oEvent) {
         }
     );
 },
-onSaveDistributionChannel: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `DistributionChannel(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    distributionChannelDescription:
-                        item.distributionChannelDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Distribution Channel updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteDistributionChannel: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3597,43 +2699,11 @@ onDeleteDistributionChannel: async function (oEvent) {
         }
     );
 },
-onSaveArReference: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `ArReferences(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    arReferenceDescription:
-                        item.arReferenceDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "AR Reference updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteArReference: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3671,43 +2741,11 @@ onDeleteArReference: async function (oEvent) {
         }
     );
 },
-onSaveStorageLocation: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `StorageLocation(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    storageLocationName:
-                        item.storageLocationName,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Storage Location updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteStorageLocation: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3745,42 +2783,11 @@ onDeleteStorageLocation: async function (oEvent) {
         }
     );
 },
-onSaveSalesOrg: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `SalesOrg(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    salesOrgName: item.salesOrgName,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Sales Org updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteSalesOrg: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3818,43 +2825,11 @@ onDeleteSalesOrg: async function (oEvent) {
         }
     );
 },
-onSaveIncoterm: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `Incoterms(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    incotermsDescription:
-                        item.incotermsDescription,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Incoterm updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteIncoterm: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3892,46 +2867,11 @@ onDeleteIncoterm: async function (oEvent) {
         }
     );
 },
-onSaveContractType: async function (oEvent) {
-
-    const context = oEvent
-        .getSource()
-        .getBindingContext("admin");
-
-    const item = context.getObject();
-
-    try {
-
-        await this.requestMaster(
-            `ContractType(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    contractTypeDescription:
-                        item.contractTypeDescription,
-                    isActive:
-                        item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show(
-            "Contract Type updated successfully."
-        );
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        this.showError(error);
-
-    }
-},
 onDeleteContractType: async function (oEvent) {
 
     const context = oEvent
         .getSource()
-        .getBindingContext("admin");
+        .getBindingContext("master");
 
     const item = context.getObject();
 
@@ -3971,24 +2911,8 @@ onDeleteContractType: async function (oEvent) {
         }
     );
 },
-onSaveBudgetCode: async function (oEvent) {
-    const item = oEvent.getSource().getBindingContext("admin").getObject();
-    try {
-        await this.requestMaster(`BudgetCode(${item.ID})`, {
-            method: "PATCH",
-            body: {
-                budgetCodeDescription: item.budgetCodeDescription,
-                isActive: item.isActive
-            }
-        });
-        sap.m.MessageToast.show("Budget Code updated successfully.");
-        await this.onRefresh();
-    } catch (error) {
-        this.showError(error);
-    }
-},
 onDeleteBudgetCode: async function (oEvent) {
-    const item = oEvent.getSource().getBindingContext("admin").getObject();
+    const item = oEvent.getSource().getBindingContext("master").getObject();
     MessageBox.confirm(
         `Are you sure you want to delete Budget Code "${item.budgetCode}"?`,
         {
@@ -4008,44 +2932,11 @@ onDeleteBudgetCode: async function (oEvent) {
         }
     );
 },
-onSaveCostCenter: async function (oEvent) {
-
-    const item = oEvent
-        .getSource()
-        .getBindingContext("admin")
-        .getObject();
-
-    try {
-
-        await this.requestMaster(
-            `CostCenter(${item.ID})`,
-            {
-                method: "PATCH",
-                body: {
-                    costCenterName: item.costCenterName,
-                    isActive: item.isActive
-                }
-            }
-        );
-
-        sap.m.MessageToast.show("Cost Center updated successfully.");
-
-        await this.onRefresh();
-
-    } catch (error) {
-
-        MessageBox.error(
-            error.message || "Failed to update Cost Center."
-        );
-
-    }
-},
-
 onDeleteCostCenter: async function (oEvent) {
 
     const item = oEvent
         .getSource()
-        .getBindingContext("admin")
+        .getBindingContext("master")
         .getObject();
 
     try {
@@ -4070,25 +2961,8 @@ onDeleteCostCenter: async function (oEvent) {
     }
 },
 
-onSaveBudgetCode: async function (oEvent) {
-    const item = oEvent.getSource().getBindingContext("admin").getObject();
-    try {
-        await this.requestMaster(`BudgetCode(${item.ID})`, {
-            method: "PATCH",
-            body: {
-                budgetCodeDescription: item.budgetCodeDescription,
-                isActive: item.isActive
-            }
-        });
-        this.showSuccess("Budget Code updated successfully.");
-        await this.onRefresh();
-    } catch (error) {
-        this.showError(error);
-    }
-},
-
 onDeleteBudgetCode: async function (oEvent) {
-    const item = oEvent.getSource().getBindingContext("admin").getObject();
+    const item = oEvent.getSource().getBindingContext("master").getObject();
     try {
         await this.requestMaster(`BudgetCode(${item.ID})`, { method: "DELETE" });
         this.showSuccess("Budget Code deleted successfully.");

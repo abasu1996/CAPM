@@ -695,6 +695,7 @@ entity OutlineContractItems : cuid, managed {
   orderNumber          : String(80);
   wbsElement           : String(80);
   projectCode          : String(80);
+  employeeId           : String(80);
   scmSpocUserId        : String(255);
 }
 
