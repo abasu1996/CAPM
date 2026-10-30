@@ -1105,6 +1105,11 @@ sap.ui.define([
         missing.control.focus();
         return;
       }
+      if (draft.details.loaApprover_ID && String(draft.details.loaApprover_ID).toLowerCase()
+        === String(formModel.getProperty("/requesterId") || "").toLowerCase()) {
+        MessageBox.error("Requester cannot be the Approver of a request");
+        return;
+      }
       // Hidden fields (the dates of a non tax based transaction) are not kept.
       (this._sesControls || []).forEach(function (entry) {
         if (!this._sesFieldShown(entry.definition, draft.details)) {
@@ -2445,6 +2450,15 @@ sap.ui.define([
       if (missing) {
         MessageBox.warning(`${missing.definition.label} is required.`);
         this._focusFieldControl(missing.control);
+        return;
+      }
+      const requesterId = String(form.requesterId || "").toLowerCase();
+      const selectedApprovers = [form.details?.approver_ID, form.details?.loaApprover_ID,
+        form.sesDraft?.saved && form.sesDraft.details?.loaApprover_ID];
+      if (requesterId && selectedApprovers.some(function (id) {
+        return id && String(id).toLowerCase() === requesterId;
+      })) {
+        MessageBox.error("Requester cannot be the Approver of a request");
         return;
       }
       // Service Entry Sheet, tax based: the two dates may be at most 30 days apart.

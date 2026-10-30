@@ -87,6 +87,37 @@ test("supervisor assigns a single open task without changing request ownership",
   } finally { cds.tx = originalTx; }
 });
 
+test("an approval task cannot be reassigned to its requester", async () => {
+  const { service, rows, tx } = setup();
+  service.master.run = async () => ({ ID: "original", displayName: "Original", isActive: true });
+  const originalTx = cds.tx;
+  cds.tx = () => tx;
+  try {
+    await assert.rejects(service._reassignTask(req("CASupervisor", { taskId: "approval", userId: "original" })), {
+      status: 400,
+      message: "Requester cannot be the Approver of a request"
+    });
+    assert.equal(rows.tasks.find((task) => task.ID === "approval").assignedUser_ID, "old");
+  } finally { cds.tx = originalTx; }
+});
+
+test("a requester cannot claim an approval task from a team queue", async () => {
+  const { service, rows, tx } = setup();
+  const approval = rows.tasks.find((task) => task.ID === "approval");
+  approval.assignedUser_ID = null;
+  approval.assignedTeam_ID = "team";
+  service._ensureCurrentUser = async () => ({ ID: "original" });
+  const originalTx = cds.tx;
+  cds.tx = () => tx;
+  try {
+    await assert.rejects(service._claimTeamTask(req("CAProcessor", { taskId: "approval" })), {
+      status: 400,
+      message: "Requester cannot be the Approver of a request"
+    });
+    assert.equal(approval.assignedUser_ID, null);
+  } finally { cds.tx = originalTx; }
+});
+
 test("a task paused in progress can also be reassigned without changing its status", async () => {
   const { service, rows, tx } = setup();
   rows.tasks[1].status_code = "IN_PROGRESS";

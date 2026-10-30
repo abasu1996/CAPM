@@ -191,6 +191,37 @@ test("requester may process a task assigned directly to them but not another use
   ), { status: 403 });
 });
 
+test("request creation rejects the requester as the selected approver", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._assertNoDuplicateMaterialDescription = async () => {};
+  service._applyProjectCode = async () => {};
+  service._applyReservationMaterialType = () => {};
+  await assert.rejects(service._insertOneRequest(
+    requestFor("CARequester"),
+    { run() { throw new Error("An invalid request must not be inserted"); } },
+    { ID: "requester" },
+    {
+      requestType: { code: "SERVICE_ENTRY_SHEET" },
+      input: { details: JSON.stringify({ loaApprover_ID: "REQUESTER" }) }
+    }
+  ), { status: 400, message: "Requester cannot be the Approver of a request" });
+  assert.doesNotThrow(() => service._assertRequesterNotApprover(
+    requestFor("CARequester"), "requester", { loaApprover_ID: "someone-else" }
+  ));
+  await assert.rejects(service._insertOneRequest(
+    requestFor("CARequester"),
+    { run() { throw new Error("An invalid successor must not be inserted"); } },
+    { ID: "requester" },
+    {
+      requestType: { code: "PURCHASE_ORDER" },
+      input: { details: JSON.stringify({
+        sesRequired: true,
+        sesDraft: JSON.stringify({ loaApprover_ID: "requester" })
+      }) }
+    }
+  ), { status: 400, message: "Requester cannot be the Approver of a request" });
+});
+
 test("all business roles can read any submitted task and its request context", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   for (const role of ["CARequester", "CAProcessor", "CASupervisor", "CAAdmin"]) {

@@ -1803,12 +1803,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (requestType.code === "SERVICE_ENTRY_SHEET" && sesDateProblem(details)) {
       return req.reject(400, sesDateProblem(details));
     }
+    this._assertRequesterNotApprover(req, user.ID, details);
     // A PO's SES successor is created when the PO completes; its dates are checked now.
     if (requestType.code === "PURCHASE_ORDER" && details.sesRequired && details.sesDraft) {
       const draftProblem = sesDateProblem(typeof details.sesDraft === "string" ? this._parseDetails(req, details.sesDraft) : details.sesDraft);
       if (draftProblem) {
         return req.reject(400, `SES Successor: ${draftProblem}`);
       }
+      this._assertRequesterNotApprover(req, user.ID,
+        typeof details.sesDraft === "string" ? this._parseDetails(req, details.sesDraft) : details.sesDraft);
     }
     await this._assertNoDuplicateMaterialDescription(req, requestType.code, details);
     this._assertEmailLimits(req, requestType.code, details);
@@ -2130,6 +2133,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         ? this.master.run(SELECT.one.from(this.masterEntities.Teams).where({ ID: req.data.assignedTeamId }))
         : null
     ]);
+    if (req.data.isApproval === true) {
+      this._assertRequesterNotApprover(req, request.requester_ID, { approver_ID: assignedUser?.ID });
+    }
     const taskId = cds.utils.uuid();
     const task = {
       ID: taskId,
@@ -2170,13 +2176,18 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
   _claimTeamTask = async (req) => {
     const tx = cds.tx(req);
     const user = await this._ensureCurrentUser(req, tx);
-    const task = await SELECT.one.from(this.db.CATasks).where({ ID: req.data.taskId });
+    const task = await tx.run(SELECT.one.from(this.db.CATasks).where({ ID: req.data.taskId }));
 
     if (!task) {
       return req.reject(404, "Task not found");
     }
     if (!task.assignedTeam_ID || task.assignedUser_ID) {
       return req.reject(409, "This task is no longer available in the team queue");
+    }
+    if (task.isApproval) {
+      const request = await tx.run(SELECT.one.from(this.db.CARequests)
+        .columns("requester_ID").where({ ID: task.request_ID }));
+      this._assertRequesterNotApprover(req, request?.requester_ID, { approver_ID: user.ID });
     }
 
     const membership = await this.master.run(SELECT.one.from(this.masterEntities.TeamMembers).where({
@@ -2269,6 +2280,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this._assertMutableRequest(req, request);
     if (![TASK_STATUS.OPEN, TASK_STATUS.IN_PROGRESS].includes(task.status_code) || task.isSuperseded) {
       return req.reject(409, "Only an open or in-progress current task can be reassigned");
+    }
+    if (task.isApproval) {
+      this._assertRequesterNotApprover(req, request.requester_ID, { approver_ID: target.ID });
     }
     if (task.assignedUser_ID === target.ID) return req.reject(409, "This task is already assigned to the selected user");
     const changed = await tx.run(UPDATE(this.db.CATasks).set({
@@ -3132,6 +3146,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (request.requestType_code === "SERVICE_ENTRY_SHEET" && sesDateProblem(details)) {
       return req.reject(400, sesDateProblem(details));
     }
+    this._assertRequesterNotApprover(req, request.requester_ID, details);
     await this._assertNoDuplicateMaterialDescription(req, request.requestType_code, details, request.ID);
     this._assertEmailLimits(req, request.requestType_code, details);
     if (request.requestType_code === "PROJECT_CODE") {
@@ -3364,6 +3379,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       .where({ requestType_code: requestTypeCode, isActive: true })
       .orderBy("stepNo");
     const conditionSource = details || await this._loadDetails(tx, requestTypeCode, requestId);
+    const requestIdentity = await tx.run(SELECT.one.from(this.db.CARequests)
+      .columns("requester_ID").where({ ID: requestId }));
+    this._assertRequesterNotApprover(req, requestIdentity?.requester_ID, conditionSource);
     const selectedConfigs = this._selectWorkflowConfigs(configs, requestVariantCode)
       .filter((config) => this._isStepApplicable(config, conditionSource));
 
@@ -4309,7 +4327,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!["APPROVER", "SCM"].includes(config?.roleCode) && !this._isVendorAllocationStep(config)) {
       return {};
     }
-    const request = await tx.run(SELECT.one.from(this.db.CARequests).columns("requestType_code").where({ ID: requestId }));
+    const request = await tx.run(SELECT.one.from(this.db.CARequests).columns("requestType_code", "requester_ID").where({ ID: requestId }));
     const details = await this._loadDetails(tx, request?.requestType_code, requestId);
     // New Contract keeps the SCM SPOC on its line items, which _loadDetails does not read.
     const itemsEntityName = ITEMS_ENTITY_BY_REQUEST_TYPE[request?.requestType_code];
@@ -4318,7 +4336,21 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         .where({ details_ID: details.ID })
         .orderBy("itemNo"));
     }
-    return this._approverAssignment(config, details);
+    const assignment = await this._approverAssignment(config, details);
+    if (config?.isApproval || config?.roleCode === "APPROVER") {
+      this._assertRequesterNotApprover(null, request?.requester_ID, { approver_ID: assignment.assignedUser_ID });
+    }
+    return assignment;
+  }
+
+  _assertRequesterNotApprover(req, requesterId, details) {
+    const selected = [details?.approver_ID, details?.loaApprover_ID];
+    if (requesterId && selected.some((approverId) => approverId
+      && String(approverId).toLowerCase() === String(requesterId).toLowerCase())) {
+      const message = "Requester cannot be the Approver of a request";
+      if (req?.reject) return req.reject(400, message);
+      throw Object.assign(new Error(message), { status: 400 });
+    }
   }
 
   // E-mail list fields ("a@x.com; b@y.com") that take a limited number of addresses.
