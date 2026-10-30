@@ -191,30 +191,28 @@ test("requester may process a task assigned directly to them but not another use
   ), { status: 403 });
 });
 
-test("requester All Tasks includes their requests and directly assigned approval tasks", async () => {
+test("all business roles can read any submitted task and its request context", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
-  service._ensureCurrentUser = async () => ({ ID: "requester" });
-  service._effectiveTaskUserIds = async () => ["requester", "delegator"];
-  const query = { where(value) { this.filter = value; } };
-  await service._filterTasksByRole({ ...requestFor("CARequester"), query });
-  const serialized = JSON.stringify(query.filter);
-  assert.match(serialized, /requester_ID/);
-  assert.match(serialized, /owner_ID/);
-  assert.match(serialized, /assignedUser_ID/);
-  assert.match(serialized, /requester/);
-  assert.match(serialized, /delegator/);
+  for (const role of ["CARequester", "CAProcessor", "CASupervisor", "CAAdmin"]) {
+    const query = { where() { throw new Error(`${role} must not receive a task read filter`); } };
+    service._filterTasksByRole({ ...requestFor(role), query });
+    service._filterRequestChildrenByRole({ ...requestFor(role), query });
+  }
 });
 
-test("processor All Tasks includes direct and active-team work", async () => {
+test("technical clients cannot read tasks or submitted request details", () => {
   const service = new FlowmateCAService("FlowmateCAService");
-  service._ensureCurrentUser = async () => ({ ID: "processor" });
-  service._effectiveTaskUserIds = async () => ["processor"];
-  service._teamIdsOf = async () => ["team-a", "team-b"];
-  const query = { where(value) { this.filter = value; } };
-  await service._filterTasksByRole({ ...requestFor("CAProcessor"), query });
-  const serialized = JSON.stringify(query.filter);
-  assert.match(serialized, /assignedUser_ID/);
-  assert.match(serialized, /assignedTeam_ID/);
-  assert.doesNotMatch(serialized, /requester_ID/);
-  assert.match(serialized, /team-a/);
+  const taskQuery = { where(value) { this.filter = value; } };
+  service._filterTasksByRole({ ...requestFor("system-user", "PORequestCreate"), query: taskQuery });
+  assert.deepEqual(taskQuery.filter, { ID: null });
+  const detailQuery = { where(value) { this.filter = value; } };
+  service._filterRequestChildrenByRole({ ...requestFor("system-user", "PORequestCreate"), query: detailQuery });
+  assert.deepEqual(detailQuery.filter, { request_ID: null });
+});
+
+test("normal attachment reads exclude drafts even when business users can read submitted requests", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  const filters = [];
+  await service._filterRequestAttachments({ ...requestFor("CARequester"), query: { where(value) { filters.push(value); } } });
+  assert.deepEqual(filters, [{ draft_ID: null }]);
 });

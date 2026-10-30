@@ -1109,65 +1109,19 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     await this._filterRequestChildrenByRole(req);
   };
 
-  async _validatorRequestIds(req, user) {
-    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
-    const teamIds = await this._teamIdsOf(user);
-    const assigned = await cds.tx(req).run(
-      SELECT.from(this.db.CATasks).columns("request_ID").where({ assignedUser_ID: { in: effectiveUserIds } })
-    );
-    const team = teamIds.length
-      ? await cds.tx(req).run(SELECT.from(this.db.CATasks).columns("request_ID").where({ assignedTeam_ID: { in: teamIds } }))
-      : [];
-    return [...new Set([...assigned, ...team].map((task) => task.request_ID).filter(Boolean))];
-  }
-
-  async _accessibleRequestIds(req, user) {
-    const capabilities = this._roleCapabilities(req);
-    if (capabilities.canAssign) return null;
-    const requestIds = new Set();
-    if (capabilities.canCreate) {
-      const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
-      const [requested, owned] = await Promise.all([
-        cds.tx(req).run(SELECT.from(this.db.CARequests).columns("ID").where({ requester_ID: { in: effectiveUserIds } })),
-        cds.tx(req).run(SELECT.from(this.db.CARequests).columns("ID").where({ owner_ID: { in: effectiveUserIds } }))
-      ]);
-      [...requested, ...owned].forEach((request) => requestIds.add(request.ID));
+  _filterRequestChildrenByRole = (req) => {
+    // Submitted request details are readable across business roles. Mutations are
+    // checked separately, and draft attachments remain creator-only.
+    if (!this._roleCapabilities(req).canViewAllRequests) {
+      req.query.where({ request_ID: null });
     }
-    // A user assigned as an approver or correction owner must be able to open the
-    // request context even when they are not its creator and do not process its team.
-    if (capabilities.canProcessAssignedTasks && !capabilities.canValidate) {
-      const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
-      const assigned = await cds.tx(req).run(
-        SELECT.from(this.db.CATasks).columns("request_ID").where({ assignedUser_ID: { in: effectiveUserIds } })
-      );
-      assigned.forEach((task) => task.request_ID && requestIds.add(task.request_ID));
-    }
-    if (capabilities.canValidate) {
-      (await this._validatorRequestIds(req, user)).forEach((ID) => requestIds.add(ID));
-    }
-    return [...requestIds];
-  }
-
-  _filterRequestChildrenByRole = async (req) => {
-    const user = await this._ensureCurrentUser(req);
-    const requestIds = await this._accessibleRequestIds(req, user);
-    if (requestIds === null) return;
-    req.query.where(requestIds.length
-      ? { request_ID: { in: requestIds } }
-      : { request_ID: null });
   };
 
-  _filterTasksByRole = async (req) => {
-    const capabilities = this._roleCapabilities(req);
-    if (!capabilities.canViewAllTasks) {
+  _filterTasksByRole = (req) => {
+    // Opening a task is not the same as claiming, assigning, or deciding it.
+    if (!this._roleCapabilities(req).canViewAllTasks) {
       req.query.where({ ID: null });
-      return;
     }
-    if (capabilities.canAssign) return;
-    const user = await this._ensureCurrentUser(req);
-    const effectiveUserIds = await this._effectiveTaskUserIds(req, user.ID);
-    const teamIds = capabilities.canValidate ? await this._teamIdsOf(user) : [];
-    req.query.where(this._taskReadWhere(capabilities, effectiveUserIds, teamIds));
   };
 
   _taskReadWhere(capabilities, effectiveUserIds, teamIds = []) {
@@ -1399,7 +1353,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       completedRequests
     ] = await Promise.all([
       capabilities.canViewAllRequests ? this._count(this.db.CARequests, {}) : 0,
-      capabilities.canViewAllTasks ? this._count(this.db.CATasks, taskScope || {}) : 0,
+      capabilities.canViewAllTasks ? this._count(this.db.CATasks, {}) : 0,
       canCreate ? this._count(this.db.CARequests, requestedBy) : 0,
       canViewDrafts ? this._count(this.db.CARequestDrafts, { creator_ID: user.ID }) : 0,
       canProcessAssignedTasks ? this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }) : 0,
