@@ -31,6 +31,8 @@ sap.ui.define([
       model.setProperty("/showScopeFilters", mode !== "mine");
       model.setProperty("/title", mode === "all" ? "All Tasks" : (mode === "team" ? "Team Task Queue" : "My Tasks"));
       this._approvalOnly = query.approval === "true";
+      // From a Dashboard tile: tasks assigned to the logged-in user only, without delegators'.
+      this._ownOnly = query.own === "true";
       this._requestStatus = query.requestStatus || "";
       this._presetStatus = query.status || "";
       this.byId("taskStatusFilter").setSelectedKey(this._presetStatus);
@@ -97,6 +99,11 @@ sap.ui.define([
         if (this._requestStatus) {
           filters.push(`request/status_code eq '${String(this._requestStatus).replace(/'/g, "''")}'`);
         }
+        if (this._ownOnly) {
+          const user = this.getAppModel().getProperty("/currentUser")?.ID
+            ? this.getAppModel().getProperty("/currentUser") : await this.loadCurrentUser();
+          filters.push(`assignedUser_ID eq '${String(user?.ID || "").replace(/'/g, "''")}'`);
+        }
 
         const filterQuery = filters.length ? `&$filter=${encodeURIComponent(filters.join(" and "))}` : "";
         const result = await this.request(
@@ -161,6 +168,7 @@ sap.ui.define([
       this.byId("taskRequesterFilter").setValue("");
       this.getView().getModel("sortView").setProperty("/key", "asc");
       this._approvalOnly = false;
+      this._ownOnly = false;
       this._requestStatus = "";
       this._presetStatus = "";
       this.onRefresh();

@@ -197,7 +197,7 @@ sap.ui.define([], function () {
   const whenDms = { field: "dmsUpdate", equals: true };
   const onDms = { visibleWhen: whenDms, lineItem: true };
   const dmsBlock = [
-    field("dmsSapMaterialCode", "SAP Material Code", "input", Object.assign({ maxLength: 40 }, onDms)),
+    field("dmsSapMaterialCode", "Product Code", "input", Object.assign({ maxLength: 40 }, onDms)),
     field("itemName", "Item Name", "input", Object.assign({ required: true }, onDms)),
     field("itemCategory", "Item Category", "input", Object.assign({ required: true }, onDms)),
     field("unitsPerItem", "Units per Item", "number", Object.assign({ required: true }, onDms)),
@@ -206,7 +206,10 @@ sap.ui.define([], function () {
     field("isSaleable", "Is Saleable", "checkbox", onDms),
     field("isSerialized", "Is Serialized", "checkbox", onDms),
     field("requiredAgents", "Required Agents", "input", Object.assign({ required: true }, onDms)),
-    Object.assign({}, vendor, { label: "Vendor ERP", required: true }, onDms),
+    field("vendorErp", "Vendor ERP", "select", Object.assign({
+      required: true,
+      options: [{ key: "SAP", text: "SAP" }, { key: "Bright Star", text: "Bright Star" }]
+    }, onDms)),
     field("defaultWarrantyPeriod", "Default Warranty Period", "number", Object.assign({ required: true }, onDms)),
     field("warrantyType", "Warranty Type", "input", Object.assign({ required: true }, onDms)),
     field("valueType", "Value Type", "input", Object.assign({ required: true }, onDms)),
@@ -271,7 +274,9 @@ sap.ui.define([], function () {
     return Object.assign({}, definition, { visibleWhen: whenTradingMaterial, lineItem: true });
   };
   const tradingModificationFields = [
-    field("referenceMaterialCode", "Material Code", "valueHelp", Object.assign({ required: true }, materialLookup)),
+    field("referenceMaterialCode", "Material Code", "valueHelp", Object.assign({
+      requiredWhen: { field: "transactionType", notEquals: "DMS_UPDATE_ONLY" }
+    }, materialLookup)),
     tradingMaterialField(tradingModificationPlant),
     field("divisionChanging", "Division Changing", "input", {
       maxLength: 255, visibleWhen: whenTradingChange, lineItem: true
@@ -448,7 +453,7 @@ sap.ui.define([], function () {
       field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
         required: true
       }),
-      field("dmsSapMaterialCode", "DMS - SAP Material Code", "input", { required: true, maxLength: 40 })
+      field("dmsSapMaterialCode", "DMS - Product Code", "input", { required: true, maxLength: 40 })
     ],
     MAT_ZTRD_EXISTING: [
       field("transactionType", "Change Type", "select", {
@@ -482,7 +487,7 @@ sap.ui.define([], function () {
       field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
         required: true
       }),
-      field("dmsSapMaterialCode", "DMS - SAP Material Code", "input", { required: true, maxLength: 40 })
+      field("dmsSapMaterialCode", "DMS - Product Code", "input", { required: true, maxLength: 40 })
     ],
     SVC_NEW: serviceNewBase,
     SVC_NEW_REF: [

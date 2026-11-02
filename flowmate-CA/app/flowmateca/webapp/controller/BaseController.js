@@ -462,9 +462,10 @@ sap.ui.define([
     },
 
     formatSlaText: function (slaDueAt, statusCode, slaBreached) {
-      // S/4 Data Validation waiting on its Budget Check: its SLA restarts when the check is done.
+      // A task waiting on a task added with Add Task, or a PO's S/4 Data Validation waiting on its
+      // Budget Check: its SLA restarts when that is done.
       if (statusCode === "IN_PROGRESS") {
-        return "SLA paused · Budget Check";
+        return "SLA paused";
       }
       if (this.isSlaBreached(slaDueAt, statusCode, slaBreached)) {
         return "SLA Breached";

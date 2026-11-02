@@ -77,7 +77,7 @@ test("search is an OR group combined with the other filters", () => {
   }
 });
 
-test("dashboard counts include requests created or owned by the current user or active delegators", async () => {
+test("dashboard counts include delegators for My Requests but only own requests for status tiles", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   service.db = { CARequests: "requests", CARequestDrafts: "drafts", CATasks: "tasks" };
   service._ensureCurrentUser = async () => ({ ID: "alice" });
@@ -100,7 +100,7 @@ test("dashboard counts include requests created or owned by the current user or 
   assert.equal(counts.allTasks, 0);
   assert.equal(counts.myRequests, 4);
   assert.equal(counts.myDrafts, 0);
-  assert.equal(counts.rejectedRequests, 1);
+  assert.equal(counts.rejectedRequests, 0);
   assert.equal(counts.completedRequests, 1);
 });
 

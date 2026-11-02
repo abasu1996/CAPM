@@ -20,9 +20,11 @@ sap.ui.define([
 
     _onRouteMatched: async function (event) {
       this._query = event.getParameter("arguments")["?query"] || {};
-      this.getView().getModel("list").setProperty("/title", this._query.mode === "all"
-        ? (this._query.status === "REJECTED" ? "Terminated Requests" : "Completed Requests")
-        : "My Requests");
+      this.getView().getModel("list").setProperty("/title", {
+        REJECTED: "Terminated Requests",
+        COMPLETED: "Completed Requests",
+        SENT_BACK: "Sent Back Requests"
+      }[this._query.status] || "My Requests");
       this.byId("requestStatusFilter").setSelectedKey(this._query.status || "");
       this.getView().getModel("sortView").setProperty("/key", "asc");
       await this._loadCatalog();
@@ -61,6 +63,13 @@ sap.ui.define([
         }
         if (status) {
           filters.push(`status_code eq '${status}'`);
+        }
+        // From a Dashboard tile: the logged-in user's own requests only, without delegators'.
+        if (this._query?.own === "true") {
+          const user = this.getAppModel().getProperty("/currentUser")?.ID
+            ? this.getAppModel().getProperty("/currentUser") : await this.loadCurrentUser();
+          const me = String(user?.ID || "").replace(/'/g, "''");
+          filters.push(`(requester_ID eq '${me}' or owner_ID eq '${me}')`);
         }
 
         const filterQuery = filters.length ? `&$filter=${encodeURIComponent(filters.join(" and "))}` : "";

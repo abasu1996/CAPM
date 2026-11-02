@@ -81,6 +81,12 @@
             showIcon="true"
             class="sapUiSmallMarginTop"
             visible="{= !!${task>/budgetCheckMessage} }"/>
+          <MessageStrip
+            text="An added task is open in this step. This task is In Progress and can be approved, sent back or terminated once the added task is completed."
+            type="Information"
+            showIcon="true"
+            class="sapUiSmallMarginTop"
+            visible="{= ${task>/waitingOnAddedTask} === true }"/>
           <FlexBox wrap="Wrap" class="caFactGrid">
             <VBox class="caFact">
               <Label text="Workflow Step"/>
@@ -96,7 +102,7 @@
             </VBox>
             <VBox class="caFact">
               <Label text="{i18n>slaDue}"/>
-              <Text text="{= ${task>/status/code} === 'IN_PROGRESS' ? 'Paused while the Budget Check runs' : ${task>/status/code} === 'OPEN' &amp;&amp; ${task>/slaPausedAt} ? 'Paused until the added task is completed' : (${task>/slaDueAt} ? ${path: 'task>/slaDueAt', formatter: '.formatDateTime'} : ${path: 'task>/dueDate', formatter: '.formatDate'}) }"/>
+              <Text text="{= ['OPEN', 'IN_PROGRESS'].indexOf(${task>/status/code}) >= 0 &amp;&amp; ${task>/slaPausedAt} ? 'Paused until the added task is completed' : ${task>/status/code} === 'IN_PROGRESS' ? 'Paused while the Budget Check runs' : (${task>/slaDueAt} ? ${path: 'task>/slaDueAt', formatter: '.formatDateTime'} : ${path: 'task>/dueDate', formatter: '.formatDate'}) }"/>
               <ObjectStatus
                 text="{parts: ['task>/slaDueAt', 'task>/status/code'], formatter: '.formatSlaRemaining'}"
                 state="{parts: ['task>/slaDueAt', 'task>/status/code', 'task>/slaBreached'], formatter: '.formatSlaHighlight'}"

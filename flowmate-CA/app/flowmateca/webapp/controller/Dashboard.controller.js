@@ -73,42 +73,44 @@ sap.ui.define([
       this.navTo("reports");
     },
 
+    // Sent Back, Terminated, Completed, My Tasks and Pending Approval show the logged-in user's own
+    // requests and tasks only (own=true), as their counts do (srv _getDashboardCounts).
     onSentBack: function () {
-      this.navTo("tasks", {
-        "?query": {
-          mode: "all",
-          requestStatus: "SENT_BACK",
-          status: "OPEN"
-        }
-      });
+      this._ownRequests("SENT_BACK");
     },
 
     onRejected: function () {
-      this.navTo("requests", {
-        "?query": {
-          mode: this.getAppModel().getProperty("/currentUser/isAdmin") ? "all" : "mine",
-          status: "REJECTED"
-        }
-      });
+      this._ownRequests("REJECTED");
     },
 
     onCompleted: function () {
+      this._ownRequests("COMPLETED");
+    },
+
+    _ownRequests: function (status) {
       this.navTo("requests", {
         "?query": {
-          mode: this.getAppModel().getProperty("/currentUser/isAdmin") ? "all" : "mine",
-          status: "COMPLETED"
+          mode: "mine",
+          status,
+          own: "true"
         }
       });
     },
 
     onTasks: function () {
-      this.onMyTasks();
+      this.navTo("tasks", {
+        "?query": {
+          mode: "mine"
+        }
+      });
     },
 
     onMyTasks: function () {
       this.navTo("tasks", {
         "?query": {
-          mode: "mine"
+          mode: "mine",
+          status: "OPEN",
+          own: "true"
         }
       });
     },
@@ -125,7 +127,9 @@ sap.ui.define([
       this.navTo("tasks", {
         "?query": {
           mode: "mine",
-          approval: "true"
+          status: "OPEN",
+          approval: "true",
+          own: "true"
         }
       });
     },

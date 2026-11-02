@@ -2073,17 +2073,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const { isAdmin, canCreate, canViewDrafts, canValidate, canProcessAssignedTasks } = capabilities;
     const effectiveUserIds = isAdmin ? [user.ID] : await this._effectiveTaskUserIds(req, user.ID);
     const requestedBy = this._myRequestWhere(effectiveUserIds);
-    const assignedToMe = { assignedUser_ID: { in: effectiveUserIds } };
     // Only OPEN tasks are waiting on someone. A SENT_BACK task belongs to a step that
     // has been rolled back and is reopened when that step comes around again.
     const openStatus = { status_code: TASK_STATUS.OPEN };
     const teamIds = isAdmin ? [] : await this._teamIdsOf(user);
-    const taskScope = this._taskReadWhere(capabilities, effectiveUserIds, teamIds);
-    const sentBackTaskScope = this._withTaskFilters(
-      taskScope,
-      [{ ref: ["status_code"] }, "=", { val: TASK_STATUS.OPEN }],
-      [{ ref: ["request", "status_code"] }, "=", { val: REQUEST_STATUS.SENT_BACK }]
-    );
+    // Sent Back, Terminated, Completed, My Tasks and Pending Approval are the user's own work only:
+    // no delegators' and, for an administrator, nobody else's. Dashboard.controller.js opens the
+    // lists with the same filter (own=true).
+    const ownRequests = (status) => this._myRequestWhere([user.ID], status);
+    const ownOpenTasks = { assignedUser_ID: user.ID, ...openStatus };
 
     const [
       allRequests,
@@ -2100,17 +2098,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       capabilities.canViewAllTasks ? this._count(this.db.CATasks, {}) : 0,
       canCreate ? this._count(this.db.CARequests, requestedBy) : 0,
       canViewDrafts ? this._count(this.db.CARequestDrafts, { creator_ID: user.ID }) : 0,
-      canProcessAssignedTasks ? this._count(this.db.CATasks, { ...assignedToMe, ...openStatus }) : 0,
-      capabilities.canViewSentBack ? this._count(this.db.CATasks, sentBackTaskScope) : 0,
-      capabilities.canViewTerminated
-        ? this._count(this.db.CARequests, isAdmin ? { status_code: REQUEST_STATUS.REJECTED } : this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.REJECTED))
-        : 0,
-      canProcessAssignedTasks ? this._count(this.db.CATasks, {
-        ...assignedToMe,
-        ...openStatus,
-        isApproval: true
-      }) : 0,
-      canCreate ? this._count(this.db.CARequests, isAdmin ? { status_code: REQUEST_STATUS.COMPLETED } : this._myRequestWhere(effectiveUserIds, REQUEST_STATUS.COMPLETED)) : 0
+      canProcessAssignedTasks ? this._count(this.db.CATasks, ownOpenTasks) : 0,
+      capabilities.canViewSentBack ? this._count(this.db.CARequests, ownRequests(REQUEST_STATUS.SENT_BACK)) : 0,
+      capabilities.canViewTerminated ? this._count(this.db.CARequests, ownRequests(REQUEST_STATUS.REJECTED)) : 0,
+      canProcessAssignedTasks ? this._count(this.db.CATasks, { ...ownOpenTasks, isApproval: true }) : 0,
+      canCreate ? this._count(this.db.CARequests, ownRequests(REQUEST_STATUS.COMPLETED)) : 0
     ]);
 
     let myTeamTasks = 0;
@@ -3061,7 +3053,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     };
 
     await tx.run(INSERT.into(this.db.CATasks).entries(task));
-    await this._pauseStepSla(tx, request.ID, step.stepNo);
+    await this._pauseStepSla(tx, request.ID, step.stepNo, user);
     await this._notifyTaskAssignment(tx, task);
     await tx.run(UPDATE(this.db.RequestStepInstances).set({
       status: "OPEN",
@@ -3288,9 +3280,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       stepNo: task.stepNo
     });
     const request = await SELECT.one.from(this.db.CARequests).where({ ID: task.request_ID });
-    const glEnrichmentStep = /g\s*\/?\s*l\s+account\s+enrichment/i.test(step?.stepName || "");
-    const valuationClassStep = /valuation\s+class/i.test(step?.stepName || "");
-    const serviceCodeStep = /s\s*\/?\s*4\s+data\s+validation/i.test(step?.stepName || "");
+    // A task added with Add Task is a decision with remarks: the values its step records (codes,
+    // numbers, Budget Check) are given by the step's own task. Mirrored in TaskDetail.controller.js.
+    const stepName = task.isAdditional ? "" : (step?.stepName || "");
+    const glEnrichmentStep = /g\s*\/?\s*l\s+account\s+enrichment/i.test(stepName);
+    const valuationClassStep = /valuation\s+class/i.test(stepName);
+    const serviceCodeStep = /s\s*\/?\s*4\s+data\s+validation/i.test(stepName);
     // Purchase Order / Service Entry Sheet: S/4 Data Validation cannot be approved while a
     // requested Budget Check is running (the Budget Check itself is optional); approving the
     // Budget Check task marks it done.
@@ -3298,12 +3293,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (budgetEntity) {
       const budget = await SELECT.one.from(this.db[budgetEntity])
         .columns("ID", "budgetCheckStatus").where({ request_ID: task.request_ID });
-      if (budget && isS4ValidationStep(step?.stepName) && approvalBlockedByBudgetCheck(budget.budgetCheckStatus)) {
+      if (budget && isS4ValidationStep(stepName) && approvalBlockedByBudgetCheck(budget.budgetCheckStatus)) {
         return req.reject(409, "Complete the Budget Check before approving this task");
       }
       // Purchase Order: the S/4 Data Validation approver records one or more PO Numbers ("a; b").
       // The first is mandatory; with Create SES Successor only one is allowed, and the SES uses it.
-      if (budget && request.requestType_code === "PURCHASE_ORDER" && isS4ValidationStep(step?.stepName)) {
+      if (budget && request.requestType_code === "PURCHASE_ORDER" && isS4ValidationStep(stepName)) {
         const poNumbers = poNumberList(req.data.purchaseOrderNo);
         if (!poNumbers.length) {
           return req.reject(400, "Enter the PO Number to approve this task");
@@ -3318,7 +3313,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         await tx.run(UPDATE(this.db.PurchaseOrderDetails)
           .set({ purchaseOrderNumber: poNumbers.join("; ") }).where({ ID: budget.ID }));
       }
-      if (budget?.budgetCheckStatus && isBudgetCheckStep(step?.stepName)) {
+      if (budget?.budgetCheckStatus && isBudgetCheckStep(stepName)) {
         await tx.run(UPDATE(this.db[budgetEntity])
           .set({ budgetCheckStatus: BUDGET_CHECK.COMPLETED }).where({ ID: budget.ID }));
         // The S/4 task that waited resumes (OPEN again, full SLA from now) before the step advances.
@@ -3494,7 +3489,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
     // Material Reservation: the approver of the S/4 step records the Material Reservation Number
     // created in S/4 for each line item (both variants).
-    if (request?.requestType_code === "MATERIAL_RESERVATION" && this._isReservationS4Step(step?.stepName)) {
+    if (request?.requestType_code === "MATERIAL_RESERVATION" && this._isReservationS4Step(stepName)) {
       const reservationDetails = await SELECT.one.from(this.db.MaterialReservationDetails)
         .where({ request_ID: task.request_ID });
       if (reservationDetails) {
@@ -3505,7 +3500,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
 
     // PO Approval Completion records the date the PO was released (mandatory).
-    if (request?.requestType_code === "PURCHASE_ORDER" && isPoApprovalCompletionStep(step?.stepName)) {
+    if (request?.requestType_code === "PURCHASE_ORDER" && isPoApprovalCompletionStep(stepName)) {
       const poReleasedDate = String(req.data.poReleasedDate || "").trim();
       if (!poReleasedDate) {
         return req.reject(400, "Enter the PO Released Date to approve this task");
@@ -3515,7 +3510,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
 
     // The last step of a PO with "Create SES Successor" captures the PO number for the SES.
-    const poDetails = await this._poDetailsNeedingNumber(tx, task);
+    const poDetails = task.isAdditional ? null : await this._poDetailsNeedingNumber(tx, task);
     if (poDetails) {
       const purchaseOrderNo = String(req.data.purchaseOrderNo || "").trim();
       if (!purchaseOrderNo) {
@@ -3543,10 +3538,11 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         `Approved ${this._overdueText(task.slaDueAt, approvedAt)} after the SLA due date`);
     }
     // Values the approver entered (codes, numbers per line) become a version of their own.
-    await this._recordVersion(tx, task.request_ID, request?.requestType_code, user,
-      { approverStep: { stepNo: task.stepNo, stepName: step?.stepName || task.taskName } });
     if (task.isAdditional) {
       await this._resumeStepSla(tx, task, user);
+    } else {
+      await this._recordVersion(tx, task.request_ID, request?.requestType_code, user,
+        { approverStep: { stepNo: task.stepNo, stepName: step?.stepName || task.taskName } });
     }
     await this._autoCompleteStepIfDone(req, tx, task, user);
     return true;
@@ -4188,7 +4184,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const waiting = (await tx.run(SELECT.from(this.db.CATasks).where({
       request_ID: requestId,
       status_code: TASK_STATUS.IN_PROGRESS
-    }))).filter((entry) => !entry.isSuperseded && entry.stepNo > budgetStepNo);
+    // slaPausedAt: waiting on an added task, not on the Budget Check.
+    }))).filter((entry) => !entry.isSuperseded && !entry.slaPausedAt && entry.stepNo > budgetStepNo);
     const startedAt = new Date().toISOString();
     for (const waitingTask of waiting) {
       const step = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
@@ -4202,6 +4199,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       await this._notifyTaskAssignment(tx, { ...waitingTask, ...resumed });
       await this._writeHistory(tx, requestId, waitingTask.stepNo, "SLA_RESTARTED", { displayName: "SLA Monitor", email: null },
         TASK_STATUS.IN_PROGRESS, TASK_STATUS.OPEN, `${waitingTask.taskName}: Budget Check completed, a full SLA starts now`);
+      const addedTaskOpen = await tx.run(SELECT.one.from(this.db.CATasks).columns("ID").where({
+        request_ID: requestId, stepNo: waitingTask.stepNo, isAdditional: true, isSuperseded: false, status_code: TASK_STATUS.OPEN
+      }));
+      if (addedTaskOpen) {
+        await this._pauseStepSla(tx, requestId, waitingTask.stepNo);
+      }
     }
     if (waiting.length) {
       await this._refreshRequestSla(tx, requestId);
@@ -4523,7 +4526,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const existing = stepTasks.filter((task) => !task.isAdditional);
     const closedAdditional = stepTasks.filter((task) => task.isAdditional && task.status_code !== TASK_STATUS.OPEN);
     const additionalOpen = stepTasks.some((task) => task.isAdditional && task.status_code === TASK_STATUS.OPEN);
-    if (existing.some((task) => task.status_code === TASK_STATUS.OPEN)) {
+    // IN_PROGRESS: waiting on an added task (or a PO's Budget Check); it carries on as it is.
+    if (existing.some((task) => [TASK_STATUS.OPEN, TASK_STATUS.IN_PROGRESS].includes(task.status_code))) {
       return;
     }
     const config = step.config_ID
@@ -4881,7 +4885,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!this._roleCapabilities(req).canProcessAssignedTasks) return false;
     const openTasks = (await SELECT.from(this.db.CATasks)
       .columns("assignedUser_ID", "isSuperseded")
-      .where({ request_ID: request.ID, status_code: TASK_STATUS.OPEN }))
+      // IN_PROGRESS: a task waiting on an added task or a Budget Check is still its holder's work.
+      .where({ request_ID: request.ID, status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.IN_PROGRESS] } }))
       .filter((task) => !task.isSuperseded && task.assignedUser_ID);
     for (const task of openTasks) {
       if (await this._canActOnTask(req, user.ID, task.assignedUser_ID)) {
@@ -5017,11 +5022,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }).format(date);
   }
 
-  // While a task added with Add Task is open, the SLA of its step's own open task(s) is paused:
-  // no deadline, so the breach scan cannot flag them. _resumeStepSla restarts it.
-  async _pauseStepSla(tx, requestId, stepNo) {
+  // While a task added with Add Task is open, its step's own open task(s) wait In Progress (no
+  // approve, send back or terminate) with the SLA paused: no deadline, so the breach scan cannot
+  // flag them. _resumeStepSla reopens them.
+  async _pauseStepSla(tx, requestId, stepNo, user) {
     const main = (await tx.run(SELECT.from(this.db.CATasks)
-      .columns("ID", "isAdditional", "isSuperseded", "slaPausedAt")
+      .columns("ID", "isAdditional", "isSuperseded", "slaPausedAt", "taskName")
       .where({ request_ID: requestId, stepNo, status_code: TASK_STATUS.OPEN })))
       .filter((task) => !task.isSuperseded && !task.isAdditional);
     if (!main.length) {
@@ -5029,24 +5035,28 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     const now = new Date().toISOString();
     for (const task of main) {
-      await tx.run(UPDATE(this.db.CATasks)
-        .set({ slaPausedAt: task.slaPausedAt || now, slaDueAt: null, dueDate: null }).where({ ID: task.ID }));
+      await tx.run(UPDATE(this.db.CATasks).set({
+        status_code: TASK_STATUS.IN_PROGRESS, slaPausedAt: task.slaPausedAt || now, slaDueAt: null, dueDate: null
+      }).where({ ID: task.ID }));
+      await this._writeHistory(tx, requestId, stepNo, "TASK_WAITING", user || { displayName: "SLA Monitor", email: null },
+        TASK_STATUS.OPEN, TASK_STATUS.IN_PROGRESS, `${task.taskName}: waits until the added task is completed`);
     }
     await tx.run(UPDATE(this.db.RequestStepInstances)
       .set({ slaDueAt: null, dueDate: null }).where({ request_ID: requestId, stepNo }));
   }
 
-  // Once the last open Add Task task of a step is completed, the step's paused task(s) get their
-  // SLA again from the start: the step's full SLA days from now.
+  // Once the last open Add Task task of a step is completed, the step's waiting task(s) are OPEN
+  // again, with their SLA from the start: the step's full SLA days from now.
   async _resumeStepSla(tx, additionalTask, user) {
     const stepTasks = (await tx.run(SELECT.from(this.db.CATasks)
-      .columns("ID", "status_code", "isAdditional", "isSuperseded", "slaPausedAt", "taskName")
       .where({ request_ID: additionalTask.request_ID, stepNo: additionalTask.stepNo })))
       .filter((task) => !task.isSuperseded);
     if (stepTasks.some((task) => task.isAdditional && task.status_code === TASK_STATUS.OPEN && task.ID !== additionalTask.ID)) {
       return;
     }
-    const paused = stepTasks.filter((task) => !task.isAdditional && task.status_code === TASK_STATUS.OPEN && task.slaPausedAt);
+    // OPEN too: tasks paused before the wait moved them to In Progress.
+    const paused = stepTasks.filter((task) => !task.isAdditional && task.slaPausedAt
+      && [TASK_STATUS.IN_PROGRESS, TASK_STATUS.OPEN].includes(task.status_code));
     if (!paused.length) {
       return;
     }
@@ -5058,14 +5068,18 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const startedAt = new Date().toISOString();
     const slaDays = this._isPoApprovalCompletionStep(config) ? 0 : (step?.slaDays ?? config?.slaDays ?? 2);
     const deadline = Number(slaDays) === 0 ? { slaDueAt: null, dueDate: null } : this._slaDeadline(startedAt, slaDays);
-    await tx.run(UPDATE(this.db.CATasks).set({ ...deadline, slaStartedAt: startedAt, slaPausedAt: null })
+    const resumed = { status_code: TASK_STATUS.OPEN, ...deadline, slaStartedAt: startedAt, slaPausedAt: null };
+    await tx.run(UPDATE(this.db.CATasks).set(resumed)
       .where({ ID: { in: paused.map((task) => task.ID) } }));
     if (step) {
       await tx.run(UPDATE(this.db.RequestStepInstances).set(deadline).where({ ID: step.ID }));
     }
     await this._refreshRequestSla(tx, additionalTask.request_ID);
-    await this._writeHistory(tx, additionalTask.request_ID, additionalTask.stepNo, "SLA_RESTARTED", user, null, null,
-      `SLA of ${paused.map((task) => task.taskName).join(", ")} restarted after ${additionalTask.taskName} was completed`);
+    for (const task of paused) {
+      await this._notifyTaskAssignment(tx, { ...task, ...resumed });
+    }
+    await this._writeHistory(tx, additionalTask.request_ID, additionalTask.stepNo, "SLA_RESTARTED", user, TASK_STATUS.IN_PROGRESS, TASK_STATUS.OPEN,
+      `${paused.map((task) => task.taskName).join(", ")} reopened with a full SLA after ${additionalTask.taskName} was completed`);
   }
 
   // The open step's deadline plus the SLA days of the steps still to come.

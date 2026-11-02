@@ -317,6 +317,7 @@ entity MaterialCodeDetails : cuid, managed {
   isSerialized           : Boolean;
   requiredAgents         : String(255);
   vendor                 : Association to common.Vendors;
+  vendorErp              : String(40);
   defaultWarrantyPeriod  : Integer;
   warrantyType           : String(80);
   valueType              : String(80);
@@ -376,6 +377,7 @@ entity MaterialCodeItems : cuid, managed {
   isSerialized           : Boolean;
   requiredAgents         : String(255);
   vendor                 : Association to common.Vendors;
+  vendorErp              : String(40);
   defaultWarrantyPeriod  : Integer;
   warrantyType           : String(80);
   valueType              : String(80);

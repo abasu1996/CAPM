@@ -60,6 +60,8 @@ sap.ui.define([
         // Line-item exports are for the approver the task is assigned to (once claimed), also after deciding it.
         task.isAssignedToMe = assignedToActor;
         task.canSendBack = task.canProcess && task.stepNo > 1;
+        // The step's own task waits In Progress while a task added with Add Task is open (srv _pauseStepSla).
+        task.waitingOnAddedTask = task.status?.code === "IN_PROGRESS" && Boolean(task.slaPausedAt);
 
         const request = task.request || {};
         const details = request[this.detailNavigationFor(request.requestType?.code)] || {};
@@ -80,11 +82,13 @@ sap.ui.define([
         const lastStepNo = Math.max.apply(null, (request.stepInstances || []).map(function (step) {
           return step.stepNo;
         }));
-        task.needsPoNumber = request.requestType?.code === "PURCHASE_ORDER"
+        task.needsPoNumber = !task.isAdditional && request.requestType?.code === "PURCHASE_ORDER"
           && details.sesRequired === true
           && !details.purchaseOrderNumber
           && task.stepNo === lastStepNo;
-        const currentStep = (request.stepInstances || []).find(function (step) {
+        // A task added with Add Task records none of its step's values (codes, numbers, Budget
+        // Check): those stay with the step's own task. Mirrors _approveTask in srv/flowmate-ca.js.
+        const currentStep = task.isAdditional ? null : (request.stepInstances || []).find(function (step) {
           return step.stepNo === task.stepNo;
         });
         // Workhub transmission is available only on an assigned PO S/4 Data Validation task.
