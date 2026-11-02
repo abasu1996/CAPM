@@ -1534,3 +1534,16 @@
     background: var(--flowmateSoftBlue);
     border-color: #8cc5ff;
 }
+
+.flowmateSectionTitle.sapMLabel {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1d2d3e;
+    line-height: normal;
+}
+
+.flowmateSectionTitle.sapMLabel.sapMLabelRequired::before {
+    font-size: inherit;
+    margin-left: 0.125rem;
+}

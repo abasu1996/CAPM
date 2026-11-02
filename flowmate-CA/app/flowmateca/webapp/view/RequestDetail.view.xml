@@ -238,12 +238,20 @@
                 </Toolbar>
                 <!-- Grouped by field in the controller (_bindAttachments). -->
                 <List id="attachmentsList" items="{path: 'detail>/attachments', templateShareable: true}" noDataText="No attachments">
-                  <StandardListItem
-                    title="{detail>filename}"
-                    description="{detail>uploadInfo}"
-                    icon="{= ${detail>replacedAt} ? 'sap-icon://document-text' : 'sap-icon://document' }"
-                    type="Active"
-                    press=".onAttachmentPress"/>
+                  <CustomListItem type="Active" press=".onAttachmentPress">
+                    <HBox alignItems="Center" justifyContent="SpaceBetween" class="sapUiSmallMarginBeginEnd sapUiTinyMarginTopBottom">
+                      <HBox alignItems="Center">
+                        <core:Icon src="{= ${detail>replacedAt} ? 'sap-icon://document-text' : 'sap-icon://document' }"
+                          size="1.5rem" class="sapUiSmallMarginEnd"/>
+                        <VBox>
+                          <Text text="{detail>filename}" class="sapMSLITitleOnly"/>
+                          <Text text="{detail>uploadInfo}" class="sapMSLIDescription"/>
+                        </VBox>
+                      </HBox>
+                      <Button icon="sap-icon://delete" type="Transparent" tooltip="Delete attachment"
+                        visible="{= ${detail>canDelete} === true }" press=".onDeleteAttachment"/>
+                    </HBox>
+                  </CustomListItem>
                 </List>
               </VBox>
             </IconTabFilter>

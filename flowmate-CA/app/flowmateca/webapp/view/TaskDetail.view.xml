@@ -96,7 +96,7 @@
             </VBox>
             <VBox class="caFact">
               <Label text="{i18n>slaDue}"/>
-              <Text text="{= ${task>/status/code} === 'IN_PROGRESS' ? 'Paused while the Budget Check runs' : (${task>/slaDueAt} ? ${path: 'task>/slaDueAt', formatter: '.formatDateTime'} : ${path: 'task>/dueDate', formatter: '.formatDate'}) }"/>
+              <Text text="{= ${task>/status/code} === 'IN_PROGRESS' ? 'Paused while the Budget Check runs' : ${task>/status/code} === 'OPEN' &amp;&amp; ${task>/slaPausedAt} ? 'Paused until the added task is completed' : (${task>/slaDueAt} ? ${path: 'task>/slaDueAt', formatter: '.formatDateTime'} : ${path: 'task>/dueDate', formatter: '.formatDate'}) }"/>
               <ObjectStatus
                 text="{parts: ['task>/slaDueAt', 'task>/status/code'], formatter: '.formatSlaRemaining'}"
                 state="{parts: ['task>/slaDueAt', 'task>/status/code', 'task>/slaBreached'], formatter: '.formatSlaHighlight'}"
@@ -155,7 +155,7 @@
               <Toolbar>
                 <ToolbarSpacer/>
                 <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent"
-                  press=".onExportTaskTable" app:table="headers" visible="{task>/isAssignedToMe}"/>
+                  press=".onExportTaskTable" app:table="headers"/>
               </Toolbar>
               <ScrollContainer horizontal="true" vertical="false" width="100%">
                 <Table id="taskHeadersTable" fixedLayout="true" class="caWorklistTable"/>
@@ -192,7 +192,7 @@
                   visible="{= ${task>/isRequesterStep} }"
                   tooltip="Replace the rows with an edited Excel (.xlsx) or CSV file"/>
                 <Button text="Export to Excel" icon="sap-icon://excel-attachment" type="Transparent"
-                  press=".onExportTaskTable" app:table="items" visible="{= !${task>/isRequesterStep} &amp;&amp; ${task>/isAssignedToMe} }"/>
+                  press=".onExportTaskTable" app:table="items" visible="{= !${task>/isRequesterStep} }"/>
               </Toolbar>
               <ScrollContainer horizontal="true" vertical="false" width="100%">
                 <Table id="taskItemsTable" fixedLayout="true" class="caWorklistTable"/>

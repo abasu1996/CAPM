@@ -458,7 +458,7 @@ const SUBTYPE_FIELDS = {
       "merchantEntityValues",
       "highestValueInExcel",
       "aggregateTotalValueAcrossAllFiles"
-      
+
     ],
     optional: ["processingBankAccountDetails"]
   },
@@ -1441,6 +1441,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
           `${aMissing.join(", ")} ${aMissing.length === 1 ? "is" : "are"} mandatory for this process subtype`
         );
       }
+      this._rejectInvalidCurrencyForPaymentCategory(req);
         if (sSubProcessTypeCode === "NON_PO_CC_SETTLEMENT") {
         const aEntries = Array.isArray(req.data.settlementEntries)
           ? req.data.settlementEntries
@@ -1963,6 +1964,14 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
       if (!bUpdatesIvArchivalUrl && !bUpdatesRevisedDueDate) {
         return;
+      }
+
+      const oRequest = await this._getRequest(req, this._requestIdFromReq(req));
+      if (!oRequest) {
+        return req.reject(404, "Process request was not found");
+      }
+      if ([PROCESS_STATUS.COMPLETED, PROCESS_STATUS.REJECTED, PROCESS_STATUS.PENDING_APPROVAL].includes(oRequest.status_code)) {
+        return req.reject(409, "IV archival link and revised due date cannot be changed for this request status");
       }
 
       const oCurrentUser = await this._currentReservationUser(req, Users);
@@ -3245,6 +3254,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         return req.reject(409, "Only open or sent-back team tasks can be assigned");
       }
 
+      if (!this._isRequestReserved(request)) {
+        return req.reject(409, "Reserve the request before assigning a team task");
+      }
+
       const oReservationUser = await this._currentReservationUser(req, Users);
       const oCurrentUser = oReservationUser.user;
 
@@ -3771,6 +3784,20 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       };
     }
   }
+  _rejectInvalidCurrencyForPaymentCategory(req, data = req.data) {
+    if (!this._hasValue(data.currency_code)) {
+      return;
+    }
+
+    if (data.paymentCategory_code === "LOCAL" && data.currency_code !== "LKR") {
+      return req.reject(400, "Currency must be LKR when the payment category is Local");
+    }
+
+    if (data.paymentCategory_code === "FOREIGN" && data.currency_code === "LKR") {
+      return req.reject(400, "Currency cannot be LKR when the payment category is Foreign");
+    }
+  }
+
   _hasValue(value) {
     return value !== null && value !== undefined && String(value).trim() !== "";
   }
@@ -4916,6 +4943,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return Boolean(oMembership);
   }
 
+  _isRequestReserved(request) {
+    return Boolean(request?.reservedBy || request?.reservedByUser_ID);
+  }
   _setTeamTaskAssignmentEligibility(data, options = {}) {
     const aTasks = Array.isArray(data) ? data : (data ? [data] : []);
     const oTeamIds = new Set(options.teamIds || []);
@@ -6317,7 +6347,7 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
         .columns("taskName", "stepNo")
         .where({
           request_ID: oPayment.ID,
-          status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] },
+          status_code: { in: [TASK_STATUS.OPEN] },
           stepNo: { "!=": iLastStepNo }
         })
     );
@@ -6349,7 +6379,7 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
       }).where({
         request_ID: oPayment.ID,
         stepNo: mLastStepNo.get(oPayment.ID),
-        status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
+        status_code: { in: [TASK_STATUS.OPEN] }
       })
     );
 
@@ -6369,8 +6399,8 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
       newStatus: PROCESS_STATUS.COMPLETED,
       remarks: `Completed automatically because settlement request ${sSettlementRef} was completed`
     });
+    await this._notifyRequestFinalStatus(req, oPayment.ID, `Completed with settlement request ${sSettlementRef}`);
   }
-  await this._notifyRequestFinalStatus(req, oPayment.ID, `Completed with settlement request ${sSettlementRef}`);
 }
 
   _getTaskProgressionError(task, request, currentStep) {
@@ -7943,16 +7973,20 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
       for (const oRecipient of aRecipients) {
         try {
           // Never send the same final-status mail to the same person twice
-          const oAlreadySent = await cds.tx(req).run(
-            SELECT.one.from(this.entities.ProcessEmailMessages).columns("ID").where({
-              request_ID: requestId,
-              interfaceSystem: "BPA_REQUEST_STATUS_WORKFLOW",
-              subject: sSubject,
-              toRecipients: oRecipient.email,
-              status: "SENT"
-            })
+          const aSentMails = await cds.tx(req).run(
+            SELECT.from(this.entities.ProcessEmailMessages)
+              .columns("ID", "toRecipients")
+              .where({
+                request_ID: requestId,
+                interfaceSystem: "BPA_REQUEST_STATUS_WORKFLOW",
+                subject: sSubject,
+                status: "SENT"
+              })
           );
-          if (oAlreadySent) continue;
+          const bAlreadySent = aSentMails.some((oMail) =>
+            String(oMail.toRecipients || "").trim().toLowerCase() === oRecipient.email
+          );
+          if (bAlreadySent) continue;
 
           await this._startBpaRequestStatusWorkflow(req, {
             request: oRequest,

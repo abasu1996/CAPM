@@ -11,6 +11,12 @@ service FlowmateCAService {
     mimeType     : String(128);
   }
 
+  // A dashboard chart as the browser rendered it, for the PDF export.
+  type ReportChartSnapshot {
+    chartKey : String(40);
+    title    : String(150);
+    svg      : LargeString;
+  }
   type DashboardCounts {
     allRequests     : Integer;
     allTasks        : Integer;
@@ -28,6 +34,7 @@ service FlowmateCAService {
     ID                     : UUID;
     displayName            : String(160);
     email                  : String(255);
+    loginId                : String(255);
     isAdmin                : Boolean;
     isSupervisor           : Boolean;
     isValidator            : Boolean;
@@ -224,6 +231,19 @@ service FlowmateCAService {
    */
   @requires: ['CASupervisor', 'CAAdmin']
   action getReportingDashboard(periodStart: Date, periodEnd: Date, poType: String(40)) returns LargeString;
+  /** Purchase Order Lifecycle dashboard for a reporting period, optionally for one PO type. */
+  @requires: ['CASupervisor', 'CAAdmin']
+  action getPoLifecycleDashboard(periodStart: Date, periodEnd: Date, poType: String(40)) returns LargeString;
+  /** Spend Analysis dashboard: approved POs' LKR spend for a period, compared with a year before. */
+  @requires: ['CASupervisor', 'CAAdmin']
+  action getSpendAnalysisDashboard(periodStart: Date, periodEnd: Date, poType: String(40)) returns LargeString;
+  /** The same dashboard as a PDF, with the charts as the browser rendered them (SVG). */
+  @requires: ['CASupervisor', 'CAAdmin']
+  action exportPoLifecycleDashboardPdf(periodStart: Date, periodEnd: Date, poType: String(40), charts: many ReportChartSnapshot) returns {
+    fileName : String(150);
+    mimeType : String(100);
+    content  : LargeString;
+  };
   @requires: ['CARequester', 'CAAdmin']
   action submitRequest(requestId: UUID) returns Boolean;
   @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']

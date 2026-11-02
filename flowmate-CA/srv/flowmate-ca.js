@@ -9,6 +9,8 @@ const {
   normalizeAttachmentManifest
 } = require("./lib/po-integration");
 const { sendPoNumbersToWorkhub } = require("./lib/workhub");
+const PDFDocument = require("pdfkit");
+const SVGtoPDF = require("svg-to-pdfkit");
 const { SELECT, INSERT, UPDATE, DELETE } = cds.ql;
 // Only the server's completion path can mark a request as an automatic handoff.
 const INTERNAL_FLOWMATE_HANDOFF = Symbol("internalFlowmateHandoff");
@@ -402,6 +404,741 @@ const readAttachmentContent = async (content) => {
   return Buffer.from(content);
 };
 
+// Purchase Order Lifecycle dashboard ("PURCHASE ORDER LIFECYCLE DB" in docs/ARIBA Reports.xlsx).
+// Pure: the service reads the rows and this module turns them into the dashboard document, so
+// every figure can be checked without a database.
+//
+// Stages follow the workflow: a request is Received when submitted, Created once the S/4 Data
+// Validation step recorded its PO number, Approved when every step is done (COMPLETED), Rejected
+// when terminated, and Pending while still open. A stage is within SLA when the calendar days
+// from submission to that stage are no more than the configured step SLA days up to it.
+
+const OPEN_STATUSES = new Set(["SUBMITTED", "IN_PROGRESS", "SENT_BACK"]);
+const DEFAULT_SLA_DAYS = 5;
+const NOT_SPECIFIED = "Not specified";
+
+const lifecycleDate = (value) => {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const round1 = (value) => Math.round(value * 10) / 10;
+const lifecyclePercent = (part, whole) => (whole ? round1((part / whole) * 100) : null);
+const averageOf = (values) => (values.length ? round1(values.reduce((sum, value) => sum + value, 0) / values.length) : null);
+const daysBetween = (from, to) => Math.max(0, (to - from) / DAY_MS);
+
+// "YYYY-MM" of a moment as seen in the reporting time zone.
+const monthKey = (date, timeZone) => {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit" }).formatToParts(date);
+  return `${parts.find((part) => part.type === "year").value}-${parts.find((part) => part.type === "month").value}`;
+};
+
+// "YYYY-MM-DD" of a moment as seen in the reporting time zone.
+const dayKey = (date, timeZone) => new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+
+// "YYYY-MM-DD" moved by a number of calendar days.
+const shiftDay = (key, delta) => new Date(Date.parse(`${key}T00:00:00Z`) + delta * DAY_MS).toISOString().slice(0, 10);
+
+// The reporting period: the given start and end days, or the whole of a "YYYY-MM" month.
+const periodOf = (periodStart, periodEnd, month) => {
+  const valid = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value || "") && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
+  if (valid(periodStart) && valid(periodEnd) && periodStart <= periodEnd) {
+    return { start: periodStart, end: periodEnd };
+  }
+  return { start: `${month}-01`, end: shiftDay(`${shiftMonth(month, 1)}-01`, -1) };
+};
+
+const shiftMonth = (key, delta) => {
+  const [year, month] = key.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1 + delta, 1));
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+};
+
+// Late days -> the sheet's fail status: Critical from 10 days, Warning from 5, else Monitor.
+const failStatus = (days) => (days >= 10 ? "CRITICAL" : days >= 5 ? "WARNING" : "MONITOR");
+// SLA % -> the sheet's group status: green from 90 %, amber from 80 %, else red.
+const slaStatus = (pct) => (pct === null ? "NONE" : pct >= 90 ? "GOOD" : pct >= 80 ? "WATCH" : "POOR");
+
+// One request's lifecycle: stage moments, SLA targets and how late it is.
+function evaluatePoLifecycle(request, detail, steps, configuredSla, now) {
+  const submittedAt = lifecycleDate(request.submittedAt) || lifecycleDate(request.createdAt);
+  const ordered = steps.slice().sort((left, right) => left.stepNo - right.stepNo);
+  const slaOf = (step) => {
+    const days = Number(step.slaDays);
+    if (Number.isFinite(days) && days > 0) return days;
+    const configured = Number(configuredSla.get(`${request.requestVariant_code}|${step.stepNo}`));
+    return Number.isFinite(configured) && configured > 0 ? configured : 0;
+  };
+  let totalTarget = ordered.reduce((sum, step) => sum + slaOf(step), 0);
+  if (!totalTarget) {
+    const due = lifecycleDate(request.slaDueAt);
+    totalTarget = due && submittedAt ? Math.max(1, Math.round((due - submittedAt) / DAY_MS)) : DEFAULT_SLA_DAYS;
+  }
+  const s4Index = ordered.findIndex((step) => isS4ValidationStep(step.stepName));
+  const createdTarget = s4Index >= 0
+    ? ordered.slice(0, s4Index + 1).reduce((sum, step) => sum + slaOf(step), 0) || totalTarget
+    : totalTarget;
+
+  const status = request.status_code;
+  const closedAt = lifecycleDate(request.completedAt) || lifecycleDate(request.modifiedAt);
+  const rejectedAt = status === "REJECTED" ? closedAt : null;
+  const approvedAt = status === "COMPLETED" ? lifecycleDate(request.completedAt) || closedAt : null;
+  const hasPoNumber = Boolean(String(detail.purchaseOrderNumber || "").trim());
+  const s4CompletedAt = s4Index >= 0 ? lifecycleDate(ordered[s4Index].completedAt) : null;
+  const poCreatedAt = hasPoNumber ? s4CompletedAt || approvedAt : null;
+  const endAt = approvedAt || rejectedAt || now;
+  const elapsed = submittedAt ? daysBetween(submittedAt, endAt) : 0;
+
+  return {
+    request,
+    detail,
+    steps: ordered,
+    slaOf,
+    submittedAt,
+    totalTarget,
+    createdTarget,
+    elapsed,
+    breached: elapsed > totalTarget,
+    rejected: status === "REJECTED",
+    approved: status === "COMPLETED",
+    pending: OPEN_STATUSES.has(status),
+    created: Boolean(poCreatedAt),
+    createdDays: poCreatedAt && submittedAt ? daysBetween(submittedAt, poCreatedAt) : null,
+    rejectedDays: rejectedAt && submittedAt ? daysBetween(submittedAt, rejectedAt) : null,
+    approvedDays: approvedAt && submittedAt ? daysBetween(submittedAt, approvedAt) : null
+  };
+}
+
+// The step that made a breached request late: the first one finished (or still open) after
+// its own due time. Each step's due time is its start plus its SLA days.
+function failReason(entry, now) {
+  for (const step of entry.steps) {
+    const startedAt = lifecycleDate(step.startedAt);
+    const completedAt = lifecycleDate(step.completedAt);
+    if (!startedAt && !completedAt) continue;
+    const due = lifecycleDate(step.slaDueAt) || (startedAt ? new Date(startedAt.getTime() + entry.slaOf(step) * DAY_MS) : null);
+    if (!due) continue;
+    if (completedAt && completedAt > due) return `Delayed at ${step.stepName}`;
+    if (!completedAt && entry.pending && now > due) return `Open at ${step.stepName} past SLA`;
+  }
+  if (entry.rejected) return "Terminated after the SLA";
+  return entry.pending ? "Open past the overall SLA" : "Completed after the overall SLA";
+}
+
+// SLA figures for a set of stage measurements: { days, target } pairs.
+function slaFigures(measurements) {
+  return {
+    count: measurements.length,
+    targetDays: averageOf(measurements.map((entry) => entry.target)),
+    achievedDays: averageOf(measurements.map((entry) => entry.days)),
+    slaPercent: lifecyclePercent(measurements.filter((entry) => entry.days <= entry.target).length, measurements.length)
+  };
+}
+
+const stageMeasurements = (entries) => ({
+  received: entries.map((entry) => ({ days: entry.elapsed, target: entry.totalTarget })),
+  rejected: entries.filter((entry) => entry.rejected && entry.rejectedDays !== null)
+    .map((entry) => ({ days: entry.rejectedDays, target: entry.totalTarget })),
+  created: entries.filter((entry) => entry.created && entry.createdDays !== null)
+    .map((entry) => ({ days: entry.createdDays, target: entry.createdTarget })),
+  approved: entries.filter((entry) => entry.approved && entry.approvedDays !== null)
+    .map((entry) => ({ days: entry.approvedDays, target: entry.totalTarget })),
+  pending: entries.filter((entry) => entry.pending)
+    .map((entry) => ({ days: entry.elapsed, target: entry.totalTarget }))
+});
+
+function kpisOf(entries) {
+  const received = entries.length;
+  return {
+    totalRequests: received,
+    rejected: entries.filter((entry) => entry.rejected).length,
+    created: entries.filter((entry) => entry.created).length,
+    approved: entries.filter((entry) => entry.approved).length,
+    pendingApproval: entries.filter((entry) => entry.pending).length,
+    slaCompliancePercent: lifecyclePercent(entries.filter((entry) => !entry.breached).length, received)
+  };
+}
+
+// One row per value of a dimension (purchasing group, company code, ...), largest first.
+function poLifecycleBreakdown(entries, labelOf) {
+  const groups = new Map();
+  entries.forEach((entry) => {
+    const label = labelOf(entry) || NOT_SPECIFIED;
+    if (!groups.has(label)) groups.set(label, []);
+    groups.get(label).push(entry);
+  });
+  return Array.from(groups.entries()).map(([label, rows]) => {
+    const figures = slaFigures(rows.map((entry) => ({ days: entry.elapsed, target: entry.totalTarget })));
+    return {
+      label,
+      volume: rows.length,
+      sharePercent: lifecyclePercent(rows.length, entries.length),
+      created: rows.filter((entry) => entry.created).length,
+      approved: rows.filter((entry) => entry.approved).length,
+      rejected: rows.filter((entry) => entry.rejected).length,
+      pending: rows.filter((entry) => entry.pending).length,
+      targetDays: figures.targetDays,
+      achievedDays: figures.achievedDays,
+      slaPercent: figures.slaPercent,
+      status: slaStatus(figures.slaPercent)
+    };
+  }).sort((left, right) => right.volume - left.volume || left.label.localeCompare(right.label));
+}
+
+const poLifecycleText = (value) => String(value ?? "").trim();
+const purchasingGroupOf = (entry) => poLifecycleText(entry.detail.purchasingGroup);
+const companyCodeOf = (entry) => poLifecycleText(entry.detail.companyCode);
+const contractOf = (entry) => (entry.detail.contractBased ? "Contracted" : "Non-contracted");
+const divisionOf = (entry) => poLifecycleText(entry.detail.division);
+
+const missingRemark = (entries, valueOf, field) => {
+  const missing = entries.filter((entry) => !valueOf(entry)).length;
+  return missing ? `${missing} of ${entries.length} POs have no ${field}` : "";
+};
+
+/**
+ * @param {object} input
+ * @param {object[]} input.requests  PO requests (CARequests rows)
+ * @param {object[]} input.details   PurchaseOrderDetails rows (request_ID, ...)
+ * @param {object[]} input.steps     RequestStepInstances rows (request_ID, stepNo, ...)
+ * @param {object[]} [input.stepConfigs] WorkflowStepConfigs rows (fallback SLA days)
+ * @param {string} [input.periodStart] first day of the reporting period, "YYYY-MM-DD"
+ * @param {string} [input.periodEnd]   last day of the reporting period, "YYYY-MM-DD"
+ * @param {string} [input.month]       "YYYY-MM": the whole month, when no period is given
+ * @param {string} [input.poType]    PO type code, or "ALL"
+ * @param {Date}   [input.now]
+ * @param {string} [input.timeZone]
+ */
+function buildPoLifecycle({ requests, details, steps, stepConfigs = [], periodStart, periodEnd, month, poType = "ALL", now = new Date(), timeZone = "Asia/Colombo" }) {
+  const period = periodOf(periodStart, periodEnd, month || monthKey(now, timeZone));
+  // The period before has the same number of days and ends the day before this one starts.
+  const length = Math.round((Date.parse(`${period.end}T00:00:00Z`) - Date.parse(`${period.start}T00:00:00Z`)) / DAY_MS) + 1;
+  const previousPeriod = { start: shiftDay(period.start, -length), end: shiftDay(period.start, -1) };
+  // The trend runs over the twelve months up to the one the period ends in.
+  const trendMonth = period.end.slice(0, 7);
+  const detailByRequest = new Map(details.map((row) => [row.request_ID, row]));
+  const stepsByRequest = new Map();
+  steps.forEach((row) => {
+    if (!stepsByRequest.has(row.request_ID)) stepsByRequest.set(row.request_ID, []);
+    stepsByRequest.get(row.request_ID).push(row);
+  });
+  const configuredSla = new Map(stepConfigs.map((row) => [`${row.requestVariant_code}|${row.stepNo}`, row.slaDays]));
+  const typeFilter = String(poType || "ALL").toUpperCase();
+
+  const entries = requests
+    .filter((request) => request.requestType_code === "PURCHASE_ORDER" && (OPEN_STATUSES.has(request.status_code)
+      || request.status_code === "COMPLETED" || request.status_code === "REJECTED"))
+    .map((request) => evaluatePoLifecycle(request, detailByRequest.get(request.ID) || {}, stepsByRequest.get(request.ID) || [], configuredSla, now))
+    .filter((entry) => entry.submittedAt
+      && (typeFilter === "ALL" || entry.detail.purchaseOrderType_code === typeFilter));
+  const byMonth = new Map();
+  const current = [];
+  const previous = [];
+  entries.forEach((entry) => {
+    const key = monthKey(entry.submittedAt, timeZone);
+    if (!byMonth.has(key)) byMonth.set(key, []);
+    byMonth.get(key).push(entry);
+    const day = dayKey(entry.submittedAt, timeZone);
+    if (day >= period.start && day <= period.end) current.push(entry);
+    else if (day >= previousPeriod.start && day <= previousPeriod.end) previous.push(entry);
+  });
+
+  const stages = stageMeasurements(current);
+  const allMeasurements = [].concat(stages.rejected, stages.created, stages.approved, stages.pending);
+  const metric = (key, label, measurements) => Object.assign({ key, label }, slaFigures(measurements));
+
+  const pgRows = poLifecycleBreakdown(current, purchasingGroupOf);
+  const total = slaFigures(stages.received);
+  const views = [
+    { key: "PG_VOLUME", label: "Purchasing Group wise PO volume", volume: current.length, slaPercent: total.slaPercent,
+      remarks: missingRemark(current, purchasingGroupOf, "purchasing group"), rows: pgRows, layout: "VOLUME" },
+    { key: "COMPANY_CODE", label: "Company code wise", volume: current.length, slaPercent: total.slaPercent,
+      remarks: missingRemark(current, companyCodeOf, "company code"), rows: poLifecycleBreakdown(current, companyCodeOf), layout: "VOLUME" },
+    { key: "CONTRACT", label: "Contracted / non contracted", volume: current.length, slaPercent: total.slaPercent,
+      remarks: "", rows: poLifecycleBreakdown(current, contractOf), layout: "VOLUME" },
+    { key: "PG_ALL", label: "All PG group wise", volume: current.length, slaPercent: total.slaPercent,
+      remarks: `${pgRows.length} purchasing group${pgRows.length === 1 ? "" : "s"}`, rows: pgRows, layout: "STAGES" },
+    { key: "PG_SLA", label: "SLA PG group wise", volume: current.length, slaPercent: total.slaPercent,
+      remarks: `${pgRows.filter((row) => row.status === "POOR").length} below 80 % SLA`, rows: pgRows, layout: "SLA" },
+    { key: "ALL_SLA", label: "All include SLA", volume: current.length, slaPercent: total.slaPercent,
+      remarks: "Included in the period's SLA", rows: [], layout: "NONE" }
+  ].map((view) => Object.assign(view, { status: slaStatus(view.slaPercent) }));
+
+  const slaFailures = current.filter((entry) => entry.breached).map((entry) => {
+    const failDays = round1(entry.elapsed - entry.totalTarget);
+    return {
+      requestId: entry.request.ID,
+      reference: entry.request.referenceNumber || "",
+      poNumber: poLifecycleText(entry.detail.purchaseOrderNumber) || entry.request.referenceNumber || "",
+      hasPoNumber: Boolean(poLifecycleText(entry.detail.purchaseOrderNumber)),
+      vendorId: entry.detail.vendor_ID || null,
+      supplier: poLifecycleText(entry.detail.vendorCode),
+      reason: failReason(entry, now),
+      failDays,
+      failStatus: failStatus(failDays),
+      targetDays: entry.totalTarget,
+      elapsedDays: round1(entry.elapsed)
+    };
+  }).sort((left, right) => right.failDays - left.failDays);
+
+  const trend = [];
+  for (let offset = -11; offset <= 0; offset++) {
+    const key = shiftMonth(trendMonth, offset);
+    const rows = byMonth.get(key) || [];
+    const kpis = kpisOf(rows);
+    trend.push({ month: key, received: kpis.totalRequests, created: kpis.created, approved: kpis.approved,
+      rejected: kpis.rejected, pending: kpis.pendingApproval, slaPercent: kpis.slaCompliancePercent });
+  }
+
+  // The period's requests behind the KPI tiles, with the stage each belongs to.
+  const periodRequests = current.map((entry) => {
+    const openStep = entry.pending ? entry.steps.find((step) => !step.completedAt) : null;
+    return {
+      requestId: entry.request.ID,
+      reference: entry.request.referenceNumber || "",
+      title: entry.request.title || "",
+      status: entry.request.status_code,
+      poNumber: poLifecycleText(entry.detail.purchaseOrderNumber),
+      vendorId: entry.detail.vendor_ID || null,
+      supplier: poLifecycleText(entry.detail.vendorCode),
+      submittedAt: entry.submittedAt.toISOString(),
+      currentStep: openStep ? openStep.stepName : "",
+      elapsedDays: round1(entry.elapsed),
+      targetDays: entry.totalTarget,
+      breached: entry.breached,
+      rejected: entry.rejected,
+      created: entry.created,
+      approved: entry.approved,
+      pending: entry.pending
+    };
+  }).sort((left, right) => right.submittedAt.localeCompare(left.submittedAt));
+
+  return {
+    period,
+    poType: typeFilter,
+    generatedAt: now.toISOString(),
+    kpis: kpisOf(current),
+    previousPeriod: Object.assign({}, previousPeriod, kpisOf(previous)),
+    monthlySla: [
+      metric("RECEIVED", "Total PO requests received", stages.received),
+      metric("REJECTED", "Total PO requests rejected", stages.rejected),
+      metric("CREATED", "Total PO created", stages.created),
+      metric("APPROVED", "Total PO approved", stages.approved),
+      metric("PENDING", "Total PO pending approval", stages.pending),
+      metric("ALL", "All include SLA", allMeasurements)
+    ].map((row) => Object.assign(row, { status: slaStatus(row.slaPercent) })),
+    views,
+    slaFailures,
+    divisionBreakdown: poLifecycleBreakdown(current, divisionOf),
+    trend,
+    requests: periodRequests
+  };
+}
+
+// "YYYY-MM-DD" one year earlier (29 Feb -> 28 Feb).
+const shiftYear = (key) => {
+  const [year, month, day] = key.split("-").map(Number);
+  const last = new Date(Date.UTC(year - 1, month, 0)).getUTCDate();
+  return `${year - 1}-${String(month).padStart(2, "0")}-${String(Math.min(day, last)).padStart(2, "0")}`;
+};
+const SPEND_TOP = 10;
+const SPEND_RECENT = 20;
+
+/**
+ * Spend Analysis dashboard: the approved Purchase Orders of a period, compared with the same
+ * period one year earlier. Only LKR POs count in the spend figures (no currency conversion);
+ * the recent transactions list every currency.
+ * @param {object} input
+ * @param {object[]} input.requests  approved PO requests (CARequests rows with completedAt)
+ * @param {object[]} input.details   PurchaseOrderDetails rows (request_ID, vendor_ID, currency_code, ...)
+ * @param {Map<string,string>} [input.vendorNames] vendor ID -> name
+ * @param {number} [input.inactiveSuppliers] inactive vendors in the master
+ * @param {string} [input.periodStart] "YYYY-MM-DD"
+ * @param {string} [input.periodEnd]   "YYYY-MM-DD"
+ * @param {string} [input.poType]      PO type code, or "ALL"
+ */
+function buildSpendAnalysis({ requests, details, vendorNames = new Map(), inactiveSuppliers = 0, periodStart, periodEnd, poType = "ALL", now = new Date(), timeZone = "Asia/Colombo" }) {
+  const period = periodOf(periodStart, periodEnd, monthKey(now, timeZone));
+  const previousPeriod = { start: shiftYear(period.start), end: shiftYear(period.end) };
+  const typeFilter = String(poType || "ALL").toUpperCase();
+  const detailByRequest = new Map(details.map((row) => [row.request_ID, row]));
+  const entries = requests
+    .filter((request) => request.requestType_code === "PURCHASE_ORDER" && request.status_code === "COMPLETED" && request.completedAt)
+    .map((request) => {
+      const detail = detailByRequest.get(request.ID) || {};
+      const vendorKey = detail.vendor_ID || poLifecycleText(detail.vendorCode);
+      const amount = Number(detail.poValueWithTaxes ?? detail.totalValue ?? 0) || 0;
+      return {
+        request,
+        detail,
+        day: dayKey(new Date(request.completedAt), timeZone),
+        vendorKey,
+        supplier: vendorNames.get(detail.vendor_ID) || poLifecycleText(detail.vendorCode) || "Not set",
+        amount,
+        currency: poLifecycleText(detail.currency_code),
+        lkr: poLifecycleText(detail.currency_code).toUpperCase() === "LKR",
+        expenditure: String(detail.procurementCategory_code || "").toUpperCase().startsWith("CAPEX") ? "Capex" : "Opex",
+        division: poLifecycleText(detail.division) || "Not set"
+      };
+    })
+    .filter((entry) => typeFilter === "ALL" || entry.detail.purchaseOrderType_code === typeFilter);
+  const current = entries.filter((entry) => entry.day >= period.start && entry.day <= period.end);
+  const previous = entries.filter((entry) => entry.day >= previousPeriod.start && entry.day <= previousPeriod.end);
+  const round = (value) => Math.round(value * 100) / 100;
+  const share = (part, whole) => (whole ? round((part / whole) * 100) : 0);
+  // LKR spend per key, largest first.
+  const spendBy = (rows, keyOf) => {
+    const totals = new Map();
+    rows.filter((entry) => entry.lkr).forEach((entry) => {
+      const key = keyOf(entry);
+      const total = totals.get(key) || { key, label: key, amount: 0 };
+      total.amount += entry.amount;
+      totals.set(key, total);
+    });
+    return Array.from(totals.values()).sort((left, right) => right.amount - left.amount || left.label.localeCompare(right.label));
+  };
+  const totalOf = (rows) => rows.filter((entry) => entry.lkr).reduce((sum, entry) => sum + entry.amount, 0);
+  const total = totalOf(current);
+  const previousTotal = totalOf(previous);
+  const supplierLabel = new Map(current.concat(previous).map((entry) => [entry.vendorKey || entry.supplier, entry.supplier]));
+  const suppliers = spendBy(current, (entry) => entry.vendorKey || entry.supplier)
+    .map((row) => Object.assign(row, { label: supplierLabel.get(row.key) || row.key }));
+  const previousBySupplier = new Map(spendBy(previous, (entry) => entry.vendorKey || entry.supplier).map((row) => [row.key, row.amount]));
+  const top = suppliers.slice(0, SPEND_TOP);
+  const topTotal = top.reduce((sum, row) => sum + row.amount, 0);
+  const variance = (now, before) => (before ? round(((now - before) / before) * 100) : null);
+  const breakdown = (rows) => rows.map((row) => ({ label: row.label, amount: round(row.amount), sharePercent: share(row.amount, total) }));
+
+  return {
+    period,
+    previousPeriod,
+    poType: typeFilter,
+    kpis: {
+      totalSpend: round(total),
+      previousSpend: round(previousTotal),
+      activeSuppliers: new Set(current.map((entry) => entry.vendorKey || entry.supplier)).size,
+      topSupplierSharePercent: share(topTotal, total),
+      yoyVariancePercent: variance(total, previousTotal),
+      inactiveSuppliers: Number(inactiveSuppliers) || 0,
+      poCount: current.length,
+      currentYear: period.end.slice(0, 4),
+      previousYear: previousPeriod.end.slice(0, 4)
+    },
+    topSuppliers: top.map((row, index) => ({
+      rank: index + 1, supplier: row.label, amount: round(row.amount), sharePercent: share(row.amount, total)
+    })),
+    yoy: top.map((row) => {
+      const before = previousBySupplier.get(row.key) || 0;
+      return {
+        supplier: row.label, previous: round(before), current: round(row.amount),
+        variancePercent: variance(row.amount, before), trend: row.amount >= before ? "UP" : "DOWN"
+      };
+    }),
+    byExpenditure: breakdown(spendBy(current, (entry) => entry.expenditure)),
+    byDivision: breakdown(spendBy(current, (entry) => entry.division)),
+    recent: current.slice()
+      .sort((left, right) => String(right.request.completedAt).localeCompare(String(left.request.completedAt)))
+      .slice(0, SPEND_RECENT)
+      .map((entry) => ({
+        requestId: entry.request.ID,
+        poNumber: poNumberList(entry.detail.purchaseOrderNumber)[0] || entry.request.referenceNumber || "",
+        supplier: entry.supplier,
+        date: entry.day,
+        amount: round(entry.amount),
+        currency: entry.currency,
+        amountLkr: entry.lkr ? round(entry.amount) : null,
+        division: entry.division,
+        expenditure: entry.expenditure
+      })),
+    otherCurrencyCount: current.filter((entry) => !entry.lkr).length
+  };
+}
+
+// PDF of the Purchase Order Lifecycle dashboard, drawn with pdfkit the way the Flowmate project
+// exports its dashboards: a header band, the KPI tiles, the charts the browser sent as SVG, and
+// the dashboard tables. A4 landscape; every page carries a footer.
+
+const PDF_PAGE = { width: 842, height: 595, margin: 36 };
+const PDF_CONTENT_WIDTH = PDF_PAGE.width - 2 * PDF_PAGE.margin;
+const PDF_BOTTOM = PDF_PAGE.height - 48;
+const PDF_COLOR = {
+  text: "#1d2d3e", muted: "#526579", border: "#d9e2ec", header: "#064f9e", headerBand: "#0a6ed1",
+  rowAlt: "#f6f8fb", good: "#18864b", watch: "#c35500", poor: "#bb0000", bar: "#0a6ed1"
+};
+const PDF_KPI_ACCENT = ["#0a6ed1", "#bb0000", "#087f8c", "#18864b", "#c94b13", "#6d4bd1"];
+const PDF_STATUS_COLOR = { GOOD: PDF_COLOR.good, WATCH: PDF_COLOR.watch, POOR: PDF_COLOR.poor };
+const PDF_FAIL_TEXT = { CRITICAL: "Critical", WARNING: "Warning", MONITOR: "Monitor" };
+const PDF_FAIL_COLOR = { CRITICAL: PDF_COLOR.poor, WARNING: PDF_COLOR.watch, MONITOR: PDF_COLOR.headerBand };
+const PDF_STATUS_TEXT = { GOOD: "On track", WATCH: "Watch", POOR: "Off track", NONE: "No data" };
+
+const pdfMonthName = (key, style = "long") => {
+  const [year, month] = String(key || "").split("-").map(Number);
+  if (!year || !month) return "";
+  return new Intl.DateTimeFormat("en-GB", { month: style, year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, 1)));
+};
+// "01 Oct 2026 - 31 Oct 2026" for a { start, end } period of "YYYY-MM-DD" pdfDays.
+const pdfDayLabel = (key) => new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" })
+  .format(new Date(`${key}T00:00:00Z`));
+const pdfPeriodLabel = (period) => `${pdfDayLabel(period.start)} - ${pdfDayLabel(period.end)}`;
+const pdfPercent = (value) => (value === null || value === undefined ? "-" : `${Number(value).toFixed(1)}%`);
+const pdfDays = (value) => (value === null || value === undefined ? "-" : Number(value).toFixed(1));
+
+// The six KPI tiles of the dashboard, with the change against the period before.
+function pdfKpiTiles(report) {
+  const k = report.kpis;
+  const p = report.previousPeriod || {};
+  const previous = "previous period";
+  const change = (current, before, isPercent) => {
+    if (current === null || current === undefined || before === null || before === undefined) return `No data for the ${previous}`;
+    const delta = Math.round((current - before) * 10) / 10;
+    return delta ? `${delta > 0 ? "+" : ""}${delta}${isPercent ? " pts" : ""} vs ${previous}` : `Same as ${previous}`;
+  };
+  return [
+    ["Total PO requests", k.totalRequests, "In the reporting period", change(k.totalRequests, p.totalRequests)],
+    ["PO rejected", k.rejected, "Terminated in the workflow", change(k.rejected, p.rejected)],
+    ["PO created", k.created, "PO number recorded at S/4", change(k.created, p.created)],
+    ["PO approved", k.approved, "All approval steps done", change(k.approved, p.approved)],
+    ["Pending approval", k.pendingApproval, "Awaiting action", change(k.pendingApproval, p.pendingApproval)],
+    ["SLA compliance", k.slaCompliancePercent === null ? "-" : pdfPercent(k.slaCompliancePercent), "All included SLA",
+      change(k.slaCompliancePercent, p.slaCompliancePercent, true)]
+  ];
+}
+
+function pdfEnsureSpace(doc, height) {
+  if (doc.y + height > PDF_BOTTOM) {
+    doc.addPage();
+    doc.y = PDF_PAGE.margin;
+  }
+}
+
+function pdfSectionTitle(doc, title) {
+  pdfEnsureSpace(doc, 60);
+  doc.fillColor(PDF_COLOR.headerBand).rect(PDF_PAGE.margin, doc.y + 2, 3, 13).fill();
+  doc.fillColor(PDF_COLOR.text).font("Helvetica-Bold").fontSize(12).text(title, PDF_PAGE.margin + 9, doc.y, { width: PDF_CONTENT_WIDTH - 9 });
+  doc.moveDown(0.4);
+}
+
+function drawPdfHeader(doc, report, options) {
+  doc.fillColor(PDF_COLOR.headerBand).rect(0, 0, PDF_PAGE.width, 70).fill();
+  doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(19).text("Purchase Order (PO) Lifecycle Dashboard", PDF_PAGE.margin, 18);
+  doc.font("Helvetica").fontSize(10)
+    .text(`Reporting period: ${pdfPeriodLabel(report.period)} · ${options.poTypeName || "All PO types"}`, PDF_PAGE.margin, 44);
+  doc.text(`Generated ${options.generatedAt}`, PDF_PAGE.margin, 44, { width: PDF_CONTENT_WIDTH, align: "right" });
+  doc.y = 86;
+}
+
+function drawPdfKpis(doc, report) {
+  const tiles = pdfKpiTiles(report);
+  const gap = 10;
+  const width = (PDF_CONTENT_WIDTH - gap * (tiles.length - 1)) / tiles.length;
+  const top = doc.y;
+  tiles.forEach(([label, value, caption, change], index) => {
+    const left = PDF_PAGE.margin + index * (width + gap);
+    doc.roundedRect(left, top, width, 74, 5).fillAndStroke("#ffffff", PDF_COLOR.border);
+    doc.fillColor(PDF_KPI_ACCENT[index]).rect(left, top, width, 3).fill();
+    doc.fillColor(PDF_COLOR.text).font("Helvetica-Bold").fontSize(8.5).text(label, left + 9, top + 10, { width: width - 18 });
+    doc.fillColor(PDF_COLOR.muted).font("Helvetica").fontSize(7).text(caption, left + 9, top + 22, { width: width - 18, height: 9, ellipsis: true });
+    doc.fillColor(PDF_KPI_ACCENT[index]).font("Helvetica-Bold").fontSize(20).text(String(value ?? "-"), left + 9, top + 35, { width: width - 18 });
+    doc.fillColor(PDF_COLOR.muted).font("Helvetica").fontSize(7).text(change, left + 9, top + 60, { width: width - 18, height: 9, ellipsis: true });
+  });
+  doc.y = top + 88;
+}
+
+// A chart the browser rendered, or simple bars when no snapshot was sent.
+function drawPdfChart(doc, title, chart, fallbackRows, left, width) {
+  const top = doc.y;
+  const height = 200;
+  doc.roundedRect(left, top, width, height + 26, 5).fillAndStroke("#ffffff", PDF_COLOR.border);
+  doc.fillColor(PDF_COLOR.text).font("Helvetica-Bold").fontSize(10).text(title, left + 10, top + 9, { width: width - 20 });
+  if (chart) {
+    SVGtoPDF(doc, chart.svg, left + 8, top + 24, { width: width - 16, height: height - 4, preserveAspectRatio: "xMidYMid meet", assumePt: true });
+  } else {
+    const rows = fallbackRows.slice(0, 12);
+    const maximum = Math.max(1, ...rows.map((row) => row.value));
+    rows.forEach((row, index) => {
+      const y = top + 30 + index * 14;
+      doc.fillColor(PDF_COLOR.muted).font("Helvetica").fontSize(7).text(row.label, left + 10, y + 2, { width: 70, ellipsis: true });
+      doc.fillColor("#edf1f5").rect(left + 84, y, width - 150, 9).fill();
+      doc.fillColor(PDF_COLOR.bar).rect(left + 84, y, Math.max(1, (row.value / maximum) * (width - 150)), 9).fill();
+      doc.fillColor(PDF_COLOR.text).font("Helvetica-Bold").fontSize(7).text(row.text, left + width - 60, y + 1, { width: 50, align: "right" });
+    });
+    if (!rows.length) doc.fillColor(PDF_COLOR.muted).font("Helvetica").fontSize(9).text("No data for this period.", left + 10, top + 34);
+  }
+  return top + height + 26;
+}
+
+function drawPdfCharts(doc, report, charts) {
+  pdfEnsureSpace(doc, 240);
+  const top = doc.y;
+  const gap = 14;
+  const width = (PDF_CONTENT_WIDTH - gap) / 2;
+  const byKey = new Map(charts.map((chart) => [chart.chartKey, chart]));
+  const trendBottom = drawPdfChart(doc, "Monthly trend: approved, rejected and pending POs with SLA %", byKey.get("trend"),
+    report.trend.map((row) => ({ label: pdfMonthName(row.month, "short"), value: row.received, text: String(row.received) })), PDF_PAGE.margin, width);
+  doc.y = top;
+  const groupBottom = drawPdfChart(doc, "SLA % by group (division)", byKey.get("groups"),
+    report.divisionBreakdown.map((row) => ({ label: row.label, value: row.slaPercent || 0, text: pdfPercent(row.slaPercent) })),
+    PDF_PAGE.margin + width + gap, width);
+  doc.y = Math.max(trendBottom, groupBottom) + 16;
+}
+
+// A table: columns are [header, width share, value(row), options]; the header repeats on a new page.
+function drawPdfTable(doc, title, rows, columns, emptyText) {
+  // A short table moves to the next page whole rather than leaving its last rows behind.
+  pdfEnsureSpace(doc, 46 + Math.min(rows.length, 8) * 17);
+  pdfSectionTitle(doc, title);
+  const total = columns.reduce((sum, column) => sum + column[1], 0);
+  const widths = columns.map((column) => (column[1] / total) * PDF_CONTENT_WIDTH);
+  const header = () => {
+    const top = doc.y;
+    doc.fillColor("#eef2f6").rect(PDF_PAGE.margin, top, PDF_CONTENT_WIDTH, 18).fill();
+    let x = PDF_PAGE.margin;
+    columns.forEach((column, index) => {
+      const align = (column[3] || {}).align || "left";
+      doc.fillColor(PDF_COLOR.muted).font("Helvetica-Bold").fontSize(7.5)
+        .text(column[0].toUpperCase(), x + 5, top + 5.5, { width: widths[index] - 10, align, lineBreak: false, ellipsis: true });
+      x += widths[index];
+    });
+    doc.y = top + 18;
+  };
+  if (!rows.length) {
+    doc.fillColor(PDF_COLOR.muted).font("Helvetica").fontSize(9).text(emptyText || "No data for this period.", PDF_PAGE.margin, doc.y + 4);
+    doc.moveDown(1.2);
+    return;
+  }
+  header();
+  rows.forEach((row, rowIndex) => {
+    doc.font("Helvetica").fontSize(8);
+    const heights = columns.map((column, index) => doc.heightOfString(String(column[2](row) ?? ""), { width: widths[index] - 10 }));
+    const height = Math.max(16, Math.max(...heights) + 7);
+    if (doc.y + height > PDF_BOTTOM) {
+      doc.addPage();
+      doc.y = PDF_PAGE.margin;
+      header();
+    }
+    const top = doc.y;
+    if (rowIndex % 2) doc.fillColor(PDF_COLOR.rowAlt).rect(PDF_PAGE.margin, top, PDF_CONTENT_WIDTH, height).fill();
+    let x = PDF_PAGE.margin;
+    columns.forEach((column, index) => {
+      const options = column[3] || {};
+      doc.fillColor(options.color ? options.color(row) || PDF_COLOR.text : PDF_COLOR.text)
+        .font(options.bold ? "Helvetica-Bold" : "Helvetica").fontSize(8)
+        .text(String(column[2](row) ?? ""), x + 5, top + 4, { width: widths[index] - 10, align: options.align || "left" });
+      x += widths[index];
+    });
+    doc.strokeColor(PDF_COLOR.border).lineWidth(0.5).moveTo(PDF_PAGE.margin, top + height).lineTo(PDF_PAGE.margin + PDF_CONTENT_WIDTH, top + height).stroke();
+    doc.y = top + height;
+  });
+  doc.y += 14;
+}
+
+const PDF_RIGHT = { align: "right" };
+const pdfStatusColor = (row) => PDF_STATUS_COLOR[row.status];
+
+/**
+ * @param {object} report  the document of buildPoLifecycle
+ * @param {Array<{chartKey: string, svg: string}>} charts  validated chart snapshots ("trend", "groups")
+ * @param {{poTypeName?: string, generatedAt?: string}} options
+ * @returns {Promise<{fileName: string, content: Buffer}>}
+ */
+function renderPoLifecyclePdf(report, charts = [], options = {}) {
+  const generatedAt = options.generatedAt || new Date().toISOString().slice(0, 16).replace("T", " ");
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ size: "A4", layout: "landscape", margin: PDF_PAGE.margin, bufferPages: true,
+      info: { Title: `PO Lifecycle Dashboard ${pdfPeriodLabel(report.period)}`, Author: "Flowmate CA" } });
+    const chunks = [];
+    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on("error", reject);
+    doc.on("end", () => resolve({
+      fileName: `po-lifecycle-${report.period.start}-to-${report.period.end}-${String(report.poType || "ALL").toLowerCase()}.pdf`,
+      content: Buffer.concat(chunks)
+    }));
+
+    drawPdfHeader(doc, report, Object.assign({}, options, { generatedAt }));
+    drawPdfKpis(doc, report);
+    drawPdfCharts(doc, report, charts);
+
+    drawPdfTable(doc, `SLA - ${pdfPeriodLabel(report.period)}`, report.monthlySla, [
+      ["Metric", 4, (row) => row.label, { bold: true }],
+      ["Requests", 1.4, (row) => row.count, PDF_RIGHT],
+      ["SLA target (pdfDays)", 1.8, (row) => pdfDays(row.targetDays), PDF_RIGHT],
+      ["Achieved (pdfDays)", 1.8, (row) => pdfDays(row.achievedDays), PDF_RIGHT],
+      ["SLA %", 1.4, (row) => pdfPercent(row.slaPercent), Object.assign({ color: pdfStatusColor }, PDF_RIGHT)]
+    ]);
+    drawPdfTable(doc, "Purchasing group / company code / contract view", report.views, [
+      ["View", 3.4, (row) => row.label, { bold: true }],
+      ["PO volume", 1.4, (row) => row.volume, PDF_RIGHT],
+      ["SLA %", 1.4, (row) => pdfPercent(row.slaPercent), Object.assign({ color: pdfStatusColor }, PDF_RIGHT)],
+      ["Remarks", 3.8, (row) => row.remarks || ""]
+    ]);
+    report.views.filter((view) => view.rows.length && view.layout !== "STAGES").forEach((view) => {
+      const sla = view.layout === "SLA";
+      drawPdfTable(doc, view.label, view.rows, [
+        [view.key === "CONTRACT" ? "Contract" : view.key === "COMPANY_CODE" ? "Company code" : "Purchasing group", 3, (row) => row.label, { bold: true }],
+        ["PO volume", 1.4, (row) => row.volume, PDF_RIGHT],
+        sla ? ["SLA target (pdfDays)", 1.8, (row) => pdfDays(row.targetDays), PDF_RIGHT] : ["Share", 1.4, (row) => pdfPercent(row.sharePercent), PDF_RIGHT],
+        sla ? ["Achieved (pdfDays)", 1.8, (row) => pdfDays(row.achievedDays), PDF_RIGHT]
+          : ["Created / approved / rejected / pending", 3.2, (row) => `${row.created} / ${row.approved} / ${row.rejected} / ${row.pending}`, PDF_RIGHT],
+        ["SLA %", 1.4, (row) => pdfPercent(row.slaPercent), Object.assign({ color: pdfStatusColor }, PDF_RIGHT)]
+      ]);
+    });
+    drawPdfTable(doc, `SLA fail reasons (${report.slaFailures.length})`, report.slaFailures, [
+      ["PO number", 2.2, (row) => (row.hasPoNumber ? `${row.poNumber}\n${row.reference}` : row.poNumber), { bold: true }],
+      ["Supplier", 2.4, (row) => row.supplier || "-"],
+      ["SLA fail reason", 3.6, (row) => row.reason],
+      ["Fail status", 1.4, (row) => PDF_FAIL_TEXT[row.failStatus], { color: (row) => PDF_FAIL_COLOR[row.failStatus] }],
+      ["Days of fail", 1.4, (row) => `${pdfDays(row.failDays)} pdfDays`, Object.assign({ color: (row) => PDF_FAIL_COLOR[row.failStatus] }, PDF_RIGHT)]
+    ], "No PO missed its SLA in this period.");
+    drawPdfTable(doc, "SLA breakdown by group", report.divisionBreakdown, [
+      ["Group", 3, (row) => row.label, { bold: true }],
+      ["PO volume", 1.4, (row) => row.volume, PDF_RIGHT],
+      ["SLA %", 1.4, (row) => pdfPercent(row.slaPercent), Object.assign({ color: pdfStatusColor }, PDF_RIGHT)],
+      ["Status", 1.6, (row) => PDF_STATUS_TEXT[row.status] || "", { color: pdfStatusColor }]
+    ]);
+
+    const pages = doc.bufferedPageRange().count;
+    for (let page = 0; page < pages; page++) {
+      doc.switchToPage(page);
+      // The footer sits in the bottom margin; without lifting it pdfkit would start a new page.
+      doc.page.margins.bottom = 0;
+      doc.fillColor(PDF_COLOR.muted).font("Helvetica").fontSize(7.5)
+        .text(`Generated by Flowmate CA | Page ${page + 1} of ${pages}`, PDF_PAGE.margin, PDF_PAGE.height - 30,
+          { width: PDF_CONTENT_WIDTH, align: "right", lineBreak: false });
+    }
+    doc.end();
+  });
+}
+
+// Chart snapshots from the browser: known keys only, real SVG of a sane size, without scripts,
+// embedded HTML, event handlers or external links (as the Flowmate PDF export does).
+const PDF_CHART_KEYS = new Set(["trend", "groups"]);
+function validatedChartSnapshots(charts) {
+  const list = Array.isArray(charts) ? charts : [];
+  if (list.length > 4) {
+    throw Object.assign(new Error("A maximum of four dashboard charts can be exported at once"), { status: 400 });
+  }
+  return list.map((chart) => {
+    const chartKey = String(chart?.chartKey || "");
+    const svg = String(chart?.svg || "");
+    if (!PDF_CHART_KEYS.has(chartKey)) {
+      throw Object.assign(new Error(`Chart ${chartKey || "without a key"} is not valid for this dashboard`), { status: 400 });
+    }
+    if (!svg.trim().startsWith("<svg") || svg.length > 1500000) {
+      throw Object.assign(new Error(`Chart ${chartKey} contains invalid or excessive SVG content`), { status: 400 });
+    }
+    return {
+      chartKey,
+      title: String(chart?.title || "").trim().slice(0, 150),
+      svg: svg
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "")
+        .replace(/<foreignObject\b[^>]*>[\s\S]*?<\/foreignObject\s*>/gi, "")
+        .replace(/\s+on[a-z]+\s*=\s*("[^"]*"|'[^']*')/gi, "")
+        .replace(/\s+(?:href|xlink:href)\s*=\s*("|')(?!(?:#|data:image\/))[^"']*\1/gi, "")
+    };
+  });
+}
+
 module.exports = class FlowmateCAService extends cds.ApplicationService {
   _workhubClient = sendPoNumbersToWorkhub;
 
@@ -422,6 +1159,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.before("claimTeamTask", this._requireValidator);
     this.before(["reassignRequest", "reassignTask"], this._requireSupervisor);
     this.before("getReportingDashboard", this._requireSupervisor);
+    this.before(["getPoLifecycleDashboard", "exportPoLifecycleDashboardPdf", "getSpendAnalysisDashboard"],
+      (req) => this._requireCapability(req, "canViewReports", "Only a supervisor or administrator can view reports"));
     this.before("addTask", this._requireAddTask);
     this.before(["rejectTask", "completeStep", "sendToS4"], this._requireAdmin);
 
@@ -457,6 +1196,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getFlowmateRequestFormCatalog", this._getFlowmateRequestFormCatalog);
     this.on("getDashboardCounts", this._getDashboardCounts);
     this.on("getReportingDashboard", this._getReportingDashboard);
+    this.on("getPoLifecycleDashboard", this._getPoLifecycleDashboard);
+    this.on("getSpendAnalysisDashboard", this._getSpendAnalysisDashboard);
+    this.on("exportPoLifecycleDashboardPdf", this._exportPoLifecycleDashboardPdf);
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
     this.on("saveDraft", this._saveDraft);
@@ -1315,6 +2057,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       ID: user.ID,
       displayName: user.displayName,
       email: user.email,
+      // The login the server records as createdBy (e.g. on attachments).
+      loginId: String(req.user.id || ""),
       ...capabilities,
       canDelegateOnBehalf: capabilities.canManageDelegation,
       canReassign: capabilities.canAssign,
@@ -1394,6 +2138,165 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       pendingApproval,
       completedRequests
     };
+  };
+
+  // Purchase Order Lifecycle dashboard (buildPoLifecycle) for a reporting period.
+  _getPoLifecycleDashboard = async (req) => JSON.stringify(await this._poLifecycleReport(req.data));
+
+  // The dashboard as a PDF (renderPoLifecyclePdf), with the charts the browser rendered.
+  _exportPoLifecycleDashboardPdf = async (req) => {
+    let charts;
+    try {
+      charts = validatedChartSnapshots(req.data.charts);
+    } catch (error) {
+      return req.reject(error.status || 400, error.message);
+    }
+    const report = await this._poLifecycleReport(req.data);
+    const poTypeName = (report.poTypes.find((type) => type.code === report.poType) || {}).name || report.poType;
+    const generatedAt = new Intl.DateTimeFormat("en-GB", {
+      timeZone: SLA_TIME_ZONE, day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+    }).format(new Date());
+    const pdf = await renderPoLifecyclePdf(report, charts, { poTypeName, generatedAt });
+    return { fileName: pdf.fileName, mimeType: "application/pdf", content: pdf.content.toString("base64") };
+  };
+
+  // Reads the period, the period of the same length before it (for the comparison) and the twelve
+  // months up to the period's end (for the trend); only the columns the dashboard uses.
+  _poLifecycleReport = async ({ periodStart, periodEnd, poType }) => {
+    const now = new Date();
+    const day = (value) => (value instanceof Date ? value.toISOString() : String(value || "")).slice(0, 10);
+    const thisMonth = monthKey(now, SLA_TIME_ZONE);
+    let start = day(periodStart);
+    let end = day(periodEnd);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || start > end) {
+      start = `${thisMonth}-01`;
+      end = new Date(Date.parse(`${shiftMonth(thisMonth, 1)}-01T00:00:00Z`) - DAY_MS).toISOString().slice(0, 10);
+    }
+    const length = Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`) + DAY_MS;
+    const trendStart = Date.parse(`${shiftMonth(end.slice(0, 7), -11)}-01T00:00:00Z`);
+    // One day early: the day boundaries are applied in the reporting time zone by the builder.
+    const windowStart = new Date(Math.min(Date.parse(`${start}T00:00:00Z`) - length, trendStart) - DAY_MS).toISOString();
+    const statuses = [REQUEST_STATUS.SUBMITTED, REQUEST_STATUS.IN_PROGRESS, REQUEST_STATUS.SENT_BACK,
+      REQUEST_STATUS.COMPLETED, REQUEST_STATUS.REJECTED];
+    const requests = await SELECT.from(this.db.CARequests)
+      .columns("ID", "referenceNumber", "title", "requestType_code", "requestVariant_code", "status_code",
+        "createdAt", "modifiedAt", "submittedAt", "completedAt", "slaDueAt")
+      .where({ requestType_code: "PURCHASE_ORDER", status_code: { in: statuses } })
+      .and`(submittedAt >= ${windowStart} or (submittedAt is null and createdAt >= ${windowStart}))`;
+    const ids = requests.map((row) => row.ID);
+    const inChunks = async (query) => {
+      const rows = [];
+      for (let index = 0; index < ids.length; index += 500) {
+        rows.push(...await query(ids.slice(index, index + 500)));
+      }
+      return rows;
+    };
+    const [details, steps, stepConfigs, poTypes] = await Promise.all([
+      inChunks((chunk) => SELECT.from(this.db.PurchaseOrderDetails)
+        .columns("request_ID", "purchaseOrderType_code", "purchaseOrderNumber", "purchasingGroup", "companyCode",
+          "contractBased", "division", "vendor_ID", "vendorCode")
+        .where({ request_ID: { in: chunk } })),
+      inChunks((chunk) => SELECT.from(this.db.RequestStepInstances)
+        .columns("ID", "request_ID", "stepNo", "stepName", "slaDays", "slaDueAt", "startedAt", "completedAt")
+        .where({ request_ID: { in: chunk } })),
+      SELECT.from(this.db.WorkflowStepConfigs).columns("requestVariant_code", "stepNo", "slaDays")
+        .where({ requestType_code: "PURCHASE_ORDER" }),
+      SELECT.from(this.db.PurchaseOrderTypes).columns("code", "name").where({ isActive: true }).orderBy("sortOrder")
+    ]);
+    const report = buildPoLifecycle({
+      requests, details, steps, stepConfigs, periodStart: start, periodEnd: end, poType: poType || "ALL", now, timeZone: SLA_TIME_ZONE
+    });
+    // Supplier names for the period's POs; the code stays when the vendor master has no name.
+    const vendorIds = [...new Set(report.requests.map((row) => row.vendorId).filter(Boolean))];
+    if (vendorIds.length) {
+      try {
+        const names = new Map();
+        for (let index = 0; index < vendorIds.length; index += 500) {
+          const vendors = await this.master.run(SELECT.from(this.masterEntities.Vendors)
+            .columns("ID", "vendorName").where({ ID: { in: vendorIds.slice(index, index + 500) } }));
+          vendors.forEach((row) => names.set(row.ID, row.vendorName));
+        }
+        report.requests.concat(report.slaFailures).forEach((row) => {
+          row.supplier = names.get(row.vendorId) || row.supplier;
+        });
+      } catch (error) {
+        cds.log("reports").warn("Supplier names for the PO Lifecycle dashboard could not be read", error.message);
+      }
+    }
+    // The tasks of the month's requests, for the drill-down behind the KPI tiles.
+    const monthIds = report.requests.map((row) => row.requestId);
+    const references = new Map(report.requests.map((row) => [row.requestId, row.reference]));
+    const tasks = [];
+    for (let index = 0; index < monthIds.length; index += 500) {
+      tasks.push(...await SELECT.from(this.db.CATasks)
+        .columns("ID", "referenceNumber", "request_ID", "stepInstance_ID", "stepNo", "taskName", "assignedName", "assignedTeamName",
+          "status_code", "slaDueAt", "slaBreached", "completedAt", "completedByName")
+        .where({ request_ID: { in: monthIds.slice(index, index + 500) }, isSuperseded: { "!=": true } }));
+    }
+    // The workflow step each task belongs to: its own name can differ from the step's.
+    const stepNames = new Map(steps.map((step) => [step.ID, step.stepName]));
+    report.tasks = tasks.map((task) => Object.assign(task, {
+      requestReference: references.get(task.request_ID) || "",
+      stepName: stepNames.get(task.stepInstance_ID) || task.taskName
+    }))
+      .sort((left, right) => left.requestReference.localeCompare(right.requestReference) || left.stepNo - right.stepNo);
+    report.poTypes = [{ code: "ALL", name: "All PO types" }].concat(poTypes);
+    report.timeZone = SLA_TIME_ZONE;
+    return report;
+  };
+
+  // Spend Analysis dashboard (buildSpendAnalysis): the period's approved POs and the same period a
+  // year earlier, with supplier names and the number of inactive suppliers from the master.
+  _getSpendAnalysisDashboard = async (req) => {
+    const { periodStart, periodEnd, poType } = req.data;
+    const now = new Date();
+    const day = (value) => (value instanceof Date ? value.toISOString() : String(value || "")).slice(0, 10);
+    const thisMonth = monthKey(now, SLA_TIME_ZONE);
+    let start = day(periodStart);
+    let end = day(periodEnd);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || start > end) {
+      start = `${thisMonth}-01`;
+      end = shiftDay(`${shiftMonth(thisMonth, 1)}-01`, -1);
+    }
+    // One day either side: the day boundaries are applied in the reporting time zone by the builder.
+    const lastYearFrom = new Date(Date.parse(`${shiftYear(start)}T00:00:00Z`) - DAY_MS).toISOString();
+    const lastYearTo = new Date(Date.parse(`${shiftYear(end)}T00:00:00Z`) + 2 * DAY_MS).toISOString();
+    const from = new Date(Date.parse(`${start}T00:00:00Z`) - DAY_MS).toISOString();
+    const to = new Date(Date.parse(`${end}T00:00:00Z`) + 2 * DAY_MS).toISOString();
+    const requests = await SELECT.from(this.db.CARequests)
+      .columns("ID", "referenceNumber", "requestType_code", "status_code", "completedAt")
+      .where({ requestType_code: "PURCHASE_ORDER", status_code: REQUEST_STATUS.COMPLETED })
+      .and`((completedAt >= ${from} and completedAt < ${to}) or (completedAt >= ${lastYearFrom} and completedAt < ${lastYearTo}))`;
+    const ids = requests.map((row) => row.ID);
+    const details = [];
+    for (let index = 0; index < ids.length; index += 500) {
+      details.push(...await SELECT.from(this.db.PurchaseOrderDetails)
+        .columns("request_ID", "purchaseOrderType_code", "purchaseOrderNumber", "vendor_ID", "vendorCode", "currency_code",
+          "poValueWithTaxes", "totalValue", "procurementCategory_code", "division")
+        .where({ request_ID: { in: ids.slice(index, index + 500) } }));
+    }
+    const vendorNames = new Map();
+    let inactiveSuppliers = 0;
+    try {
+      const vendorIds = [...new Set(details.map((row) => row.vendor_ID).filter(Boolean))];
+      for (let index = 0; index < vendorIds.length; index += 500) {
+        const vendors = await this.master.run(SELECT.from(this.masterEntities.Vendors)
+          .columns("ID", "vendorName").where({ ID: { in: vendorIds.slice(index, index + 500) } }));
+        vendors.forEach((row) => vendorNames.set(row.ID, row.vendorName));
+      }
+      const inactiveQuery = SELECT.from(this.masterEntities.Vendors).columns("ID").where({ isActive: false }).limit(1);
+      inactiveQuery.SELECT.count = true;
+      const inactive = await this.master.run(inactiveQuery);
+      inactiveSuppliers = Number(inactive && inactive.$count) || 0;
+    } catch (error) {
+      cds.log("reports").warn("Suppliers for the Spend Analysis dashboard could not be read", error.message);
+    }
+    const poTypes = await SELECT.from(this.db.PurchaseOrderTypes).columns("code", "name").where({ isActive: true }).orderBy("sortOrder");
+    const report = buildSpendAnalysis({
+      requests, details, vendorNames, inactiveSuppliers, periodStart: start, periodEnd: end, poType: poType || "ALL", now, timeZone: SLA_TIME_ZONE
+    });
+    report.poTypes = [{ code: "ALL", name: "All PO types" }].concat(poTypes);
+    return JSON.stringify(report);
   };
 
   _getReportingDashboard = async (req) => {
@@ -2153,10 +3056,12 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       status_code: TASK_STATUS.OPEN,
       isMandatory: req.data.isMandatory === true,
       isApproval: req.data.isApproval === true,
-      dueDate: req.data.dueDate || null
+      dueDate: req.data.dueDate || null,
+      isAdditional: true
     };
 
     await tx.run(INSERT.into(this.db.CATasks).entries(task));
+    await this._pauseStepSla(tx, request.ID, step.stepNo);
     await this._notifyTaskAssignment(tx, task);
     await tx.run(UPDATE(this.db.RequestStepInstances).set({
       status: "OPEN",
@@ -2640,6 +3545,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     // Values the approver entered (codes, numbers per line) become a version of their own.
     await this._recordVersion(tx, task.request_ID, request?.requestType_code, user,
       { approverStep: { stepNo: task.stepNo, stepName: step?.stepName || task.taskName } });
+    if (task.isAdditional) {
+      await this._resumeStepSla(tx, task, user);
+    }
     await this._autoCompleteStepIfDone(req, tx, task, user);
     return true;
   };
@@ -3606,10 +4514,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
 
   // notice: extra e-mail content for the (re)opened task, e.g. a send-back's remarks.
   async _createConfiguredTaskIfMissing(tx, requestId, step, notice = {}) {
-    const existing = (await tx.run(SELECT.from(this.db.CATasks).where({
+    const stepTasks = (await tx.run(SELECT.from(this.db.CATasks).where({
       request_ID: requestId,
       stepNo: step.stepNo
     }))).filter((task) => !task.isSuperseded);
+    // Only the step's own tasks are (re)opened; tasks added with Add Task are not. A closed one
+    // stays as history (superseded below); an open one carries on and keeps the new task's SLA paused.
+    const existing = stepTasks.filter((task) => !task.isAdditional);
+    const closedAdditional = stepTasks.filter((task) => task.isAdditional && task.status_code !== TASK_STATUS.OPEN);
+    const additionalOpen = stepTasks.some((task) => task.isAdditional && task.status_code === TASK_STATUS.OPEN);
     if (existing.some((task) => task.status_code === TASK_STATUS.OPEN)) {
       return;
     }
@@ -3639,7 +4552,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     // recorded handler goes to the requester.
     if (existing.length) {
       await tx.run(UPDATE(this.db.CATasks).set({ isSuperseded: true })
-        .where({ ID: { in: existing.map((task) => task.ID) } }));
+        .where({ ID: { in: existing.concat(closedAdditional).map((task) => task.ID) } }));
       const request = step.stepNo === 1
         ? await tx.run(SELECT.one.from(this.db.CARequests)
           .columns("requester_ID", "requesterName", "requesterEmail", "owner_ID").where({ ID: requestId }))
@@ -3685,6 +4598,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         await tx.run(INSERT.into(this.db.CATasks).entries(rework));
         await this._notifyTaskAssignment(tx, rework, notice);
       }
+      if (additionalOpen) {
+        await this._pauseStepSla(tx, requestId, step.stepNo);
+      }
       await this._refreshRequestSla(tx, requestId);
       return;
     }
@@ -3710,6 +4626,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       ...sla
     };
     await tx.run(INSERT.into(this.db.CATasks).entries(task));
+    if (additionalOpen) {
+      await this._pauseStepSla(tx, requestId, step.stepNo);
+    }
     await this._refreshRequestSla(tx, requestId);
     // Step 1 is the requester's own step: they just submitted, so nobody is notified.
     if (step.stepNo > 1) {
@@ -4004,10 +4923,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const ID = this._attachmentId(req);
     if (!ID) return;
     const attachment = await cds.tx(req).run(
-      SELECT.one.from(this.db.CAAttachments).columns("ID", "draft_ID", "request_ID").where({ ID })
+      SELECT.one.from(this.db.CAAttachments).columns("ID", "draft_ID", "request_ID", "createdBy").where({ ID })
     );
     if (!attachment || attachment.draft_ID) {
       return req.reject(404, "Attachment not found");
+    }
+    // A file can only be deleted by the person who uploaded it (on top of the rules below).
+    if (req.event === "DELETE"
+      && String(attachment.createdBy || "").trim().toLowerCase() !== String(req.user.id || "").trim().toLowerCase()) {
+      return req.reject(403, "Only the person who uploaded an attachment can delete it");
     }
     if (Object.hasOwn(req.data || {}, "draft_ID") || Object.hasOwn(req.data || {}, "request_ID")) {
       return req.reject(400, "Attachment ownership cannot be changed through this endpoint");
@@ -4016,7 +4940,10 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     const request = await cds.tx(req).run(SELECT.one.from(this.db.CARequests).where({ ID: attachment.request_ID }));
     const creating = this._roleCapabilities(req).canCreate && request?.requester_ID === user.ID
       && Date.now() - Date.parse(request.createdAt) < 15 * 60 * 1000;
-    if (!creating && (!request || !await this._canContribute(req, request, user))) {
+    // The requester may delete their own uploads while the request is still open.
+    const requesterDeleting = req.event === "DELETE" && request?.requester_ID === user.ID
+      && [REQUEST_STATUS.SUBMITTED, REQUEST_STATUS.IN_PROGRESS, REQUEST_STATUS.SENT_BACK].includes(request.status_code);
+    if (!creating && !requesterDeleting && (!request || !await this._canContribute(req, request, user))) {
       return req.reject(403, "Only an administrator or the person working on the open task can change attachments");
     }
   };
@@ -4088,6 +5015,57 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return new Intl.DateTimeFormat("en-CA", {
       timeZone: SLA_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
     }).format(date);
+  }
+
+  // While a task added with Add Task is open, the SLA of its step's own open task(s) is paused:
+  // no deadline, so the breach scan cannot flag them. _resumeStepSla restarts it.
+  async _pauseStepSla(tx, requestId, stepNo) {
+    const main = (await tx.run(SELECT.from(this.db.CATasks)
+      .columns("ID", "isAdditional", "isSuperseded", "slaPausedAt")
+      .where({ request_ID: requestId, stepNo, status_code: TASK_STATUS.OPEN })))
+      .filter((task) => !task.isSuperseded && !task.isAdditional);
+    if (!main.length) {
+      return;
+    }
+    const now = new Date().toISOString();
+    for (const task of main) {
+      await tx.run(UPDATE(this.db.CATasks)
+        .set({ slaPausedAt: task.slaPausedAt || now, slaDueAt: null, dueDate: null }).where({ ID: task.ID }));
+    }
+    await tx.run(UPDATE(this.db.RequestStepInstances)
+      .set({ slaDueAt: null, dueDate: null }).where({ request_ID: requestId, stepNo }));
+  }
+
+  // Once the last open Add Task task of a step is completed, the step's paused task(s) get their
+  // SLA again from the start: the step's full SLA days from now.
+  async _resumeStepSla(tx, additionalTask, user) {
+    const stepTasks = (await tx.run(SELECT.from(this.db.CATasks)
+      .columns("ID", "status_code", "isAdditional", "isSuperseded", "slaPausedAt", "taskName")
+      .where({ request_ID: additionalTask.request_ID, stepNo: additionalTask.stepNo })))
+      .filter((task) => !task.isSuperseded);
+    if (stepTasks.some((task) => task.isAdditional && task.status_code === TASK_STATUS.OPEN && task.ID !== additionalTask.ID)) {
+      return;
+    }
+    const paused = stepTasks.filter((task) => !task.isAdditional && task.status_code === TASK_STATUS.OPEN && task.slaPausedAt);
+    if (!paused.length) {
+      return;
+    }
+    const step = await tx.run(SELECT.one.from(this.db.RequestStepInstances)
+      .where({ request_ID: additionalTask.request_ID, stepNo: additionalTask.stepNo }));
+    const config = step?.config_ID
+      ? await tx.run(SELECT.one.from(this.db.WorkflowStepConfigs).where({ ID: step.config_ID }))
+      : null;
+    const startedAt = new Date().toISOString();
+    const slaDays = this._isPoApprovalCompletionStep(config) ? 0 : (step?.slaDays ?? config?.slaDays ?? 2);
+    const deadline = Number(slaDays) === 0 ? { slaDueAt: null, dueDate: null } : this._slaDeadline(startedAt, slaDays);
+    await tx.run(UPDATE(this.db.CATasks).set({ ...deadline, slaStartedAt: startedAt, slaPausedAt: null })
+      .where({ ID: { in: paused.map((task) => task.ID) } }));
+    if (step) {
+      await tx.run(UPDATE(this.db.RequestStepInstances).set(deadline).where({ ID: step.ID }));
+    }
+    await this._refreshRequestSla(tx, additionalTask.request_ID);
+    await this._writeHistory(tx, additionalTask.request_ID, additionalTask.stepNo, "SLA_RESTARTED", user, null, null,
+      `SLA of ${paused.map((task) => task.taskName).join(", ")} restarted after ${additionalTask.taskName} was completed`);
   }
 
   // The open step's deadline plus the SLA days of the steps still to come.
@@ -4669,6 +5647,11 @@ module.exports.REQUEST_OUTCOME = REQUEST_OUTCOME;
 module.exports.formatTaskReference = formatTaskReference;
 // Rules and texts used by the service, exported for the unit tests.
 Object.assign(module.exports, {
+  buildPoLifecycle,
+  failStatus,
+  slaStatus,
+  renderPoLifecyclePdf,
+  validatedChartSnapshots,
   isPoApprovalCompletionStep,
   procurementCategoryForVariant,
   withVariantProcurementCategory,

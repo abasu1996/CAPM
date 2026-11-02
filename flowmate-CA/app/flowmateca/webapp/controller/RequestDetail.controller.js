@@ -118,9 +118,16 @@ sap.ui.define([
       }.bind(this));
       // A field's earlier files stay listed, marked "Replaced on <date>".
       FormDefinitions.markReplacedAttachments(request.attachments);
+      // Only the uploader may delete a file: while they may upload, or as the requester while the
+      // request is still open (checked on the server too).
+      const loginId = String(this.getAppModel().getProperty("/currentUser/loginId") || "").trim().toLowerCase();
+      const requesterMayDelete = !!request.requester_ID && request.requester_ID === this.getAppModel().getProperty("/currentUser/ID")
+        && ["SUBMITTED", "IN_PROGRESS", "SENT_BACK"].includes(request.status_code || request.status?.code);
       request.attachments.forEach(function (attachment) {
         const info = this.formatUploadInfo(attachment.uploadedByName, attachment.createdBy, attachment.createdAt, attachment.category);
         attachment.uploadInfo = attachment.replacedAt ? `Replaced on ${this.formatDateTime(attachment.replacedAt)} · ${info}` : info;
+        attachment.canDelete = (request.canContribute || requesterMayDelete) && !!loginId
+          && String(attachment.createdBy || "").trim().toLowerCase() === loginId;
       }.bind(this));
       request.comments = request.comments || [];
       request.successors = request.successors || [];
@@ -566,6 +573,29 @@ sap.ui.define([
     onAttachmentPress: function (event) {
       const attachment = event.getSource().getBindingContext("detail").getObject();
       window.open(this.resolveAppUri(`odata/v4/flowmate-ca/Attachments(${attachment.ID})/content`), "_blank", "noopener");
+    },
+
+    onDeleteAttachment: function (event) {
+      const attachment = event.getSource().getBindingContext("detail").getObject();
+      MessageBox.confirm(`Delete the attachment "${attachment.filename}"?`, {
+        title: "Delete Attachment",
+        emphasizedAction: MessageBox.Action.OK,
+        onClose: async function (action) {
+          if (action !== MessageBox.Action.OK) {
+            return;
+          }
+          this.setBusy(true);
+          try {
+            await this.request(`Attachments(${attachment.ID})`, { method: "DELETE" });
+            this.showSuccess("Attachment deleted");
+            await this.onRefresh();
+          } catch (error) {
+            this.showError(error);
+          } finally {
+            this.setBusy(false);
+          }
+        }.bind(this)
+      });
     },
 
     onAddComment: async function () {

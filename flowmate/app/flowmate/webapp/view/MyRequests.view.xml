@@ -457,7 +457,7 @@
                                     class="flowmateHeaderInputRow"
                                     width="100%"
                                     alignItems="Center"
-                                    visible="{requestAccess>/canEditRevisedDueDate}">
+                                    visible="{= ${requestAccess>/canEditRevisedDueDate}  &amp;&amp; (!!${reservedBy} || !!${reservedByUser_ID}) &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' }">
                                     <DatePicker
                                         width="100%"
                                         value="{revisedDueDateEdit>/date}"
@@ -471,7 +471,7 @@
                                 </HBox>
                                 <Text
                                     text="{= ${revisedDueDate} || ${i18n>revisedDueDateNotSet} }"
-                                    visible="{= !${requestAccess>/canEditRevisedDueDate} }" />
+                                    visible="{= !${requestAccess>/canEditRevisedDueDate} || (!${reservedBy} &amp;&amp; !${reservedByUser_ID}) || ${status_code} === 'COMPLETED' || ${status_code} === 'REJECTED' || ${status_code} === 'PENDING_APPROVAL' }" />
                             </VBox>
                             <VBox class="flowmateHeaderCell flowmateHeaderFact">
                                 <Label text="{i18n>processorLabel}" />
@@ -685,7 +685,7 @@
                                     <HBox
                                         width="100%"
                                         alignItems="Center"
-                                        visible="{requestAccess>/canEditIvArchivalUrl}">
+                                        visible="{= ${requestAccess>/canEditIvArchivalUrl}  &amp;&amp; (!!${reservedBy} || !!${reservedByUser_ID}) &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' }">
                                         <Input
                                             width="100%"
                                             value="{ivArchivalEdit>/url}"
@@ -2450,7 +2450,7 @@
                                                                 type="Transparent"
                                                                 tooltip="{i18n>assignTeamTaskToMeButton}"
                                                                 visible="{canAssignToMe}"
-                                                                enabled="{= (${status_code} === 'OPEN' || ${status_code} === 'SENT_BACK') &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                                                enabled="{= (${status_code} === 'OPEN' || ${status_code} === 'SENT_BACK') &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' &amp;&amp; (!!${request/reservedBy} || !!${request/reservedByUser_ID}) }"
                                                                 press=".onAssignRequestTaskToMe" />
                                                             <Button
                                                                 icon="sap-icon://email"
@@ -2804,21 +2804,21 @@
                                 text="{i18n>assignTeamTaskToMeButton}"
                                 type="Emphasized"
                                 visible="{canAssignToMe}"
-                                enabled="{= (${status_code} === 'OPEN' || ${status_code} === 'SENT_BACK') &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED' }"
+                                enabled="{= (${status_code} === 'OPEN' || ${status_code} === 'SENT_BACK') &amp;&amp; ${request/status_code} !== 'COMPLETED' &amp;&amp; ${request/status_code} !== 'REJECTED'  &amp;&amp; (!!${request/reservedBy} || !!${request/reservedByUser_ID}) }"
                                 press=".onAssignRequestTaskToMe" />
                             <Button
                                 text="{i18n>approveButton}"
                                 type="Accept"
-                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED'  &amp;&amp; (!!${request/reservedBy} || !!${request/reservedByUser_ID}) }"
                                 press=".onApproveRequestTask" />
                             <Button
                                 text="{i18n>sendBackButton}"
-                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED'  &amp;&amp; (!!${request/reservedBy} || !!${request/reservedByUser_ID}) }"
                                 press=".onSendBackRequestTask" />
                             <Button
                                 text="{i18n>rejectButton}"
                                 type="Reject"
-                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED' }" 
+                                enabled="{= ${status_code} !== 'APPROVED' &amp;&amp; ${status_code} !== 'REJECTED'  &amp;&amp; (!!${request/reservedBy} || !!${request/reservedByUser_ID}) }"
                                 press=".onRejectRequestTask" />
                             <Button
                                 icon="sap-icon://decline"

@@ -332,7 +332,7 @@ sap.ui.define([
           this._exportSource = { request: request, details: details };
           this.renderReadOnlyRows("taskHeadersTable", "task>/detailHeaders",
             FormDefinitions.getHeaderDisplayColumns(variantCode));
-          this.renderChangeTables("taskChangeTablesHost", "task", variantCode, details.changeItems, "{task>/isAssignedToMe}");
+          this.renderChangeTables("taskChangeTablesHost", "task", variantCode, details.changeItems);
         }
       } catch (error) {
         this.showError(error);

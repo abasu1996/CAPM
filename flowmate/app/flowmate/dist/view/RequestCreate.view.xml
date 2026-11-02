@@ -1440,9 +1440,10 @@
                                 src="sap-icon://document-text"
                                 size="1.2rem"
                             />
-                            <Title
+                            <Label
+                                class="flowmateSectionTitle"
                                 text="{i18n>invoiceDetailsTitle}"
-                                level="H3"
+                                required="{= ${create>/isPoBasedNonAdvance} || ${create>/isPoAdvance} || ${create>/isPoAdvSettlement} }"
                             />
                             <ToolbarSpacer />
                             <Button
@@ -1923,9 +1924,10 @@
                                 src="sap-icon://travel-expense"
                                 size="1.2rem"
                             />
-                            <Title
+                            <Label
+                                class="flowmateSectionTitle"
                                 text="{i18n>directForeignTravelEntriesDetailsTitle}"
-                                level="H3"
+                                required="{create>/isNonPoDirectForeignTravel}"
                             />
                             <ToolbarSpacer />
                             <Button
@@ -4054,9 +4056,10 @@
                                 src="sap-icon://travel-expense"
                                 size="1.2rem"
                             />
-                            <Title
+                           <Label
+                                class="flowmateSectionTitle"
                                 text="{i18n>travelExpensesDetailsTitle}"
-                                level="H3"
+                                required="{create>/isDirectForeignTravelReimb}"
                             />
                             <ToolbarSpacer />
                             <Button
@@ -4490,9 +4493,10 @@
                                 src="sap-icon://document-text"
                                 size="1.2rem"
                             />
-                            <Title
+                            <Label
+                                class="flowmateSectionTitle"
                                 text="{i18n>glBreakupDetailsTitle}"
-                                level="H3"
+                                required="{create>/isNonPoTaxLiability}"
                             />
                             <ToolbarSpacer />
                             <Button
@@ -6192,9 +6196,10 @@
                                 src="sap-icon://document-text"
                                 size="1.2rem"
                             />
-                            <Title
+                           <Label
+                                class="flowmateSectionTitle"
                                 text="{i18n>settlementEntriesDetailsTitle}"
-                                level="H3"
+                                required="{create>/isNonPoCcSettlement}"
                             />
                             <ToolbarSpacer />
                             <Button
@@ -6494,9 +6499,10 @@
                                 src="sap-icon://document-text"
                                 size="1.2rem"
                             />
-                            <Title
+                            <Label
+                                class="flowmateSectionTitle"
                                 text="{i18n>merchantEntityValuesDetailsTitle}"
-                                level="H3"
+                                required="{create>/isNonPoMerchantSettlements}"
                             />
                             <ToolbarSpacer />
                             <Button

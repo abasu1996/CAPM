@@ -3,9 +3,10 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/m/MessageToast",
     "sap/ui/model/Filter",
+    "sap/ui/model/FilterType",
     "sap/ui/model/FilterOperator",
     "sap/ui/model/json/JSONModel"
-], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
+], (BaseController, MessageBox, MessageToast, Filter, FilterType, FilterOperator, JSONModel) => {
     "use strict";
 
     const MAX_ATTACHMENT_SIZE_MB = 400;
@@ -808,6 +809,11 @@ sap.ui.define([
                 totalPayableValue: null
             }), "merchantEntityValueEdit");
 
+            this._oCategoryBinding?.destroy();
+            this._oCategoryBinding = this.getView().getModel("create").bindProperty("/paymentCategory_code");
+            this._oCategoryBinding.attachChange(() => this._applyCurrencyRestriction());
+            this._applyCurrencyRestriction();
+
             await this._populateCurrentRequester();
 
             if (this._sPredecessorId) {
@@ -970,6 +976,16 @@ sap.ui.define([
 
                 if (aMissing.length) {
                     MessageBox.warning(this.getText("subtypeRequiredFieldsMessage", [aMissing.join(", ")]));
+                    return;
+                }
+            }
+            if (oPayload.currency_code) {
+                if (oPayload.paymentCategory_code === "LOCAL" && oPayload.currency_code !== "LKR") {
+                    MessageBox.warning("Local payments must use LKR as the currency.");
+                    return;
+                }
+                if (oPayload.paymentCategory_code === "FOREIGN" && oPayload.currency_code === "LKR") {
+                    MessageBox.warning("Foreign payments cannot use LKR as the currency.");
                     return;
                 }
             }
@@ -3856,6 +3872,36 @@ sap.ui.define([
             oCreateModel.setProperty("/vendor_ID", oContext.getProperty("ID"));
             oCreateModel.setProperty("/vendorCode", oContext.getProperty("vendorCode"));
             oCreateModel.setProperty("/vendorName", oContext.getProperty("vendorName"));
+        },
+        _getCreateCurrencyComboBoxes() {
+            return this.getView().findAggregatedObjects(true, (oControl) => {
+                if (!oControl.isA("sap.m.ComboBox")) {
+                    return false;
+                }
+                const oInfo = oControl.getBindingInfo("selectedKey");
+                const oPart = oInfo?.parts?.[0];
+                return oPart?.model === "create" && oPart?.path === "/currency_code";
+            });
+        },
+
+        _applyCurrencyRestriction() {
+            const oCreateModel = this.getView().getModel("create");
+            const sCategory = oCreateModel.getProperty("/paymentCategory_code");
+            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+
+            if (sCategory === "LOCAL") {
+                aFilters.push(new Filter("code", FilterOperator.EQ, "LKR"));
+                oCreateModel.setProperty("/currency_code", "LKR");
+            } else if (sCategory === "FOREIGN") {
+                aFilters.push(new Filter("code", FilterOperator.NE, "LKR"));
+                if (oCreateModel.getProperty("/currency_code") === "LKR") {
+                    oCreateModel.setProperty("/currency_code", "");
+                }
+            }
+
+            this._getCreateCurrencyComboBoxes().forEach((oCombo) => {
+                oCombo.getBinding("items")?.filter(aFilters, FilterType.Application);
+            });
         },
 
         async _onProcessSelectionChanged() {

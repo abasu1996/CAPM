@@ -24,11 +24,9 @@ sap.ui.define([], function () {
     entity: "UnitsOfMeasure"
   });
   // Material Code fields pick an existing code from the Materials master (value help with
-  // server-side search). An imported table row whose Material Description is blank takes the
-  // master's description (import only: the form keeps a description the user is typing).
+  // server-side search). Material Description is never filled from it, on the form or on import.
   const materialLookup = {
-    entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription",
-    importFills: { field: "description", from: "materialDescription" }
+    entity: "Materials", key: "materialCode", text: "materialCode", secondaryText: "materialDescription"
   };
   // Valuation Class has one master per request type: MCC for Material Code creation, SCC for
   // Service Code creation. TaskDetail uses the same lookups for the approver's value.
@@ -194,27 +192,29 @@ sap.ui.define([], function () {
 
   const dmsToggle = field("dmsUpdate", "DMS Update Required", "checkbox");
 
+  // With Multiple Line Items the DMS fields are columns of the items table, shown while the
+  // request's DMS Update is ticked.
   const whenDms = { field: "dmsUpdate", equals: true };
+  const onDms = { visibleWhen: whenDms, lineItem: true };
   const dmsBlock = [
-    field("dmsSapMaterialCode", "SAP Material Code", "valueHelp", Object.assign({ visibleWhen: whenDms }, materialLookup)),
-    field("itemName", "Item Name", "input", { required: true, visibleWhen: whenDms }),
-    field("itemCategory", "Item Category", "input", { required: true, visibleWhen: whenDms }),
-    field("unitsPerItem", "Units per Item", "number", { required: true, visibleWhen: whenDms }),
-    field("unitPrice", "Unit Price", "number", { required: true, visibleWhen: whenDms }),
-    field("taxPercentage", "Tax Percentage", "number", { required: true, visibleWhen: whenDms }),
-    field("isSaleable", "Is Saleable", "checkbox", { visibleWhen: whenDms }),
-    field("isSerialized", "Is Serialized", "checkbox", { visibleWhen: whenDms }),
-    field("requiredAgents", "Required Agents", "input", { required: true, visibleWhen: whenDms }),
-    Object.assign({}, vendor, { label: "Vendor ERP", required: true, visibleWhen: whenDms }),
-    field("defaultWarrantyPeriod", "Default Warranty Period", "number", { required: true, visibleWhen: whenDms }),
-    field("warrantyType", "Warranty Type", "input", { required: true, visibleWhen: whenDms }),
-    field("valueType", "Value Type", "input", { required: true, visibleWhen: whenDms }),
-    field("sbu", "SBU", "input", { required: true, visibleWhen: whenDms }),
-    field("configurationId", "Config ID", "input", {
+    field("dmsSapMaterialCode", "SAP Material Code", "input", Object.assign({ maxLength: 40 }, onDms)),
+    field("itemName", "Item Name", "input", Object.assign({ required: true }, onDms)),
+    field("itemCategory", "Item Category", "input", Object.assign({ required: true }, onDms)),
+    field("unitsPerItem", "Units per Item", "number", Object.assign({ required: true }, onDms)),
+    field("unitPrice", "Unit Price", "number", Object.assign({ required: true }, onDms)),
+    field("taxPercentage", "Tax Percentage", "number", Object.assign({ required: true }, onDms)),
+    field("isSaleable", "Is Saleable", "checkbox", onDms),
+    field("isSerialized", "Is Serialized", "checkbox", onDms),
+    field("requiredAgents", "Required Agents", "input", Object.assign({ required: true }, onDms)),
+    Object.assign({}, vendor, { label: "Vendor ERP", required: true }, onDms),
+    field("defaultWarrantyPeriod", "Default Warranty Period", "number", Object.assign({ required: true }, onDms)),
+    field("warrantyType", "Warranty Type", "input", Object.assign({ required: true }, onDms)),
+    field("valueType", "Value Type", "input", Object.assign({ required: true }, onDms)),
+    field("sbu", "SBU", "input", Object.assign({ required: true }, onDms)),
+    field("configurationId", "Config ID", "input", Object.assign({
       required: true,
-      visibleWhen: whenDms,
       placeholder: "1 = serials from 2500, 2 = from 1000, 3 = random or sequential, 4 = alphanumeric"
-    })
+    }, onDms))
   ];
 
   const referenceMaterial = field("referenceMaterialCode", "Reference Material Code", "valueHelp", Object.assign({
@@ -263,22 +263,19 @@ sap.ui.define([], function () {
     field("description", "Material Description", "input", { maxLength: 40, visibleWhen: whenChange }),
     Object.assign({}, materialStatus, { visibleWhen: whenChange, lineItem: true })
   ];
+  // Trading Existing: Extension and Change With DMS Update keep the material fields, DMS Update
+  // only has the Material Code and the DMS fields. The DMS Update checkbox is offered for Change
+  // With DMS Update; DMS Update only sets it itself (valueWhen).
+  const whenTradingMaterial = { field: "transactionType", in: ["EXTENSION", "CHANGE_DMS"] };
+  const tradingMaterialField = function (definition) {
+    return Object.assign({}, definition, { visibleWhen: whenTradingMaterial, lineItem: true });
+  };
   const tradingModificationFields = [
     field("referenceMaterialCode", "Material Code", "valueHelp", Object.assign({ required: true }, materialLookup)),
-    tradingModificationPlant,
-    field("storageLocation", "Storage Location", "combo", {
-      entity: "StorageLocation", key: "storageLocationCode", text: "storageLocationName", visibleWhen: whenExtension
-    }),
-    field("distributionChannel", "Distribution Channel", "combo", {
-      entity: "DistributionChannel", key: "distributionChannelCode", text: "distributionChannelDescription", visibleWhen: whenExtension
-    }),
-    field("salesOrganization", "Sales Org", "combo", {
-      entity: "SalesOrg", key: "salesOrgCode", text: "salesOrgName", visibleWhen: whenExtension
-    }),
+    tradingMaterialField(tradingModificationPlant),
     field("divisionChanging", "Division Changing", "input", {
       maxLength: 255, visibleWhen: whenTradingChange, lineItem: true
     }),
-    field("description", "Material Description", "input", { maxLength: 40, visibleWhen: whenTradingChange }),
     field("serialNumberChange", "Serial Number", "input", {
       maxLength: 255, visibleWhen: whenTradingChange, lineItem: true
     }),
@@ -287,12 +284,11 @@ sap.ui.define([], function () {
     }),
     Object.assign({}, materialStatus, { visibleWhen: whenTradingChange, lineItem: true }),
     field("infoRecord", "Info Record", "checkbox", { visibleWhen: whenTradingChange, lineItem: true }),
-    field("dmsUpdate", "DMS Update", "checkbox", { visibleWhen: whenTradingChange }),
     field("dmsUpdate", "DMS Update", "checkbox", {
-      visibleWhen: { field: "transactionType", equals: "DMS_UPDATE_ONLY" }
-    }),
-    ...dmsBlock
-  ];
+      visibleWhen: whenTradingChange,
+      valueWhen: { field: "transactionType", equals: "DMS_UPDATE_ONLY", value: true }
+    })
+  ].concat(dmsBlock);
 
   const materialCategoryFields = {
     ENG_IT: matCore,
@@ -362,7 +358,12 @@ sap.ui.define([], function () {
       : materialModificationFields;
     const existingFields = [categoryCode === "TRADING" ? tradingChangeType : changeType]
       .concat(modificationFields.slice(0, 2));
-    appendMissingFields(existingFields, optionalMaterialFields(base));
+    const materialFields = categoryCode === "TRADING"
+      ? optionalMaterialFields(base)
+        .filter(function (definition) { return definition.name !== "dmsUpdate" && !definition.visibleWhen; })
+        .map(tradingMaterialField)
+      : optionalMaterialFields(base);
+    appendMissingFields(existingFields, materialFields);
     appendMissingFields(existingFields, modificationFields.slice(2));
     materialDefinitions[categoryCode + ":MAT_EXISTING"] = existingFields;
     materialDefinitions[categoryCode + ":MAT_NEW_REF"] = withPriceDefault(appendMissingFields(
@@ -447,9 +448,7 @@ sap.ui.define([], function () {
       field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
         required: true
       }),
-      field("dmsSapMaterialCode", "DMS - SAP Material Code", "valueHelp", Object.assign({
-        required: true
-      }, materialLookup))
+      field("dmsSapMaterialCode", "DMS - SAP Material Code", "input", { required: true, maxLength: 40 })
     ],
     MAT_ZTRD_EXISTING: [
       field("transactionType", "Change Type", "select", {
@@ -483,9 +482,7 @@ sap.ui.define([], function () {
       field("approvalDocumentsAttachment", "Approval Documents Attachment", "file", {
         required: true
       }),
-      field("dmsSapMaterialCode", "DMS - SAP Material Code", "valueHelp", Object.assign({
-        required: true
-      }, materialLookup))
+      field("dmsSapMaterialCode", "DMS - SAP Material Code", "input", { required: true, maxLength: 40 })
     ],
     SVC_NEW: serviceNewBase,
     SVC_NEW_REF: [

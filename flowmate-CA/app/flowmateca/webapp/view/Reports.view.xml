@@ -3,107 +3,552 @@
   xmlns:mvc="sap.ui.core.mvc"
   xmlns:core="sap.ui.core"
   xmlns="sap.m">
-  <Page class="caPage reportsPage" showHeader="true" busy="{reports>/loading}" busyIndicatorDelay="0">
-    <customHeader>
-      <OverflowToolbar class="caTopBar">
-        <Button icon="sap-icon://nav-back" type="Transparent" tooltip="Dashboard" press=".onDashboard"/>
-        <Title text="Reports and Dashboard" level="H2"/>
-        <ToolbarSpacer/>
-        <Button icon="sap-icon://home" type="Transparent" tooltip="Workspace" press=".onDashboard"/>
-        <Button icon="sap-icon://documents" type="Transparent" tooltip="Requests" press=".onRequests"/>
-        <Button icon="sap-icon://task" type="Transparent" tooltip="Tasks" press=".onTasks"/>
-        <Button icon="sap-icon://action-settings" type="Transparent" tooltip="Administration" visible="{app>/currentUser/isAdmin}" press=".onAdmin"/>
-      </OverflowToolbar>
-    </customHeader>
+  <Page class="caPage" showNavButton="true" navButtonPress=".onDashboard" title="{i18n>reportsDashboard}">
+    <dependents>
+      <Dialog id="drillDialog" title="{drill>/title}" contentWidth="80rem" contentHeight="36rem" resizable="true" draggable="true"
+        horizontalScrolling="false" class="sapUiNoContentPadding">
+        <content>
+          <IconTabBar selectedKey="{drill>/tab}" expandable="false" headerMode="Inline" stretchContentHeight="true" applyContentPadding="false">
+            <items>
+              <IconTabFilter key="overview" text="{i18n>drillOverview}" icon="sap-icon://business-objects-experience">
+                <ScrollContainer vertical="true" height="100%" width="100%">
+                  <VBox class="sapUiSmallMargin">
+                    <FlexBox wrap="Wrap" class="caFactGrid rptDrillFacts" renderType="Div">
+                      <VBox class="caFact"><Label text="{i18n>drillRequests}"/><Title text="{drill>/facts/requests}" level="H3"/></VBox>
+                      <VBox class="caFact"><Label text="{i18n>drillTasks}"/><Title text="{drill>/facts/tasks}" level="H3"/></VBox>
+                      <VBox class="caFact"><Label text="{i18n>drillOpenTasks}"/><Title text="{drill>/facts/openTasks}" level="H3"/></VBox>
+                      <VBox class="caFact"><Label text="{i18n>drillAverageDays}"/><Title text="{drill>/facts/averageDays}" level="H3"/></VBox>
+                      <VBox class="caFact"><Label text="{i18n>drillBreached}"/><Title text="{drill>/facts/breached}" level="H3"/></VBox>
+                    </FlexBox>
+                    <FlexBox class="rptDrillCharts" renderType="Div">
+                      <VBox width="100%">
+                        <Title text="{i18n>drillByStatus}" level="H5" class="rptChartTitle"/>
+                        <VBox id="drillStatusChartHost" width="100%"/>
+                      </VBox>
+                      <VBox width="100%">
+                        <Title text="{i18n>drillSla}" level="H5" class="rptChartTitle"/>
+                        <VBox id="drillSlaChartHost" width="100%"/>
+                      </VBox>
+                      <VBox width="100%">
+                        <Title text="{i18n>drillTasksByStep}" level="H5" class="rptChartTitle"/>
+                        <VBox id="drillStepChartHost" width="100%"/>
+                      </VBox>
+                    </FlexBox>
+                  </VBox>
+                </ScrollContainer>
+              </IconTabFilter>
+              <IconTabFilter key="requests" text="{i18n>drillRequests}" count="{= ${drill>/requests}.length }">
+                <ScrollContainer vertical="true" height="100%" width="100%">
+                  <Table items="{drill>/requests}" class="caWorklistTable" growing="true" growingThreshold="50" growingScrollToLoad="true"
+                    sticky="ColumnHeaders" noDataText="{i18n>drillNoRequests}">
+                    <columns>
+                      <Column><Text text="Request ID"/></Column>
+                      <Column><Text text="{i18n>poNumber}"/></Column>
+                      <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>supplier}"/></Column>
+                      <Column><Text text="{i18n>status}"/></Column>
+                      <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>drillCurrentStep}"/></Column>
+                      <Column hAlign="End"><Text text="{i18n>drillDays}"/></Column>
+                      <Column><Text text="SLA"/></Column>
+                    </columns>
+                    <items>
+                      <ColumnListItem type="Navigation" press=".onDrillRequestPress">
+                        <cells>
+                          <ObjectIdentifier title="{drill>reference}" text="{drill>title}"/>
+                          <Text text="{= ${drill>poNumber} || '—' }"/>
+                          <Text text="{= ${drill>supplier} || '—' }" class="caWrapCell"/>
+                          <ObjectStatus text="{path: 'drill>status', formatter: '.requestStatusText'}" state="{path: 'drill>status', formatter: '.requestStatusState'}"/>
+                          <Text text="{= ${drill>currentStep} || '—' }"/>
+                          <Text text="{parts: ['drill>elapsedDays', 'drill>targetDays'], formatter: '.daysOfTarget'}"/>
+                          <ObjectStatus text="{= ${drill>breached} ? 'Breached' : 'Within SLA' }" state="{= ${drill>breached} ? 'Error' : 'Success' }"/>
+                        </cells>
+                      </ColumnListItem>
+                    </items>
+                  </Table>
+                </ScrollContainer>
+              </IconTabFilter>
+              <IconTabFilter key="tasks" text="{i18n>drillTasks}" count="{= ${drill>/tasks}.length }">
+                <ScrollContainer vertical="true" height="100%" width="100%">
+                  <Table items="{drill>/tasks}" class="caWorklistTable" growing="true" growingThreshold="50" growingScrollToLoad="true"
+                    sticky="ColumnHeaders" noDataText="{i18n>drillNoTasks}">
+                    <columns>
+                      <Column><Text text="Task ID"/></Column>
+                      <Column><Text text="Request ID"/></Column>
+                      <Column><Text text="{i18n>drillTask}"/></Column>
+                      <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>drillAssignedTo}"/></Column>
+                      <Column><Text text="{i18n>status}"/></Column>
+                      <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>slaDue}"/></Column>
+                      <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>drillCompleted}"/></Column>
+                    </columns>
+                    <items>
+                      <ColumnListItem type="Navigation" press=".onDrillTaskPress">
+                        <cells>
+                          <ObjectIdentifier title="{drill>referenceNumber}"/>
+                          <Text text="{drill>requestReference}"/>
+                          <Text text="{= ${drill>stepNo} + '. ' + ${drill>taskName} }" class="caWrapCell"/>
+                          <Text text="{= ${drill>assignedName} || ${drill>assignedTeamName} || '—' }" class="caWrapCell"/>
+                          <ObjectStatus text="{path: 'drill>status_code', formatter: '.taskStatusText'}" state="{parts: ['drill>status_code', 'drill>slaBreached'], formatter: '.taskStatusState'}"/>
+                          <Text text="{path: 'drill>slaDueAt', formatter: '.dateTime'}"/>
+                          <Text text="{path: 'drill>completedAt', formatter: '.dateTime'}"/>
+                        </cells>
+                      </ColumnListItem>
+                    </items>
+                  </Table>
+                </ScrollContainer>
+              </IconTabFilter>
+            </items>
+          </IconTabBar>
+        </content>
+        <endButton>
+          <Button text="Close" press=".onDrillClose"/>
+        </endButton>
+      </Dialog>
+    </dependents>
+    <headerContent>
+      <Button icon="sap-icon://home" type="Transparent" tooltip="Dashboard" press=".onNavHome"/>
+      <Button icon="sap-icon://documents" type="Transparent" tooltip="Requests" visible="{app>/currentUser/canViewAllRequests}" press=".onAllRequests"/>
+      <Button icon="sap-icon://task" type="Transparent" tooltip="Tasks" visible="{app>/currentUser/canViewAllTasks}" press=".onTasks"/>
+      <Button icon="sap-icon://action-settings" type="Transparent" tooltip="Administration" visible="{app>/currentUser/isAdmin}" press=".onAdmin"/>
+    </headerContent>
     <content>
-      <VBox class="reportsShell sapUiResponsiveContentPadding">
-        <HBox class="reportsHero" alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap">
-          <HBox alignItems="Center" class="reportsHeroTitle">
-            <core:Icon src="sap-icon://business-objects-experience" class="reportsHeroIcon"/>
+      <VBox class="caDashboard rptTop sapUiResponsiveContentPadding">
+        <HBox class="rptHero" alignItems="Center" justifyContent="SpaceBetween" wrap="Wrap">
+          <HBox alignItems="Center" class="rptHeroTitle">
+            <core:Icon src="sap-icon://line-charts" class="rptHeroIcon"/>
             <VBox>
-              <Title text="Operations intelligence" level="H1"/>
-              <Text text="A clear view of volume, value and service-level performance across Commerce Automation."/>
+              <Title text="{i18n>reportsHeroTitle}" level="H1" class="rptHeroHeading"/>
+              <Text text="{i18n>reportsHeroSubtitle}" class="rptHeroSubtitle"/>
             </VBox>
           </HBox>
-          <VBox class="reportsPeriodBox">
-            <Label text="Reporting period"/>
-            <DateRangeSelection id="reportPeriod" displayFormat="dd MMM yyyy" change=".onPeriodChange"/>
+          <VBox class="rptHeroPeriod">
+            <Label text="{i18n>reportingPeriod}" labelFor="reportPeriod" design="Bold"/>
+            <DateRangeSelection id="reportPeriod" width="25rem" dateValue="{reports>/filters/from}" secondDateValue="{reports>/filters/to}"
+              displayFormat="dd MMM yyyy" delimiter="-" change=".onPeriodChange"/>
           </VBox>
         </HBox>
-
-        <Toolbar class="reportsToolbar">
-          <Title text="Reports" level="H3"/>
+        <OverflowToolbar class="rptReportsBar">
+          <Title text="{i18n>reportsBarTitle}" level="H2"/>
           <ToolbarSpacer/>
-          <Label text="View" labelFor="reportScope"/>
-          <Select id="reportScope" selectedKey="{reports>/scope}" change=".onScopeChange" width="13rem">
-            <items>
-              <core:Item key="ALL" text="All reports"/>
-              <core:Item key="PO_SPEND" text="PO Spend Analysis"/>
-              <core:Item key="PO_LIFECYCLE" text="PO Lifecycle"/>
-              <core:Item key="SES_LIFECYCLE" text="SES Lifecycle"/>
-              <core:Item key="SCM" text="SCM Operations"/>
-              <core:Item key="SOURCE_TO_PAY" text="Source-to-Pay visibility"/>
-            </items>
+          <Label text="{i18n>viewLabel}" labelFor="reportDashboard"/>
+          <Select id="reportDashboard" width="19rem" selectedKey="{reports>/selectedDashboard}" items="{reports>/dashboards}"
+            tooltip="{i18n>selectDashboard}" change=".onApplyFilters">
+            <core:Item key="{reports>key}" text="{reports>title}"/>
           </Select>
-          <Label text="PO type" labelFor="poType" class="sapUiSmallMarginBegin"/>
-          <Select id="poType" selectedKey="{reports>/poType}" change=".onPoTypeChange" width="10rem">
-            <items>
-              <core:Item key="ALL" text="All PO types"/>
-              <core:Item key="GENERAL" text="General"/>
-              <core:Item key="DNS" text="DNS"/>
-              <core:Item key="FTK" text="FTK"/>
-            </items>
+          <Label text="{i18n>poTypeLabel}" labelFor="reportPoType"/>
+          <Select id="reportPoType" width="15rem" selectedKey="{reports>/filters/poType}" items="{reports>/poTypes}"
+            tooltip="{i18n>poTypeLabel}" change=".onApplyFilters">
+            <core:Item key="{reports>code}" text="{reports>name}"/>
           </Select>
-        </Toolbar>
+          <Button icon="sap-icon://clear-filter" type="Transparent" tooltip="{i18n>clearFilters}" press=".onResetFilters"/>
+          <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onApplyFilters"/>
+          <Button icon="sap-icon://pdf-attachment" type="Transparent" tooltip="{i18n>exportPdf}" press=".onExport"
+            visible="{= ${reports>/selectedDashboard} !== 'SPEND_ANALYSIS' }"/>
+        </OverflowToolbar>
+      </VBox>
+      <VBox class="caDashboard rptBody sapUiResponsiveContentPadding" busy="{reports>/loading}" busyIndicatorDelay="0"
+        visible="{= ${reports>/selectedDashboard} !== 'SPEND_ANALYSIS' }">
+        <Title text="{i18n>poLifecycleSection}" level="H2" class="rptSectionTitle"
+          visible="{= ${reports>/selectedDashboard} === 'ALL' }"/>
+        <MessageStrip text="{i18n>noPoRequestsInPeriod}" type="Information" showIcon="true" class="sapUiSmallMarginBottom"
+          visible="{= ${reports>/loaded} === true &amp;&amp; ${reports>/kpis/totalRequests} === 0 }"/>
 
-        <HBox class="reportsKpiRow" wrap="Wrap" visible="{reports>/visible/all}">
-          <VBox class="reportKpi reportKpiBlue"><Text text="Requests received"/><ObjectNumber number="{reports>/summary/totalRequests}"/></VBox>
-          <VBox class="reportKpi reportKpiGreen"><Text text="Completed"/><ObjectNumber number="{reports>/summary/completed}" state="Success"/></VBox>
-          <VBox class="reportKpi reportKpiAmber"><Text text="In progress"/><ObjectNumber number="{reports>/summary/inProgress}" state="Warning"/></VBox>
-          <VBox class="reportKpi reportKpiRed"><Text text="SLA exceeded"/><ObjectNumber number="{reports>/summary/slaBreached}" state="Error"/></VBox>
-        </HBox>
+        <!-- KPI tiles, in the workspace tile style -->
+        <FlexBox wrap="Wrap" class="caTileGrid rptKpiGrid" renderType="Div">
+          <GenericTile class="caTile caTileBlue" header="{reports>/kpiTiles/0/label}" subheader="{reports>/kpiTiles/0/caption}" press=".onKpiPress">
+            <customData><core:CustomData key="kpiIndex" value="0"/></customData>
+            <tileContent>
+              <TileContent footer="{reports>/kpiTiles/0/footer}">
+                <NumericContent value="{reports>/kpiTiles/0/value}" scale="{reports>/kpiTiles/0/scale}" icon="{reports>/kpiTiles/0/icon}"
+                  valueColor="{reports>/kpiTiles/0/valueColor}" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileRed" header="{reports>/kpiTiles/1/label}" subheader="{reports>/kpiTiles/1/caption}" press=".onKpiPress">
+            <customData><core:CustomData key="kpiIndex" value="1"/></customData>
+            <tileContent>
+              <TileContent footer="{reports>/kpiTiles/1/footer}">
+                <NumericContent value="{reports>/kpiTiles/1/value}" scale="{reports>/kpiTiles/1/scale}" icon="{reports>/kpiTiles/1/icon}"
+                  valueColor="{reports>/kpiTiles/1/valueColor}" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileTeal" header="{reports>/kpiTiles/2/label}" subheader="{reports>/kpiTiles/2/caption}" press=".onKpiPress">
+            <customData><core:CustomData key="kpiIndex" value="2"/></customData>
+            <tileContent>
+              <TileContent footer="{reports>/kpiTiles/2/footer}">
+                <NumericContent value="{reports>/kpiTiles/2/value}" scale="{reports>/kpiTiles/2/scale}" icon="{reports>/kpiTiles/2/icon}"
+                  valueColor="{reports>/kpiTiles/2/valueColor}" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileGreen" header="{reports>/kpiTiles/3/label}" subheader="{reports>/kpiTiles/3/caption}" press=".onKpiPress">
+            <customData><core:CustomData key="kpiIndex" value="3"/></customData>
+            <tileContent>
+              <TileContent footer="{reports>/kpiTiles/3/footer}">
+                <NumericContent value="{reports>/kpiTiles/3/value}" scale="{reports>/kpiTiles/3/scale}" icon="{reports>/kpiTiles/3/icon}"
+                  valueColor="{reports>/kpiTiles/3/valueColor}" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileOrange" header="{reports>/kpiTiles/4/label}" subheader="{reports>/kpiTiles/4/caption}" press=".onKpiPress">
+            <customData><core:CustomData key="kpiIndex" value="4"/></customData>
+            <tileContent>
+              <TileContent footer="{reports>/kpiTiles/4/footer}">
+                <NumericContent value="{reports>/kpiTiles/4/value}" scale="{reports>/kpiTiles/4/scale}" icon="{reports>/kpiTiles/4/icon}"
+                  valueColor="{reports>/kpiTiles/4/valueColor}" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTilePurple" header="{reports>/kpiTiles/5/label}" subheader="{reports>/kpiTiles/5/caption}" press=".onKpiPress">
+            <customData><core:CustomData key="kpiIndex" value="5"/></customData>
+            <tileContent>
+              <TileContent footer="{reports>/kpiTiles/5/footer}">
+                <NumericContent value="{reports>/kpiTiles/5/value}" scale="{reports>/kpiTiles/5/scale}" icon="{reports>/kpiTiles/5/icon}"
+                  valueColor="{reports>/kpiTiles/5/valueColor}" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+        </FlexBox>
 
-        <VBox class="reportSection" visible="{reports>/visible/poSpend}">
-          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://money-bills"/><VBox><Title text="PO Spend Analysis" level="H2"/><Text text="Spend is based on the PO request value before tax."/></VBox></HBox>
-          <HBox class="reportCardRow" wrap="Wrap">
-            <VBox class="reportCard reportMetricCard"><Text text="Total spend"/><ObjectNumber number="{path:'reports>/poSpend/totalSpend', formatter:'.formatNumber'}"/><Text text="{reports>/poSpend/reportingCurrency}" class="reportMutedText"/></VBox>
-            <VBox class="reportCard reportMetricCard"><Text text="Active suppliers"/><ObjectNumber number="{reports>/poSpend/activeSuppliers}"/><Text text="Distinct suppliers in period" class="reportMutedText"/></VBox>
-            <VBox class="reportCard reportMetricCard"><Text text="YoY variance"/><ObjectNumber number="{path:'reports>/poSpend/yoyVariance', formatter:'.formatVariance'}" state="{= ${reports>/poSpend/yoyVariance} &gt;= 0 ? 'Error' : 'Success'}"/><Text text="{path:'reports>/poSpend/yoyVariancePercent', formatter:'.formatPercent'}" class="reportMutedText"/></VBox>
-            <VBox class="reportCard reportMetricCard reportWarningCard"><Text text="Data readiness"/><Text text="{reports>/poSpend/conversionNote}" wrapping="true"/><Text text="{reports>/poSpend/mappingNote}" wrapping="true" class="reportMutedText sapUiTinyMarginTop"/></VBox>
-          </HBox>
-          <HBox class="reportCardRow" wrap="Wrap">
-            <VBox class="reportCard reportWideCard"><Title text="Top supplier spend" level="H3"/><List items="{reports>/poSpend/topSuppliers}" noDataText="No PO spend in this period" class="reportList"><CustomListItem><HBox alignItems="Center" class="reportBarRow"><Text text="{reports>supplier}" class="reportBarLabel"/><ProgressIndicator percentValue="{reports>sharePercent}" displayValue="{path:'reports>sharePercent', formatter:'.formatPercent'}" state="Information"/><Text text="{path:'reports>spend', formatter:'.formatNumber'}" class="reportBarValue"/></HBox></CustomListItem></List></VBox>
-            <VBox class="reportCard reportCardNarrow"><Title text="Capex / Opex" level="H3"/><List items="{reports>/poSpend/categorySplit}" noDataText="No category data" class="reportList"><CustomListItem><HBox alignItems="Center" class="reportBarRow"><Text text="{reports>label}" class="reportBarLabel"/><ProgressIndicator percentValue="{reports>sharePercent}" displayValue="{path:'reports>sharePercent', formatter:'.formatPercent'}" state="Success"/></HBox></CustomListItem></List></VBox>
-          </HBox>
-          <Table class="reportTable" items="{reports>/recentTransactions}" growing="true" growingThreshold="25" noDataText="No PO transactions in this period"><headerToolbar><Toolbar><Title text="Recent PO transactions" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Request"/></Column><Column><Text text="Supplier"/></Column><Column><Text text="PO number"/></Column><Column><Text text="Value"/></Column><Column><Text text="Type"/></Column><Column><Text text="Status"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>requestId}"/><Text text="{reports>supplier}"/><Text text="{reports>poNumber}"/><ObjectNumber number="{path:'reports>amount', formatter:'.formatNumber'}" unit="{reports>currency}"/><Text text="{reports>variant}"/><ObjectStatus text="{reports>status}" state="{path:'reports>status', formatter:'.statusState'}"/></cells></ColumnListItem></items></Table>
-          <Table class="reportTable" items="{reports>/poSpend/supplierYoY}" growing="true" noDataText="No prior-year supplier data"><headerToolbar><Toolbar><Title text="Supplier year-over-year comparison" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Supplier"/></Column><Column><Text text="Current spend"/></Column><Column><Text text="Previous year"/></Column><Column><Text text="Variance"/></Column><Column><Text text="Variance %"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>supplier}"/><Text text="{path:'reports>currentSpend', formatter:'.formatNumber'}"/><Text text="{path:'reports>previousSpend', formatter:'.formatNumber'}"/><ObjectNumber number="{path:'reports>variance', formatter:'.formatVariance'}"/><ObjectStatus text="{path:'reports>variancePercent', formatter:'.formatPercent'}" state="{= ${reports>variance} &gt; 0 ? 'Error' : 'Success'}"/></cells></ColumnListItem></items></Table>
-        </VBox>
+        <Panel headerText="{i18n>trendTitle}" class="caFormSection">
+          <content>
+            <FlexBox class="rptChartGrid" renderType="Div">
+              <VBox width="100%">
+                <Title text="{i18n>trendSubtitle}" level="H5" class="rptChartTitle"/>
+                <VBox id="trendChartHost" width="100%"/>
+              </VBox>
+              <VBox width="100%">
+                <Title text="{i18n>groupChartTitle}" level="H5" class="rptChartTitle"/>
+                <VBox id="groupChartHost" width="100%"/>
+              </VBox>
+            </FlexBox>
+          </content>
+        </Panel>
 
-        <VBox class="reportSection" visible="{reports>/visible/poLifecycle}">
-          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://process"/><VBox><Title text="PO Lifecycle" level="H2"/><Text text="Volume, outcome and configured SLA performance for purchase orders."/></VBox></HBox>
-          <HBox class="reportCardRow" wrap="Wrap"><VBox class="reportCard reportMetricCard"><Text text="Received"/><ObjectNumber number="{reports>/poLifecycle/totalReceived}"/></VBox><VBox class="reportCard reportMetricCard"><Text text="PO created"/><ObjectNumber number="{reports>/poLifecycle/completed}" state="Success"/></VBox><VBox class="reportCard reportMetricCard"><Text text="Rejected"/><ObjectNumber number="{reports>/poLifecycle/rejected}" state="Error"/></VBox><VBox class="reportCard reportMetricCard"><Text text="SLA compliance"/><ObjectNumber number="{path:'reports>/poLifecycle/slaCompliancePercent', formatter:'.formatPercent'}"/></VBox></HBox>
-          <HBox class="reportCardRow" wrap="Wrap"><VBox class="reportCard reportWideCard"><Title text="PO type distribution and SLA" level="H3"/><List items="{reports>/poLifecycle/typeBreakdown}" class="reportList"><CustomListItem><HBox alignItems="Center" class="reportBarRow"><Text text="{reports>label}" class="reportBarLabel"/><ProgressIndicator percentValue="{= ${reports>received} / ${reports>/poLifecycle/totalReceived} * 100 }" displayValue="{reports>received}" state="Information"/><Text text="{= ${reports>withinSla} + ' within / ' + ${reports>breached} + ' breached' }" class="reportBarValue"/></HBox></CustomListItem></List></VBox><VBox class="reportCard reportCardNarrow"><Title text="SLA target" level="H3"/><Text text="General: 2 days"/><Text text="DNS: 5 days"/><Text text="FTK: 5 days"/><Text text="These targets are configurable in the reporting service." class="reportMutedText" wrapping="true"/></VBox></HBox>
-          <Table class="reportTable" items="{reports>/procurementView}" growing="true" growingThreshold="25" noDataText="No purchasing-group data"><headerToolbar><Toolbar><Title text="Purchasing group / company / contract view" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Purchasing group"/></Column><Column><Text text="Company code"/></Column><Column><Text text="Contract"/></Column><Column><Text text="PO type"/></Column><Column><Text text="Requests"/></Column><Column><Text text="Spend"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>purchasingGroup}"/><Text text="{reports>companyCode}"/><Text text="{reports>contractStatus}"/><Text text="{reports>poType}"/><Text text="{reports>requests}"/><Text text="{path:'reports>spend', formatter:'.formatNumber'}"/></cells></ColumnListItem></items></Table>
-          <Table class="reportTable" items="{reports>/poLifecycle/slaFailures}" growing="true" growingThreshold="25" noDataText="No SLA failures in this period"><headerToolbar><Toolbar><Title text="SLA failure reasons" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Request"/></Column><Column><Text text="Supplier"/></Column><Column><Text text="Status"/></Column><Column><Text text="Duration (days)"/></Column><Column><Text text="Breach (days)"/></Column><Column><Text text="Reason"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>requestId}"/><Text text="{reports>supplier}"/><Text text="{reports>status}"/><Text text="{reports>durationDays}"/><ObjectStatus text="{reports>breachDays}" state="Error"/><Text text="{reports>reason}"/></cells></ColumnListItem></items></Table>
-          <Table class="reportTable" items="{reports>/poLifecycle/divisionBreakdown}" growing="true" noDataText="No division data"><headerToolbar><Toolbar><Title text="Division-wise SLA" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Division"/></Column><Column><Text text="Requests"/></Column><Column><Text text="Within SLA"/></Column><Column><Text text="Breached"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>label}"/><Text text="{reports>received}"/><ObjectStatus text="{reports>withinSla}" state="Success"/><ObjectStatus text="{reports>breached}" state="{path:'reports>breached', formatter:'.slaState'}"/></cells></ColumnListItem></items></Table>
-        </VBox>
+        <Panel headerText="{parts: ['i18n>periodSlaTitle', 'reports>/period'], formatter: '.titleWithPeriod'}" class="caFormSection caItemsSection">
+          <content>
+            <Table items="{reports>/monthlySla}" class="caWorklistTable" noDataText="{i18n>noData}">
+              <columns>
+                <Column><Text text="{i18n>metric}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>requestsLabel}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>slaTargetDays}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>slaAchievedDays}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>slaPercent}"/></Column>
+              </columns>
+              <items>
+                <ColumnListItem>
+                  <cells>
+                    <Text text="{reports>label}"/>
+                    <Text text="{reports>count}"/>
+                    <Text text="{path: 'reports>targetDays', formatter: '.days'}"/>
+                    <Text text="{path: 'reports>achievedDays', formatter: '.days'}"/>
+                    <ObjectStatus text="{path: 'reports>slaPercent', formatter: '.percent'}" state="{path: 'reports>status', formatter: '.statusState'}"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
+          </content>
+        </Panel>
 
-        <VBox class="reportSection" visible="{reports>/visible/sesLifecycle}">
-          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://receipt"/><VBox><Title text="SES Lifecycle" level="H2"/><Text text="Service Entry Sheet requests with General/DNS operational views."/></VBox></HBox>
-          <HBox class="reportCardRow" wrap="Wrap"><VBox class="reportCard reportMetricCard"><Text text="Received"/><ObjectNumber number="{reports>/sesLifecycle/totalReceived}"/></VBox><VBox class="reportCard reportMetricCard"><Text text="SES created"/><ObjectNumber number="{reports>/sesLifecycle/completed}" state="Success"/></VBox><VBox class="reportCard reportMetricCard"><Text text="Rejected"/><ObjectNumber number="{reports>/sesLifecycle/rejected}" state="Error"/></VBox><VBox class="reportCard reportMetricCard"><Text text="SLA exceeded"/><ObjectNumber number="{reports>/sesLifecycle/slaBreached}" state="Error"/></VBox></HBox>
-          <Table class="reportTable" items="{reports>/sesLifecycle/monthlySummary}" noDataText="No SES transactions in this period"><headerToolbar><Toolbar><Title text="Monthly SES SLA summary" level="H3"/></Toolbar></headerToolbar><columns><Column><Text text="Month"/></Column><Column><Text text="Received"/></Column><Column><Text text="Completed"/></Column><Column><Text text="Rejected"/></Column><Column><Text text="Within SLA"/></Column><Column><Text text="Breached"/></Column></columns><items><ColumnListItem><cells><Text text="{path:'reports>month', formatter:'.formatMonth'}"/><Text text="{reports>received}"/><Text text="{reports>completed}"/><Text text="{reports>rejected}"/><ObjectStatus text="{reports>withinSla}" state="Success"/><ObjectStatus text="{reports>breached}" state="{path:'reports>breached', formatter:'.slaState'}"/></cells></ColumnListItem></items></Table>
-        </VBox>
+        <Panel headerText="{i18n>procurementViewTitle}" class="caFormSection caItemsSection">
+          <content>
+            <Table id="viewSummaryTable" items="{reports>/views}" mode="SingleSelectMaster" selectionChange=".onViewSelect"
+              class="caWorklistTable" noDataText="{i18n>noData}">
+              <columns>
+                <Column><Text text="{i18n>viewLabel}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>poVolume}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>slaPercent}"/></Column>
+                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>remarks}"/></Column>
+              </columns>
+              <items>
+                <ColumnListItem>
+                  <cells>
+                    <Text text="{reports>label}"/>
+                    <Text text="{reports>volume}"/>
+                    <ObjectStatus text="{path: 'reports>slaPercent', formatter: '.percent'}" state="{path: 'reports>status', formatter: '.statusState'}"/>
+                    <Text text="{reports>remarks}" class="caMuted"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
+            <Toolbar class="caSectionToolbar" visible="{= ${reports>/selectedView/rows}.length &gt; 0 }">
+              <Title text="{reports>/selectedView/label}"/>
+            </Toolbar>
+            <Table items="{reports>/selectedView/rows}" class="caWorklistTable" visible="{= ${reports>/selectedView/rows}.length &gt; 0 }">
+              <columns>
+                <Column><Text text="{reports>/selectedView/groupLabel}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>poVolume}"/></Column>
+                <Column hAlign="End" visible="{= ${reports>/selectedView/layout} === 'VOLUME' }"><Text text="{i18n>share}"/></Column>
+                <Column hAlign="End" visible="{= ${reports>/selectedView/layout} === 'STAGES' }"><Text text="{i18n>stageCreated}"/></Column>
+                <Column hAlign="End" visible="{= ${reports>/selectedView/layout} === 'STAGES' }"><Text text="{i18n>stageApproved}"/></Column>
+                <Column hAlign="End" visible="{= ${reports>/selectedView/layout} === 'STAGES' }"><Text text="{i18n>stageRejected}"/></Column>
+                <Column hAlign="End" visible="{= ${reports>/selectedView/layout} === 'STAGES' }"><Text text="{i18n>stagePending}"/></Column>
+                <Column hAlign="End" visible="{= ${reports>/selectedView/layout} === 'SLA' }"><Text text="{i18n>slaTargetDays}"/></Column>
+                <Column hAlign="End" visible="{= ${reports>/selectedView/layout} === 'SLA' }"><Text text="{i18n>slaAchievedDays}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>slaPercent}"/></Column>
+              </columns>
+              <items>
+                <ColumnListItem>
+                  <cells>
+                    <Text text="{reports>label}"/>
+                    <Text text="{reports>volume}"/>
+                    <Text text="{path: 'reports>sharePercent', formatter: '.percent'}"/>
+                    <Text text="{reports>created}"/>
+                    <Text text="{reports>approved}"/>
+                    <Text text="{reports>rejected}"/>
+                    <Text text="{reports>pending}"/>
+                    <Text text="{path: 'reports>targetDays', formatter: '.days'}"/>
+                    <Text text="{path: 'reports>achievedDays', formatter: '.days'}"/>
+                    <ObjectStatus text="{path: 'reports>slaPercent', formatter: '.percent'}" state="{path: 'reports>status', formatter: '.statusState'}"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
+          </content>
+        </Panel>
 
-        <VBox class="reportSection" visible="{reports>/visible/scm}">
-          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://workflow-tasks"/><VBox><Title text="SCM Commerce Automation" level="H2"/><Text text="A single operational view across the six master-data and supply-chain flows."/></VBox></HBox>
-          <Table class="reportTable" items="{reports>/scmFlows}" noDataText="No SCM requests in this period"><columns><Column><Text text="Flow"/></Column><Column><Text text="Received"/></Column><Column><Text text="Completed"/></Column><Column><Text text="Rejected"/></Column><Column><Text text="In progress"/></Column><Column><Text text="Within SLA"/></Column><Column><Text text="Breached"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>label}"/><Text text="{reports>totalReceived}"/><ObjectStatus text="{reports>completed}" state="Success"/><ObjectStatus text="{reports>rejected}" state="Error"/><Text text="{reports>inProgress}"/><Text text="{reports>withinSla}"/><ObjectStatus text="{reports>slaBreached}" state="{path:'reports>slaBreached', formatter:'.slaState'}"/></cells></ColumnListItem></items></Table>
-        </VBox>
+        <Panel headerText="{= ${i18n>slaFailTitle} + ' (' + ${reports>/slaFailures}.length + ')' }" class="caFormSection caItemsSection">
+          <content>
+            <Table items="{reports>/slaFailures}" growing="true" growingThreshold="10" growingScrollToLoad="false"
+              class="caWorklistTable" noDataText="{i18n>noSlaFailures}">
+              <columns>
+                <Column><Text text="{i18n>poNumber}"/></Column>
+                <Column><Text text="{i18n>supplier}"/></Column>
+                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>slaFailReason}"/></Column>
+                <Column><Text text="{i18n>failStatus}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>daysOfFail}"/></Column>
+              </columns>
+              <items>
+                <ColumnListItem type="Navigation" press=".onFailurePress">
+                  <cells>
+                    <ObjectIdentifier title="{reports>poNumber}" text="{= ${reports>hasPoNumber} ? ${reports>reference} : '' }"/>
+                    <Text text="{= ${reports>supplier} || '—' }" class="caWrapCell"/>
+                    <Text text="{reports>reason}" class="caWrapCell"/>
+                    <ObjectStatus text="{path: 'reports>failStatus', formatter: '.failText'}" state="{path: 'reports>failStatus', formatter: '.failState'}"/>
+                    <ObjectStatus text="{path: 'reports>failDays', formatter: '.daysText'}" state="{path: 'reports>failStatus', formatter: '.failState'}"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
+          </content>
+        </Panel>
 
-        <VBox class="reportSection" visible="{reports>/visible/sourceToPay}">
-          <HBox class="reportSectionHeading" alignItems="Center"><core:Icon src="sap-icon://chain-link"/><VBox><Title text="Source-to-Pay visibility" level="H2"/><Text text="The CA slice of the end-to-end chain; external source and payment fields are reserved for integration data."/></VBox></HBox>
-          <MessageStrip text="Sourcing event, award, invoice and payment values are not currently stored in Flowmate CA. They will appear after the S/4HANA, Ariba or I2P integration is connected." type="Information" showIcon="true" class="reportInfoStrip"/>
-          <Table class="reportTable" items="{reports>/sourceToPay}" growing="true" growingThreshold="25" noDataText="No PO records in this period"><columns><Column><Text text="Vendor"/></Column><Column><Text text="PO number"/></Column><Column><Text text="PO value"/></Column><Column><Text text="SES number"/></Column><Column><Text text="SES value"/></Column><Column><Text text="Invoice value"/></Column><Column><Text text="Paid value"/></Column></columns><items><ColumnListItem><cells><Text text="{reports>vendor}"/><Text text="{reports>poNumber}"/><ObjectNumber number="{path:'reports>poRaisedValue', formatter:'.formatNumber'}" unit="{reports>currency}"/><Text text="{reports>sesNumber}"/><Text text="{path:'reports>sesValue', formatter:'.formatNumber'}"/><Text text="—"/><Text text="—"/></cells></ColumnListItem></items></Table>
-        </VBox>
+        <Panel headerText="{i18n>groupBreakdownTitle}" class="caFormSection caItemsSection">
+          <content>
+            <Table items="{reports>/divisionBreakdown}" class="caWorklistTable" noDataText="{i18n>noData}">
+              <columns>
+                <Column><Text text="{i18n>groupLabel}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>poVolume}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>slaPercent}"/></Column>
+                <Column><Text text="{i18n>status}"/></Column>
+              </columns>
+              <items>
+                <ColumnListItem>
+                  <cells>
+                    <Text text="{reports>label}"/>
+                    <Text text="{reports>volume}"/>
+                    <ObjectStatus text="{path: 'reports>slaPercent', formatter: '.percent'}" state="{path: 'reports>status', formatter: '.statusState'}"/>
+                    <ObjectStatus text="{path: 'reports>status', formatter: '.statusText'}" state="{path: 'reports>status', formatter: '.statusState'}"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
+          </content>
+        </Panel>
+      </VBox>
+
+      <!-- Spend Analysis: approved POs' LKR spend for the period, compared with a year before -->
+      <VBox class="caDashboard rptBody sapUiResponsiveContentPadding" busy="{reports>/loading}" busyIndicatorDelay="0"
+        visible="{= ${reports>/selectedDashboard} !== 'PO_LIFECYCLE' }">
+        <Title text="{i18n>spendAnalysisSection}" level="H2" class="rptSectionTitle"
+          visible="{= ${reports>/selectedDashboard} === 'ALL' }"/>
+        <MessageStrip text="{i18n>spendNoPos}" type="Information" showIcon="true" class="sapUiSmallMarginBottom"
+          visible="{= ${spend>/loaded} === true &amp;&amp; ${spend>/kpis/poCount} === 0 }"/>
+        <MessageStrip text="{parts: ['i18n>spendOtherCurrencies', 'spend>/otherCurrencyCount'], formatter: '.otherCurrencyText'}"
+          type="Warning" showIcon="true" class="sapUiSmallMarginBottom" visible="{= ${spend>/otherCurrencyCount} &gt; 0 }"/>
+
+        <FlexBox wrap="Wrap" class="caTileGrid rptKpiGrid rptKpiGrid5" renderType="Div">
+          <GenericTile class="caTile caTileBlue" header="{i18n>spendTotal}" subheader="{i18n>spendLkrOnly}">
+            <tileContent>
+              <TileContent footer="{path: 'reports>/period', formatter: '.periodText'}">
+                <NumericContent value="{path: 'spend>/kpis/totalSpend', formatter: '.tileMillions'}" scale="Mn" truncateValueTo="9"
+                  icon="sap-icon://money-bills" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileTeal" header="{i18n>spendActiveSuppliers}" subheader="{i18n>spendActiveCaption}">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{spend>/kpis/activeSuppliers}" icon="sap-icon://supplier" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTilePurple" header="{i18n>spendTopShare}" subheader="{i18n>spendTopShareCaption}">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{= (${spend>/kpis/topSupplierSharePercent} || 0).toFixed(1) }" scale="%" icon="sap-icon://pie-chart" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileGreen" header="{i18n>spendYoy}"
+            subheader="{parts: ['spend>/kpis/currentYear', 'spend>/kpis/previousYear'], formatter: '.yearsText'}">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{path: 'spend>/kpis/yoyVariancePercent', formatter: '.tileVariance'}" scale="%" truncateValueTo="7"
+                  icon="{= ${spend>/kpis/yoyVariancePercent} &lt; 0 ? 'sap-icon://trend-down' : 'sap-icon://trend-up' }"
+                  valueColor="{= ${spend>/kpis/yoyVariancePercent} &lt; 0 ? 'Error' : 'Good' }" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+          <GenericTile class="caTile caTileRed" header="{i18n>spendInactiveSuppliers}" subheader="{i18n>spendInactiveCaption}">
+            <tileContent>
+              <TileContent>
+                <NumericContent value="{spend>/kpis/inactiveSuppliers}" icon="sap-icon://alert" valueColor="Error" withMargin="false"/>
+              </TileContent>
+            </tileContent>
+          </GenericTile>
+        </FlexBox>
+
+        <Panel headerText="{i18n>spendChartsTitle}" class="caFormSection">
+          <content>
+            <FlexBox class="rptChartGrid" renderType="Div">
+              <VBox width="100%">
+                <Title text="{i18n>spendTopChart}" level="H5" class="rptChartTitle"/>
+                <VBox id="spendTopChartHost" width="100%"/>
+              </VBox>
+              <VBox width="100%">
+                <Title text="{i18n>spendYoyChart}" level="H5" class="rptChartTitle"/>
+                <VBox id="spendYoyChartHost" width="100%"/>
+              </VBox>
+            </FlexBox>
+          </content>
+        </Panel>
+
+        <FlexBox class="rptChartGrid" renderType="Div">
+          <Panel headerText="{i18n>spendTopTitle}" class="caFormSection caItemsSection">
+            <content>
+              <Table items="{spend>/topSuppliers}" class="caWorklistTable" noDataText="{i18n>noData}">
+                <columns>
+                  <Column width="4rem"><Text text="{i18n>spendRank}"/></Column>
+                  <Column><Text text="{i18n>spendSupplier}"/></Column>
+                  <Column hAlign="End"><Text text="{i18n>spendAmountMn}"/></Column>
+                  <Column hAlign="End"><Text text="{i18n>spendShare}"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{spend>rank}"/>
+                      <Text text="{spend>supplier}" class="caWrapCell"/>
+                      <Text text="{path: 'spend>amount', formatter: '.lkrMillions'}"/>
+                      <Text text="{path: 'spend>sharePercent', formatter: '.shareText'}"/>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </content>
+          </Panel>
+          <Panel headerText="{i18n>spendYoyTitle}" class="caFormSection caItemsSection">
+            <content>
+              <Table items="{spend>/yoy}" class="caWorklistTable" noDataText="{i18n>noData}">
+                <columns>
+                  <Column><Text text="{i18n>spendSupplier}"/></Column>
+                  <Column hAlign="End"><Text text="{= ${spend>/kpis/previousYear} + ' (LKR Mn)' }"/></Column>
+                  <Column hAlign="End"><Text text="{= ${spend>/kpis/currentYear} + ' (LKR Mn)' }"/></Column>
+                  <Column hAlign="End"><Text text="{i18n>spendVariance}"/></Column>
+                  <Column hAlign="Center" width="4rem"><Text text="{i18n>spendTrend}"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{spend>supplier}" class="caWrapCell"/>
+                      <Text text="{path: 'spend>previous', formatter: '.lkrMillions'}"/>
+                      <Text text="{path: 'spend>current', formatter: '.lkrMillions'}"/>
+                      <ObjectStatus text="{path: 'spend>variancePercent', formatter: '.varianceText'}" state="{path: 'spend>variancePercent', formatter: '.varianceState'}"/>
+                      <core:Icon src="{path: 'spend>trend', formatter: '.trendIcon'}" color="{path: 'spend>trend', formatter: '.trendColor'}"/>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </content>
+          </Panel>
+        </FlexBox>
+
+        <FlexBox class="rptChartGrid" renderType="Div">
+          <Panel headerText="{i18n>spendExpenditureTitle}" class="caFormSection caItemsSection">
+            <content>
+              <Table items="{spend>/byExpenditure}" class="caWorklistTable" noDataText="{i18n>noData}">
+                <columns>
+                  <Column><Text text="{i18n>spendCategory}"/></Column>
+                  <Column hAlign="End"><Text text="{i18n>spendAmountMn}"/></Column>
+                  <Column hAlign="End"><Text text="{i18n>spendShare}"/></Column>
+                  <Column width="35%"><Text text="{i18n>spendVisual}"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{spend>label}"/>
+                      <Text text="{path: 'spend>amount', formatter: '.lkrMillions'}"/>
+                      <Text text="{path: 'spend>sharePercent', formatter: '.shareText'}"/>
+                      <ProgressIndicator percentValue="{path: 'spend>sharePercent', formatter: '.shareValue'}" showValue="false" height="0.75rem" class="rptSpendBar"/>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </content>
+          </Panel>
+          <Panel headerText="{i18n>spendDivisionTitle}" class="caFormSection caItemsSection">
+            <content>
+              <Table items="{spend>/byDivision}" class="caWorklistTable" noDataText="{i18n>noData}">
+                <columns>
+                  <Column><Text text="{i18n>spendBusinessUnit}"/></Column>
+                  <Column hAlign="End"><Text text="{i18n>spendAmountMn}"/></Column>
+                  <Column hAlign="End"><Text text="{i18n>spendShare}"/></Column>
+                  <Column width="35%"><Text text="{i18n>spendVisual}"/></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{spend>label}" class="caWrapCell"/>
+                      <Text text="{path: 'spend>amount', formatter: '.lkrMillions'}"/>
+                      <Text text="{path: 'spend>sharePercent', formatter: '.shareText'}"/>
+                      <ProgressIndicator percentValue="{path: 'spend>sharePercent', formatter: '.shareValue'}" showValue="false" height="0.75rem" class="rptSpendBar"/>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </content>
+          </Panel>
+        </FlexBox>
+
+        <Panel headerText="{i18n>spendRecentTitle}" class="caFormSection caItemsSection">
+          <content>
+            <Table items="{spend>/recent}" class="caWorklistTable" noDataText="{i18n>noData}">
+              <columns>
+                <Column><Text text="{i18n>spendPoNo}"/></Column>
+                <Column><Text text="{i18n>spendSupplier}"/></Column>
+                <Column><Text text="{i18n>spendDate}"/></Column>
+                <Column hAlign="End"><Text text="{i18n>spendAmount}"/></Column>
+                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>spendDocCurrency}"/></Column>
+                <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>spendAmountLkr}"/></Column>
+                <Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>spendBusinessUnit}"/></Column>
+                <Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>spendCapexOpex}"/></Column>
+              </columns>
+              <items>
+                <ColumnListItem type="Navigation" press=".onSpendRowPress">
+                  <cells>
+                    <Text text="{spend>poNumber}"/>
+                    <Text text="{spend>supplier}" class="caWrapCell"/>
+                    <Text text="{path: 'spend>date', formatter: '.dayText'}"/>
+                    <Text text="{path: 'spend>amount', formatter: '.amountText'}"/>
+                    <Text text="{spend>currency}"/>
+                    <Text text="{path: 'spend>amountLkr', formatter: '.amountText'}"/>
+                    <Text text="{spend>division}"/>
+                    <Text text="{spend>expenditure}"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
+          </content>
+        </Panel>
       </VBox>
     </content>
   </Page>

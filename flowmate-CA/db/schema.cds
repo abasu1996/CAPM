@@ -180,6 +180,10 @@ entity CATasks : cuid, managed {
   // A send-back opens a new task for the step; the earlier one stays as history, superseded.
   isSuperseded    : Boolean default false;
   reworkOf        : Association to CATasks;
+  // Added with Add Task: not reopened by a send-back, and pauses the step's main task SLA while open.
+  isAdditional    : Boolean default false;
+  // Set while the task's SLA is paused by an open additional task of its step.
+  slaPausedAt     : DateTime;
 }
 
 entity CAAttachments : Attachments {

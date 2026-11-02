@@ -1194,13 +1194,22 @@ ${reasons.join("\n")}`);
         if (entry.label) {
           entry.label.setVisible(visible);
         }
-        // A hidden field must not carry a stale value into the payload.
+        // A hidden field must not carry a stale value into the payload. It is cleared to null,
+        // which every column type stores, where "" would land in a number or flag column.
+        // valueWhen: { field, equals | in, value } holds the hidden field at that value instead.
         if (!visible) {
           const path = entry.definition.source === "request"
             ? `/${entry.definition.name}`
             : `/details/${entry.definition.name}`;
-          if (formModel.getProperty(path) !== undefined && formModel.getProperty(path) !== "") {
-            formModel.setProperty(path, "");
+          const value = formModel.getProperty(path);
+          const fixed = entry.definition.valueWhen;
+          const details = formModel.getProperty("/details") || {};
+          if (fixed && FormDefinitions.whenMatches(fixed, details[fixed.field])) {
+            if (value !== fixed.value) {
+              formModel.setProperty(path, fixed.value);
+            }
+          } else if (value !== undefined && value !== null && value !== "") {
+            formModel.setProperty(path, null);
           }
         }
       }.bind(this));
