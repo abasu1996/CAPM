@@ -1232,9 +1232,6 @@ sap.ui.define([], function () {
     wbsElement: column("wbsElement", "WBS Element", "valueHelp", {
       entity: "Wbs", key: "wbsCode", text: "wbsDescription", secondaryText: "ProjectID",
       autoFills: { field: "projectCode", from: "ProjectID" }
-    }),
-    projectCode: column("projectCode", "Project Code", "input", {
-      placeholder: "Filled from the selected WBS Element"
     })
   };
 
@@ -1340,8 +1337,7 @@ sap.ui.define([], function () {
       contractColumn.accountAssignment,
       contractColumn.costCenter,
       column("orderNumber", "Order Number"),
-      contractColumn.wbsElement,
-      contractColumn.projectCode
+      contractColumn.wbsElement
     ],
     // Labels follow "Details of Contract Creation-SCC M-212.csv" so that file imports as-is.
     CONTRACT_NEW: [
@@ -1378,7 +1374,6 @@ sap.ui.define([], function () {
       contractColumn.costCenter,
       column("orderNumber", "Order Number"),
       Object.assign({}, contractColumn.wbsElement, { label: "Work Breakdown Structure Element (WBS Element)" }),
-      contractColumn.projectCode,
       column("employeeId", "Employee ID", "input", { maxLength: 80 })
       // User ID - SCM SPOC is captured once, in the Details section (definitions.CONTRACT_NEW).
     ]

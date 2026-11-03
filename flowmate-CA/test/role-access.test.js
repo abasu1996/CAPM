@@ -222,6 +222,82 @@ test("request creation rejects the requester as the selected approver", async ()
   ), { status: 400, message: "Requester cannot be the Approver of a request" });
 });
 
+test("a human CAAdmin may select themselves as approver and the exception is stored for later steps", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service.db = { CARequests: "requests" };
+  service._assertNoDuplicateMaterialDescription = async () => {};
+  service._applyProjectCode = async () => {};
+  service._applyReservationMaterialType = () => {};
+  service._nextRequestSerial = async () => ({ year: 2026, number: 1 });
+  service._insertDetails = async () => {};
+  service._recordVersion = async () => {};
+  service._moveDraftAttachments = async () => 0;
+  service._initializeWorkflow = async () => {};
+  service._writeHistory = async () => {};
+  let inserted;
+  const tx = { run(query) { inserted = query.INSERT?.entries?.[0]; return 1; } };
+  await service._insertOneRequest(requestFor("CAAdmin"), tx,
+    { ID: "requester", displayName: "Admin Requester" }, {
+      requestType: { code: "SERVICE_ENTRY_SHEET" },
+      input: { details: JSON.stringify({ loaApprover_ID: "REQUESTER" }) }
+    });
+  assert.equal(inserted.requesterAdminApprovalAllowed, true);
+  assert.equal(inserted.requester_ID, "requester");
+});
+
+test("a technical client with CAAdmin scope does not get the self-approval exception", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service._assertNoDuplicateMaterialDescription = async () => {};
+  service._applyProjectCode = async () => {};
+  service._applyReservationMaterialType = () => {};
+  await assert.rejects(service._insertOneRequest(
+    requestFor("CAAdmin", "system-user"),
+    { run() { throw new Error("A technical self-approval must not be inserted"); } },
+    { ID: "requester" },
+    {
+      requestType: { code: "PURCHASE_ORDER" },
+      integration: { clientId: "api-client" },
+      input: {
+        requesterAdminApprovalAllowed: true,
+        details: JSON.stringify({ approver_ID: "requester" })
+      }
+    }
+  ), { status: 400, message: "Requester cannot be the Approver of a request" });
+});
+
+test("a later approval step respects only the stored admin-requester exception", async () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  service.db = { CARequests: "requests" };
+  service._loadDetails = async () => ({ approver_ID: "requester" });
+  service._approverAssignment = async () => ({ assignedUser_ID: "requester" });
+  const config = { roleCode: "APPROVER", isApproval: true };
+  const tx = (requesterAdminApprovalAllowed) => ({
+    run: async () => ({ requester_ID: "requester", requestType_code: "OTHER", requesterAdminApprovalAllowed })
+  });
+  assert.deepEqual(await service._resolveStepAssignment(tx(true), "request-id", config),
+    { assignedUser_ID: "requester" });
+  await assert.rejects(service._resolveStepAssignment(tx(false), "request-id", config),
+    { status: 400, message: "Requester cannot be the Approver of a request" });
+});
+
+test("self-approval still requires the requester to hold CAAdmin when deciding the task", () => {
+  const service = new FlowmateCAService("FlowmateCAService");
+  const request = { requester_ID: "requester" };
+  const task = { isApproval: true, assignedUser_ID: "requester" };
+  assert.doesNotThrow(() => service._assertCurrentAdminForSelfApproval(
+    requestFor("CAAdmin"), request, task, { ID: "requester" }
+  ));
+  assert.throws(() => service._assertCurrentAdminForSelfApproval(
+    requestFor("CARequester"), request, task, { ID: "requester" }
+  ), { status: 403 });
+  assert.throws(() => service._assertCurrentAdminForSelfApproval(
+    requestFor("CAAdmin", "system-user"), request, task, { ID: "requester" }
+  ), { status: 403 });
+  assert.throws(() => service._assertCurrentAdminForSelfApproval(
+    requestFor("CAAdmin"), request, task, { ID: "delegate" }
+  ), { status: 403 });
+});
+
 test("all business roles can read any submitted task and its request context", async () => {
   const service = new FlowmateCAService("FlowmateCAService");
   for (const role of ["CARequester", "CAProcessor", "CASupervisor", "CAAdmin"]) {

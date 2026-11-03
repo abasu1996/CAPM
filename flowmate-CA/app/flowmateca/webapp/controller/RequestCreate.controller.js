@@ -1105,7 +1105,8 @@ sap.ui.define([
         missing.control.focus();
         return;
       }
-      if (draft.details.loaApprover_ID && String(draft.details.loaApprover_ID).toLowerCase()
+      if (!this.getAppModel().getProperty("/currentUser/isAdmin")
+        && draft.details.loaApprover_ID && String(draft.details.loaApprover_ID).toLowerCase()
         === String(formModel.getProperty("/requesterId") || "").toLowerCase()) {
         MessageBox.error("Requester cannot be the Approver of a request");
         return;
@@ -2455,7 +2456,8 @@ sap.ui.define([
       const requesterId = String(form.requesterId || "").toLowerCase();
       const selectedApprovers = [form.details?.approver_ID, form.details?.loaApprover_ID,
         form.sesDraft?.saved && form.sesDraft.details?.loaApprover_ID];
-      if (requesterId && selectedApprovers.some(function (id) {
+      if (!this.getAppModel().getProperty("/currentUser/isAdmin")
+        && requesterId && selectedApprovers.some(function (id) {
         return id && String(id).toLowerCase() === requesterId;
       })) {
         MessageBox.error("Requester cannot be the Approver of a request");

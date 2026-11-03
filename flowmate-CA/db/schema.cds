@@ -67,6 +67,8 @@ entity CARequests : cuid, managed {
   requester       : Association to common.Users;
   requesterName   : String(160);
   requesterEmail  : String(255);
+  // Set only by the server for a human CAAdmin requester; inherited by an automatic SES successor.
+  requesterAdminApprovalAllowed : Boolean default false;
   owner           : Association to common.Users;
   ownerTeam       : Association to common.Teams;
   ownerTeamName   : String(160);

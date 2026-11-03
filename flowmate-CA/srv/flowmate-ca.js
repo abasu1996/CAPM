@@ -2635,8 +2635,15 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return tx.run(SELECT.one.from(this.db.CARequests).where({ ID: requestId }));
   };
 
-  async _insertOneRequest(req, tx, user, { requestType, requestVariant, processorTeam, input, integration }) {
+  async _insertOneRequest(req, tx, user, {
+    requestType, requestVariant, processorTeam, input, integration,
+    requesterAdminApprovalAllowed: inheritedAdminApproval
+  }) {
     const requestId = cds.utils.uuid();
+    // The technical API client also has CAAdmin authority; only a human admin gets this exception.
+    // An automatically created SES successor inherits the trusted decision from its PO request.
+    const requesterAdminApprovalAllowed = inheritedAdminApproval === true
+      || (!integration && this._isHumanAdmin(req));
     const attachmentManifest = normalizeAttachmentManifest(req, input.attachmentManifest, integration);
     const waitsForAttachments = attachmentManifest.length > 0;
     let details = this._parseDetails(req, input.details);
@@ -2698,7 +2705,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (requestType.code === "SERVICE_ENTRY_SHEET" && sesDateProblem(details)) {
       return req.reject(400, sesDateProblem(details));
     }
-    this._assertRequesterNotApprover(req, user.ID, details);
+    this._assertRequesterNotApprover(req, user.ID, details, requesterAdminApprovalAllowed);
     // A PO's SES successor is created when the PO completes; its dates are checked now.
     if (requestType.code === "PURCHASE_ORDER" && details.sesRequired && details.sesDraft) {
       const draftProblem = sesDateProblem(typeof details.sesDraft === "string" ? this._parseDetails(req, details.sesDraft) : details.sesDraft);
@@ -2706,7 +2713,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         return req.reject(400, `SES Successor: ${draftProblem}`);
       }
       this._assertRequesterNotApprover(req, user.ID,
-        typeof details.sesDraft === "string" ? this._parseDetails(req, details.sesDraft) : details.sesDraft);
+        typeof details.sesDraft === "string" ? this._parseDetails(req, details.sesDraft) : details.sesDraft,
+        requesterAdminApprovalAllowed);
     }
     await this._assertNoDuplicateMaterialDescription(req, requestType.code, details);
     this._assertEmailLimits(req, requestType.code, details);
@@ -2732,6 +2740,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       requester_ID: user.ID,
       requesterName: user.displayName,
       requesterEmail: user.email,
+      requesterAdminApprovalAllowed,
       owner_ID: user.ID,
       ownerTeam_ID: processorTeam?.ID || null,
       ownerTeamName: processorTeam?.name || null,
@@ -3029,7 +3038,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         : null
     ]);
     if (req.data.isApproval === true) {
-      this._assertRequesterNotApprover(req, request.requester_ID, { approver_ID: assignedUser?.ID });
+      this._assertRequesterNotApprover(req, request.requester_ID, { approver_ID: assignedUser?.ID },
+        request.requesterAdminApprovalAllowed);
     }
     const taskId = cds.utils.uuid();
     const task = {
@@ -3083,8 +3093,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     if (task.isApproval) {
       const request = await tx.run(SELECT.one.from(this.db.CARequests)
-        .columns("requester_ID").where({ ID: task.request_ID }));
-      this._assertRequesterNotApprover(req, request?.requester_ID, { approver_ID: user.ID });
+        .columns("requester_ID", "requesterAdminApprovalAllowed").where({ ID: task.request_ID }));
+      this._assertRequesterNotApprover(req, request?.requester_ID, { approver_ID: user.ID },
+        request?.requesterAdminApprovalAllowed);
     }
 
     const membership = await this.master.run(SELECT.one.from(this.masterEntities.TeamMembers).where({
@@ -3179,7 +3190,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       return req.reject(409, "Only an open or in-progress current task can be reassigned");
     }
     if (task.isApproval) {
-      this._assertRequesterNotApprover(req, request.requester_ID, { approver_ID: target.ID });
+      this._assertRequesterNotApprover(req, request.requester_ID, { approver_ID: target.ID },
+        request.requesterAdminApprovalAllowed);
     }
     if (task.assignedUser_ID === target.ID) return req.reject(409, "This task is already assigned to the selected user");
     const changed = await tx.run(UPDATE(this.db.CATasks).set({
@@ -3280,6 +3292,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       stepNo: task.stepNo
     });
     const request = await SELECT.one.from(this.db.CARequests).where({ ID: task.request_ID });
+    this._assertCurrentAdminForSelfApproval(req, request, task, user);
     // A task added with Add Task is a decision with remarks: the values its step records (codes,
     // numbers, Budget Check) are given by the step's own task. Mirrored in TaskDetail.controller.js.
     const stepName = task.isAdditional ? "" : (step?.stepName || "");
@@ -4050,7 +4063,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (request.requestType_code === "SERVICE_ENTRY_SHEET" && sesDateProblem(details)) {
       return req.reject(400, sesDateProblem(details));
     }
-    this._assertRequesterNotApprover(req, request.requester_ID, details);
+    this._assertRequesterNotApprover(req, request.requester_ID, details,
+      request.requesterAdminApprovalAllowed);
     await this._assertNoDuplicateMaterialDescription(req, request.requestType_code, details, request.ID);
     this._assertEmailLimits(req, request.requestType_code, details);
     if (request.requestType_code === "PROJECT_CODE") {
@@ -4291,8 +4305,9 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
       .orderBy("stepNo");
     const conditionSource = details || await this._loadDetails(tx, requestTypeCode, requestId);
     const requestIdentity = await tx.run(SELECT.one.from(this.db.CARequests)
-      .columns("requester_ID").where({ ID: requestId }));
-    this._assertRequesterNotApprover(req, requestIdentity?.requester_ID, conditionSource);
+      .columns("requester_ID", "requesterAdminApprovalAllowed").where({ ID: requestId }));
+    this._assertRequesterNotApprover(req, requestIdentity?.requester_ID, conditionSource,
+      requestIdentity?.requesterAdminApprovalAllowed);
     const selectedConfigs = this._selectWorkflowConfigs(configs, requestVariantCode)
       .filter((config) => this._isStepApplicable(config, conditionSource));
 
@@ -4462,7 +4477,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
         priorityCode: poRequest.priority_code,
         predecessorId: poRequest.ID,
         details
-      }
+      },
+      requesterAdminApprovalAllowed: poRequest.requesterAdminApprovalAllowed === true
     });
 
     const sesAttachments = (await tx.run(SELECT.from(this.db.CAAttachments)
@@ -5319,7 +5335,8 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     if (!["APPROVER", "SCM"].includes(config?.roleCode) && !this._isVendorAllocationStep(config)) {
       return {};
     }
-    const request = await tx.run(SELECT.one.from(this.db.CARequests).columns("requestType_code", "requester_ID").where({ ID: requestId }));
+    const request = await tx.run(SELECT.one.from(this.db.CARequests)
+      .columns("requestType_code", "requester_ID", "requesterAdminApprovalAllowed").where({ ID: requestId }));
     const details = await this._loadDetails(tx, request?.requestType_code, requestId);
     // New Contract keeps the SCM SPOC on its line items, which _loadDetails does not read.
     const itemsEntityName = ITEMS_ENTITY_BY_REQUEST_TYPE[request?.requestType_code];
@@ -5330,18 +5347,33 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     const assignment = await this._approverAssignment(config, details);
     if (config?.isApproval || config?.roleCode === "APPROVER") {
-      this._assertRequesterNotApprover(null, request?.requester_ID, { approver_ID: assignment.assignedUser_ID });
+      this._assertRequesterNotApprover(null, request?.requester_ID, { approver_ID: assignment.assignedUser_ID },
+        request?.requesterAdminApprovalAllowed);
     }
     return assignment;
   }
 
-  _assertRequesterNotApprover(req, requesterId, details) {
+  _assertRequesterNotApprover(req, requesterId, details, requesterAdminApprovalAllowed = false) {
+    if (requesterAdminApprovalAllowed === true) return;
     const selected = [details?.approver_ID, details?.loaApprover_ID];
     if (requesterId && selected.some((approverId) => approverId
       && String(approverId).toLowerCase() === String(requesterId).toLowerCase())) {
       const message = "Requester cannot be the Approver of a request";
       if (req?.reject) return req.reject(400, message);
       throw Object.assign(new Error(message), { status: 400 });
+    }
+  }
+
+  _isHumanAdmin(req) {
+    return Boolean(req?.user?.is?.("CAAdmin") && !req.user.is("system-user"));
+  }
+
+  _assertCurrentAdminForSelfApproval(req, request, task, user) {
+    if (!task?.isApproval || !request?.requester_ID || !task.assignedUser_ID) return;
+    const requesterId = String(request.requester_ID).toLowerCase();
+    if (String(task.assignedUser_ID).toLowerCase() !== requesterId) return;
+    if (String(user?.ID || "").toLowerCase() !== requesterId || !this._isHumanAdmin(req)) {
+      return req.reject(403, "Only a current administrator may approve their own request");
     }
   }
 
