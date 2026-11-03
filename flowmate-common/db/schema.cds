@@ -284,7 +284,7 @@ entity PaymentTerms {
 
 entity SystemContractBasePO {
   key code        : String(40);
-      name        : String(160) not null;
+      name        : String(160);
       description : String(500);
       isActive    : Boolean default true;
       sortOrder   : Integer default 0;
@@ -338,7 +338,7 @@ entity Entity : cuid, managed {
 
 entity Projects : cuid, managed {
   projectID : String(40);
-  projectCategory : String(160) not null;
+  projectCategory : String(160);
   projectDescription : LargeString;
   isActive : Boolean default true;
 }

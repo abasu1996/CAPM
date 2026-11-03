@@ -1149,20 +1149,20 @@
 
 <IconTabFilter
     key="systemContractBasePO"
-    text="System Contract Base PO"
+    text="System Contract Based PO"
     icon="sap-icon://sales-document">
 
     <Toolbar class="caSectionToolbar">
 
         <Title
-            text="System Contract Base PO"
+            text="System Contract Based PO"
             level="H3"/>
         <SearchField width="22rem" placeholder="Search" search=".onAdminTableSearch" app:table="admin_systemContractBasePOTable" app:fields="code,name"/>
 
         <ToolbarSpacer/>
 
         <Button
-            text="Add System Contract Base PO"
+            text="Add System Contract Based PO"
             icon="sap-icon://add"
             type="Emphasized"
             press=".onAddSystemContractBasePO"/>
@@ -1177,11 +1177,11 @@
         <columns>
 
             <Column width="14rem">
-                <Text text="System Contract Base PO Code"/>
+                <Text text="System Contract Based PO Code"/>
             </Column>
 
             <Column>
-                <Text text="System Contract Base PO Name"/>
+                <Text text="System Contract Based PO Name"/>
             </Column>
 
             <Column width="7rem">
@@ -3788,10 +3788,10 @@
             </VBox>
 
            <VBox visible="{newItem>/isSystemContractBasePO}">
-            <Label text="System Contract Base PO Code" required="true"/>
-            <Input value="{newItem>/systemContractBasePOCode}"  placeholder="Enter System Contract Base PO Code"/>
-            <Label text="System Contract Base PO Name" required="true" class="sapUiSmallMarginTop"/>
-            <Input value="{newItem>/systemContractBasePOName}" placeholder="Enter System Contract Base PO Name"/>
+            <Label text="System Contract Based PO Code" required="true"/>
+            <Input value="{newItem>/systemContractBasePOCode}"  placeholder="Enter System Contract Based PO Code"/>
+            <Label text="System Contract Based PO Name" class="sapUiSmallMarginTop"/>
+            <Input value="{newItem>/systemContractBasePOName}" placeholder="Enter System Contract Based PO Name"/>
             </VBox>
 
             <VBox visible="{newItem>/isDivision}">
@@ -3880,7 +3880,6 @@
 
     <Label
         text="Project Category"
-        required="true"
         class="sapUiSmallMarginTop"/>
 
     <Input

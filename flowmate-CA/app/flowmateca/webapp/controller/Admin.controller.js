@@ -441,7 +441,7 @@ sap.ui.define([
     },
 
     onAddSystemContractBasePO: function () {
-    this._openAddDialog("systemContractBasePO", "Add System Contract Base PO");
+    this._openAddDialog("systemContractBasePO", "Add System Contract Based PO");
     },
 
     onAddDivision: function () {
@@ -1005,9 +1005,9 @@ else if (item.type === "purchasingOrganization") {
     const code = item.systemContractBasePOCode?.trim();
     const name = item.systemContractBasePOName?.trim();
 
-    if (!code || !name) {
+    if (!code) {
         throw new Error(
-            "System Contract Base PO Code and System Contract Base PO Name are required."
+            "System Contract Based PO Code is required."
         );
     }
 
@@ -1017,7 +1017,7 @@ else if (item.type === "purchasingOrganization") {
             method: "POST",
             body: {
                 code: code,
-                name: name,
+                name: name || null,
                 isActive: true
             }
         }
@@ -1254,9 +1254,9 @@ else if (item.type === "purchasingOrganization") {
     const projectDescription =
         item.projectDescription?.trim();
 
-    if (!projectID || !projectCategory) {
+    if (!projectID) {
         throw new Error(
-            "Project ID and Project Category are required."
+            "Project ID is required."
         );
     }
 
@@ -1266,7 +1266,7 @@ else if (item.type === "purchasingOrganization") {
             method: "POST",
             body: {
                 projectID: projectID,
-                projectCategory: projectCategory,
+                projectCategory: projectCategory || null,
                 projectDescription:
                     projectDescription || null,
                 isActive: true
@@ -1913,7 +1913,7 @@ onDeletePaymentTerm: async function (event) {
     const confirmed = await new Promise(function (resolve) {
 
         MessageBox.confirm(
-            "Delete this System Contract Base PO?",
+            "Delete this System Contract Based PO?",
             {
                 onClose: function (action) {
                     resolve(
@@ -1942,7 +1942,7 @@ onDeletePaymentTerm: async function (event) {
         );
 
         this.showSuccess(
-            "System Contract Base PO deleted"
+            "System Contract Based PO deleted"
         );
 
         await this.onRefresh();
