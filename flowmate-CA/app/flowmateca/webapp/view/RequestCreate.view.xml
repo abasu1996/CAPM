@@ -97,18 +97,15 @@
               <Input id="requesterInput" value="{form>/requesterName}" editable="false" placeholder="Logged-in user"/>
 
 <Label text="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' ? 'Requester Division' : 'Requester Team' }" required="true"/>
-<ComboBox
+<Input
     id="processorTeamComboBox"
-    selectedKey="{form>/processorTeamCode}"
-    items="{catalog>/teams}"
-    showSecondaryValues="true"
+    value="{parts: ['form>/processorTeamCode', 'catalog>/teams'], mode: 'OneWay', formatter: '.formatProcessorTeam'}"
+    showValueHelp="true"
+    valueHelpOnly="true"
+    showClearIcon="true"
     placeholder="{= ${form>/requestTypeCode} === 'PURCHASE_ORDER' ? 'Select requester division' : 'Select requester team' }"
-    selectionChange=".onProcessorTeamChange">
-    <core:ListItem
-        key="{catalog>teamCode}"
-        text="{catalog>name}"
-        additionalText="{catalog>teamCode}"/>
-</ComboBox>
+    valueHelpRequest=".onProcessorTeamValueHelp"
+    change=".onProcessorTeamChange"/>
             </form:SimpleForm>
           </content>
         </Panel>

@@ -562,33 +562,36 @@ sap.ui.define([
         this.setBusy(false);
       }
     },
+    // Requester Team / Division: a value help (OVS) over the Admin Console's Requester Teams.
+    onProcessorTeamValueHelp: function () {
+      const formModel = this.getView().getModel("form");
+      const label = formModel.getProperty("/requestTypeCode") === "PURCHASE_ORDER" ? "Requester Division" : "Requester Team";
+      this._openCatalogDialog({ entity: "teams", key: "teamCode", text: "name", label },
+        formModel.getProperty("/processorTeamCode"), this._setProcessorTeam.bind(this));
+    },
+
+    // The clear icon empties the field; a value is only ever picked in the dialog.
     onProcessorTeamChange: function (event) {
+      if (event.getParameter("value")) {
+        event.getSource().getBinding("value").checkUpdate(true);
+      } else {
+        this._setProcessorTeam(null);
+      }
+    },
 
-    const selectedItem =
-        event.getParameter("selectedItem");
+    _setProcessorTeam: function (team) {
+      const formModel = this.getView().getModel("form");
+      formModel.setProperty("/processorTeamCode", team ? team.teamCode : "");
+      formModel.setProperty("/processorTeamName", team ? team.name : "");
+    },
 
-    if (!selectedItem) {
-        return;
-    }
-
-    const team = 
-    selectedItem
-            .getBindingContext("catalog")
-            .getObject();
-
-    const formModel =
-        this.getView().getModel("form");
-
-    formModel.setProperty(
-        "/processorTeamCode",
-        team.teamCode
-    );
-
-    formModel.setProperty(
-        "/processorTeamName",
-        team.name
-    );
-},
+    formatProcessorTeam: function (code, teams) {
+      if (!code) {
+        return "";
+      }
+      const team = (teams || []).find(function (row) { return row.teamCode === code; });
+      return team ? this.codeAndText(team.teamCode, team.name) : code;
+    },
 
     _loadCatalog: async function () {
       this.setBusy(true);

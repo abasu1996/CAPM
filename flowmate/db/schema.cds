@@ -92,6 +92,11 @@ entity RequestDivision : CodeList {
     isActive : Boolean default true;
 }
 
+entity Departments : CodeList {
+    key code : String(100);
+    isActive : Boolean default true;
+}
+
 entity GuaranteeTypes : CodeList {
     key code : String(40);
     isActive : Boolean default true;
@@ -104,6 +109,33 @@ entity Priorities : CodeList {
 entity Operator : CodeList {
     key code : String(10);
     isActive : Boolean default true;
+}
+entity TelcoOperators : CodeList {
+    key code : String(30);
+    isActive : Boolean default true;
+}
+entity OtherPaymentTypes : CodeList {
+    key code : String(40);
+    isActive : Boolean default true;
+}
+entity UtilityPaymentTypes : CodeList {
+    key code : String(40);
+    isActive : Boolean default true;
+}
+
+
+@assert.unique.ccCustodianName: [custodianName]
+entity CcCustodians : cuid, managed {
+    custodianName : String(150) @mandatory;
+    email         : String(150);
+    isActive      : Boolean default true;
+}
+
+entity CostCentres : managed {
+    key businessEntity : Association to FtkEntities @assert.target;
+    key code           : String(30);
+    name               : String(100);
+    isActive           : Boolean default true;
 }
 
 @assert.unique.workingCalendarCode: [code]
@@ -155,6 +187,8 @@ entity LoaApproval : cuid, managed {
     requireAllApprovers  : Boolean default false;
     // When true, approverUserIds is used instead of approverRoleCodes.
     directUserAssignment : Boolean default false;
+    // Optional. When set, the rule applies only to requests with this requesting division.
+    requestingDivision   : Association to RequestDivision;
     approverUserIds      : String(2000);
     conditionCode        : String(50);
     conditionDescription : String(1000);
@@ -284,6 +318,8 @@ entity ProcessRequests : cuid, managed {
     authorityVendorName : String(150);
     employeeVendorCode : String(30);
     employeeVendorName : String(150);
+    otherPaymentType : Association to OtherPaymentTypes @assert.target;
+    utilityPaymentType : Association to UtilityPaymentTypes @assert.target;
     transactionDate : Date;
     totalAmountForeignCurrency : Decimal(15, 2);
     totalAmountLKR : Decimal(15, 2);
@@ -318,6 +354,7 @@ entity ProcessRequests : cuid, managed {
     cusdecNumber                    : String(50);
     totalDeclarationValueInCusdec   : Decimal(15, 2);
     ccCustodianName               : String(150);
+    ccCustodian : Association to CcCustodians @assert.target;
     whtEligibilityConfirmation    : Boolean default false;
     transactionAmountDocumentCurrency : Decimal(15, 2);
     transactionAmountLocalCurrency    : Decimal(15, 2);
@@ -395,6 +432,7 @@ entity ProcessRequests : cuid, managed {
     slaDueAt    : DateTime;
     slaCalendarCode : String(30);
     completedAt : DateTime;
+    telcoOperator : Association to TelcoOperators @assert.target;
     //treasury
     treasuryEntity     : Association to FtkEntities @assert.target;
     debitAccountName   : String(150);
@@ -730,6 +768,8 @@ entity ProcessStepConfig : cuid, managed {
     processType   : Association to ProcessTypes;
     processorTeam : Association to Teams;
     processorTeamName : String(150);
+    processorUser     : Association to Users;
+    processorUserName : String(150);
     stepNo        : Integer;
     stepName      : String(100);
     stepType      : String(20) enum { PROCESSING; LOA; } default 'PROCESSING';

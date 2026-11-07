@@ -162,12 +162,21 @@ service FlowmateService {
     entity PaymentMethod as projection on fldb.PaymentMethod;
     entity TypeOfPayment as projection on fldb.TypeOfPayment;
     entity RequestDivision as projection on fldb.RequestDivision;
+    entity Departments as projection on fldb.Departments;
     entity GuaranteeTypes as projection on fldb.GuaranteeTypes;
     entity Priorities as projection on fldb.Priorities;
     entity Operator as projection on fldb.Operator;
     entity Roles as projection on common.Roles;
+    entity TelcoOperators as projection on fldb.TelcoOperators;
+    entity OtherPaymentTypes as projection on fldb.OtherPaymentTypes;
+    entity UtilityPaymentTypes as projection on fldb.UtilityPaymentTypes;
+    entity CcCustodians as projection on fldb.CcCustodians;
+    entity CostCentres as projection on fldb.CostCentres {
+    *, businessEntity : redirected to FtkEntities
+    };
     entity LoaApproval as projection on fldb.LoaApproval {
         *,
+        requestingDivision : redirected to RequestDivision,
         role : Association to one Roles on role.code = roleCode
     };
     entity ProcessStatus as projection on fldb.ProcessStatus;
@@ -259,6 +268,10 @@ service FlowmateService {
         treasuryCurrency : redirected to Currencies,
         whtEntity : redirected to FtkEntities,
         whtCurrency : redirected to Currencies,
+        telcoOperator : redirected to TelcoOperators,
+        ccCustodian : redirected to CcCustodians,
+        otherPaymentType : redirected to OtherPaymentTypes,
+        utilityPaymentType : redirected to UtilityPaymentTypes
     };
     // Queue-only projection. Unlike ProcessRequests, this endpoint never exposes
     // another team's unreserved work to an interactive user.
@@ -396,7 +409,7 @@ service FlowmateService {
         incompleteStepName : String(100);
     };
     action getRequestCreationLoaContext(subProcessTypeCode: String(100)) returns RequestCreationLoaContext;
-    action previewRequestCreationLoa(subProcessTypeCode: String(100), amount: Decimal(18, 2)) returns GuidedLoaPreview;
+    action previewRequestCreationLoa(subProcessTypeCode: String(100), amount: Decimal(18, 2), requestingDivisionCode : String) returns GuidedLoaPreview;
     action previewGuidedLoa(requestId: UUID, stepNo: Integer, progressionMode: String(30)) returns GuidedLoaPreview;
     action completeGuidedStep(requestId: UUID, stepNo: Integer, remarks: String, progressionMode: String(30)) returns Boolean;
     action getGuidedProcessTasks(requestId: UUID) returns many GuidedProcessTask;

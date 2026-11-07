@@ -244,6 +244,13 @@ service FlowmateCAService {
     mimeType : String(100);
     content  : LargeString;
   };
+  /** The Spend Analysis dashboard as a PDF, with its two charts as the browser rendered them (SVG). */
+  @requires: ['CASupervisor', 'CAAdmin']
+  action exportSpendAnalysisDashboardPdf(periodStart: Date, periodEnd: Date, poType: String(40), charts: many ReportChartSnapshot) returns {
+    fileName : String(150);
+    mimeType : String(100);
+    content  : LargeString;
+  };
   @requires: ['CARequester', 'CAAdmin']
   action submitRequest(requestId: UUID) returns Boolean;
   @requires: ['CAProcessor', 'CASupervisor', 'CAAdmin']

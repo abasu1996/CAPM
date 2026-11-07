@@ -701,29 +701,41 @@ sap.ui.define([
             }
 
             try {
-                const aIvTeams = await this._readList("/Teams", {
-                    filters: [
-                        new Filter("teamCode", FilterOperator.EQ, "IV"),
-                        new Filter("isActive", FilterOperator.EQ, true)
-                    ]
-                });
-                const oIvTeam = aIvTeams[0];
+                const [aI2pTeams, aPrTeams] = await Promise.all(["I2P", "PR"].map((sTeamCode) =>
+                    this._readList("/Teams", {
+                        filters: [
+                            new Filter("teamCode", FilterOperator.EQ, sTeamCode),
+                            new Filter("isActive", FilterOperator.EQ, true)
+                        ]
+                    })
+                ));
+                const oI2pTeam = aI2pTeams[0];
+                const oPrTeam = aPrTeams[0];
 
-                if (!oIvTeam?.ID) {
+                const aTeamIds = [oI2pTeam?.ID, oPrTeam?.ID].filter(Boolean);
+                if (!aTeamIds.length) {
                     return;
                 }
 
-                const aMemberships = await this._readList("/TeamMembers", {
-                    filters: [
-                        new Filter("team_ID", FilterOperator.EQ, oIvTeam.ID),
-                        new Filter("user_ID", FilterOperator.EQ, sUserId),
-                        new Filter("isActive", FilterOperator.EQ, true)
-                    ]
-                });
+                const aMembershipsByTeam = await Promise.all(aTeamIds.map((sTeamId) =>
+                    this._readList("/TeamMembers", {
+                        filters: [
+                            new Filter("team_ID", FilterOperator.EQ, sTeamId),
+                            new Filter("user_ID", FilterOperator.EQ, sUserId),
+                            new Filter("isActive", FilterOperator.EQ, true)
+                        ]
+                    })
+                ));
+                const bIsActiveI2pTeamMember = Boolean(oI2pTeam?.ID) &&
+                    aMembershipsByTeam[aTeamIds.indexOf(oI2pTeam.ID)]?.length > 0;
+                const bIsActivePrTeamMember = Boolean(oPrTeam?.ID) &&
+                    aMembershipsByTeam[aTeamIds.indexOf(oPrTeam.ID)]?.length > 0;
 
-                const bIsActiveIvTeamMember = aMemberships.length > 0;
-                oAccessModel.setProperty("/canEditIvArchivalUrl", bIsActiveIvTeamMember);
-                oAccessModel.setProperty("/canEditRevisedDueDate", bIsActiveIvTeamMember);
+                oAccessModel.setProperty(
+                    "/canEditIvArchivalUrl",
+                    bIsActiveI2pTeamMember || bIsActivePrTeamMember
+                );
+                oAccessModel.setProperty("/canEditRevisedDueDate", bIsActiveI2pTeamMember);
             } catch {
                 oAccessModel.setProperty("/canEditIvArchivalUrl", false);
                 oAccessModel.setProperty("/canEditRevisedDueDate", false);
@@ -2367,8 +2379,12 @@ async onBudgetCheckConfirm() {
                 return;
             }
 
-            if (!this._canCurrentUserModifyRequest(oContext.getObject())) {
-                MessageBox.warning(this.getText("requestNotEditableMessage"));
+            // if (!this._canCurrentUserModifyRequest(oContext.getObject())) {
+            //     MessageBox.warning(this.getText("requestNotEditableMessage"));
+            //     return;
+            // }
+            if (!this._canCurrentUserDeleteRequest(oContext.getObject())) {
+                MessageBox.warning(this.getText("requestNotDeletableMessage"));
                 return;
             }
 
@@ -2408,8 +2424,12 @@ async onBudgetCheckConfirm() {
                 return;
             }
 
-            if (aSelectedContexts.some((oContext) => !this._canCurrentUserModifyRequest(oContext.getObject()))) {
-                MessageBox.warning(this.getText("requestNotEditableMessage"));
+            // if (aSelectedContexts.some((oContext) => !this._canCurrentUserModifyRequest(oContext.getObject()))) {
+            //     MessageBox.warning(this.getText("requestNotEditableMessage"));
+            //     return;
+            // }
+            if (aSelectedContexts.some((oContext) => !this._canCurrentUserDeleteRequest(oContext.getObject()))) {
+                MessageBox.warning(this.getText("requestNotDeletableMessage"));
                 return;
             }
 
@@ -2666,7 +2686,7 @@ async onBudgetCheckConfirm() {
             this.byId("requestObjectPage").bindElement({
                 path: `/ProcessRequests(guid'${sRequestId}')`,
                 parameters: {
-                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,paymentMethod,typeOfPayment,guaranteeType,paymentSubCategory"
+                    expand: "processType,subProcessType,paymentCategory,businessEntity,predecessor,successors,paymentMethod,typeOfPayment,guaranteeType,paymentSubCategory,ccCustodian,otherPaymentType,utilityPaymentType"
                 },
                 events: {
                     dataRequested: this.onDataRequested.bind(this),
@@ -3815,6 +3835,18 @@ async onBudgetCheckConfirm() {
                 //&& oRequest.processorUser_ID === this._sCurrentReservationUserId
                 && !["COMPLETED", "REJECTED", "PENDING_APPROVAL"].includes(oRequest?.status_code)
             );
+        },
+
+        _canCurrentUserDeleteRequest(oRequest) {
+            if (!oRequest || ["COMPLETED", "REJECTED"].includes(oRequest.status_code)) {
+                return false;
+            }
+            // Before a processor owns it, only the requester may delete it
+            if (oRequest.status_code === "PENDING_APPROVAL" || !oRequest.reservedBy) {
+                return Boolean(oRequest.requesterUser_ID)
+                    && oRequest.requesterUser_ID === this._sCurrentReservationUserId;
+            }
+            return this._canCurrentUserModifyRequest(oRequest);
         },
 
         _normalizeCollection(vCollection) {

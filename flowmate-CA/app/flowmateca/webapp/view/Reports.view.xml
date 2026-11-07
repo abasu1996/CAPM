@@ -102,6 +102,94 @@
           <Button text="Close" press=".onDrillClose"/>
         </endButton>
       </Dialog>
+      <Dialog id="spendDrillDialog" title="{spendDrill>/title}" contentWidth="80rem" contentHeight="36rem" resizable="true" draggable="true"
+        horizontalScrolling="false" class="sapUiNoContentPadding">
+        <content>
+          <IconTabBar selectedKey="{spendDrill>/tab}" expandable="false" headerMode="Inline" stretchContentHeight="true" applyContentPadding="false">
+            <items>
+              <IconTabFilter key="overview" text="{i18n>drillOverview}" icon="sap-icon://business-objects-experience">
+                <ScrollContainer vertical="true" height="100%" width="100%">
+                  <VBox class="sapUiSmallMargin">
+                    <FlexBox wrap="Wrap" class="caFactGrid rptDrillFacts" renderType="Div">
+                      <VBox class="caFact"><Label text="{i18n>spendDrillPos}"/><Title text="{spendDrill>/facts/purchaseOrders}" level="H3"/></VBox>
+                      <VBox class="caFact"><Label text="{i18n>spendDrillSuppliers}"/><Title text="{spendDrill>/facts/suppliers}" level="H3"/></VBox>
+                      <VBox class="caFact"><Label text="{i18n>spendDrillSpend}"/><Title text="{spendDrill>/facts/spend}" level="H3"/></VBox>
+                      <VBox class="caFact" visible="{= !${spendDrill>/inactive} }"><Label text="{i18n>spendDrillPrevious}"/><Title text="{spendDrill>/facts/previous}" level="H3"/></VBox>
+                      <VBox class="caFact" visible="{= !${spendDrill>/inactive} }"><Label text="{i18n>spendDrillYears}"/><Title text="{spendDrill>/facts/years}" level="H3"/></VBox>
+                    </FlexBox>
+                    <Title text="{i18n>spendDrillChart}" level="H5" class="rptChartTitle"/>
+                    <VBox id="spendDrillChartHost" width="100%"/>
+                    <Text text="{i18n>spendDrillNoSpend}" visible="{= ${spendDrill>/chart}.length === 0 }"/>
+                  </VBox>
+                </ScrollContainer>
+              </IconTabFilter>
+              <IconTabFilter key="suppliers" text="{i18n>spendDrillSuppliers}" count="{= ${spendDrill>/suppliers}.length }">
+                <ScrollContainer vertical="true" height="100%" width="100%">
+                  <Table items="{spendDrill>/suppliers}" class="caWorklistTable" growing="true" growingThreshold="50" growingScrollToLoad="true"
+                    sticky="ColumnHeaders" noDataText="{i18n>spendDrillNoSuppliers}">
+                    <columns>
+                      <Column width="4rem" visible="{= !${spendDrill>/inactive} }"><Text text="{i18n>spendRank}"/></Column>
+                      <Column visible="{spendDrill>/inactive}"><Text text="{i18n>spendDrillVendorCode}"/></Column>
+                      <Column><Text text="{i18n>spendSupplier}"/></Column>
+                      <Column hAlign="End" visible="{= !${spendDrill>/inactive} }"><Text text="{= ${spend>/kpis/currentYear} + ' (LKR Mn)' }"/></Column>
+                      <Column hAlign="End" visible="{= !${spendDrill>/inactive} }"><Text text="{= ${spend>/kpis/previousYear} + ' (LKR Mn)' }"/></Column>
+                      <Column hAlign="End" visible="{= !${spendDrill>/inactive} }"><Text text="{i18n>spendVariance}"/></Column>
+                      <Column hAlign="End"><Text text="{i18n>spendDrillPoCount}"/></Column>
+                      <Column hAlign="End" visible="{= !${spendDrill>/inactive} }"><Text text="{i18n>spendShare}"/></Column>
+                    </columns>
+                    <items>
+                      <ColumnListItem>
+                        <cells>
+                          <Text text="{= ${spendDrill>rank} || '—' }"/>
+                          <Text text="{spendDrill>vendorCode}"/>
+                          <Text text="{spendDrill>supplier}" class="caWrapCell"/>
+                          <Text text="{path: 'spendDrill>current', formatter: '.lkrMillions'}"/>
+                          <Text text="{path: 'spendDrill>previous', formatter: '.lkrMillions'}"/>
+                          <ObjectStatus text="{path: 'spendDrill>variancePercent', formatter: '.varianceText'}" state="{path: 'spendDrill>variancePercent', formatter: '.varianceState'}"/>
+                          <Text text="{spendDrill>poCount}"/>
+                          <Text text="{path: 'spendDrill>sharePercent', formatter: '.shareText'}"/>
+                        </cells>
+                      </ColumnListItem>
+                    </items>
+                  </Table>
+                </ScrollContainer>
+              </IconTabFilter>
+              <IconTabFilter key="purchaseOrders" text="{i18n>spendDrillPos}" count="{= ${spendDrill>/purchaseOrders}.length }">
+                <ScrollContainer vertical="true" height="100%" width="100%">
+                  <Table items="{spendDrill>/purchaseOrders}" class="caWorklistTable" growing="true" growingThreshold="50" growingScrollToLoad="true"
+                    sticky="ColumnHeaders" noDataText="{i18n>spendDrillNoPos}">
+                    <columns>
+                      <Column><Text text="{i18n>spendPoNo}"/></Column>
+                      <Column><Text text="{i18n>spendSupplier}"/></Column>
+                      <Column><Text text="{i18n>spendDate}"/></Column>
+                      <Column hAlign="End"><Text text="{i18n>spendAmount}"/></Column>
+                      <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>spendAmountLkr}"/></Column>
+                      <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>spendBusinessUnit}"/></Column>
+                      <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>spendCapexOpex}"/></Column>
+                    </columns>
+                    <items>
+                      <ColumnListItem type="Navigation" press=".onSpendDrillPoPress">
+                        <cells>
+                          <ObjectIdentifier title="{spendDrill>poNumber}" text="{= ${spendDrill>poNumber} !== ${spendDrill>reference} ? ${spendDrill>reference} : '' }"/>
+                          <Text text="{spendDrill>supplier}" class="caWrapCell"/>
+                          <Text text="{path: 'spendDrill>date', formatter: '.dayText'}"/>
+                          <Text text="{= ${path: 'spendDrill>amount', formatter: '.amountText'} + ' ' + (${spendDrill>currency} || '') }"/>
+                          <Text text="{= ${spendDrill>amountLkr} === null ? '—' : ${path: 'spendDrill>amountLkr', formatter: '.amountText'} }"/>
+                          <Text text="{spendDrill>division}"/>
+                          <Text text="{spendDrill>expenditure}"/>
+                        </cells>
+                      </ColumnListItem>
+                    </items>
+                  </Table>
+                </ScrollContainer>
+              </IconTabFilter>
+            </items>
+          </IconTabBar>
+        </content>
+        <endButton>
+          <Button text="Close" press=".onSpendDrillClose"/>
+        </endButton>
+      </Dialog>
     </dependents>
     <headerContent>
       <Button icon="sap-icon://home" type="Transparent" tooltip="Dashboard" press=".onNavHome"/>
@@ -141,7 +229,16 @@
           <Button icon="sap-icon://clear-filter" type="Transparent" tooltip="{i18n>clearFilters}" press=".onResetFilters"/>
           <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onApplyFilters"/>
           <Button icon="sap-icon://pdf-attachment" type="Transparent" tooltip="{i18n>exportPdf}" press=".onExport"
-            visible="{= ${reports>/selectedDashboard} !== 'SPEND_ANALYSIS' }"/>
+            visible="{= ${reports>/selectedDashboard} !== 'ALL' }"/>
+          <MenuButton icon="sap-icon://pdf-attachment" type="Transparent" tooltip="{i18n>exportPdf}"
+            visible="{= ${reports>/selectedDashboard} === 'ALL' }">
+            <menu>
+              <Menu>
+                <MenuItem text="{i18n>exportLifecyclePdf}" icon="sap-icon://pdf-attachment" press=".onExportLifecycle"/>
+                <MenuItem text="{i18n>exportSpendPdf}" icon="sap-icon://pdf-attachment" press=".onExportSpend"/>
+              </Menu>
+            </menu>
+          </MenuButton>
         </OverflowToolbar>
       </VBox>
       <VBox class="caDashboard rptBody sapUiResponsiveContentPadding" busy="{reports>/loading}" busyIndicatorDelay="0"
@@ -367,7 +464,8 @@
           type="Warning" showIcon="true" class="sapUiSmallMarginBottom" visible="{= ${spend>/otherCurrencyCount} &gt; 0 }"/>
 
         <FlexBox wrap="Wrap" class="caTileGrid rptKpiGrid rptKpiGrid5" renderType="Div">
-          <GenericTile class="caTile caTileBlue" header="{i18n>spendTotal}" subheader="{i18n>spendLkrOnly}">
+          <GenericTile class="caTile caTileBlue" header="{i18n>spendTotal}" subheader="{i18n>spendLkrOnly}" press=".onSpendKpiPress">
+            <customData><core:CustomData key="spendKpi" value="TOTAL"/></customData>
             <tileContent>
               <TileContent footer="{path: 'reports>/period', formatter: '.periodText'}">
                 <NumericContent value="{path: 'spend>/kpis/totalSpend', formatter: '.tileMillions'}" scale="Mn" truncateValueTo="9"
@@ -375,14 +473,16 @@
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTileTeal" header="{i18n>spendActiveSuppliers}" subheader="{i18n>spendActiveCaption}">
+          <GenericTile class="caTile caTileTeal" header="{i18n>spendActiveSuppliers}" subheader="{i18n>spendActiveCaption}" press=".onSpendKpiPress">
+            <customData><core:CustomData key="spendKpi" value="ACTIVE"/></customData>
             <tileContent>
               <TileContent>
                 <NumericContent value="{spend>/kpis/activeSuppliers}" icon="sap-icon://supplier" withMargin="false"/>
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTilePurple" header="{i18n>spendTopShare}" subheader="{i18n>spendTopShareCaption}">
+          <GenericTile class="caTile caTilePurple" header="{i18n>spendTopShare}" subheader="{i18n>spendTopShareCaption}" press=".onSpendKpiPress">
+            <customData><core:CustomData key="spendKpi" value="TOP10"/></customData>
             <tileContent>
               <TileContent>
                 <NumericContent value="{= (${spend>/kpis/topSupplierSharePercent} || 0).toFixed(1) }" scale="%" icon="sap-icon://pie-chart" withMargin="false"/>
@@ -390,7 +490,8 @@
             </tileContent>
           </GenericTile>
           <GenericTile class="caTile caTileGreen" header="{i18n>spendYoy}"
-            subheader="{parts: ['spend>/kpis/currentYear', 'spend>/kpis/previousYear'], formatter: '.yearsText'}">
+            subheader="{parts: ['spend>/kpis/currentYear', 'spend>/kpis/previousYear'], formatter: '.yearsText'}" press=".onSpendKpiPress">
+            <customData><core:CustomData key="spendKpi" value="YOY"/></customData>
             <tileContent>
               <TileContent>
                 <NumericContent value="{path: 'spend>/kpis/yoyVariancePercent', formatter: '.tileVariance'}" scale="%" truncateValueTo="7"
@@ -399,7 +500,8 @@
               </TileContent>
             </tileContent>
           </GenericTile>
-          <GenericTile class="caTile caTileRed" header="{i18n>spendInactiveSuppliers}" subheader="{i18n>spendInactiveCaption}">
+          <GenericTile class="caTile caTileRed" header="{i18n>spendInactiveSuppliers}" subheader="{i18n>spendInactiveCaption}" press=".onSpendKpiPress">
+            <customData><core:CustomData key="spendKpi" value="INACTIVE"/></customData>
             <tileContent>
               <TileContent>
                 <NumericContent value="{spend>/kpis/inactiveSuppliers}" icon="sap-icon://alert" valueColor="Error" withMargin="false"/>

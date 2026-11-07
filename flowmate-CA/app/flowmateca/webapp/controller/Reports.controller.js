@@ -87,6 +87,7 @@ sap.ui.define([
       this.getView().setModel(new ListModel(emptyReport()), "reports");
       this.getView().setModel(new ListModel({ title: "", tab: "requests", requests: [], tasks: [] }), "drill");
       this.getView().setModel(new ListModel(emptySpend()), "spend");
+      this.getView().setModel(new ListModel({ title: "", tab: "overview", inactive: false, suppliers: [], purchaseOrders: [] }), "spendDrill");
       // Charts come from sap.viz, loaded only for this page.
       this._chartsReady = Lib.load({ name: "sap.viz" });
       this.getRouter().getRoute("reports").attachPatternMatched(this._onRouteMatched, this);
@@ -203,6 +204,95 @@ sap.ui.define([
 
     onSpendRowPress: function (event) {
       this.navTo("requestDetail", { requestId: event.getSource().getBindingContext("spend").getProperty("requestId") });
+    },
+
+    // A Spend Analysis KPI tile opens the suppliers and purchase orders behind its figure.
+    onSpendKpiPress: function (event) {
+      const kpi = event.getSource().data("spendKpi");
+      const spend = this.getView().getModel("spend").getData();
+      const bundle = this.getView().getModel("i18n").getResourceBundle();
+      const all = spend.suppliers || [];
+      const pos = spend.purchaseOrders || [];
+      const ofSuppliers = function (rows) {
+        const keys = new Set(rows.map(function (row) { return row.supplierKey; }));
+        return pos.filter(function (row) { return keys.has(row.supplierKey); });
+      };
+      const variance = function (row) { return row.variancePercent === null ? Infinity : row.variancePercent; };
+      let suppliers;
+      let purchaseOrders;
+      let inactive = false;
+      if (kpi === "INACTIVE") {
+        inactive = true;
+        suppliers = spend.inactiveSupplierList || [];
+        const ids = new Set(suppliers.map(function (row) { return row.vendorId; }));
+        purchaseOrders = pos.filter(function (row) { return row.vendorId && ids.has(row.vendorId); });
+      } else if (kpi === "ACTIVE") {
+        suppliers = all.filter(function (row) { return row.current > 0; });
+        purchaseOrders = ofSuppliers(suppliers);
+      } else if (kpi === "TOP10") {
+        suppliers = all.filter(function (row) { return row.isTop10; });
+        purchaseOrders = ofSuppliers(suppliers);
+      } else if (kpi === "YOY") {
+        suppliers = all.slice().sort(function (left, right) { return variance(right) - variance(left); });
+        purchaseOrders = pos;
+      } else {
+        suppliers = all;
+        purchaseOrders = pos;
+      }
+      const label = bundle.getText({ TOTAL: "spendTotal", ACTIVE: "spendActiveSuppliers", TOP10: "spendTopShare",
+        YOY: "spendYoy", INACTIVE: "spendInactiveSuppliers" }[kpi] || "spendTotal");
+      const lkr = purchaseOrders.reduce(function (sum, row) { return sum + (Number(row.amountLkr) || 0); }, 0);
+      const previous = suppliers.reduce(function (sum, row) { return sum + (Number(row.previous) || 0); }, 0);
+      const k = spend.kpis || {};
+      this.getView().getModel("spendDrill").setData({
+        title: `${label} - ${periodLabel(spend.period)} (${inactive ? suppliers.length : purchaseOrders.length})`,
+        tab: "overview",
+        inactive,
+        suppliers,
+        purchaseOrders,
+        facts: {
+          purchaseOrders: String(purchaseOrders.length),
+          suppliers: String(suppliers.length),
+          spend: millions(lkr),
+          previous: inactive ? "—" : millions(previous),
+          years: k.currentYear && k.previousYear ? `${k.previousYear} → ${k.currentYear}` : ""
+        },
+        // The overview chart: LKR spend of the selection's ten largest suppliers.
+        chart: (inactive
+          ? suppliers.map(function (row) {
+            const amount = pos.filter(function (po) { return po.vendorId === row.vendorId; })
+              .reduce(function (sum, po) { return sum + (Number(po.amountLkr) || 0); }, 0);
+            return { supplier: row.supplier, spend: Math.round(amount / MILLION * 100) / 100 };
+          })
+          : suppliers.map(function (row) { return { supplier: row.supplier, spend: Math.round((row.current || 0) / MILLION * 100) / 100 }; }))
+          .filter(function (row) { return row.spend > 0; })
+          .sort(function (left, right) { return right.spend - left.spend; })
+          .slice(0, 10)
+      });
+      this.byId("spendDrillDialog").open();
+      this._renderSpendDrillChart();
+    },
+
+    _renderSpendDrillChart: async function () {
+      if (this._spendDrillChart) return;
+      const classes = await this._vizClasses();
+      this._spendDrillChart = this._chart(classes, "bar", {
+        legend: { visible: false },
+        plotArea: { dataLabel: { visible: true }, dataPointSize: { min: 6, max: 26 }, colorPalette: ["#2c4fa3"] }
+      }, [["valueAxis", "Measure", ["Spend (LKR Mn)"]], ["categoryAxis", "Dimension", ["Supplier"]]],
+      { dimensions: [{ name: "Supplier", value: "{supplier}" }], measures: [{ name: "Spend (LKR Mn)", value: "{spend}" }], data: { path: "/chart" } },
+      "spendDrill");
+      this._spendDrillChart.setHeight("19rem");
+      this.byId("spendDrillChartHost").addItem(this._spendDrillChart);
+    },
+
+    onSpendDrillClose: function () {
+      this.byId("spendDrillDialog").close();
+    },
+
+    onSpendDrillPoPress: function (event) {
+      this.byId("spendDrillDialog").close();
+      this.navTo("requestDetail", { requestId: event.getSource().getBindingContext("spendDrill").getProperty("requestId") });
     },
 
     // The six KPI tiles of the sheet; the footer compares with the period of the same length before.
@@ -437,25 +527,43 @@ sap.ui.define([
 
     // --- export --------------------------------------------------------------------------------
 
-    // The dashboard as a PDF, built on the server (exportPoLifecycleDashboardPdf) with the two
+    // The PDF of the dashboard on screen; All reports offers both (onExportLifecycle, onExportSpend).
+    onExport: function () {
+      return this.getView().getModel("reports").getProperty("/selectedDashboard") === "SPEND_ANALYSIS"
+        ? this.onExportSpend() : this.onExportLifecycle();
+    },
+
+    // PO Lifecycle as a PDF, built on the server (exportPoLifecycleDashboardPdf) with the two
     // charts as the browser rendered them.
-    onExport: async function () {
+    onExportLifecycle: function () {
+      return this._exportPdf("exportPoLifecycleDashboardPdf",
+        [this._snapshot(this._trendChart, "trend", "Monthly trend"), this._snapshot(this._groupChart, "groups", "SLA % by group")]);
+    },
+
+    // Spend Analysis as a PDF (exportSpendAnalysisDashboardPdf), with its two charts.
+    onExportSpend: function () {
+      return this._exportPdf("exportSpendAnalysisDashboardPdf",
+        [this._snapshot(this._spendTopChart, "spendTop", "Top 10 suppliers"), this._snapshot(this._spendYoyChart, "spendYoy", "YoY analysis")]);
+    },
+
+    _snapshot: function (chart, chartKey, title) {
+      const dom = chart && chart.getDomRef();
+      if (!dom) return null;
+      const size = dom.getBoundingClientRect();
+      return { chartKey, title, svg: chart.exportToSVGString({ width: Math.max(700, Math.round(size.width)), height: Math.max(360, Math.round(size.height)) }) };
+    },
+
+    _exportPdf: async function (action, charts) {
       const model = this.getView().getModel("reports");
-      const snapshot = function (chart, chartKey, title) {
-        const dom = chart && chart.getDomRef();
-        if (!dom) return null;
-        const size = dom.getBoundingClientRect();
-        return { chartKey, title, svg: chart.exportToSVGString({ width: Math.max(700, Math.round(size.width)), height: Math.max(360, Math.round(size.height)) }) };
-      };
       model.setProperty("/loading", true);
       try {
-        const result = await this.request("exportPoLifecycleDashboardPdf", {
+        const result = await this.request(action, {
           method: "POST",
           body: {
             periodStart: model.getProperty("/period/start"),
             periodEnd: model.getProperty("/period/end"),
             poType: model.getProperty("/poType"),
-            charts: [snapshot(this._trendChart, "trend", "Monthly trend"), snapshot(this._groupChart, "groups", "SLA % by group")].filter(Boolean)
+            charts: charts.filter(Boolean)
           }
         });
         this._downloadPdf(result);

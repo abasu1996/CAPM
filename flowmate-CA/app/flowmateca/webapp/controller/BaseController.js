@@ -35,9 +35,8 @@ sap.ui.define([
   "sap/ui/model/Filter",
   "sap/ui/model/FilterOperator",
   "sap/ui/model/FilterType",
-  "flowmateca/control/FormHBox",
   "sap/m/MultiComboBox"
-], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel, TableSelectDialog, Filter, FilterOperator, FilterType, FormHBox, MultiComboBox) {
+], function (Controller, UIComponent, MessageBox, MessageToast, Column, ColumnListItem, Text, FormDefinitions, Input, TextArea, DatePicker, CheckBox, ComboBox, Item, ListItem, FileUploader, Log, serviceUrl, Table, Panel, ScrollContainer, VBox, HBox, Button, FlexItemData, Sorter, GroupHeaderListItem, Toolbar, ToolbarSpacer, SelectDialog, StandardListItem, JSONModel, TableSelectDialog, Filter, FilterOperator, FilterType, MultiComboBox) {
   "use strict";
 
   // A VBox that a SimpleForm accepts as a field (forms only take IFormContent controls); it holds
@@ -1405,31 +1404,9 @@ ${reasons.join("\n")}`);
             }
           }.bind(this)
         });
-      } else if (definition.type === "combo" && SEARCHED_ENTITIES[definition.entity]) {
-        control = this._createBrowseInput(definition, path);
       } else if (definition.type === "combo") {
-        const key = definition.key || "code";
-        const text = definition.text || "name";
-        const secondaryText = definition.secondaryText || "code";
-        control = new ComboBox({
-          width: "100%",
-          showSecondaryValues: true,
-          filterSecondaryValues: true,
-          placeholder: definition.placeholder || `Search ${definition.label}`,
-          selectionChange: function (event) {
-            const item = event.getParameter("selectedItem");
-            const context = event.getSource().getBindingContext("form");
-            const rowContext = item ? item.getBindingContext("catalog") : null;
-            this._applyAutoFill(definition, item ? item.getKey() : "", context ? context.getPath() : null,
-              rowContext ? rowContext.getObject() : null);
-            this._applyConditionalVisibility();
-          }.bind(this)
-        }).bindProperty("selectedKey", path);
-        control.bindItems({
-          path: `catalog>/${definition.entity}`,
-          templateShareable: true,
-          template: this._comboListItem(definition, key, text, secondaryText)
-        });
+        // Admin-console masters are picked in a value help (OVS), not a dropdown.
+        control = this._createMasterValueHelp(definition, path);
       } else if (definition.type === "valueHelp") {
         // Value help (OVS): the value is picked from the master in a searchable dialog.
         control = new Input({
@@ -1466,23 +1443,37 @@ ${reasons.join("\n")}`);
       return control;
     },
 
-    // A pick list too big for a dropdown (Vendors, Materials): a box that shows what was picked,
-    // with a button beside it that opens the dialog to browse and search the whole list. The form
-    // holds the key (the vendor's ID, the material code); the box displays its label, taken from
-    // the catalog row, which the formatter also asks for when a saved key has no row yet.
-    _createBrowseInput: function (definition, path) {
+    // An Admin-console master field ("combo"): a value help (OVS) that shows what was picked. The
+    // form holds the key (a vendor's ID, a plant code); the input displays its label, taken from the
+    // catalog row, which the formatter also asks for when a saved key has no row yet. Big masters
+    // (SEARCHED_ENTITIES) are searched on the server, the others in the loaded catalog.
+    _createMasterValueHelp: function (definition, path) {
       const controller = this;
       const entity = definition.entity;
       const key = definition.key || "code";
-      const fields = this._comboFields(definition);
       const keyPath = path.split(">")[1];
-      const label = function (row) {
-        return CODE_ONLY_ENTITIES.has(entity) ? row[fields.code] : controller.codeAndText(row[fields.code], row[fields.text]);
+      const pick = function (input, row) {
+        controller._setBrowsedKey(input, keyPath, definition, row[key], row);
       };
       const input = new Input({
+        width: "100%",
+        showValueHelp: true,
+        valueHelpOnly: true,
         showClearIcon: true,
         placeholder: definition.placeholder || `Select ${definition.label}`,
-        layoutData: new FlexItemData({ growFactor: 1, minWidth: "0" }),
+        valueHelpRequest: function (event) {
+          const field = event.getSource();
+          if (SEARCHED_ENTITIES[entity]) {
+            controller._openSearchDialog(definition, function (row) {
+              controller._mergeCatalogRows(entity, [row]);
+              pick(field, row);
+            });
+          } else {
+            const context = field.getBindingContext("form");
+            const current = field.getModel("form").getProperty(keyPath, context || undefined);
+            controller._openCatalogDialog(definition, current, function (row) { pick(field, row); });
+          }
+        },
         change: function (event) {
           const field = event.getSource();
           if (event.getParameter("value")) {
@@ -1493,31 +1484,33 @@ ${reasons.join("\n")}`);
           }
         }
       });
-      const button = new Button({
-        icon: "sap-icon://value-help",
-        type: "Transparent",
-        tooltip: `Browse all ${definition.label}`,
-        press: function (event) {
-          const field = event.getSource().getParent().getItems()[0];
-          controller._openSearchDialog(definition, function (row) {
-            controller._mergeCatalogRows(entity, [row]);
-            controller._setBrowsedKey(field, keyPath, definition, row[key], row);
-          });
-        }
-      });
       input.bindValue({
         parts: [{ path: keyPath, model: "form" }, { path: `/${entity}`, model: "catalog" }],
         mode: "OneWay",
         formatter: function (value, rows) {
-          if (!value) {
+          if (value === undefined || value === null || value === "") {
             return "";
           }
           controller._ensureCatalogRow(entity, key, value);
           const row = (rows || []).find(function (entry) { return String(entry[key]) === String(value); });
-          return row ? label(row) : (CODE_ONLY_ENTITIES.has(entity) ? String(value) : "");
+          return row ? controller._pickLabel(definition, row) : (key === "ID" ? "" : String(value));
         }
       });
-      return new FormHBox({ width: "100%", alignItems: "Center", items: [input, button] });
+      return input;
+    },
+
+    // What a picked master row shows: the code only (Site ID, Material Code), "Name (e-mail)" for a
+    // user, otherwise "CODE - Name".
+    _pickLabel: function (definition, row) {
+      const fields = this._comboFields(definition);
+      if (!fields) {
+        const name = row[definition.text || "displayName"];
+        const email = row[definition.secondaryText || "email"];
+        return name && email && name !== email ? `${name} (${email})` : (name || email || "");
+      }
+      return CODE_ONLY_ENTITIES.has(definition.entity)
+        ? String(row[fields.code] ?? "")
+        : this.codeAndText(row[fields.code], fields.text ? row[fields.text] : "");
     },
 
     // Writes the picked (or cleared) key into the form, in a table row's own row, then fills the
@@ -1606,29 +1599,47 @@ ${reasons.join("\n")}`);
       const description = definition.secondaryText && definition.secondaryText !== key
         ? definition.secondaryText
         : (text !== key ? text : null);
-      const fields = [key].concat(description ? [description] : []);
-      const current = input.getValue();
+      this._openCatalogDialog(definition, input.getValue(), function (row) {
+        input.setValue(row[key]);
+        const context = input.getBindingContext("form");
+        this._applyAutoFill(definition, row[key], context ? context.getPath() : null, row);
+        this._applyConditionalVisibility();
+      }.bind(this), [[key, definition.label]].concat(description ? [[description, "Description"]] : []));
+    },
+
+    // The value-help dialog of a master already loaded in the catalog model: its active rows, one
+    // column per [field, header] (by default the code and, when the master has one, its name; a user
+    // shows name and e-mail), searched on any column. The current row is preselected; onPick gets
+    // the chosen row.
+    _openCatalogDialog: function (definition, current, onPick, columns) {
+      const key = definition.key || "code";
+      const fields = this._comboFields(definition);
+      const shown = columns || (fields
+        ? [[CODE_ONLY_ENTITIES.has(definition.entity) || key === "ID" ? fields.code : key, definition.label]]
+          .concat(fields.text ? [[fields.text, "Description"]] : [])
+        : [[definition.text || "displayName", "Name"], [definition.secondaryText || "email", "E-mail"]]);
       const dialog = new TableSelectDialog({
         title: `Select ${definition.label}`,
         noDataText: `No ${definition.label} found`,
-        contentWidth: description ? "40rem" : "24rem",
-        columns: [new Column({ header: new Text({ text: definition.label }) })].concat(description
-          ? [new Column({ header: new Text({ text: "Description" }) })]
-          : []),
+        contentWidth: shown.length > 1 ? "40rem" : "24rem",
+        columns: shown.map(function (column) { return new Column({ header: new Text({ text: column[1] }) }); }),
         items: {
           path: `catalog>/${definition.entity}`,
           templateShareable: false,
           template: new ColumnListItem({
-            selected: { path: `catalog>${key}`, formatter: function (value) { return Boolean(current) && value === current; } },
-            cells: fields.map(function (field) { return new Text({ text: `{catalog>${field}}` }); })
+            selected: {
+              path: `catalog>${key}`,
+              formatter: function (value) { return current !== undefined && current !== null && current !== "" && String(value) === String(current); }
+            },
+            cells: shown.map(function (column) { return new Text({ text: `{catalog>${column[0]}}` }); })
           })
         },
         search: function (event) {
           const value = String(event.getParameter("value") || "").trim();
           const filters = value
             ? [new Filter({
-              filters: fields.map(function (field) {
-                return new Filter({ path: field, operator: FilterOperator.Contains, value1: value, caseSensitive: false });
+              filters: shown.map(function (column) {
+                return new Filter({ path: column[0], operator: FilterOperator.Contains, value1: value, caseSensitive: false });
               }),
               and: false
             })]
@@ -1639,12 +1650,9 @@ ${reasons.join("\n")}`);
           const item = event.getParameter("selectedItem");
           const row = item && item.getBindingContext("catalog").getObject();
           if (row) {
-            input.setValue(row[key]);
-            const context = input.getBindingContext("form");
-            this._applyAutoFill(definition, row[key], context ? context.getPath() : null, row);
-            this._applyConditionalVisibility();
+            onPick(row);
           }
-        }.bind(this),
+        },
         afterClose: function () {
           dialog.destroy();
         }

@@ -23,7 +23,11 @@ sap.ui.define([
         PaymentMethod: { tableId: "paymentMethodTable", titleKey: "paymentMethodConfigTitle" },
         TypeOfPayment: { tableId: "typeOfPaymentTable", titleKey: "typeOfPaymentConfigTitle" },
         RequestDivision: { tableId: "requestDivisionTable", titleKey: "requestDivisionConfigTitle" },
-        GuaranteeTypes: { tableId: "guaranteeTypesTable", titleKey: "guaranteeTypesConfigTitle" }
+        Departments: { tableId: "departmentsTable", titleKey: "departmentsConfigTitle" },
+        GuaranteeTypes: { tableId: "guaranteeTypesTable", titleKey: "guaranteeTypesConfigTitle" },
+        TelcoOperators: { tableId: "telcoOperatorsTable", titleKey: "telcoOperatorsConfigTitle" },
+        OtherPaymentTypes: { tableId: "otherPaymentTypesTable", titleKey: "otherPaymentTypesConfigTitle" },
+        UtilityPaymentTypes: { tableId: "utilityPaymentTypesTable", titleKey: "utilityPaymentTypesConfigTitle" }
     };
 
     return BaseController.extend("flowmate.controller.AdminProcessConfig", {
@@ -33,6 +37,8 @@ sap.ui.define([
             this.getView().setModel(new JSONModel(this._emptySubType()), "subTypeEdit");
             this.getView().setModel(new JSONModel(this._emptyVendor()), "vendorEdit");
             this.getView().setModel(new JSONModel(this._emptyVendor()), "customerEdit");
+            this.getView().setModel(new JSONModel(this._emptyCcCustodian()), "ccCustodianEdit");
+            this.getView().setModel(new JSONModel(this._emptyCostCentre()), "costCentreEdit");
             this.getView().setModel(new JSONModel(this._emptyLoaApproval()), "loaApprovalEdit");
             this.getView().setModel(new JSONModel(this._emptyWorkingCalendar()), "calendarEdit");
             this.getView().setModel(new JSONModel(this._emptyHoliday()), "holidayEdit");
@@ -121,6 +127,7 @@ sap.ui.define([
             "approverUserIds",
             "conditionCode",
             "conditionDescription",
+            "requestingDivision_code",
             "remarks"
             ]);
         },
@@ -454,6 +461,7 @@ sap.ui.define([
                     conditionCode: String(oEntry.conditionCode || "").trim() || null,
                     conditionDescription: String(oEntry.conditionDescription || "").trim() || null,
                     priority: Number(oEntry.priority || 0),
+                    requestingDivision_code: oEntry.requestingDivision_code || null,
                     isActive: oEntry.isActive !== false,
                     remarks: String(oEntry.remarks || "").trim() || null
                 },
@@ -633,6 +641,158 @@ sap.ui.define([
                 })
             ]);
         },
+        onAddCcCustodian() {
+            const oEntry = this._emptyCcCustodian();
+            oEntry.dialogTitle = this.getText("addCcCustodianButton");
+            this.getView().getModel("ccCustodianEdit").setData(oEntry);
+            this.byId("ccCustodianDialog").open();
+        },
+
+        onEditCcCustodian(oEvent) {
+            const oEntry = oEvent.getSource().getBindingContext().getObject();
+            this.getView().getModel("ccCustodianEdit").setData({
+                ...oEntry,
+                isEdit: true,
+                dialogTitle: this.getText("editCcCustodianButton")
+            });
+            this.byId("ccCustodianDialog").open();
+        },
+
+        onCloseCcCustodianDialog() {
+            this.byId("ccCustodianDialog").close();
+        },
+
+        async onSaveCcCustodian() {
+            const oEntry = this.getView().getModel("ccCustodianEdit").getData();
+            const sCustodianName = String(oEntry.custodianName || "").trim();
+            const sEmail = String(oEntry.email || "").trim();
+
+            if (!sCustodianName) {
+                MessageBox.warning(this.getText("ccCustodianRequiredMessage"));
+                return;
+            }
+
+            if (sEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sEmail)) {
+                MessageBox.warning(this.getText("ccCustodianEmailInvalidMessage"));
+                return;
+            }
+
+            await this._saveConfigEntity({
+                isEdit: oEntry.isEdit,
+                createPath: "/CcCustodians",
+                updatePath: `/CcCustodians(guid'${oEntry.ID}')`,
+                payload: {
+                    custodianName: sCustodianName,
+                    email: sEmail || null,
+                    isActive: Boolean(oEntry.isActive)
+                },
+                successCreateKey: "ccCustodianCreatedMessage",
+                successUpdateKey: "ccCustodianUpdatedMessage",
+                errorKey: "ccCustodianSaveErrorMessage",
+                tableId: "ccCustodiansTable",
+                close: () => this.onCloseCcCustodianDialog()
+            });
+        },
+
+        async onDeleteSelectedCcCustodians() {
+            await this._deleteSelectedByKey({
+                tableId: "ccCustodiansTable",
+                path: (sId) => `/CcCustodians(guid'${sId}')`,
+                keyProperty: "ID",
+                confirmKey: "deleteSelectedCcCustodiansConfirmMessage",
+                successKey: "selectedCcCustodiansDeletedMessage",
+                errorKey: "ccCustodianDeleteErrorMessage"
+            });
+        },
+
+        onSearchCcCustodians(oEvent) {
+            this._filterTable(oEvent, "ccCustodiansTable", ["custodianName", "email"]);
+        },
+        onSearchCostCentres(oEvent) {
+            this._filterTable(oEvent, "costCentresTable", ["code", "name", "businessEntity_code"]);
+        },
+
+        onAddCostCentre() {
+            const oEntry = this._emptyCostCentre();
+            oEntry.dialogTitle = this.getText("addCostCentreButton");
+            this.getView().getModel("costCentreEdit").setData(oEntry);
+            this.byId("costCentreDialog").open();
+        },
+
+        onEditCostCentre(oEvent) {
+            const oEntry = oEvent.getSource().getBindingContext().getObject();
+            this.getView().getModel("costCentreEdit").setData({
+                ...oEntry,
+                isEdit: true,
+                dialogTitle: this.getText("editCostCentreButton")
+            });
+            this.byId("costCentreDialog").open();
+        },
+
+        onCloseCostCentreDialog() {
+            this.byId("costCentreDialog").close();
+        },
+
+        async onSaveCostCentre() {
+            const oEntry = this.getView().getModel("costCentreEdit").getData();
+            const sCode = String(oEntry.code || "").trim().toUpperCase();
+
+            if (!oEntry.businessEntity_code || !sCode) {
+                MessageBox.warning(this.getText("costCentreRequiredMessage"));
+                return;
+            }
+
+            await this._saveConfigEntity({
+                isEdit: oEntry.isEdit,
+                createPath: "/CostCentres",
+                updatePath: this._costCentrePath(oEntry.businessEntity_code, sCode),
+                payload: {
+                    businessEntity_code: oEntry.businessEntity_code,
+                    code: sCode,
+                    name: String(oEntry.name || "").trim() || null,
+                    isActive: Boolean(oEntry.isActive)
+                },
+                successCreateKey: "costCentreCreatedMessage",
+                successUpdateKey: "costCentreUpdatedMessage",
+                errorKey: "costCentreSaveErrorMessage",
+                tableId: "costCentresTable",
+                close: () => this.onCloseCostCentreDialog()
+            });
+        },
+
+        async onDeleteSelectedCostCentres() {
+            const oTable = this.byId("costCentresTable");
+            const aPaths = oTable.getSelectedContexts().map((oContext) => this._costCentrePath(
+                oContext.getProperty("businessEntity_code"),
+                oContext.getProperty("code")
+            ));
+
+            if (!aPaths.length) {
+                MessageToast.show(this.getText("selectItemsToDeleteMessage"));
+                return;
+            }
+            if (!await this._confirmDelete("deleteSelectedCostCentresConfirmMessage", [aPaths.length])) {
+                return;
+            }
+
+            this.showBusy();
+            try {
+                await Promise.all(aPaths.map((sPath) => this.removeEntry(sPath)));
+                MessageToast.show(this.getText("selectedCostCentresDeletedMessage", [aPaths.length]));
+                oTable.removeSelections(true);
+                this._refreshTable("costCentresTable");
+            } catch (oError) {
+                MessageBox.error(this._getErrorMessage(oError, "costCentreDeleteErrorMessage"));
+            } finally {
+                this.hideBusy();
+            }
+        },
+        // Composite key: businessEntity + code
+        _costCentrePath(sEntity, sCode) {
+            const fnKey = (s) => encodeURIComponent(String(s).replace(/'/g, "''"));
+            return `/CostCentres(businessEntity_code='${fnKey(sEntity)}',code='${fnKey(sCode)}')`;
+        },
+
         onAddCodeList(oEvent) {
             const sEntitySet = oEvent.getSource().data("entitySet");
             const oEntry = this._emptyCodeList();
@@ -762,6 +922,8 @@ sap.ui.define([
             if (oModel.getProperty("/stepType") === "LOA") {
                 oModel.setProperty("/processorTeam_ID", null);
                 oModel.setProperty("/processorTeamName", null);
+                oModel.setProperty("/processorUser_ID", null);
+                oModel.setProperty("/processorUserName", null);
                 oModel.setProperty("/requestOrigin", null);
                 oModel.setProperty("/isVendorNotification", false);
                 oModel.setProperty("/isActiveDemandTask", false);
@@ -787,6 +949,8 @@ sap.ui.define([
                 activityDescription: oEntry.activityDescription,
                 processorTeam_ID: bRequesterNotification ? null : (oEntry.processorTeam_ID || null),
                 processorTeamName: bRequesterNotification ? null : (oEntry.processorTeamName || null),
+                processorUser_ID: (bRequesterNotification || oEntry.stepType === "LOA") ? null : (oEntry.processorUser_ID || null),
+                processorUserName: (bRequesterNotification || oEntry.stepType === "LOA" || !oEntry.processorUser_ID) ? null : (oEntry.processorUserName || null),
                 requestOrigin: oEntry.stepType === "LOA" ? null : oEntry.requestOrigin,
                 slaDays: this._optionalNumber(oEntry.slaDays),
                 isActiveDemandTask: Boolean(oEntry.isActiveDemandTask),
@@ -899,6 +1063,74 @@ sap.ui.define([
         onStepTeamValueHelpClose(oEvent) {
             oEvent.getSource().getBinding("items")?.filter([]);
         },
+        onStepProcessorValueHelpRequest() {
+            this.byId("processStepUserValueHelpDialog").open();
+        },
+
+        onStepProcessorSuggest(oEvent) {
+            this._filterSuggestionItems(oEvent, ["displayName", "email", "userPrincipalName"], [
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
+        },
+
+        onStepProcessorSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (oContext) {
+                this._setStepProcessor(oContext);
+            }
+        },
+
+        onStepProcessorLiveChange() {
+            this.getView().getModel("stepEdit").setProperty("/processorUser_ID", "");
+        },
+
+        onStepProcessorValueHelpSearch(oEvent) {
+            const sQuery = (oEvent.getParameter("value") || "").trim();
+            const oBinding = oEvent.getSource().getBinding("items");
+            const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+
+            if (sQuery) {
+                aFilters.push(new Filter({
+                    filters: ["displayName", "email", "userPrincipalName"].map((sProperty) => new Filter({
+                        path: sProperty,
+                        operator: FilterOperator.Contains,
+                        value1: sQuery,
+                        caseSensitive: false
+                    })),
+                    and: false
+                }));
+            }
+            oBinding.filter(aFilters);
+        },
+
+        onStepProcessorValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+
+            if (oContext) {
+                this._setStepProcessor(oContext);
+            }
+            this.onStepProcessorValueHelpClose(oEvent);
+        },
+
+        onStepProcessorValueHelpClose(oEvent) {
+            oEvent.getSource().getBinding("items")?.filter([
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
+        },
+
+        onClearStepProcessor() {
+            const oModel = this.getView().getModel("stepEdit");
+            oModel.setProperty("/processorUser_ID", "");
+            oModel.setProperty("/processorUserName", "");
+        },
+
+        _setStepProcessor(oContext) {
+            const oModel = this.getView().getModel("stepEdit");
+            oModel.setProperty("/processorUser_ID", oContext.getProperty("ID"));
+            oModel.setProperty("/processorUserName",
+                oContext.getProperty("displayName") || oContext.getProperty("email") || "");
+        },
 
         onClearStepProcessorTeam() {
             const oModel = this.getView().getModel("stepEdit");
@@ -914,6 +1146,8 @@ sap.ui.define([
 
             oModel.setProperty("/processorTeam_ID", "");
             oModel.setProperty("/processorTeamName", "");
+            oModel.setProperty("/processorUser_ID", "");
+            oModel.setProperty("/processorUserName", "");
         },
         onAddSubType() {
             const oEntry = this._emptySubType();
@@ -1006,6 +1240,8 @@ sap.ui.define([
                 activityDescription: "",
                 processorTeam_ID: "",
                 processorTeamName: "",
+                processorUser_ID: "",
+                processorUserName: "",
                 requestOrigin: "INTERNAL_USER",
                 slaDays: "",
                 isActiveDemandTask: false,
@@ -1116,6 +1352,27 @@ sap.ui.define([
                 dialogTitle: ""
             };
         },
+        _emptyCcCustodian() {
+            return {
+                ID: "",
+                custodianName: "",
+                email: "",
+                isActive: true,
+                isEdit: false,
+                dialogTitle: ""
+            };
+        },
+        _emptyCostCentre() {
+            return {
+                dialogTitle: "",
+                isEdit: false,
+                businessEntity_code: "",
+                code: "",
+                name: "",
+                isActive: true
+            };
+        },
+
         _emptyLoaApproval() {
             return {
                 dialogTitle: "",
@@ -1136,6 +1393,7 @@ sap.ui.define([
                 directUsers: [],
                 conditionCode: "",
                 conditionDescription: "",
+                requestingDivision_code: "",
                 priority: 0,
                 isActive: true,
                 remarks: ""

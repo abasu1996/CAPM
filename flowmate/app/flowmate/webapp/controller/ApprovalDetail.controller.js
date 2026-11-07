@@ -2,10 +2,21 @@ sap.ui.define([
     "flowmate/controller/BaseController",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
+    "sap/m/Button",
+    "sap/m/Dialog",
+    "sap/m/Select",
+    "sap/m/Text",
+    "sap/m/Label",
+    "sap/m/Input",
+    "sap/m/SelectDialog",
+    "sap/m/StandardListItem",
+    "sap/ui/core/Item",
+    "sap/ui/core/ListItem",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
     "sap/ui/model/json/JSONModel"
-], (BaseController, MessageBox, MessageToast, Filter, FilterOperator, JSONModel) => {
+], (BaseController, MessageBox, MessageToast, Button, Dialog, Select, Text, Label, Input, SelectDialog, StandardListItem, Item, ListItem, Filter, FilterOperator, Sorter, JSONModel) => {
     "use strict";
     const GFA_CONFIRMATION_STEP_NO = 2;
     const PAYMENT_COMPLETION_STEP_NO = 6;
@@ -19,6 +30,11 @@ sap.ui.define([
                 processorUser_ID: "",
                 processorName: ""
             }), "processorEdit");
+            this.getView().setModel(new JSONModel({
+                sendBackStepNo: "",
+                steps: [],
+                requestTeamId: ""
+            }), "taskAction");
             this.getRouter().getRoute("RouteApprovalDetail").attachPatternMatched(this.onRouteMatched, this);
         },
 
@@ -54,6 +70,7 @@ sap.ui.define([
                             "/processorName",
                             this.getView().getBindingContext()?.getProperty("processor") || ""
                         );
+                        this._loadTaskStepOptions();
                     }
                 }
             });
@@ -272,14 +289,49 @@ sap.ui.define([
             ]);
         },
 
+        // async _completeTask(sAction, sSuccessTextKey) {
+        //     this.showBusy();
+
+        //     try {
+        //         await this.callAction(sAction, {
+        //             taskId: this._sTaskId,
+        //             remarks: this.byId("remarksTextArea").getValue()
+        //         });
+        //         MessageToast.show(this.getText(sSuccessTextKey));
+        //         this.navTo("RouteMyTasks");
+        //     } catch (oError) {
+        //         MessageBox.error(this.getErrorMessage(oError, this.getText("actionFailedMessage")));
+        //     } finally {
+        //         this.hideBusy();
+        //     }
+        // }
         async _completeTask(sAction, sSuccessTextKey) {
+            let oSendBack;
+
+            if (sAction === "sendBack") {
+                oSendBack = await this._chooseSendBackStep();
+
+                if (!oSendBack) {
+                    return;
+                }
+            }
+
             this.showBusy();
 
             try {
-                await this.callAction(sAction, {
+                const oPayload = {
                     taskId: this._sTaskId,
                     remarks: this.byId("remarksTextArea").getValue()
-                });
+                };
+
+                if (sAction === "sendBack") {
+                    oPayload.targetStepNo = oSendBack.stepNo;
+                    if (oSendBack.processorUserId) {
+                        oPayload.processorUserId = oSendBack.processorUserId;
+                    }
+                }
+
+                await this.callAction(sAction, oPayload);
                 MessageToast.show(this.getText(sSuccessTextKey));
                 this.navTo("RouteMyTasks");
             } catch (oError) {
@@ -287,6 +339,249 @@ sap.ui.define([
             } finally {
                 this.hideBusy();
             }
-        }
+        },
+
+        _readList(sPath, oParameters) {
+            return new Promise((resolve, reject) => {
+                this.getModel().read(sPath, {
+                    ...(oParameters || {}),
+                    success: (oData) => resolve(oData.results || []),
+                    error: reject
+                });
+            });
+        },
+
+        async _loadTaskStepOptions() {
+            const oTaskActionModel = this.getView().getModel("taskAction");
+            const oContext = this.getView().getBindingContext();
+            const sSubProcessTypeCode = oContext?.getProperty("request/subProcessType_code");
+            const iCurrentStepNo = Number(oContext?.getProperty("stepNo") || 0);
+
+            oTaskActionModel.setData({
+                sendBackStepNo: "",
+                steps: [],
+                requestTeamId: ""
+            });
+
+            if (!sSubProcessTypeCode) {
+                return;
+            }
+
+            try {
+                const aSteps = await this._readList("/ProcessStepConfig", {
+                    filters: [new Filter("subProcessType_code", FilterOperator.EQ, sSubProcessTypeCode)]
+                });
+                const aStepItems = aSteps
+                    .sort((oLeft, oRight) => Number(oLeft.stepNo || 0) - Number(oRight.stepNo || 0))
+                    .filter((oStep) => Number(oStep.stepNo || 0) < iCurrentStepNo)
+                    .map((oStep) => ({
+                        stepNo: String(oStep.stepNo),
+                        text: this.getText("sendBackStepOptionText", [oStep.stepNo, oStep.stepName || ""]),
+                        teamId: oStep.processorTeam_ID || ""
+                    }));
+
+                oTaskActionModel.setData({
+                    sendBackStepNo: aStepItems[0]?.stepNo || "",
+                    steps: aStepItems,
+                    requestTeamId: oContext?.getProperty("request/processorTeam_ID") || ""
+                });
+            } catch (oError) {
+                MessageToast.show(this.getText("sendBackStepsLoadErrorMessage"));
+            }
+        },
+
+        _chooseSendBackStep() {
+            const oTaskActionModel = this.getView().getModel("taskAction");
+            const aSteps = oTaskActionModel.getProperty("/steps") || [];
+
+            if (!aSteps.length) {
+                MessageBox.warning(this.getText("noPreviousSendBackStepsMessage"));
+                return Promise.resolve(null);
+            }
+
+            return new Promise((resolve) => {
+                let sTeamId = "";
+                let sSelectedUserId = "";
+                let iSearchTimer;
+                let oPickerDialog = null;
+
+                const oHint = new Text({ wrapping: true }).addStyleClass("sapUiTinyMarginTop");
+
+                // Backend filters: active users, optional team, optional typed text
+                const fnBuildFilters = (sQuery) => {
+                    const aFilters = [new Filter("isActive", FilterOperator.EQ, true)];
+
+                    if (sTeamId) {
+                        aFilters.push(new Filter("team_ID", FilterOperator.EQ, sTeamId));
+                    }
+                    if (sQuery) {
+                        aFilters.push(new Filter({
+                            filters: [
+                                new Filter("displayName", FilterOperator.Contains, sQuery),
+                                new Filter("email", FilterOperator.Contains, sQuery)
+                            ],
+                            and: false
+                        }));
+                    }
+                    return aFilters;
+                };
+
+                const sUserPath = () => (sTeamId ? "/TeamMembers" : "/Users");
+                const sUserKeyField = () => (sTeamId ? "user_ID" : "ID");
+
+                const oProcessorInput = new Input({
+                    width: "100%",
+                    placeholder: this.getText("selectProcessorPlaceholder"),
+                    showSuggestion: true,
+                    startSuggestion: 1,
+                    filterSuggests: false,
+                    maxSuggestionWidth: "28rem",
+                    showValueHelp: true,
+                    valueHelpIconSrc: "sap-icon://slim-arrow-down",
+                    // Typing clears the previous pick, then asks the backend (debounced)
+                    liveChange: (oEvent) => {
+                        sSelectedUserId = "";
+                        const sQuery = (oEvent.getParameter("value") || "").trim();
+
+                        clearTimeout(iSearchTimer);
+                        iSearchTimer = setTimeout(() => {
+                            oProcessorInput.getBinding("suggestionItems")?.filter(fnBuildFilters(sQuery));
+                        }, 300);
+                    },
+                    suggestionItemSelected: (oEvent) => {
+                        const oItem = oEvent.getParameter("selectedItem");
+
+                        sSelectedUserId = oItem?.getKey() || "";
+                        oProcessorInput.setValue(oItem?.getText() || "");
+                    },
+                    // Arrow icon: full list with its own backend search
+                    valueHelpRequest: () => {
+                        if (!oPickerDialog) {
+                            oPickerDialog = new SelectDialog({
+                                title: this.getText("sendBackProcessorLabel"),
+                                growing: true,
+                                growingThreshold: 50,
+                                noDataText: this.getText("noUsersFoundText"),
+                                search: (oEvt) => {
+                                    oEvt.getSource().getBinding("items")
+                                        ?.filter(fnBuildFilters((oEvt.getParameter("value") || "").trim()));
+                                },
+                                liveChange: (oEvt) => {
+                                    oEvt.getSource().getBinding("items")
+                                        ?.filter(fnBuildFilters((oEvt.getParameter("value") || "").trim()));
+                                },
+                                confirm: (oEvt) => {
+                                    const oContext = oEvt.getParameter("selectedItem")?.getBindingContext();
+
+                                    if (oContext) {
+                                        sSelectedUserId = oContext.getProperty(sUserKeyField());
+                                        oProcessorInput.setValue(oContext.getProperty("displayName"));
+                                    }
+                                }
+                            });
+                            this.getView().addDependent(oPickerDialog);
+                        }
+
+                        oPickerDialog.unbindAggregation("items");
+                        oPickerDialog.bindAggregation("items", {
+                            path: sUserPath(),
+                            filters: fnBuildFilters(""),
+                            sorter: new Sorter("displayName"),
+                            templateShareable: false,
+                            template: new StandardListItem({
+                                title: "{displayName}",
+                                description: "{email}",
+                                type: "Active"
+                            })
+                        });
+                        oPickerDialog.open();
+                    }
+                });
+
+                // Step with a team -> its members; no team -> all active users
+                const fnBindItems = () => {
+                    const oStep = aSteps.find((oItem) =>
+                        String(oItem.stepNo) === String(oStepSelect.getSelectedKey())
+                    );
+
+                    sTeamId = oStep?.teamId || "";
+                    sSelectedUserId = "";
+                    oProcessorInput.setValue("");
+                    oProcessorInput.unbindAggregation("suggestionItems");
+                    oProcessorInput.bindAggregation("suggestionItems", {
+                        path: sUserPath(),
+                        filters: fnBuildFilters(""),
+                        sorter: new Sorter("displayName"),
+                        templateShareable: false,
+                        template: new ListItem({
+                            key: sTeamId ? "{user_ID}" : "{ID}",
+                            text: "{displayName}",
+                            additionalText: "{email}"
+                        })
+                    });
+                    oHint.setText(sTeamId
+                        ? this.getText("sendBackProcessorHintText")
+                        : this.getText("sendBackAllUsersHintText"));
+                };
+
+                const oStepSelect = new Select({
+                    width: "100%",
+                    selectedKey: aSteps[0].stepNo,
+                    items: aSteps.map((oStep) => new Item({ key: oStep.stepNo, text: oStep.text })),
+                    change: fnBindItems
+                });
+
+                const oDialog = new Dialog({
+                    title: this.getText("sendBackTargetStepDialogTitle"),
+                    contentWidth: "26rem",
+                    content: [
+                        new Text({ text: this.getText("sendBackTargetStepDialogText"), wrapping: true }),
+                        oStepSelect,
+                        new Label({
+                            text: this.getText("sendBackProcessorLabel"),
+                            labelFor: oProcessorInput
+                        }).addStyleClass("sapUiSmallMarginTop"),
+                        oProcessorInput,
+                        oHint
+                    ],
+                    beginButton: new Button({
+                        text: this.getText("sendBackButton"),
+                        type: "Emphasized",
+                        press: () => {
+                            // Text typed but no user picked
+                            if (oProcessorInput.getValue().trim() && !sSelectedUserId) {
+                                MessageToast.show(this.getText("selectProcessorFromListMessage"));
+                                return;
+                            }
+
+                            resolve({
+                                stepNo: Number(oStepSelect.getSelectedKey()),
+                                processorUserId: sSelectedUserId || null
+                            });
+                            oDialog.close();
+                        }
+                    }),
+                    endButton: new Button({
+                        text: this.getText("cancelButton"),
+                        press: () => {
+                            resolve(null);
+                            oDialog.close();
+                        }
+                    })
+                });
+
+                oDialog.addStyleClass("sapUiContentPadding");
+                oDialog.attachAfterClose(() => {
+                    clearTimeout(iSearchTimer);
+                    resolve(null); // no-op if already resolved (covers Esc)
+                    oPickerDialog?.destroy();
+                    oDialog.destroy();
+                });
+
+                this.getView().addDependent(oDialog);
+                fnBindItems();
+                oDialog.open();
+            });
+        },
     });
 });

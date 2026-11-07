@@ -12,6 +12,8 @@ const PROCESS_STATUS = {
   REJECTED: "REJECTED",
   COMPLETED: "COMPLETED"
 };
+const IV_ARCHIVAL_EDITOR_TEAM_CODES = ["I2P", "PR"];
+const REVISED_DUE_DATE_EDITOR_TEAM_CODE = "I2P";
 
 const REQUEST_ORIGIN = Object.freeze({
   INTERNAL_USER: "INTERNAL_USER",
@@ -137,8 +139,6 @@ const NON_PO_IDEAMART_APPMAKER_FIELDS = {
     "customer_ID",
     "customerCode",
     "customerName",
-    "invoiceDebitNoteDate",
-    "invoiceDebitNoteNumber",
     "totalPaymentValueForMonth",
     "userDivisionRepresentativeName",
     "whtNicHighestTransactionValue",
@@ -146,7 +146,10 @@ const NON_PO_IDEAMART_APPMAKER_FIELDS = {
     "retentionRepaymentValue"
   ],
   optional: [
-    "brcHighestTransactionValue", "remarks"
+    "invoiceDebitNoteDate",
+    "invoiceDebitNoteNumber",
+    "brcHighestTransactionValue",
+    "remarks"
   ]
 };
 const NON_PO_SITE_SHARING_FIELDS = {
@@ -158,6 +161,7 @@ const NON_PO_SITE_SHARING_FIELDS = {
     "vendorName"
   ],
   optional: [
+    "telcoOperator_code",
     "remarks"
   ]
 };
@@ -183,6 +187,34 @@ const DIRECT_NON_PO_REIMBURSEMENT_FIELDS = {
         "remarks"
     ]
 };
+const DIRECT_NON_PO_REIMB_LIAB_FIELDS = {
+    required: DIRECT_NON_PO_REIMBURSEMENT_FIELDS.required
+        .filter((sField) => sField !== "costCentre"),
+    optional: [
+        ...DIRECT_NON_PO_REIMBURSEMENT_FIELDS.optional,
+        "costCentre"
+    ]
+};
+  const DIRECT_OTHER_PAYMENTS_REIMB_FIELDS = {
+    required: DIRECT_NON_PO_REIMBURSEMENT_FIELDS.required
+      .filter((sField) => !["employeeVendorCode", "employeeVendorName"].includes(sField))
+      .concat("otherPaymentType_code"),
+    optional: [
+      ...DIRECT_NON_PO_REIMBURSEMENT_FIELDS.optional,
+      "employeeVendorCode",
+      "employeeVendorName"
+    ]
+  };
+  const DIRECT_WATER_TOUCH_FUEL_OTHER_FIELDS = {
+    required: DIRECT_NON_PO_REIMBURSEMENT_FIELDS.required
+      .filter((sField) => !["employeeVendorCode", "employeeVendorName"].includes(sField))
+      .concat("utilityPaymentType_code"),
+    optional: [
+      ...DIRECT_NON_PO_REIMBURSEMENT_FIELDS.optional,
+      "employeeVendorCode",
+      "employeeVendorName"
+    ]
+  };
 const NON_PO_TAX_LIABILITY_FIELDS = {
   required: [
     "paymentCategory_code",
@@ -226,6 +258,27 @@ const NON_PO_IMPORT_DGC_FIELDS = {
     "poNumber",
     "totalDeclarationValueInCusdec"
   ],
+  optional: ["remarks"]
+};
+const PO_IMPORT_DGC_FIELDS = {
+  required: [
+    "paymentCategory_code",
+    "businessEntity_code",
+    "currency_code",
+    "vendor_ID",
+    "vendorCode",
+    "vendorName",
+    "cusdecDate",
+    "cusdecNumber",
+    "poNumber",
+    "totalDeclarationValueInCusdec"
+  ],
+  optional: ["remarks"]
+};
+const PO_IMPORT_DGC_DIRECT_FIELDS = {
+  required: PO_IMPORT_DGC_FIELDS.required
+    .filter((sField) => sField !== "poNumber")
+    .concat("costCentre"),
   optional: ["remarks"]
 };
 const DIN_MANDATORY_ENTITIES = ["DAP", "DBN", "DTV", "H_ONE"];
@@ -304,7 +357,7 @@ const SUBTYPE_FIELDS = {
       "paymentCategory_code", "businessEntity_code", "category_code", "currency_code", "vendor_ID", "vendorCode",
       "vendorName", "invoiceDate", "invoiceNumber", "totalInvoiceValue", "invoiceDescription"
     ],
-    optional: ["remarks"]
+    optional: ["telcoOperator_code","remarks"]
   },
   NON_PO_SITE_SHARING_SETOFF: NON_PO_SITE_SHARING_FIELDS,
   "NON_PO_SITE_SHARING_SETOFF&PAY": NON_PO_SITE_SHARING_FIELDS,
@@ -333,8 +386,10 @@ const SUBTYPE_FIELDS = {
       "glAccount","profitCentre","invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
     ]
   },
-  DIRECT_NON_PO_REIMB_LIAB: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
+  DIRECT_NON_PO_REIMB_LIAB: DIRECT_NON_PO_REIMB_LIAB_FIELDS,
   DIRECT_NON_PO_REIMB_PAYMENT: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
+  DIRECT_OTHER_PAYMENTS_REIMB: DIRECT_OTHER_PAYMENTS_REIMB_FIELDS,
+  DIRECT_WATER_TOUCH_FUEL_OTHER: DIRECT_WATER_TOUCH_FUEL_OTHER_FIELDS,
   DIRECT_FOREIGN_TRAVEL_REIMB: {
     required: [
       "paymentCategory_code", "businessEntity_code", "currency_code",
@@ -361,12 +416,10 @@ const SUBTYPE_FIELDS = {
       "customer_ID",
       "customerCode",
       "customerName",
-      "invoiceDebitNoteDate",
-      "invoiceDebitNoteNumber",
       "totalInvoiceValueRelevantCurrency",
       "totalInvoiceValueLKR"
     ],
-    optional: ["vatAmount", "glAccount", "costCentre", "remarks"]
+    optional: ["vatAmount", "glAccount", "costCentre", "invoiceDebitNoteDate", "invoiceDebitNoteNumber", "remarks"]
   },
   NON_PO_INTERCONNECTION_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
   NON_PO_ROAMING_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
@@ -423,29 +476,44 @@ const SUBTYPE_FIELDS = {
   },
   NON_PO_IMPORT_DGC_ADV: NON_PO_IMPORT_DGC_FIELDS,
   NON_PO_IMPORT_DGC_DIRECT: NON_PO_IMPORT_DGC_FIELDS,
+  PO_IMPORT_TRC: {
+    required: [
+      "paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName",
+      "trcslProformaInvoiceDate", "typeOfPayment_code", "trcslProformaInvoiceTotalValue"
+    ],
+    optional: ["poNumber", "budgetCode", "costCentre", "remarks"]
+  },
+  PO_IMPORT_ICL: {
+    required: [
+      "paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName",
+      "pivDate", "pivApplicationNumber", "totalPivValue"
+    ],
+    optional: ["poNumber", "costCentre", "remarks"]
+  },
+  PO_IMPORT_DGC_ADV: PO_IMPORT_DGC_FIELDS,
+  PO_IMPORT_DGC_DIRECT: PO_IMPORT_DGC_DIRECT_FIELDS,
   NON_PO_CC_PAYMENT: {
     required: [
       "paymentCategory_code",
       "businessEntity_code",
       "currency_code",
-      "ccCustodianName",
+      // "ccCustodianName",
+      "ccCustodian_ID",
       "vendor_ID",
       "vendorCode",
       "vendorName",
-      "whtEligibilityConfirmation",
-      "poNumber",
       "sesReference",
       "transactionAmountDocumentCurrency",
       "transactionAmountLocalCurrency",
       "descriptionOfPayment",
       "justificationForCreditCardUse"
     ],
-    optional: ["invoiceDate", "invoiceNumber", "budgetCode", "remarks"]
+    optional: ["invoiceDate", "invoiceNumber", "budgetCode", "poNumber", "whtEligibilityConfirmation", "remarks"]
   },
   NON_PO_CC_SETTLEMENT: {
       required: [
           "paymentCategory_code", "businessEntity_code", "currency_code",
-          "bankName", "ccCustodianName", "ccPeriodFromDate", "ccPeriodToDate",
+          "bankName", "ccCustodian_ID", "ccPeriodFromDate", "ccPeriodToDate",
           "settlementEntries", "totalAmountPayableCcSettlement"
       ],
       optional: ["annualFee", "stampDuty", "latePaymentFee", "interestCharges", "remarks"]
@@ -509,6 +577,8 @@ const LOA_AMOUNT_SOURCE_FIELD = {
   NON_PO_SITE_RENT_STAMP_ADHOC: "totalPayableValue",
   DIRECT_NON_PO_REIMB_LIAB: "totalValue",
   DIRECT_NON_PO_REIMB_PAYMENT: "totalValue",
+  DIRECT_OTHER_PAYMENTS_REIMB: "totalValue",
+  DIRECT_WATER_TOUCH_FUEL_OTHER: "totalValue",
   DIRECT_FOREIGN_TRAVEL_REIMB: "totalAmountLKR",
   NON_PO_TAX_LIAB_PAY_OTTP: "totalTaxPayable",
   NON_PO_TAX_LIAB_PAY_PAYORDER: "totalTaxPayable",
@@ -535,7 +605,11 @@ const LOA_AMOUNT_SOURCE_FIELD = {
   NON_PO_IMPORT_TRC: "trcslProformaInvoiceTotalValue",
   NON_PO_IMPORT_ICL: "totalPivValue",
   NON_PO_IMPORT_DGC_ADV: "totalDeclarationValueInCusdec",
-  NON_PO_IMPORT_DGC_DIRECT: "totalDeclarationValueInCusdec"
+  NON_PO_IMPORT_DGC_DIRECT: "totalDeclarationValueInCusdec",
+  PO_IMPORT_TRC: "trcslProformaInvoiceTotalValue",
+  PO_IMPORT_ICL: "totalPivValue",
+  PO_IMPORT_DGC_ADV: "totalDeclarationValueInCusdec",
+  PO_IMPORT_DGC_DIRECT: "totalDeclarationValueInCusdec"
 };
 const DEFAULT_CONFIG_CACHE_TTL_MS = 60 * 1000;
 const BPA_USER_DESTINATION = "bpa_workflow";
@@ -586,7 +660,13 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       PaymentMethod,
       TypeOfPayment,
       RequestDivision,
+      Departments,
       GuaranteeTypes,
+      TelcoOperators,
+      OtherPaymentTypes,
+      UtilityPaymentTypes,
+      CcCustodians,
+      CostCentres,
       Operator,
       LoaApproval,
       ProcessStatus,
@@ -1137,7 +1217,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
     });
 
-    [ProcessTypes, PaymentCategories, FtkEntities, Priorities, Operator, ProcessStatus, TaskStatus, RequestDropDown, Currencies, Categories, PaymentSubCategories, PaymentMethod, TypeOfPayment, RequestDivision, GuaranteeTypes].forEach((oCodeList) => {
+    [ProcessTypes, PaymentCategories, FtkEntities, Priorities, Operator, ProcessStatus, TaskStatus, RequestDropDown, Currencies, Categories, PaymentSubCategories, PaymentMethod, TypeOfPayment, RequestDivision, Departments, GuaranteeTypes, TelcoOperators, OtherPaymentTypes, UtilityPaymentTypes].forEach((oCodeList) => {
       this.before(["CREATE", "UPDATE", "DELETE"], oCodeList, (req) => {
         if (!this._isAdministrator(req)) {
           return req.reject(403, "Only an administrator can maintain configuration code lists");
@@ -1148,6 +1228,38 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         }
       });
       this.after(["CREATE", "UPDATE", "DELETE"], oCodeList, () => this._clearConfigCache());
+    });
+
+    this.before(["CREATE", "UPDATE", "DELETE"], CcCustodians, (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain CC custodians");
+      }
+
+      if (req.event === "CREATE" && !String(req.data.custodianName || "").trim()) {
+        return req.reject(400, "Custodian name is required");
+      }
+
+      if (Object.prototype.hasOwnProperty.call(req.data, "custodianName")) {
+        req.data.custodianName = String(req.data.custodianName || "").trim();
+        if (!req.data.custodianName) {
+          return req.reject(400, "Custodian name is required");
+        }
+      }
+    });
+    this.before(["CREATE", "UPDATE", "DELETE"], CostCentres, (req) => {
+      if (!this._isAdministrator(req)) {
+        return req.reject(403, "Only an administrator can maintain cost centres");
+      }
+
+      if (req.event === "CREATE") {
+        if (!String(req.data.businessEntity_code || "").trim() || !String(req.data.code || "").trim()) {
+          return req.reject(400, "Entity and cost centre code are required");
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(req.data, "code") && req.data.code) {
+        req.data.code = String(req.data.code).trim().toUpperCase();
+      }
     });
 
     this.before(["CREATE", "UPDATE", "DELETE"], ProcessSubTypes, async (req) => {
@@ -1211,6 +1323,25 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         oStep.processorTeam_ID = null;
       }
 
+      // Processor (optional): assign the task straight to one user instead of the team queue.
+      if (Object.prototype.hasOwnProperty.call(req.data, "processorUser_ID") && req.data.processorUser_ID === "") {
+        req.data.processorUser_ID = null;
+      }
+      if (oStep.isVendorNotification === true || oStep.stepType === "LOA") {
+        req.data.processorUser_ID = null;
+        req.data.processorUserName = null;
+        oStep.processorUser_ID = null;
+      }
+      if (req.data.processorUser_ID) {
+        const oStepProcessor = await this._getUser(req, req.data.processorUser_ID, Users);
+
+      if (!oStepProcessor) {
+        return req.reject(400, "Selected processor was not found or is inactive");
+      }
+        req.data.processorUserName = this._userDisplayName(oStepProcessor);
+      } else if (Object.prototype.hasOwnProperty.call(req.data, "processorUser_ID")) {
+        req.data.processorUserName = null;
+      }
       if (Object.prototype.hasOwnProperty.call(req.data, "requestOrigin")) {
         const sRequestOrigin = String(req.data.requestOrigin || "").trim().toUpperCase();
         const bLoaWithoutOrigin = oStep.stepType === "LOA" && !sRequestOrigin;
@@ -1428,12 +1559,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       ) {
         aMissing.push("din");
       }
-      if (
-          sSubProcessTypeCode === "NON_PO_CC_PAYMENT" &&
-          req.data.whtEligibilityConfirmation !== true
-      ) {
-          aMissing.push("whtEligibilityConfirmation");
-      }
+      // if (
+      //     sSubProcessTypeCode === "NON_PO_CC_PAYMENT" &&
+      //     req.data.whtEligibilityConfirmation !== true
+      // ) {
+      //     aMissing.push("whtEligibilityConfirmation");
+      // }
 
       if (aMissing.length) {
         return req.reject(
@@ -1864,6 +1995,10 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       const sRequestId = this._requestIdFromReq(req);
 
       if (sRequestId) {
+        // Requester may delete their own request while it is unreserved or pending approval
+        if (req.event === "DELETE" && await this._isRequesterDeletingOwnOpenRequest(req, sRequestId)) {
+          return;
+        }
         await this._rejectIfRequestLocked(req, sRequestId);
       }
 
@@ -1975,28 +2110,36 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       }
 
       const oCurrentUser = await this._currentReservationUser(req, Users);
-      const oIvTeam = await this.master.run(
-        SELECT.one.from(Teams)
+      // PR may edit only the archival link. Revised due date remains I2P-only.
+      const aAllowedTeamCodes = bUpdatesRevisedDueDate
+        ? [REVISED_DUE_DATE_EDITOR_TEAM_CODE]
+        : IV_ARCHIVAL_EDITOR_TEAM_CODES;
+      const aAllowedTeams = await this.master.run(
+        SELECT.from(Teams)
           .columns("ID")
-          .where({ teamCode: "IV", isActive: true })
+          .where({ teamCode: { in: aAllowedTeamCodes }, isActive: true })
       );
+      const aAllowedTeamIds = aAllowedTeams.map((oTeam) => oTeam.ID);
 
-      if (!oIvTeam) {
-        return req.reject(403, "The IV team is not configured");
+      if (!aAllowedTeamIds.length) {
+        return req.reject(403, "The required editor team is not configured");
       }
 
       const oMembership = await this.master.run(
         SELECT.one.from(TeamMembers)
           .columns("ID")
           .where({
-            team_ID: oIvTeam.ID,
+            team_ID: { in: aAllowedTeamIds },
             user_ID: oCurrentUser.user.ID,
             isActive: true
           })
       );
 
       if (!oMembership) {
-        return req.reject(403, "Only active IV team members can edit the IV archival link");
+        const sPermission = bUpdatesRevisedDueDate
+          ? "Only active I2P team members can edit the revised due date"
+          : "Only active I2P or PR team members can edit the IV archival link";
+        return req.reject(403, sPermission);
       }
 
       if (!bUpdatesIvArchivalUrl) {
@@ -2509,7 +2652,8 @@ module.exports = class FlowmateService extends cds.ApplicationService {
       return this._buildRequestCreationLoaPreview(
         req,
         req.data.subProcessTypeCode,
-        req.data.amount
+        req.data.amount,
+        req.data.requestingDivisionCode
       );
     });
 
@@ -2858,6 +3002,9 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         UPDATE(ProcessRequests, requestId).set({ status_code: statusCode })
       );
       if (statusCode === PROCESS_STATUS.COMPLETED) {
+        if (request.subProcessType_code === "NON_PO_CC_PAYMENT") {
+          return req.reject(409, "Credit Card Payment requests can only be completed through a settlement request");
+        }
         await this._completePredecessorOnSettlement(req, request);
       }
 
@@ -5308,6 +5455,18 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     await this._rejectIfRequestReservedByAnotherUser(req, request);
   }
 
+  async _isRequesterDeletingOwnOpenRequest(req, sRequestId) {
+  const request = await cds.tx(req).run(
+    SELECT.one.from(this.entities.ProcessRequests)
+      .columns("ID", "status_code", "reservedBy", "requesterUser_ID")
+      .where({ ID: sRequestId })
+  );
+  if (!request || this._isLockedRequest(request)) return false;
+  if (request.status_code !== PROCESS_STATUS.PENDING_APPROVAL && request.reservedBy) return false;
+
+  const oUser = await this._currentReservationUser(req, this.masterEntities.Users);
+  return Boolean(request.requesterUser_ID) && request.requesterUser_ID === oUser.user.ID;
+}
   async _rejectIfParentRequestTerminal(req, requestId) {
     if (!requestId) return;
 
@@ -5951,7 +6110,12 @@ module.exports = class FlowmateService extends cds.ApplicationService {
 
   async _completeGuidedStep(req, requestId, stepNo, remarks, progressionMode = "continue", Users = this.masterEntities.Users) {
     const { request, steps, currentStep } = await this._getStepCompletionContext(req, requestId, stepNo, Users);
-
+    if (
+      request.subProcessType_code === "NON_PO_CC_PAYMENT" &&
+      Number(currentStep.stepNo) === 3
+    ) {
+      return req.reject(409, "Complete this Credit Card Payment through a settlement request");
+    }
     await this._rejectUnlessGuidedStepCanComplete(req, requestId, steps, currentStep);
 
     return this._advanceGuidedStep(req, requestId, request, steps, currentStep, remarks, progressionMode, {
@@ -6094,21 +6258,75 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return aSteps;
   }
 
+  // async _resolveLoaRule(req, LoaApproval, amount, request = {}) {
+  //   const aRules = await cds.tx(req).run(
+  //     SELECT.from(LoaApproval).columns(
+  //       "ruleCode", "description", "minimumAmount", "maximumAmount", "minimumInclusive", "maximumInclusive",
+  //       "approvalMode", "approverRoleCodes", "requireAllApprovers", "directUserAssignment", "approverUserIds",
+  //       "subProcessType_code", "conditionCode", "priority", "isActive",
+  //       "amount", "operator_code", "roleCode"
+  //     )
+  //   );
+  //   let oWinner = null;
+
+  //   for (const oRule of aRules) {
+  //     if (oRule.isActive === false
+  //       || (oRule.subProcessType_code && oRule.subProcessType_code !== request.subProcessType_code)
+  //       || !this._matchesLoaCondition(oRule.conditionCode, request)) {
+  //       continue;
+  //     }
+
+  //     const bStructuredRule = Boolean(oRule.ruleCode);
+  //     let bMatches = false;
+
+  //     if (bStructuredRule) {
+  //       const bAboveMinimum = oRule.minimumAmount === null || oRule.minimumAmount === undefined
+  //         || (oRule.minimumInclusive === false ? amount > Number(oRule.minimumAmount) : amount >= Number(oRule.minimumAmount));
+  //       const bBelowMaximum = oRule.maximumAmount === null || oRule.maximumAmount === undefined
+  //         || (oRule.maximumInclusive === false ? amount < Number(oRule.maximumAmount) : amount <= Number(oRule.maximumAmount));
+  //       bMatches = bAboveMinimum && bBelowMaximum;
+  //     } else {
+  //       const fThreshold = Number(oRule.amount);
+  //       bMatches = Number.isFinite(fThreshold) && this._evaluateLoaOperator(amount, oRule.operator_code, fThreshold);
+  //     }
+
+  //     if (!bMatches) {
+  //       continue;
+  //     }
+
+  //     if (!oWinner || this._loaRuleRank(oRule) > this._loaRuleRank(oWinner)) {
+  //       oWinner = oRule;
+  //     }
+  //   }
+
+  //   return oWinner;
+  // }
+
   async _resolveLoaRule(req, LoaApproval, amount, request = {}) {
     const aRules = await cds.tx(req).run(
       SELECT.from(LoaApproval).columns(
         "ruleCode", "description", "minimumAmount", "maximumAmount", "minimumInclusive", "maximumInclusive",
         "approvalMode", "approverRoleCodes", "requireAllApprovers", "directUserAssignment", "approverUserIds",
-        "subProcessType_code", "conditionCode", "priority", "isActive",
+        "subProcessType_code", "requestingDivision_code", "conditionCode", "priority", "isActive",
         "amount", "operator_code", "roleCode"
       )
     );
+
+    const sRequestingDivisionCode = String(request.requestingDivision_code || "").trim();
+    const bTaxRequest = sRequestingDivisionCode === "Tax";
     let oWinner = null;
 
     for (const oRule of aRules) {
-      if (oRule.isActive === false
-        || (oRule.subProcessType_code && oRule.subProcessType_code !== request.subProcessType_code)
-        || !this._matchesLoaCondition(oRule.conditionCode, request)) {
+      const sRuleDivisionCode = String(oRule.requestingDivision_code || "").trim();
+      if (
+        oRule.isActive === false ||
+        (oRule.subProcessType_code && oRule.subProcessType_code !== request.subProcessType_code) ||
+        // Non-Tax / blank requests must use only normal rules.
+        (!bTaxRequest && sRuleDivisionCode) ||
+        // Tax can use a Tax-specific rule or fall back to a normal blank rule.
+        (bTaxRequest && sRuleDivisionCode && sRuleDivisionCode !== "Tax") ||
+        !this._matchesLoaCondition(oRule.conditionCode, request)
+      ) {
         continue;
       }
 
@@ -6130,7 +6348,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
         continue;
       }
 
-      if (!oWinner || this._loaRuleRank(oRule) > this._loaRuleRank(oWinner)) {
+      if (!oWinner || this._loaRuleRank(oRule, sRequestingDivisionCode) > this._loaRuleRank(oWinner, sRequestingDivisionCode) ) {
         oWinner = oRule;
       }
     }
@@ -6175,7 +6393,7 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     if (!conditionCode) return true;
 
     if (conditionCode === "NOTE_36") {
-      return ["NON_PO_IMPORT_TRC", "NON_PO_IMPORT_ICL", "NON_PO_IMPORT_DGC_ADV", "NON_PO_IMPORT_DGC_DIRECT"]
+      return ["NON_PO_IMPORT_TRC", "NON_PO_IMPORT_ICL", "NON_PO_IMPORT_DGC_ADV", "NON_PO_IMPORT_DGC_DIRECT", "PO_IMPORT_TRC", "PO_IMPORT_ICL", "PO_IMPORT_DGC_ADV", "PO_IMPORT_DGC_DIRECT"]
         .includes(request.subProcessType_code);
     }
 
@@ -6184,14 +6402,19 @@ module.exports = class FlowmateService extends cds.ApplicationService {
     return false;
   }
 
-  _loaRuleRank(rule) {
+  _loaRuleRank(rule, requestingDivisionCode = "") {
     const priority = Number(rule.priority || 0);
     const structured = rule.ruleCode ? 1 : 0;
     const subtypeSpecific = rule.subProcessType_code ? 1 : 0;
+    const taxSpecific =
+    requestingDivisionCode === "Tax" &&
+    String(rule.requestingDivision_code || "").trim() === "Tax"
+      ? 1
+      : 0;
     const upper = rule.maximumAmount === null || rule.maximumAmount === undefined
       ? Number.MAX_SAFE_INTEGER
       : Number(rule.maximumAmount);
-    return subtypeSpecific * 1e20 + priority * 1e18 + structured * 1e17 - upper;
+    return taxSpecific * 1e21 + subtypeSpecific * 1e20 + priority * 1e18 + structured * 1e17 - upper;
   }
 
   _booleanValue(value) {
@@ -6344,11 +6567,10 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
     // No pending work before the final step
     const aPendingTasks = await tx.run(
       SELECT.from(ProcessTasks)
-        .columns("taskName", "stepNo")
+        .columns("taskName", "stepNo", "status_code")
         .where({
           request_ID: oPayment.ID,
-          status_code: { in: [TASK_STATUS.OPEN] },
-          stepNo: { "!=": iLastStepNo }
+          status_code: { in: [TASK_STATUS.OPEN, TASK_STATUS.SENT_BACK] }
         })
     );
 
@@ -6370,18 +6592,18 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
 
   // ---- 2. All payments are ready: complete them ----
   for (const oPayment of aPayments) {
-    await tx.run(
-      UPDATE(ProcessTasks).set({
-        status_code: TASK_STATUS.APPROVED,
-        decision: "APPROVED",
-        remarks: `Completed with settlement request ${sSettlementRef}`,
-        completedAt: this._now()
-      }).where({
-        request_ID: oPayment.ID,
-        stepNo: mLastStepNo.get(oPayment.ID),
-        status_code: { in: [TASK_STATUS.OPEN] }
-      })
-    );
+    // await tx.run(
+    //   UPDATE(ProcessTasks).set({
+    //     status_code: TASK_STATUS.APPROVED,
+    //     decision: "APPROVED",
+    //     remarks: `Completed with settlement request ${sSettlementRef}`,
+    //     completedAt: this._now()
+    //   }).where({
+    //     request_ID: oPayment.ID,
+    //     stepNo: mLastStepNo.get(oPayment.ID),
+    //     status_code: { in: [TASK_STATUS.OPEN] }
+    //   })
+    // );
 
     await tx.run(
       UPDATE(ProcessRequests, oPayment.ID).set({
@@ -7360,6 +7582,20 @@ async _completePaymentsViaSettlement(req, settlement, payments) {
         processorTeamName: null,
         assignedTo: sRequesterName || step?.role || null,
         processor: sRequesterName,
+        processorEmail: null
+      };
+    }
+
+    // A processor configured on the step receives the task directly.
+    // The team is intentionally left null so no team queue / team notification is created.
+    if (step?.processorUser_ID) {
+      return {
+        assignedUser_ID: step.processorUser_ID,
+        processorUser_ID: step.processorUser_ID,
+        processorTeam_ID: null,
+        processorTeamName: null,
+        assignedTo: step.processorUserName || step.role || null,
+        processor: step.processorUserName || null,
         processorEmail: null
       };
     }

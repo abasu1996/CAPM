@@ -758,7 +758,7 @@ const SPEND_RECENT = 20;
  * @param {string} [input.periodEnd]   "YYYY-MM-DD"
  * @param {string} [input.poType]      PO type code, or "ALL"
  */
-function buildSpendAnalysis({ requests, details, vendorNames = new Map(), inactiveSuppliers = 0, periodStart, periodEnd, poType = "ALL", now = new Date(), timeZone = "Asia/Colombo" }) {
+function buildSpendAnalysis({ requests, details, vendorNames = new Map(), inactiveSuppliers = 0, inactiveVendors = [], periodStart, periodEnd, poType = "ALL", now = new Date(), timeZone = "Asia/Colombo" }) {
   const period = periodOf(periodStart, periodEnd, monthKey(now, timeZone));
   const previousPeriod = { start: shiftYear(period.start), end: shiftYear(period.end) };
   const typeFilter = String(poType || "ALL").toUpperCase();
@@ -809,6 +809,41 @@ function buildSpendAnalysis({ requests, details, vendorNames = new Map(), inacti
   const topTotal = top.reduce((sum, row) => sum + row.amount, 0);
   const variance = (now, before) => (before ? round(((now - before) / before) * 100) : null);
   const breakdown = (rows) => rows.map((row) => ({ label: row.label, amount: round(row.amount), sharePercent: share(row.amount, total) }));
+  // Every PO of the period (all currencies), newest first: the drill-downs behind the KPI tiles.
+  const purchaseOrders = current.slice()
+    .sort((left, right) => String(right.request.completedAt).localeCompare(String(left.request.completedAt)))
+    .map((entry) => ({
+      requestId: entry.request.ID,
+      reference: entry.request.referenceNumber || "",
+      poNumber: poNumberList(entry.detail.purchaseOrderNumber)[0] || entry.request.referenceNumber || "",
+      supplierKey: entry.vendorKey || entry.supplier,
+      vendorId: entry.detail.vendor_ID || null,
+      supplier: entry.supplier,
+      date: entry.day,
+      amount: round(entry.amount),
+      currency: entry.currency,
+      amountLkr: entry.lkr ? round(entry.amount) : null,
+      division: entry.division,
+      expenditure: entry.expenditure
+    }));
+  // One row per supplier with LKR spend this period or in the same period last year.
+  const topKeys = new Set(top.map((row) => row.key));
+  const poCounts = new Map();
+  current.forEach((entry) => {
+    const key = entry.vendorKey || entry.supplier;
+    poCounts.set(key, (poCounts.get(key) || 0) + 1);
+  });
+  const currentBySupplier = new Map(suppliers.map((row, index) => [row.key, { amount: row.amount, rank: index + 1 }]));
+  const supplierRows = [...new Set(suppliers.map((row) => row.key).concat([...previousBySupplier.keys()]))].map((key) => {
+    const now = currentBySupplier.get(key);
+    const amount = now ? now.amount : 0;
+    const before = previousBySupplier.get(key) || 0;
+    return {
+      supplierKey: key, supplier: supplierLabel.get(key) || key, rank: now ? now.rank : null,
+      current: round(amount), previous: round(before), poCount: poCounts.get(key) || 0, sharePercent: share(amount, total),
+      variancePercent: variance(amount, before), trend: amount >= before ? "UP" : "DOWN", isTop10: topKeys.has(key)
+    };
+  }).sort((left, right) => (left.rank || Infinity) - (right.rank || Infinity) || right.previous - left.previous);
 
   return {
     period,
@@ -837,20 +872,16 @@ function buildSpendAnalysis({ requests, details, vendorNames = new Map(), inacti
     }),
     byExpenditure: breakdown(spendBy(current, (entry) => entry.expenditure)),
     byDivision: breakdown(spendBy(current, (entry) => entry.division)),
-    recent: current.slice()
-      .sort((left, right) => String(right.request.completedAt).localeCompare(String(left.request.completedAt)))
-      .slice(0, SPEND_RECENT)
-      .map((entry) => ({
-        requestId: entry.request.ID,
-        poNumber: poNumberList(entry.detail.purchaseOrderNumber)[0] || entry.request.referenceNumber || "",
-        supplier: entry.supplier,
-        date: entry.day,
-        amount: round(entry.amount),
-        currency: entry.currency,
-        amountLkr: entry.lkr ? round(entry.amount) : null,
-        division: entry.division,
-        expenditure: entry.expenditure
-      })),
+    recent: purchaseOrders.slice(0, SPEND_RECENT),
+    purchaseOrders,
+    suppliers: supplierRows,
+    // The master's inactive vendors, each with its POs of the period (if any).
+    inactiveSupplierList: inactiveVendors.map((vendor) => ({
+      vendorId: vendor.ID,
+      vendorCode: vendor.vendorCode || "",
+      supplier: vendor.vendorName || vendor.vendorCode || "",
+      poCount: purchaseOrders.filter((row) => row.vendorId === vendor.ID).length
+    })),
     otherCurrencyCount: current.filter((entry) => !entry.lkr).length
   };
 }
@@ -921,15 +952,15 @@ function pdfSectionTitle(doc, title) {
 
 function drawPdfHeader(doc, report, options) {
   doc.fillColor(PDF_COLOR.headerBand).rect(0, 0, PDF_PAGE.width, 70).fill();
-  doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(19).text("Purchase Order (PO) Lifecycle Dashboard", PDF_PAGE.margin, 18);
+  doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(19).text(options.title || "Purchase Order (PO) Lifecycle Dashboard", PDF_PAGE.margin, 18);
   doc.font("Helvetica").fontSize(10)
     .text(`Reporting period: ${pdfPeriodLabel(report.period)} · ${options.poTypeName || "All PO types"}`, PDF_PAGE.margin, 44);
   doc.text(`Generated ${options.generatedAt}`, PDF_PAGE.margin, 44, { width: PDF_CONTENT_WIDTH, align: "right" });
   doc.y = 86;
 }
 
-function drawPdfKpis(doc, report) {
-  const tiles = pdfKpiTiles(report);
+// tiles: [label, value, caption, footer] per tile (pdfKpiTiles, pdfSpendKpiTiles).
+function drawPdfKpis(doc, tiles) {
   const gap = 10;
   const width = (PDF_CONTENT_WIDTH - gap * (tiles.length - 1)) / tiles.length;
   const top = doc.y;
@@ -1056,7 +1087,7 @@ function renderPoLifecyclePdf(report, charts = [], options = {}) {
     }));
 
     drawPdfHeader(doc, report, Object.assign({}, options, { generatedAt }));
-    drawPdfKpis(doc, report);
+    drawPdfKpis(doc, pdfKpiTiles(report));
     drawPdfCharts(doc, report, charts);
 
     drawPdfTable(doc, `SLA - ${pdfPeriodLabel(report.period)}`, report.monthlySla, [
@@ -1097,15 +1128,115 @@ function renderPoLifecyclePdf(report, charts = [], options = {}) {
       ["Status", 1.6, (row) => PDF_STATUS_TEXT[row.status] || "", { color: pdfStatusColor }]
     ]);
 
-    const pages = doc.bufferedPageRange().count;
-    for (let page = 0; page < pages; page++) {
-      doc.switchToPage(page);
-      // The footer sits in the bottom margin; without lifting it pdfkit would start a new page.
-      doc.page.margins.bottom = 0;
-      doc.fillColor(PDF_COLOR.muted).font("Helvetica").fontSize(7.5)
-        .text(`Generated by Flowmate CA | Page ${page + 1} of ${pages}`, PDF_PAGE.margin, PDF_PAGE.height - 30,
-          { width: PDF_CONTENT_WIDTH, align: "right", lineBreak: false });
+    drawPdfFooters(doc);
+    doc.end();
+  });
+}
+
+function drawPdfFooters(doc) {
+  const pages = doc.bufferedPageRange().count;
+  for (let page = 0; page < pages; page++) {
+    doc.switchToPage(page);
+    // The footer sits in the bottom margin; without lifting it pdfkit would start a new page.
+    doc.page.margins.bottom = 0;
+    doc.fillColor(PDF_COLOR.muted).font("Helvetica").fontSize(7.5)
+      .text(`Generated by Flowmate CA | Page ${page + 1} of ${pages}`, PDF_PAGE.margin, PDF_PAGE.height - 30,
+        { width: PDF_CONTENT_WIDTH, align: "right", lineBreak: false });
+  }
+}
+
+// --- Spend Analysis PDF -------------------------------------------------------------------------
+
+const pdfMillions = (value) => (value === null || value === undefined ? "-"
+  : (Number(value) / 1000000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+const pdfAmount = (value) => Number(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pdfSigned = (value) => (value === null || value === undefined ? "-" : `${value > 0 ? "+" : ""}${Number(value).toFixed(1)}%`);
+const pdfVarianceColor = (row) => (row.variancePercent === null || row.variancePercent === undefined ? PDF_COLOR.muted
+  : row.variancePercent < 0 ? PDF_COLOR.poor : PDF_COLOR.good);
+
+// The five KPI tiles of the Spend Analysis dashboard, as on the screen.
+function pdfSpendKpiTiles(report) {
+  const k = report.kpis;
+  return [
+    ["Total Supplier Spend", `${pdfMillions(k.totalSpend)} Mn`, "Approved LKR POs (LKR Mn)", `${k.poCount} PO(s) in the period`],
+    ["Active Suppliers", k.activeSuppliers, "With active transactions", `Previous year: LKR ${pdfMillions(k.previousSpend)} Mn`],
+    ["Top 10 Supplier Spend %", pdfPercent(k.topSupplierSharePercent), "Share of total spend", ""],
+    ["YoY Spend Variance", pdfSigned(k.yoyVariancePercent), `${k.currentYear} vs ${k.previousYear}`,
+      k.yoyVariancePercent === null ? "No spend in the previous year" : ""],
+    ["Inactive Suppliers", k.inactiveSuppliers, "Requires attention", ""]
+  ];
+}
+
+/**
+ * @param {object} report  the document of buildSpendAnalysis
+ * @param {Array<{chartKey: string, svg: string}>} charts  validated chart snapshots ("spendTop", "spendYoy")
+ * @param {{poTypeName?: string, generatedAt?: string}} options
+ * @returns {Promise<{fileName: string, content: Buffer}>}
+ */
+function renderSpendAnalysisPdf(report, charts = [], options = {}) {
+  const generatedAt = options.generatedAt || new Date().toISOString().slice(0, 16).replace("T", " ");
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ size: "A4", layout: "landscape", margin: PDF_PAGE.margin, bufferPages: true,
+      info: { Title: `Spend Analysis Dashboard ${pdfPeriodLabel(report.period)}`, Author: "Flowmate CA" } });
+    const chunks = [];
+    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on("error", reject);
+    doc.on("end", () => resolve({
+      fileName: `spend-analysis-${report.period.start}-to-${report.period.end}-${String(report.poType || "ALL").toLowerCase()}.pdf`,
+      content: Buffer.concat(chunks)
+    }));
+
+    drawPdfHeader(doc, report, Object.assign({}, options, { generatedAt, title: "Spend Analysis Dashboard" }));
+    drawPdfKpis(doc, pdfSpendKpiTiles(report));
+    if (report.otherCurrencyCount) {
+      doc.fillColor(PDF_COLOR.watch).font("Helvetica").fontSize(8.5)
+        .text(`${report.otherCurrencyCount} approved PO(s) in other currencies are listed under Recent transactions but not counted in the LKR spend figures.`,
+          PDF_PAGE.margin, doc.y - 6, { width: PDF_CONTENT_WIDTH });
+      doc.moveDown(0.8);
     }
+
+    pdfEnsureSpace(doc, 240);
+    const top = doc.y;
+    const gap = 14;
+    const width = (PDF_CONTENT_WIDTH - gap) / 2;
+    const byKey = new Map(charts.map((chart) => [chart.chartKey, chart]));
+    const topBottom = drawPdfChart(doc, "Top 10 suppliers by spend (LKR Mn)", byKey.get("spendTop"),
+      report.topSuppliers.map((row) => ({ label: row.supplier, value: row.amount, text: pdfMillions(row.amount) })), PDF_PAGE.margin, width);
+    doc.y = top;
+    const yoyBottom = drawPdfChart(doc, `YoY analysis: ${report.kpis.previousYear} vs ${report.kpis.currentYear} (LKR Mn)`, byKey.get("spendYoy"),
+      report.yoy.map((row) => ({ label: row.supplier, value: row.current, text: pdfMillions(row.current) })), PDF_PAGE.margin + width + gap, width);
+    doc.y = Math.max(topBottom, yoyBottom) + 16;
+
+    drawPdfTable(doc, "Top 10 suppliers by spend", report.topSuppliers, [
+      ["Rank", 0.8, (row) => row.rank, PDF_RIGHT],
+      ["Supplier name", 5, (row) => row.supplier, { bold: true }],
+      ["Spend (LKR Mn)", 2, (row) => pdfMillions(row.amount), PDF_RIGHT],
+      ["% of total", 1.6, (row) => pdfPercent(row.sharePercent), PDF_RIGHT]
+    ]);
+    drawPdfTable(doc, "Year-over-year spend comparison", report.yoy, [
+      ["Supplier name", 4.4, (row) => row.supplier, { bold: true }],
+      [`${report.kpis.previousYear} (LKR Mn)`, 2, (row) => pdfMillions(row.previous), PDF_RIGHT],
+      [`${report.kpis.currentYear} (LKR Mn)`, 2, (row) => pdfMillions(row.current), PDF_RIGHT],
+      ["Variance", 1.6, (row) => pdfSigned(row.variancePercent), Object.assign({ color: pdfVarianceColor }, PDF_RIGHT)]
+    ]);
+    const breakdownColumns = (label) => [
+      [label, 4, (row) => row.label, { bold: true }],
+      ["Spend (LKR Mn)", 2, (row) => pdfMillions(row.amount), PDF_RIGHT],
+      ["% of total", 1.6, (row) => pdfPercent(row.sharePercent), PDF_RIGHT]
+    ];
+    drawPdfTable(doc, "Spend distribution by cost expenditure", report.byExpenditure, breakdownColumns("Category"));
+    drawPdfTable(doc, "Spend distribution by business unit", report.byDivision, breakdownColumns("Business unit"));
+    drawPdfTable(doc, `Recent transactions (${report.recent.length} of ${(report.purchaseOrders || report.recent).length})`, report.recent, [
+      ["PO No", 2, (row) => row.poNumber, { bold: true }],
+      ["Supplier", 3, (row) => row.supplier],
+      ["Date", 1.4, (row) => (row.date ? pdfDayLabel(row.date) : "-")],
+      ["Amount", 1.8, (row) => `${pdfAmount(row.amount)} ${row.currency || ""}`, PDF_RIGHT],
+      ["Amount in LKR", 1.8, (row) => (row.amountLkr === null ? "-" : pdfAmount(row.amountLkr)), PDF_RIGHT],
+      ["Business unit", 1.8, (row) => row.division],
+      ["Capex / Opex", 1.2, (row) => row.expenditure]
+    ], "No approved purchase orders in this period.");
+
+    drawPdfFooters(doc);
     doc.end();
   });
 }
@@ -1113,7 +1244,8 @@ function renderPoLifecyclePdf(report, charts = [], options = {}) {
 // Chart snapshots from the browser: known keys only, real SVG of a sane size, without scripts,
 // embedded HTML, event handlers or external links (as the Flowmate PDF export does).
 const PDF_CHART_KEYS = new Set(["trend", "groups"]);
-function validatedChartSnapshots(charts) {
+const SPEND_PDF_CHART_KEYS = new Set(["spendTop", "spendYoy"]);
+function validatedChartSnapshots(charts, allowedKeys = PDF_CHART_KEYS) {
   const list = Array.isArray(charts) ? charts : [];
   if (list.length > 4) {
     throw Object.assign(new Error("A maximum of four dashboard charts can be exported at once"), { status: 400 });
@@ -1121,7 +1253,7 @@ function validatedChartSnapshots(charts) {
   return list.map((chart) => {
     const chartKey = String(chart?.chartKey || "");
     const svg = String(chart?.svg || "");
-    if (!PDF_CHART_KEYS.has(chartKey)) {
+    if (!allowedKeys.has(chartKey)) {
       throw Object.assign(new Error(`Chart ${chartKey || "without a key"} is not valid for this dashboard`), { status: 400 });
     }
     if (!svg.trim().startsWith("<svg") || svg.length > 1500000) {
@@ -1159,7 +1291,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.before("claimTeamTask", this._requireValidator);
     this.before(["reassignRequest", "reassignTask"], this._requireSupervisor);
     this.before("getReportingDashboard", this._requireSupervisor);
-    this.before(["getPoLifecycleDashboard", "exportPoLifecycleDashboardPdf", "getSpendAnalysisDashboard"],
+    this.before(["getPoLifecycleDashboard", "exportPoLifecycleDashboardPdf", "getSpendAnalysisDashboard", "exportSpendAnalysisDashboardPdf"],
       (req) => this._requireCapability(req, "canViewReports", "Only a supervisor or administrator can view reports"));
     this.before("addTask", this._requireAddTask);
     this.before(["rejectTask", "completeStep", "sendToS4"], this._requireAdmin);
@@ -1199,6 +1331,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     this.on("getPoLifecycleDashboard", this._getPoLifecycleDashboard);
     this.on("getSpendAnalysisDashboard", this._getSpendAnalysisDashboard);
     this.on("exportPoLifecycleDashboardPdf", this._exportPoLifecycleDashboardPdf);
+    this.on("exportSpendAnalysisDashboardPdf", this._exportSpendAnalysisDashboardPdf);
     this.on("getFlowmateConnectionStatus", this._getFlowmateConnectionStatus);
     this.on("createRequest", this._createRequest);
     this.on("saveDraft", this._saveDraft);
@@ -2237,10 +2370,28 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     return report;
   };
 
+  _getSpendAnalysisDashboard = async (req) => JSON.stringify(await this._spendAnalysisReport(req.data));
+
+  // The Spend Analysis dashboard as a PDF (renderSpendAnalysisPdf), with the charts the browser rendered.
+  _exportSpendAnalysisDashboardPdf = async (req) => {
+    let charts;
+    try {
+      charts = validatedChartSnapshots(req.data.charts, SPEND_PDF_CHART_KEYS);
+    } catch (error) {
+      return req.reject(error.status || 400, error.message);
+    }
+    const report = await this._spendAnalysisReport(req.data);
+    const poTypeName = (report.poTypes.find((type) => type.code === report.poType) || {}).name || report.poType;
+    const generatedAt = new Intl.DateTimeFormat("en-GB", {
+      timeZone: SLA_TIME_ZONE, day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+    }).format(new Date());
+    const pdf = await renderSpendAnalysisPdf(report, charts, { poTypeName, generatedAt });
+    return { fileName: pdf.fileName, mimeType: "application/pdf", content: pdf.content.toString("base64") };
+  };
+
   // Spend Analysis dashboard (buildSpendAnalysis): the period's approved POs and the same period a
-  // year earlier, with supplier names and the number of inactive suppliers from the master.
-  _getSpendAnalysisDashboard = async (req) => {
-    const { periodStart, periodEnd, poType } = req.data;
+  // year earlier, with supplier names and the inactive suppliers of the master.
+  _spendAnalysisReport = async ({ periodStart, periodEnd, poType }) => {
     const now = new Date();
     const day = (value) => (value instanceof Date ? value.toISOString() : String(value || "")).slice(0, 10);
     const thisMonth = monthKey(now, SLA_TIME_ZONE);
@@ -2269,6 +2420,7 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
     }
     const vendorNames = new Map();
     let inactiveSuppliers = 0;
+    let inactiveVendors = [];
     try {
       const vendorIds = [...new Set(details.map((row) => row.vendor_ID).filter(Boolean))];
       for (let index = 0; index < vendorIds.length; index += 500) {
@@ -2276,19 +2428,22 @@ module.exports = class FlowmateCAService extends cds.ApplicationService {
           .columns("ID", "vendorName").where({ ID: { in: vendorIds.slice(index, index + 500) } }));
         vendors.forEach((row) => vendorNames.set(row.ID, row.vendorName));
       }
-      const inactiveQuery = SELECT.from(this.masterEntities.Vendors).columns("ID").where({ isActive: false }).limit(1);
+      // The tile counts every inactive vendor; its drill-down lists the first 500 by name.
+      const inactiveQuery = SELECT.from(this.masterEntities.Vendors).columns("ID", "vendorCode", "vendorName")
+        .where({ isActive: false }).orderBy("vendorName").limit(500);
       inactiveQuery.SELECT.count = true;
       const inactive = await this.master.run(inactiveQuery);
-      inactiveSuppliers = Number(inactive && inactive.$count) || 0;
+      inactiveVendors = Array.from(inactive || []);
+      inactiveSuppliers = Number(inactive && inactive.$count) || inactiveVendors.length;
     } catch (error) {
       cds.log("reports").warn("Suppliers for the Spend Analysis dashboard could not be read", error.message);
     }
     const poTypes = await SELECT.from(this.db.PurchaseOrderTypes).columns("code", "name").where({ isActive: true }).orderBy("sortOrder");
     const report = buildSpendAnalysis({
-      requests, details, vendorNames, inactiveSuppliers, periodStart: start, periodEnd: end, poType: poType || "ALL", now, timeZone: SLA_TIME_ZONE
+      requests, details, vendorNames, inactiveSuppliers, inactiveVendors, periodStart: start, periodEnd: end, poType: poType || "ALL", now, timeZone: SLA_TIME_ZONE
     });
     report.poTypes = [{ code: "ALL", name: "All PO types" }].concat(poTypes);
-    return JSON.stringify(report);
+    return report;
   };
 
   _getReportingDashboard = async (req) => {
@@ -5694,9 +5849,11 @@ module.exports.formatTaskReference = formatTaskReference;
 // Rules and texts used by the service, exported for the unit tests.
 Object.assign(module.exports, {
   buildPoLifecycle,
+  buildSpendAnalysis,
   failStatus,
   slaStatus,
   renderPoLifecyclePdf,
+  renderSpendAnalysisPdf,
   validatedChartSnapshots,
   isPoApprovalCompletionStep,
   procurementCategoryForVariant,

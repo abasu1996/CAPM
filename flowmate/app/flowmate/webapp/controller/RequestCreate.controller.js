@@ -97,8 +97,6 @@ sap.ui.define([
             "customer_ID",
             "customerCode",
             "customerName",
-            "invoiceDebitNoteDate",
-            "invoiceDebitNoteNumber",
             "totalPaymentValueForMonth",
             "userDivisionRepresentativeName",
             "whtNicHighestTransactionValue",
@@ -106,7 +104,10 @@ sap.ui.define([
             "retentionRepaymentValue"
         ],
         optional: [
-            "brcHighestTransactionValue", "remarks"
+            "invoiceDebitNoteDate",
+            "invoiceDebitNoteNumber",
+            "brcHighestTransactionValue",
+            "remarks"
         ]
     };
     const NON_PO_SITE_SHARING_FIELDS = {
@@ -118,7 +119,7 @@ sap.ui.define([
             "vendorName"
         ],
         optional: [
-            "remarks"
+            "telcoOperator_code","remarks"
         ]
     };
     const DIRECT_NON_PO_REIMBURSEMENT_FIELDS = {
@@ -141,6 +142,34 @@ sap.ui.define([
             "siteId",
             "siteName",
             "remarks"
+        ]
+    };
+    const DIRECT_NON_PO_REIMB_LIAB_FIELDS = {
+        required: DIRECT_NON_PO_REIMBURSEMENT_FIELDS.required
+            .filter((sField) => sField !== "costCentre"),
+        optional: [
+            ...DIRECT_NON_PO_REIMBURSEMENT_FIELDS.optional,
+            "costCentre"
+        ]
+    };
+    const DIRECT_OTHER_PAYMENTS_REIMB_FIELDS = {
+        required: DIRECT_NON_PO_REIMBURSEMENT_FIELDS.required
+            .filter((sField) => !["employeeVendorCode", "employeeVendorName"].includes(sField))
+            .concat("otherPaymentType_code"),
+        optional: [
+            ...DIRECT_NON_PO_REIMBURSEMENT_FIELDS.optional,
+            "employeeVendorCode",
+            "employeeVendorName"
+        ]
+    };
+    const DIRECT_WATER_TOUCH_FUEL_OTHER_FIELDS = {
+        required: DIRECT_NON_PO_REIMBURSEMENT_FIELDS.required
+            .filter((sField) => !["employeeVendorCode", "employeeVendorName"].includes(sField))
+            .concat("utilityPaymentType_code"),
+        optional: [
+            ...DIRECT_NON_PO_REIMBURSEMENT_FIELDS.optional,
+            "employeeVendorCode",
+            "employeeVendorName"
         ]
     };
     const NON_PO_TAX_LIABILITY_FIELDS = {
@@ -186,6 +215,27 @@ sap.ui.define([
             "poNumber",
             "totalDeclarationValueInCusdec"
         ],
+        optional: ["remarks"]
+    };
+    const PO_IMPORT_DGC_FIELDS = {
+        required: [
+            "paymentCategory_code",
+            "businessEntity_code",
+            "currency_code",
+            "vendor_ID",
+            "vendorCode",
+            "vendorName",
+            "cusdecDate",
+            "cusdecNumber",
+            "poNumber",
+            "totalDeclarationValueInCusdec"
+        ],
+        optional: ["remarks"]
+    };
+    const PO_IMPORT_DGC_DIRECT_FIELDS = {
+        required: PO_IMPORT_DGC_FIELDS.required
+            .filter((sField) => sField !== "poNumber")
+            .concat("costCentre"),
         optional: ["remarks"]
     };
     const PO_ADV_SETTLEMENT_100_FIELDS = {
@@ -272,7 +322,7 @@ sap.ui.define([
                 "vendor_ID", "vendorCode", "vendorName",
                 "invoiceDate", "invoiceNumber", "totalInvoiceValue", "invoiceDescription"
             ],
-            optional: ["remarks"]
+            optional: ["telcoOperator_code", "remarks"]
         },
         NON_PO_SITE_SHARING_SETOFF: NON_PO_SITE_SHARING_FIELDS,
         "NON_PO_SITE_SHARING_SETOFF&PAY": NON_PO_SITE_SHARING_FIELDS,
@@ -301,8 +351,10 @@ sap.ui.define([
                 "glAccount","profitCentre","invoiceDate", "invoiceNumber", "siteId", "siteName", "remarks"
             ]
         },
-        DIRECT_NON_PO_REIMB_LIAB: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
+        DIRECT_NON_PO_REIMB_LIAB: DIRECT_NON_PO_REIMB_LIAB_FIELDS,
         DIRECT_NON_PO_REIMB_PAYMENT: DIRECT_NON_PO_REIMBURSEMENT_FIELDS,
+        DIRECT_OTHER_PAYMENTS_REIMB: DIRECT_OTHER_PAYMENTS_REIMB_FIELDS,
+        DIRECT_WATER_TOUCH_FUEL_OTHER: DIRECT_WATER_TOUCH_FUEL_OTHER_FIELDS,
         DIRECT_FOREIGN_TRAVEL_REIMB: {
             required: [
                 "paymentCategory_code", "businessEntity_code", "currency_code",
@@ -325,12 +377,10 @@ sap.ui.define([
                 "customer_ID",
                 "customerCode",
                 "customerName",
-                "invoiceDebitNoteDate",
-                "invoiceDebitNoteNumber",
                 "totalInvoiceValueRelevantCurrency",
                 "totalInvoiceValueLKR"
             ],
-            optional: ["vatAmount", "glAccount", "costCentre", "remarks"]
+            optional: ["vatAmount", "glAccount", "costCentre", "invoiceDebitNoteDate", "invoiceDebitNoteNumber", "remarks"]
         },
         NON_PO_INTERCONNECTION_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
         NON_PO_ROAMING_PAY: NON_PO_INTERCONNECT_ROAM_PAY_FIELDS,
@@ -387,29 +437,44 @@ sap.ui.define([
         },
         NON_PO_IMPORT_DGC_ADV: NON_PO_IMPORT_DGC_FIELDS,
         NON_PO_IMPORT_DGC_DIRECT: NON_PO_IMPORT_DGC_FIELDS,
+        PO_IMPORT_TRC: {
+            required: [
+                "paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName",
+                "trcslProformaInvoiceDate", "typeOfPayment_code", "trcslProformaInvoiceTotalValue"
+            ],
+            optional: ["poNumber", "budgetCode", "costCentre", "remarks"]
+        },
+        PO_IMPORT_ICL: {
+            required: [
+                "paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName",
+                "pivDate", "pivApplicationNumber", "totalPivValue"
+            ],
+            optional: ["poNumber", "costCentre", "remarks"]
+        },
+        PO_IMPORT_DGC_ADV: PO_IMPORT_DGC_FIELDS,
+        PO_IMPORT_DGC_DIRECT: PO_IMPORT_DGC_DIRECT_FIELDS,
         NON_PO_CC_PAYMENT: {
             required: [
                 "paymentCategory_code",
                 "businessEntity_code",
                 "currency_code",
-                "ccCustodianName",
+                // "ccCustodianName",
+                "ccCustodian_ID",
                 "vendor_ID",
                 "vendorCode",
                 "vendorName",
-                "whtEligibilityConfirmation",
-                "poNumber",
                 "sesReference",
                 "transactionAmountDocumentCurrency",
                 "transactionAmountLocalCurrency",
                 "descriptionOfPayment",
                 "justificationForCreditCardUse"
             ],
-            optional: ["invoiceDate", "invoiceNumber", "budgetCode", "remarks"]
+            optional: ["invoiceDate", "invoiceNumber", "budgetCode",  "poNumber", "whtEligibilityConfirmation", "remarks"]
         },
         NON_PO_CC_SETTLEMENT: {
             required: [
                 "paymentCategory_code", "businessEntity_code", "currency_code",
-                "bankName", "ccCustodianName", "ccPeriodFromDate", "ccPeriodToDate",
+                "bankName", "ccCustodian_ID", "ccPeriodFromDate", "ccPeriodToDate",
                 "settlementEntries", "totalAmountPayableCcSettlement"
             ],
             optional: ["annualFee", "stampDuty", "latePaymentFee", "interestCharges", "remarks"]
@@ -475,6 +540,8 @@ sap.ui.define([
     NON_PO_SITE_RENT_STAMP_ADHOC: "totalPayableValue",
     DIRECT_NON_PO_REIMB_LIAB: "totalValue",
     DIRECT_NON_PO_REIMB_PAYMENT: "totalValue",
+    DIRECT_OTHER_PAYMENTS_REIMB: "totalValue",
+    DIRECT_WATER_TOUCH_FUEL_OTHER: "totalValue",
     DIRECT_FOREIGN_TRAVEL_REIMB: "totalAmountLKR",
     NON_PO_TAX_LIAB_PAY_OTTP: "totalTaxPayable",
     NON_PO_TAX_LIAB_PAY_PAYORDER: "totalTaxPayable",
@@ -500,7 +567,11 @@ sap.ui.define([
     NON_PO_IMPORT_TRC: "trcslProformaInvoiceTotalValue",
     NON_PO_IMPORT_ICL: "totalPivValue",
     NON_PO_IMPORT_DGC_ADV: "totalDeclarationValueInCusdec",
-    NON_PO_IMPORT_DGC_DIRECT: "totalDeclarationValueInCusdec"
+    NON_PO_IMPORT_DGC_DIRECT: "totalDeclarationValueInCusdec",
+    PO_IMPORT_TRC: "trcslProformaInvoiceTotalValue",
+    PO_IMPORT_ICL: "totalPivValue",
+    PO_IMPORT_DGC_ADV: "totalDeclarationValueInCusdec",
+    PO_IMPORT_DGC_DIRECT: "totalDeclarationValueInCusdec"
 
     };
 
@@ -577,6 +648,8 @@ sap.ui.define([
                 isNonPoSiteRentMonthlyFile: false,
                 isNonPoSiteRentStampAdhoc: false,
                 isDirectNonPoReimbursement: false,
+                isDirectOtherPaymentsReimb: false,
+                isDirectWaterTouchFuelOther: false,
                 isDirectForeignTravelReimb: false,
                 isNonPoTaxLiability: false,
                 isNonPoInterconnectLiab: false,
@@ -586,6 +659,10 @@ sap.ui.define([
                 isNonPoImportTrc: false,
                 isNonPoImportIcl: false,
                 isNonPoImportDgc: false,
+                isPoImportTrc: false,
+                isPoImportIcl: false,
+                isPoImportDgcAdv: false,
+                isPoImportDgcDirect: false,
                 isNonPoCcPayment: false,
                 isNonPoCcSettlement: false,
                 isNonPoMerchantSettlements: false,
@@ -631,6 +708,7 @@ sap.ui.define([
                 totalInvoiceValue: null,
                 liabilityBookingDocumentNumber: "",
                 invoiceDescription: "",
+                telcoOperator_code: "",
                 highestMonthlyRentalValueInFile: null,
                 totalFileValue: null,
                 totalPayableValue: null,
@@ -639,6 +717,8 @@ sap.ui.define([
                 authorityVendorName: "",
                 employeeVendorCode: "",
                 employeeVendorName: "",
+                otherPaymentType_code: "",
+                utilityPaymentType_code: "",
                 transactionDate: null,
                 totalAmountForeignCurrency: null,
                 totalAmountLKR: null,
@@ -669,6 +749,7 @@ sap.ui.define([
                 cusdecNumber: "",
                 totalDeclarationValueInCusdec: null,
                 ccCustodianName: "",
+                ccCustodian_ID: "",
                 whtEligibilityConfirmation: false,
                 transactionAmountDocumentCurrency: null,
                 transactionAmountLocalCurrency: null,
@@ -813,7 +894,10 @@ sap.ui.define([
             this._oCategoryBinding = this.getView().getModel("create").bindProperty("/paymentCategory_code");
             this._oCategoryBinding.attachChange(() => this._applyCurrencyRestriction());
             this._applyCurrencyRestriction();
-
+            this._sPrevBusinessEntity = "";
+            this._oEntityBinding?.destroy();
+            this._oEntityBinding = this.getView().getModel("create").bindProperty("/businessEntity_code");
+            this._oEntityBinding.attachChange(() => this._onBusinessEntityChanged());
             await this._populateCurrentRequester();
 
             if (this._sPredecessorId) {
@@ -964,12 +1048,12 @@ sap.ui.define([
                 ) {
                     aMissing.push("din");
                 }
-                if (
-                    oPayload.subProcessType_code === "NON_PO_CC_PAYMENT" &&
-                    oPayload.whtEligibilityConfirmation !== true
-                ) {
-                    aMissing.push("whtEligibilityConfirmation");
-                }
+                // if (
+                //     oPayload.subProcessType_code === "NON_PO_CC_PAYMENT" &&
+                //     oPayload.whtEligibilityConfirmation !== true
+                // ) {
+                //     aMissing.push("whtEligibilityConfirmation");
+                // }
                 if (!this._aAttachmentFiles.length) {
                     aMissing.push("Supporting Documents");
                 }
@@ -989,7 +1073,9 @@ sap.ui.define([
                     return;
                 }
             }
-
+            if (!await this._validateCostCentre(oPayload, oFieldSet)) {
+                return;
+            }
             const oCreateModel = this.getView().getModel("create");
             oCreateModel.setProperty("/creating", true);
 
@@ -1312,6 +1398,65 @@ sap.ui.define([
         },
 
         onProcessTypeValueHelpClose(oEvent) {
+            const oBinding = oEvent.getSource().getBinding("items");
+
+            if (oBinding) {
+                oBinding.filter([]);
+            }
+        },
+
+        onDepartmentValueHelpRequest() {
+            this.byId("departmentValueHelpDialog").open();
+        },
+
+        onDepartmentSuggest(oEvent) {
+            this._filterSuggestionItems(oEvent, ["code", "name", "descr"], [
+                new Filter("isActive", FilterOperator.EQ, true)
+            ]);
+        },
+
+        onDepartmentSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+
+            if (oContext) {
+                this.getView().getModel("create").setProperty("/department", oContext.getProperty("name"));
+            }
+        },
+
+        onDepartmentValueHelpSearch(oEvent) {
+            const sQuery = oEvent.getParameter("value") || "";
+            const oBinding = oEvent.getSource().getBinding("items");
+            const oActiveFilter = new Filter("isActive", FilterOperator.EQ, true);
+
+            if (!sQuery) {
+                oBinding.filter([oActiveFilter]);
+                return;
+            }
+
+            oBinding.filter([
+                oActiveFilter,
+                new Filter({
+                    filters: [
+                        new Filter("code", FilterOperator.Contains, sQuery),
+                        new Filter("name", FilterOperator.Contains, sQuery),
+                        new Filter("descr", FilterOperator.Contains, sQuery)
+                    ],
+                    and: false
+                })
+            ]);
+        },
+
+        onDepartmentValueHelpConfirm(oEvent) {
+            const oSelectedItem = oEvent.getParameter("selectedItem");
+            const oContext = oSelectedItem && oSelectedItem.getBindingContext();
+
+            if (oContext) {
+                this.getView().getModel("create").setProperty("/department", oContext.getProperty("name"));
+            }
+            this.onDepartmentValueHelpClose(oEvent);
+        },
+
+        onDepartmentValueHelpClose(oEvent) {
             const oBinding = oEvent.getSource().getBinding("items");
 
             if (oBinding) {
@@ -1725,10 +1870,108 @@ sap.ui.define([
             oCreateModel.setProperty("/customerCode", oContext.getProperty("customerCode"));
             oCreateModel.setProperty("/customerName", oContext.getProperty("customerName"));
         },
+        // ---------- Cost centre value help ----------
+        _getCostCentreBaseFilters() {
+            const sEntity = this.getView().getModel("create").getProperty("/businessEntity_code");
+            return [
+                new Filter("isActive", FilterOperator.EQ, true),
+                // no entity selected -> match nothing
+                new Filter("businessEntity_code", FilterOperator.EQ, sEntity || "__NONE__")
+            ];
+        },
+
+        _onBusinessEntityChanged() {
+            const oCreateModel = this.getView().getModel("create");
+            const sEntity = oCreateModel.getProperty("/businessEntity_code");
+
+            // Clear a cost centre chosen for a different entity. Ignored on first
+            // assignment, so predecessor prefill is not wiped.
+            if (this._sPrevBusinessEntity && sEntity !== this._sPrevBusinessEntity) {
+                oCreateModel.setProperty("/costCentre", "");
+            }
+            this._sPrevBusinessEntity = sEntity || "";
+        },
+
+        onCostCentreSuggest(oEvent) {
+            this._filterSuggestionItems(oEvent, ["code", "name"], this._getCostCentreBaseFilters());
+        },
+
+        onCostCentreSuggestionSelected(oEvent) {
+            const oContext = this._getSuggestionContext(oEvent);
+            if (oContext) {
+                this.getView().getModel("create").setProperty("/costCentre", oContext.getProperty("code"));
+            }
+        },
+
+        onCostCentreValueHelpRequest() {
+            if (!this.getView().getModel("create").getProperty("/businessEntity_code")) {
+                MessageToast.show(this.getText("selectEntityFirstMessage"));
+                return;
+            }
+            const oDialog = this.byId("requestCreateCostCentreValueHelpDialog");
+            this._filterCostCentreDialog(oDialog, "");
+            oDialog.open();
+        },
+
+        onCostCentreValueHelpSearch(oEvent) {
+            this._filterCostCentreDialog(oEvent.getSource(), oEvent.getParameter("value") || "");
+        },
+
+        onCostCentreValueHelpConfirm(oEvent) {
+            const oContext = oEvent.getParameter("selectedItem")?.getBindingContext();
+            if (oContext) {
+                this.getView().getModel("create").setProperty("/costCentre", oContext.getProperty("code"));
+            }
+        },
+
+        _filterCostCentreDialog(oDialog, sQuery) {
+            const aFilters = this._getCostCentreBaseFilters();
+            if (sQuery) {
+                aFilters.push(new Filter({
+                    filters: ["code", "name"].map((sProperty) => new Filter({
+                        path: sProperty,
+                        operator: FilterOperator.Contains,
+                        value1: sQuery,
+                        caseSensitive: false
+                    })),
+                    and: false
+                }));
+            }
+            oDialog.getBinding("items").filter(aFilters);
+        },
+
+        // Free text is no longer accepted: the value must be an active cost centre of the selected entity.
+        async _validateCostCentre(oPayload, oFieldSet) {
+            const sCostCentre = String(oPayload.costCentre || "").trim();
+            const bUsed = oFieldSet && [...oFieldSet.required, ...oFieldSet.optional].includes("costCentre");
+
+            if (!bUsed || !sCostCentre) {
+                return true;
+            }
+            try {
+                const aMatches = await this._readList("/CostCentres", {
+                    filters: [
+                        new Filter("businessEntity_code", FilterOperator.EQ, oPayload.businessEntity_code),
+                        new Filter("code", FilterOperator.EQ, sCostCentre),
+                        new Filter("isActive", FilterOperator.EQ, true)
+                    ]
+                });
+                if (aMatches.length) {
+                    return true;
+                }
+            } catch (oError) {
+                MessageBox.error(this.getErrorMessage(oError, this.getText("costCentreValidationErrorMessage")));
+                return false;
+            }
+            MessageBox.warning(this.getText("costCentreInvalidMessage"));
+            return false;
+        },
         _getSettlementPaymentRequestBaseFilters() {
+            const sCustodianId = this.getView().getModel("create").getProperty("/ccCustodian_ID");
             return [
                 new Filter("subProcessType_code", FilterOperator.EQ, "NON_PO_CC_PAYMENT"),
-                new Filter("status_code", FilterOperator.EQ, "IN_PROGRESS")
+                new Filter("status_code", FilterOperator.EQ, "IN_PROGRESS"),
+                new Filter("ccCustodian_ID", FilterOperator.EQ, sCustodianId || "00000000-0000-0000-0000-000000000000")
             ];
         },
         _setSettlementPaymentRequest(oContext) {
@@ -2067,7 +2310,7 @@ sap.ui.define([
             if (
                 !String(oEntry.travelerName || "").trim() ||
                 !String(oEntry.vendorCode || "").trim() ||
-                !String(oEntry.ctmProposalNo || "").trim() ||
+                // !String(oEntry.ctmProposalNo || "").trim() ||
                 !String(oEntry.purposeOfTravel || "").trim() ||
                 !oEntry.currency_code ||
                 oEntry.perDayAllowanceUSD === null ||
@@ -2691,6 +2934,7 @@ sap.ui.define([
             this._pLoaTiming = this._configureLoaSelectionTiming(sCode, bLoaApplicable);
             this._applySubProcessTypeFlags(sCode);
             if (sCode === "FTK_DUTY_REIMBURSEMENT" || sCode === "NON_PO_IMPORT_TRC" || sCode === "NON_PO_IMPORT_ICL"
+                || sCode === "PO_IMPORT_TRC" || sCode === "PO_IMPORT_ICL"
                 || sCode === "NON_PO_FUEL_GENERATOR" ||
                 sCode === "NON_PO_FUEL_STAFF" || sCode === "NON_PO_TAX_LIAB_PAY_OTTP" ||
                 sCode === "NON_PO_TAX_LIAB_PAY_PAYORDER"
@@ -2709,9 +2953,21 @@ sap.ui.define([
                 oCreateModel.setProperty("/currency_code", "USD");
             }
             if(
-                sCode === "DIRECT_NON_PO_REIMB_PAYMENT" || sCode === "DIRECT_NON_PO_REIMB_LIAB"
+                sCode === "DIRECT_NON_PO_REIMB_PAYMENT" || sCode === "DIRECT_NON_PO_REIMB_LIAB" ||
+                sCode === "DIRECT_OTHER_PAYMENTS_REIMB" || sCode === "DIRECT_WATER_TOUCH_FUEL_OTHER"
             ){
                 oCreateModel.setProperty("/paymentCategory_code", "LOCAL");
+            }
+        },
+        _autoSelectBankGuaranteeSubType(aSubTypes) {
+            const oCreateModel = this.getView().getModel("create");
+            if (oCreateModel.getProperty("/processType_code") !== "BANK_GUARANTEE") {
+                return;
+            }
+            const oSubType = aSubTypes.find((o) => o.code === "BANK_GUARANTEE")
+                || (aSubTypes.length === 1 ? aSubTypes[0] : null);
+            if (oSubType) {
+                this._setSubProcessType({ getProperty: (sKey) => oSubType[sKey] });
             }
         },
 
@@ -2845,7 +3101,9 @@ sap.ui.define([
         _isDirectNonPoReimbursementSubtype(sCode) {
             return [
                 "DIRECT_NON_PO_REIMB_LIAB",
-                "DIRECT_NON_PO_REIMB_PAYMENT"
+                "DIRECT_NON_PO_REIMB_PAYMENT",
+                "DIRECT_OTHER_PAYMENTS_REIMB",
+                "DIRECT_WATER_TOUCH_FUEL_OTHER"
             ].includes(sCode);
         },
         _isDirectForeignTravelReimbSubtype(sCode) {
@@ -2883,6 +3141,18 @@ sap.ui.define([
                 "NON_PO_IMPORT_DGC_ADV",
                 "NON_PO_IMPORT_DGC_DIRECT"
             ].includes(sCode);
+        },
+        _isPoImportTrcSubtype(sCode) {
+            return sCode === "PO_IMPORT_TRC";
+        },
+        _isPoImportIclSubtype(sCode) {
+            return sCode === "PO_IMPORT_ICL";
+        },
+        _isPoImportDgcAdvSubtype(sCode) {
+            return sCode === "PO_IMPORT_DGC_ADV";
+        },
+        _isPoImportDgcDirectSubtype(sCode) {
+            return sCode === "PO_IMPORT_DGC_DIRECT";
         },
         _isNonPoCcPaymentSubtype(sCode) {
             return sCode === "NON_PO_CC_PAYMENT";
@@ -3211,7 +3481,7 @@ sap.ui.define([
             if (!bEnabled) {
                 [
                     "paymentCategory_code", "businessEntity_code", "category_code", "currency_code",
-                    "vendor_ID", "vendorCode", "vendorName", "invoiceNumber", "invoiceDescription", "remarks"
+                    "vendor_ID", "vendorCode", "vendorName", "invoiceNumber", "invoiceDescription", "telcoOperator_code","remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
 
                 oCreateModel.setProperty("/invoiceDate", null);
@@ -3230,6 +3500,7 @@ sap.ui.define([
                     "vendor_ID",
                     "vendorCode",
                     "vendorName",
+                    "telcoOperator_code",
                     "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
             }
@@ -3327,6 +3598,8 @@ sap.ui.define([
                     "authorityVendorName",
                     "employeeVendorCode",
                     "employeeVendorName",
+                    "otherPaymentType_code",
+                    "utilityPaymentType_code",
                     "invoiceNumber",
                     "costCentre",
                     "wbsElement",
@@ -3549,6 +3822,50 @@ sap.ui.define([
                 oCreateModel.setProperty("/totalDeclarationValueInCusdec", null);
             }
         },
+        _setPoImportTrcMode(bEnabled, bCodeChanged = false) {
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/isPoImportTrc", bEnabled);
+            if (bEnabled) oCreateModel.setProperty("/isNonPoImportTrc", false);
+            if (bEnabled && bCodeChanged) {
+                ["paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName", "poNumber", "budgetCode", "costCentre", "typeOfPayment_code", "remarks"]
+                    .forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
+                oCreateModel.setProperty("/trcslProformaInvoiceDate", null);
+                oCreateModel.setProperty("/trcslProformaInvoiceTotalValue", null);
+            }
+        },
+        _setPoImportIclMode(bEnabled, bCodeChanged = false) {
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/isPoImportIcl", bEnabled);
+            if (bEnabled) oCreateModel.setProperty("/isNonPoImportIcl", false);
+            if (bEnabled && bCodeChanged) {
+                ["paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName", "poNumber", "costCentre", "pivApplicationNumber", "remarks"]
+                    .forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
+                oCreateModel.setProperty("/pivDate", null);
+                oCreateModel.setProperty("/totalPivValue", null);
+            }
+        },
+        _setPoImportDgcAdvMode(bEnabled, bCodeChanged = false) {
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/isPoImportDgcAdv", bEnabled);
+            if (bEnabled) oCreateModel.setProperty("/isNonPoImportDgc", false);
+            if (bEnabled && bCodeChanged) {
+                ["paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName", "poNumber", "costCentre", "cusdecNumber", "remarks"]
+                    .forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
+                oCreateModel.setProperty("/cusdecDate", null);
+                oCreateModel.setProperty("/totalDeclarationValueInCusdec", null);
+            }
+        },
+        _setPoImportDgcDirectMode(bEnabled, bCodeChanged = false) {
+            const oCreateModel = this.getView().getModel("create");
+            oCreateModel.setProperty("/isPoImportDgcDirect", bEnabled);
+            if (bEnabled) oCreateModel.setProperty("/isNonPoImportDgc", false);
+            if (bEnabled && bCodeChanged) {
+                ["paymentCategory_code", "businessEntity_code", "currency_code", "vendor_ID", "vendorCode", "vendorName", "poNumber", "costCentre", "cusdecNumber", "remarks"]
+                    .forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
+                oCreateModel.setProperty("/cusdecDate", null);
+                oCreateModel.setProperty("/totalDeclarationValueInCusdec", null);
+            }
+        },
         _setNonPoCcPaymentMode(bEnabled) {
             const oCreateModel = this.getView().getModel("create");
             oCreateModel.setProperty("/isNonPoCcPayment", bEnabled);
@@ -3558,7 +3875,8 @@ sap.ui.define([
                     "paymentCategory_code",
                     "businessEntity_code",
                     "currency_code",
-                    "ccCustodianName",
+                    // "ccCustodianName",
+                    "ccCustodian_ID",
                     "vendor_ID",
                     "vendorCode",
                     "vendorName",
@@ -3587,7 +3905,8 @@ sap.ui.define([
                     "businessEntity_code",
                     "currency_code",
                     "bankName",
-                    "ccCustodianName",
+                    // "ccCustodianName",
+                    "ccCustodian_ID",
                     "remarks"
                 ].forEach((sProperty) => oCreateModel.setProperty(`/${sProperty}`, ""));
 
@@ -3778,7 +4097,8 @@ sap.ui.define([
             const sSubProcessTypeCode = oCreateModel.getProperty("/subProcessType_code");
             const oResponse = await this.callAction("previewRequestCreationLoa", {
                 subProcessTypeCode: sSubProcessTypeCode,
-                amount: Number(fAmount)
+                amount: Number(fAmount),
+                requestingDivisionCode: oCreateModel.getProperty("/requestingDivision_code") || null
             });
             const oPreview = oResponse.value || oResponse;
 
@@ -3930,6 +4250,8 @@ sap.ui.define([
             this._setNonPoSiteRentMonthlyFileMode(false);
             this._setNonPoSiteRentStampAdhocMode(false);
             this._setDirectNonPoReimbursementMode(false, true);
+            oCreateModel.setProperty("/isDirectOtherPaymentsReimb", false);
+            oCreateModel.setProperty("/isDirectWaterTouchFuelOther", false);
             this._setDirectForeignTravelReimbMode(false);
             this._setNonPoTaxLiabilityMode(false, true);
             this._setNonPoInterconnectLiabMode(false);
@@ -3939,6 +4261,10 @@ sap.ui.define([
             this._setNonPoImportTrcMode(false);
             this._setNonPoImportIclMode(false);
             this._setNonPoImportDgcMode(false, true);
+            this._setPoImportTrcMode(false);
+            this._setPoImportIclMode(false);
+            this._setPoImportDgcAdvMode(false);
+            this._setPoImportDgcDirectMode(false);
             this._setNonPoCcPaymentMode(false);
             this._setNonPoCcSettlementMode(false);
             this._setNonPoMerchantSettlementsMode(false);
@@ -3961,6 +4287,7 @@ sap.ui.define([
             });
 
             oCreateModel.setProperty("/hasSubProcessTypes", aSubTypes.length > 0);
+            this._autoSelectBankGuaranteeSubType(aSubTypes);
         },
 
         async _prefillFromPredecessor(sPredecessorId) {
@@ -4295,15 +4622,47 @@ sap.ui.define([
     this._setNonPoSiteRentMonthlyFileMode(this._isNonPoSiteRentMonthlyFileSubtype(sCode));
     this._setNonPoSiteRentStampAdhocMode(this._isNonPoSiteRentStampAdhocSubtype(sCode));
     this._setDirectNonPoReimbursementMode(this._isDirectNonPoReimbursementSubtype(sCode), bCodeChanged);
+    oCreateModel.setProperty("/isDirectOtherPaymentsReimb", sCode === "DIRECT_OTHER_PAYMENTS_REIMB");
+    oCreateModel.setProperty("/isDirectWaterTouchFuelOther", sCode === "DIRECT_WATER_TOUCH_FUEL_OTHER");
     this._setDirectForeignTravelReimbMode(this._isDirectForeignTravelReimbSubtype(sCode));
     this._setNonPoTaxLiabilityMode(this._isNonPoTaxLiabilitySubtype(sCode), bCodeChanged);
     this._setNonPoInterconnectLiabMode(this._isNonPoInterconnectLiabSubtype(sCode));
     this._setNonPoInterconnectRoamPayMode(this._isNonPoInterconnectRoamPaySubtype(sCode), bCodeChanged);
     this._setNonPoRoamingLiabilityMode(this._isNonPoRoamingLiabilitySubtype(sCode));
     this._setNonPoStarPointPaymentsMode(this._isNonPoStarPointPaymentsSubtype(sCode));
-    this._setNonPoImportTrcMode(this._isNonPoImportTrcSubtype(sCode));
-    this._setNonPoImportIclMode(this._isNonPoImportIclSubtype(sCode));
-    this._setNonPoImportDgcMode(this._isNonPoImportDgcSubtype(sCode), bCodeChanged);
+    if (this._isNonPoImportTrcSubtype(sCode)) {
+        this._setNonPoImportTrcMode(true);
+        this._setPoImportTrcMode(false);
+    } else if (this._isPoImportTrcSubtype(sCode)) {
+        this._setPoImportTrcMode(true, bCodeChanged);
+    } else {
+        this._setNonPoImportTrcMode(false);
+        this._setPoImportTrcMode(false);
+    }
+    if (this._isNonPoImportIclSubtype(sCode)) {
+        this._setNonPoImportIclMode(true);
+        this._setPoImportIclMode(false);
+    } else if (this._isPoImportIclSubtype(sCode)) {
+        this._setPoImportIclMode(true, bCodeChanged);
+    } else {
+        this._setNonPoImportIclMode(false);
+        this._setPoImportIclMode(false);
+    }
+    if (this._isNonPoImportDgcSubtype(sCode)) {
+        this._setNonPoImportDgcMode(true, bCodeChanged);
+        this._setPoImportDgcAdvMode(false);
+        this._setPoImportDgcDirectMode(false);
+    } else if (this._isPoImportDgcAdvSubtype(sCode)) {
+        this._setPoImportDgcAdvMode(true, bCodeChanged);
+        this._setPoImportDgcDirectMode(false);
+    } else if (this._isPoImportDgcDirectSubtype(sCode)) {
+        this._setPoImportDgcAdvMode(false);
+        this._setPoImportDgcDirectMode(true, bCodeChanged);
+    } else {
+        this._setNonPoImportDgcMode(false, bCodeChanged);
+        this._setPoImportDgcAdvMode(false);
+        this._setPoImportDgcDirectMode(false);
+    }
     this._setNonPoCcPaymentMode(this._isNonPoCcPaymentSubtype(sCode));
     this._setNonPoCcSettlementMode(this._isNonPoCcSettlementSubtype(sCode));
     this._setNonPoMerchantSettlementsMode(this._isNonPoMerchantSettlementsSubtype(sCode));

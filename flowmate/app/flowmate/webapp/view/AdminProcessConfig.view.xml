@@ -55,6 +55,7 @@
                                     <Column width="8rem" importance="Medium" demandPopin="true"><Text text="{i18n>stepTypeLabel}" /></Column>
                                     <Column width="13rem" importance="Low" demandPopin="true"><Text text="{i18n>activityDescriptionLabel}" wrapping="true" /></Column>
                                     <Column width="10rem" importance="Medium" demandPopin="true"><Text text="{i18n>processorTeamLabel}" wrapping="true" /></Column>
+                                    <!-- <Column width="10rem" importance="Medium" demandPopin="true"><Text text="{i18n>stepProcessorLabel}" wrapping="true" /></Column> -->
                                     <Column width="9rem" importance="Low" demandPopin="true"><Text text="{i18n>requestOriginLabel}" wrapping="true" /></Column>
                                     <Column width="5rem" importance="Low" demandPopin="true"><Text text="{i18n>slaDaysLabel}" wrapping="true" /></Column>
                                     <Column width="4rem" hAlign="Center" importance="High"><Text text="{i18n>actionsLabel}" /></Column>
@@ -69,6 +70,7 @@
                                             <ObjectStatus text="{= ${stepType} === 'LOA' ? ${i18n>loaStepTypeLabel} : ${i18n>processingStepTypeLabel} }" state="{= ${stepType} === 'LOA' ? 'Information' : 'None' }" />
                                             <Text text="{activityDescription}" wrapping="true" />
                                             <Text text="{processorTeamName}" wrapping="true" />
+                                            <!-- <Text text="{processorUserName}" wrapping="true" /> -->
                                             <Text text="{path: 'requestOrigin', formatter: '.formatRequestOrigin'}" />
                                             <Text text="{slaDays}" />
                                             <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editProcessStepButton}" press=".onEditProcessStep" />
@@ -515,6 +517,115 @@
                             </items>
                         </Table>
                     </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://employee" text="{i18n>ccCustodiansTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>ccCustodiansTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField
+                                    width="18rem"
+                                    placeholder="{i18n>searchCcCustodiansPlaceholder}"
+                                    search=".onSearchCcCustodians"
+                                    liveChange=".onSearchCcCustodians" />
+                                <Button
+                                    icon="sap-icon://add"
+                                    text="{i18n>addCcCustodianButton}"
+                                    type="Emphasized"
+                                    press=".onAddCcCustodian" />
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>deleteSelectedButton}"
+                                    type="Reject"
+                                    press=".onDeleteSelectedCcCustodians" />
+                            </OverflowToolbar>
+                            <Table
+                                id="ccCustodiansTable"
+                                class="flowmateTable"
+                                mode="MultiSelect"
+                                noDataText="{i18n>noCcCustodiansText}"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                items="{
+                                    path: '/CcCustodians',
+                                    sorter: { path: 'custodianName' },
+                                    events: {
+                                        dataRequested: '.onDataRequested',
+                                        dataReceived: '.onDataReceived'
+                                    }
+                                }">
+                                <columns>
+                                    <Column><Text text="{i18n>ccCustodianNameLabel}" wrapping="true" /></Column>
+                                    <Column width="20rem" demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>ccCustodianEmailLabel}" wrapping="true" /></Column>
+                                    <Column width="7rem" hAlign="Center"><Text text="{i18n>activeLabel}" /></Column>
+                                    <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem vAlign="Middle">
+                                        <cells>
+                                            <ObjectIdentifier title="{custodianName}" />
+                                            <Link text="{email}" href="{= ${email} ? 'mailto:' + ${email} : '' }" />
+                                            <ObjectStatus
+                                                text="{= ${isActive} ? ${i18n>activeStatusText} : ${i18n>inactiveStatusText} }"
+                                                state="{= ${isActive} ? 'Success' : 'None' }" />
+                                            <Button
+                                                icon="sap-icon://edit"
+                                                type="Transparent"
+                                                tooltip="{i18n>editCcCustodianButton}"
+                                                press=".onEditCcCustodian" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
+                        <IconTabFilter icon="sap-icon://building" text="{i18n>costCentresConfigTitle}">
+                            <OverflowToolbar class="flowmateToolbar">
+                                <Title text="{i18n>costCentresConfigTitle}" />
+                                <ToolbarSpacer />
+                                <SearchField
+                                    width="18rem"
+                                    placeholder="{i18n>searchCostCentresPlaceholder}"
+                                    search=".onSearchCostCentres"
+                                    liveChange=".onSearchCostCentres" />
+                                <Button icon="sap-icon://add" text="{i18n>addCostCentreButton}" type="Emphasized" press=".onAddCostCentre" />
+                                <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCostCentres" />
+                            </OverflowToolbar>
+                            <Table
+                                id="costCentresTable"
+                                class="flowmateTable"
+                                mode="MultiSelect"
+                                noDataText="{i18n>noCostCentresText}"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                items="{
+                                    path: '/CostCentres',
+                                    parameters: { expand: 'businessEntity' },
+                                    sorter: [{ path: 'businessEntity_code' }, { path: 'code' }],
+                                    events: {
+                                        dataRequested: '.onDataRequested',
+                                        dataReceived: '.onDataReceived'
+                                    }
+                                }">
+                                <columns>
+                                    <Column width="14rem"><Text text="{i18n>entityLabel}" wrapping="true" /></Column>
+                                    <Column width="12rem"><Text text="{i18n>costCentreCodeLabel}" wrapping="true" /></Column>
+                                    <Column><Text text="{i18n>costCentreNameLabel}" wrapping="true" /></Column>
+                                    <Column width="7rem" hAlign="Center"><Text text="{i18n>activeLabel}" /></Column>
+                                    <Column width="5rem" hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem vAlign="Middle">
+                                        <cells>
+                                            <ObjectIdentifier title="{businessEntity/name}" text="{businessEntity_code}" />
+                                            <ObjectIdentifier title="{code}" />
+                                            <Text text="{name}" wrapping="true" />
+                                            <ObjectStatus
+                                                text="{= ${isActive} ? ${i18n>activeStatusText} : ${i18n>inactiveStatusText} }"
+                                                state="{= ${isActive} ? 'Success' : 'None' }" />
+                                            <Button icon="sap-icon://edit" type="Transparent" tooltip="{i18n>editCostCentreButton}" press=".onEditCostCentre" />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </IconTabFilter>
                         <IconTabFilter icon="sap-icon://calendar" text="{i18n>workingCalendarAdminTitle}">
                             <VBox class="flowmateAdminCalendarSection">
                                 <OverflowToolbar class="flowmateToolbar">
@@ -787,6 +898,35 @@
                         </cells></ColumnListItem></items>
                     </Table>
                 </IconTabFilter>
+                <IconTabFilter icon="sap-icon://org-chart" text="{i18n>departmentsConfigTitle}">
+                    <OverflowToolbar class="flowmateToolbar">
+                        <Title text="{i18n>departmentsConfigTitle}" />
+                        <ToolbarSpacer />
+                        <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                            <customData><core:CustomData key="entitySet" value="Departments" /></customData>
+                        </SearchField>
+                        <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                            <customData><core:CustomData key="entitySet" value="Departments" /></customData>
+                        </Button>
+                        <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                            <customData><core:CustomData key="entitySet" value="Departments" /></customData>
+                        </Button>
+                    </OverflowToolbar>
+                    <Table id="departmentsTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/Departments}">
+                        <columns>
+                            <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                            <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                            <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                            <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                        </columns>
+                        <items><ColumnListItem><cells>
+                            <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                            <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                                <customData><core:CustomData key="entitySet" value="Departments" /></customData>
+                            </Button>
+                        </cells></ColumnListItem></items>
+                    </Table>
+                </IconTabFilter>
                 <IconTabFilter icon="sap-icon://org-chart" text="{i18n>requestDivisionConfigTitle}">
                 <OverflowToolbar class="flowmateToolbar">
                     <Title text="{i18n>requestDivisionConfigTitle}" />
@@ -812,6 +952,93 @@
                         <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
                         <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
                             <customData><core:CustomData key="entitySet" value="RequestDivision" /></customData>
+                        </Button>
+                    </cells></ColumnListItem></items>
+                </Table>
+            </IconTabFilter>
+            <IconTabFilter icon="sap-icon://phone" text="{i18n>telcoOperatorsConfigTitle}">
+                <OverflowToolbar class="flowmateToolbar">
+                    <Title text="{i18n>telcoOperatorsConfigTitle}" />
+                    <ToolbarSpacer />
+                    <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                        <customData><core:CustomData key="entitySet" value="TelcoOperators" /></customData>
+                    </SearchField>
+                    <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                        <customData><core:CustomData key="entitySet" value="TelcoOperators" /></customData>
+                    </Button>
+                    <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                        <customData><core:CustomData key="entitySet" value="TelcoOperators" /></customData>
+                    </Button>
+                </OverflowToolbar>
+                <Table id="telcoOperatorsTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/TelcoOperators}">
+                    <columns>
+                        <Column width="10rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                        <Column width="14rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                        <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                        <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                    </columns>
+                    <items><ColumnListItem><cells>
+                        <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                        <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                            <customData><core:CustomData key="entitySet" value="TelcoOperators" /></customData>
+                        </Button>
+                    </cells></ColumnListItem></items>
+                </Table>
+            </IconTabFilter>
+            <IconTabFilter icon="sap-icon://payment-approval" text="{i18n>otherPaymentTypesConfigTitle}">
+                <OverflowToolbar class="flowmateToolbar">
+                    <Title text="{i18n>otherPaymentTypesConfigTitle}" />
+                    <ToolbarSpacer />
+                    <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                        <customData><core:CustomData key="entitySet" value="OtherPaymentTypes" /></customData>
+                    </SearchField>
+                    <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                        <customData><core:CustomData key="entitySet" value="OtherPaymentTypes" /></customData>
+                    </Button>
+                    <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                        <customData><core:CustomData key="entitySet" value="OtherPaymentTypes" /></customData>
+                    </Button>
+                </OverflowToolbar>
+                <Table id="otherPaymentTypesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/OtherPaymentTypes}">
+                    <columns>
+                        <Column width="12rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                        <Column width="18rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                        <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                        <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                    </columns>
+                    <items><ColumnListItem><cells>
+                        <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                        <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                            <customData><core:CustomData key="entitySet" value="OtherPaymentTypes" /></customData>
+                        </Button>
+                    </cells></ColumnListItem></items>
+                </Table>
+            </IconTabFilter>
+            <IconTabFilter icon="sap-icon://drop-down-list" text="{i18n>utilityPaymentTypesConfigTitle}">
+                <OverflowToolbar class="flowmateToolbar">
+                    <Title text="{i18n>utilityPaymentTypesConfigTitle}" />
+                    <ToolbarSpacer />
+                    <SearchField width="18rem" search=".onSearchCodeList" liveChange=".onSearchCodeList">
+                        <customData><core:CustomData key="entitySet" value="UtilityPaymentTypes" /></customData>
+                    </SearchField>
+                    <Button icon="sap-icon://add" text="{i18n>addConfigValueButton}" type="Emphasized" press=".onAddCodeList">
+                        <customData><core:CustomData key="entitySet" value="UtilityPaymentTypes" /></customData>
+                    </Button>
+                    <Button icon="sap-icon://delete" text="{i18n>deleteSelectedButton}" type="Reject" press=".onDeleteSelectedCodeList">
+                        <customData><core:CustomData key="entitySet" value="UtilityPaymentTypes" /></customData>
+                    </Button>
+                </OverflowToolbar>
+                <Table id="utilityPaymentTypesTable" class="flowmateTable" mode="MultiSelect" noDataText="{i18n>noConfigValuesText}" items="{/UtilityPaymentTypes}">
+                    <columns>
+                        <Column width="12rem"><Text text="{i18n>configCodeLabel}" wrapping="true" /></Column>
+                        <Column width="18rem"><Text text="{i18n>configNameLabel}" wrapping="true" /></Column>
+                        <Column><Text text="{i18n>configDescriptionLabel}" wrapping="true" /></Column>
+                        <Column hAlign="End"><Text text="{i18n>actionsLabel}" /></Column>
+                    </columns>
+                    <items><ColumnListItem><cells>
+                        <Text text="{code}" wrapping="true" /><Text text="{name}" wrapping="true" /><Text text="{descr}" wrapping="true" />
+                        <Button icon="sap-icon://edit" type="Transparent" press=".onEditCodeList">
+                            <customData><core:CustomData key="entitySet" value="UtilityPaymentTypes" /></customData>
                         </Button>
                     </cells></ColumnListItem></items>
                 </Table>
@@ -904,6 +1131,13 @@
                     <TextArea value="{loaApprovalEdit>/conditionDescription}" rows="2" />
                     <Label text="{i18n>loaPriorityLabel}" />
                     <Input value="{loaApprovalEdit>/priority}" type="Number" />
+                     <Label text="{i18n>loaRequestingDivisionLabel}" />
+                    <Select
+                        selectedKey="{loaApprovalEdit>/requestingDivision_code}"
+                        items="{path: '/RequestDivision', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
+                        forceSelection="false">
+                        <core:Item key="{code}" text="{name}" additionalText="{code}" />
+                    </Select>
                     <Label text="{i18n>activeLabel}" />
                     <CheckBox selected="{loaApprovalEdit>/isActive}" />
                     <Label text="{i18n>remarksLabel}" />
@@ -994,6 +1228,43 @@
     <endButton>
         <Button text="{i18n>cancelButton}" press=".onCloseCustomerDialog" />
     </endButton>
+</Dialog>
+<Dialog id="ccCustodianDialog" title="{ccCustodianEdit>/dialogTitle}" contentWidth="42rem" stretch="{device>/system/phone}">
+    <content>
+        <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
+            <Label text="{i18n>ccCustodianNameLabel}" required="true" />
+            <Input value="{ccCustodianEdit>/custodianName}" maxLength="150" required="true" />
+            <Label text="{i18n>ccCustodianEmailLabel}" />
+            <Input value="{ccCustodianEdit>/email}" type="Email" maxLength="150" />
+            <Label text="{i18n>activeLabel}" />
+            <CheckBox selected="{ccCustodianEdit>/isActive}" />
+        </form:SimpleForm>
+    </content>
+    <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveCcCustodian" /></beginButton>
+    <endButton><Button text="{i18n>cancelButton}" press=".onCloseCcCustodianDialog" /></endButton>
+</Dialog>
+<Dialog id="costCentreDialog" title="{costCentreEdit>/dialogTitle}" contentWidth="42rem" stretchOnPhone="true">
+    <content>
+        <form:SimpleForm class="flowmateDialogContent" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="4">
+            <Label text="{i18n>entityLabel}" required="true" />
+            <ComboBox
+                selectedKey="{costCentreEdit>/businessEntity_code}"
+                enabled="{= !${costCentreEdit>/isEdit} }"
+                required="true"
+                placeholder="{i18n>selectEntityPlaceholder}"
+                items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
+                <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
+            </ComboBox>
+            <Label text="{i18n>costCentreCodeLabel}" required="true" />
+            <Input value="{costCentreEdit>/code}" enabled="{= !${costCentreEdit>/isEdit} }" maxLength="30" required="true" />
+            <Label text="{i18n>costCentreNameLabel}" />
+            <Input value="{costCentreEdit>/name}" maxLength="100" />
+            <Label text="{i18n>activeLabel}" />
+            <CheckBox selected="{costCentreEdit>/isActive}" />
+        </form:SimpleForm>
+    </content>
+    <beginButton><Button icon="sap-icon://save" text="{i18n>saveButton}" type="Emphasized" press=".onSaveCostCentre" /></beginButton>
+    <endButton><Button text="{i18n>cancelButton}" press=".onCloseCostCentreDialog" /></endButton>
 </Dialog>
         <Dialog id="processSubTypeDialog" title="{subTypeEdit>/dialogTitle}" contentWidth="52rem" stretchOnPhone="true">
             <content>
@@ -1142,6 +1413,33 @@
                             enabled="{= !!${stepEdit>/processorTeam_ID} &amp;&amp; !${stepEdit>/isVendorNotification} }"
                             press=".onClearStepProcessorTeam" />
                     </HBox>
+                    <Label text="{i18n>stepProcessorLabel}" />
+                    <HBox width="100%" alignItems="Center">
+                        <Input
+                            value="{stepEdit>/processorUserName}"
+                            enabled="{= ${stepEdit>/stepType} !== 'LOA' &amp;&amp; !${stepEdit>/isVendorNotification} }"
+                            placeholder="{i18n>selectStepProcessorPlaceholder}"
+                            showValueHelp="true"
+                            showSuggestion="true"
+                            startSuggestion="1"
+                            filterSuggests="false"
+                            suggest=".onStepProcessorSuggest"
+                            suggestionItemSelected=".onStepProcessorSuggestionSelected"
+                            liveChange=".onStepProcessorLiveChange"
+                            valueHelpRequest=".onStepProcessorValueHelpRequest"
+                            width="100%"
+                            suggestionItems="{/Users}">
+                            <suggestionItems>
+                                <core:ListItem key="{ID}" text="{displayName}" additionalText="{email}" />
+                            </suggestionItems>
+                        </Input>
+                        <Button
+                            class="sapUiTinyMarginBegin"
+                            icon="sap-icon://decline"
+                            tooltip="{i18n>clearButton}"
+                            enabled="{= !!${stepEdit>/processorUser_ID} }"
+                            press=".onClearStepProcessor" />
+                    </HBox>
                     <Label text="{i18n>requestOriginLabel}" required="{= ${stepEdit>/stepType} !== 'LOA' }" />
                     <Select
                         selectedKey="{stepEdit>/requestOrigin}"
@@ -1223,6 +1521,33 @@
                     <Text text="{displayName}" />
                     <Text text="{email}" />
                     <Text text="{role_code}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+        <TableSelectDialog
+            id="processStepUserValueHelpDialog"
+            title="{i18n>selectStepProcessorTitle}"
+            noDataText="{i18n>noStepProcessorsFoundText}"
+            rememberSelections="false"
+            search=".onStepProcessorValueHelpSearch"
+            confirm=".onStepProcessorValueHelpConfirm"
+            cancel=".onStepProcessorValueHelpClose"
+            items="{
+                path: '/Users',
+                filters: [{ path: 'isActive', operator: 'EQ', value1: true }],
+                events: {
+                    dataRequested: '.onDataRequested',
+                    dataReceived: '.onDataReceived'
+                }
+            }">
+            <columns>
+                <Column><Text text="{i18n>userNameLabel}" /></Column>
+                <Column><Text text="{i18n>emailLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{displayName}" />
+                    <Text text="{email}" />
                 </cells>
             </ColumnListItem>
         </TableSelectDialog>

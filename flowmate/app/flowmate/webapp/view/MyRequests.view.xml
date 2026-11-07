@@ -278,7 +278,10 @@
                                                 <Button
                                                     icon="sap-icon://delete"
                                                     type="Transparent"
-                                                    enabled="{= !!${processorUser_ID} &amp;&amp; ${processorUser_ID} === ${requestAccess>/currentUserId} &amp;&amp; ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' }"
+                                                    enabled="{= ${status_code} !== 'COMPLETED' &amp;&amp; ${status_code} !== 'REJECTED' &amp;&amp; (
+                                                        ( (${status_code} === 'PENDING_APPROVAL' || !${reservedBy}) &amp;&amp; !!${requesterUser_ID} &amp;&amp; ${requesterUser_ID} === ${requestAccess>/currentUserId} )
+                                                        || ( !!${reservedBy} &amp;&amp; ${status_code} !== 'PENDING_APPROVAL' &amp;&amp; !!${processorUser_ID} &amp;&amp; ${processorUser_ID} === ${requestAccess>/currentUserId} )
+                                                    ) }"
                                                     tooltip="{i18n>deleteRequestButton}"
                                                     press=".onDeleteRequest" />
                                             </HBox>
@@ -567,6 +570,7 @@
                                             text="{i18n>completeStepButton}"
                                             type="Emphasized"
                                             visible="{processFlow>/selectedStep/completeEnabled}"
+                                           enabled="{= !(${subProcessType_code} === 'NON_PO_CC_PAYMENT' &amp;&amp; Number(${processFlow>/selectedStep/stepNo}) === 3) }"
                                             press=".onCompleteGuidedStep" />
                                     </HBox>
                                 </HBox>
@@ -1605,6 +1609,7 @@
                                     <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
                                     <Label text="{i18n>totalInvoiceValueLabelSiteShare}" /><Text text="{totalInvoiceValue}" />
                                     <Label text="{i18n>invoiceDescriptionLabel}" /><Text text="{invoiceDescription}" wrapping="true" />
+                                    <Label text="{i18n>telcoOperatorLabel}" /><Text text="{telcoOperator_code}" />
                                     <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
                                 </form:SimpleForm>
                             </uxap:blocks>
@@ -1629,6 +1634,7 @@
                                     <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
                                     <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
                                     <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>telcoOperatorLabel}" /><Text text="{telcoOperator_code}" />
                                     <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
                                 </form:SimpleForm>
                             </uxap:blocks>
@@ -1718,7 +1724,7 @@
 
                 <uxap:ObjectPageSection
                     title="{subProcessType/name}"
-                    visible="{= ['DIRECT_NON_PO_REIMB_LIAB','DIRECT_NON_PO_REIMB_PAYMENT'].indexOf(${subProcessType_code}) > -1 }">
+                    visible="{= ['DIRECT_NON_PO_REIMB_LIAB','DIRECT_NON_PO_REIMB_PAYMENT','DIRECT_OTHER_PAYMENTS_REIMB','DIRECT_WATER_TOUCH_FUEL_OTHER'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
                             <uxap:blocks>
@@ -1731,6 +1737,10 @@
                                     <Label text="{i18n>authorityVendorNameLabel}" /><Text text="{authorityVendorName}" wrapping="true" />
                                     <Label text="{i18n>employeeVendorCodeLabel}" /><Text text="{employeeVendorCode}" />
                                     <Label text="{i18n>employeeVendorNameLabel}" /><Text text="{employeeVendorName}" wrapping="true" />
+                                    <Label text="{i18n>otherPaymentTypeLabel}" visible="{= ${subProcessType_code} === 'DIRECT_OTHER_PAYMENTS_REIMB' }" />
+                                    <Text text="{otherPaymentType/name}" visible="{= ${subProcessType_code} === 'DIRECT_OTHER_PAYMENTS_REIMB' }" />
+                                    <Label text="{i18n>utilityPaymentTypeLabel}" visible="{= ${subProcessType_code} === 'DIRECT_WATER_TOUCH_FUEL_OTHER' }" />
+                                    <Text text="{utilityPaymentType/name}" visible="{= ${subProcessType_code} === 'DIRECT_WATER_TOUCH_FUEL_OTHER' }" />
                                     <Label text="{i18n>invoiceDateLabel}" />
                                     <Text text="{path: 'invoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
                                     <Label text="{i18n>invoiceNumberLabel}" /><Text text="{invoiceNumber}" />
@@ -2001,7 +2011,7 @@
 
                 <uxap:ObjectPageSection
                     title="{i18n>nonPoImportTrcDetailsTitle}"
-                    visible="{= ${subProcessType_code} === 'NON_PO_IMPORT_TRC' }">
+                    visible="{= ['NON_PO_IMPORT_TRC','PO_IMPORT_TRC'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
                             <uxap:blocks>
@@ -2014,6 +2024,7 @@
                                     <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
                                     <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
                                     <Label text="{i18n>budgetCodeLabelTRC}" /><Text text="{budgetCode}" />
+                                    <Label text="{i18n>costCentreLabel}" visible="{= ${subProcessType_code} === 'PO_IMPORT_TRC' }" /><Text text="{costCentre}" visible="{= ${subProcessType_code} === 'PO_IMPORT_TRC' }" />
                                     <Label text="{i18n>trcslProformaInvoiceDateLabel}" />
                                     <Text text="{path: 'trcslProformaInvoiceDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
                                     <Label text="{i18n>typeOfPaymentLabel}" /><Text text="{typeOfPayment/name}" />
@@ -2027,7 +2038,7 @@
 
                 <uxap:ObjectPageSection
                     title="{i18n>nonPoImportIclDetailsTitle}"
-                    visible="{= ${subProcessType_code} === 'NON_PO_IMPORT_ICL' }">
+                    visible="{= ['NON_PO_IMPORT_ICL','PO_IMPORT_ICL'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
                             <uxap:blocks>
@@ -2038,6 +2049,8 @@
                                     <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
                                     <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
                                     <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
+                                    <Label text="{i18n>poNumberLabel}" visible="{= ${subProcessType_code} === 'PO_IMPORT_ICL' }" /><Text text="{poNumber}" visible="{= ${subProcessType_code} === 'PO_IMPORT_ICL' }" />
+                                    <Label text="{i18n>costCentreLabel}" visible="{= ${subProcessType_code} === 'PO_IMPORT_ICL' }" /><Text text="{costCentre}" visible="{= ${subProcessType_code} === 'PO_IMPORT_ICL' }" />
                                     <Label text="{i18n>pivDateLabel}" />
                                     <Text text="{path: 'pivDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
                                     <Label text="{i18n>pivApplicationNumberLabel}" /><Text text="{pivApplicationNumber}" />
@@ -2050,8 +2063,8 @@
                 </uxap:ObjectPageSection>
 
                 <uxap:ObjectPageSection
-                    title="{= ${subProcessType_code} === 'NON_PO_IMPORT_DGC_ADV' ? ${i18n>nonPoImportDgcAdvDetailsTitle} : ${i18n>nonPoImportDgcDirectDetailsTitle} }"
-                    visible="{= ['NON_PO_IMPORT_DGC_ADV','NON_PO_IMPORT_DGC_DIRECT'].indexOf(${subProcessType_code}) > -1 }">
+                    title="{= ['NON_PO_IMPORT_DGC_ADV','PO_IMPORT_DGC_ADV'].indexOf(${subProcessType_code}) > -1 ? ${i18n>nonPoImportDgcAdvDetailsTitle} : ${i18n>nonPoImportDgcDirectDetailsTitle} }"
+                    visible="{= ['NON_PO_IMPORT_DGC_ADV','NON_PO_IMPORT_DGC_DIRECT','PO_IMPORT_DGC_ADV','PO_IMPORT_DGC_DIRECT'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
                             <uxap:blocks>
@@ -2065,7 +2078,8 @@
                                     <Label text="{i18n>cusdecDateLabel}" />
                                     <Text text="{path: 'cusdecDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
                                     <Label text="{i18n>cusdecNumberLabel}" /><Text text="{cusdecNumber}" />
-                                    <Label text="{i18n>poNumberLabel}" /><Text text="{poNumber}" />
+                                    <Label text="{i18n>poNumberLabel}" visible="{= ${subProcessType_code} !== 'PO_IMPORT_DGC_DIRECT' }" /><Text text="{poNumber}" visible="{= ${subProcessType_code} !== 'PO_IMPORT_DGC_DIRECT' }" />
+                                    <Label text="{i18n>costCentreLabel}" visible="{= ${subProcessType_code} === 'PO_IMPORT_DGC_DIRECT' }" /><Text text="{costCentre}" visible="{= ${subProcessType_code} === 'PO_IMPORT_DGC_DIRECT' }" />
                                     <Label text="{i18n>totalDeclarationValueInCusdecLabel}" /><Text text="{totalDeclarationValueInCusdec}" />
                                     <Label text="{i18n>remarksLabel}" /><Text text="{remarks}" wrapping="true" />
                                 </form:SimpleForm>
@@ -2085,7 +2099,8 @@
                                     <Label text="{i18n>paymentCategoryLabel}" /><Text text="{paymentCategory/name}" />
                                     <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
                                     <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
-                                    <Label text="{i18n>ccCustodianNameLabel}" /><Text text="{ccCustodianName}" />
+                                    <!-- <Label text="{i18n>ccCustodianNameLabel}" /><Text text="{ccCustodianName}" /> -->
+                                    <Label text="{i18n>ccCustodianNameLabel}" /><Text text="{ccCustodian/custodianName}" />
                                     <Label text="{i18n>vendorCodeLabel}" /><Text text="{vendorCode}" />
                                     <Label text="{i18n>vendorNameLabel}" /><Text text="{vendorName}" wrapping="true" />
                                     <Label text="{i18n>whtEligibilityConfirmationLabel}" /><Text text="{= ${whtEligibilityConfirmation} ? ${i18n>yesText} : ${i18n>noText} }" />
@@ -2118,7 +2133,8 @@
                                     <Label text="{i18n>entityLabel}" /><Text text="{businessEntity/name}" />
                                     <Label text="{i18n>currencyLabel}" /><Text text="{currency_code}" />
                                     <Label text="{i18n>bankNameLabel}" /><Text text="{bankName}" />
-                                    <Label text="{i18n>ccCustodianNameLabel}" /><Text text="{ccCustodianName}" />
+                                    <!-- <Label text="{i18n>ccCustodianNameLabel}" /><Text text="{ccCustodianName}" /> -->
+                                    <Label text="{i18n>ccCustodianNameLabel}" /><Text text="{ccCustodian/custodianName}" />
                                     <Label text="{i18n>ccPeriodFromDateLabel}" />
                                     <Text text="{path: 'ccPeriodFromDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
                                     <Label text="{i18n>ccPeriodToDateLabel}" />

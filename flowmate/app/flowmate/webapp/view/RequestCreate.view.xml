@@ -230,7 +230,21 @@
                             <Input
                                 value="{create>/department}"
                                 maxLength="100"
-                            />
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onDepartmentSuggest"
+                                suggestionItemSelected=".onDepartmentSuggestionSelected"
+                                valueHelpRequest=".onDepartmentValueHelpRequest"
+                                suggestionItems="{/Departments}">
+                                <suggestionItems>
+                                    <core:ListItem
+                                        key="{code}"
+                                        text="{name}"
+                                        additionalText="{code}" />
+                                </suggestionItems>
+                            </Input>
                             <Label
                                 text="{i18n>amountLabel}"
                                 visible="{= ${create>/isPaymentRequest} &amp;&amp; !${create>/loaAmountDerived} }"
@@ -1726,10 +1740,29 @@
                                 text="{i18n>costCentreLabel}"
                                 required="{create>/isOfnAuthority}"
                             />
+                            <!-- <Input
+                                value="{create>/costCentre}"
+                                required="{create>/isOfnAuthority}"
+                            />                       -->
                             <Input
                                 value="{create>/costCentre}"
                                 required="{create>/isOfnAuthority}"
-                            />
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems>
+                                    <core:ListItem
+                                        key="{code}"
+                                        text="{code}"
+                                        additionalText="{name}" />
+                                </suggestionItems>
+                            </Input>
                             <Label
                                 text="{i18n>profitCentreLabel}"
                                 required="{create>/isOfnAuthority}"
@@ -2307,7 +2340,6 @@
 
                             <Label
                                 text="{i18n>invoiceDebitNoteDateLabel}"
-                                required="{create>/isNonPoIdeaMartAppMaker}"
                             />
                             <DatePicker
                                 value="{
@@ -2317,17 +2349,15 @@
                                     'pattern': 'yyyy-MM-dd'
                                 }
                             }"
-                                required="{create>/isNonPoIdeaMartAppMaker}"
                                 placeholder="{i18n>selectDatePlaceholder}"
                             />
 
                             <Label
                                 text="{i18n>invoiceDebitNoteNumberLabel}"
-                                required="{create>/isNonPoIdeaMartAppMaker}"
+
                             />
                             <Input
                                 value="{create>/invoiceDebitNoteNumber}"
-                                required="{create>/isNonPoIdeaMartAppMaker}"
                             />
 
                             <Label
@@ -2877,6 +2907,13 @@
                                 required="{create>/isNonPoSiteShareLiability}"
                             />
 
+                            <Label text="{i18n>telcoOperatorLabel}" />
+                            <ComboBox
+                                selectedKey="{create>/telcoOperator_code}"
+                                placeholder="{i18n>selectTelcoOperatorPlaceholder}"
+                                items="{path: '/TelcoOperators', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
+                                <core:ListItem key="{code}" text="{name}" />
+                            </ComboBox>
                             <Label text="{i18n>remarksLabel}" />
                             <TextArea
                                 value="{create>/remarks}"
@@ -3021,6 +3058,13 @@
                                 editable="false"
                                 required="{create>/isNonPoSiteSharing}"
                             />
+                            <Label text="{i18n>telcoOperatorLabel}" />
+                                <ComboBox
+                                    selectedKey="{create>/telcoOperator_code}"
+                                    placeholder="{i18n>selectTelcoOperatorPlaceholder}"
+                                    items="{path: '/TelcoOperators', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
+                                    <core:ListItem key="{code}" text="{name}" />
+                                </ComboBox>
 
                             <Label text="{i18n>remarksLabel}" />
                             <TextArea
@@ -3506,10 +3550,29 @@
                                 text="{i18n>costCentreLabel}"
                                 required="{create>/isNonPoSiteRentStampAdhoc}"
                             />
+                            <!-- <Input
+                                value="{create>/costCentre}"
+                                required="{create>/isNonPoSiteRentStampAdhoc}"
+                            /> -->
                             <Input
                                 value="{create>/costCentre}"
                                 required="{create>/isNonPoSiteRentStampAdhoc}"
-                            />
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems>
+                                    <core:ListItem
+                                        key="{code}"
+                                        text="{code}"
+                                        additionalText="{name}" />
+                                </suggestionItems>
+                            </Input>
                             <Label text="{i18n>remarksLabel}" />
                             <TextArea
                                 value="{create>/remarks}"
@@ -3537,7 +3600,7 @@
                             />
                             <ToolbarSpacer />
                             <ObjectStatus
-                                text="{i18n>directNonPoReimbursementSubtypeText}"
+                                text="{= ${create>/isDirectWaterTouchFuelOther} ? ${i18n>directWaterTouchFuelOtherSubtypeText} : ${i18n>directNonPoReimbursementSubtypeText} }"
                                 state="Information"
                                 inverted="true"
                             />
@@ -3608,6 +3671,36 @@
                             </ComboBox>
 
                             <Label
+                                text="{i18n>otherPaymentTypeLabel}"
+                                required="{create>/isDirectOtherPaymentsReimb}"
+                                visible="{create>/isDirectOtherPaymentsReimb}"
+                            />
+                            <ComboBox
+                                selectedKey="{create>/otherPaymentType_code}"
+                                required="{create>/isDirectOtherPaymentsReimb}"
+                                visible="{create>/isDirectOtherPaymentsReimb}"
+                                placeholder="{i18n>selectOtherPaymentTypePlaceholder}"
+                                items="{path: '/OtherPaymentTypes', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
+                            >
+                                <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
+                            </ComboBox>
+
+                            <Label
+                                text="{i18n>utilityPaymentTypeLabel}"
+                                required="{create>/isDirectWaterTouchFuelOther}"
+                                visible="{create>/isDirectWaterTouchFuelOther}"
+                            />
+                            <ComboBox
+                                selectedKey="{create>/utilityPaymentType_code}"
+                                required="{create>/isDirectWaterTouchFuelOther}"
+                                visible="{create>/isDirectWaterTouchFuelOther}"
+                                placeholder="{i18n>selectUtilityPaymentTypePlaceholder}"
+                                items="{path: '/UtilityPaymentTypes', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
+                            >
+                                <core:ListItem key="{code}" text="{name}" additionalText="{code}" />
+                            </ComboBox>
+
+                            <Label
                                 text="{i18n>authorityVendorCodeLabel}"
                                 
                             />
@@ -3645,11 +3738,11 @@
 
                             <Label
                                 text="{i18n>employeeVendorCodeLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                required="{= ${create>/isDirectNonPoReimbursement} &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_OTHER_PAYMENTS_REIMB' &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_WATER_TOUCH_FUEL_OTHER' }"
                             />
                             <Input
                                 value="{create>/employeeVendorCode}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                required="{= ${create>/isDirectNonPoReimbursement} &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_OTHER_PAYMENTS_REIMB' &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_WATER_TOUCH_FUEL_OTHER' }"
                                 placeholder="{i18n>selectVendorPlaceholder}"
                                 showValueHelp="true"
                                 showSuggestion="true"
@@ -3672,12 +3765,12 @@
 
                             <Label
                                 text="{i18n>employeeVendorNameLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                required="{= ${create>/isDirectNonPoReimbursement} &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_OTHER_PAYMENTS_REIMB' &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_WATER_TOUCH_FUEL_OTHER' }"
                             />
                             <Input
                                 value="{create>/employeeVendorName}"
                                 editable="false"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                required="{= ${create>/isDirectNonPoReimbursement} &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_OTHER_PAYMENTS_REIMB' &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_WATER_TOUCH_FUEL_OTHER' }"
                             />
 
                             <Label
@@ -3708,12 +3801,31 @@
 
                             <Label
                                 text="{i18n>costCentreLabel}"
-                                required="{create>/isDirectNonPoReimbursement}"
+                                required="{= ${create>/isDirectNonPoReimbursement} &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_NON_PO_REIMB_LIAB' }"
                             />
-                            <Input
+                            <!-- <Input
                                 value="{create>/costCentre}"
                                 required="{create>/isDirectNonPoReimbursement}"
-                            />
+                            /> -->
+                            <Input
+                                value="{create>/costCentre}"
+                                required="{= ${create>/isDirectNonPoReimbursement} &amp;&amp; ${create>/subProcessType_code} !== 'DIRECT_NON_PO_REIMB_LIAB' }"
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems>
+                                    <core:ListItem
+                                        key="{code}"
+                                        text="{code}"
+                                        additionalText="{name}" />
+                                </suggestionItems>
+                            </Input>
 
                             <Label
                                 text="{i18n>wbsElementLabel}"
@@ -4724,7 +4836,7 @@
 
                             <Label
                                 text="{i18n>invoiceDebitNoteDateLabel}"
-                                required="{create>/isNonPoInterconnectLiab}"
+
                             />
                             <DatePicker
                                 id="interconnectLiabInvoiceDebitNoteDate"
@@ -4733,17 +4845,17 @@
                     'type': 'sap.ui.model.type.Date',
                     'formatOptions': { 'pattern': 'yyyy-MM-dd' }
                 }"
-                                required="{create>/isNonPoInterconnectLiab}"
+
                                 placeholder="{i18n>selectDatePlaceholder}"
                             />
 
                             <Label
                                 text="{i18n>invoiceDebitNoteNumberLabel}"
-                                required="{create>/isNonPoInterconnectLiab}"
+
                             />
                             <Input
                                 value="{create>/invoiceDebitNoteNumber}"
-                                required="{create>/isNonPoInterconnectLiab}"
+
                             />
 
                             <Label
@@ -4776,7 +4888,25 @@
                             <Input value="{create>/glAccount}" />
 
                             <Label text="{i18n>costCentreLabel}" />
-                            <Input value="{create>/costCentre}" />
+                            <!-- <Input value="{create>/costCentre}" /> -->
+                            <Input
+                                value="{create>/costCentre}"
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems>
+                                    <core:ListItem
+                                        key="{code}"
+                                        text="{code}"
+                                        additionalText="{name}" />
+                                </suggestionItems>
+                            </Input>
 
                             <Label text="{i18n>remarksLabel}" />
                             <TextArea
@@ -5098,7 +5228,25 @@
                             <Input value="{create>/glAccount}" />
 
                             <Label text="{i18n>costCentreLabel}" />
-                            <Input value="{create>/costCentre}" />
+                            <!-- <Input value="{create>/costCentre}" /> -->
+                             <Input
+                                value="{create>/costCentre}"
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems>
+                                    <core:ListItem
+                                        key="{code}"
+                                        text="{code}"
+                                        additionalText="{name}" />
+                                </suggestionItems>
+                            </Input>
 
                             <Label text="{i18n>remarksLabel}" />
                             <TextArea
@@ -5238,7 +5386,7 @@
                     class="flowmateCreateSection flowmateFtkFactoringSection"
                     backgroundDesign="Transparent"
                     expandable="false"
-                    visible="{create>/isNonPoImportTrc}"
+                    visible="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                 >
                     <headerToolbar>
                         <OverflowToolbar>
@@ -5272,11 +5420,11 @@
                         >
                             <Label
                                 text="{i18n>paymentCategoryLabel}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/paymentCategory_code}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
                                 items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5289,11 +5437,11 @@
 
                             <Label
                                 text="{i18n>entityLabel}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/businessEntity_code}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                                 placeholder="{i18n>selectEntityPlaceholder}"
                                 items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5306,11 +5454,11 @@
 
                             <Label
                                 text="{i18n>currencyLabel}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/currency_code}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                                 placeholder="{i18n>selectCurrencyPlaceholder}"
                                 items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5323,11 +5471,11 @@
 
                             <Label
                                 text="{i18n>vendorCodeLabel}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
                             <Input
                                 value="{create>/vendorCode}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                                 placeholder="{i18n>selectVendorPlaceholder}"
                                 showValueHelp="true"
                                 showSuggestion="true"
@@ -5350,12 +5498,12 @@
 
                             <Label
                                 text="{i18n>vendorNameLabel}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
                             <Input
                                 value="{create>/vendorName}"
                                 editable="false"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
 
                             <Label text="{i18n>poNumberLabel}" />
@@ -5364,9 +5512,25 @@
                             <Label text="{i18n>budgetCodeLabelTRC}" />
                             <Input value="{create>/budgetCode}" />
 
+                            <Label text="{i18n>costCentreLabel}" visible="{= ${create>/subProcessType_code} === 'PO_IMPORT_TRC' }" />
+                            <Input
+                                value="{create>/costCentre}"
+                                visible="{= ${create>/subProcessType_code} === 'PO_IMPORT_TRC' }"
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems><core:ListItem key="{code}" text="{code}" additionalText="{name}" /></suggestionItems>
+                            </Input>
+
                             <Label
                                 text="{i18n>trcslProformaInvoiceDateLabel}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
                             <DatePicker
                                 id="importTrcProformaInvoiceDate"
@@ -5375,17 +5539,17 @@
                     'type': 'sap.ui.model.type.Date',
                     'formatOptions': { 'pattern': 'yyyy-MM-dd' }
                 }"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                                 placeholder="{i18n>selectDatePlaceholder}"
                             />
 
                             <Label
                                 text="{i18n>typeOfPaymentLabel}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/typeOfPayment_code}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                                 placeholder="{i18n>selectTypeOfPaymentPlaceholder}"
                                 items="{path: '/TypeOfPayment', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5398,12 +5562,12 @@
 
                             <Label
                                 text="{i18n>trcslProformaInvoiceTotalValueLabel}"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                             />
                             <Input
                                 value="{create>/trcslProformaInvoiceTotalValue}"
                                 type="Number"
-                                required="{create>/isNonPoImportTrc}"
+                                required="{= ${create>/isNonPoImportTrc} || ${create>/isPoImportTrc} }"
                                 change=".onLoaSourceFieldChange"
                             />
 
@@ -5421,7 +5585,7 @@
                     class="flowmateCreateSection flowmateFtkFactoringSection"
                     backgroundDesign="Transparent"
                     expandable="false"
-                    visible="{create>/isNonPoImportIcl}"
+                    visible="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                 >
                     <headerToolbar>
                         <OverflowToolbar>
@@ -5455,11 +5619,11 @@
                         >
                             <Label
                                 text="{i18n>paymentCategoryLabel}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/paymentCategory_code}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
                                 items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5472,11 +5636,11 @@
 
                             <Label
                                 text="{i18n>entityLabel}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/businessEntity_code}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                                 placeholder="{i18n>selectEntityPlaceholder}"
                                 items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5489,11 +5653,11 @@
 
                             <Label
                                 text="{i18n>currencyLabel}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/currency_code}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                                 placeholder="{i18n>selectCurrencyPlaceholder}"
                                 items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5506,11 +5670,11 @@
 
                             <Label
                                 text="{i18n>vendorCodeLabel}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
                             <Input
                                 value="{create>/vendorCode}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                                 placeholder="{i18n>selectVendorPlaceholder}"
                                 showValueHelp="true"
                                 showSuggestion="true"
@@ -5533,17 +5697,36 @@
 
                             <Label
                                 text="{i18n>vendorNameLabel}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
                             <Input
                                 value="{create>/vendorName}"
                                 editable="false"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
+
+                            <Label text="{i18n>poNumberLabel}" visible="{= ${create>/subProcessType_code} === 'PO_IMPORT_ICL' }" />
+                            <Input value="{create>/poNumber}" visible="{= ${create>/subProcessType_code} === 'PO_IMPORT_ICL' }" />
+
+                            <Label text="{i18n>costCentreLabel}" visible="{= ${create>/subProcessType_code} === 'PO_IMPORT_ICL' }" />
+                            <Input
+                                value="{create>/costCentre}"
+                                visible="{= ${create>/subProcessType_code} === 'PO_IMPORT_ICL' }"
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems><core:ListItem key="{code}" text="{code}" additionalText="{name}" /></suggestionItems>
+                            </Input>
 
                             <Label
                                 text="{i18n>pivDateLabel}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
                             <DatePicker
                                 id="importIclPivDate"
@@ -5552,27 +5735,27 @@
                     'type': 'sap.ui.model.type.Date',
                     'formatOptions': { 'pattern': 'yyyy-MM-dd' }
                 }"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                                 placeholder="{i18n>selectDatePlaceholder}"
                             />
 
                             <Label
                                 text="{i18n>pivApplicationNumberLabel}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
                             <Input
                                 value="{create>/pivApplicationNumber}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
 
                             <Label
                                 text="{i18n>totalPivValueLabel}"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                             />
                             <Input
                                 value="{create>/totalPivValue}"
                                 type="Number"
-                                required="{create>/isNonPoImportIcl}"
+                                required="{= ${create>/isNonPoImportIcl} || ${create>/isPoImportIcl} }"
                                 change=".onLoaSourceFieldChange"
                             />
 
@@ -5590,7 +5773,7 @@
                     class="flowmateCreateSection flowmateFtkFactoringSection"
                     backgroundDesign="Transparent"
                     expandable="false"
-                    visible="{create>/isNonPoImportDgc}"
+                    visible="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                 >
                     <headerToolbar>
                         <OverflowToolbar>
@@ -5626,11 +5809,11 @@
                         >
                             <Label
                                 text="{i18n>paymentCategoryLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/paymentCategory_code}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                                 placeholder="{i18n>selectPaymentCategoryPlaceholder}"
                                 items="{path: '/PaymentCategories', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5643,11 +5826,11 @@
 
                             <Label
                                 text="{i18n>entityLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/businessEntity_code}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                                 placeholder="{i18n>selectEntityPlaceholder}"
                                 items="{path: '/FtkEntities', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5660,11 +5843,11 @@
 
                             <Label
                                 text="{i18n>currencyLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
                             <ComboBox
                                 selectedKey="{create>/currency_code}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                                 placeholder="{i18n>selectCurrencyPlaceholder}"
                                 items="{path: '/Currencies', filters: [{path: 'isActive', operator: 'EQ', value1: true}]}"
                             >
@@ -5677,11 +5860,11 @@
 
                             <Label
                                 text="{i18n>vendorCodeLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
                             <Input
                                 value="{create>/vendorCode}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                                 placeholder="{i18n>selectVendorPlaceholder}"
                                 showValueHelp="true"
                                 showSuggestion="true"
@@ -5704,17 +5887,17 @@
 
                             <Label
                                 text="{i18n>vendorNameLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
                             <Input
                                 value="{create>/vendorName}"
                                 editable="false"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
 
                             <Label
                                 text="{i18n>cusdecDateLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
                             <DatePicker
                                 id="importDgcCusdecDate"
@@ -5723,36 +5906,55 @@
                     'type': 'sap.ui.model.type.Date',
                     'formatOptions': { 'pattern': 'yyyy-MM-dd' }
                 }"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                                 placeholder="{i18n>selectDatePlaceholder}"
                             />
 
                             <Label
                                 text="{i18n>cusdecNumberLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
                             <Input
                                 value="{create>/cusdecNumber}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
 
                             <Label
                                 text="{i18n>poNumberLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                visible="{= ${create>/subProcessType_code} !== 'PO_IMPORT_DGC_DIRECT' }"
+                                required="{= (${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv}) &amp;&amp; ${create>/subProcessType_code} !== 'PO_IMPORT_DGC_DIRECT' }"
                             />
                             <Input
                                 value="{create>/poNumber}"
-                                required="{create>/isNonPoImportDgc}"
+                                visible="{= ${create>/subProcessType_code} !== 'PO_IMPORT_DGC_DIRECT' }"
+                                required="{= (${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv}) &amp;&amp; ${create>/subProcessType_code} !== 'PO_IMPORT_DGC_DIRECT' }"
                             />
+
+                            <Label text="{i18n>costCentreLabel}" visible="{= ${create>/subProcessType_code} === 'PO_IMPORT_DGC_DIRECT' }" required="{= ${create>/subProcessType_code} === 'PO_IMPORT_DGC_DIRECT' }" />
+                            <Input
+                                value="{create>/costCentre}"
+                                visible="{= ${create>/subProcessType_code} === 'PO_IMPORT_DGC_DIRECT' }"
+                                required="{= ${create>/subProcessType_code} === 'PO_IMPORT_DGC_DIRECT' }"
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems><core:ListItem key="{code}" text="{code}" additionalText="{name}" /></suggestionItems>
+                            </Input>
 
                             <Label
                                 text="{i18n>totalDeclarationValueInCusdecLabel}"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                             />
                             <Input
                                 value="{create>/totalDeclarationValueInCusdec}"
                                 type="Number"
-                                required="{create>/isNonPoImportDgc}"
+                                required="{= ${create>/isNonPoImportDgc} || ${create>/isPoImportDgcAdv} || ${create>/isPoImportDgcDirect} }"
                                 change=".onLoaSourceFieldChange"
                             />
 
@@ -5857,10 +6059,17 @@
                                 text="{i18n>ccCustodianNameLabel}"
                                 required="{create>/isNonPoCcPayment}"
                             />
-                            <Input
+                            <!-- <Input
                                 value="{create>/ccCustodianName}"
                                 required="{create>/isNonPoCcPayment}"
-                            />
+                            /> -->
+                            <ComboBox
+                                selectedKey="{create>/ccCustodian_ID}"
+                                required="{create>/isNonPoCcPayment}"
+                                placeholder="{i18n>selectCcCustodianPlaceholder}"
+                                items="{path: '/CcCustodians', sorter: {path: 'custodianName'}, filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
+                                <core:ListItem key="{ID}" text="{custodianName}" additionalText="{email}"/>
+                            </ComboBox>
 
                             <Label
                                 text="{i18n>vendorCodeLabel}"
@@ -5901,7 +6110,7 @@
 
                             <Label
                                 text="{i18n>whtEligibilityConfirmationLabel}"
-                                required="{create>/isNonPoCcPayment}"
+
                             />
                             <CheckBox
                                 selected="{create>/whtEligibilityConfirmation}"
@@ -5923,11 +6132,11 @@
 
                             <Label
                                 text="{i18n>poNumberLabel}"
-                                required="{create>/isNonPoCcPayment}"
+
                             />
                             <Input
                                 value="{create>/poNumber}"
-                                required="{create>/isNonPoCcPayment}"
+
                             />
 
                             <Label
@@ -6095,10 +6304,17 @@
                                 text="{i18n>ccCustodianNameLabel}"
                                 required="{create>/isNonPoCcSettlement}"
                             />
-                            <Input
+                            <!-- <Input
                                 value="{create>/ccCustodianName}"
                                 required="{create>/isNonPoCcSettlement}"
-                            />
+                            /> -->
+                            <ComboBox
+                                selectedKey="{create>/ccCustodian_ID}"
+                                required="{create>/isNonPoCcPayment}"
+                                placeholder="{i18n>selectCcCustodianPlaceholder}"
+                                items="{path: '/CcCustodians', sorter: {path: 'custodianName'}, filters: [{path: 'isActive', operator: 'EQ', value1: true}]}">
+                                <core:ListItem key="{ID}" text="{custodianName}" additionalText="{email}"/>
+                            </ComboBox>
 
                             <Label
                                 text="{i18n>ccPeriodFromDateLabel}"
@@ -6701,7 +6917,25 @@
                             />
 
                             <Label text="{i18n>costCentreLabel}" />
-                            <Input value="{create>/costCentre}" />
+                            <!-- <Input value="{create>/costCentre}" /> -->
+                             <Input
+                                value="{create>/costCentre}"
+                                placeholder="{i18n>selectCostCentrePlaceholder}"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                startSuggestion="1"
+                                filterSuggests="false"
+                                suggest=".onCostCentreSuggest"
+                                suggestionItemSelected=".onCostCentreSuggestionSelected"
+                                valueHelpRequest=".onCostCentreValueHelpRequest"
+                                suggestionItems="{/CostCentres}">
+                                <suggestionItems>
+                                    <core:ListItem
+                                        key="{code}"
+                                        text="{code}"
+                                        additionalText="{name}" />
+                                </suggestionItems>
+                            </Input>
 
                             <!-- <Label text="{i18n>debitGLLabel}" required="{create>/isNonPoMiscReceipts}" />
             <Input
@@ -7458,6 +7692,32 @@
             </ColumnListItem>
         </TableSelectDialog>
         <TableSelectDialog
+            id="departmentValueHelpDialog"
+            title="{i18n>departmentLabel}"
+            noDataText="{i18n>noDepartmentsFoundText}"
+            rememberSelections="false"
+            search=".onDepartmentValueHelpSearch"
+            confirm=".onDepartmentValueHelpConfirm"
+            cancel=".onDepartmentValueHelpClose"
+            items="{
+                path: '/Departments',
+                filters: [{path: 'isActive', operator: 'EQ', value1: true}]
+            }"
+        >
+            <columns>
+                <Column><Text text="{i18n>configCodeLabel}" /></Column>
+                <Column><Text text="{i18n>configNameLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet"><Text text="{i18n>configDescriptionLabel}" /></Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{code}" />
+                    <Text text="{name}" />
+                    <Text text="{descr}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
+        <TableSelectDialog
             id="subProcessTypeValueHelpDialog"
             title="{i18n>subProcessTypeLabel}"
             noDataText="{i18n>noSubProcessTypesFoundText}"
@@ -7657,6 +7917,32 @@
                 </cells>
             </ColumnListItem>
         </TableSelectDialog>
+        <TableSelectDialog
+            id="requestCreateCostCentreValueHelpDialog"
+            title="{i18n>selectCostCentreTitle}"
+            noDataText="{i18n>noCostCentresText}"
+            rememberSelections="false"
+            search=".onCostCentreValueHelpSearch"
+            confirm=".onCostCentreValueHelpConfirm"
+            items="{
+                path: '/CostCentres',
+                filters: [{path: 'isActive', operator: 'EQ', value1: true}]
+            }">
+            <columns>
+                <Column><Text text="{i18n>costCentreCodeLabel}" /></Column>
+                <Column><Text text="{i18n>costCentreNameLabel}" /></Column>
+                <Column demandPopin="true" minScreenWidth="Tablet">
+                    <Text text="{i18n>entityLabel}" />
+                </Column>
+            </columns>
+            <ColumnListItem type="Active">
+                <cells>
+                    <Text text="{code}" />
+                    <Text text="{name}" />
+                    <Text text="{businessEntity_code}" />
+                </cells>
+            </ColumnListItem>
+        </TableSelectDialog>
 
         <Dialog
             id="invoiceDialog"
@@ -7788,11 +8074,9 @@
 
                     <Label
                         text="{i18n>ctmProposalNoLabel}"
-                        required="true"
                     />
                     <Input
                         value="{directForeignTravelEdit>/ctmProposalNo}"
-                        required="true"
                     />
 
                     <Label

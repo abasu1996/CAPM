@@ -109,7 +109,7 @@ module.exports = (amountSources) => ({
     };
   },
 
-  async _buildRequestCreationLoaPreview(req, subProcessTypeCode, amount) {
+  async _buildRequestCreationLoaPreview(req, subProcessTypeCode, amount, requestingDivisionCode) {
     const context = await this._getRequestCreationLoaContext(req, subProcessTypeCode);
     if (!context.loaApprovalApplicable || !context.selectionRequired) {
       return {
@@ -133,7 +133,8 @@ module.exports = (amountSources) => ({
       return req.reject(400, "A valid approval amount is required to preview LoA approvers");
     }
     const rule = await this._resolveLoaRule(req, this.entities.LoaApproval, numericAmount, {
-      subProcessType_code: String(subProcessTypeCode || "").trim()
+      subProcessType_code: String(subProcessTypeCode || "").trim(),
+      requestingDivision_code: String(requestingDivisionCode || "").trim()
     });
     if (!rule) return req.reject(400, `No LoA approval rule is configured for amount ${numericAmount}`);
 
@@ -248,6 +249,8 @@ module.exports = (amountSources) => ({
     if (req.event !== "DELETE" && this._isLoaStep(next)) {
       req.data.processorTeam_ID = null;
       req.data.processorTeamName = null;
+      req.data.processorUser_ID = null;
+      req.data.processorUserName = null;
       req.data.role = null;
       req.data.requestOrigin = null;
       req.data.isVendorNotification = false;
