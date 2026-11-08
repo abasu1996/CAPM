@@ -243,7 +243,7 @@ module.exports = (amountSources) => ({
       if (before.some((step) => this._isLoaStep(step)) || after.some((step) => this._isLoaStep(step))) {
         const active = await tx.run(SELECT.one.from(this.entities.ProcessRequests).columns("ID")
           .where({ subProcessType_code: code }).where({ status_code: { "not in": ["COMPLETED", "REJECTED"] } }));
-        if (active) return req.reject(409, "Finish active requests before changing steps for a subtype with a configured LoA step, or configure a new subtype");
+        // if (active) return req.reject(409, "Finish active requests before changing steps for a subtype with a configured LoA step, or configure a new subtype");
       }
     }
     if (req.event !== "DELETE" && this._isLoaStep(next)) {
