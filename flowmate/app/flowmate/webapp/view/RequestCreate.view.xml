@@ -5394,12 +5394,12 @@
                                 src="sap-icon://business-objects-experience"
                             />
                             <Title
-                                text="{i18n>nonPoImportTrcDetailsTitle}"
+                                text="{= ${create>/isPoImportTrc} ? ${i18n>poImportTrcDetailsTitle} : ${i18n>nonPoImportTrcDetailsTitle} }"
                                 level="H3"
                             />
                             <ToolbarSpacer />
                             <ObjectStatus
-                                text="{i18n>nonPoImportTrcSubtypeText}"
+                                text="{= ${create>/isPoImportTrc} ? ${i18n>poImportTrcSubtypeText} : ${i18n>nonPoImportTrcSubtypeText} }"
                                 state="Information"
                                 inverted="true"
                             />
@@ -5593,12 +5593,12 @@
                                 src="sap-icon://business-objects-experience"
                             />
                             <Title
-                                text="{i18n>nonPoImportIclDetailsTitle}"
+                                text="{= ${create>/isPoImportIcl} ? ${i18n>poImportIclDetailsTitle} : ${i18n>nonPoImportIclDetailsTitle} }"
                                 level="H3"
                             />
                             <ToolbarSpacer />
                             <ObjectStatus
-                                text="{i18n>nonPoImportIclSubtypeText}"
+                                text="{= ${create>/isPoImportIcl} ? ${i18n>poImportIclSubtypeText} : ${i18n>nonPoImportIclSubtypeText} }"
                                 state="Information"
                                 inverted="true"
                             />
@@ -5783,12 +5783,22 @@
                             <Title
                                 text="{= ${create>/subProcessType_code} === 'NON_PO_IMPORT_DGC_ADV'
                     ? ${i18n>nonPoImportDgcAdvDetailsTitle}
-                    : ${i18n>nonPoImportDgcDirectDetailsTitle} }"
+                    : ${create>/subProcessType_code} === 'NON_PO_IMPORT_DGC_DIRECT'
+                        ? ${i18n>nonPoImportDgcDirectDetailsTitle}
+                        : ${create>/subProcessType_code} === 'PO_IMPORT_DGC_ADV'
+                            ? ${i18n>poImportDgcAdvDetailsTitle}
+                            : ${i18n>poImportDgcDirectDetailsTitle} }"
                                 level="H3"
                             />
                             <ToolbarSpacer />
                             <ObjectStatus
-                                text="{create>/subProcessTypeName}"
+                                text="{= ${create>/subProcessType_code} === 'NON_PO_IMPORT_DGC_ADV'
+                    ? ${i18n>nonPoImportDgcAdvSubtypeText}
+                    : ${create>/subProcessType_code} === 'NON_PO_IMPORT_DGC_DIRECT'
+                        ? ${i18n>nonPoImportDgcDirectSubtypeText}
+                        : ${create>/subProcessType_code} === 'PO_IMPORT_DGC_ADV'
+                            ? ${i18n>poImportDgcAdvSubtypeText}
+                            : ${i18n>poImportDgcDirectSubtypeText} }"
                                 state="Information"
                                 inverted="true"
                             />

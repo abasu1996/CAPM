@@ -702,13 +702,22 @@
                                     text="{i18n>refreshButton}"
                                     press=".onRefreshEmailNotifications" />
                             </OverflowToolbar>
+                            <ScrollContainer
+                                class="flowmateLogScroll"
+                                width="100%"
+                                height="32rem"
+                                horizontal="true"
+                                vertical="true">
                             <Table
                                 id="emailNotificationLogTable"
                                 class="flowmateTable"
                                 noDataText="{i18n>noEmailNotificationsText}"
                                 growing="true"
                                 growingThreshold="25"
-                                growingScrollToLoad="true"
+                                growingScrollToLoad="false"
+                                width="120rem"
+                                fixedLayout="false"
+                                sticky="ColumnHeaders"
                                 items="{
                                     path: '/ProcessEmailMessages',
                                     sorter: { path: 'queuedAt', descending: true },
@@ -750,6 +759,7 @@
                                     </ColumnListItem>
                                 </items>
                             </Table>
+                            </ScrollContainer>
                         </IconTabFilter>
                         <IconTabFilter icon="sap-icon://money-bills" text="{i18n>currencyConfigTitle}">
                         <OverflowToolbar class="flowmateToolbar">

@@ -674,6 +674,7 @@
     padding: 0.875rem 0.25rem 0.625rem;
     overflow-x: auto;
     overflow-y: hidden;
+    min-height: 7rem;
 }
 
 .flowmateAdminConfig .sapMITBFilter {
@@ -727,6 +728,12 @@
 
 .flowmateAdminConfig .flowmateTable .sapMText {
     line-height: 1.35;
+}
+
+.flowmateAdminConfig .flowmateLogScroll {
+    flex: 0 0 auto;
+    height: 32rem;
+    overflow: auto !important;
 }
 
 .flowmateDashboardHero {

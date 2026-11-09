@@ -2010,7 +2010,7 @@
                 </uxap:ObjectPageSection>
 
                 <uxap:ObjectPageSection
-                    title="{i18n>nonPoImportTrcDetailsTitle}"
+                    title="{= ${subProcessType_code} === 'PO_IMPORT_TRC' ? ${i18n>poImportTrcDetailsTitle} : ${i18n>nonPoImportTrcDetailsTitle} }"
                     visible="{= ['NON_PO_IMPORT_TRC','PO_IMPORT_TRC'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
@@ -2037,7 +2037,7 @@
                 </uxap:ObjectPageSection>
 
                 <uxap:ObjectPageSection
-                    title="{i18n>nonPoImportIclDetailsTitle}"
+                    title="{= ${subProcessType_code} === 'PO_IMPORT_ICL' ? ${i18n>poImportIclDetailsTitle} : ${i18n>nonPoImportIclDetailsTitle} }"
                     visible="{= ['NON_PO_IMPORT_ICL','PO_IMPORT_ICL'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
@@ -2063,7 +2063,13 @@
                 </uxap:ObjectPageSection>
 
                 <uxap:ObjectPageSection
-                    title="{= ['NON_PO_IMPORT_DGC_ADV','PO_IMPORT_DGC_ADV'].indexOf(${subProcessType_code}) > -1 ? ${i18n>nonPoImportDgcAdvDetailsTitle} : ${i18n>nonPoImportDgcDirectDetailsTitle} }"
+                    title="{= ${subProcessType_code} === 'NON_PO_IMPORT_DGC_ADV'
+                        ? ${i18n>nonPoImportDgcAdvDetailsTitle}
+                        : ${subProcessType_code} === 'NON_PO_IMPORT_DGC_DIRECT'
+                            ? ${i18n>nonPoImportDgcDirectDetailsTitle}
+                            : ${subProcessType_code} === 'PO_IMPORT_DGC_ADV'
+                                ? ${i18n>poImportDgcAdvDetailsTitle}
+                                : ${i18n>poImportDgcDirectDetailsTitle} }"
                     visible="{= ['NON_PO_IMPORT_DGC_ADV','NON_PO_IMPORT_DGC_DIRECT','PO_IMPORT_DGC_ADV','PO_IMPORT_DGC_DIRECT'].indexOf(${subProcessType_code}) > -1 }">
                     <uxap:subSections>
                         <uxap:ObjectPageSubSection>
