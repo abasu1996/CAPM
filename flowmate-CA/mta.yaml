@@ -19,7 +19,7 @@ modules:
     type: nodejs
     path: gen/srv
     parameters:
-      instances: 2
+      instances: 3
       buildpack: nodejs_buildpack
       memory: 512M
     build-parameters:
@@ -101,7 +101,7 @@ modules:
     type: nodejs
     path: gen/router
     parameters:
-      instances: 2
+      instances: 3
       buildpack: nodejs_buildpack
       memory: 256M
       disk-quota: 512M
